@@ -46,7 +46,7 @@ public:
     static bool hideSelected(bool reverse=false);
     static bool showHidden(const std::vector<std::string>& names={},bool only=false);
     static std::vector<std::pair<std::string,QString>> hiddenObjects();
-    static bool objectEditable(App::DocumentObject* object);
+    static bool objectEditable(App::DocumentObject* object,bool requireVisible=true);
     static bool objectLocked(App::DocumentObject* object);
     // Plain, root OM9 group with a unique validated slot, containing this member.
     static bool isLayerOwner(App::DocumentObject* owner,App::DocumentObject& member);

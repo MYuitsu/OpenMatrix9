@@ -40,6 +40,8 @@ def invoke(token,text,finish='done',cmd=False,close_document=None):
 def run():
     global window
     try:
+        import OpenMatrix9Gui as native
+        result['module']=native.__file__
         Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('NotesTest');doc.UndoMode=1;doc.Meta={'unrelated':'preserved'};settle();window=Gui.getMainWindow();window.show()
         check('Notes menu actions enabled',all(window.findChild(QtGui.QAction,n).isEnabled() for n in ('OM9_FileNotes','OM9_ProjectNotes')))
         notes='Ghi chú nhẫn\nSize 12 — 金'
@@ -53,6 +55,10 @@ def run():
         field.setText('0,0,0');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
         invoke('Notes','discard curve interruption','esc',cmd=True)
         check('CMD Notes interrupts pending Curve without geometry or note changes',len(doc.Objects)==1 and doc.Meta.get(key)==notes+'\nDone' and not result.get('esc_blocked',False))
+        # Stock Windows ZipWriter checks preexisting CRT errno without a failed
+        # write. Isolate this host defect; keep the complete Notes/FCStd oracle.
+        from stock_save_support import prepare_stock_fcstd_save
+        prepare_stock_fcstd_save(result)
         path=out/'notes.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name);doc=App.openDocument(str(path));settle();check('notes survive FCStd reload',doc.Meta.get(key)==notes+'\nDone' and doc.Meta['unrelated']=='preserved')
         other=App.newDocument('NotesOther');settle();invoke('OM9_FileNotes','other','x');check('notes are independent per document',other.Meta.get(key)=='other' and doc.Meta.get(key)==notes+'\nDone')
         invoke('OM9_ProjectNotes','discard after close',close_document=other.Name);check('closing originating document prevents stale note commit',doc.Meta.get(key)==notes+'\nDone')

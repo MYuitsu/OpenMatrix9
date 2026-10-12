@@ -1,5 +1,9 @@
 # OM9-INFO-020 — Gumball
 
+Current 2026-10-12: `implemented` / `validated_supported_slice`; approved OM9 scope complete. [Tests run locally](../validation/2026-10-12-local-tests-ci-build-only.md); the exact commit's [GitHub Action](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml) records build/package status only.
+[Final native evidence](../validation/2026-10-12-gumball-core-completion.md).
+The dated 2026-10-11 implementation/evidence below is the validated baseline.
+
 Ngày 2026-10-11; trạng thái `partially_implemented`, native `validated_supported_slice`.
 Command `Gumball`, `OM9_Gumball`; legacy `OM9_InfoSettingsGumballON` dùng cùng
 Rust handler. [Spec](../../OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-020-gumball.md).
@@ -50,7 +54,7 @@ input raw/unit/frame/source stamps và affine; giữ material/layer/parent/retai
 definition. Không tạo associative History graph mới; existing native parametric
 dependencies vẫn recompute. Provenance/successful geometry lưu trong FCStd.
 
-Giới hạn rõ trước transaction: generic/expression-driven parametric Scale,
+Giới hạn của baseline 2026-10-11 trước transaction: generic/expression-driven parametric Scale,
 Link shear, external-document Link và unresolved geometry/capability.
 Không có fallback mesh. Callback synchronous
 sửa nguồn trong publication abort cả batch. Mesh/Points được so sánh với
@@ -93,5 +97,38 @@ vẫn sở hữu giá trị, không giữ object pointer hoặc serialize flag.
 Native multi-view/owner/settings proof mới nằm tại
 [báo cáo triển khai](../validation/2026-10-11-gumball-four-view-completion.md).
 Bản PDF hiện tại3trang/printed35–37; [đối chiếu nguồn lịch sử](../validation/2026-10-11-gumball-four-view-spec-review.md).
-Generic owners, Link shear/externaldoc và failed-transaction Redo cũ của shared
+Giới hạn baseline 2026-10-11: generic owners, Link shear/externaldoc và failed-transaction Redo cũ của shared
 host vẫn là giới hạn. Chưa nhận full original-host parity hoặc tăng version bb.
+
+### Approved core closure — 2026-10-12, native gates passed
+
+Native primitive Scale keeps native types and edits their dimensional properties
+when the affine transform is representable: Box/Plane/Ellipsoid/Wedge by owner
+axes, Sphere/Torus uniformly, and Cylinder/Cone/Prism with equal radial factors
+and a separate axial factor. A bound dimension retains its expression and
+dependency by multiplying the expression; coupled changed dimensions,
+attachment/bound Placement, oblique primitive limits and unrepresentable owner
+frames use an admitted associative result instead of overwriting definitions.
+
+The fallback uses standard FreeCAD `App::Link` and `Part::Scale`, with native
+`OpenMatrix9Gui::GumballScaleCompound` helpers derived from `Part::Compound`
+for occurrence normalization and legacy Part owners. The helper fixes its
+stock non-hiding Part view provider so native Undo/Redo and FCStd reopening
+retain the same presentation. It retains source definitions,
+supported incoming native links/subelements, group coordinates and Body/Tip
+trees. The visible result recomputes from that native graph; Alt creates a
+private result while keeping the original and its consumers intact. This is
+FreeCAD dependency preservation, not full Matrix History or Clayoo/SmartTargets.
+Read-only/foreign-document/unresolved graph cases must reject before mutation;
+publication callbacks must abort the whole batch. Native warm/cold checks passed for the final compiled plugin in the exact30 cohort.
+
+Typed `OpenMatrix9Gui::GumballCamera` and `GumballLight` are document objects with
+physical Placement and unit-bearing dimensions. Gumball moves/rotates those
+objects and scales admitted camera/light parameters. This does not establish
+renderer support or parity with the host's live modeling-camera widgets.
+
+[Candidate fixture map, applicability and gate status](../validation/2026-10-12-gumball-core-release-candidate.md).
+
+## Multi-selection correction — 2026-10-12
+
+Shift/window whole-owner selection shares one Gumball; Object mode uses the construction basis and union-bounds center while retaining Object preference. MSR affects all owners around that common pivot. Single-owner/component frames and transaction protection remain intact. Multi-selection relocation does not persist after deselect. [143 regression checks and final31/1099 suite](../validation/2026-10-12-gumball-multi-selection.md).

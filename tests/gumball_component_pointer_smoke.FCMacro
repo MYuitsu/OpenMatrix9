@@ -176,9 +176,13 @@ def run():
                             'position':[event.position().x(),event.position().y()],
                             'viewport_marker':bool(port.property('om9GumballViewport'))}
                     return False
+            # Focus reinstalls OM9's global mouse filter, which Qt moves first.
+            # Settle that transition before installing our independent observer
+            # so it records the press before the native controller consumes it.
+            port.setFocus()
+            QtWidgets.QApplication.processEvents()
             recorder = Recorder()
             QtWidgets.QApplication.instance().installEventFilter(recorder)
-            port.setFocus()
             QtTest.QTest.mouseClick(port, QtCore.Qt.LeftButton,
                                    QtCore.Qt.ControlModifier | QtCore.Qt.ShiftModifier, pos)
             QtWidgets.QApplication.instance().removeEventFilter(recorder)

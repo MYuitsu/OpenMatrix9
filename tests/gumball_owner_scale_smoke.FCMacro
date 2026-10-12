@@ -81,7 +81,9 @@ def run():
         ui.numeric('ScaleX','2');doc.recompute();ui.settle();shear_result=result_for(doc,link)
         check('Link shear creates associated native graph without changing source occurrence',shear_result is not None and
               (link.Placement,link.ScaleVector)==before and link.LinkedObject==source and doc.UndoCount==undo+1 and
-              shear_result.LinkedObject.Base.LinkedObject.TypeId=='Part::Compound' and len(shear_result.LinkedObject.Base.LinkedObject.Links)==1 and
+              shear_result.LinkedObject.Base.LinkedObject.TypeId=='OpenMatrix9Gui::GumballScaleCompound' and
+              shear_result.LinkedObject.Base.LinkedObject.ViewObject.TypeId=='PartGui::ViewProviderPartExt' and
+              len(shear_result.LinkedObject.Base.LinkedObject.Links)==1 and
               shear_result.LinkedObject.Base.LinkedObject.Links[0].TypeId=='App::Link' and
               shear_result.LinkedObject.Base.LinkedObject.Links[0].LinkedObject==link and shear_result.LinkedObject.Base.LinkedObject.Links[0].LinkTransform and
               shear_result.LinkedObject.Base.LinkedObject.Links[0].LinkPlacement==App.Placement())
@@ -92,6 +94,32 @@ def run():
               (link.Placement,link.ScaleVector)==before and link.LinkedObject==source and link.Visibility)
         doc.redo();doc.recompute();ui.settle();shear_result=doc.getObject(shear_name)
         check('Link shear Redo restores native associative result',shear_result is not None and shear_result.OM9GumballScaleSource==link and same_geometry(Part.getShape(shear_result),shear_expected))
+        probe=doc.addObject('Part::Sphere','PendingInputProbe');probe.Radius=3;probe.Placement.Base=App.Vector(50,0,0);doc.recompute();ui.select(probe)
+        probe.touch();ui.settle();probe_shape=probe.Shape;probe_names={o.Name for o in doc.Objects};history=(doc.UndoCount,doc.RedoCount)
+        report['admission_probe_before']={'state':list(probe.State),'history':list(history),'radius':probe.Radius.Value}
+        doc.RecomputesFrozen=True
+        try:
+            point=ui.target('ScaleX');QtTest.QTest.mouseClick(ui.viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,point);ui.settle()
+            check('disabled recompute rejects new gesture without geometry or history changes',probe.Shape.isSame(probe_shape) and probe.Radius.Value==3 and
+                  {o.Name for o in doc.Objects}==probe_names and (doc.UndoCount,doc.RedoCount)==history and native.gumballState()['phase']==1 and
+                  'Gumball inputs require a writable, stable document with recompute enabled' in ui.transcript())
+        finally:doc.RecomputesFrozen=False
+        class AdmissionObserver:
+            changed=False
+            def slotChangedObject(self,obj,prop):
+                if obj==probe and prop=='Shape' and not self.changed:
+                    self.changed=True;Gui.Selection.clearSelection();Gui.Selection.addSelection(doc.Name,box.Name)
+        admission_observer=AdmissionObserver();App.addDocumentObserver(admission_observer)
+        try:
+            ui.select(probe);point=ui.target('ScaleX');QtTest.QTest.mouseClick(ui.viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,point);ui.settle()
+            check('recompute selection callback cancels admission before a Gumball transaction',admission_observer.changed and
+                  {o.Name for o in doc.Objects}==probe_names and (doc.UndoCount,doc.RedoCount)==history and probe.Radius.Value==3 and
+                  abs(probe.Shape.optimalBoundingBox(False,False).XLength-6)<1e-7 and native.gumballState()['phase']==1 and
+                  'Gumball document, selection or interaction changed during gesture admission' in ui.transcript())
+        finally:App.removeDocumentObserver(admission_observer)
+        ui.select(probe);ui.numeric('ScaleX','2',QtCore.Qt.ShiftModifier);doc.recompute();ui.settle()
+        check('fresh gesture succeeds after settling and cancelled admission',probe.Radius.Value==6 and
+              abs(probe.Shape.optimalBoundingBox(False,False).XLength-12)<1e-7 and {o.Name for o in doc.Objects}==probe_names and doc.UndoCount==history[0]+1)
         report['ok']=True
     except Exception:
         report['ok']=False;report['error']=traceback.format_exc()

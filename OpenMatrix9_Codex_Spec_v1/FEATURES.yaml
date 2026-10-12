@@ -1289,7 +1289,7 @@
   description: "Gumball toggle hiển thị move/scale/rotate widgets khi object selected. OM9 chọn X đỏ, Y xanh lá, Z xanh dương theo ảnh Rhino5 được duyệt; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, squares scale một axis. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview."
   access: Access this command from Info and Settings > Gumball
   spec_path: specs/01-core/om9-info-020-gumball.md
-  implementation_status: partially_implemented
+  implementation_status: "implemented"
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1349,9 +1349,15 @@
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: validated_supported_slice
   native_implementation_status: validated_supported_slice
-  implementation_date: '2026-10-11'
-  implementation_notes: "Shared four-view Rust session/preview, first-click native picks, bounds Scale, projection culling and DPI profile. Core menu/settings/Snappy/Strength/orbit; Box dimensions, uniform Sphere Radius and representable Link ScaleVector with native Undo/Redo. Generic/expression owners, Link shear/externaldoc and failed-transaction old Redo remain explicit limits."
-  validation_report: "../docs/validation/2026-10-11-gumball-four-view-completion.md"
+  implementation_date: "2026-10-12"
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Tests run locally; exact-commit GitHub Actions records build/package status only, with tests_executed false. Multi-selection correction0.3.5: Shift/window whole owners share one construction-basis frame in Object mode; common-pivot MSR and component rejection verified in local143-check regression/full31-case suite."
+  validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  candidate_status: "validated"
+  candidate_date: '2026-10-12'
+  candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  approved_scope_complete: true
+  stock_ci_status: "build_only_action_authoritative"
+  multi_selection_validation: "../docs/validation/2026-10-12-gumball-multi-selection.md"
 - id: OM9-INFO-021
   name: Gumball Alignment
   command: GumballAlignment
@@ -1363,7 +1369,7 @@
   description: "GumballAlignment chọn C-Plane, Object hoặc World. CPlane theo frame viewport, World theo XYZ, Object theo định hướng curve/extrusion/light/mesh face-edge-vertex/planar subobject/camera mà adapter có thể xác định. Không có frame object duy nhất thì báo unresolved thay vì lấy world ngầm. Chỉ đổi gizmo frame, không xoay shape."
   access: Access this command from Info and Settings>Gumball Alignment
   spec_path: specs/01-core/om9-info-021-gumball-alignment.md
-  implementation_status: partially_implemented
+  implementation_status: "implemented"
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1393,9 +1399,15 @@
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: validated_supported_slice
   native_implementation_status: validated_supported_slice
-  implementation_date: '2026-10-11'
-  implementation_notes: "One shared World/Object/CPlane frame, idle CPlane recapture, frozen gesture and relocated override across focus/maximize. Native whole-owner/curve/face frames; Planar oriented Mesh Segments; Mesh edge/vertex/light/camera or ambiguous frames remain explicit UnsupportedFrame."
-  validation_report: "../docs/validation/2026-10-11-gumball-four-view-completion.md"
+  implementation_date: "2026-10-12"
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Tests run locally; exact-commit GitHub Actions records build/package status only, with tests_executed false. Multi-selection correction0.3.5: Shift/window whole owners share one construction-basis frame in Object mode; common-pivot MSR and component rejection verified in local143-check regression/full31-case suite."
+  validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  candidate_status: "validated"
+  candidate_date: '2026-10-12'
+  candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  approved_scope_complete: true
+  stock_ci_status: "build_only_action_authoritative"
+  multi_selection_validation: "../docs/validation/2026-10-12-gumball-multi-selection.md"
 - id: OM9-INFO-022
   name: Relocate Gumball
   command: RelocateGumball
@@ -1407,7 +1419,7 @@
   description: "RelocateGumball đổi origin và hướng X của widgets; CMD nhận world point (qua parser coordinate) rồi direction, Enter hoàn tất. Ctrl-click widget rồi thả Ctrl và kéo là cách tương tác thứ hai. Việc di chuyển pivot không dịch geometry; hướng zero/đồng tuyến không đủ frame phải báo rõ."
   access: Access this command from Info and Settings>Relocate Gumball
   spec_path: specs/01-core/om9-info-022-relocate-gumball.md
-  implementation_status: partially_implemented
+  implementation_status: "implemented"
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1442,9 +1454,15 @@
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: validated_supported_slice
   native_implementation_status: validated_supported_slice
-  implementation_date: '2026-10-11'
-  implementation_notes: "Shared four-view origin/X/optional-Y Relocate preview/accept/cancel, Ctrl-start numeric widget-only and native End/Mid/Point pointer picks in each view. Captured CPlane/document units and w world. Process-local owner cache256; no cold FCStd widget persistence or full original-host parity claim."
-  validation_report: "../docs/validation/2026-10-11-gumball-four-view-completion.md"
+  implementation_date: "2026-10-12"
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Tests run locally; exact-commit GitHub Actions records build/package status only, with tests_executed false. Multi-selection correction0.3.5: Shift/window whole owners share one construction-basis frame in Object mode; common-pivot MSR and component rejection verified in local143-check regression/full31-case suite."
+  validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  candidate_status: "validated"
+  candidate_date: '2026-10-12'
+  candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  approved_scope_complete: true
+  stock_ci_status: "build_only_action_authoritative"
+  multi_selection_validation: "../docs/validation/2026-10-12-gumball-multi-selection.md"
 - id: OM9-HISTORY-001
   name: History Workflow
   command: null

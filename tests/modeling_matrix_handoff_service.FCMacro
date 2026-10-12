@@ -1,0 +1,109 @@
+"""Owned OM9 companion: real clipboard pipeline/local Undo, no Rhino plugin."""
+import os,json,time,traceback,hashlib
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+
+root=Path(os.environ['OM9_SMOKE_OUTPUT'])
+source=Path(r'C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/Mod/OpenMatrix9/tests')
+import sys
+sys.path.insert(0,str(source))
+import matrix_om9_handoff_support as support
+config=support.read_json(str(root/'session.json'));run_id=config['run_id']
+assert root.name==run_id and len(run_id)==32 and all(c in '0123456789abcdef' for c in run_id)
+assert config['output']==str(root) and config['version']==1
+last_request=0;owned_docs=[];doc=None;timer=None;started=time.monotonic();busy=False
+
+def state():
+    if App.ActiveDocument is not doc or doc.Name not in App.listDocuments():raise RuntimeError('Owned OM9 test document changed')
+    raw=json.loads(native.layerDocumentSnapshot(doc.Name));snapshot=raw['snapshot']
+    layer_map={row['source_id']:row for row in snapshot['layers']}
+    layers=[]
+    for row in snapshot['layers']:
+        layers.append(dict(path=row['path_components'],rgb=row['rgb'],locked=row['locked'],visible=row['visible'],
+            persistent_locked=row['locked'] if row['persistent_locked'] is None else row['persistent_locked'],
+            persistent_visible=row['visible'] if row['persistent_visible'] is None else row['persistent_visible']))
+    objects=[]
+    for obj in doc.Objects:
+        if 'Shape' not in obj.PropertiesList or obj.Shape.isNull():continue
+        identity=getattr(obj,'OM9LayerObjectId',obj.Name)
+        matches=[row for row in snapshot['objects'] if row['id']==identity]
+        if len(matches)!=1:raise RuntimeError('Native geometry has no unique canonical object binding')
+        row=matches[0];box=obj.Shape.BoundBox
+        objects.append(dict(name=obj.Label,layer=layer_map[row['layer_id']]['path_components'],locked=row['locked'],visible=row['visible'],
+            color_source=row['color_source'],rgb=row['rgb'],bounds=[box.XMin,box.YMin,box.ZMin,box.XMax,box.YMax,box.ZMax]))
+    semantic=dict(layers=layers,active=layer_map[snapshot['active_layer']]['path_components'] if snapshot['active_layer'] else None,objects=objects)
+    return dict(raw=raw,semantic=semantic,undo_count=doc.UndoCount,redo_count=doc.RedoCount,document_name=doc.Name)
+
+def fixture():
+    global doc
+    doc=App.newDocument('OM9HandoffSource');doc.UndoMode=1;owned_docs.append(doc.Name)
+    items=[]
+    for name,shape in [('OM9 Ring',Part.makeBox(2,3,4)),('OM9 Curve',Part.makeLine(App.Vector(40,0,0),App.Vector(44,1,0))),('OM9 Locked Hidden',Part.makeBox(1,2,3))]:
+        obj=doc.addObject('Part::Feature',name.replace(' ',''));obj.Label=name;obj.Shape=shape;items.append(obj)
+    items[0].Placement.Base=App.Vector(20,0,0);items[2].Placement.Base=App.Vector(60,0,0);doc.recompute()
+    raw=json.loads(native.layerDocumentSnapshot(doc.Name));snapshot=raw['snapshot']
+    for i,row in enumerate(snapshot['layers']):row['rgb']=[(7*i+17)%256,(11*i+31)%256,(13*i+47)%256]
+    parent=snapshot['layers'][0]['source_id'];parent_path=snapshot['layers'][0]['path_components']
+    child=dict(source_id='handoff-detail',parent_id=parent,name='Handoff Detail',path_components=parent_path+['Handoff Detail'],rgb=[11,93,173],locked=False,visible=True,persistent_locked=False,persistent_visible=True)
+    empty=dict(source_id='handoff-empty',parent_id=None,name='OM9 Empty Locked',path_components=['OM9 Empty Locked'],rgb=[173,19,211],locked=True,visible=False,persistent_locked=True,persistent_visible=False)
+    snapshot['layers'].extend([child,empty]);snapshot['active_layer']=parent
+    snapshot['objects']=[dict(id=items[0].Name,layer_id=parent,locked=False,visible=True,color_source='ByLayer',rgb=[1,2,3]),
+        dict(id=items[1].Name,layer_id=child['source_id'],locked=False,visible=True,color_source='ByObject',rgb=[221,31,51]),
+        dict(id=items[2].Name,layer_id=parent,locked=True,visible=False,color_source='ByLayer',rgb=[1,2,3])]
+    native.initializeLayerDocument(doc.Name,json.dumps(raw));Gui.activeDocument().activeView().fitAll()
+
+def dispatch(action):
+    observed=None
+    if action=='paste':
+        observed=json.loads(native.captureLayerClipboard3dm(str(root/'matrix-copy-observed.3dm'),str(root/'matrix-copy-observed.layer.json')))
+    if action=='fixture':fixture()
+    elif action=='paste':clip.paste_selection()
+    elif action=='undo':doc.undo();Gui.updateGui()
+    elif action=='redo':doc.redo();Gui.updateGui()
+    elif action=='copy':
+        clip.copy_session()
+        observed=json.loads(native.captureLayerClipboard3dm(str(root/'om9-copy-observed.3dm'),str(root/'om9-copy-observed.layer.json')))
+    elif action=='finish':return dict(finished=True,documents=owned_docs[:])
+    elif action!='snapshot':raise ValueError('Unknown action')
+    result=state()
+    if action in ('copy','paste'):result['clipboard_result']=clip.last_result
+    if observed is not None:result['observed_clipboard']=observed
+    return result
+
+def close_owned():
+    timer.stop()
+    for name in owned_docs:
+        if name in App.listDocuments():App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+
+def poll():
+    global last_request,busy
+    if busy:return
+    if time.monotonic()-started>900:
+        support.write_json(str(root/'companion-timeout.json'),dict(run_id=run_id,pid=os.getpid(),error='Owned companion idle timeout'));close_owned();return
+    seq=last_request+1;request=root/('request-%03d.json'%seq)
+    if not request.is_file():return
+    busy=True;begin=time.perf_counter()
+    try:
+        action=support.validate_request(support.read_json(str(request)),run_id,seq)
+        result=dispatch(action);reply=dict(version=1,run_id=run_id,seq=seq,pid=os.getpid(),ok=True,result=result)
+    except Exception:reply=dict(version=1,run_id=run_id,seq=seq,pid=os.getpid(),ok=False,error=traceback.format_exc())
+    finally:busy=False
+    reply['seconds']=time.perf_counter()-begin
+    support.write_json(str(root/('response-%03d.json'%seq)),reply);last_request=seq
+    if reply.get('ok') and action=='finish':close_owned()
+
+try:
+    import OpenMatrix9Gui as native,ThreeDmClipboard as clip
+    expected=Path(config['plugin']).resolve()
+    if Path(native.__file__).resolve()!=expected:raise RuntimeError('Wrong OM9 plugin selected')
+    if hashlib.sha256(expected.read_bytes()).hexdigest()!=config['plugin_sha256']:raise RuntimeError('OM9 runtime hash changed')
+    if App.listDocuments():raise RuntimeError('Companion profile already contains documents')
+    Gui.activateWorkbench('OpenMatrix9Workbench')
+    doc=App.newDocument('MatrixHandoffTarget');doc.UndoMode=1;owned_docs.append(doc.Name)
+    support.write_json(str(root/'companion-ready.json'),dict(version=1,run_id=run_id,pid=os.getpid(),ok=True,module=str(expected),plugin_sha256=config['plugin_sha256'],state=state()))
+    timer=QtCore.QTimer();timer.setInterval(100);timer.timeout.connect(poll);timer.start()
+except Exception:
+    support.write_json(str(root/'companion-ready.json'),dict(version=1,run_id=run_id,pid=os.getpid(),ok=False,error=traceback.format_exc()))
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)

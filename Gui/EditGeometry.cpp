@@ -1,3 +1,4 @@
+#include "LayerDocumentAdapter.h"
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "EditGeometry.h"
 #include "CoreLayers.h"
@@ -245,11 +246,12 @@ static EditInput readInput(App::Document& doc,const std::string& name,unsigned k
         Ref global(PyObject_CallMethod(object.value,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(object.value,"Placement")),inverse(PyObject_CallMethod(local.value,"inverse",nullptr)),parent(PyNumber_Multiply(global.value,inverse.value)),matrix(PyObject_CallMethod(parent.value,"toMatrix",nullptr));
         if(mesh)set(shape->value,"Placement",global.value);else{Ref moved(PyObject_CallMethod(shape->value,"transformShape","OO",matrix.value,Py_False));}
     }
-    return {name,signature(object.value),shape,mesh,{},std::move(guard)};
+    Phase3Snapshot phase3Guard;if(!mesh&&!o->getPropertyByName("OM9SourceUUID"))phase3Guard=capturePhase3Object(doc,name);
+    return {name,signature(object.value),shape,mesh,{},std::move(guard),std::move(phase3Guard)};
 }
 EditInput editInput(App::Document& doc,const std::string& name,unsigned kind,bool allowBlocks){if(!CoreLayers::objectEditable(doc.getObject(name.c_str())))throw std::runtime_error("Input is hidden, locked or not selectable");return readInput(doc,name,kind,allowBlocks,nullptr);}
 EditInput nativeShapeInput(App::Document& doc,const std::string& name,const NativeShapeAdmission* admission){return readInput(doc,name,0,false,admission);}
-void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){verifyObject(doc,i.guard);auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");if(CoreLayers::objectLocked(o))throw std::runtime_error("An edit input layer is locked; unlock and retry");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
+void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){verifyObject(doc,i.guard);if(i.phase3Guard)verifyPhase3Object(doc,i.phase3Guard);auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");if(CoreLayers::objectLocked(o))throw std::runtime_error("An edit input layer is locked; unlock and retry");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
 ToleranceSnapshot editJoinTolerance(const std::string& context,const std::vector<EditInput>& inputs,const std::optional<double>& overrideMm){
     if(inputs.empty())throw std::runtime_error("Select Join inputs before resolving tolerance");
     const bool surfaces=count(inputs.front().shape->value,"Faces")!=0;double bound=0;
@@ -269,6 +271,8 @@ EditShapes buildEdit(const std::vector<EditInput>& inputs,unsigned kind,std::siz
     validateEditCapabilities(inputs,kind,mode);
     for(const auto& i:inputs)if(kind!=2&&i.mesh!=inputs[0].mesh)throw std::runtime_error("Mesh and BRep input types cannot be mixed in one Edit operation");
     if(inputs[0].mesh&&kind>=4){auto converted=inputs;for(auto& i:converted){i.shape=meshEditSolid(i.shape->value);i.mesh=false;}auto solids=buildEdit(converted,kind,first,mode,tolerance);EditShapes meshes;for(auto& s:solids)meshes.push_back(meshEditResult(s->value));return meshes;}
+    const bool phase3=std::all_of(inputs.begin(),inputs.end(),[](const EditInput& input){return bool(input.phase3Guard)&&!input.mesh;}) && !(kind>=4&&surfaceOnly(inputs[0].shape->value));
+    if(phase3){std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs)facts.push_back(phase3ShapeFacts(input.shape->value));phase3Validate(kind,facts);}
     Ref part(PyImport_ImportModule("Part"));EditShapes output;
     if(kind==1){
         bool curves=count(inputs[0].shape->value,"Faces")==0;Ref list(PyList_New(0));
@@ -336,6 +340,7 @@ void verifyEditPickBoundary(const EditShapes& shapes,const std::set<std::size_t>
     }
 }
 void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const EditShapes& shapes,unsigned kind,bool remove,unsigned mode,std::size_t first,const EditProjection* projection,const ToleranceSnapshot* toleranceContext){
+    requireLayerGeometryEditable(doc);
     const double tolerance=toleranceContext?toleranceContext->values.effectiveMm:om9_edit_tolerance();
     if(toleranceContext&&unitContextSnapshot(doc)!=toleranceContext->context)throw std::runtime_error("Join unit/tolerance context changed; cancel and reselect");
     verifyEditInputs(doc,inputs);for(const auto& s:shapes)if(isExplodedText(s->value))continue;else if(isEditMesh(s->value))validateEditMesh(s->value,kind>=4);else valid(s->value);
@@ -416,7 +421,10 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
                 throw std::runtime_error("StaleGeometry: Edit output parent changed during publication: "+output.name);
         }
     };
-    try{if(!doc.openTransactionPreservingRedo(name(kind)))throw std::runtime_error("StaleGeometry: Edit transaction could not be opened");opened=true;publication.check();Ref pyDoc(doc.getPyObject()),id(PyUnicode_FromString(feature(kind))),command(PyUnicode_FromString(name(kind))),sources(PyList_New(0));
+    int transaction=0;
+    try{transaction=doc.openTransactionPreservingRedo(name(kind));if(!transaction)throw std::runtime_error("StaleGeometry: Edit transaction could not be opened");opened=true;publication.check();
+        std::unique_ptr<LayerGeometryTransaction> layers;if(hasCanonicalLayerDocument(doc))layers=std::make_unique<LayerGeometryTransaction>(doc,transaction);
+        Ref pyDoc(doc.getPyObject()),id(PyUnicode_FromString(feature(kind))),command(PyUnicode_FromString(name(kind))),sources(PyList_New(0));
         for(const auto& i:inputs){Ref n(PyUnicode_FromString(i.name.c_str()));append(sources.value,n.value);}
         for(std::size_t index=0;index<shapes.size();++index){publication.check();auto shape=cad?owned(new Part::TopoShapePy(new Part::TopoShape(prepared[index].shape))):shapes[index];const bool mesh=isEditMesh(shape->value),textOutput=isExplodedText(shape->value);auto groups=outputGroups[index];Ref source(kind==2?doc.getObject(inputs[owners.at(index)].name.c_str())->getPyObject():Py_NewRef(Py_None));
             if(kind==2&&!cad){
@@ -444,7 +452,9 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
         for(const auto& n:deleting){verifyPublished(true);auto* source=doc.getObject(n.c_str());if(!source)throw std::runtime_error("StaleGeometry: Edit source missing before deletion: "+n);
             publication.remove(std::uint64_t(source->getID()));doc.removeObject(n.c_str());publication.remove(0);verifyPublished(true);}
         publication.recompute();verifyPublished(true);
+        if(layers)layers->finish();
+        if(!ownsLayerGeometryTransaction(doc,transaction))throw std::runtime_error("BRep edit transaction ownership changed");
         doc.commitTransaction();
-    }catch(...){if(opened&&publication.live())doc.abortTransaction();throw;}
+    }catch(...){if(opened&&publication.live()&&ownsLayerGeometryTransaction(doc,transaction))doc.abortTransaction();throw;}
 }
 }

@@ -1,0 +1,31 @@
+{
+  "checks": [
+    {
+      "name": "native curve Join creates independent connected wire",
+      "passed": true
+    },
+    {
+      "name": "Join Undo atomic retains inputs",
+      "passed": true
+    },
+    {
+      "name": "Join Redo restores result",
+      "passed": true
+    },
+    {
+      "name": "disconnected curves rejected without mutation",
+      "passed": true
+    },
+    {
+      "name": "joined curve current V5 reimport",
+      "passed": true
+    },
+    {
+      "name": "closed curve Join rejected before mutation",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\runtime\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+  "exported": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_curve_join_smoke-3c4cad8e469a475f8b73ea7a0cd2bd1f\\joined-curve-v5.3dm"
+}

@@ -1,0 +1,56 @@
+{
+  "version": "0.0.1",
+  "experimental": true,
+  "platform": "Windows x64",
+  "freecad": "27.1.0dev",
+  "python": "3.13.15",
+  "native_reports": [
+    {
+      "name": "release_smoke",
+      "checks": 9,
+      "passed": true,
+      "sha256": "a2bc34d6bf97cec2a257b5ed9b7eaa93f35391c27bf13f594d10d54e8696f19f"
+    },
+    {
+      "name": "modeling_layer_panel_smoke",
+      "checks": 27,
+      "passed": true,
+      "sha256": "93eb8a49e2f28e37480a7e20efeae733706d933981ac7bef2ad81f826c595c3d"
+    },
+    {
+      "name": "modeling_clipboard_user_smoke",
+      "checks": 26,
+      "passed": true,
+      "sha256": "a313e5acd8fbede3cad71453f1390e21f014020a0d8c2d49ec72bd5184d4b0b2"
+    },
+    {
+      "name": "relocated_workers_smoke",
+      "checks": 9,
+      "passed": true,
+      "sha256": "1ff41c157a6ec9978f9e79063809d569b7f41bea2b326c26e37b6b73bc634ea2"
+    }
+  ],
+  "native_checks": 71,
+  "rust_tests": 262,
+  "rust_tests_sha256": "8f6189d67d29ee0aacc13a9ea2d91b4bdd79eb9ecc472a296bf9efb9439c0c1b",
+  "public_source_audit": {
+    "source_files": 3532,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "native_plugin_sha256": "5a073035f258b856274bd5342104ed1f5c424a098f70674be3a4979f3723534f",
+  "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+  "source_snapshot": "Accepted layer-session candidate; isolated release branch; primary checkout unchanged.",
+  "runtime_test": "Actual extracted ZIPs, stripped development PATH/PYTHONPATH, relocated Python/runtime, actual Windows clipboard and OM9 Undo/Redo.",
+  "matrix_palette_adapter_packaged": false,
+  "full_opennurbs": false,
+  "packaging_adjustments": [
+    "Public authored SVG assets replace private reference rasters.",
+    "Launcher installs import helper next to portable FreeCAD.exe."
+  ],
+  "limitations": [
+    "Full Matrix palette transfer remains a separate candidate API gate, not product UI deployment.",
+    "Compatibility with other FreeCAD binaries is unverified."
+  ]
+}

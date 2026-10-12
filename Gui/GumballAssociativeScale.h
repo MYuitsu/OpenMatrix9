@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #pragma once
 #include <Base/Placement.h>
+#include <Mod/Part/App/FeatureCompound.h>
 #include <array>
 #include <functional>
 #include <memory>
@@ -9,6 +10,14 @@
 #include <vector>
 namespace App {class Document;class DocumentObject;class Property;enum class LinkScope;}
 namespace OpenMatrix9Gui {
+// Native Compound execution and links are unchanged. The provider is a type
+// default so FreeCAD's transaction replay cannot discard an addObject override.
+class GumballScaleCompound final:public Part::Compound {
+    PROPERTY_HEADER_WITH_OVERRIDE(OpenMatrix9Gui::GumballScaleCompound);
+public:
+    GumballScaleCompound()=default;
+    const char* getViewProviderName()const override{return "PartGui::ViewProviderPartExt";}
+};
 struct GumballScaleLinkEdit {
     struct OriginalTarget {
         App::DocumentObject* object=nullptr;

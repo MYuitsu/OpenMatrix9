@@ -1,0 +1,53 @@
+"""Actual shared-SDK pre-close timing and same-Undo writes, no inferred ownership."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]};observer=None
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    global observer
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('NativeHook');doc.UndoMode=1
+        native.layerDocumentCommand(doc.Name,json.dumps({'operation':'set_current','layer_id':'om9-preset-7'}))
+        owner=next(o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::LayerDocumentObject')
+        owner.addProperty('App::PropertyString','HookProof');owner.HookProof='baseline'
+        other=App.newDocument('ForeignPending');other.UndoMode=1;foreign=other.addObject('Part::Feature','Foreign');foreign.Shape=Part.makeBox(1,1,1);other.recompute()
+        other.openTransaction('Unrelated pending user work');foreign.Label='Keep foreign draft'
+        App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name)
+        class Probe:
+            def slotBeforeCloseTransaction(self,abort):
+                try:
+                    main=native.layerDocumentTransactionFacts(doc.Name);outside=native.layerDocumentTransactionFacts(other.Name)
+                    report.setdefault('before_close',[]).append({'abort':bool(abort),'main':main,'outside':outside})
+                    if not abort and main['pending'] and main['transacting'] and not main['performing']:
+                        owner.HookProof='written inside current native Undo'
+                except Exception:report.setdefault('hook_errors',[]).append(traceback.format_exc())
+        observer=Probe();App.addDocumentObserver(observer)
+        check('native transaction facts are available',native.layerDocumentTransactionFacts(doc.Name)['pending'] is False)
+        undo=doc.UndoCount;doc.openTransaction('Native box');obj=doc.addObject('Part::Feature','NativeBox');obj.Shape=Part.makeBox(2,3,4);doc.recompute();doc.commitTransaction()
+        frame=report['before_close'][-1]
+        check('pre-close has active Undo after booked ID cleared',frame['main']['pending'] and frame['main']['pending_id']!=0 and frame['main']['booked_id']==0)
+        check('pre-close identifies committing document without rollback',frame['main']['transacting'] and not frame['main']['performing'])
+        check('unrelated document is still pending but not transacting',frame['outside']['pending'] and not frame['outside']['transacting'])
+        check('hook adds no second Undo record',doc.UndoCount==undo+1 and owner.HookProof=='written inside current native Undo')
+        check('hook never commits or aborts foreign draft',other.HasPendingTransaction and foreign.Label=='Keep foreign draft')
+        doc.undo();check('one native Undo restores hook metadata and removes geometry',doc.getObject('NativeBox') is None and owner.HookProof=='baseline')
+        doc.redo();check('one native Redo restores hook metadata and geometry',doc.getObject('NativeBox') is not None and owner.HookProof=='written inside current native Undo')
+        owner.HookProof='baseline';doc.openTransaction('Abort native draft');obj=doc.getObject('NativeBox');obj.Label='Discard native change';doc.abortTransaction()
+        frame=report['before_close'][-1]
+        check('abort hook sees rollback before changes are replayed',frame['abort'] and frame['main']['performing'] and frame['main']['pending'])
+        check('abort writes no supplemental metadata',owner.HookProof=='baseline' and obj.Label!='Discard native change')
+        check('hook generated no exceptions',not report.get('hook_errors'))
+        App.removeDocumentObserver(observer);observer=None;other.abortTransaction()
+        report.update(ok=True,module=native.__file__,scope='native before-close API/Undo proof only; product lifecycle hook still pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if observer is not None:App.removeDocumentObserver(observer);observer=None
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

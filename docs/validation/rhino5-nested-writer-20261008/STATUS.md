@@ -1,0 +1,1 @@
+Actual Rhino5 GUI12/12 passed on2026-10-08. Native/FreeCAD reimport73/73 preserves exact child fields, UUID, dependencies, CRC and complete GUI archive/plugin tables through source-deleted FCStd. Opaque plugin dependency guard remains atomic. Modal warnings not established by command log. Scope remains restricted; full exchange incomplete.

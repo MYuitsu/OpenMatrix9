@@ -1,0 +1,58 @@
+"""Native additions to an existing custom canonical document remain usable."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtTest
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('ExternalLayers');doc.UndoMode=1
+        def settle():Gui.updateGui();QtTest.QTest.qWait(300)
+        settle();field=command_input(Gui.getMainWindow())
+        def cmd(text):field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        first=doc.addObject('Part::Feature','Known');first.Shape=Part.makeBox(1,2,3);doc.recompute()
+        native.layerDocumentCommand(doc.Name,json.dumps({'operation':'set_current','layer_id':'om9-preset-7'}))
+        baseline=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot'];known=next(o for o in baseline['objects'] if o['id']==first.OM9LayerObjectId)
+        owner=next(o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::LayerDocumentObject')
+        late=doc.addObject('Part::Feature','External');late.Shape=Part.makeBox(4,5,6)
+        late.addProperty('App::PropertyString','OM9LayerPath');late.OM9LayerPath='Custom::Detail'
+        late.addProperty('App::PropertyBool','OM9Locked');late.OM9Locked=True
+        late.ViewObject.Visibility=False;late.ViewObject.ShapeColor=(31/255.,32/255.,33/255.)
+        doc.recompute();raw=owner.OM9LayerSnapshot;undo=doc.UndoCount;shape=late.Shape.hashCode()
+        snapshot=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']
+        check('pure snapshot covers native addition and full custom path',len(snapshot['objects'])==2 and len(snapshot['layers'])==34)
+        check('pure reconciliation leaves storage and Undo unchanged',owner.OM9LayerSnapshot==raw and doc.UndoCount==undo)
+        row=next(o for o in snapshot['objects'] if o['id']=='External')
+        check('unobserved own restriction and displayed color stay conservative',row['locked'] and not row['visible'] and row['color_source']=='ByObject' and row['rgb']==[31,32,33])
+        check('known canonical state never comes from flattened projection',next(o for o in snapshot['objects'] if o['id']==known['id'])==known)
+        custom=next(l for l in snapshot['layers'] if l['path_components']==['Custom','Detail'])
+        native.layerDocumentCommand(doc.Name,json.dumps({'operation':'set_color','layer_id':custom['source_id'],'rgb':[81,82,83]}))
+        after=owner.OM9LayerSnapshot
+        check('one layer command persists complete native binding',doc.UndoCount==undo+1 and late.OM9LayerObjectId=='External' and late.OM9LayerHostName==late.Name)
+        report['native_projection']={'shape_before':shape,'shape_after':late.Shape.hashCode(),'locked':late.OM9Locked,'visible':late.ViewObject.Visibility,'shape_color':list(late.ViewObject.ShapeColor)}
+        check('ByObject geometry and restrictions unchanged by layer color',late.Shape.hashCode()==shape and late.OM9Locked and not late.ViewObject.Visibility and tuple(round(x*255) for x in late.ViewObject.ShapeColor[:3])==(31,32,33))
+        doc.undo();check('Undo restores previous canonical storage without deleting external geometry',owner.OM9LayerSnapshot==raw and doc.getObject('External') is late)
+        check('Undo can still read conservative native addition',len(json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['objects'])==2)
+        doc.redo();check('Redo restores canonical metadata and native binding',owner.OM9LayerSnapshot==after and late.OM9LayerHostName=='External')
+        # Existing OM9 native creation must accept reconciled external inputs.
+        Gui.activeDocument().activeView().viewTop();Gui.Selection.clearSelection()
+        for text in ['Line','0,0,0','10,0,0']:cmd(text)
+        current=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot'];rows=[r for r in current['objects'] if r['id'] not in {known['id'],'External'}]
+        check('Line continuation adds a current ByLayer object',len(rows)==1 and rows[0]['layer_id']=='om9-preset-7' and rows[0]['color_source']=='ByLayer')
+        check('native continuation preserves external own state',next(r for r in current['objects'] if r['id']=='External')==row)
+        saved=output/'external-layers.FCStd';doc.recompute();doc.saveAs(str(saved));expected=native.layerDocumentSnapshot(doc.Name)
+        App.closeDocument(doc.Name);doc=App.openDocument(str(saved));Gui.activeDocument().activeView().viewTop()
+        check('FCStd reopens complete canonical bindings',native.layerDocumentSnapshot(doc.Name)==expected and doc.getObject('External').OM9LayerHostName=='External')
+        report.update(ok=True,module=native.__file__,scope='unobserved native additions reconciliation and explicit OM9 creation; general native command observer pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

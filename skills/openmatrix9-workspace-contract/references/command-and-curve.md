@@ -6,7 +6,7 @@ Place Command above the viewports with Matrix-green background and black text. H
 
 Default height is **two history rows plus one live input row**, based on font metrics. Drag the lower dock separator to change history height; retain the user's resized height through workbench switches. The live prompt/input remains pinned at the bottom at every supported height, including minimum height and while scrolling old history. Draw a horizontal separator immediately above it. History scrolls independently without discarding or moving the draft.
 
-Private reference logical filenames: `matrix-command-options.png` (default rows and options), `matrix-command-completion.png` (separator, pinned input and suggestions). Resolve them through the ignored `docs/openmatrix9-reference-locations.json` registry under the [private reference policy](../../../docs/private-reference-policy.md); they are not distributed in repository assets.
+References: [default rows and options](../assets/matrix-command-options.png), [separator, pinned input and suggestions](../assets/matrix-command-completion.png).
 
 ## Idle command-name suggestions
 

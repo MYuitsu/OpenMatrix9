@@ -5,8 +5,8 @@ import uuid
 
 SCOPE_OMISSIONS = ('history', 'render', 'materials', 'textures', 'lights', 'layouts', 'userdata')
 
-def validate_prepared(rows):
-    if not rows:
+def validate_prepared(rows,allow_empty=False):
+    if not rows and not allow_empty:
         raise RuntimeError('3DM archive has no supported working geometry')
     for row in rows:
         kind = row.get('geometry_kind', 9)
@@ -22,7 +22,7 @@ def validate_prepared(rows):
 def prepare_modeling(path, staging, scale=0):
     import OpenMatrix9Gui as native
     model = json.loads(native.prepareModeling3dm(os.fspath(path), staging, scale))
-    validate_prepared(model['items'])
+    validate_prepared(model['items'],allow_empty='layer_session' in model)
     return model
 
 def bind_working_metadata(obj, item):
@@ -64,9 +64,7 @@ def working_selection(objects):
     visiting=set()
     def visit(obj):
         if obj in visiting: raise RuntimeError('Cyclic selection container')
-        if obj.isDerivedFrom('App::DocumentObjectGroup') or (
-            obj.isDerivedFrom('App::Part') and not obj.isDerivedFrom('PartDesign::Body')
-        ):
+        if obj.isDerivedFrom('App::DocumentObjectGroup'):
             if any(hasattr(obj,name) for name in ('OM9ArchiveMode','OM9DefinitionUUID','OM9NewDefinitionUUID')):
                 raise RuntimeError('Select independently editable geometry inside this archive container')
             visiting.add(obj)

@@ -1,0 +1,4441 @@
+{
+  "ok": true,
+  "native_processes": 30,
+  "native_checks": 955,
+  "plugin": "H:\\FreeCAD-src\\build\\gumball-clean-runtime-20261012\\bin\\OpenMatrix9Gui.pyd",
+  "plugin_sha256": "559e0dca08e3535174879dd81c598d4a894e70e43989d22dba8b6d77a8db6b20",
+  "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+  "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+  "native_suite": "H:\\FreeCAD-src\\build\\gumball-final-candidate-27-20261012\\suite.json",
+  "suite_sha256": "4ae88f0b50996b99a2a1bb8b709c8ef0d7c84c00469a4f43d812655147f004bb",
+  "runs": [
+    {
+      "name": "geometry",
+      "macro": "gumball_geometry_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 15,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021"
+      ],
+      "report_sha256": "f025abe6bd088477634e222d452badf21be53e288c782acab518e9168101294d",
+      "launch_sha256": "5cc594d23e6da24febdcb2432545f460734a99d00a958005bd99a8d2a5d30d2a",
+      "macro_sha256": "e4e19bd189351759898325e8ba3271f1c00ca65d38c08ff53ec39848767c784a",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "scale stages without editing source",
+          "passed": true
+        },
+        {
+          "name": "scale stages ellipse geometry",
+          "passed": true
+        },
+        {
+          "name": "scale retains exact native curve",
+          "passed": true
+        },
+        {
+          "name": "curve Object alignment follows native tangent",
+          "passed": true
+        },
+        {
+          "name": "single-edge wire Object alignment follows rotated native tangent",
+          "passed": true
+        },
+        {
+          "name": "ambiguous Object alignment reports unresolved",
+          "passed": true
+        },
+        {
+          "name": "nested placement included exactly once",
+          "passed": true
+        },
+        {
+          "name": "parent child selection normalized once",
+          "passed": true
+        },
+        {
+          "name": "distinct links remain separate occurrences",
+          "passed": true
+        },
+        {
+          "name": "Mesh retains discrete representation",
+          "passed": true
+        },
+        {
+          "name": "Points retains discrete representation",
+          "passed": true
+        },
+        {
+          "name": "face extrusion keeps hole volume",
+          "passed": true
+        },
+        {
+          "name": "reflected solid remains valid",
+          "passed": true
+        },
+        {
+          "name": "private staging adds no objects or Undo entries",
+          "passed": true
+        },
+        {
+          "name": "invalid batch is rejected",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "commands",
+      "macro": "gumball_commands_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 16,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "b95d5db8a0a9fb335ef37a4252d3512a7aaa830b23f1e4ea32a1395da5483489",
+      "launch_sha256": "59512c767e5e84006caa093d9a77fc3a4aebdb5001c89f93a5dba41e2644ab5a",
+      "macro_sha256": "9c8e22c3ab1d53618abb6470bc74c9186a2f9943360d9328fac02238661dcf04",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "new profile starts Off",
+          "passed": true
+        },
+        {
+          "name": "menu toggles On",
+          "passed": true
+        },
+        {
+          "name": "menu toggles Off",
+          "passed": true
+        },
+        {
+          "name": "CMD On",
+          "passed": true
+        },
+        {
+          "name": "CMD World alignment",
+          "passed": true
+        },
+        {
+          "name": "CMD CPlane alignment",
+          "passed": true
+        },
+        {
+          "name": "CMD Object alignment",
+          "passed": true
+        },
+        {
+          "name": "RelocateGumball starts relocate",
+          "passed": true
+        },
+        {
+          "name": "RelocateGumball accepts origin and X",
+          "passed": true
+        },
+        {
+          "name": "GumballRelocate starts relocate",
+          "passed": true
+        },
+        {
+          "name": "GumballRelocate accepts origin and X",
+          "passed": true
+        },
+        {
+          "name": "CMD Toggle",
+          "passed": true
+        },
+        {
+          "name": "deactivate cancels interaction",
+          "passed": true
+        },
+        {
+          "name": "reactivate keeps enable preference",
+          "passed": true
+        },
+        {
+          "name": "view commands create no geometry or Undo",
+          "passed": true
+        },
+        {
+          "name": "closed document owns no gesture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "ownership",
+      "macro": "gumball_ownership_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 24,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "029d95a60f0fc20c6243384b08b80402e9e7d99a3dc552cc562c4684cba34069",
+      "launch_sha256": "52adb8913d09013c3d8e8fad68d944c49d69ea071b6cf9150adc9cf87967f8a4",
+      "macro_sha256": "a114d841d9fa378fc10518e318aa2e98f6fb99f267e8fa67e4c6b5b8e0bfd83d",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "two occurrences move once without modifying definition",
+          "passed": true
+        },
+        {
+          "name": "occurrence Undo is atomic",
+          "passed": true
+        },
+        {
+          "name": "definition callback aborts occurrence and definition together",
+          "passed": true
+        },
+        {
+          "name": "definition mutation invalidates captured Link gesture",
+          "passed": true
+        },
+        {
+          "name": "Link copy retains shared definition and independent occurrence",
+          "passed": true
+        },
+        {
+          "name": "selected parent and child transform once",
+          "passed": true
+        },
+        {
+          "name": "group copy owns independent native members",
+          "passed": true
+        },
+        {
+          "name": "closed solid oracle accepts copied geometry with different native identity",
+          "passed": true
+        },
+        {
+          "name": "closed solid oracle rejects a translated box",
+          "passed": true
+        },
+        {
+          "name": "closed solid oracle rejects a missing face",
+          "passed": true
+        },
+        {
+          "name": "closed solid oracle rejects different solid geometry",
+          "passed": true
+        },
+        {
+          "name": "selected ordinary parent and child Scale applies one affine transaction",
+          "passed": true
+        },
+        {
+          "name": "ordinary parent and child Scale Undo restores geometry and membership",
+          "passed": true
+        },
+        {
+          "name": "ordinary parent and child Scale Redo restores one affine result",
+          "passed": true
+        },
+        {
+          "name": "whole Part fixture has valid direct and ordinary group membership",
+          "passed": true
+        },
+        {
+          "name": "whole Part shared member Move applies once in one transaction",
+          "passed": true
+        },
+        {
+          "name": "whole Part shared member Move Undo restores native ownership and geometry",
+          "passed": true
+        },
+        {
+          "name": "whole Part shared member Scale applies one affine in one transaction",
+          "passed": true
+        },
+        {
+          "name": "whole Part shared member Scale Undo restores native ownership and geometry",
+          "passed": true
+        },
+        {
+          "name": "whole Part shared member Scale Redo restores only one affine",
+          "passed": true
+        },
+        {
+          "name": "native Mesh and Points rigid batch commits",
+          "passed": true
+        },
+        {
+          "name": "native Mesh and Points affine batch keeps representations",
+          "passed": true
+        },
+        {
+          "name": "Ctrl numeric click moves widget only",
+          "passed": true
+        },
+        {
+          "name": "unsupported Mesh component frame keeps prior alignment explicitly",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "review",
+      "macro": "gumball_review_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 9,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "dcd28d23c3f8bb1e301e221e17480e3cf882bae19e15a911dda599b05c267b6f",
+      "launch_sha256": "8df5ee2d016aed14b65ffc8285123a050e08aee4e1cf204a4ee50e31eedc1b14",
+      "macro_sha256": "06162565504cfb91cdafc02de369df91d6c14eb1822b1984fb6282fac8a86213",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "Mesh same-field callback rejects complete publication",
+          "passed": true
+        },
+        {
+          "name": "Points same-field callback rejects complete publication",
+          "passed": true
+        },
+        {
+          "name": "axis constraint 5 follows pointer side 1",
+          "passed": true
+        },
+        {
+          "name": "axis constraint 5 follows pointer side -1",
+          "passed": true
+        },
+        {
+          "name": "axis constraint -5 follows pointer side 1",
+          "passed": true
+        },
+        {
+          "name": "axis constraint -5 follows pointer side -1",
+          "passed": true
+        },
+        {
+          "name": "extrusion constraint follows pointer side 1",
+          "passed": true
+        },
+        {
+          "name": "extrusion constraint follows pointer side -1",
+          "passed": true
+        },
+        {
+          "name": "unsupported BRep vertex retains rotated CPlane frame",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "lifecycle",
+      "macro": "gumball_lifecycle_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 18,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "40a301c9fe059db15927b75025340e5a43cac9c23f450723d91e2588c9173ca1",
+      "launch_sha256": "5adbd90c6ca8f95b39056683ac26601c4839b0e37f69675c131e7be73316964c",
+      "macro_sha256": "61d165285ac077643c872fb7ebcae38ad29d3eec6a9b258d1b3d86e05f435710",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "legacy command registered OM9_InfoSettingsGumballON",
+          "passed": true
+        },
+        {
+          "name": "legacy command registered OM9_InfoSettingsGumballAlignment",
+          "passed": true
+        },
+        {
+          "name": "legacy command registered OM9_InfoSettingsRelocateGumball",
+          "passed": true
+        },
+        {
+          "name": "three points give rigid rotated frame",
+          "passed": true
+        },
+        {
+          "name": "relocated axis moves along its world direction",
+          "passed": true
+        },
+        {
+          "name": "single object keeps relocated frame across reselect",
+          "passed": true
+        },
+        {
+          "name": "native Relocate pointer origin and CMD direction change only widget",
+          "passed": true
+        },
+        {
+          "name": "rotated CPlane move uses native frame",
+          "passed": true
+        },
+        {
+          "name": "invalid factor keeps native editor and model",
+          "passed": true
+        },
+        {
+          "name": "Alt copy drag shows native copy cursor",
+          "passed": true
+        },
+        {
+          "name": "Alt tap and auto-repeat copy exactly once",
+          "passed": true
+        },
+        {
+          "name": "two Alt taps return to move",
+          "passed": true
+        },
+        {
+          "name": "navigation cancels gesture without commit",
+          "passed": true
+        },
+        {
+          "name": "appearance invalidates pending gesture",
+          "passed": true
+        },
+        {
+          "name": "delete invalidates pending gesture",
+          "passed": true
+        },
+        {
+          "name": "replacement invalidates pending gesture",
+          "passed": true
+        },
+        {
+          "name": "workbench switch releases gesture ownership",
+          "passed": true
+        },
+        {
+          "name": "document close clears native overlay and gesture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "reentrancy",
+      "macro": "gumball_reentrancy_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 3,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "fd467cbee2b2f4979289b7edd6dfcfd6b882d4b35e1bffa7dc5762137a7a6d42",
+      "launch_sha256": "315f449466fa0a1216359e061fd6b388d780bb1efef246184732f6bc98e19619",
+      "macro_sha256": "7979bd5962d514bfbbf84c35f52650ad4a6959cbd4c420af8ba17c1ff237ce60",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "readonly callback actually observed publication",
+          "passed": true
+        },
+        {
+          "name": "readonly callback cannot cancel or free publication inputs",
+          "passed": true
+        },
+        {
+          "name": "reentrant publication has one reversible transaction",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "cancel-publication",
+      "macro": "gumball_reentrancy_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 2,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "7f7886e9f75d1e4cc0c6ca6f0cee6e9d26f0debf217e8caa7c437625a704400d",
+      "launch_sha256": "3a05d9c5dd4828e37c2a8226f00d32af1b9db78b9f60978a54dac0a6b9bb149e",
+      "macro_sha256": "7979bd5962d514bfbbf84c35f52650ad4a6959cbd4c420af8ba17c1ff237ce60",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "readonly callback actually observed publication",
+          "passed": true
+        },
+        {
+          "name": "synchronous user cancellation aborts publication",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "core-dpi1",
+      "macro": "gumball_core_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 68,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "ff90dc6f20ad6a4e88fed0a26cfb1cf58bb24552c530840f97d007b1eaa0ea9b",
+      "launch_sha256": "3e2eb73ca16ade4c81dd6bafdaa26da17cf4f88f1fa7d08fe884758c016fce05",
+      "macro_sha256": "f3e430fa0a59c68b197c3ac93444b36354fd0b3d2e44e9d6bc689343c153ce1a",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "native scene exposes actual picked handles",
+          "passed": true
+        },
+        {
+          "name": "all thirteen transform handle identities are pickable",
+          "passed": true
+        },
+        {
+          "name": "rendered planar handles stay within a compact widget",
+          "passed": true
+        },
+        {
+          "name": "pointer hit begins Rust gesture",
+          "passed": true
+        },
+        {
+          "name": "handle click opens native numeric editor",
+          "passed": true
+        },
+        {
+          "name": "numeric movement keeps double precision",
+          "passed": true
+        },
+        {
+          "name": "one gesture creates one Undo",
+          "passed": true
+        },
+        {
+          "name": "Undo restores original geometry",
+          "passed": true
+        },
+        {
+          "name": "Redo restores movement",
+          "passed": true
+        },
+        {
+          "name": "MoveY click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "MoveY exact numeric axis",
+          "passed": true
+        },
+        {
+          "name": "MoveZ click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "MoveZ exact numeric axis",
+          "passed": true
+        },
+        {
+          "name": "RotateX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "RotateX preserves pivot and native volume",
+          "passed": true
+        },
+        {
+          "name": "RotateY click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "RotateY preserves pivot and native volume",
+          "passed": true
+        },
+        {
+          "name": "RotateZ click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "RotateZ preserves pivot and native volume",
+          "passed": true
+        },
+        {
+          "name": "RotateZ pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "typed angle step during drag waits for release",
+          "passed": true
+        },
+        {
+          "name": "native rotation drag commits a nonzero multiple of angle step",
+          "passed": true
+        },
+        {
+          "name": "ScaleX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "axis scale is centered native affine geometry",
+          "passed": true
+        },
+        {
+          "name": "ScaleY click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "Shift scale changes all three dimensions",
+          "passed": true
+        },
+        {
+          "name": "ScaleZ click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "negative factor keeps valid native solid orientation",
+          "passed": true
+        },
+        {
+          "name": "MoveXY pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "MoveXY remains in its plane",
+          "passed": true
+        },
+        {
+          "name": "MoveYZ pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "MoveYZ remains in its plane",
+          "passed": true
+        },
+        {
+          "name": "MoveZX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "MoveZX remains in its plane",
+          "passed": true
+        },
+        {
+          "name": "MoveFree pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "origin handle moves geometry",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "CMD focus preserves viewport mouse grab",
+          "passed": true
+        },
+        {
+          "name": "Enter during held drag only sets constraint",
+          "passed": true
+        },
+        {
+          "name": "release commits the typed drag constraint",
+          "passed": true
+        },
+        {
+          "name": "numeric editor retains IME commit and text focus",
+          "passed": true
+        },
+        {
+          "name": "IME numeric value follows native commit path",
+          "passed": true
+        },
+        {
+          "name": "MoveX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "Alt numeric copy has independent identity and preserves source",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start relocates only widget",
+          "passed": true
+        },
+        {
+          "name": "MoveX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "multiple source batch transforms each object once",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "native callback changing second source aborts the entire transaction",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "selection changed before release rejects the whole gesture",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "unit change invalidates preview without a transform transaction",
+          "passed": true
+        },
+        {
+          "name": "MoveX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "ScaleX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "second protected scale dependency rejects the entire batch",
+          "passed": true
+        },
+        {
+          "name": "pretransaction capability rejection preserves an existing Redo",
+          "passed": true
+        },
+        {
+          "name": "MoveX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "rigid move survives parametric recompute",
+          "passed": true
+        },
+        {
+          "name": "MoveZ pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "Ctrl released before mouse-up returns to Move",
+          "passed": true
+        },
+        {
+          "name": "MoveZ pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-after-motion extrudes a holed face",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "same-source callback geometry replacement aborts whole transaction",
+          "passed": true
+        },
+        {
+          "name": "first Esc closes numeric editor only",
+          "passed": true
+        },
+        {
+          "name": "second Esc cancels gesture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "core-dpi150",
+      "macro": "gumball_core_smoke.FCMacro",
+      "dpi": "1.5",
+      "checks": 68,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "1e3c2c9db94d31c28eeb51b755e35da9dd197c47eee2db78cc0100a31adeb77e",
+      "launch_sha256": "7b25ebb8e6408517cfff76153f664d70d1338119022a8fc2a8cb16ca2988ee66",
+      "macro_sha256": "f3e430fa0a59c68b197c3ac93444b36354fd0b3d2e44e9d6bc689343c153ce1a",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "native scene exposes actual picked handles",
+          "passed": true
+        },
+        {
+          "name": "all thirteen transform handle identities are pickable",
+          "passed": true
+        },
+        {
+          "name": "rendered planar handles stay within a compact widget",
+          "passed": true
+        },
+        {
+          "name": "pointer hit begins Rust gesture",
+          "passed": true
+        },
+        {
+          "name": "handle click opens native numeric editor",
+          "passed": true
+        },
+        {
+          "name": "numeric movement keeps double precision",
+          "passed": true
+        },
+        {
+          "name": "one gesture creates one Undo",
+          "passed": true
+        },
+        {
+          "name": "Undo restores original geometry",
+          "passed": true
+        },
+        {
+          "name": "Redo restores movement",
+          "passed": true
+        },
+        {
+          "name": "MoveY click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "MoveY exact numeric axis",
+          "passed": true
+        },
+        {
+          "name": "MoveZ click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "MoveZ exact numeric axis",
+          "passed": true
+        },
+        {
+          "name": "RotateX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "RotateX preserves pivot and native volume",
+          "passed": true
+        },
+        {
+          "name": "RotateY click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "RotateY preserves pivot and native volume",
+          "passed": true
+        },
+        {
+          "name": "RotateZ click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "RotateZ preserves pivot and native volume",
+          "passed": true
+        },
+        {
+          "name": "RotateZ pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "typed angle step during drag waits for release",
+          "passed": true
+        },
+        {
+          "name": "native rotation drag commits a nonzero multiple of angle step",
+          "passed": true
+        },
+        {
+          "name": "ScaleX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "axis scale is centered native affine geometry",
+          "passed": true
+        },
+        {
+          "name": "ScaleY click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "Shift scale changes all three dimensions",
+          "passed": true
+        },
+        {
+          "name": "ScaleZ click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "negative factor keeps valid native solid orientation",
+          "passed": true
+        },
+        {
+          "name": "MoveXY pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "MoveXY remains in its plane",
+          "passed": true
+        },
+        {
+          "name": "MoveYZ pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "MoveYZ remains in its plane",
+          "passed": true
+        },
+        {
+          "name": "MoveZX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "MoveZX remains in its plane",
+          "passed": true
+        },
+        {
+          "name": "MoveFree pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "origin handle moves geometry",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "CMD focus preserves viewport mouse grab",
+          "passed": true
+        },
+        {
+          "name": "Enter during held drag only sets constraint",
+          "passed": true
+        },
+        {
+          "name": "release commits the typed drag constraint",
+          "passed": true
+        },
+        {
+          "name": "numeric editor retains IME commit and text focus",
+          "passed": true
+        },
+        {
+          "name": "IME numeric value follows native commit path",
+          "passed": true
+        },
+        {
+          "name": "MoveX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "Alt numeric copy has independent identity and preserves source",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start relocates only widget",
+          "passed": true
+        },
+        {
+          "name": "MoveX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "multiple source batch transforms each object once",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "native callback changing second source aborts the entire transaction",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "selection changed before release rejects the whole gesture",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "unit change invalidates preview without a transform transaction",
+          "passed": true
+        },
+        {
+          "name": "MoveX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "ScaleX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "second protected scale dependency rejects the entire batch",
+          "passed": true
+        },
+        {
+          "name": "pretransaction capability rejection preserves an existing Redo",
+          "passed": true
+        },
+        {
+          "name": "MoveX click owns gesture",
+          "passed": true
+        },
+        {
+          "name": "rigid move survives parametric recompute",
+          "passed": true
+        },
+        {
+          "name": "MoveZ pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "Ctrl released before mouse-up returns to Move",
+          "passed": true
+        },
+        {
+          "name": "MoveZ pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-after-motion extrudes a holed face",
+          "passed": true
+        },
+        {
+          "name": "MoveX pointer motion owns dragging",
+          "passed": true
+        },
+        {
+          "name": "same-source callback geometry replacement aborts whole transaction",
+          "passed": true
+        },
+        {
+          "name": "first Esc closes numeric editor only",
+          "passed": true
+        },
+        {
+          "name": "second Esc cancels gesture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "four-view-dpi1",
+      "macro": "gumball_four_view_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 65,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "f49db0ec76720e3d545664606b8cd406070fe6ab96bac29019465042316802d6",
+      "launch_sha256": "6e3783a7cd7fc559cebf692bc693f3fd333a74f2acb5bd49feb1465609ea896c",
+      "macro_sha256": "5258a96ade5a432cc9c37cd545ee2c8a6fb3ec5b15f390e68c9a9771752ad562",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "four native views exist",
+          "passed": true
+        },
+        {
+          "name": "selection does not enable an Off widget",
+          "passed": true
+        },
+        {
+          "name": "On attaches all four overlays without visiting them",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 0",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 0",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 1",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 2",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 2",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 3",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 3",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 0",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 0",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 0",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 1",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 1",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 1",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 2",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 2",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 2",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 3",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 3",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 3",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 0",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 0",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 0",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 0",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 0",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 0",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 0",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 0",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 0",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 1",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 1",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 1",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 1",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 1",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 1",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 1",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 1",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 1",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 2",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 2",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 2",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 2",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 2",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 2",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 2",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 2",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 2",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 3",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 3",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 3",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 3",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 3",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 3",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 3",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 3",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 3",
+          "passed": true
+        },
+        {
+          "name": "relocate world input changes only widget",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 0",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 1",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 2",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 3",
+          "passed": true
+        },
+        {
+          "name": "Off removes every overlay",
+          "passed": true
+        },
+        {
+          "name": "view operations preserve native owner and Undo",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "view-lifecycle-dpi1",
+      "macro": "gumball_view_lifecycle_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 19,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "50adfc7a1c185a53e7e5ba1821d7fb4127ca23795545e1b3c5e7d355f019377d",
+      "launch_sha256": "728fb9e1bf1b248c5f7082933c8dd59b6c2657773b36044e8ec56f415ee7f6c6",
+      "macro_sha256": "f6610b8393a8e2dc1da2a4cf1b9810769d6c9e4056b99f1c1bddf9969595ed24",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "native stroke widths preserve configured logical pixels",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "maximize preserves shared frame and all scenes",
+          "passed": true
+        },
+        {
+          "name": "restore keeps frame and geometry",
+          "passed": true
+        },
+        {
+          "name": "one drag preview is shared by four views",
+          "passed": true
+        },
+        {
+          "name": "view navigation cancels every preview",
+          "passed": true
+        },
+        {
+          "name": "closing passive view leaves shared session ready",
+          "passed": true
+        },
+        {
+          "name": "closing source view cancels preview and mouse capture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "four-view-dpi1.5",
+      "macro": "gumball_four_view_smoke.FCMacro",
+      "dpi": "1.5",
+      "checks": 65,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "dfe99dd0878c941616f0b9e8e7d6f0ed517d8724c176bf0b71c3fd2f7dfa1e21",
+      "launch_sha256": "d6fa4c2fdd28d36e85a354d89b314466459f6d73f0de14c903c7f6b64bbbd732",
+      "macro_sha256": "5258a96ade5a432cc9c37cd545ee2c8a6fb3ec5b15f390e68c9a9771752ad562",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "four native views exist",
+          "passed": true
+        },
+        {
+          "name": "selection does not enable an Off widget",
+          "passed": true
+        },
+        {
+          "name": "On attaches all four overlays without visiting them",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 0",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 0",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 1",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 2",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 2",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 3",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 3",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 0",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 0",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 0",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 1",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 1",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 1",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 2",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 2",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 2",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 3",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 3",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 3",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 0",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 0",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 0",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 0",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 0",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 0",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 0",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 0",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 0",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 1",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 1",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 1",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 1",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 1",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 1",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 1",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 1",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 1",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 2",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 2",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 2",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 2",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 2",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 2",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 2",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 2",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 2",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 3",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 3",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 3",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 3",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 3",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 3",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 3",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 3",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 3",
+          "passed": true
+        },
+        {
+          "name": "relocate world input changes only widget",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 0",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 1",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 2",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 3",
+          "passed": true
+        },
+        {
+          "name": "Off removes every overlay",
+          "passed": true
+        },
+        {
+          "name": "view operations preserve native owner and Undo",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "view-lifecycle-dpi1.5",
+      "macro": "gumball_view_lifecycle_smoke.FCMacro",
+      "dpi": "1.5",
+      "checks": 19,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "99f5fe438dcf8669ff51dc9b9358d0073f11f012c5580a42c6543c531abd52a8",
+      "launch_sha256": "370fe2b48afee714cb8ea0557712109f3cf8d57b8e39affbe180f871d2da6bdf",
+      "macro_sha256": "f6610b8393a8e2dc1da2a4cf1b9810769d6c9e4056b99f1c1bddf9969595ed24",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "native stroke widths preserve configured logical pixels",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "maximize preserves shared frame and all scenes",
+          "passed": true
+        },
+        {
+          "name": "restore keeps frame and geometry",
+          "passed": true
+        },
+        {
+          "name": "one drag preview is shared by four views",
+          "passed": true
+        },
+        {
+          "name": "view navigation cancels every preview",
+          "passed": true
+        },
+        {
+          "name": "closing passive view leaves shared session ready",
+          "passed": true
+        },
+        {
+          "name": "closing source view cancels preview and mouse capture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "four-view-dpi2",
+      "macro": "gumball_four_view_smoke.FCMacro",
+      "dpi": "2",
+      "checks": 65,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "bc1821c4644725faefd170de4f702b6d76a8882aab2207aca886aa417d256f82",
+      "launch_sha256": "7b18062cdf5bbc7e54cf5ef7c8c38109c6c1dd61cee6bb008961ca7bf244a683",
+      "macro_sha256": "5258a96ade5a432cc9c37cd545ee2c8a6fb3ec5b15f390e68c9a9771752ad562",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "four native views exist",
+          "passed": true
+        },
+        {
+          "name": "selection does not enable an Off widget",
+          "passed": true
+        },
+        {
+          "name": "On attaches all four overlays without visiting them",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 0",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 0",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 1",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 2",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 2",
+          "passed": true
+        },
+        {
+          "name": "World frame remains shared in view 3",
+          "passed": true
+        },
+        {
+          "name": "orthographic projection filters native hits 3",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 0",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 0",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 0",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 1",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 1",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 1",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 2",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 2",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 2",
+          "passed": true
+        },
+        {
+          "name": "inactive view first click owns exactly one editor 3",
+          "passed": true
+        },
+        {
+          "name": "numeric commit once in view 3",
+          "passed": true
+        },
+        {
+          "name": "Undo restores geometry 3",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 0",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 0",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 0",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 0",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 0",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 0",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 0",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 0",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 0",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 1",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 1",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 1",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 1",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 1",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 1",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 1",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 1",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 1",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 2",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 2",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 2",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 2",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 2",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 2",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 2",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 2",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 2",
+          "passed": true
+        },
+        {
+          "name": "Scale has one batch and correct axis 3",
+          "passed": true
+        },
+        {
+          "name": "Rotate uses camera-visible world axis 3",
+          "passed": true
+        },
+        {
+          "name": "Alt Copy commits once and preserves source 3",
+          "passed": true
+        },
+        {
+          "name": "drag preview is present in all view scenes 3",
+          "passed": true
+        },
+        {
+          "name": "late Ctrl Extrude has one native output 3",
+          "passed": true
+        },
+        {
+          "name": "Shift Scale3D affects all dimensions once 3",
+          "passed": true
+        },
+        {
+          "name": "Ctrl-start numeric changes only shared widget 3",
+          "passed": true
+        },
+        {
+          "name": "Relocate origin preview is shared 3",
+          "passed": true
+        },
+        {
+          "name": "Relocate optional Y accepts shared rotated frame 3",
+          "passed": true
+        },
+        {
+          "name": "relocate world input changes only widget",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 0",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 1",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 2",
+          "passed": true
+        },
+        {
+          "name": "relocated frame survives focus 3",
+          "passed": true
+        },
+        {
+          "name": "Off removes every overlay",
+          "passed": true
+        },
+        {
+          "name": "view operations preserve native owner and Undo",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "view-lifecycle-dpi2",
+      "macro": "gumball_view_lifecycle_smoke.FCMacro",
+      "dpi": "2",
+      "checks": 19,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "60e9e93d351f06bcddf7ba2472f1e3da8eb9f165dbe8be8d33986c3027e51222",
+      "launch_sha256": "757595f3bbe5972b26d06214afc65d7a94b128020a6d92953a008cdfbb7955af",
+      "macro_sha256": "f6610b8393a8e2dc1da2a4cf1b9810769d6c9e4056b99f1c1bddf9969595ed24",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "native stroke widths preserve configured logical pixels",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 0.5",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 1.0",
+          "passed": true
+        },
+        {
+          "name": "menu logical pixel offset at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "Move arrow logical profile at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "Plane center logical profile at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "world Scale anchors remain native bounds at zoom 2.0",
+          "passed": true
+        },
+        {
+          "name": "maximize preserves shared frame and all scenes",
+          "passed": true
+        },
+        {
+          "name": "restore keeps frame and geometry",
+          "passed": true
+        },
+        {
+          "name": "one drag preview is shared by four views",
+          "passed": true
+        },
+        {
+          "name": "view navigation cancels every preview",
+          "passed": true
+        },
+        {
+          "name": "closing passive view leaves shared session ready",
+          "passed": true
+        },
+        {
+          "name": "closing source view cancels preview and mouse capture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "macro": "gumball_settings_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 10,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "59090546f1a4de39c936f170557363145c8d98d3bbe7add2d6002aeb611914a2",
+      "launch_sha256": "73cdeeb80e65d5198b963f1c45918b3fd3fa94cc39ddec02eda681be4d168955",
+      "macro_sha256": "dc6cce864dccf3b134b97149e549185baa3c5348e437970065fe377a69571a22",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "menu exposes the complete core settings",
+          "passed": true
+        },
+        {
+          "name": "new profile uses Smooth",
+          "passed": true
+        },
+        {
+          "name": "Snappy session setting applies",
+          "passed": true
+        },
+        {
+          "name": "Settings opens a real editable dialog",
+          "passed": true
+        },
+        {
+          "name": "zero Scale size removes native Scale hits",
+          "passed": true
+        },
+        {
+          "name": "Drag Strength accepted and persisted",
+          "passed": true
+        },
+        {
+          "name": "orbit center follows the shared pivot",
+          "passed": true
+        },
+        {
+          "name": "enabled orbit follows a newly accepted relocated pivot",
+          "passed": true
+        },
+        {
+          "name": "Restore defaults restores only Gumball preferences",
+          "passed": true
+        },
+        {
+          "name": "settings and orbit do not change geometry or Undo",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "snappy",
+      "macro": "gumball_snappy_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 6,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "a33bcf87a00cb202d746bd681b33cbeebf482a3169ff3cdb0947e831427b5859",
+      "launch_sha256": "b112f2d23ed7bae8891a55d1700abf2810c9f9068657fd0a104957b7fb72416a",
+      "macro_sha256": "85f77d032cc6c3561f69d20c7c8f920d7df39979e952bda500ab51bc17f97c08",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "pointer preview is shared",
+          "passed": true
+        },
+        {
+          "name": "pointer preview is shared",
+          "passed": true
+        },
+        {
+          "name": "pointer preview is shared",
+          "passed": true
+        },
+        {
+          "name": "Snappy consumes the enabled native endpoint candidate",
+          "passed": true
+        },
+        {
+          "name": "Smooth pointer strength scales displacement exactly",
+          "passed": true
+        },
+        {
+          "name": "each native drag is one Undo and restores source",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "relocate_pointer",
+      "macro": "gumball_relocate_pointer_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 25,
+      "feature_ids": [
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "b037a34863346276ef5d43f92da85a99b4d5322d648b89cee69584c8c63521c6",
+      "launch_sha256": "e61733b0e36e36bd58736e06560370715fac8eb3c62f21cda441d23834d55a26",
+      "macro_sha256": "332eff6390c000f1691104b6a309ee5a4741deb86a2cc05c45e36d4ffcf91867",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "End pointer origin shared in view0",
+          "passed": true
+        },
+        {
+          "name": "End cancel restores every frame in view0",
+          "passed": true
+        },
+        {
+          "name": "Mid pointer origin shared in view0",
+          "passed": true
+        },
+        {
+          "name": "Mid cancel restores every frame in view0",
+          "passed": true
+        },
+        {
+          "name": "Point pointer origin shared in view0",
+          "passed": true
+        },
+        {
+          "name": "Point cancel restores every frame in view0",
+          "passed": true
+        },
+        {
+          "name": "End pointer origin shared in view1",
+          "passed": true
+        },
+        {
+          "name": "End cancel restores every frame in view1",
+          "passed": true
+        },
+        {
+          "name": "Mid pointer origin shared in view1",
+          "passed": true
+        },
+        {
+          "name": "Mid cancel restores every frame in view1",
+          "passed": true
+        },
+        {
+          "name": "Point pointer origin shared in view1",
+          "passed": true
+        },
+        {
+          "name": "Point cancel restores every frame in view1",
+          "passed": true
+        },
+        {
+          "name": "End pointer origin shared in view2",
+          "passed": true
+        },
+        {
+          "name": "End cancel restores every frame in view2",
+          "passed": true
+        },
+        {
+          "name": "Mid pointer origin shared in view2",
+          "passed": true
+        },
+        {
+          "name": "Mid cancel restores every frame in view2",
+          "passed": true
+        },
+        {
+          "name": "Point pointer origin shared in view2",
+          "passed": true
+        },
+        {
+          "name": "Point cancel restores every frame in view2",
+          "passed": true
+        },
+        {
+          "name": "End pointer origin shared in view3",
+          "passed": true
+        },
+        {
+          "name": "End cancel restores every frame in view3",
+          "passed": true
+        },
+        {
+          "name": "Mid pointer origin shared in view3",
+          "passed": true
+        },
+        {
+          "name": "Mid cancel restores every frame in view3",
+          "passed": true
+        },
+        {
+          "name": "Point pointer origin shared in view3",
+          "passed": true
+        },
+        {
+          "name": "Point cancel restores every frame in view3",
+          "passed": true
+        },
+        {
+          "name": "pointer workflow preserves all native sources",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "owner_scale",
+      "macro": "gumball_owner_scale_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 27,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021"
+      ],
+      "report_sha256": "01a57437b8a4d77d3ebcc3df3a50511c24728abf452a0eb3344ef48973f28390",
+      "launch_sha256": "a1b28fe6f8c6bbbd4d2e0ab87d4795fb60f2f4fe2cf52733e11c0bc104054a46",
+      "macro_sha256": "85532df02c9b69a9f9ee3d5a7cad740effb72903a965337a73d9bcb81f33bd29",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "Box scales through durable native dimensions",
+          "passed": true
+        },
+        {
+          "name": "native downstream dependency recomputes after Gumball Scale",
+          "passed": true
+        },
+        {
+          "name": "Box Undo restores native parameters",
+          "passed": true
+        },
+        {
+          "name": "Undo restores existing native dependency result",
+          "passed": true
+        },
+        {
+          "name": "Box Redo remains parametric",
+          "passed": true
+        },
+        {
+          "name": "uniform Sphere scale uses Radius",
+          "passed": true
+        },
+        {
+          "name": "anisotropic Sphere creates durable native affine result and preserves Radius",
+          "passed": true
+        },
+        {
+          "name": "anisotropic Sphere result matches native affine geometry",
+          "passed": true
+        },
+        {
+          "name": "anisotropic Sphere Undo removes only the result graph",
+          "passed": true
+        },
+        {
+          "name": "anisotropic Sphere Redo restores associated geometry",
+          "passed": true
+        },
+        {
+          "name": "Link scales occurrence properties",
+          "passed": true
+        },
+        {
+          "name": "Link definition and ownership preserved",
+          "passed": true
+        },
+        {
+          "name": "Link Undo restores ScaleVector",
+          "passed": true
+        },
+        {
+          "name": "Link Redo survives recompute",
+          "passed": true
+        },
+        {
+          "name": "Undo deletion restores scaled Link",
+          "passed": true
+        },
+        {
+          "name": "Undo Scale after restoration returns original vector",
+          "passed": true
+        },
+        {
+          "name": "Redo Scale after restoration preserves anisotropy",
+          "passed": true
+        },
+        {
+          "name": "Alt Link Scale preserves source and creates scaled occurrence",
+          "passed": true
+        },
+        {
+          "name": "Alt Link Scale Undo removes only new occurrence",
+          "passed": true
+        },
+        {
+          "name": "Alt Link Scale Redo restores anisotropic occurrence",
+          "passed": true
+        },
+        {
+          "name": "Link shear creates associated native graph without changing source occurrence",
+          "passed": true
+        },
+        {
+          "name": "Link shear result matches complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "Link shear Undo preserves definition and removes result graph",
+          "passed": true
+        },
+        {
+          "name": "Link shear Redo restores native associative result",
+          "passed": true
+        },
+        {
+          "name": "disabled recompute rejects new gesture without geometry or history changes",
+          "passed": true
+        },
+        {
+          "name": "recompute selection callback cancels admission before a Gumball transaction",
+          "passed": true
+        },
+        {
+          "name": "fresh gesture succeeds after settling and cancelled admission",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "owner_callback",
+      "macro": "gumball_owner_callback_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 2,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "d70c723432d7324261f55ebe08630098ce5a5bc34c38778a317b803654dcb8ce",
+      "launch_sha256": "e181091d670098d3943ae112ff97b56f4ce4ad645e40730a84ea5bc49402dc3b",
+      "macro_sha256": "9236978cd3c38cd283e26c69c727b691d3243c3db1f34c5e8c9dcb15115a50fd",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "native parametric callback was exercised",
+          "passed": true
+        },
+        {
+          "name": "foreign topology rejects the complete batch",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "mesh_frame",
+      "macro": "gumball_mesh_frame_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 13,
+      "feature_ids": [
+        "OM9-INFO-021"
+      ],
+      "report_sha256": "ed94181cfa95c56002f3caf35ebbb7803f3a011ebecad0deee8a7a21f3122b9b",
+      "launch_sha256": "d9a04bd61a354bffff0b3a45663a381aabcc9fea2e90097c9115879d5122c4e5",
+      "macro_sha256": "204d607ebaa2d5500584b611b43754a75cf3d5d56247df2c40defa3ac14c4502",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "placed planar Mesh Segment uses actual tangent and normal",
+          "passed": true
+        },
+        {
+          "name": "Mesh component frame shared by all four views",
+          "passed": true
+        },
+        {
+          "name": "single native facet resolves Object frame",
+          "passed": true
+        },
+        {
+          "name": "multiple selected components reject ambiguous frame",
+          "passed": true
+        },
+        {
+          "name": "missing component rejects without fallback",
+          "passed": true
+        },
+        {
+          "name": "alignment does not mutate Mesh ownership or Undo",
+          "passed": true
+        },
+        {
+          "name": "Mesh affine Scale preserves both native segments",
+          "passed": true
+        },
+        {
+          "name": "Mesh Scale Undo preserves native segment lists",
+          "passed": true
+        },
+        {
+          "name": "Mesh Scale Redo preserves native segment lists",
+          "passed": true
+        },
+        {
+          "name": "Mesh component does not inherit whole-owner relocated cache",
+          "passed": true
+        },
+        {
+          "name": "component relocation does not replace whole-owner cache",
+          "passed": true
+        },
+        {
+          "name": "degenerate facet has explicit unresolved frame",
+          "passed": true
+        },
+        {
+          "name": "nonplanar segment rejects ambiguous Object axes",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "visual",
+      "macro": "gumball_visual_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 23,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "fd40b1c6e23a678f229ff4094451785ccd6fe2dfebfc2d9b4376629ff5f7308e",
+      "launch_sha256": "57f06ba3b8b3822e9f1c0199ea09ff59a6e488fb5416c11d712e3b1dc8d422c6",
+      "macro_sha256": "bd1f9a38758629c9f7951aa293845d9c416a2984e7ca7802d587637b1720aa1f",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "all thirteen transform handles stay native-pickable",
+          "passed": true
+        },
+        {
+          "name": "three axis colors are actually rendered",
+          "passed": true
+        },
+        {
+          "name": "ScaleX sits opposite its move arrow",
+          "passed": true
+        },
+        {
+          "name": "ScaleY sits opposite its move arrow",
+          "passed": true
+        },
+        {
+          "name": "ScaleZ sits opposite its move arrow",
+          "passed": true
+        },
+        {
+          "name": "MoveX compact editor stays inside viewport",
+          "passed": true
+        },
+        {
+          "name": "new move arrow commits one precise movement",
+          "passed": true
+        },
+        {
+          "name": "ScaleX compact editor stays inside viewport",
+          "passed": true
+        },
+        {
+          "name": "opposite-side scale square still scales X about pivot",
+          "passed": true
+        },
+        {
+          "name": "negative-side scale square owns a real drag preview",
+          "passed": true
+        },
+        {
+          "name": "dragging scale away from pivot expands only X in one Undo",
+          "passed": true
+        },
+        {
+          "name": "RotateZ compact editor stays inside viewport",
+          "passed": true
+        },
+        {
+          "name": "new rotation arc rotates precisely about the same origin",
+          "passed": true
+        },
+        {
+          "name": "menu ball is a separate native pointer target",
+          "passed": true
+        },
+        {
+          "name": "menu ball opens a real popup",
+          "passed": true
+        },
+        {
+          "name": "menu exposes relocation and reset",
+          "passed": true
+        },
+        {
+          "name": "menu alignment uses the existing Rust state",
+          "passed": true
+        },
+        {
+          "name": "popup release does not swallow the next handle click",
+          "passed": true
+        },
+        {
+          "name": "move after popup commits once",
+          "passed": true
+        },
+        {
+          "name": "menu relocation enters the existing origin prompt",
+          "passed": true
+        },
+        {
+          "name": "menu relocation changes only the widget frame",
+          "passed": true
+        },
+        {
+          "name": "menu reset restores selection origin and keeps alignment",
+          "passed": true
+        },
+        {
+          "name": "opening and using view menu creates no geometry or Undo",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "warm",
+      "macro": "gumball_persistence_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 20,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "f964b03f019b71fd36e8a9fd3148136298dbb469f7c92bf8b0c18956544fb632",
+      "launch_sha256": "1866b38c343e8dfbbbb82cdfaed134016233572235ba43df93e951b3f90f0dad",
+      "macro_sha256": "7504c4ee3f68e916039fabef7652b886ea4c61c2d84466e94977871026db9c4e",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "RotateZ commits native geometry",
+          "passed": true
+        },
+        {
+          "name": "RotateZ Undo restores exact geometry",
+          "passed": true
+        },
+        {
+          "name": "RotateZ Redo restores exact geometry",
+          "passed": true
+        },
+        {
+          "name": "ScaleX commits native geometry",
+          "passed": true
+        },
+        {
+          "name": "ScaleX Undo restores exact geometry",
+          "passed": true
+        },
+        {
+          "name": "ScaleX Redo restores exact geometry",
+          "passed": true
+        },
+        {
+          "name": "MoveX commits native geometry",
+          "passed": true
+        },
+        {
+          "name": "MoveX Undo restores exact geometry",
+          "passed": true
+        },
+        {
+          "name": "MoveX Redo restores exact geometry",
+          "passed": true
+        },
+        {
+          "name": "native current layer control exists",
+          "passed": true
+        },
+        {
+          "name": "source assigned to native layer",
+          "passed": true
+        },
+        {
+          "name": "copy inherits native layer and material",
+          "passed": true
+        },
+        {
+          "name": "affine circle preserves native ellipse geometry",
+          "passed": true
+        },
+        {
+          "name": "saved group copies private native membership",
+          "passed": true
+        },
+        {
+          "name": "saved Link copies independent occurrence and shared definition",
+          "passed": true
+        },
+        {
+          "name": "negative extrusion retains holes and orientation",
+          "passed": true
+        },
+        {
+          "name": "retained BRep move keeps native volume and source UUID",
+          "passed": true
+        },
+        {
+          "name": "retained copies export distinct archive UUIDs",
+          "passed": true
+        },
+        {
+          "name": "retained export contains moved and copied native geometry",
+          "passed": true
+        },
+        {
+          "name": "save leaves no active gesture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "cold",
+      "macro": "gumball_core_cold_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 17,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "722d41ae80ce184af6659fa735d45e596ec755e3c644553147d25b71e1c9fe76",
+      "launch_sha256": "53e6b5783290ee6ec884eeeaf91493db2f19b3bca269dfd57f696f39e3f1f949",
+      "macro_sha256": "69da6c6e7e097c614c8a7a282d021f5fef0a24cc3ae81c322d53c5eb5043cd77",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "Box cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "Box001 cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "Ellipse cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "HoledFace cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "GumballExtrusion cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "RhinoObject cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "RhinoObject001 cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "OM9Layer1 cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "PlacedGroup cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "Member cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "PlacedGroup001 cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "Member001 cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "Occurrence cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "Occurrence001 cold native geometry ownership and provenance",
+          "passed": true
+        },
+        {
+          "name": "cold preserved export keeps independent archive UUIDs",
+          "passed": true
+        },
+        {
+          "name": "cold preserved export keeps exact transformed geometry",
+          "passed": true
+        },
+        {
+          "name": "new process starts without gesture",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "parametric",
+      "macro": "gumball_parametric_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 22,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "61235083a73abcc224ccaa30af72a0522a2a9c93e48398072e7637d4d3c2b3e0",
+      "launch_sha256": "65bb6f37b8986afc80d5df6d418e524fae84afc6ce9d73903ce757db1920d655",
+      "macro_sha256": "5b5e904fa39ba2ce7600f67875a8280cb316122c52449625b306f4202778f1e8",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "Cylinder axial scale updates durable Height and preserves Radius/type",
+          "passed": true
+        },
+        {
+          "name": "Cylinder Undo restores dimensions",
+          "passed": true
+        },
+        {
+          "name": "Cylinder Redo survives recompute",
+          "passed": true
+        },
+        {
+          "name": "Cylinder Shift uniform changes Radius and Height",
+          "passed": true
+        },
+        {
+          "name": "Part::Cone scales through native parameters",
+          "passed": true
+        },
+        {
+          "name": "Part::Prism scales through native parameters",
+          "passed": true
+        },
+        {
+          "name": "Part::Ellipsoid scales through native parameters",
+          "passed": true
+        },
+        {
+          "name": "Part::Torus scales through native parameters",
+          "passed": true
+        },
+        {
+          "name": "Part::Plane scales through native parameters",
+          "passed": true
+        },
+        {
+          "name": "expression-driven Box stays its native owner and retains dependencies",
+          "passed": true
+        },
+        {
+          "name": "only touched expression changes",
+          "passed": true
+        },
+        {
+          "name": "expression Scale Undo restores original binding",
+          "passed": true
+        },
+        {
+          "name": "expression Scale Redo restores durable doubled dimension",
+          "passed": true
+        },
+        {
+          "name": "later expression driver edits retain Gumball scale",
+          "passed": true
+        },
+        {
+          "name": "saved expression Scale reopens as native Box with unchanged bound formula and dependency",
+          "passed": true
+        },
+        {
+          "name": "reopened expression driver edits retain the native scale factor",
+          "passed": true
+        },
+        {
+          "name": "reopened driver Undo preserves scaled expression",
+          "passed": true
+        },
+        {
+          "name": "reopened driver Redo preserves scaled expression",
+          "passed": true
+        },
+        {
+          "name": "late primitive callback rejects same-value expression flattening after report",
+          "passed": true
+        },
+        {
+          "name": "late primitive callback rollback preserves Undo Redo and object properties",
+          "passed": true
+        },
+        {
+          "name": "late primitive callback rollback preserves bound formula dimensions and Placement",
+          "passed": true
+        },
+        {
+          "name": "late primitive callback rollback preserves the future native driver dependency",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "component-pointer",
+      "macro": "gumball_component_pointer_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 85,
+      "feature_ids": [
+        "OM9-INFO-021"
+      ],
+      "report_sha256": "6fb373753db659bd3bea0e4acc8354c6fbcbb7795ab25a309007cb673a5cb737",
+      "launch_sha256": "7091c2439887aaca8972da0e2da4e8589a54cfc9e5671557a49f66fcdd27bc42",
+      "macro_sha256": "0171484090b83b276ee5efc6fe1da96b443654f759b6a78f38d2a9fc450dff7d",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "four native Mesh pointer viewports exist",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 0)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 0)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 0)",
+          "passed": true
+        },
+        {
+          "name": "Ctrl Shift vertex click yields native point identity (view 0)",
+          "passed": true
+        },
+        {
+          "name": "vertex origin is the actual placed Mesh point (view 0)",
+          "passed": true
+        },
+        {
+          "name": "vertex normal comes from the native triangle (view 0)",
+          "passed": true
+        },
+        {
+          "name": "selected vertex has visible unpickable native point highlight (view 0)",
+          "passed": true
+        },
+        {
+          "name": "vertex frame is shared by all four native views (view 0)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 0)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 0)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 0)",
+          "passed": true
+        },
+        {
+          "name": "Ctrl Shift edge click yields canonical endpoint identities (view 0)",
+          "passed": true
+        },
+        {
+          "name": "edge frame uses placed midpoint and lower to higher native point IDs (view 0)",
+          "passed": true
+        },
+        {
+          "name": "edge normal is the native triangle normal (view 0)",
+          "passed": true
+        },
+        {
+          "name": "selected edge has visible unpickable native endpoint highlight (view 0)",
+          "passed": true
+        },
+        {
+          "name": "edge frame is shared by all four native views (view 0)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 0)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 0)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 0)",
+          "passed": true
+        },
+        {
+          "name": "face center outside component radius selects whole Mesh (view 0)",
+          "passed": true
+        },
+        {
+          "name": "pointer selection and Object alignment leave source and Undo unchanged (view 0)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 1)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 1)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 1)",
+          "passed": true
+        },
+        {
+          "name": "Ctrl Shift vertex click yields native point identity (view 1)",
+          "passed": true
+        },
+        {
+          "name": "vertex origin is the actual placed Mesh point (view 1)",
+          "passed": true
+        },
+        {
+          "name": "vertex normal comes from the native triangle (view 1)",
+          "passed": true
+        },
+        {
+          "name": "selected vertex has visible unpickable native point highlight (view 1)",
+          "passed": true
+        },
+        {
+          "name": "vertex frame is shared by all four native views (view 1)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 1)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 1)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 1)",
+          "passed": true
+        },
+        {
+          "name": "Ctrl Shift edge click yields canonical endpoint identities (view 1)",
+          "passed": true
+        },
+        {
+          "name": "edge frame uses placed midpoint and lower to higher native point IDs (view 1)",
+          "passed": true
+        },
+        {
+          "name": "edge normal is the native triangle normal (view 1)",
+          "passed": true
+        },
+        {
+          "name": "selected edge has visible unpickable native endpoint highlight (view 1)",
+          "passed": true
+        },
+        {
+          "name": "edge frame is shared by all four native views (view 1)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 1)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 1)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 1)",
+          "passed": true
+        },
+        {
+          "name": "face center outside component radius selects whole Mesh (view 1)",
+          "passed": true
+        },
+        {
+          "name": "pointer selection and Object alignment leave source and Undo unchanged (view 1)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 2)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 2)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 2)",
+          "passed": true
+        },
+        {
+          "name": "Ctrl Shift vertex click yields native point identity (view 2)",
+          "passed": true
+        },
+        {
+          "name": "vertex origin is the actual placed Mesh point (view 2)",
+          "passed": true
+        },
+        {
+          "name": "vertex normal comes from the native triangle (view 2)",
+          "passed": true
+        },
+        {
+          "name": "selected vertex has visible unpickable native point highlight (view 2)",
+          "passed": true
+        },
+        {
+          "name": "vertex frame is shared by all four native views (view 2)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 2)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 2)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 2)",
+          "passed": true
+        },
+        {
+          "name": "Ctrl Shift edge click yields canonical endpoint identities (view 2)",
+          "passed": true
+        },
+        {
+          "name": "edge frame uses placed midpoint and lower to higher native point IDs (view 2)",
+          "passed": true
+        },
+        {
+          "name": "edge normal is the native triangle normal (view 2)",
+          "passed": true
+        },
+        {
+          "name": "selected edge has visible unpickable native endpoint highlight (view 2)",
+          "passed": true
+        },
+        {
+          "name": "edge frame is shared by all four native views (view 2)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 2)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 2)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 2)",
+          "passed": true
+        },
+        {
+          "name": "face center outside component radius selects whole Mesh (view 2)",
+          "passed": true
+        },
+        {
+          "name": "pointer selection and Object alignment leave source and Undo unchanged (view 2)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 3)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 3)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 3)",
+          "passed": true
+        },
+        {
+          "name": "Ctrl Shift vertex click yields native point identity (view 3)",
+          "passed": true
+        },
+        {
+          "name": "vertex origin is the actual placed Mesh point (view 3)",
+          "passed": true
+        },
+        {
+          "name": "vertex normal comes from the native triangle (view 3)",
+          "passed": true
+        },
+        {
+          "name": "selected vertex has visible unpickable native point highlight (view 3)",
+          "passed": true
+        },
+        {
+          "name": "vertex frame is shared by all four native views (view 3)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 3)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 3)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 3)",
+          "passed": true
+        },
+        {
+          "name": "Ctrl Shift edge click yields canonical endpoint identities (view 3)",
+          "passed": true
+        },
+        {
+          "name": "edge frame uses placed midpoint and lower to higher native point IDs (view 3)",
+          "passed": true
+        },
+        {
+          "name": "edge normal is the native triangle normal (view 3)",
+          "passed": true
+        },
+        {
+          "name": "selected edge has visible unpickable native endpoint highlight (view 3)",
+          "passed": true
+        },
+        {
+          "name": "edge frame is shared by all four native views (view 3)",
+          "passed": true
+        },
+        {
+          "name": "independent native Coin query observes actual Mesh facet and point IDs (view 3)",
+          "passed": true
+        },
+        {
+          "name": "empty selection receives actual Ctrl Shift pointer in its source viewport (view 3)",
+          "passed": true
+        },
+        {
+          "name": "pointer selects the actual Mesh owner (view 3)",
+          "passed": true
+        },
+        {
+          "name": "face center outside component radius selects whole Mesh (view 3)",
+          "passed": true
+        },
+        {
+          "name": "pointer selection and Object alignment leave source and Undo unchanged (view 3)",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "associative-warm",
+      "macro": "gumball_associative_scale_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 127,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "28dd15b6e887084e49219b969b813520dd6af71b4ce336e7bf26eceb10666dc9",
+      "launch_sha256": "8b8ba6fa238d58184eac8fb99c85364988ff60c925f14a74eeb745cac26245b0",
+      "macro_sha256": "7466acfe34fbfdad493cee808e19578031502e08da48748be7acad2d78e60389",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "rotated expression owner creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "rotated expression owner keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "rotated expression owner matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "rotated expression owner selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "original native type parameters Placement and expressions stay intact",
+          "passed": true
+        },
+        {
+          "name": "unselected scalar expression consumer continues reading the original native definition",
+          "passed": true
+        },
+        {
+          "name": "visible associative result inherits original per-face materials",
+          "passed": true
+        },
+        {
+          "name": "whole geometry and Face1 Edge1 dependencies consume the new result",
+          "passed": true
+        },
+        {
+          "name": "native Support reroute preserves its editor-only ReadOnly flag",
+          "passed": true
+        },
+        {
+          "name": "legacy native Part result owner uses the non-hiding Part view provider",
+          "passed": true
+        },
+        {
+          "name": "legacy Face2 Edge5 consumers follow a native Part owner of the visible result",
+          "passed": true
+        },
+        {
+          "name": "one gesture creates exactly one Undo entry",
+          "passed": true
+        },
+        {
+          "name": "Undo removes the native graph and restores all incoming references",
+          "passed": true
+        },
+        {
+          "name": "Redo restores the graph geometry and source owner",
+          "passed": true
+        },
+        {
+          "name": "legacy result owner retains the non-hiding native Compound provider after Redo",
+          "passed": true
+        },
+        {
+          "name": "legacy result owner after Redo saves the durable native Compound provider identity",
+          "passed": true
+        },
+        {
+          "name": "repeated recompute applies the Scale exactly once",
+          "passed": true
+        },
+        {
+          "name": "future expression driver changes propagate without baking",
+          "passed": true
+        },
+        {
+          "name": "future native dimensions propagate independently to unselected scalar expression consumers",
+          "passed": true
+        },
+        {
+          "name": "legacy consumers propagate future driver changes through their native result owner",
+          "passed": true
+        },
+        {
+          "name": "elliptical primitive preserves its circular native definition",
+          "passed": true
+        },
+        {
+          "name": "signed elliptical Cylinder creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "signed elliptical Cylinder keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "signed elliptical Cylinder matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "signed elliptical Cylinder selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "nested fixture retains one native coordinate system and ordinary group membership",
+          "passed": true
+        },
+        {
+          "name": "nested Parts owner creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "nested Parts owner keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "nested Parts owner matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "nested Parts owner selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "result and helpers remain in the native owning Part",
+          "passed": true
+        },
+        {
+          "name": "Alt associative copy creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "Alt associative copy keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "Alt associative copy matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "Alt associative copy selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "Alt leaves its original owner visible and unchanged",
+          "passed": true
+        },
+        {
+          "name": "scaled Link requiring shear creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "scaled Link requiring shear normalizer uses the native non-hiding Part view provider",
+          "passed": true
+        },
+        {
+          "name": "scaled Link requiring shear uses a durable native occurrence bridge in the helper coordinate system",
+          "passed": true
+        },
+        {
+          "name": "scaled Link requiring shear keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "scaled Link requiring shear matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "scaled Link requiring shear selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "normalized scaled Link preserves incoming Face1 Edge1 topology references",
+          "passed": true
+        },
+        {
+          "name": "source ScaleVector Vector (1.0, 1.0, 1.0) remains associative",
+          "passed": true
+        },
+        {
+          "name": "source ScaleVector Vector (1.0000000003333334, 1.0, 1.0) remains associative",
+          "passed": true
+        },
+        {
+          "name": "source ScaleVector Vector (2.0, 2.0, 2.0) remains associative",
+          "passed": true
+        },
+        {
+          "name": "source ScaleVector Vector (2.0, 1.0, 0.5) remains associative",
+          "passed": true
+        },
+        {
+          "name": "coupled expression dimensions creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "coupled expression dimensions keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "coupled expression dimensions matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "coupled expression dimensions selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "coupled dimensions are neither overwritten nor accidentally multiplied twice",
+          "passed": true
+        },
+        {
+          "name": "selected expression source creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "selected expression source keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "selected expression source matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "selected expression source selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "selected expression dependent creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "selected expression dependent keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "selected expression dependent matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "selected expression dependent selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "selected connected definitions retain original dimensions expressions and Placements",
+          "passed": true
+        },
+        {
+          "name": "shared external subelement consumer reroutes both selected sources in one transaction",
+          "passed": true
+        },
+        {
+          "name": "shared consumer faces transform once",
+          "passed": true
+        },
+        {
+          "name": "batch Undo removes both graphs and restores shared Support",
+          "passed": true
+        },
+        {
+          "name": "batch Redo transforms each selected definition exactly once",
+          "passed": true
+        },
+        {
+          "name": "selected Cut source creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "selected Cut source keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "selected Cut source matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "selected Cut source selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "selected Cut consumer creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "selected Cut consumer keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "selected Cut consumer matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "selected Cut consumer selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "native transformed Cut retains full closed-solid intersection coverage",
+          "passed": true
+        },
+        {
+          "name": "closed-solid oracle rejects shifted cavity despite identical outer bounds topology and measures",
+          "passed": true
+        },
+        {
+          "name": "closed-solid oracle rejects a missing cavity",
+          "passed": true
+        },
+        {
+          "name": "selected Boolean definition remains connected to the original source",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Box creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Box keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Box matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Cylinder creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Cylinder keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Cylinder matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "Alt copied hierarchy owns its results and preserves original members",
+          "passed": true
+        },
+        {
+          "name": "Alt group Undo removes only copied hierarchy and graphs",
+          "passed": true
+        },
+        {
+          "name": "Alt group Redo restores private ownership and exact affine geometry",
+          "passed": true
+        },
+        {
+          "name": "nested Part native selection identifies the child through its unselected outer owner",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Box creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Box keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Box matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Cylinder creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Cylinder keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped rotated Cylinder matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped scaled occurrence creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped scaled occurrence normalizer uses the native non-hiding Part view provider",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped scaled occurrence uses a durable native occurrence bridge in the helper coordinate system",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped scaled occurrence keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "Alt grouped scaled occurrence matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "Alt copied hierarchy owns its results and preserves original members",
+          "passed": true
+        },
+        {
+          "name": "Alt copied nested Part keeps every helper in the copied coordinate system",
+          "passed": true
+        },
+        {
+          "name": "Alt nested Part copies only the selected child under its unchanged outer parent",
+          "passed": true
+        },
+        {
+          "name": "Alt copied nested Part privately owns the native occurrence normalizer and preserves source geometry",
+          "passed": true
+        },
+        {
+          "name": "Alt group Undo removes only copied hierarchy and graphs",
+          "passed": true
+        },
+        {
+          "name": "Alt group Redo restores private ownership and exact affine geometry",
+          "passed": true
+        },
+        {
+          "name": "Alt nested occurrence normalizer retains the non-hiding native Compound provider after Redo",
+          "passed": true
+        },
+        {
+          "name": "Alt nested occurrence normalizer after Redo saves the durable native Compound provider identity",
+          "passed": true
+        },
+        {
+          "name": "Body internal child path rejects before a transaction and requests its native final result",
+          "passed": true
+        },
+        {
+          "name": "Body Move transforms its actual Tip result once",
+          "passed": true
+        },
+        {
+          "name": "Body Move Undo restores final result and ownership",
+          "passed": true
+        },
+        {
+          "name": "Body Alt Move copies its private Tip definition",
+          "passed": true
+        },
+        {
+          "name": "Body Alt Move Undo removes copied Body and its private Tip",
+          "passed": true
+        },
+        {
+          "name": "native Body final result creates a native associative result",
+          "passed": true
+        },
+        {
+          "name": "native Body final result keeps native local graph dependencies within the result coordinate system",
+          "passed": true
+        },
+        {
+          "name": "native Body final result matches the complete affine geometry",
+          "passed": true
+        },
+        {
+          "name": "native Body final result selection follows the new result",
+          "passed": true
+        },
+        {
+          "name": "Body fallback Scale preserves Tip type dimensions and native ownership",
+          "passed": true
+        },
+        {
+          "name": "Body fallback Scale Undo restores native Tip result and removes graph",
+          "passed": true
+        },
+        {
+          "name": "Body fallback Scale Redo restores exact affine result with original Tip",
+          "passed": true
+        },
+        {
+          "name": "late Scale factor callback aborts atomically despite stale matching Shape",
+          "passed": true
+        },
+        {
+          "name": "late external Support callback aborts atomically and restores original dependency",
+          "passed": true
+        },
+        {
+          "name": "same-name untouched Support replacement aborts and restores original identities",
+          "passed": true
+        },
+        {
+          "name": "late Scale Shape callback aborts atomically after presentation",
+          "passed": true
+        },
+        {
+          "name": "late normalizer Shape callback aborts atomically after presentation",
+          "passed": true
+        },
+        {
+          "name": "immutable native Support rejects before transaction and retains protection",
+          "passed": true
+        },
+        {
+          "name": "ordinary read-only dependency rejects without clearing its protection",
+          "passed": true
+        },
+        {
+          "name": "expression governed Placement consumers reject explicitly before publication",
+          "passed": true
+        },
+        {
+          "name": "final associative graph saves the durable native Compound provider identity",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "associative-cold",
+      "macro": "gumball_associative_scale_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 63,
+      "feature_ids": [
+        "OM9-INFO-020"
+      ],
+      "report_sha256": "bcc8e0732b8a985129cff11a359a5535acfde66b25cfa0393b3a1486383fe294",
+      "launch_sha256": "c0ef5f914197fb429461958965951d5e8de2c859d85fa8eb20dd28c3536626e2",
+      "macro_sha256": "7466acfe34fbfdad493cee808e19578031502e08da48748be7acad2d78e60389",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "cold graph uses registered native FreeCAD and OM9 Compound types",
+          "passed": true
+        },
+        {
+          "name": "cold ExpressionSourceScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold ExpressionSourceScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold ExpressionSourceScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold ExpressionSourceScaled retains per-face native appearance",
+          "passed": true
+        },
+        {
+          "name": "cold LegacyFaceConsumer native Part owner retains the non-hiding Part view provider",
+          "passed": true
+        },
+        {
+          "name": "cold LegacyFaceConsumer follows native Part result with unchanged subelement",
+          "passed": true
+        },
+        {
+          "name": "cold LegacyEdgeConsumer native Part owner retains the non-hiding Part view provider",
+          "passed": true
+        },
+        {
+          "name": "cold LegacyEdgeConsumer follows native Part result with unchanged subelement",
+          "passed": true
+        },
+        {
+          "name": "cold UnselectedScalarConsumer retains the original scalar definition reference",
+          "passed": true
+        },
+        {
+          "name": "cold CylinderScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold CylinderScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold CylinderScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold NestedSourceScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold NestedSourceScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold NestedSourceScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold AltSourceScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold AltSourceScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold AltSourceScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold ScaledOccurrenceScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold ScaledOccurrenceScaled normalizer retains the native non-hiding Part view provider",
+          "passed": true
+        },
+        {
+          "name": "cold ScaledOccurrenceScaled retains its durable native occurrence bridge",
+          "passed": true
+        },
+        {
+          "name": "cold ScaledOccurrenceScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold ScaledOccurrenceScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold CoupledDimensionsScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold CoupledDimensionsScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold CoupledDimensionsScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold BatchAScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold BatchAScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold BatchAScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold BatchBScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold BatchBScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold BatchBScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold SelectedCutSourceScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold SelectedCutSourceScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold SelectedCutSourceScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold SelectedCutScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold SelectedCutScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold SelectedCutScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedBoxScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedBoxScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedBoxScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedCylinderScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedCylinderScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedCylinderScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedBox001Scaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedBox001Scaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedBox001Scaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedCylinder001Scaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedCylinder001Scaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedCylinder001Scaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedOccurrenceScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedOccurrenceScaled normalizer retains the native non-hiding Part view provider",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedOccurrenceScaled retains its durable native occurrence bridge",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedOccurrenceScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold AltGroupedOccurrenceScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold NativeBodyScaled retains original source association",
+          "passed": true
+        },
+        {
+          "name": "cold NativeBodyScaled retains native local dependency coordinate systems",
+          "passed": true
+        },
+        {
+          "name": "cold NativeBodyScaled recomputes the affine result",
+          "passed": true
+        },
+        {
+          "name": "cold expression driver edits remain associative",
+          "passed": true
+        },
+        {
+          "name": "cold UnselectedScalarConsumer follows future native dimension edits independently of Scale",
+          "passed": true
+        },
+        {
+          "name": "cold LegacyFaceConsumer propagates subsequent expression driver edits",
+          "passed": true
+        },
+        {
+          "name": "cold LegacyEdgeConsumer propagates subsequent expression driver edits",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "frame-objects-warm",
+      "macro": "gumball_frame_objects_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 24,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "baa4b9c42813494ecde3f069233f6b512aa1a58f880c598e4a347fc7e3a76a83",
+      "launch_sha256": "5a06c057876f40a8b03b46cd0ea52ba9c180f625d62de87b4d61a3c578a1044a",
+      "macro_sha256": "70d86171a284083291e4fb2a6b67914b3bfc517bea8a0977f247578830d37015",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "native frame-object creation bridge exists",
+          "passed": true
+        },
+        {
+          "name": "Camera physical origin and native orientation",
+          "passed": true
+        },
+        {
+          "name": "Camera alignment is read-only",
+          "passed": true
+        },
+        {
+          "name": "Camera visible in four native views",
+          "passed": true
+        },
+        {
+          "name": "Camera native placement moves",
+          "passed": true
+        },
+        {
+          "name": "Camera Move Undo",
+          "passed": true
+        },
+        {
+          "name": "Camera Move Redo",
+          "passed": true
+        },
+        {
+          "name": "Camera native parameter Scale",
+          "passed": true
+        },
+        {
+          "name": "Camera parameter Scale Undo",
+          "passed": true
+        },
+        {
+          "name": "Camera protected ReadOnly parameter rejects before transaction",
+          "passed": true
+        },
+        {
+          "name": "Camera protected Immutable parameter rejects before transaction",
+          "passed": true
+        },
+        {
+          "name": "Camera relocation leaves native properties intact",
+          "passed": true
+        },
+        {
+          "name": "Light physical origin and native orientation",
+          "passed": true
+        },
+        {
+          "name": "Light alignment is read-only",
+          "passed": true
+        },
+        {
+          "name": "Light visible in four native views",
+          "passed": true
+        },
+        {
+          "name": "Light native placement moves",
+          "passed": true
+        },
+        {
+          "name": "Light Move Undo",
+          "passed": true
+        },
+        {
+          "name": "Light Move Redo",
+          "passed": true
+        },
+        {
+          "name": "Light native parameter Scale",
+          "passed": true
+        },
+        {
+          "name": "Light parameter Scale Undo",
+          "passed": true
+        },
+        {
+          "name": "Light protected ReadOnly parameter rejects before transaction",
+          "passed": true
+        },
+        {
+          "name": "Light protected Immutable parameter rejects before transaction",
+          "passed": true
+        },
+        {
+          "name": "Light relocation leaves native properties intact",
+          "passed": true
+        },
+        {
+          "name": "FCStd retains two typed frame objects",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "frame-objects-cold",
+      "macro": "gumball_frame_objects_cold_smoke.FCMacro",
+      "dpi": "1",
+      "checks": 16,
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "report_sha256": "5e58e518c6d837d79a59e515f0f4ddda982e5236763d96635daaccaf69df23ae",
+      "launch_sha256": "1eb4602433dcbfac1f4c64d15d025317c1431497917a918d3c6bf1cba8941ea1",
+      "macro_sha256": "ce5e9deea3aa7d90c5d8a4ac8794a66694f6737761e276c3f7878d24e2429772",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "checks_detail": [
+        {
+          "name": "native frame types are registered before cold document open",
+          "passed": true
+        },
+        {
+          "name": "warm native frame object file exists",
+          "passed": true
+        },
+        {
+          "name": "cold process starts without an active gesture",
+          "passed": true
+        },
+        {
+          "name": "cold restore retains both native Camera and Light classes",
+          "passed": true
+        },
+        {
+          "name": "Camera cold restore matches independently read FCStd source values and pose",
+          "passed": true
+        },
+        {
+          "name": "Camera restored native view provider and visible pickable symbol",
+          "passed": true
+        },
+        {
+          "name": "Camera source properties retain native unit and scalar types",
+          "passed": true
+        },
+        {
+          "name": "Camera cold Object alignment observes physical source origin and native axes",
+          "passed": true
+        },
+        {
+          "name": "Camera cold Object frame is shared by every native viewport",
+          "passed": true
+        },
+        {
+          "name": "Camera cold selection and alignment leave source properties and Undo unchanged",
+          "passed": true
+        },
+        {
+          "name": "Light cold restore matches independently read FCStd source values and pose",
+          "passed": true
+        },
+        {
+          "name": "Light restored native view provider and visible pickable symbol",
+          "passed": true
+        },
+        {
+          "name": "Light source properties retain native unit and scalar types",
+          "passed": true
+        },
+        {
+          "name": "Light cold Object alignment observes physical source origin and native axes",
+          "passed": true
+        },
+        {
+          "name": "Light cold Object frame is shared by every native viewport",
+          "passed": true
+        },
+        {
+          "name": "Light cold selection and alignment leave source properties and Undo unchanged",
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "feature_ids": [
+    "OM9-INFO-020",
+    "OM9-INFO-021",
+    "OM9-INFO-022"
+  ],
+  "implementation_status": "implemented",
+  "approved_scope_complete": true,
+  "stock_ci_status": "pending",
+  "version": "0.3.4-202610120606",
+  "completed_at": "2026-10-12T06:06:00+07:00",
+  "approved_scope": "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. At this local evidence checkpoint, stock GitHub Actions CI is pending; the current exact-commit Action result is authoritative.",
+  "stock_header_regression": {
+    "ok": true,
+    "initial_failed_action": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/38179645945",
+    "native_red_log_sha256": "f39331e1c83533a8b4b7ff29eede68de86cc9b1b0e47eca0f9a43794d4ab4c54",
+    "native_green_log_sha256": "dc1f17c91f0cffa52fb329bdf8bb5b12d1c2dddcdf563049147a3c27d4e2fd6a",
+    "fixture_sha256": "12b199a7db71ec07139fa613340a147510e63605c2e5a66e864308ea48c860b1",
+    "checks": [
+      "Old stock distance-macro prelude reproduces the actual zconf.h315 C2146 failure.",
+      "Windows x64 FAR remains empty after removing the near/far CAD-name collisions.",
+      "FreeCAD consumes its unprefixed system zlib header; bundled openNURBS headers remain private.",
+      "Native unprefixed CRC32 of 123456789 equals independent canonical 0xcbf43926."
+    ],
+    "stock_ci_status": "pending"
+  },
+  "stock_api_regression": {
+    "ok": true,
+    "initial_failed_action": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/38181436135",
+    "syntax_only": true,
+    "syntax_report_sha256": "c667a71626ed526244caf42c6e9f43813f2efac6ef149e4868dbea126bdee72c",
+    "rows": [
+      {
+        "source": "GumballAssociativeScale.cpp",
+        "source_sha256": "99b5c23df5a4bd616c4753ea1c27ef090e5fd8ae698ae5f5206b0ba67596e03b",
+        "exit_code": 0,
+        "ok": true,
+        "log": "H:\\FreeCAD-src\\build\\gumball-stock-syntax-20261012\\GumballAssociativeScale.log",
+        "log_sha256": "c7e372d4fbf755abbb2c688ccdb84a120b8416a72d3f9afe2f548ef30bab8113"
+      },
+      {
+        "source": "GumballController.cpp",
+        "source_sha256": "5c99daf570db84d7798ec88f31e63b65f0f28a2502f71db4eb42d93aaf735ccc",
+        "exit_code": 0,
+        "ok": true,
+        "log": "H:\\FreeCAD-src\\build\\gumball-stock-syntax-20261012\\GumballController.log",
+        "log_sha256": "0208d2cd7fe73b6b3f69d399fb0afe00aa0e8e10aedc57c4bd7a114ae464173f"
+      },
+      {
+        "source": "GumballFrame.cpp",
+        "source_sha256": "0d32b600984fbc8150b9b502da32dac66d36867d17a9b2d655384ea364b723a4",
+        "exit_code": 0,
+        "ok": true,
+        "log": "H:\\FreeCAD-src\\build\\gumball-stock-syntax-20261012\\GumballFrame.log",
+        "log_sha256": "f31391f68a680cb9324cd76cdc5f9397a858b18b267f82eccafa29a6ea4a55c7"
+      },
+      {
+        "source": "GumballFrameObjects.cpp",
+        "source_sha256": "5d8dd8adea7243d194da0da54fe4f14d98e1121eed6066e2c19834891fb3e9a6",
+        "exit_code": 0,
+        "ok": true,
+        "log": "H:\\FreeCAD-src\\build\\gumball-stock-syntax-20261012\\GumballFrameObjects.log",
+        "log_sha256": "1e300aba9153abf3c4da994a2512b6a45cfcdafadad392955207703b24408c9d"
+      },
+      {
+        "source": "GumballGeometry.cpp",
+        "source_sha256": "c935cdad910bcc624cfb1c7b7495efb989593d3ff0d11e28ab8b0fab75274fe1",
+        "exit_code": 0,
+        "ok": true,
+        "log": "H:\\FreeCAD-src\\build\\gumball-stock-syntax-20261012\\GumballGeometry.log",
+        "log_sha256": "bee27d129cdf985bedb46869357a118da9d0278e165ebaceaaa63767e777e62b"
+      },
+      {
+        "source": "GumballMeshComponents.cpp",
+        "source_sha256": "ca031504de829d6ec06e8f89f347e41414b1ee2d293e6fac995653498a9da511",
+        "exit_code": 0,
+        "ok": true,
+        "log": "H:\\FreeCAD-src\\build\\gumball-stock-syntax-20261012\\GumballMeshComponents.log",
+        "log_sha256": "ec30f4e2d389fc698e5c9fb9fc4b419699f355e632b409d5f6f5a4dcc0b46f31"
+      },
+      {
+        "source": "GumballOverlay.cpp",
+        "source_sha256": "b912fb33eb53836fa940e44adc1772500dfd2ed39b53e73aef497861bba7665e",
+        "exit_code": 0,
+        "ok": true,
+        "log": "H:\\FreeCAD-src\\build\\gumball-stock-syntax-20261012\\GumballOverlay.log",
+        "log_sha256": "11d8bc44181df834e4bcaadef443580906a5dc90e600597330d2dc29d5e1fc50"
+      },
+      {
+        "source": "GumballParametric.cpp",
+        "source_sha256": "1a0c3f4a61c17ec600147a172bd336e7a57e3f3d2edb12d7e5363752ec26f2fe",
+        "exit_code": 0,
+        "ok": true,
+        "log": "H:\\FreeCAD-src\\build\\gumball-stock-syntax-20261012\\GumballParametric.log",
+        "log_sha256": "313974a71c99978eaf9e84a1bd34c9ebd873604572de1836f3edebe91b307a2e"
+      }
+    ],
+    "checks": [
+      "Parsed AST ownership is explicitly adopted from stock raw pointers or moved from dev unique_ptr, matching FreeCAD production code.",
+      "Each host uses its own native MDI inventory and focal-point API.",
+      "All eight Gumball translation units pass MSVC syntax checking against the cached official 1.1.4 headers."
+    ],
+    "stock_ci_status": "pending"
+  },
+  "stock_gui_adapter_regression": {
+    "ok": true,
+    "syntax_only": true,
+    "initial_failed_action": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/38183085601",
+    "stock_translation_units": 94,
+    "stock_syntax_report_sha256": "71ec1ca7f1677a5fb3337072460897def4892f7c61fd1b9dfd081fd96eecdf47",
+    "dev_adapter_translation_units": 4,
+    "dev_syntax_report_sha256": "8879c5391ea9a1691ad68fc2f7e060d6cf7de8f549552f8f73bce05f744af893",
+    "adapter_source_sha256": {
+      "Gui/CoreKeyboard.cpp": "3f4284683ffaf2885604f9930f652cce5756e146b74e2ba57521abcba834407c",
+      "Gui/CoreMouse.cpp": "5e2ad5ea5326493e7afa3f9bb5013cff63c188ac6d4dcdcff9bdf43e536e2af6",
+      "Gui/CoreViewControls.cpp": "996db7e24178e35fe3f394752583e6c8ff8f58a477d47151f4b915fcee8c08ee",
+      "Gui/CoreWorkspace.cpp": "4d9cd004321164c54b4443488de3847db0727d46ae52392170273604617deef1",
+      "compat/freecad11/fastsignals/signal.h": "a1c709d98bfdf2ab2166ef3af4fb6785b4c76e897e78970a177f68bead43c0f0"
+    },
+    "checks": [
+      "Stock signal connection types match native Boost signals.",
+      "Selection snapshots preserve unreduced native object and subelement paths.",
+      "Camera capture and cancellation use native Coin state.",
+      "Model fit excludes guide bounds, preserves prior skip-group modes and invalidates Coin caches.",
+      "Optional camera tracing owns and detaches its native sensor with the viewport."
+    ],
+    "native_checkpoint_note": "The 30-process development-host cohort above predates these stock GUI adapters. Development API branches are preserved; syntax checks do not prove stock ABI or runtime. The exact-commit GitHub Actions native cohort is authoritative for the final stock build.",
+    "stock_ci_status": "pending"
+  }
+}

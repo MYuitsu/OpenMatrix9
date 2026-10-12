@@ -1,0 +1,643 @@
+{
+  "checks": [
+    {
+      "name": "all repeated nested affine members imported workers1",
+      "passed": true
+    },
+    {
+      "name": "all repeated nested affine members imported workers4",
+      "passed": true
+    },
+    {
+      "name": "worker expansion matches serial geometry and root/member order",
+      "passed": true
+    },
+    {
+      "name": "cm nested affine transform scales exactly once",
+      "passed": true
+    },
+    {
+      "name": "modeling excludes page curves and annotations workers1",
+      "passed": true
+    },
+    {
+      "name": "modeling excludes page curves and annotations workers4",
+      "passed": true
+    },
+    {
+      "name": "preservation missing worker rolls back before document mutation",
+      "passed": true
+    },
+    {
+      "name": "preservation nonzero worker rolls back before document mutation",
+      "passed": true
+    },
+    {
+      "name": "failed workers joined before return",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd",
+  "cases": [
+    [
+      {
+        "name": "Placed0/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          11.0,
+          26.0,
+          0.0,
+          33.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed0/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            22.0,
+            52.0,
+            27.0
+          ],
+          [
+            0.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed1/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          167.0,
+          26.0,
+          0.0,
+          189.0,
+          65.0,
+          36.0
+        ],
+        "volume": -30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed1/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            177.99999999999997,
+            52.0,
+            27.0
+          ],
+          [
+            200.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed2/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          411.0,
+          26.0,
+          0.0,
+          433.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30888.00000000008,
+        "area": 6108.000000000007,
+        "valid": true
+      },
+      {
+        "name": "Placed2/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            422.0,
+            52.0,
+            27.0
+          ],
+          [
+            400.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed3/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          567.0,
+          26.0,
+          0.0,
+          589.0,
+          65.0,
+          36.0
+        ],
+        "volume": -30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed3/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            578.0,
+            52.0,
+            27.0
+          ],
+          [
+            600.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed4/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          811.0,
+          26.0,
+          0.0,
+          833.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed4/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            821.9999999999999,
+            52.0,
+            27.0
+          ],
+          [
+            800.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed5/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          967.0,
+          26.0,
+          0.0,
+          989.0,
+          65.0,
+          36.0
+        ],
+        "volume": -30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed5/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            978.0000000000001,
+            52.0,
+            27.0
+          ],
+          [
+            1000.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed6/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          1211.0,
+          26.0,
+          0.0,
+          1233.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed6/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            1222.0,
+            52.0,
+            27.0
+          ],
+          [
+            1200.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed7/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          1367.0,
+          26.0,
+          0.0,
+          1389.0,
+          65.0,
+          36.0
+        ],
+        "volume": -30887.99999999968,
+        "area": 6107.999999999965,
+        "valid": true
+      },
+      {
+        "name": "Placed7/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            1378.0,
+            52.0,
+            27.0
+          ],
+          [
+            1400.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed8/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          1611.0,
+          26.0,
+          0.0,
+          1633.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30887.99999999968,
+        "area": 6107.999999999965,
+        "valid": true
+      },
+      {
+        "name": "Placed8/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            1622.0,
+            52.0,
+            27.0
+          ],
+          [
+            1600.0,
+            78.0,
+            45.0
+          ]
+        ]
+      }
+    ],
+    [
+      {
+        "name": "Placed0/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          11.0,
+          26.0,
+          0.0,
+          33.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed0/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            22.0,
+            52.0,
+            27.0
+          ],
+          [
+            0.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed1/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          167.0,
+          26.0,
+          0.0,
+          189.0,
+          65.0,
+          36.0
+        ],
+        "volume": -30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed1/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            177.99999999999997,
+            52.0,
+            27.0
+          ],
+          [
+            200.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed2/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          411.0,
+          26.0,
+          0.0,
+          433.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30888.00000000008,
+        "area": 6108.000000000007,
+        "valid": true
+      },
+      {
+        "name": "Placed2/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            422.0,
+            52.0,
+            27.0
+          ],
+          [
+            400.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed3/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          567.0,
+          26.0,
+          0.0,
+          589.0,
+          65.0,
+          36.0
+        ],
+        "volume": -30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed3/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            578.0,
+            52.0,
+            27.0
+          ],
+          [
+            600.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed4/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          811.0,
+          26.0,
+          0.0,
+          833.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed4/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            821.9999999999999,
+            52.0,
+            27.0
+          ],
+          [
+            800.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed5/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          967.0,
+          26.0,
+          0.0,
+          989.0,
+          65.0,
+          36.0
+        ],
+        "volume": -30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed5/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            978.0000000000001,
+            52.0,
+            27.0
+          ],
+          [
+            1000.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed6/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          1211.0,
+          26.0,
+          0.0,
+          1233.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30887.999999999996,
+        "area": 6108.0,
+        "valid": true
+      },
+      {
+        "name": "Placed6/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            1222.0,
+            52.0,
+            27.0
+          ],
+          [
+            1200.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed7/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          1367.0,
+          26.0,
+          0.0,
+          1389.0,
+          65.0,
+          36.0
+        ],
+        "volume": -30887.99999999968,
+        "area": 6107.999999999965,
+        "valid": true
+      },
+      {
+        "name": "Placed7/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            1378.0,
+            52.0,
+            27.0
+          ],
+          [
+            1400.0,
+            78.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "name": "Placed8/ON_InstanceRef/ON_Brep",
+        "kind": 3,
+        "layer": "Working::Geometry",
+        "bounds": [
+          1611.0,
+          26.0,
+          0.0,
+          1633.0,
+          65.0,
+          36.0
+        ],
+        "volume": 30887.99999999968,
+        "area": 6107.999999999965,
+        "valid": true
+      },
+      {
+        "name": "Placed8/ON_InstanceRef/ON_PointCloud",
+        "kind": 5,
+        "layer": "Working::Geometry",
+        "points": [
+          [
+            1622.0,
+            52.0,
+            27.0
+          ],
+          [
+            1600.0,
+            78.0,
+            45.0
+          ]
+        ]
+      }
+    ]
+  ]
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_workers_smoke-1\268ee2a800104386a293bfe07269baed

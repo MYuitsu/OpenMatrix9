@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "release": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2",
+  "assets": [
+    {
+      "name": "OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip",
+      "digest": "sha256:c17aa3851dc82b32c0f7ef79c3e22998eee45831724796554945dd75a4432c38",
+      "size": 12477780,
+      "url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip"
+    },
+    {
+      "name": "Launcher-r2-SHA256SUMS.txt",
+      "digest": "sha256:a4ed651a0eb65cf797b573b0c509d2d76ea88920f01da5bd6545ba1df4123e1e",
+      "size": 118,
+      "url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/Launcher-r2-SHA256SUMS.txt"
+    }
+  ],
+  "original_assets_preserved": 8
+}

@@ -1,0 +1,11 @@
+SDK readable property: Int32 DocumentId
+SDK readable property: Boolean Modified
+SDK readable property: Rhino.DocObjects.Tables.LayerTable Layers
+SDK readable property: Int32 Count
+SDK readable property: Int32 CurrentLayerIndex
+SDK readable property: System.String CommandHistoryWindowText
+SDK native dynamic-command registration available; actual command runtime still pending.
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_verify_matrix_om9_palette.py
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_matrix_layer_receive.py
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_matrix_layer_bridge.py
+SDK/compile checks only; actual Matrix runtime and full handoff remain separate.

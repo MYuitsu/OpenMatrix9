@@ -1,3 +1,4 @@
+#include <TopoDS_Shape.hxx>
 #pragma once
 #include <Python.h>
 #include <array>
@@ -5,7 +6,8 @@
 #include <stdexcept>
 #include <utility>
 #include <string>
-namespace App {class Document;}
+namespace App {class Document;class DocumentObject;}
+class TopoDS_Wire;
 namespace OpenMatrix9Gui {
 // Owned references for the typed native Part adapter; command input is never evaluated.
 class CurvePyRef {
@@ -26,4 +28,11 @@ std::string curveGeometryResult(App::Document&,PyObject* shape,const std::string
 void persistCurveGeometryResult(PyObject*,const std::string&);
 CurvePyRef createCurveFeature(App::Document&,PyObject* shape,const char* name);
 std::vector<std::array<double,3>> sampleCurve(PyObject* edge,std::size_t count);
+}
+
+namespace OpenMatrix9Gui {
+TopoDS_Shape publishedNativeSplineShape();
+App::DocumentObject* createCurveFeature(App::Document&,const TopoDS_Shape&,const char*);
+std::vector<std::array<double,3>> sampleCurve(const TopoDS_Shape&,std::size_t);
+void validateCurveWire(const TopoDS_Wire&,std::size_t);
 }

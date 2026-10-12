@@ -1,3 +1,5 @@
+#include "ModelingCurveEditor.h"
+#include "LayerDocumentAdapter.h"
 #include "RustBridge.h"
 #include "GumballController.h"
 #include "CoreThreeDm.h"
@@ -79,7 +81,15 @@ bool om9NativeCommandAvailable(std::size_t index) {
     if(((om9_command_permissions(index)&1U)&&(!nativeId||std::string(nativeId)=="Std_Delete"))&&!OpenMatrix9Gui::CoreLayers::selectionEditable())return false;
     if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().available(index);
     if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().available(index);
-    if(auto operation=om9_3dm_operation(index)) {auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();return doc&&gui&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(doc)&&(operation==1||Gui::Selection().hasSelection(doc->getName()));}
+    if(auto operation=om9_3dm_operation(index)) {
+        auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
+        if(!doc||!gui||gui->getInEdit()||!om9AlterDocument(doc))return false;
+        if(operation<3)return operation==1||Gui::Selection().hasSelection(doc->getName());
+        Base::PyGILStateLocker lock;auto* module=PyImport_ImportModule("ThreeDmClipboard");
+        auto* result=module?PyObject_CallMethod(module,"available","i",static_cast<int>(operation)):nullptr;
+        Py_XDECREF(module);if(!result){PyErr_Clear();return false;}bool allowed=PyObject_IsTrue(result)==1;Py_DECREF(result);return allowed;
+    }
+    if(std::string(om9_command_id(index))=="PointsOn")return OpenMatrix9Gui::modelingCurveEditorAvailable();
     if(OpenMatrix9Gui::CoreKeyboard::handles(index))return OpenMatrix9Gui::CoreKeyboard::instance().available(index);
     if(OpenMatrix9Gui::CoreSnaps::handles(index))return OpenMatrix9Gui::CoreSnaps::available();
     if(OpenMatrix9Gui::CoreDistance::handles(index))return OpenMatrix9Gui::CoreDistance::instance().available();
@@ -95,9 +105,9 @@ bool om9NativeCommandAvailable(std::size_t index) {
     auto* doc=App::GetApplication().getActiveDocument();
     const std::string id=native;
     const auto permissions=om9_command_permissions(index);
-    if((permissions&1U) && !Gui::Control().isAllowedAlterDocument(doc))return false;
-    if((permissions&2U) && !Gui::Control().isAllowedAlterView(doc))return false;
-    if((permissions&4U) && !Gui::Control().isAllowedAlterSelection(doc))return false;
+    if((permissions&1U) && !om9AlterDocument(doc))return false;
+    if((permissions&2U) && !om9AlterView(doc))return false;
+    if((permissions&4U) && !om9AlterSelection(doc))return false;
     if(id=="OM9_SelectAllObjects" || id=="OM9_ClearSelection" || id=="Std_Delete" || id=="Std_ViewFitSelection") {
         if(!doc)return false;
         auto* guiDoc=Gui::Application::Instance->activeDocument();
@@ -112,6 +122,7 @@ bool om9NativeCommandAvailable(std::size_t index) {
 }
 bool om9ExecuteNativeCommand(std::size_t index) {
     if(!om9NativeCommandAvailable(index))return false;
+    if(std::string(om9_command_id(index))=="PointsOn")return OpenMatrix9Gui::startModelingCurveEditor();
     if(OpenMatrix9Gui::GumballController::handles(index))return OpenMatrix9Gui::GumballController::instance().execute(index);
     if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().start(index);
     if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().start(index);
@@ -120,6 +131,7 @@ bool om9ExecuteNativeCommand(std::size_t index) {
     if(OpenMatrix9Gui::SurfaceController::handles(index))return OpenMatrix9Gui::SurfaceController::instance().start(index);
     if(auto operation=om9_3dm_operation(index)) {
         if(!om9NativeCommandAvailable(index))return false;
+    if(std::string(om9_command_id(index))=="PointsOn")return OpenMatrix9Gui::startModelingCurveEditor();
         return executeThreeDm(operation);
     }
     if(OpenMatrix9Gui::CoreKeyboard::handles(index))return OpenMatrix9Gui::CoreKeyboard::instance().execute(index);
@@ -146,7 +158,7 @@ bool om9ExecuteNativeCommand(std::size_t index) {
             Gui::Selection().clearSelection(name.c_str());
             if(auto* current=App::GetApplication().getDocument(name.c_str())) {
                 std::vector<App::DocumentObject*> objects;
-                for(auto* object:current->getObjects())if(OpenMatrix9Gui::CoreLayers::objectEditable(object)&&!OpenMatrix9Gui::CoreNotes::isStorageObject(object)&&!dynamic_cast<OpenMatrix9Gui::HistorySettings*>(object)&&!OpenMatrix9Gui::isBuilderStorageObject(object)&&!OpenMatrix9Gui::isCageStorageObject(object))objects.push_back(object);
+                for(auto* object:current->getObjects())if(OpenMatrix9Gui::CoreLayers::objectEditable(object)&&!OpenMatrix9Gui::isLayerStorageObject(object)&&!OpenMatrix9Gui::CoreNotes::isStorageObject(object)&&!dynamic_cast<OpenMatrix9Gui::HistorySettings*>(object)&&!OpenMatrix9Gui::isBuilderStorageObject(object)&&!OpenMatrix9Gui::isCageStorageObject(object))objects.push_back(object);
                 Gui::Selection().setSelection(name.c_str(),objects);
             }
         }

@@ -1,0 +1,4 @@
+[1/5] Automatic MOC for target MatrixSidebarTest
+[2/4] Building CXX object CMakeFiles\MatrixSidebarTest.dir\MatrixSidebarTest.cpp.obj
+[3/4] Building CXX object CMakeFiles\MatrixSidebarTest.dir\C_\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\Mod\OpenMatrix9\Gui\MatrixSidebar.cpp.obj
+[4/4] Linking CXX executable MatrixSidebarTest.exe

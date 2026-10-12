@@ -43,7 +43,8 @@ void Workbench::activated()
 
     om9_workbench_activated();
     if(!sidebar) {
-        const QString resources=QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources");
+        const QString root=qEnvironmentVariable("OM9_PLUGIN_ROOT");
+        const QString resources=root.isEmpty()?QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources"):QDir(root).filePath("Resources");
         sidebar=new MatrixSidebar(Gui::getMainWindow(),resources,{om9NativeCommandAvailable,om9ExecuteNativeCommand});
     }
     static_cast<MatrixSidebar*>(sidebar.data())->activate();
@@ -97,7 +98,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
     openMatrixMenu->setCommand(
         "&OpenMatrix9"
     );
-    *openMatrixMenu << "Import3dm" << "Export3dm" << "Separator";
+    *openMatrixMenu << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm" << "Separator";
     auto* workspaceMenu=new Gui::MenuItem();workspaceMenu->setCommand("Workspace");
     for(std::size_t i=0;i<om9_workspace_command_count();++i)
         *workspaceMenu << om9_command_id(om9_workspace_command(i));
@@ -126,7 +127,8 @@ Gui::MenuItem* Workbench::setupMenuBar() const
             new Gui::MenuItem();
 
         submenu->setCommand(title);
-        if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm";
+        if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm";
+        if(std::string(title)=="Curve")*submenu << "PointsOn";
         if(std::string(title)=="Transform")*submenu << "OM9_ReleaseFromCage";
 
         const std::size_t commandCount =
@@ -160,8 +162,12 @@ Gui::MenuItem* Workbench::setupMenuBar() const
 
 Gui::ToolBarItem* Workbench::setupToolBars() const
 {
-    // Exchange commands remain in the menu and sidebar File group.
-    return Gui::StdWorkbench::setupToolBars();
+    // Exchange is visible without opening the sidebar's File group.
+    auto* root=Gui::StdWorkbench::setupToolBars();
+    auto* exchange=new Gui::ToolBarItem(root);
+    exchange->setCommand("3DM");
+    *exchange << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm";
+    return root;
 }
 
 

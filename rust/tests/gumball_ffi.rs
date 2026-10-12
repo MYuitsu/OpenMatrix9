@@ -1,5 +1,33 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 use openmatrix9_rust::{geometry_frame::IDENTITY, gumball_ffi::*};
+#[test]
+fn whole_selection_uses_a_shared_basis_without_borrowing_one_owner_frame() {
+    unsafe {
+        let mut effective = 99;
+        assert_eq!(om9_gumball_selection_alignment(1, 3, 0, &mut effective), 0);
+        assert_eq!(effective, 0);
+        for (requested, roots, components, wanted) in [
+            (1, 1, 0, 1), (1, 1, 1, 1), (1, 3, 1, 1),
+            (0, 3, 0, 0), (2, 3, 0, 2), (2, 3, 1, 2),
+        ] {
+            assert_eq!(om9_gumball_selection_alignment(requested, roots, components, &mut effective), 0);
+            assert_eq!(effective, wanted);
+        }
+    }
+}
+
+#[test]
+fn malformed_selection_frame_requests_do_not_publish_an_alignment() {
+    unsafe {
+        for (alignment, roots, components) in [(3, 2, 0), (1, 0, 0), (1, usize::MAX, 0), (1, 2, 2)] {
+            let mut effective = 99;
+            assert_ne!(om9_gumball_selection_alignment(alignment, roots, components, &mut effective), 0);
+            assert_eq!(effective, 99);
+        }
+        assert_ne!(om9_gumball_selection_alignment(1, 2, 0, std::ptr::null_mut()), 0);
+    }
+}
+
 fn frame() -> [f64; 12] {
     [0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 0., 1.]
 }

@@ -1,0 +1,41 @@
+{
+    "checks":  [
+                   {
+                       "name":  "same user source imports through Python API",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native QAction queued without Gui.runCommand",
+                       "passed":  true
+                   }
+               ],
+    "source":  "C:\\Users\\nguye\\Downloads\\nhan oval 11.91x8.37x4.97.3dm",
+    "phase":  "native-import",
+    "inventory":  {
+                      "source_version":  50,
+                      "issues":  [
+
+                                 ],
+                      "record_count":  31
+                  },
+    "dialogs":  [
+                    "native-import-file",
+                    "preserve-mode"
+                ],
+    "native_alert":  {
+                         "title":  "Ngoại lệ",
+                         "text":  "Illegal storage access! Please save your work under a new file name and restart the application!"
+                     },
+    "ok":  false,
+    "module":  "H:\\FreeCAD-src\\build\\om9-ui-3dm-sdk\\bin\\OpenMatrix9Gui.pyd",
+    "source_sha256":  "5cdd84533c2dca20ef441fcbe2f1edd0226cc3ab02805caa4af60ef3dbba9997",
+    "error":  "Traceback (most recent call last):\n  File \"H:/FreeCAD-src/build/om9-dev/tests/three_dm_native_action_crash_smoke.FCMacro\", line 49, in completed\n    check(\u0027native menu imports same geometry count as API\u0027,len([o for o in doc.Objects if hasattr(o,\u0027Shape\u0027) and not o.Shape.isNull()])==api_count)\n                                                                           ^^^^^^^^^^^\nReferenceError: Cannot access attribute \u0027Objects\u0027 of deleted object\n"
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_native_action_crash_smoke-1\670056f893b2436488e57118731d5ede
+Runtime smoke failed
+At H:\FreeCAD-src\build\om9-dev\tests\run_menu_smoke.ps1:31 char:29
++         if(-not $result.ok){throw 'Runtime smoke failed'}
++                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Runtime smoke failed:String) [], RuntimeException
+    + FullyQualifiedErrorId : Runtime smoke failed
+ 

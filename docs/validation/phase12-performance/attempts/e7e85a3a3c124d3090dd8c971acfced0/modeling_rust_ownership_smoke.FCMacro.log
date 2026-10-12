@@ -1,0 +1,46 @@
+{
+  "checks": [
+    {
+      "name": "native runtime exposes Rust-owned curve path",
+      "passed": true
+    },
+    {
+      "name": "curve validation/session owners are Rust",
+      "passed": true
+    },
+    {
+      "name": "PointsOn uses native Qt with Rust session without Python editor",
+      "passed": true
+    },
+    {
+      "name": "Rust-backed edit commits once",
+      "passed": true
+    },
+    {
+      "name": "Rust validation preserves draft/transaction on invalid weight",
+      "passed": true
+    },
+    {
+      "name": "repeated PointsOn replaces prior editor and its Rust session",
+      "passed": true
+    },
+    {
+      "name": "Undo invalidates native session even when object identity survives",
+      "passed": true
+    },
+    {
+      "name": "deleted native curve cancels Rust session",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd",
+  "ownership": {
+    "curve": "rust",
+    "session": "rust",
+    "snap": "rust",
+    "rebuild": "rust",
+    "native_bridge": "FreeCAD/Qt/OCCT/openNURBS"
+  }
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_rust_ownership_smoke-1\7ad9ba6826e14582bd3722411a2d1709

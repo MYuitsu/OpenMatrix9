@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "name": "plugin-local worker runs with only installed host DLL search path",
+      "passed": true
+    },
+    {
+      "name": "worker imports same current object count",
+      "passed": true
+    },
+    {
+      "name": "worker preserves full palette",
+      "passed": true
+    },
+    {
+      "name": "worker stages valid editable BRep Ring",
+      "passed": true
+    },
+    {
+      "name": "worker stages valid editable BRep Curve",
+      "passed": true
+    }
+  ],
+  "worker_exit": 0,
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\runtime\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd"
+}

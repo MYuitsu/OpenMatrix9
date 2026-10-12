@@ -1,0 +1,115 @@
+{
+  "checks": [
+    {
+      "name": "panel native API registered",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerLock0",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerName4",
+      "passed": true
+    },
+    {
+      "name": "fresh palette preview has32 and does not mutate document",
+      "passed": true
+    },
+    {
+      "name": "fresh layer controls enabled",
+      "passed": true
+    },
+    {
+      "name": "first panel click is one Undo including lazy state",
+      "passed": true
+    },
+    {
+      "name": "locking default current chooses eligible fallback",
+      "passed": true
+    },
+    {
+      "name": "Undo lazy state removes metadata and restores default",
+      "passed": true
+    },
+    {
+      "name": "Redo lazy state restores layer lock",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerSwatch0",
+      "passed": true
+    },
+    {
+      "name": "source palette color replaces default swatch",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerAll",
+      "passed": true
+    },
+    {
+      "name": "custom nested duplicate leaves and equalRGB remain accessible",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerArrow4",
+      "passed": true
+    },
+    {
+      "name": "selected assignment enabled",
+      "passed": true
+    },
+    {
+      "name": "panel assigns selected set and preserves ByObject RGB",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerAllCurrent",
+      "passed": true
+    },
+    {
+      "name": "extra nested current uses exact fullpath",
+      "passed": true
+    },
+    {
+      "name": "actual CMD control exists",
+      "passed": true
+    },
+    {
+      "name": "actual CMD reaches same guarded layer controller",
+      "passed": true
+    },
+    {
+      "name": "Rust panel retains local/effective distinction",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerLock0",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerSwatch0",
+      "passed": true
+    },
+    {
+      "name": "switch document restores that palette lock",
+      "passed": true
+    },
+    {
+      "name": "control exists OM9LayerLock0",
+      "passed": true
+    },
+    {
+      "name": "foreign transaction disables mutation controls",
+      "passed": true
+    },
+    {
+      "name": "panel refresh leaves unrelated transaction intact",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\runtime\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+  "scope": "live32/custom panel and CMD; legacy/new geometry/receive/guards/Matrix acceptance pending"
+}

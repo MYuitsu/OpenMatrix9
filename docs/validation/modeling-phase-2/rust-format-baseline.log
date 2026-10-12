@@ -1,0 +1,77 @@
+Diff in \\?\H:\FreeCAD-src\build\phase2-source-backup-20261009\rust\src\core_3dm.rs:1:
+ //! OM9-FILE-012: policy for CAD-preserving Rhino 5 archive exchange.
+ use std::ffi::CStr;
+-pub const ICONS: [&str; 4] = ["FileImport3dm", "FileExport3dm", "FileCopy3dm", "FilePaste3dm"];
++pub const ICONS: [&str; 4] = [
++    "FileImport3dm",
++    "FileExport3dm",
++    "FileCopy3dm",
++    "FilePaste3dm",
++];
+ pub fn command(icon: &str) -> Option<&'static str> {
+     match icon {
+         "FileImport3dm" => Some("Import3dm"),
+Diff in \\?\H:\FreeCAD-src\build\phase2-source-backup-20261009\rust\src\modeling_exchange.rs:9:
+ }
+ 
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_modeling_worker_target(available: u32) -> u32 { worker_target(available) }
++pub extern "C" fn om9_modeling_worker_target(available: u32) -> u32 {
++    worker_target(available)
++}
+ 
+ #[unsafe(no_mangle)]
+ pub extern "C" fn om9_modeling_workers(available: u32, tasks: u32, ram_slots: u32) -> u32 {
+Diff in \\?\H:\FreeCAD-src\build\phase2-source-backup-20261009\rust\tests\core_3dm.rs:32:
+ #[test]
+ fn clipboard_commands_share_catalog_dispatch() {
+     use openmatrix9_rust::core_3dm;
+-    assert_eq!(core_3dm::command("FileCopy3dm"),Some("Copy3dm"));
+-    assert_eq!(core_3dm::command("FilePaste3dm"),Some("Paste3dm"));
++    assert_eq!(core_3dm::command("FileCopy3dm"), Some("Copy3dm"));
++    assert_eq!(core_3dm::command("FilePaste3dm"), Some("Paste3dm"));
+     assert!(openmatrix9_rust::command_completion::names().contains(&"Copy3dm"));
+     assert!(openmatrix9_rust::command_completion::names().contains(&"Paste3dm"));
+ }
+Diff in \\?\H:\FreeCAD-src\build\phase2-source-backup-20261009\rust\tests\modeling_exchange_policy.rs:2:
+ 
+ #[test]
+ fn sixty_percent_uses_available_threads_without_four_thread_cap() {
+-    use openmatrix9_rust::modeling_exchange::{worker_target, bounded_workers};
+-    for (n, expected) in [(0,1),(1,1),(2,1),(4,2),(8,4),(12,7),(16,9),(24,14),(32,19)] {
+-        assert_eq!(worker_target(n),expected);
++    use openmatrix9_rust::modeling_exchange::{bounded_workers, worker_target};
++    for (n, expected) in [
++        (0, 1),
++        (1, 1),
++        (2, 1),
++        (4, 2),
++        (8, 4),
++        (12, 7),
++        (16, 9),
++        (24, 14),
++        (32, 19),
++    ] {
++        assert_eq!(worker_target(n), expected);
+     }
+-    assert_eq!(worker_target(u32::MAX),2_576_980_377);
+-    assert_eq!(bounded_workers(32,40,40),19);
+-    assert_eq!(bounded_workers(32,3,40),3);
+-    assert_eq!(bounded_workers(32,40,2),2);
+-    assert_eq!(bounded_workers(32,0,40),0);
+-    assert_eq!(bounded_workers(32,40,0),0);
++    assert_eq!(worker_target(u32::MAX), 2_576_980_377);
++    assert_eq!(bounded_workers(32, 40, 40), 19);
++    assert_eq!(bounded_workers(32, 3, 40), 3);
++    assert_eq!(bounded_workers(32, 40, 2), 2);
++    assert_eq!(bounded_workers(32, 0, 40), 0);
++    assert_eq!(bounded_workers(32, 40, 0), 0);
+ }
+ 
+ #[test]
+Diff in \\?\H:\FreeCAD-src\build\phase2-source-backup-20261009\rust\tests\modeling_snap_policy.rs:1:
+-use openmatrix9_rust::modeling_exchange::{snap_allowed, GeometryKind::*};
++use openmatrix9_rust::modeling_exchange::{GeometryKind::*, snap_allowed};
+ 
+ #[test]
+ fn mesh_and_cloud_default_snap_reads_zero_points_policy() {

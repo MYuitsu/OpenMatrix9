@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tests\rhino5_gui_profiles_probe.py", line 153, in run_cases
+    row=run_case(expected)
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 61, in run_case
+    if case['fixture']=='bad':raise RuntimeError('Rhino transport failure')
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Rhino transport failure
+
+OM9 GUI profile bad: False
+OM9 GUI profile good: True
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.031s
+
+OK

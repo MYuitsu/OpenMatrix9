@@ -1,0 +1,22 @@
+# PointCloud legacy-target verification and geometry/affine routes
+
+Continue the approved comprehensive openNURBS exchange design inline. The previous native current-field package is verified at767 GUI checks/native11; full coverage remains active.
+
+1. Establish an independent Rhino5-era reader: official McNeel SDK20130711, archive SHA2565cb9ff879c94c63145526a188f9ddc8c522f35cd82d8726ad49ed64a63d6e05a. Build unchanged sources in a separate executable, never mix legacy/current ON_* classes in one binary. Reread modern Rhino5-header cloud fixtures, write with the legacy SDK and inspect with the modern native oracle. Verify exact points/normals/colors/plane/flags/identity/userdata and demonstrate intensity retention or loss. Update the gate to the evidence's actual scope; actual Rhino5.14 application remains untested if startup cannot produce evidence.
+2. Native failing tests for non-preserving PointCloud reads/writes and affine/nested block expansion. Add a typed native PointCloud variant, keeping double arrays and native optional fields; stage bounded hashed data files instead of per-point manifest JSON. Reconstruct geometry-only output from current native fields, strip userdata/resources under its existing explicit policy and enforce target compatibility before replacement. No float kernel/tessellation or stale source substitution.
+3. Bind geometry-only import to independent double FeaturePython properties and Coin PointSet. Reuse full current-field validation and stage independent current geometry on export, composing native/parent/proxy matrices once. Retained imports keep immutable provenance and the existing current-field adapter. Mixed current CAD/mesh/cloud and placed/nested block exports must work through the same native route.
+4. Native affine expansion supplies derived PointCloud display leaves. Never treat their float Coin nodes or cached preview fields as authoritative export data. Lifecycle and stale/current preview behavior must be tested and explicitly reported.
+5. Focused native/FreeCAD RED→GREEN tests for direct import/edit/export, mixed native geometry, affine/nested blocks, mm/cm, normal/color precision, intensity compatibility rejection, Undo/Redo/FCStd, source immutability and atomic errors. Run the full regression suite and both rings; update scoped coverage/spec/README/ledger and create a verified checkpoint. Large-data streaming/performance and remaining annotation/resources/components/document/history/version/legacy categories remain pending.
+
+Installed Rhino5.14 was detected. The first owned launcher hit the configured RunAsAdmin UAC before obtaining a Rhino PID; its PowerShell launcher was terminated. The lower-privilege owned Rhino PID45112 exited3 without fixture output. No evidence of actual application acceptance exists and the existing user Rhino process was not touched. The optional application script is ready for a later usable runtime; do not mark its checks passed or alter permanent application/elevation settings.
+
+
+## PointCloud geometry and legacy5 reader progress — 2026-10-07
+
+- [x] Independent unchanged McNeel SDK20130711 reader proves exact native cloud fields in mm/cm and intensity loss; precise shared rejection before writes replaces the interim unknown-reader gate. Actual Rhino5.14 application acceptance remains unverified.
+- [x] Geometry-only current native double PointCloud alongside CAD/mesh; native nested affine/unit normalization, selected cloud/member/block routes, explicit userdata omission, exact cloud reread and atomic malformed-field/transform/RGB rejection.
+- [x] Derived typed mixed affine cloud previews, automatic canonical refresh, native/full-field fingerprints, root delta, FCStd and verified copied-definition graph; edited/unverified preview copies remain guarded.
+- [ ] Large-data streaming/performance, PointCloud viewport lock semantics, arbitrary cloud/preview legacy upgrades and actual Rhino5 application acceptance.
+- [ ] Remaining geometry/annotations/styles, resources/components/document/history/reference/version audit, comprehensive review and public integration.
+
+Evidence: `docs/validation/2026-10-07-3dm-cloud-geometry-legacy5.md` — isolated FreeCAD817/817 across39 suites; native13/13,31.87s; unchanged Rust75 evidence. Earlier dated pending PointCloud geometry/affine/reader notes are superseded within this tested scope. Full openNURBS remains in_progress.

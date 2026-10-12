@@ -1,0 +1,104 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+from pathlib import Path
+import os,json,traceback,tempfile,subprocess,time,ctypes,types,sys
+sys.path.insert(0,str(Path(__file__).parent))
+from clipboard_text_support import windows_text
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def rejected(name,fn,text=None):
+    try:fn()
+    except RuntimeError as error:
+        check(name,text is None or text.lower() in str(error).lower());return
+    check(name,False)
+def run():
+    try:
+        import ThreeDmClipboard as clip,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        rejected('Paste without active project',clip.paste_selection,'active project')
+        doc=App.newDocument('FailureTarget');doc.UndoMode=1
+        source=Path('H:/FreeCAD-src/build/om9-dev/build/modeling_ring_roundtrip_smoke-1/73061512b6d34cceb2b3be7c4f074998/ring-current-and-new-v5.3dm')
+        payload=source.read_bytes();clip.publish_payload(payload)
+        def settle():
+            loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+        settle()
+        QtWidgets.QApplication.clipboard().setText('clipboard before failed publication')
+        ctypes.WinDLL('ole32').OleFlushClipboard()
+        settle()
+        old_ole=ctypes.OleDLL
+        old_verify=clip._capture_published
+        _,diagnostic_user,_,_=clip._win32()
+        report['rollback_initial']={'sequence':int(diagnostic_user.GetClipboardSequenceNumber()),'expected_text':QtWidgets.QApplication.clipboard().text()=='clipboard before failed publication'}
+        def captured_publication():
+            report['rollback_publication_sequence']=int(diagnostic_user.GetClipboardSequenceNumber())
+            return payload
+        clip._capture_published=captured_publication
+        ctypes.OleDLL=lambda name:types.SimpleNamespace(OleFlushClipboard=lambda:1)
+        try:rejected('post-publication persistence error is reported',lambda:clip.publish_payload(payload),'retain')
+        finally:ctypes.OleDLL=old_ole;clip._capture_published=old_verify
+        report['rollback_after']={'sequence':int(diagnostic_user.GetClipboardSequenceNumber()),'expected_text':QtWidgets.QApplication.clipboard().text()=='clipboard before failed publication','native_geometry':clip.has_geometry()}
+        check('failed publication restores previous clipboard',windows_text(clip)=='clipboard before failed publication')
+        settle()
+        clip.publish_payload(payload)
+        settle()
+        prior_payload=payload
+        other_payload=Path('H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures/mm-current.3dm').read_bytes()
+        check('rollback exercises different native archives',other_payload!=prior_payload)
+        old_ole=ctypes.OleDLL
+        clip._capture_published=lambda:other_payload
+        ctypes.OleDLL=lambda name:types.SimpleNamespace(OleFlushClipboard=lambda:1)
+        try:rejected('native publication persistence error is reported',lambda:clip.publish_payload(other_payload),'retain')
+        finally:ctypes.OleDLL=old_ole;clip._capture_published=old_verify
+        check('failed publication restores native geometry',clip.capture_payload()==prior_payload)
+        settle()
+        def foreign_owner():
+            QtWidgets.QApplication.clipboard().setText('newer clipboard from another owner')
+            raise RuntimeError('publication verification failed')
+        clip._capture_published=foreign_owner
+        try:rejected('publication verification failure reported',lambda:clip.publish_payload(other_payload),'verification')
+        finally:clip._capture_published=old_verify
+        check('rollback preserves newer clipboard owner',QtWidgets.QApplication.clipboard().text()=='newer clipboard from another owner')
+        settle()
+        clip.publish_payload(payload)
+        settle()
+        process=subprocess.Popen(['H:/FreeCAD-src/.pixi/envs/default/python.exe','H:/FreeCAD-src/build/om9-dev/tests/clipboard_busy_helper.py',str(out)],creationflags=subprocess.CREATE_NO_WINDOW)
+        started=time.monotonic()
+        while not (out/'clipboard-lock-ready').exists() and time.monotonic()-started<5:time.sleep(.02)
+        try:
+            check('independent process owns clipboard lock',(out/'clipboard-lock-ready').exists())
+            rejected('busy clipboard rejected before document change',clip.capture_payload,'busy')
+            check('busy clipboard leaves active document empty',len(doc.Objects)==0)
+        finally:(out/'clipboard-lock-release').touch();process.wait(timeout=10)
+        previous=set(Path(tempfile.gettempdir()).glob('om9-clipboard-paste-*'))
+        pulses=[];timer=QtCore.QTimer();timer.timeout.connect(lambda:pulses.append(True));timer.start(10)
+        def cancel():
+            for widget in QtWidgets.QApplication.topLevelWidgets():
+                if isinstance(widget,QtWidgets.QProgressDialog) and widget.isVisible():
+                    buttons=widget.findChildren(QtWidgets.QPushButton)
+                    if buttons:buttons[0].click();return
+            QtCore.QTimer.singleShot(10,cancel)
+        QtCore.QTimer.singleShot(50,cancel)
+        rejected('cancel actual native preparation',clip.paste_selection,'cancel')
+        timer.stop();check('cancel leaves no partial objects',len(doc.Objects)==0)
+        check('GUI receives events while native job runs',len(pulses)>=2)
+        check('cancel joins and removes owned staging',set(Path(tempfile.gettempdir()).glob('om9-clipboard-paste-*'))==previous and not clip._busy)
+        check('cancel does not change source clipboard',clip.capture_payload()==payload)
+        changed=[]
+        def switch():changed.append(App.newDocument('SwitchedTarget'))
+        QtCore.QTimer.singleShot(50,switch)
+        rejected('async completion rejects switched target',clip.paste_selection,'target project changed')
+        check('old and new project remain empty',len(doc.Objects)==0 and len(changed[0].Objects)==0)
+        check('switch failure joins and cleans staging',set(Path(tempfile.gettempdir()).glob('om9-clipboard-paste-*'))==previous and not clip._busy)
+        report.update(ok=True,module=native.__file__)
+    except Exception:
+        user=ctypes.WinDLL('user32');user.GetOpenClipboardWindow.restype=ctypes.c_void_p
+        owner=user.GetOpenClipboardWindow();pid=ctypes.c_ulong()
+        user.GetWindowThreadProcessId.argtypes=[ctypes.c_void_p,ctypes.POINTER(ctypes.c_ulong)]
+        user.GetWindowThreadProcessId(owner,ctypes.byref(pid))
+        report.update(ok=False,error=traceback.format_exc(),clipboard_lock_pid=int(pid.value),test_pid=os.getpid())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

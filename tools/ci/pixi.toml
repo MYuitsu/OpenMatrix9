@@ -1,0 +1,15 @@
+[workspace]
+name = "om9-stock-freecad-sdk"
+version = "0.0.1"
+channels = ["conda-forge"]
+platforms = ["win-64"]
+
+[dependencies]
+python = "==3.11.14"
+qt6-main = "==6.8.3"
+occt = "==7.8.1"
+coin3d = "==4.0.3"
+libboost-headers = "==1.86.0"
+eigen = "==3.4.0"
+xerces-c = "==3.3.0"
+fmt = "12.1.*"

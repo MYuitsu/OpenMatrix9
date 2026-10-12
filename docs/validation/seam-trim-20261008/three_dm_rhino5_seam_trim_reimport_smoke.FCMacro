@@ -1,0 +1,50 @@
+"""Reimport the actual Rhino5 BRep seam/pole/edited SaveAs outputs."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,hashlib,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[],'cases':[],'host_metrics':[]}
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/om9-dev/docs/validation/seam-trim-20261008')
+        oracle=json.loads((root/'oracle.json').read_text());actual=json.loads((root/'rhino5-gui-profile-results.json').read_text());graph=json.loads((root/'native-rhino-results.json').read_text())
+        check('four actual GUI and native graph results bind original analytical oracle',actual['ok'] and graph['ok'] and graph['rhino_report_sha256']==sha(root/'rhino5-gui-profile-results.json') and actual['oracle_sha256']==sha(root/'oracle.json') and len(actual['cases'])==len(oracle['cases'])==len(graph['cases'])==4)
+        for wanted,row,decoded in zip(oracle['cases'],actual['cases'],graph['cases']):
+            label=row['fixture'];source=root/label;saved=root/Path(row['saved_fixture']).name;expected=wanted['objects'][0]
+            check(label+' source/saved hashes and native complete-basis decode bound',decoded['passed'] and wanted['fixture']==label==decoded['fixture'] and sha(source)==row['source_sha256']==wanted['source_sha256']==decoded['source_sha256'] and sha(saved)==row['saved_sha256']==decoded['saved_sha256'])
+            check(label+' actual GUI valid solid analytical volume at original threshold',row['passed'] and row['bad_objects']==0 and all(phase['passed'] and len(phase['objects'])==1 and phase['objects'][0]['uuid']==expected['uuid'] and phase['objects'][0]['faces']==expected['faces'] and phase['objects'][0]['orientation']=='Outward' and phase['objects'][0]['valid'] and all(x['passed'] and x['volume_threshold_mm3']==1e-6 and x['volume_deviation_mm3']<=1e-6 for x in phase['comparisons']) for phase in [row['first_read'],row['reread']]))
+            before=json.loads(native.inspect3dm(str(source)));after=json.loads(native.inspect3dm(str(saved)));a,b=before['records'][0],after['records'][0]
+            check(label+' decoded UUID/class/native geometry CRC and complete reference closure retained',after['source_version']==50 and not after['issues'] and len(after['records'])==1 and a['class_name']==b['class_name']=='ON_Brep' and a['source_uuid']==b['source_uuid']==expected['uuid'] and a['dependencies']==b['dependencies'] and a['geometry_crc']==b['geometry_crc'])
+            external=out/saved.name;external.write_bytes(saved.read_bytes());doc=App.newDocument('ActualSeamTrim');objects=ThreeDm.import_file(str(external),doc,mode='preserve');obj=objects[0];name=obj.Name;baseline=obj.OM9SourceRecord
+            check(label+' editable exact saved native record imported',len(objects)==1 and obj.OM9Capability=='editable' and json.loads(baseline)==b)
+            def measure(stage):
+                check(label+stage+' valid closed complete single solid',obj.Shape.isValid() and obj.Shape.isClosed() and len(obj.Shape.Solids)==1 and len(obj.Shape.Faces)==expected['faces'])
+                file=out/(saved.stem+stage+'.brep');obj.Shape.exportBrep(str(file));data=file.read_bytes();mass=native.measure3dmBrep(str(file),1e-13)
+                result['host_metrics'].append(dict(fixture=label,stage=stage,analytical_volume=expected['volume_mm3'],adaptive_metrics=mass))
+                check(label+stage+' independent analytical signed volume',mass['volume']>0 and abs(mass['volume']-expected['volume_mm3'])<=1e-6 and file.read_bytes()==data)
+            measure('-initial')
+            archive=out/(label+'.FCStd');doc.saveAs(str(archive));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(archive));obj=doc.getObject(name)
+            check(label+' source-deleted FCStd keeps full actual archive and record',sha(Path(obj.OM9ArchiveOwner.OM9SourceArchive))==row['saved_sha256'] and obj.OM9SourceRecord==baseline)
+            measure('-reopened')
+            tables=after['settings']['plugin_userdata'];result.setdefault('gui_plugin_tables',{})[label]=tables
+            target=out/(label+'-protected.3dm');target.write_bytes(b'keep target');count=len(doc.Objects);error=''
+            try:ThreeDm.export_file(str(target),[obj])
+            except Exception as exc:error=str(exc)
+            if tables:
+                check(label+' opaque GUI plugin dependencies keep atomic export guard','Opaque plugin table dependencies' in error and target.read_bytes()==b'keep target' and len(doc.Objects)==count and obj.OM9SourceRecord==baseline)
+            else:
+                exported=json.loads(native.inspect3dm(str(target)));check(label+' resource-free saved source safely exports native geometry',not error and not exported['issues'] and exported['records'][0]['geometry_crc']==b['geometry_crc'])
+            check(label+' source and actual saved archives remain immutable',sha(source)==wanted['source_sha256'] and sha(saved)==row['saved_sha256'])
+            result['cases'].append(dict(fixture=label,saved_sha256=row['saved_sha256'],passed=True));App.closeDocument(doc.Name)
+        result.update(ok=True,rhino_report_sha256=sha(root/'rhino5-gui-profile-results.json'),full_exchange_complete=False)
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

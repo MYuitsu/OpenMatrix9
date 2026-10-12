@@ -83,6 +83,7 @@ pub fn name(icon: &str) -> Option<&'static str> {
         "CurveLineSingleLine" => Some("Line"),
         "CurveFreeFormInterpolatePoints" => Some("InterpCrv"),
         "OthersCurveRebuild" => Some("Rebuild"),
+        "TopIconControlPointsOn" => Some("PointsOn"),
         "CurveRectangleCornertoCorner" => Some("Rectangle"),
         "CurveCircleCenterRadius" => Some("Circle"),
         "CurveEllipseFromCenter" => Some("Ellipse"),

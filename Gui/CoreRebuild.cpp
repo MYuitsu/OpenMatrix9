@@ -1,7 +1,14 @@
 #include "CoreRebuild.h"
+#include "Phase2Rust.h"
+#include <sstream>
+#include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepExtrema_DistShapeShape.hxx>
+#include <Standard_Failure.hxx>
+#include <TopoDS_Shape.hxx>
 #include "CoreLayers.h"
 #include "CoreObjects.h"
 #include "CoreGeometryContract.h"
+#include "LayerDocumentAdapter.h"
 #include "CurveController.h"
 #include "CurveGeometry.h"
 #include "RustBridge.h"
@@ -83,7 +90,7 @@ void rebuildCapability(unsigned representation,unsigned stage,std::size_t count,
 }
 struct CoreRebuild::State {
     struct Input {
-        std::string name;
+        std::string name,signature;
         CurvePyRef object,shape,edge;
         bool closed;
         Base::Placement globalPlacement;
@@ -91,6 +98,20 @@ struct CoreRebuild::State {
         int count=0,degree=0;
         Input(std::string n,PyObject* o,PyObject* s,PyObject* e,bool c):name(std::move(n)),object(o),shape(s),edge(e),closed(c){}
     };
+    std::uint64_t session=0;
+    std::vector<Om9RebuildInput> witnesses(App::Document& doc) {
+        std::vector<std::string> names;for(const auto& input:inputs)names.push_back(input->name);
+        const auto layerGeneration=hasCanonicalLayerDocument(doc)?layerMutationGeneration(doc,names,1):0;
+        std::vector<Om9RebuildInput> result;result.reserve(inputs.size());
+        for(auto& input:inputs){
+            const auto current=captureObject(doc,input->name);auto* object=doc.getObject(input->name.c_str());
+            std::ostringstream signature;signature<<current.documentUid<<';'<<current.unitContext<<';'<<current.stamp.revision<<';'<<current.stamp.epoch<<';'<<layerGeneration<<std::hexfloat;
+            for(double value:current.world)signature<<';'<<value;
+            input->signature=signature.str();
+            result.push_back({{current.stamp.document,current.stamp.object,current.stamp.generation,reinterpret_cast<const std::uint8_t*>(input->signature.data()),input->signature.size()},object&&std::any_of(object->getInList().begin(),object->getInList().end(),[&](auto* owner){return !CoreLayers::isLayerOwner(owner,*object);})?1u:0u});
+        }
+        return result;
+    }
     App::Document* document=nullptr;
     std::size_t command=0;
     bool selecting=false;
@@ -167,6 +188,7 @@ void CoreRebuild::clearPreview(){for(auto [root,node]:state->previews){if(root->
 void CoreRebuild::cancel(){
     state->optionBridge.close();state->proposed.reset();state->optionErrorPending=false;state->optionProposal=false;
     om9_result_invalidate(&state->lease->gate);
+    om9_phase2_rebuild_drop(state->session);state->session=0;
     clearPreview();state->selecting=false;state->document=nullptr;
     if(state->dialog){auto* d=state->dialog.data();state->dialog=nullptr;d->setObjectName({});d->hide();d->deleteLater();}
     Base::PyGILStateLocker lock;state->inputs.clear();
@@ -249,8 +271,11 @@ void CoreRebuild::options(){
             state->inputs.push_back(std::move(input));
         }
         if(state->inputs.empty()){CurveController::instance().setPrompt("Rebuild: Select at least one curve, then press Enter.");return;}
+        const auto witnesses=state->witnesses(*state->document);
+        const Om9RebuildOptions defaults{std::size_t(std::clamp(state->inputs[0]->degree,1,3)),std::size_t(std::clamp(state->inputs[0]->count,4,256)),1};
+        state->session=om9_phase2_rebuild_create(witnesses.data(),witnesses.size(),&defaults);phase2Require(state->session!=0);
         state->selecting=false;
-        auto* dialog=new QDialog(Gui::getMainWindow());state->dialog=dialog;dialog->setObjectName("OM9RebuildDialog");dialog->setWindowTitle("Rebuild Curve");dialog->setAttribute(Qt::WA_DeleteOnClose);
+        auto* dialog=new QDialog(Gui::getMainWindow());state->dialog=dialog;dialog->setObjectName("OM9RebuildDialog");dialog->setProperty("om9RustSession",qulonglong(state->session));dialog->setWindowTitle("Rebuild Curve");dialog->setAttribute(Qt::WA_DeleteOnClose);
         auto* layout=new QFormLayout(dialog);
         QStringList current;for(const auto& i:state->inputs)current<<QString("%1: PointCount (%2), Degree (%3)").arg(QString::fromStdString(i->name)).arg(i->count?QString::number(i->count):"analytic").arg(i->degree?QString::number(i->degree):"analytic");
         layout->addRow(new QLabel(current.join('\n'),dialog));
@@ -306,15 +331,20 @@ void CoreRebuild::calculate(bool commit){
     Base::PyGILStateLocker lock;
     om9_result_invalidate(&state->lease->gate);
     try {
-        const auto poles=std::size_t(state->optionBridge.value("PointCount",state->optionProposal).number),degree=std::size_t(state->optionBridge.value("Degree",state->optionProposal).number);
+        requireLayerGeometryEditable(*state->document);
+        const Om9RebuildOptions options{std::size_t(state->optionBridge.value("Degree",state->optionProposal).number),std::size_t(state->optionBridge.value("PointCount",state->optionProposal).number),state->optionBridge.value("DeleteInput",state->optionProposal).number!=0.?1u:0u};
+        phase2Require(om9_phase2_rebuild_replace(state->session,&options),state->session);
+        const auto witnesses=state->witnesses(*state->document);phase2Require(om9_phase2_rebuild_check(state->session,witnesses.data(),witnesses.size()),state->session);
+        Om9RebuildOptions owned{};phase2Require(om9_phase2_rebuild_get(state->session,&owned),state->session);
+        const auto poles=owned.point_count,degree=owned.degree;
         const auto ticket=om9_result_issue(&state->lease->gate);
         if(!ticket)throw std::runtime_error("Too many pending Rebuild results or request IDs exhausted");
         std::shared_ptr<Result> result;
         try {result=std::make_shared<Result>(*state,ticket);}catch(...){om9_result_retire(&state->lease->gate,ticket);throw;}
         result->documentName=state->document->getName();result->command=state->command;
-        result->commit=commit;result->remove=state->optionBridge.value("DeleteInput",state->optionProposal).number!=0.;
+        result->commit=commit;result->remove=owned.delete_input!=0;
         CurvePyRef doc(state->document->getPyObject()),part(PyImport_ImportModule("Part")),app(PyImport_ImportModule("FreeCAD"));
-        CurvePyRef vertex(PyObject_GetAttrString(part.value,"Vertex")),vector(PyObject_GetAttrString(app.value,"Vector"));
+
         auto& outputs=result->outputs;double maximum=0;
         for(const auto& input:state->inputs){
             verifyObject(*state->document,input->guard);
@@ -331,19 +361,21 @@ void CoreRebuild::calculate(bool commit){
                 for(auto* owner:native->getInList())if(!CoreLayers::isLayerOwner(owner,*native))
                     throw std::runtime_error("A selected curve has dependents. Clear DeleteInput to keep those links.");
             }
-            const auto n=std::max<std::size_t>(513,poles*4+1);auto samples=sampleCurve(input->edge.value,n);
+            const auto n=std::max<std::size_t>(513,poles*4+1);const auto nativeEdge=static_cast<Part::TopoShapePy*>(input->edge.value)->getTopoShapePtr()->getShape();auto samples=sampleCurve(nativeEdge,n);
             if(input->closed)samples.back()=samples.front();
             std::vector<double> xyz;xyz.reserve(n*3);for(const auto& p:samples)xyz.insert(xyz.end(),p.begin(),p.end());
             if(!om9_spline_rebuild(xyz.data(),n,poles,degree,input->closed)){char message[1024]={};om9_spline_message(message,sizeof(message));throw std::runtime_error(message);}
-            outputs.push_back(publishedSplineShape());
+            outputs.emplace_back(new Part::TopoShapePy(new Part::TopoShape(publishedNativeSplineShape())));
             ++state->lease->shapesCreated;result->guards.push_back(input->guard);
             if(!commit){
                 // Bidirectional sampled geometric distance, explicitly an estimate.
-                for(auto pair:{std::pair{input->edge.value,outputs.back().value},std::pair{outputs.back().value,input->edge.value}}){
-                    for(const auto& p:sampleCurve(pair.first,129)){
-                        CurvePyRef v(PyObject_CallFunction(vector.value,"ddd",p[0],p[1],p[2])),point(PyObject_CallOneArg(vertex.value,v.value));
-                        CurvePyRef distance(PyObject_CallMethod(point.value,"distToShape","O",pair.second)),first(PySequence_GetItem(distance.value,0));
-                        const double d=PyFloat_AsDouble(first.value);if(PyErr_Occurred()||!std::isfinite(d))throw std::runtime_error("Cannot measure rebuild deviation");maximum=std::max(maximum,d);
+                const auto nativeOutput=static_cast<Part::TopoShapePy*>(outputs.back().value)->getTopoShapePtr()->getShape();
+                for(const auto& pair:{std::pair{nativeEdge,nativeOutput},std::pair{nativeOutput,nativeEdge}}){
+                    for(const auto& point:sampleCurve(pair.first,129)){
+                        const auto vertex=BRepBuilderAPI_MakeVertex(gp_Pnt(point[0],point[1],point[2])).Vertex();
+                        BRepExtrema_DistShapeShape distance(vertex,pair.second);
+                        if(!distance.IsDone()||!std::isfinite(distance.Value()))throw std::runtime_error("Cannot measure native rebuild deviation");
+                        maximum=std::max(maximum,distance.Value());
                     }
                 }
             }
@@ -353,7 +385,8 @@ void CoreRebuild::calculate(bool commit){
         if(commit){publish(result);return;}
         if(state->holdDelivery)state->held.push_back(std::move(result));
         else QTimer::singleShot(0,state->deliveryContext,[this,result]{publish(result);});
-    }catch(const std::exception& e){if(state->dialog){state->error->setText(QString::fromUtf8(e.what()));state->deviation->setText("Maximum deviation: unavailable");}}
+    }catch(const Standard_Failure& e){if(state->dialog){state->error->setText(QString::fromUtf8(e.GetMessageString()?e.GetMessageString():"Native Rebuild calculation failed"));state->deviation->setText("Maximum deviation: unavailable");}}
+    catch(const std::exception& e){if(state->dialog){state->error->setText(QString::fromUtf8(e.what()));state->deviation->setText("Maximum deviation: unavailable");}}
 }
 void CoreRebuild::publish(const std::shared_ptr<Result>& result){
     Base::PyGILStateLocker lock;
@@ -383,25 +416,49 @@ void CoreRebuild::publish(const std::shared_ptr<Result>& result){
             throw std::runtime_error(staleReason);
         const auto& outputs=result->outputs;
         if(result->commit){
+            requireLayerGeometryEditable(*document);
+            const auto finalWitnesses=state->witnesses(*document);
+            phase2Require(om9_phase2_rebuild_check(state->session,finalWitnesses.data(),finalWitnesses.size()),state->session);
             for(const auto& guard:result->guards)if(CoreLayers::objectLocked(document->getObject(guard.objectName.c_str())))throw std::runtime_error("Rebuild input layer is locked");
-            const auto layer=CoreLayers::captureCircle(*document);document->openTransaction("Rebuild Curve");
+            const auto layer=CoreLayers::captureCircle(*document);
+            const std::string documentUid=document->Uid.getValueStr();
+            const auto publicationSession=state->session,publicationNext=state->lease->gate.next;
+            const int transaction=om9OpenTransaction(*document,"Rebuild Curve");
+            auto checkPublication=[&]{
+                auto* current=App::GetApplication().getDocument(result->documentName.c_str());
+                if(!current||current!=document||current->Uid.getValueStr()!=documentUid||!valid()||
+                   state->document!=current||state->session!=publicationSession||state->lease->gate.next!=publicationNext||
+                   !ownsLayerGeometryTransaction(*current,transaction))
+                    throw std::runtime_error("Rebuild transaction ownership or session changed");
+                for(const auto& guard:result->guards)verifyObject(*current,guard);
+            };
             try{
+                std::unique_ptr<LayerGeometryTransaction> layers;
+                if(hasCanonicalLayerDocument(*document))layers=std::make_unique<LayerGeometryTransaction>(*document,transaction);
+                checkPublication();
                 for(std::size_t i=0;i<outputs.size();++i){
+                    checkPublication();
                     auto object=createCurveFeature(*document,outputs[i].value,"Rebuild");
+                    checkPublication();
                     CurvePyRef source(document->getObject(result->guards[i].objectName.c_str())->getPyObject());
                     CurvePyRef oldView(PyObject_GetAttrString(source.value,"ViewObject")),newView(PyObject_GetAttrString(object.value,"ViewObject"));
                     for(const char* attr:{"LineColor","PointColor","LineWidth"}){CurvePyRef property(PyObject_GetAttrString(oldView.value,attr));if(PyObject_SetAttrString(newView.value,attr,property.value)<0)throw std::runtime_error("Cannot copy curve appearance");}
                     if(layer.index){CurvePyRef name(PyObject_GetAttrString(object.value,"Name"));auto* native=document->getObject(PyUnicode_AsUTF8(name.value));if(!native)throw std::runtime_error("Rebuild output identity missing");CoreLayers::applyCircle(*document,*native,layer);}
+                    checkPublication();
                 }
                 if(result->remove)for(const auto& guard:result->guards)document->removeObject(guard.objectName.c_str());
-                document->recompute();document->commitTransaction();
-            }catch(...){document->abortTransaction();throw;}
+                if(!valid()||App::GetApplication().getDocument(result->documentName.c_str())!=document||!ownsLayerGeometryTransaction(*document,transaction))throw std::runtime_error("Rebuild transaction ownership changed");
+                document->recompute();if(layers)layers->finish();
+                if(!valid()||App::GetApplication().getDocument(result->documentName.c_str())!=document||!ownsLayerGeometryTransaction(*document,transaction))throw std::runtime_error("Rebuild transaction ownership changed");
+                om9CommitTransaction(*document);
+            }catch(...){if(App::GetApplication().getDocument(result->documentName.c_str())==document&&ownsLayerGeometryTransaction(*document,transaction))om9AbortTransaction(*document);throw;}
             state->lastOutcome="committed";const auto command=result->command;cancel();om9_sidebar_record_execution(command,true);CurveController::instance().setPrompt("Command: ");CurveController::instance().logMessage("Rebuild completed");return;
         }
         attaching=true;
         clearPreview();
         for(const auto& output:outputs){
-            const auto sampled=sampleCurve(output.value,257);std::vector<SbVec3f> points;for(auto p:sampled)points.emplace_back(float(p[0]),float(p[1]),float(p[2]));
+            const auto& nativeShape=static_cast<Part::TopoShapePy*>(output.value)->getTopoShapePtr()->getShape();
+            const auto sampled=sampleCurve(nativeShape,257);std::vector<SbVec3f> points;for(auto p:sampled)points.emplace_back(float(p[0]),float(p[1]),float(p[2]));
             for(auto* base:Gui::Application::Instance->activeDocument()->getMDIViews())if(auto* view=dynamic_cast<Gui::View3DInventor*>(base)){
                 auto* root=dynamic_cast<SoSeparator*>(view->getViewer()->getSceneGraph());if(!root)continue;root->ref();auto* node=new SoSeparator;root->addChild(node);state->previews.emplace_back(root,node);
                 node->setName("OM9RebuildPreview");auto* pick=new SoPickStyle;pick->style=SoPickStyle::UNPICKABLE;node->addChild(pick);auto* color=new SoBaseColor;color->rgb.setValue(0.2f,1,0.65f);node->addChild(color);
@@ -410,6 +467,11 @@ void CoreRebuild::publish(const std::shared_ptr<Result>& result){
         }
         state->lastOutcome="previewed";
         state->error->clear();state->deviation->setText(QString("Maximum deviation (sampled): %1 mm").arg(result->maximum,0,'g',8));
+    }catch(const Standard_Failure& e){
+        state->lastReason=e.GetMessageString()?e.GetMessageString():"Native Rebuild publication failed";
+        if(attaching)clearPreview();
+        CurveController::instance().logMessage(QString::fromStdString(state->lastReason));
+        if(result->commit&&state->dialog&&valid())state->error->setText(QString::fromStdString(state->lastReason));
     }catch(const std::exception& e){
         state->lastReason=e.what();
         if(attaching)clearPreview();

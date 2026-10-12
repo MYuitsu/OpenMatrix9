@@ -1,0 +1,40 @@
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test invalid_spans_reset_output_before_error_and_do_not_allocate ... ok
+test stale_check_catches_unreported_changes_with_same_generation ... ok
+test result_query_short_buffer_free_and_stale_handle ... ok
+test persistent_presence_uses_shared_rust_witness_and_native_edits_win ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 5 tests
+test unknown_scope_or_native_only_does_not_claim_full_handoff ... ok
+test mismatched_geometry_is_rejected_before_native_commit ... ok
+test missing_or_duplicate_archive_provenance_rejects ... ok
+test selected_carries_all_empty_palette_and_source_colors ... ok
+test session_preserves_child_desired_and_object_own_states ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+warning: hard linking files in the incremental compilation cache failed. copying files instead. consider moving the cache directory to a file system which supports hard linking in session dir `H:\FreeCAD-src\build\om9-layer-edits\bridge\rhino5\rust-core\target\debug\incremental\om9_rhino_layer-25jcmisyu6oy1\s-hn2z7nlmbe-00a36il-working`
+
+warning: `om9_rhino_layer` (lib) generated 1 warning
+warning: hard linking files in the incremental compilation cache failed. copying files instead. consider moving the cache directory to a file system which supports hard linking in session dir `H:\FreeCAD-src\build\om9-layer-edits\bridge\rhino5\rust-core\target\debug\incremental\handoff-1pywh0669tg54\s-hn2z7o6nv7-0xtv4oc-working`
+
+warning: `om9_rhino_layer` (test "handoff") generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running unittests src\lib.rs (build\om9-layer-edits\bridge\rhino5\rust-core\target\debug\deps\om9_rhino_layer-6ba8bb66d5882d30.exe)
+     Running tests\abi.rs (build\om9-layer-edits\bridge\rhino5\rust-core\target\debug\deps\abi-aa575c88113e5a6a.exe)
+     Running tests\handoff.rs (build\om9-layer-edits\bridge\rhino5\rust-core\target\debug\deps\handoff-cf3583a80a4de625.exe)
+   Doc-tests om9_rhino_layer

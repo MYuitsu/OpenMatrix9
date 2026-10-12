@@ -1,0 +1,77 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pathlib import Path
+import os,json,traceback,hashlib,time
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def rejected(name,fn):
+    try:fn()
+    except RuntimeError:check(name,True);return
+    check(name,False)
+def command(name):
+    field=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+    cursor=field.textCursor();cursor.setPosition(int(field.property('om9InputStart')))
+    cursor.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);cursor.insertText(name);field.setTextCursor(cursor);field.setFocus()
+    QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return)
+def run():
+    try:
+        import Part,Mesh,ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        check('clipboard commands registered',all(c in Gui.listCommands() for c in ['Copy3dm','Paste3dm']))
+        import ThreeDmClipboard as clip
+        doc=App.newDocument('ClipboardSource');doc.UndoMode=1
+        line=doc.addObject('Part::Feature','MovedLine');line.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));line.Placement.Base=App.Vector(20,0,0)
+        circle=doc.addObject('Part::Feature','Circle');circle.Shape=Part.makeCircle(2)
+        extra=doc.addObject('Part::Feature','Unselected');extra.Shape=Part.makeBox(1,2,3)
+        doc.recompute();Gui.Selection.addSelection(line);Gui.Selection.addSelection(circle)
+        pulses=[];timer=QtCore.QTimer();timer.timeout.connect(lambda:pulses.append(time.perf_counter()));timer.start(5)
+        Gui.runCommand('Copy3dm');payload=clip.capture_payload();timer.stop()
+        check('menu Copy native Windows format',payload.startswith(b'3D Geometry File Format '))
+        check('Copy leaves source geometry and object count unchanged',len(doc.Objects)==3 and line.Placement.Base.x==20)
+        check('Copy keeps GUI event loop alive',len(pulses)>0)
+        source=out/'copied-current.3dm';source.write_bytes(payload)
+        check('clipboard includes only current selected objects',len(json.loads(native.inspect3dm(str(source)))['records'])==2)
+        App.closeDocument(doc.Name)
+        target=App.newDocument('ClipboardTarget');target.UndoMode=1
+        Gui.runCommand('Paste3dm');first=[o for o in target.Objects if hasattr(o,'OM9WorkingUUID')]
+        check('menu Paste creates independent editable objects',len(first)==2 and all(o.Shape.isValid() for o in first))
+        check('current placement survives Copy and source close',next(o for o in first if o.Label=='MovedLine').Shape.BoundBox.XMin==20)
+        command('Paste3dm');second=[o for o in target.Objects if hasattr(o,'OM9WorkingUUID')]
+        check('Command Paste shares handler and creates fresh UUIDs',len(second)==4 and len({o.OM9WorkingUUID for o in second})==4)
+        target.undo();check('one Undo removes one Paste',len([o for o in target.Objects if hasattr(o,'OM9WorkingUUID')])==2)
+        target.redo();check('Redo restores whole Paste',len([o for o in target.Objects if hasattr(o,'OM9WorkingUUID')])==4)
+        command('Copy3dm');check('Command Copy shares native format',clip.capture_payload().startswith(b'3D Geometry File Format '))
+        old=clip.capture_payload();opaque=target.addObject('App::FeaturePython','Unsupported');Gui.Selection.clearSelection();Gui.Selection.addSelection(opaque)
+        rejected('unsupported Copy fails before publication',clip.copy_selection)
+        check('failed Copy preserves clipboard',clip.capture_payload()==old)
+        target.removeObject(opaque.Name)
+        QtWidgets.QApplication.clipboard().setText('H:/arbitrary.3dm');before=len(target.Objects)
+        rejected('text path is not imported',clip.paste_selection);check('failed Paste leaves document unchanged',len(target.Objects)==before)
+        bad=QtCore.QMimeData();bad.setData(clip.MIME,QtCore.QByteArray(b'3D Geometry File Format       50'+b'\0'*100));QtWidgets.QApplication.clipboard().setMimeData(bad)
+        rejected('truncated archive fails before commit',clip.paste_selection);check('truncated archive leaves document unchanged',len(target.Objects)==before)
+        clip.publish_payload(old)
+        field=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');check('Command input keeps text shortcuts',not clip.shortcut_context(field))
+        text=QtWidgets.QLineEdit(Gui.getMainWindow());text.setText('text');text.show();text.selectAll();text.setFocus();QtTest.QTest.keyClick(text,QtCore.Qt.Key_C,QtCore.Qt.ControlModifier)
+        check('Ctrl+C in text field copies text',QtWidgets.QApplication.clipboard().text()=='text');text.deleteLater()
+        clip.publish_payload(old);Gui.updateGui()
+        report['filter_installed']=clip._filter is not None
+        viewers=[w for w in Gui.getMainWindow().findChildren(QtWidgets.QWidget) if w.isVisible() and 'view3d' in w.metaObject().className().lower()]
+        check('viewport shortcut context exists',bool(viewers) and clip.shortcut_context(viewers[0]))
+        viewer=next(w for w in viewers if w.focusPolicy()!=QtCore.Qt.NoFocus)
+        QtWidgets.QApplication.setActiveWindow(Gui.getMainWindow());viewer.setFocus();Gui.updateGui()
+        focus=QtWidgets.QApplication.focusWidget();report['shortcut_focus']=focus.metaObject().className() if focus else None
+        report['viewers']=[{'class':w.metaObject().className(),'name':w.objectName(),'focus_policy':int(w.focusPolicy())} for w in viewers]
+        QtTest.QTest.keyClick(focus or viewer,QtCore.Qt.Key_V,QtCore.Qt.ControlModifier)
+        check('viewport Ctrl+V uses modeling Paste',len([o for o in target.Objects if hasattr(o,'OM9WorkingUUID')])==6)
+        file=out/'clipboard.FCStd';target.saveAs(str(file));App.closeDocument(target.Name)
+        QtWidgets.QApplication.clipboard().clear();reopened=App.openDocument(str(file))
+        check('FCStd reopen survives clipboard/staging deletion',len([o for o in reopened.Objects if hasattr(o,'OM9WorkingUUID') and o.Shape.isValid()])==6)
+        check('clipboard unavailable after clear',not clip.has_geometry())
+        report.update(ok=True,module=native.__file__,payload_bytes=len(payload),payload_sha256=hashlib.sha256(payload).hexdigest())
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

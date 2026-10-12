@@ -1,0 +1,63 @@
+"""Live layer panel and CMD consumer test on the shared native host."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtTest,QtGui
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():Gui.updateGui();QtTest.QTest.qWait(350)
+def run():
+    try:
+        import Part,OpenMatrix9Gui as native
+        check('panel native API registered',hasattr(native,'layerDocumentPanel'))
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('LayerPanelFresh');doc.UndoMode=1;settle()
+        sidebar=Gui.getMainWindow().findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar')
+        def widget(kind,name):
+            value=sidebar.findChild(kind,name);check('control exists '+name,value is not None);return value
+        lock=widget(QtWidgets.QToolButton,'OM9LayerLock0');current=widget(QtWidgets.QLabel,'OM9LayerName4')
+        check('fresh palette preview has32 and does not mutate document',len(json.loads(native.layerDocumentPanel(doc.Name))['layers'])==32 and not doc.Objects)
+        check('fresh layer controls enabled',lock.isEnabled() and current.isEnabled())
+        before=doc.UndoCount;lock.click();settle()
+        state=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']
+        check('first panel click is one Undo including lazy state',doc.UndoCount==before+1 and len(doc.Objects)==1 and state['layers'][0]['locked'])
+        check('locking default current chooses eligible fallback',state['active_layer']=='om9-preset-16')
+        doc.undo();settle();check('Undo lazy state removes metadata and restores default',not doc.Objects and not json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['layers'][0]['locked'])
+        doc.redo();settle();check('Redo lazy state restores layer lock',json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['layers'][0]['locked'])
+        baseline=doc.Name
+        doc=App.newDocument('LayerPanelCustom');doc.UndoMode=1
+        envelope=json.loads(native.layerDocumentSnapshot(doc.Name));state=envelope['snapshot'];state['layers'][0]['rgb']=[201,202,203]
+        def layer(id,parent,path,color):return dict(source_id=id,parent_id=parent,name=path[-1],path_components=path,rgb=color,locked=False,visible=True,persistent_locked=None,persistent_visible=None)
+        state['layers'] += [layer('custom',None,['Custom'],[123,45,67]),layer('detail','custom',['Custom','Detail'],[11,22,33]),layer('other',None,['Other'],[123,45,67]),layer('other-detail','other',['Other','Detail'],[11,22,33])]
+        state['objects']=[]
+        for name,color in [('Alpha','ByLayer'),('Beta','ByObject')]:
+            obj=doc.addObject('Part::Feature',name);obj.Shape=Part.makeBox(1,2,3)
+            state['objects'].append(dict(id=name,layer_id='om9-preset-1',locked=False,visible=True,color_source=color,rgb=[71,72,73]))
+        doc.recompute();native.initializeLayerDocument(doc.Name,json.dumps(envelope));settle()
+        swatch=widget(QtWidgets.QLabel,'OM9LayerSwatch0')
+        check('source palette color replaces default swatch',swatch.property('om9LayerRGB')=='#c9cacb')
+        combo=widget(QtWidgets.QComboBox,'OM9LayerAll')
+        check('custom nested duplicate leaves and equalRGB remain accessible',combo.count()==36 and combo.findData('Custom::Detail')>=0 and combo.findData('Other::Detail')>=0)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(doc.getObject('Alpha'));Gui.Selection.addSelection(doc.getObject('Beta'));settle()
+        arrow=widget(QtWidgets.QToolButton,'OM9LayerArrow4');check('selected assignment enabled',arrow.isEnabled());arrow.click();settle()
+        check('panel assigns selected set and preserves ByObject RGB',doc.Alpha.OM9LayerId=='om9-preset-5' and doc.Beta.OM9LayerId=='om9-preset-5' and all(abs(a-b/255.)<1e-6 for a,b in zip(doc.Beta.ViewObject.ShapeColor,[71,72,73])))
+        combo.setCurrentIndex(combo.findData('Custom::Detail'));widget(QtWidgets.QToolButton,'OM9LayerAllCurrent').click();settle()
+        check('extra nested current uses exact fullpath',json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['active_layer']=='detail')
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');check('actual CMD control exists',console is not None);console.setFocus();console.moveCursor(QtGui.QTextCursor.End)
+        QtTest.QTest.keyClicks(console,'Layer Lock "Custom" Toggle');QtTest.QTest.keyClick(console,QtCore.Qt.Key_Return);settle()
+        state=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot'];byid={r['source_id']:r for r in state['layers']}
+        check('actual CMD reaches same guarded layer controller',byid['custom']['locked'] and not byid['detail']['locked'] and not byid['other']['locked'])
+        panel=json.loads(native.layerDocumentPanel(doc.Name));flags={r['id']:r for r in panel['layers']}
+        check('Rust panel retains local/effective distinction',not flags['detail']['locked'] and flags['detail']['effective_locked'] and not flags['detail']['can_current'])
+        App.setActiveDocument(baseline);settle();check('switch document restores that palette lock',widget(QtWidgets.QToolButton,'OM9LayerLock0').isChecked() and widget(QtWidgets.QLabel,'OM9LayerSwatch0').property('om9LayerRGB')=='#229987')
+        App.setActiveDocument(doc.Name);doc.openTransaction('User pending');doc.Alpha.Label='Keep user work';settle()
+        check('foreign transaction disables mutation controls',not widget(QtWidgets.QToolButton,'OM9LayerLock0').isEnabled())
+        check('panel refresh leaves unrelated transaction intact',doc.HasPendingTransaction and doc.Alpha.Label=='Keep user work');doc.commitTransaction()
+        report.update(ok=True,module=native.__file__,scope='live32/custom panel and CMD; legacy/new geometry/receive/guards/Matrix acceptance pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

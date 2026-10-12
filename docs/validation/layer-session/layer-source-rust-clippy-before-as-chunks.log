@@ -1,0 +1,14 @@
+    Checking openmatrix9_rust v0.1.0 (C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\Mod\OpenMatrix9\rust)
+error: using `chunks_exact` with a constant chunk size
+   --> src\layer_source_payload.rs:113:37
+    |
+113 |         for (index, group) in bytes.chunks_exact(4).enumerate() {
+    |                                     ^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<4>().0.iter()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#chunks_exact_to_as_chunks
+    = note: `-D clippy::chunks-exact-to-as-chunks` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::chunks_exact_to_as_chunks)]`
+
+error: could not compile `openmatrix9_rust` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `openmatrix9_rust` (lib test) due to 1 previous error

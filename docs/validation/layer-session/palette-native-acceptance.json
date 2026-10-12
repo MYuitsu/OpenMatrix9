@@ -1,0 +1,267 @@
+{
+  "version": 1,
+  "application_accepted": true,
+  "native_transfer_scope_accepted": true,
+  "undo_scope": "om9_only",
+  "scope": "Two-app candidate API gate: selected Matrix point/curve + three OM9 session objects; full palettes, empty/nested layers, colors, locks/visibility/current, OM9 receiving Undo/Redo, injected rollback and cleanup. This does not close full layer-session Tasks1-5 or deploy primary OM9 UI.",
+  "original_report": "H:\\FreeCAD-src\\build\\matrix-om9-handoff\\7c9f839b33e348cba0aca6235b387f42\\handoff-results.json",
+  "original_report_sha256": "efe6f1cbf39287abfdf0226128853af39754ec983acababed8662cf484fbb3b1",
+  "original_report_preserved": true,
+  "original_terminal_summary": false,
+  "checks": [
+    {
+      "name": "actual Rhino5 Matrix version",
+      "passed": true
+    },
+    {
+      "name": "current Matrix component already loaded DotMatrix",
+      "passed": true
+    },
+    {
+      "name": "current Matrix component already loaded gvMatrixCore",
+      "passed": true
+    },
+    {
+      "name": "two actual applications ready",
+      "passed": true
+    },
+    {
+      "name": "Matrix native Copy publishes clipboard",
+      "passed": true
+    },
+    {
+      "name": "OM9 Paste adds the two Matrix objects",
+      "passed": true
+    },
+    {
+      "details": [],
+      "name": "Matrix -> OM9 geometry/full palette/locks/active match",
+      "passed": true
+    },
+    {
+      "name": "one OM9 Undo restores destination state and removes paste",
+      "passed": true
+    },
+    {
+      "name": "one OM9 Redo restores geometry and layer state",
+      "passed": true
+    },
+    {
+      "name": "OM9 public Copy Session publishes current models/full palette",
+      "passed": true
+    },
+    {
+      "details": "Traceback (most recent call last):\n  File \"C:\\Users\\nguye\\.codex\\worktrees\\layer-session-handoff\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino5_matrix_layer_receive.py\", line 14, in <module>\n    bridge.receive(Rhino.RhinoDoc.ActiveDoc,os.environ.get('OM9_MATRIX_LAYER_RECEIVE_FAULT',''))\n  File \"C:\\Users\\nguye\\.codex\\worktrees\\layer-session-handoff\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino5_matrix_layer_bridge.py\", line 31, in receive\n    pair=call('NativeClipboard','Capture')\n  File \"C:\\Users\\nguye\\.codex\\worktrees\\layer-session-handoff\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino5_matrix_layer_bridge.py\", line 24, in call\n    if assembly is None:load()\nRuntimeError: System.InvalidOperationException: Injected layer failure\r\n   at OM9LayerTransfer.RhinoLayerAdapter.Receive(RhinoDoc doc, Byte[] geometry, Byte[] metadata, String fault)\n",
+      "name": "Matrix injected after-layer restores exact before state",
+      "passed": true
+    },
+    {
+      "details": "Traceback (most recent call last):\n  File \"C:\\Users\\nguye\\.codex\\worktrees\\layer-session-handoff\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino5_matrix_layer_receive.py\", line 14, in <module>\n    bridge.receive(Rhino.RhinoDoc.ActiveDoc,os.environ.get('OM9_MATRIX_LAYER_RECEIVE_FAULT',''))\n  File \"C:\\Users\\nguye\\.codex\\worktrees\\layer-session-handoff\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino5_matrix_layer_bridge.py\", line 31, in receive\n    pair=call('NativeClipboard','Capture')\n  File \"C:\\Users\\nguye\\.codex\\worktrees\\layer-session-handoff\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino5_matrix_layer_bridge.py\", line 24, in call\n    if assembly is None:load()\nRuntimeError: System.InvalidOperationException: Injected geometry failure\r\n   at OM9LayerTransfer.RhinoLayerAdapter.Receive(RhinoDoc doc, Byte[] geometry, Byte[] metadata, String fault)\n",
+      "name": "Matrix injected after-geometry restores exact before state",
+      "passed": true
+    },
+    {
+      "details": {
+        "added": [
+          {
+            "bounds": [
+              40.0,
+              0.0,
+              0.0,
+              44.0,
+              0.9999999999999998,
+              0.0
+            ],
+            "color_source": "ByObject",
+            "id": "14538829-4661-465d-ac26-47b3e257bebf",
+            "layer": [
+              "Metal 01",
+              "Handoff Detail"
+            ],
+            "locked": false,
+            "name": "OM9 Curve",
+            "rgb": [
+              221,
+              31,
+              51
+            ],
+            "visible": true
+          },
+          {
+            "bounds": [
+              20.0,
+              0.0,
+              0.0,
+              22.0,
+              3.0,
+              4.0
+            ],
+            "color_source": "ByLayer",
+            "id": "466ce884-e7a6-41bd-ab64-95db9ae82896",
+            "layer": [
+              "Metal 01"
+            ],
+            "locked": false,
+            "name": "OM9 Ring",
+            "rgb": [
+              1,
+              2,
+              3
+            ],
+            "visible": true
+          },
+          {
+            "bounds": [
+              60.0,
+              0.0,
+              0.0,
+              61.0,
+              2.0,
+              3.0
+            ],
+            "color_source": "ByLayer",
+            "id": "b7d79772-280a-45a3-aae2-5a5265b33efa",
+            "layer": [
+              "Metal 01"
+            ],
+            "locked": true,
+            "name": "OM9 Locked Hidden",
+            "rgb": [
+              1,
+              2,
+              3
+            ],
+            "visible": false
+          }
+        ],
+        "after_count": 5,
+        "before_count": 2,
+        "returned": true
+      },
+      "name": "Matrix native Paste adds the three OM9 objects",
+      "passed": true
+    },
+    {
+      "details": [],
+      "name": "OM9 -> Matrix geometry/full palette/locks/active match",
+      "passed": true
+    },
+    {
+      "name": "original blank Matrix document restored",
+      "passed": true
+    },
+    {
+      "name": "owned OM9 companion finished",
+      "passed": true
+    }
+  ],
+  "directions": {
+    "matrix_to_om9": {
+      "copy": true,
+      "paste": true,
+      "redo": true,
+      "transfer": true,
+      "undo": true
+    },
+    "om9_to_matrix": {
+      "copy": true,
+      "paste": true,
+      "paste_observation": {
+        "added": [
+          {
+            "bounds": [
+              40.0,
+              0.0,
+              0.0,
+              44.0,
+              0.9999999999999998,
+              0.0
+            ],
+            "color_source": "ByObject",
+            "id": "14538829-4661-465d-ac26-47b3e257bebf",
+            "layer": [
+              "Metal 01",
+              "Handoff Detail"
+            ],
+            "locked": false,
+            "name": "OM9 Curve",
+            "rgb": [
+              221,
+              31,
+              51
+            ],
+            "visible": true
+          },
+          {
+            "bounds": [
+              20.0,
+              0.0,
+              0.0,
+              22.0,
+              3.0,
+              4.0
+            ],
+            "color_source": "ByLayer",
+            "id": "466ce884-e7a6-41bd-ab64-95db9ae82896",
+            "layer": [
+              "Metal 01"
+            ],
+            "locked": false,
+            "name": "OM9 Ring",
+            "rgb": [
+              1,
+              2,
+              3
+            ],
+            "visible": true
+          },
+          {
+            "bounds": [
+              60.0,
+              0.0,
+              0.0,
+              61.0,
+              2.0,
+              3.0
+            ],
+            "color_source": "ByLayer",
+            "id": "b7d79772-280a-45a3-aae2-5a5265b33efa",
+            "layer": [
+              "Metal 01"
+            ],
+            "locked": true,
+            "name": "OM9 Locked Hidden",
+            "rgb": [
+              1,
+              2,
+              3
+            ],
+            "visible": false
+          }
+        ],
+        "after_count": 5,
+        "before_count": 2,
+        "returned": true
+      },
+      "transfer": true
+    }
+  },
+  "runtime": {
+    "runtime": "H:\\FreeCAD-src\\build\\om9-layer-edits\\bridge\\rhino5\\runtime",
+    "workers": 14,
+    "source_sha256": "65c89d77627d6001377ab25718e9a6391cc294e58a169bb2a34c9232700406fa",
+    "adapter": "OM9LayerTransfer_65c89d77627d.dll",
+    "version": 1,
+    "rust_sha256": "ac54f27f946507c26b88681f556193bd7556a8da4251b3c3fcc951580d94086b",
+    "adapter_sha256": "7f0fa83268e259b3d7a5bd00d533e98921c231c3b78ffd03dd0597d0e7797080",
+    "application_accepted": false,
+    "rust": "om9_rhino_layer_ac54f27f9465.dll"
+  },
+  "evaluator_sha256": "81bfc5ab82fb91899eb405a763f552843483515e87d820b5b7ea0143d6074e8a",
+  "verified_checks": 16,
+  "matrix_undo_tested": false,
+  "new_native_run": false,
+  "summary_fix": "Fresh source-based test module per run instead of cached imports. Installed Rhino5 IronPython reproduced false FAIL with old cached criteria, current acceptance PASS and rejection of a real OM9 Undo failure.",
+  "ironpython_proof": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-ironpython-cache.log",
+  "next_action": "Continue OM9 product UI deployment and remaining original transfer/lifecycle/retained/performance tasks. No repeat of this five-fixture native gate required for the summary-only fix."
+}

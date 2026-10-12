@@ -1,0 +1,33 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os, json, tempfile, traceback
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+def bounds(shape, optimal=False):
+    b = shape.optimalBoundingBox(False, False) if optimal else shape.BoundBox
+    return [b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax]
+def run():
+    report = {'pairs': []}
+    try:
+        import Part, OpenMatrix9Gui as native
+        folder = Path('H:/FreeCAD-src/build/om9-dev/build/modeling_ring_roundtrip_smoke-1/62f80cd183e0423baa140cf29969c675')
+        old = json.loads((folder/'results.json').read_text())
+        doc = App.openDocument(str(folder/'ring-working.FCStd'))
+        objects = [o for o in doc.Objects if hasattr(o,'OM9WorkingUUID') or o.Name == 'NewRingCircle']
+        with tempfile.TemporaryDirectory() as staging:
+            rows = json.loads(native.read3dm(str(folder/'ring-current-and-new-v5.3dm'), staging))['items']
+            for i,(obj,row) in enumerate(zip(objects[:1],rows[:1])):
+                shape = Part.Shape();shape.read(row['brep'])
+                a = bounds(obj.Shape,True);b = bounds(shape,True)
+                plain = bounds(shape)
+                shape.tessellate(0.1)
+                report['pairs'].append({'index': i, 'name':obj.Name, 'host_bounds':bounds(obj.Shape),
+                    'unmeshed_bounds':plain,'tessellated_bounds':bounds(shape),
+                    'optimal_host':a,'optimal_output':b,'optimal_error':max(abs(x-y) for x,y in zip(a,b))})
+        report.update(ok=True)
+    except Exception:
+        report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

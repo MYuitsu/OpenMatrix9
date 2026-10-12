@@ -1,0 +1,121 @@
+"""Canonical controller foundation: actual shared-host properties, Undo and FCStd."""
+import json, math, os, traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value: raise AssertionError(name)
+def reject(work):
+    try:work()
+    except RuntimeError:return True
+    return False
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        check('native document controller registered',all(hasattr(native,n) for n in ['initializeLayerDocument','layerDocumentSnapshot','layerDocumentCommand']))
+        doc=App.newDocument('LayerDocument');doc.UndoMode=1
+        objects=[]
+        for name,shape in [('Ring',Part.makeBox(2,3,4)),('Stone',Part.makeSphere(1)),('DetailCurve',Part.makeLine(App.Vector(20,0,0),App.Vector(21,2,3)))]:
+            obj=doc.addObject('Part::Feature',name);obj.Shape=shape;objects.append(obj)
+        doc.recompute()
+        geometry={o.Name:o.Shape.hashCode() for o in objects}
+        def facts(shape):
+            b=shape.BoundBox;c=shape.CenterOfMass
+            return {'volume':shape.Volume,'area':shape.Area,'length':shape.Length,'bounds':[b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax],'center':[c.x,c.y,c.z]}
+        report['fixture_geometry']={o.Name:facts(o.Shape) for o in objects}
+        def layer(id,parent,path,rgb,locked=False,visible=True):
+            return dict(source_id=id,parent_id=parent,name=path[-1],path_components=path,rgb=rgb,locked=locked,visible=visible,persistent_locked=None,persistent_visible=None)
+        state=dict(document_id=str(doc.Uid),generation='7',active_layer='metal',layers=[
+            layer('metal',None,['Metal 01'],[34,153,135]),layer('gem',None,['Gem 01'],[89,139,194]),
+            layer('detail','metal',['Metal 01','Detail'],[7,89,143]),layer('empty',None,['Empty purple'],[180,25,211])],objects=[
+                dict(id=o.Name,layer_id=l,locked=locked,visible=True,color_source=color,rgb=rgb)
+                for o,l,locked,color,rgb in [(objects[0],'metal',False,'ByLayer',[9,8,7]),(objects[1],'gem',True,'ByObject',[111,112,113]),(objects[2],'detail',False,'ByObject',[21,22,23])]])
+        envelope=dict(version=1,snapshot=state)
+        native.initializeLayerDocument(doc.Name,json.dumps(envelope))
+        snapshot=lambda:json.loads(native.layerDocumentSnapshot(doc.Name))
+        command=lambda **kw:json.loads(native.layerDocumentCommand(doc.Name,json.dumps(kw)))
+        initial=snapshot()
+        check('seed full palette and own flags',initial==envelope)
+        doc.undo()
+        check('initialization Undo removes metadata and retains nonmutating legacy preview',len(doc.Objects)==3 and 'OM9LayerObjectId' not in objects[0].PropertiesList and len(snapshot()['snapshot']['objects'])==3)
+        doc.redo()
+        check('initialization Redo restores canonical metadata and binding',snapshot()==initial and objects[0].OM9LayerObjectId=='Ring')
+        storage=[o for o in doc.Objects if 'OM9LayerSnapshot' in o.PropertiesList]
+        check('one hidden persisted metadata object',len(storage)==1 and not storage[0].ViewObject.ShowInTree)
+        report['metadata_property_type']=storage[0].getTypeOfProperty('OM9LayerSnapshot')
+        check('metadata is read-only and avoids recompute',all(s in report['metadata_property_type'] for s in ['ReadOnly','NoRecompute']))
+        check('ByObject color projected',all(abs(a-b/255.0)<1e-6 for a,b in zip(objects[1].ViewObject.ShapeColor,[111,112,113])))
+        check('initial own lock prevents selection',not objects[1].ViewObject.Selectable and objects[0].ViewObject.Selectable)
+        beforeUndo=doc.UndoCount
+        locked=command(operation='set_locked',layer_id='metal',locked=True)
+        report['lock_transaction']={'before_undo':beforeUndo,'after_undo':doc.UndoCount,'active_layer':locked['snapshot']['active_layer']}
+        check('one lock transaction',doc.UndoCount==beforeUndo+1)
+        check('fallback is first usable full path',locked['snapshot']['active_layer']=='empty')
+        check('inherited lock projected without own-lock flattening',not objects[0].ViewObject.Selectable and not objects[2].ViewObject.Selectable and not locked['snapshot']['objects'][0]['locked'])
+        check('lock leaves all geometry unchanged',all(o.Shape.hashCode()==geometry[o.Name] for o in objects))
+        doc.undo()
+        check('Undo restores snapshot and native projections together',snapshot()==initial and objects[0].ViewObject.Selectable and objects[2].ViewObject.Selectable)
+        doc.redo()
+        check('Redo restores lock and active fallback',snapshot()==locked and not objects[0].ViewObject.Selectable)
+        command(operation='set_locked',layer_id='metal',locked=False)
+        check('parent unlock preserves object own lock',objects[0].ViewObject.Selectable and not objects[1].ViewObject.Selectable)
+        command(operation='set_locked',layer_id='detail',locked=True)
+        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui()
+        height=json.loads(native.querySnap3dm(0,0,2))['viewport_height']
+        def query_line():
+            pixel=view.getPointOnScreen(App.Vector(20,0,0))
+            return json.loads(native.querySnap3dm(pixel[0],height-pixel[1],2))
+        lockedSnap=query_line()
+        check('locked visible native CAD still snaps',not objects[2].ViewObject.Selectable and lockedSnap['picked'] and lockedSnap['point']==[20,0,0])
+        command(operation='set_visible',layer_id='metal',visible=False)
+        check('parent hide projects descendants',not objects[0].ViewObject.Visibility and not objects[2].ViewObject.Visibility)
+        hiddenSnap=query_line()
+        check('hidden native CAD does not snap',not hiddenSnap['picked'])
+        command(operation='set_visible',layer_id='metal',visible=True)
+        check('restoring visibility restores locked snap eligibility',query_line()['picked'] and not objects[2].ViewObject.Selectable)
+        command(operation='set_locked',layer_id='detail',locked=True)
+        check('explicit child lock is persistent local state',snapshot()['snapshot']['layers'][2]['persistent_locked'] is True)
+        command(operation='set_locked',layer_id='detail',locked=False)
+        before=snapshot();undo=doc.UndoCount
+        check('mixed assignment refuses atomically',reject(lambda:command(operation='assign',layer_id='gem',object_ids=['Ring','Stone'])))
+        check('rejected selection adds no Undo and changes no state',snapshot()==before and doc.UndoCount==undo and objects[0].OM9LayerId=='metal')
+        command(operation='assign',layer_id='gem',object_ids=['Ring'])
+        check('assignment stores layer and updates ByLayer color',objects[0].OM9LayerId=='gem' and all(abs(a-b/255.0)<1e-6 for a,b in zip(objects[0].ViewObject.ShapeColor,[89,139,194])))
+        command(operation='set_color',layer_id='gem',rgb=[201,202,203])
+        check('color changes ByLayer while preserving ByObject',all(abs(a-b/255.0)<1e-6 for a,b in zip(objects[0].ViewObject.ShapeColor,[201,202,203])) and all(abs(a-b/255.0)<1e-6 for a,b in zip(objects[1].ViewObject.ShapeColor,[111,112,113])))
+        before=snapshot();undo=doc.UndoCount
+        command(operation='set_current',layer_id=before['snapshot']['active_layer'])
+        check('no-op is generation and Undo stable',snapshot()==before and doc.UndoCount==undo)
+        doc.openTransaction('User unrelated');objects[0].Label='Keep user label'
+        check('foreign transaction refuses controller',reject(lambda:command(operation='set_color',layer_id='gem',rgb=[1,2,3])))
+        check('foreign transaction and user work preserved',doc.HasPendingTransaction and objects[0].Label=='Keep user label' and snapshot()==before)
+        doc.commitTransaction()
+        saved=snapshot();path=output/'layer-session.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name)
+        doc=App.openDocument(str(path));App.setActiveDocument(doc.Name)
+        check('FCStd reopen keeps exact canonical state',snapshot()==saved)
+        restored=[doc.getObject(name) for name in ['Ring','Stone','DetailCurve']]
+        check('FCStd keeps binding and own-lock projections',restored[0].OM9LayerId=='gem' and restored[0].ViewObject.Selectable and not restored[1].ViewObject.Selectable)
+        box,sphere,line=[o.Shape for o in restored]
+        report['reopened_geometry']={o.Name:facts(o.Shape) for o in restored}
+        def near(a,b):return abs(a-b)<1e-8
+        def bounds(shape):
+            b=shape.BoundBox;return (b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax)
+        check('FCStd box geometric oracle',len(box.Faces)==6 and len(box.Edges)==12 and len(box.Vertexes)==8 and near(box.Volume,24) and near(box.Area,52) and all(near(a,b) for a,b in zip(bounds(box),(0,0,0,2,3,4))))
+        # FreeCAD BoundBox here uses triangulation (diagnostic records show
+        # xMax=.9981033287370441 before AND after). Use the analytic CAD surface.
+        surface=sphere.Faces[0].Surface
+        check('FCStd sphere geometric oracle',len(sphere.Faces)==1 and isinstance(surface,Part.Sphere) and near(surface.Radius,1) and surface.Center.Length<1e-8 and near(sphere.Volume,4*math.pi/3) and near(sphere.Area,4*math.pi) and sphere.CenterOfMass.Length<1e-8)
+        check('FCStd line geometric oracle',len(line.Edges)==1 and len(line.Vertexes)==2 and not line.Faces and near(line.Length,math.sqrt(14)) and all(near(a,b) for a,b in zip(bounds(line),(20,0,0,21,2,3))))
+        command(operation='set_color',layer_id='gem',rgb=[1,2,3]);doc.undo()
+        check('reopened controller Undo restores canonical palette',snapshot()==saved)
+        report.update(ok=True,module=native.__file__,scope='document controller foundation; default32/sidebar/receive/guards/Matrix acceptance pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

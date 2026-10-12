@@ -1,12 +1,16 @@
 """Qt events for native Gumball fixtures; never writes transform output."""
 import FreeCADGui as Gui
-from PySide6 import QtCore, QtWidgets, QtTest
+from PySide6 import QtCore, QtWidgets, QtTest, QtOpenGLWidgets
 
 
 class GumballUI:
     def __init__(self, native):
         self.native = native
         self.gesture_viewport = None
+        self.main_window = Gui.getMainWindow()
+        # Native Qt widgets can outlive transient PySide ancestor wrappers.
+        # Keep the complete lookup chain alive without caching a view lookup.
+        self._viewport_refs = ()
 
     def settle(self):
         QtWidgets.QApplication.processEvents()
@@ -14,17 +18,20 @@ class GumballUI:
 
     @property
     def viewport(self):
-        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        area=self.main_window.findChild(QtWidgets.QMdiArea)
         sub=area.activeSubWindow()
         if sub is None:
             import FreeCAD as App
             state=self.native.gumballState()
             sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==state['source_slot'] and s.widget().property('om9DocumentName')==App.ActiveDocument.Name)
-        return next(w for w in sub.widget().findChildren(QtWidgets.QWidget)
-                    if w.property('om9GumballViewport'))
+        container=sub.widget()
+        viewport=next(w for w in container.findChildren(QtOpenGLWidgets.QOpenGLWidget)
+                      if w.property('om9GumballViewport'))
+        self._viewport_refs=(area,sub,container,viewport)
+        return viewport
 
     def command(self, text):
-        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        console = self.main_window.findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
         console.setFocus()
         QtTest.QTest.keyClicks(console, text)
         QtTest.QTest.keyClick(console, QtCore.Qt.Key_Return)
@@ -55,10 +62,11 @@ class GumballUI:
 
     def numeric(self, name, value, modifiers=QtCore.Qt.NoModifier):
         pos = self.target(name)
-        self.viewport.setFocus()
-        QtTest.QTest.mouseClick(self.viewport, QtCore.Qt.LeftButton, modifiers, pos)
+        viewport=self.viewport
+        viewport.setFocus()
+        QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, modifiers, pos)
         self.settle()
-        field = next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QLineEdit, 'OM9GumballNumeric')
+        field = next(w for w in self.main_window.findChildren(QtWidgets.QLineEdit, 'OM9GumballNumeric')
                      if w.isVisible())
         QtTest.QTest.keyClicks(field, value)
         QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
@@ -86,7 +94,7 @@ class GumballUI:
         self.settle()
 
     def transcript(self):
-        return Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript').toPlainText()
+        return self.main_window.findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript').toPlainText()
 
 
 def durable_facts(obj):

@@ -21,18 +21,18 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1919203,
-    "sha256": "b0acce7a42dfd2b80ab450c8e8108701b2a64cbc9e6d71bf2c62a5e1b854eab4"
+    "bytes": 1874561,
+    "sha256": "5fc60be7e3c32a59cbf86fb5ce3b4da461e751a999ab2a19b960af4b03b20e16"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1542120,
-    "sha256": "c9ff5c4497927804bd5586e1d043192a07f9d1c4a4948dee696b017934fb32b1"
+    "bytes": 1508669,
+    "sha256": "55f99d292663dd004cda6d9c306653eb4a1d4ffed75d7bba0c06cae022b0b63f"
   },
   {
     "path": "FEATURE_LOOKUP.json",
-    "bytes": 112192,
-    "sha256": "6413eade05a38593670d735a243d1046a08c9115b42e68382a5a8ab7744e7bcf"
+    "bytes": 112162,
+    "sha256": "5631ad1b5e5b2c24a14193992309ddc35981ebfc926874c3d95037c2801ecdfd"
   },
   {
     "path": "GUIDANCE_VALIDATION.md",
@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 97178,
-    "sha256": "ad5159a39c3e701776b9027012b171d5a052d6e495a32b660ab5df5bb4d6741c"
+    "bytes": 98384,
+    "sha256": "57413d449eda6fa235e7384ca4767be442f3da5b4cff4449fc736aacd7dcd05a"
   },
   {
     "path": "INDEX.md",
@@ -411,18 +411,18 @@
   },
   {
     "path": "specs/01-core/om9-info-020-gumball.md",
-    "bytes": 21466,
-    "sha256": "f4a052c57eceefb629ba5b27880d009035ab811f97b988f3e6c4dfc5b553459b"
+    "bytes": 27069,
+    "sha256": "8cedcc683c81d3659f03956d8c065de56666e939ab389982aba571217b489478"
   },
   {
     "path": "specs/01-core/om9-info-021-gumball-alignment.md",
-    "bytes": 10566,
-    "sha256": "3b82cf592257507ee8f3d20c113f5e641e7ea142a2f6ebae0c747df98e7d1c24"
+    "bytes": 15592,
+    "sha256": "c303e06df47c29857d11fae638a45d05b29adc7b0946bce567787d11447d49b0"
   },
   {
     "path": "specs/01-core/om9-info-022-relocate-gumball.md",
-    "bytes": 11109,
-    "sha256": "6a8a8847d31bcaa20babcf31049df48e349e63eec1ba47ce417a0f878dcacf78"
+    "bytes": 14756,
+    "sha256": "e0d37e46230abca69dd9f232908d8811119a9b97f90572481f197ae0d7e3996a"
   },
   {
     "path": "specs/01-core/om9-layer-001-layer-management.md",

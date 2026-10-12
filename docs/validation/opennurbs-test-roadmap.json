@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-08",
+  "updated_at": "2026-10-10",
   "full_exchange_complete": false,
   "approved_plan": "docs/superpowers/plans/2026-10-07-full-opennurbs-completion.md",
   "counting_rule": "A named fixture matrix is one test batch. Fixtures, assertions, execution attempts and package milestones are separate counts. A retry does not create a new planned batch.",
@@ -250,6 +250,16 @@
       "runtime_reports": 15,
       "runtime_checks": 464,
       "evidence": "docs/validation/2026-10-08-modeling-public-integration.md"
+    },
+    {
+      "id": "stock-freecad-1.1.4-compatibility",
+      "package": 8,
+      "fixtures_brep": 8,
+      "status": "passed_scoped_native_host",
+      "runtime_reports": 10,
+      "runtime_checks": 217.0,
+      "rhino_new_cases": 0,
+      "evidence": "docs/validation/2026-10-10-stock-freecad-1.1.4.md"
     }
   ],
   "current_checkpoint": {

@@ -1,3 +1,4 @@
+#include "Phase3Inputs.h"
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #pragma once
 #include <Python.h>
@@ -14,6 +15,7 @@ struct SurfaceInput {
     // Runtime selection only. Persistent History reconstruction leaves this empty;
     // session stamps are never serialized into History settings.
     std::vector<ObjectSnapshot> guards;
+    std::vector<Phase3Snapshot> phase3Guards;
 };
 struct SurfaceOptions {
     unsigned int kind=0, style=0;

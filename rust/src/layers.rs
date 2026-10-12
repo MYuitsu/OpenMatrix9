@@ -289,6 +289,7 @@ pub extern "C" fn om9_layer_default_color(index: i32, channel: usize) -> f64 {
 pub extern "C" fn om9_layer_root_color(channel: usize) -> f64 {
     ROOT_COLOR.get(channel).copied().unwrap_or(f64::NAN)
 }
+
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_layer_output_status(
     index: i32,

@@ -1,0 +1,116 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json, os, traceback, hashlib
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm, ThreeDmArchiveState as state, OpenMatrix9Gui as native, Part
+        result['host_python_path']=state.__file__
+        source=Path('H:/FreeCAD-src/build/3dm-preserve-native/multishell-evidence/multishell-1-direction--1.3dm')
+        data=source.read_bytes();doc=App.newDocument('NativeOnlySource')
+        obj=ThreeDm.import_file(str(source),doc,mode='preserve')[0]
+        check('valid native-only BRep class applicability differs from host representation',obj.OM9Capability=='retained' and json.loads(obj.OM9SourceRecord)['capability']=='editable' and not hasattr(obj,'Shape'))
+        definition=state.create_definition(doc,[obj],'NativeOnlyFixture')
+        instance=state.create_instance(definition)
+        fixture=out/'native-only-block-sdk80.3dm'
+        native.writeGeometryStaging3dm(json.dumps(state.preservation_request([instance],str(out))),str(fixture))
+        check('independent block fixture stages native member with explicit SDK80 scope',json.loads(native.inspect3dm(str(fixture)))['source_version']==80 and source.read_bytes()==data)
+        protected=out/'v5-source-inward-protected.3dm';protected.write_bytes(b'keep target');error=''
+        try:ThreeDm.export_file(str(protected),[instance])
+        except Exception as exc:error=str(exc)
+        result['original_v5_guard_error']=error
+        check('original V5 source native-only inward block guard remains atomic',('inward' in error or 'solid orientation' in error) and protected.read_bytes()==b'keep target')
+        App.closeDocument(doc.Name);doc=App.newDocument('NativeOnlyMember')
+        fixture=out/'native-only-block-v5.3dm'
+        fixture.write_bytes(Path('H:/FreeCAD-src/build/3dm-preserve-native/multishell-evidence/native-only-block-1-v5.3dm').read_bytes())
+        result['v5_fixture_sha256']=hashlib.sha256(fixture.read_bytes()).hexdigest()
+        (out/'native-only-block-v5-evidence.3dm').write_bytes(fixture.read_bytes())
+        roots=ThreeDm.import_file(str(fixture),doc,mode='preserve')
+        root=roots[0];definition=root.LinkedObject
+        member=definition.Group[0];record=json.loads(member.OM9SourceRecord)
+        check('real imported definition member keeps native-only reason and original class capability',record['role']=='definition-member' and record['class_name']=='ON_Brep' and record['capability']=='editable' and member.OM9Capability=='retained' and not hasattr(member,'Shape'))
+        initial=member.OM9SourceRecord
+        doc.openTransaction('Move native-only member')
+        member.OM9BlockMemberPlacement=App.Placement(App.Vector(5,6,7),App.Rotation())
+        doc.commitTransaction()
+        request=state.preservation_request([root],str(out))
+        overlays=[row for row in request['dependency_overlays'] if row['source_uuid']==member.OM9SourceUUID]
+        check('canonical native-only member placement stages native transform',len(overlays)==1 and overlays[0]['action']=='transform' and overlays[0]['geometry_matrix'][3:12:4]==[5,6,7] and member.OM9SourceRecord==initial)
+        selected=state.preservation_request([member],str(out))
+        check('selected native-only member composes native placement',selected['member_copies'][0]['member_matrix'][3:12:4]==[5,6,7])
+        doc.undo()
+        undone=state.preservation_request([root],str(out))
+        undone_overlays=[row for row in undone['dependency_overlays'] if row['source_uuid']==member.OM9SourceUUID]
+        check('Undo restores native-only member transform to original',len(undone_overlays)==1 and undone_overlays[0]['action']=='unchanged' and 'geometry_matrix' not in undone_overlays[0])
+        doc.redo()
+        redone=state.preservation_request([member],str(out))
+        check('Redo restores physical selected-member native placement',redone['member_copies'][0]['member_matrix'][3:12:4]==[5,6,7])
+        copied=doc.copyObject(member,False);definition.addObject(copied)
+        request=state.preservation_request([root],str(out))
+        copies=[row for row in request['member_copies'] if row['host_id']==copied.Name]
+        check('independent native-only member copy preserves payload and placement',len(copies)==1 and copies[0]['member_matrix'][3:12:4]==[5,6,7] and copies[0]['follow_canonical'] is False and 'independent_overlay' not in copies[0])
+        copied_record=copied.OM9SourceRecord
+        bad=json.loads(copied_record);bad['geometry_crc']=str(int(bad['geometry_crc']) ^ 1);copied.OM9SourceRecord=json.dumps(bad)
+        rejected=False;count=len(doc.Objects)
+        try:state.preservation_request([root],str(out))
+        except Exception:rejected=True
+        check('modified native-only copy payload refuses without changing graph',rejected and len(doc.Objects)==count and member.OM9SourceRecord==initial)
+        copied.OM9SourceRecord=copied_record
+        root.ScaleVector=App.Vector(-1,1,1)
+        staged=out/'reflected-native-members-sdk80.3dm'
+        native.writeGeometryStaging3dm(json.dumps(state.preservation_request([root],str(out))),str(staged))
+        staged_inventory=json.loads(native.inspect3dm(str(staged)))
+        staged_members=[row for row in staged_inventory['records'] if row['class_name']=='ON_Brep']
+        check('decoded staging graph retains exact BRep classes and separate copy UUIDs',staged_inventory['source_version']==80 and len(staged_members)==2 and len({row['source_uuid'] for row in staged_members})==2 and not staged_inventory['issues'])
+        decoded=json.loads(native.read3dm(str(staged),str(out)))['items']
+        shapes=[]
+        for item in decoded:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);shapes.append(shape)
+        check('actual reflected native-only member writer retains two independent valid cavity payloads',len(shapes)==2 and all(shape.isValid() and len(shape.Shells)==2 and abs(shape.Volume-784)<1e-6 for shape in shapes))
+        check('decoded reflected member bounds include original and copied native placement',all(abs(shape.BoundBox.XMin+15)<1e-6 and abs(shape.BoundBox.XMax+5)<1e-6 and abs(shape.BoundBox.YMin-6)<1e-6 and abs(shape.BoundBox.ZMin-7)<1e-6 for shape in shapes) and member.OM9SourceRecord==initial)
+        flattened=out/'explicit-reflected-geometry-only-v5.3dm'
+        ThreeDm.export_file(str(flattened),[root],geometry_only=True)
+        flattened_inventory=json.loads(native.inspect3dm(str(flattened)))
+        flattened_items=json.loads(native.read3dm(str(flattened),str(out)))['items']
+        flat_shapes=[]
+        for item in flattened_items:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);flat_shapes.append(shape)
+        check('public explicit Geometry only export keeps reflected native cavities as CAD in V5',flattened_inventory['source_version']==50 and len(flattened_inventory['records'])==len(flat_shapes)==2 and all(row['class_name']=='ON_Brep' for row in flattened_inventory['records']) and all(shape.isValid() and len(shape.Shells)==2 and abs(shape.Volume-784)<1e-6 for shape in flat_shapes))
+        check('public Geometry only V5 roundtrip preserves both reflected member bounds',all(abs(shape.BoundBox.XMin+15)<1e-6 and abs(shape.BoundBox.XMax+5)<1e-6 and abs(shape.BoundBox.YMin-6)<1e-6 and abs(shape.BoundBox.ZMin-7)<1e-6 for shape in flat_shapes) and member.OM9SourceRecord==initial)
+        root.ScaleVector=App.Vector(1,1,1)
+        target=out/'protected-inward.3dm';target.write_bytes(b'keep target')
+        error=''
+        try:ThreeDm.export_file(str(target),[root])
+        except Exception as exc:error=str(exc)
+        result['v5_guard_error']=error
+        result['v5_guard_target_unchanged']=target.read_bytes()==b'keep target'
+        check('actual V5 native-only block sign compatibility guard remains atomic',('inward' in error or 'solid orientation' in error) and target.read_bytes()==b'keep target')
+        saved=out/'native-only-members.FCStd';name=root.Name;member_name=member.Name
+        fixture_bytes=fixture.read_bytes();doc.saveAs(str(saved));fixture.unlink();App.closeDocument(doc.Name)
+        doc=App.openDocument(str(saved));root=doc.getObject(name);member=doc.getObject(member_name)
+        check('native-only block source bytes survive external deletion and FCStd',Path(member.OM9ArchiveOwner.OM9SourceArchive).read_bytes()==fixture_bytes and member.OM9SourceRecord==initial)
+        request=state.preservation_request([root],str(out))
+        overlays=[row for row in request['dependency_overlays'] if row['source_uuid']==member.OM9SourceUUID]
+        check('reopened canonical native-only placement remains native transform',len(overlays)==1 and overlays[0]['action']=='transform' and overlays[0]['geometry_matrix'][3:12:4]==[5,6,7])
+        proxy=doc.addObject('App::Link','NativeOnlyProxy');proxy.setLink(member);proxy.LinkTransform=False
+        proxy.Placement=App.Placement(App.Vector(2,3,4),App.Rotation())
+        state._property(proxy,'Bool','OM9DefinitionMemberProxy',True)
+        state._property(proxy,'String','OM9ProxyMetadata',json.dumps(state.source_metadata(proxy),sort_keys=True))
+        promoted=state.create_definition(doc,[proxy],'NativeOnlyProxyDefinition')
+        promoted_instance=state.create_instance(promoted)
+        request=state.preservation_request([promoted_instance],str(out))
+        copies=[row for row in request['member_copies'] if row['host_id']=='new-proxy:'+proxy.Name]
+        check('promoted native-only proxy composes proxy and canonical native placement',len(copies)==1 and copies[0]['member_matrix'][3:12:4]==[7,9,11] and member.OM9SourceRecord==initial)
+        result['ok']=True
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

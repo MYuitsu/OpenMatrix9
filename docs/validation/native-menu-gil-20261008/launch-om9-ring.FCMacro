@@ -1,0 +1,37 @@
+"""Open the verified OM9 build for interactive ring testing; keep it open."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,hashlib,traceback,os
+root=Path(os.environ.get('OM9_MANUAL_OUTPUT','H:/FreeCAD-src/build/om9-manual-ring-test'))
+root.mkdir(exist_ok=True)
+def run():
+    report={'ok':False,'documents':[]}
+    try:
+        import ThreeDm,OpenMatrix9Gui
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        report['module']=OpenMatrix9Gui.__file__
+        fixtures=Path('H:/FreeCAD-src/build/om9-dev/tests/fixtures/3dm')
+        selected=os.environ.get('OM9_MANUAL_3DM_FILE')
+        cases=[(Path(selected),'UserRing')] if selected else [(fixtures/'Oval-twist-ring-fixed.3dm','Ring_fixed'),(fixtures/'Oval-twist-ring.3dm','Ring_NURBS')]
+        for source,name in cases:
+            before=hashlib.sha256(source.read_bytes()).hexdigest()
+            doc=App.newDocument(name)
+            objects=ThreeDm.import_file(str(source),doc,mode='preserve')
+            doc.recompute()
+            Gui.activeDocument().activeView().viewAxonometric()
+            Gui.activeDocument().activeView().fitAll()
+            if not objects:raise RuntimeError('No imported ring objects: '+str(source))
+            if hashlib.sha256(source.read_bytes()).hexdigest()!=before:raise RuntimeError('Ring source changed: '+str(source))
+            report['documents'].append(dict(name=doc.Name,source=str(source),objects=len(objects)))
+        App.setActiveDocument(report['documents'][-1]['name'])
+        Gui.getMainWindow().showMaximized()
+        Gui.getMainWindow().raise_()
+        Gui.getMainWindow().activateWindow()
+        report['ok']=True
+        App.Console.PrintMessage('OpenMatrix9 ready; ring sources unchanged.\n')
+    except Exception:
+        report['error']=traceback.format_exc()
+        App.Console.PrintError(report['error'])
+    (root/'startup.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+QtCore.QTimer.singleShot(1200,run)

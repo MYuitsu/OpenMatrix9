@@ -1,0 +1,21 @@
+Test project C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+    Start 1: OM9-LAYER-001.RustAbi
+1/8 Test #1: OM9-LAYER-001.RustAbi .................   Passed    0.03 sec
+    Start 2: OM9-LAYER-001.NativePalette
+2/8 Test #2: OM9-LAYER-001.NativePalette ...........   Passed    0.46 sec
+    Start 3: OM9-LAYER-001.NativeRetainedPalette
+3/8 Test #3: OM9-LAYER-001.NativeRetainedPalette ...   Passed    0.45 sec
+    Start 4: OM9-LAYER-001.NativeArchive
+4/8 Test #4: OM9-LAYER-001.NativeArchive ...........   Passed    0.52 sec
+    Start 5: OM9-LAYER-001.NativeStaging
+5/8 Test #5: OM9-LAYER-001.NativeStaging ...........   Passed    0.53 sec
+    Start 6: OM9-LAYER-001.NativeClipboard
+6/8 Test #6: OM9-LAYER-001.NativeClipboard .........   Passed    0.75 sec
+    Start 7: OM9-FILE-012.LayerLegacyArchive
+7/8 Test #7: OM9-FILE-012.LayerLegacyArchive .......   Passed    0.85 sec
+    Start 8: OM9-FILE-012.LayerLegacyBlocks
+8/8 Test #8: OM9-FILE-012.LayerLegacyBlocks ........   Passed    0.63 sec
+
+100% tests passed out of 8
+
+Total Test time (real) =   4.45 sec

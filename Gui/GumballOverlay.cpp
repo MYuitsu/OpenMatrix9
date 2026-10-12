@@ -18,6 +18,7 @@
 #include <Inventor/nodes/SoFaceSet.h>
 #include <Inventor/nodes/SoBaseColor.h>
 #include <Inventor/nodes/SoCamera.h>
+#include <Inventor/nodes/SoPerspectiveCamera.h>
 #include <Inventor/nodes/SoPickStyle.h>
 #include <Inventor/nodes/SoCoordinate3.h>
 #include <Inventor/nodes/SoLineSet.h>
@@ -176,7 +177,12 @@ QJsonArray GumballOverlay::handlePositions()const{
 QJsonArray GumballOverlay::cameraState()const{
     QJsonArray result;if(!view)return result;auto* camera=view->getViewer()->getSoRenderManager()->getCamera();if(!camera)return result;
     auto p=camera->position.getValue();for(unsigned i=0;i<3;++i)result.append(p[i]);const float* q=camera->orientation.getValue().getValue();for(unsigned i=0;i<4;++i)result.append(q[i]);
-    result.append(camera->getViewVolume().getHeight());result.append(camera->focalDistance.getValue());return result;
+    // Perspective view-volume height is measured at the near clip plane.
+    // Host auto-clipping can change it during a repaint without navigation.
+    result.append(QString::fromLatin1(camera->getTypeId().getName().getString()));
+    if(auto* perspective=dynamic_cast<SoPerspectiveCamera*>(camera))result.append(perspective->heightAngle.getValue());
+    else result.append(camera->getViewVolume().getHeight());
+    result.append(camera->focalDistance.getValue());return result;
 }
 QJsonObject GumballOverlay::diagnostics()const{
     int vertices=0;

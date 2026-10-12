@@ -3,6 +3,13 @@
 Chọn object, gõ **`Gumball On`** ở Command rồi nhấn Enter. Gumball xuất hiện
 đồng thời ở cả bốn ô. Bạn có thể thao tác ngay ở bất kỳ ô nào.
 
+Muốn thao tác cả cụm, giữ **Shift** và click thêm object, hoặc kéo khung chọn
+quanh nhiều object. Cả selection dùng **một Gumball chung**; không cần tạo
+Group. Move dịch cả cụm, Rotate xoay cả cụm quanh tâm chung, Scale đổi cả kích
+thước object và khoảng cách tới tâm chung. Một Ctrl+Z hoàn tác cả thao tác.
+Ở Object Alignment, selection nhiều whole object dùng trục của CPlane active
+và tâm bounds của cả cụm; một object riêng vẫn dùng frame Object của nó.
+
 | Tay nắm | Thao tác |
 |---|---|
 | Mũi tên đỏ / xanh lá / xanh dương | Di chuyển theo X / Y / Z |
@@ -37,3 +44,23 @@ là bình thường,50% dịch bằng nửa khoảng kéo. **Settings** đổi m
 
 Một số owner parametric hoặc kiểu Scale không biểu diễn được sẽ báo lý do
 và giữ model trước thao tác. [Phạm vi đã kiểm chứng](features/OM9-INFO-020.md).
+
+Phạm vi core được duyệt đã qua native cohort cuối ngày 2026-10-12. Scale một
+primitive có thể chỉnh dimensions và giữ expressions. Khi native owner không
+biểu diễn trực tiếp phép co/giãn, kết quả liên kết giữ definition và dependency
+của nguồn thay vì thay nguồn bằng một shape rời; Alt giữ nguyên nguồn. Object
+được ẩn sau khi tạo kết quả vẫn giữ definition để kết quả cập nhật khi nguồn đổi.
+Một graph hoặc frame không hỗ trợ sẽ báo lý do và hủy cả thao tác.
+
+Object alignment trong phạm vi đã kiểm chứng nhận Mesh vertex/edge/facet qua **Ctrl+Shift-click**
+ở ô nhìn; component mơ hồ, suy biến hoặc facet không phẳng sẽ bị từ chối.
+Typed Camera/Light là object trong document với vị trí/hướng và dimensions
+vật lý, có thể chọn như object khác; chúng không chứng nhận renderer hoặc
+widget camera đang điều khiển viewport.
+
+Pivot đã Relocate được nhớ trong phiên cho một owner còn nguyên. Khi đóng
+tiến trình, cache này kết thúc; mở lại FCStd giữ geometry/native object nhưng
+không khôi phục widget pivot. Reset hoặc chọn Alignment rõ sẽ đặt lại frame.
+[Candidate, phạm vi và gates](validation/2026-10-12-gumball-core-release-candidate.md).
+
+[Phạm vi core đã kiểm chứng và giới hạn host](validation/2026-10-12-gumball-core-completion.md). Xem trạng thái build và kiểm thử trên FreeCAD bản cài đặt tại [GitHub Actions](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml) của đúng commit.

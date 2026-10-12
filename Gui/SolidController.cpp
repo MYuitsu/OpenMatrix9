@@ -150,7 +150,7 @@ void SolidController::deactivate(){enabled=false;cancel();}
 bool SolidController::active()const{return document&&om9_solid_phase()!=0;}
 bool SolidController::available(std::size_t i)const{
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&handles(i)&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&activeView()&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&handles(i)&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&activeView()&&om9AlterDocument(doc);
 }
 bool SolidController::valid()const{return document==App::GetApplication().getActiveDocument()&&available(command);}
 void SolidController::frame(Gui::View3DInventor* view){

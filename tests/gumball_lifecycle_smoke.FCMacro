@@ -3,7 +3,7 @@ import json,os,sys,traceback
 from pathlib import Path
 import FreeCAD as App,FreeCADGui as Gui,Part,Mesh
 from PySide6 import QtCore,QtWidgets,QtTest,QtGui
-sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+sys.path.insert(0,str(Path(__file__).parent))
 from gumball_fixture import GumballUI
 out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
 def check(name,value):
@@ -50,6 +50,9 @@ def run():
         check('Alt copy drag shows native copy cursor',ui.viewport.cursor().shape()==QtCore.Qt.DragCopyCursor)
         ui.release(end)
         check('Alt tap and auto-repeat copy exactly once',len(doc.Objects)==before+1 and abs(box.Shape.BoundBox.XMin)<1e-8);doc.undo();ui.settle()
+        # Undo removes the selected Alt copy. The next gesture targets the
+        # original, so explicitly establish that native selection again.
+        ui.select(box)
         end=ui.drag('MoveX');ui.command('2 mm')
         for unused in range(2):QtTest.QTest.keyPress(ui.viewport,QtCore.Qt.Key_Alt);QtTest.QTest.keyRelease(ui.viewport,QtCore.Qt.Key_Alt)
         ui.release(end);check('two Alt taps return to move',len(doc.Objects)==before and abs(box.Shape.BoundBox.XMin-2)<1e-8);doc.undo();ui.settle()

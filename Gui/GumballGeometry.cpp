@@ -30,6 +30,7 @@
 #include <Gui/Document.h>
 #include <Gui/View3DInventor.h>
 #include <Gui/Selection/SelectionObject.h>
+#include <Mod/Part/App/FeatureCompound.h>
 #include <Mod/Part/App/PartFeature.h>
 #include <Mod/Part/App/TopoShape.h>
 #include <Mod/Mesh/App/Mesh.h>
@@ -295,12 +296,12 @@ std::set<App::DocumentObject*> associativeInternals(const App::GroupExtension& g
             internal.insert(definition);auto* scale=child->getLinkedObject(false);
             // Legacy ShapeBinder accepts only Part::Feature references. Its
             // hidden native Compound tail must not become a second selection.
-            for(auto* candidate:group.Group.getValues())if(candidate&&std::string(candidate->getTypeId().getName())=="Part::Compound")
+            for(auto* candidate:group.Group.getValues())if(candidate&&candidate->isDerivedFrom(Part::Compound::getClassTypeId()))
                 if(auto* links=candidate->getPropertyByName<App::PropertyLinkList>("Links"))if(links->getValues()==std::vector<App::DocumentObject*>{child})internal.insert(candidate);
             if(!scale||scale==child)continue;internal.insert(scale);
             if(auto* base=scale->getPropertyByName<App::PropertyLink>("Base"))if(auto* input=base->getValue()){
                 internal.insert(input);auto* normalizer=input->getLinkedObject(false);
-                if(normalizer&&normalizer!=input&&normalizer!=definition&&std::string(normalizer->getTypeId().getName())=="Part::Compound"){
+                if(normalizer&&normalizer!=input&&normalizer!=definition&&normalizer->isDerivedFrom(Part::Compound::getClassTypeId())){
                     if(auto* links=normalizer->getPropertyByName<App::PropertyLinkList>("Links"))if(links->getValues().size()==1){
                         auto* bridge=links->getValues().front();
                         if(bridge==definition)internal.insert(normalizer);
@@ -310,6 +311,52 @@ std::set<App::DocumentObject*> associativeInternals(const App::GroupExtension& g
             }
         }
     return internal;
+}
+std::map<std::uint64_t,std::uint64_t> selectedGroupParents(App::Document& doc,const std::vector<ObjectSnapshot>& selected){
+    // Group ownership is independent of the coordinate ancestors used by the
+    // native geometry snapshots. Observe exact Group membership for Rust's
+    // selected-root policy, without following Link or Body definition graphs.
+    std::set<std::uint64_t> selectedIds;
+    for(const auto& snapshot:selected)selectedIds.insert(snapshot.stamp.object);
+    struct Ancestry {std::set<std::uint64_t> selected;unsigned depth=0;};
+    std::map<App::DocumentObject*,Ancestry> cache;
+    std::set<App::DocumentObject*> active;
+    auto ancestors=[&](auto&& self,App::DocumentObject* object)->const Ancestry& {
+        if(active.contains(object))throw std::runtime_error("UnsupportedOwner: Gumball group ownership is cyclic");
+        if(auto found=cache.find(object);found!=cache.end())return found->second;
+        if(cache.size()>=16384||active.size()>64)throw std::runtime_error("UnsupportedOwner: Gumball group ownership exceeds input budget");
+        auto& observed=cache.emplace(object,Ancestry{}).first->second;active.insert(object);
+        for(auto* parent:object->getInList()){
+            if(!parent||parent->isDerivedFrom(Part::Feature::getClassTypeId())||parent->isDerivedFrom(Base::Type::fromName("App::Link")))continue;
+            auto* group=parent->getExtension<App::GroupExtension>();if(!group)continue;
+            const auto& members=group->Group.getValues();if(std::find(members.begin(),members.end(),object)==members.end())continue;
+            if(parent->getDocument()!=&doc||parent->getID()<=0||doc.getObject(parent->getNameInDocument())!=parent)throw std::runtime_error("UnsupportedOwner: Gumball group ownership leaves the active document");
+            const auto& above=self(self,parent);
+            observed.depth=std::max(observed.depth,above.depth+1);
+            if(observed.depth>64)throw std::runtime_error("UnsupportedOwner: Gumball group ownership exceeds input budget");
+            const auto parentId=std::uint64_t(parent->getID());if(selectedIds.contains(parentId))observed.selected.insert(parentId);
+            observed.selected.insert(above.selected.begin(),above.selected.end());
+        }
+        active.erase(object);return observed;
+    };
+    std::map<std::uint64_t,App::DocumentObject*> owners;
+    for(const auto& snapshot:selected){
+        auto* object=doc.getObject(snapshot.objectName.c_str());
+        if(!object||object->getDocument()!=&doc||std::uint64_t(object->getID())!=snapshot.stamp.object)throw std::runtime_error("Gumball selected owner changed during observation");
+        owners.emplace(snapshot.stamp.object,object);ancestors(ancestors,object);
+    }
+    std::map<std::uint64_t,std::uint64_t> result;
+    for(const auto& [id,object]:owners){
+        const auto& candidates=cache.at(object).selected;std::uint64_t nearest=0;
+        for(const auto candidate:candidates){
+            const bool shadowed=std::any_of(candidates.begin(),candidates.end(),[&](const auto other){return other!=candidate&&cache.at(owners.at(other)).selected.contains(candidate);});
+            if(shadowed)continue;
+            if(nearest)throw std::runtime_error("UnsupportedOwner: Gumball selection has ambiguous group ownership");
+            nearest=candidate;
+        }
+        result.emplace(id,nearest);
+    }
+    return result;
 }
 std::vector<App::Material> effectiveGumballAppearance(App::DocumentObject& source){
     std::set<App::DocumentObject*> visited;auto* owner=&source;
@@ -323,15 +370,26 @@ std::vector<App::Material> effectiveGumballAppearance(App::DocumentObject& sourc
     }
     throw std::runtime_error("Gumball appearance graph is cyclic or exceeds observation budget");
 }
-void collect(App::Document& doc,App::DocumentObject& object,std::uint64_t root,GumballInputs& out,GumballNativeData& data,std::set<std::string>& visited,unsigned depth){
-    if(depth>64||visited.size()>=16384||!visited.insert(object.getNameInDocument()).second)throw std::runtime_error("Gumball ownership tree is cyclic or exceeds input budget");
+void collect(App::Document& doc,App::DocumentObject& object,std::uint64_t root,GumballInputs& out,GumballNativeData& data,std::map<std::string,std::uint64_t>& observedRoots,std::set<std::string>& active,unsigned depth){
+    const std::string name=object.getNameInDocument();
+    if(depth>64||active.contains(name))throw std::runtime_error("Gumball ownership tree is cyclic or exceeds input budget");
+    if(const auto found=observedRoots.find(name);found!=observedRoots.end()){
+        if(found->second!=root)throw std::runtime_error("UnsupportedOwner: Gumball selected roots share native group ownership");
+        return;
+    }
+    if(observedRoots.size()>=16384)throw std::runtime_error("Gumball ownership tree is cyclic or exceeds input budget");
+    // A native coordinate Part and an ordinary folder can share the same
+    // physical member. Observe it once under this root, while retaining an
+    // independent active path for real cycles and cross-root ownership errors.
+    observedRoots.emplace(name,root);active.insert(name);
+    struct ActivePath {std::set<std::string>& active;const std::string& name;~ActivePath(){active.erase(name);}} activePath{active,name};
     if(!CoreLayers::objectEditable(&object))throw std::runtime_error("Gumball source is hidden, locked or not selectable");
     auto guard=captureObject(doc,object.getNameInDocument());out.witnesses.push_back(guard);
     auto* linked=object.getLinkedObject(false);if(linked&&linked!=&object){std::set<std::uint64_t> dependencies;captureDefinition(doc,*linked,out,dependencies,0);}
     if(!object.getExtension<App::GroupExtension>()||dynamic_cast<Part::Feature*>(&object)){std::set<std::uint64_t> dependencies;for(auto* dependency:object.getOutList())if(dependency&&dependency!=&object)captureDefinition(doc,*dependency,out,dependencies,0);}
     if(auto* group=object.getExtension<App::GroupExtension>();group&&!dynamic_cast<Part::Feature*>(&object)&&!object.isDerivedFrom(Base::Type::fromName("App::Link"))){
         const auto internal=associativeInternals(*group);
-        for(auto* child:group->Group.getValues())if(child&&!internal.contains(child))collect(doc,*child,root,out,data,visited,depth+1);return;
+        for(auto* child:group->Group.getValues())if(child&&!internal.contains(child))collect(doc,*child,root,out,data,observedRoots,active,depth+1);return;
     }
     const auto global=App::GeoFeature::getGlobalPlacement(&object);auto* place=object.getPropertyByName<App::PropertyPlacement>("Placement");
     const auto parent=place?global.toMatrix()*place->getValue().inverse().toMatrix():Base::Matrix4D();
@@ -400,13 +458,95 @@ GumballInputs captureGumballInputs(App::Document& doc,const std::vector<Gui::Sel
         };
         if(s.getSubNames().empty())capture({});else for(const auto& subname:s.getSubNames())capture(subname);
     }
-    for(const auto& snap:raw){auto row=source(snap);for(const auto& parent:snap.ancestors)if(ids.contains(parent.object)){row.parent=parent.object;break;}inputs.sources.push_back(row);}
-    const auto roots=selectedRoots(inputs.sources,cp);auto data=std::make_shared<GumballNativeData>();std::set<std::string> visited;
-    for(const auto id:roots){const auto found=std::find_if(raw.begin(),raw.end(),[id](const auto& s){return s.stamp.object==id;});inputs.roots.push_back(*found);collect(doc,*doc.getObject(found->objectName.c_str()),id,inputs,*data,visited,0);}
+    const auto groupParents=selectedGroupParents(doc,raw);
+    for(const auto& snap:raw){auto row=source(snap);row.parent=groupParents.at(snap.stamp.object);inputs.sources.push_back(row);}
+    const auto roots=selectedRoots(inputs.sources,cp);auto data=std::make_shared<GumballNativeData>();std::map<std::string,std::uint64_t> observedRoots;std::set<std::string> active;
+    for(const auto id:roots){const auto found=std::find_if(raw.begin(),raw.end(),[id](const auto& s){return s.stamp.object==id;});inputs.roots.push_back(*found);collect(doc,*doc.getObject(found->objectName.c_str()),id,inputs,*data,observedRoots,active,0);}
     std::erase_if(inputs.definitions,[&](const auto& d){return std::any_of(inputs.witnesses.begin(),inputs.witnesses.end(),[&](const auto& w){return w.stamp.object==d.snapshot.stamp.object;});});
     if(data->items.empty())throw std::runtime_error("Gumball selection has no native geometry");inputs.native=std::move(data);verifyGumballInputs(doc,inputs);return inputs;
 }
 void verifyGumballInputs(App::Document& doc,const GumballInputs& inputs){guiThread();verifyCoordinateContext(doc,inputs.coordinates);for(const auto& root:inputs.roots)verifyObject(doc,root);for(const auto& witness:inputs.witnesses){verifyObject(doc,witness);if(!CoreLayers::objectEditable(doc.getObject(witness.objectName.c_str())))throw std::runtime_error("Gumball source became locked, hidden or unselectable");}for(const auto& d:inputs.definitions){verifyObject(doc,d.snapshot);if(sourceAttributes(*doc.getObject(d.snapshot.objectName.c_str()),d.snapshot)!=d.attributes)throw std::runtime_error("Gumball Link definition attributes changed");}if(inputs.native)for(const auto& item:inputs.native->items){auto* object=doc.getObject(item.snapshot.objectName.c_str());if(sourceAttributes(*object,item.snapshot)!=item.attributes)throw std::runtime_error("Gumball source appearance or attributes changed");}}
+bool settleGumballInputs(App::Document& doc,const GumballInputs& inputs){
+    guiThread();
+    auto allowed=[&]{
+#if defined(OM9_STOCK_FREECAD)
+        const bool transaction=doc.hasPendingTransaction()||om9BookedTransaction(doc)||om9GlobalTransaction();
+        const bool readOnly=om9ReadOnlyFile(doc);
+#else
+        const bool transaction=doc.hasPendingTransaction()||doc.getBookedTransactionID()||App::GetApplication().getGlobalTransaction();
+        const bool readOnly=doc.isReadOnlyFile();
+#endif
+        if(transaction||readOnly||doc.isPerformingTransaction()||
+           doc.testStatus(App::Document::Recomputing)||doc.testStatus(App::Document::Restoring)||
+           doc.testStatus(App::Document::PartialDoc)||doc.testStatus(App::Document::SkipRecompute)||!om9AlterDocument(&doc))
+            throw std::runtime_error("Gumball inputs require a writable, stable document with recompute enabled");
+    };
+    allowed();verifyGumballInputs(doc,inputs);
+    // Include clean captured consumers, too: recomputing only a dirty Sphere
+    // would touch its captured Link without executing that downstream consumer.
+    std::vector<ObjectSnapshot> seeds=inputs.witnesses;
+    for(const auto& root:inputs.roots)seeds.push_back(root);
+    for(const auto& dependency:inputs.definitions)seeds.push_back(dependency.snapshot);
+    struct Observed {ObjectSnapshot snapshot;std::vector<std::uint64_t> dependencies;};
+    auto closure=[&]{
+        std::map<std::uint64_t,Observed> records;
+        std::vector<std::pair<App::DocumentObject*,unsigned>> queue;
+        auto append=[&](App::DocumentObject* object,unsigned depth){
+            if(!object||object->getDocument()!=&doc||!object->isAttachedToDocument()||object->getID()<=0||
+               doc.getObject(object->getNameInDocument())!=object)
+                throw std::runtime_error("Gumball recompute dependencies must remain in the active document");
+            const auto id=std::uint64_t(object->getID());
+            if(records.contains(id))return;
+            if(depth>64||records.size()>=16384)throw std::runtime_error("Gumball recompute dependencies exceed input budget");
+            records.emplace(id,Observed{captureObject(doc,object->getNameInDocument()),{}});queue.emplace_back(object,depth);
+        };
+        for(const auto& seed:seeds){
+            auto* object=doc.getObject(seed.objectName.c_str());append(object,0);
+            const auto& now=records.at(std::uint64_t(object->getID())).snapshot;
+            if(now.stamp.document!=seed.stamp.document||now.stamp.object!=seed.stamp.object||now.stamp.generation!=seed.stamp.generation)
+                throw std::runtime_error("Gumball input identity changed during gesture admission");
+        }
+        for(std::size_t i=0;i<queue.size();++i){
+            const auto [object,depth]=queue[i];auto& edges=records.at(std::uint64_t(object->getID())).dependencies;
+            for(auto* dependency:object->getOutList())if(dependency){append(dependency,depth+1);edges.push_back(std::uint64_t(dependency->getID()));}
+            std::sort(edges.begin(),edges.end());edges.erase(std::unique(edges.begin(),edges.end()),edges.end());
+        }
+        return records;
+    };
+    const auto before=closure();
+    if(before.empty())throw std::runtime_error("Gumball selection has no native inputs to settle");
+    std::vector<App::DocumentObject*> objects;bool pending=false;
+    for(const auto& [id,record]:before){auto* object=doc.getObject(record.snapshot.objectName.c_str());objects.push_back(object);pending|=object->isTouched()||object->mustRecompute();}
+    if(!pending){for(auto* object:objects)if(object->isError())throw std::runtime_error("Gumball native input has a recompute error");return false;}
+    const std::string name=doc.getName(),uid=doc.Uid.getValueStr();
+    const auto undoNames=doc.getAvailableUndoNames(),redoNames=doc.getAvailableRedoNames();
+    const int undoCount=doc.getAvailableUndos(),redoCount=doc.getAvailableRedos();
+    const int undoId=doc.getTransactionID(true),redoId=doc.getTransactionID(false);
+    bool hasError=false;
+    doc.recompute(objects,false,&hasError,App::Document::DepNoXLinked|App::Document::DepNoCycle);
+    // Recompute observers may close, replace or retarget the document. Resolve
+    // its lifetime again before dereferencing any previously observed object.
+    auto* current=App::GetApplication().getDocument(name.c_str());
+    if(current!=&doc||current->Uid.getValueStr()!=uid||App::GetApplication().getActiveDocument()!=current)
+        throw std::runtime_error("Gumball document changed while settling native inputs");
+    allowed();verifyCoordinateContext(doc,inputs.coordinates);
+    if(hasError||doc.getAvailableUndos()!=undoCount||doc.getAvailableRedos()!=redoCount||
+       doc.getTransactionID(true)!=undoId||doc.getTransactionID(false)!=redoId||
+       doc.getAvailableUndoNames()!=undoNames||doc.getAvailableRedoNames()!=redoNames)
+        throw std::runtime_error("Gumball native input recompute failed or changed document history");
+    const auto after=closure();
+    if(after.size()!=before.size())throw std::runtime_error("Gumball dependencies changed during gesture admission");
+    for(const auto& [id,record]:before){
+        const auto found=after.find(id);
+        if(found==after.end()||found->second.snapshot.objectName!=record.snapshot.objectName||
+           found->second.snapshot.stamp.generation!=record.snapshot.stamp.generation||found->second.dependencies!=record.dependencies)
+            throw std::runtime_error("Gumball input identity or dependencies changed during gesture admission");
+        auto* object=doc.getObject(record.snapshot.objectName.c_str());
+        if(object->isError()||object->isTouched()||object->mustRecompute())
+            throw std::runtime_error("Gumball native inputs did not settle before the gesture");
+    }
+    return true;
+}
 GumballStagedBatch stageGumballBatch(const GumballInputs& inputs,const Om9GumballSnapshot& plan){
     guiThread();if(!inputs.native||plan.phase<2||plan.phase>5)throw std::runtime_error("No active gumball geometry plan");auto data=std::make_shared<GumballNativeData>(*inputs.native);const auto affine=matrix(plan.matrix);QJsonArray rows;
     for(auto& item:data->items){
@@ -463,7 +603,7 @@ std::vector<std::vector<Base::Vector3d>> gumballPreviewLines(const GumballStaged
     }return lines;
 }
 std::vector<std::string> publishGumballBatch(App::Document& doc,const GumballInputs& inputs,const Om9GumballSnapshot& plan,GumballStagedBatch&& batch){
-    guiThread();verifyGumballInputs(doc,inputs);if(plan.phase!=5||!batch.native||batch.report.empty()||!Gui::Control().isAllowedAlterDocument(&doc))throw std::runtime_error("Gumball publication is not allowed");
+    guiThread();verifyGumballInputs(doc,inputs);if(plan.phase!=5||!batch.native||batch.report.empty()||!om9AlterDocument(&doc))throw std::runtime_error("Gumball publication is not allowed");
     // Shape assignment is durable only for plain native geometry owners. Rigid
     // Placement edits preserve parametric owners and individual Link occurrences.
     struct PropertyScale {Om9GumballOwnerScale value{};unsigned kind=0;std::optional<GumballParametricScale> parametric;};
@@ -525,7 +665,7 @@ std::vector<std::string> publishGumballBatch(App::Document& doc,const GumballInp
         if(owner!=key.first||!owner||owner->getID()!=identity.second)throw std::runtime_error("Gumball incoming dependency owner was replaced");
         auto* property=owner->getPropertyByName(key.second.c_str());if(!property||!sameGumballIncomingValue(*property,expected))throw std::runtime_error("Gumball incoming dependency changed during publication: "+identity.first+"."+key.second);
     }};
-    doc.openTransaction(plan.operation==3?"Gumball Extrude":plan.copy?"Gumball Copy":"Gumball Transform");
+    om9OpenTransaction(doc,plan.operation==3?"Gumball Extrude":plan.copy?"Gumball Copy":"Gumball Transform");
     try{
         if(plan.copy&&plan.operation!=3){
             std::vector<App::DocumentObject*> originals;for(const auto& witness:inputs.witnesses)originals.push_back(doc.getObject(witness.objectName.c_str()));
@@ -699,9 +839,9 @@ std::vector<std::string> publishGumballBatch(App::Document& doc,const GumballInp
             if(actual!=expected)throw std::runtime_error("Gumball expression bindings changed before commit");
         }
         for(const auto& item:inputs.native->items){auto expected=item.attributes;if(associativePlans.contains(item.snapshot.objectName)&&!plan.copy)expected["visibility"]=false;if(sourceAttributes(*doc.getObject(item.snapshot.objectName.c_str()),item.snapshot)!=expected)throw std::runtime_error("Gumball source attributes changed while presenting result");}
-        doc.commitTransaction();
+        om9CommitTransaction(doc);
         std::vector<std::string> selected;for(const auto& root:inputs.roots)selected.push_back(outputs.contains(root.objectName)?outputs.at(root.objectName)->getNameInDocument():root.objectName);return selected;
-    }catch(...){if(guard.live())doc.abortTransaction();throw;}
+    }catch(...){if(guard.live())om9AbortTransaction(doc);throw;}
 }
 QJsonObject gumballObjectFrameFacts(const GumballInputs& inputs){
     if(inputs.roots.size()!=1||inputs.ambiguousComponents)throw std::runtime_error("UnsupportedFrame: Object alignment requires one unambiguous object or component frame");

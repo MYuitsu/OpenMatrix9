@@ -31,7 +31,7 @@ Then run `route <stage>`:
 
 Read `read_now` in order; read conditional files only for the stated task. Feature lookup: `search "Gem Loader"`, then `feature OM9-GEM-001`. Load one spec, not the complete catalog or Ghidra export.
 
-Reconcile `docs/openmatrix9-progress.json` with code and tests. Record completed evidence, uncertainty, next document and next action using [progress.md](references/progress.md). After implementation and checks, follow its required Spec v1/checklist and README synchronization before reporting completion. Plan checkboxes, source presence and catalog `implementation_status` cannot establish completion.
+Reconcile `docs/openmatrix9-progress.json` with code and tests. Record completed evidence, uncertainty, next document and next action using [progress.md](references/progress.md). Plan checkboxes, source presence and catalog `implementation_status` cannot establish completion.
 
 Source conflicts or missing manuals: consult [source-policy.md](references/source-policy.md). Continue independent authorized work; report only the evidence gap affecting the selected task.
 

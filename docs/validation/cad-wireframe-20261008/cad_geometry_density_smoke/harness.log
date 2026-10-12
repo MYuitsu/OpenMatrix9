@@ -1,0 +1,28 @@
+{
+    "checks":  [
+                   {
+                       "name":  "default geometry import retains density -1",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "default geometry import retains density 0",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "default geometry import retains density 1",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "default geometry import retains density 3",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "default geometry import retains density 33",
+                       "passed":  true
+                   }
+               ],
+    "ok":  true,
+    "module":  "H:\\FreeCAD-src\\build\\om9-cad-wire-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\cad_geometry_density_smoke-1\80b3403130164ba6af7c8e5f2436c90d
+

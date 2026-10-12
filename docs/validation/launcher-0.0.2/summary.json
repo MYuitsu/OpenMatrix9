@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "version": "0.0.2",
+  "host": "Official FreeCAD 1.1.4 Windows x64",
+  "installer_checks": 20,
+  "native_launcher_checks": 11,
+  "desktop_shortcut_verified": true,
+  "desktop_is_onedrive": true,
+  "desktop_startup_verified": true,
+  "physical_plugin_files": 541,
+  "physical_launcher_files": 4,
+  "archive_sha256": "714dbeb66ef621b5a0c57a6e39c6f2db990cbf0989c2ec31d22872f7ba659deb",
+  "native_changed": false
+}

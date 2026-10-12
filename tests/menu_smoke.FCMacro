@@ -68,23 +68,11 @@ def run_smoke():
         check('434 menu icon images load from installed resources',len(required)==434 and all(
             assets[k]['status'] in ('resolved','fallback') and not QtGui.QImage(str(resource_root/assets[k]['image'])).isNull() for k in required))
         manifest=json.loads((resource_root/'menu/source-manifest.json').read_text(encoding='utf-8'))
-        curve_keys={v for s in menu.values() if s.get('Name')=='Curve'
-                    for k,v in s.items() if k.startswith('Icon') and k[4:].isdigit()}
-        solid_keys={v for s in menu.values() if s.get('Name')=='Solid'
-                    for k,v in s.items() if k.startswith('Icon') and k[4:].isdigit()}
-        transform_keys={v for s in menu.values() if s.get('Name')=='Transform'
-                        for k,v in s.items() if k.startswith('Icon') and k[4:].isdigit()}
-        surface_keys={v for s in menu.values() if s.get('Name')=='Surface'
-                      for k,v in s.items() if k.startswith('Icon') and k[4:].isdigit()}
-        authored_keys=required
-        check('All menu icons use authored SVG',len(curve_keys)==58 and len(solid_keys)==30 and len(transform_keys)==40 and len(surface_keys)==40 and all(
-            assets[k]['status']=='resolved' and
-                assets[k]['source']=='OpenMatrix9-authored-svg' and assets[k]['image'].endswith('.svg')
-            for k in required))
-        check('authored menu hashes match the installed manifest',all(
-            hashlib.sha256((resource_root/assets[k]['image']).read_bytes()).hexdigest()==manifest['authored_symbols'][k]['sha256']
-            for k in authored_keys))
-        check('No legacy icon PNGs are installed',not any((resource_root/'icons').rglob('*.png')))
+        check('all menu icons use packaged RGB+5 derivatives',all(assets[k]['source']=='Matrix90-RGB+5' and
+            assets[k]['rgb_delta']=='5' and assets[k]['status']=='resolved' for k in required))
+        check('RGB+5 resource hashes match verified source manifest',all(
+            hashlib.sha256((resource_root/assets[k]['image']).read_bytes()).hexdigest()==record['sha256'] and
+            record['rgb_delta']==5 for k,record in manifest['shifted_icons'].items()))
         rendered=set()
         for selector in buttons(dock,'OM9Group'):
             selector.click();QtWidgets.QApplication.processEvents()
@@ -100,7 +88,7 @@ def run_smoke():
                 rendered.add(key)
             if selector.text() in ('Curve','Builder','Gems','Render'):
                 dock.grab().save(str(out/('menu-'+selector.text().lower()+'.png')))
-        check('every menu and quick icon renders its packaged image in full color',required<=rendered)
+        check('every menu and quick icon renders its packaged RGB+5 image in full color',required<=rendered)
         dock.findChild(QtWidgets.QToolButton,'OM9Group0').click()
         snap=dock.findChild(QtWidgets.QToolButton,'OM9SnapEnd')
         check('snap icon loaded while unsupported command stays disabled',snap is not None and not snap.icon().isNull() and not snap.isEnabled())

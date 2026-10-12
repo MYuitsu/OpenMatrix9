@@ -1,0 +1,96 @@
+"""Actual GUI path and no-mutation lifecycle contract; host glue only."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pathlib import Path
+import os,json,traceback,sys,stat,tempfile
+sys.path.insert(0,'H:/FreeCAD-src/build/om9-phase3-dev/tests')
+from command_console_support import command_input
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+(out/'temp').mkdir(exist_ok=True);tempfile.tempdir=str(out/'temp')
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(250,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def enter(text=''):
+    field=command_input(Gui.getMainWindow());field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def dialog():return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions') if d.isVisible()),None)
+def select(rows):
+    Gui.Selection.clearSelection()
+    for row in rows:Gui.Selection.addSelection(row)
+    settle()
+def snapshot(doc):return ([(o.Name,o.Shape.exportBrepToString(),str(o.Placement)) for o in doc.Objects if o.isDerivedFrom('Part::Feature')],list(doc.UndoNames),list(doc.RedoNames))
+def preview(rows):select(rows);enter('Loft');enter();check('actual Loft preview ready',dialog() is not None)
+def run():
+    readonly=None
+    try:
+        import Part,ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('Lifecycle');doc.UndoMode=1
+        source=[]
+        for y in [0,4]:
+            o=doc.addObject('Part::Feature','Profile');o.Shape=Part.makeLine(App.Vector(0,y,0),App.Vector(10,y,0));source.append(o)
+        doc.recompute();path=out/'profiles.3dm';ThreeDm.export_file(str(path),source,modeling=True)
+        for o in source:doc.removeObject(o.Name)
+        rows=ThreeDm.import_file(str(path),doc,mode='modeling')
+        rows[0].setEditorMode('Shape',1);before=snapshot(doc);select(rows);enter('Loft');enter()
+        check('readonly Shape rejected before preview and mutation',dialog() is None and snapshot(doc)==before)
+        enter('Cancel');rows[0].setEditorMode('Shape',0)
+        preview(rows);before=snapshot(doc);rows[0].setEditorMode('Shape',1);enter('OK')
+        check('readonly Shape change invalidates pending request',snapshot(doc)==before)
+        enter('Cancel');rows[0].setEditorMode('Shape',0)
+        preview(rows);before=snapshot(doc);QtTest.QTest.keyClick(command_input(Gui.getMainWindow()),QtCore.Qt.Key_Escape);settle()
+        check('Esc discards preview without transaction',dialog() is None and snapshot(doc)==before)
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+            def isAllowedAlterView(self):return True
+        preview(rows);before=snapshot(doc);Gui.Control.showDialog(Restricted());settle()
+        check('Task panel cancels pending preview',dialog() is None and snapshot(doc)==before)
+        Gui.Control.closeDialog();settle();enter('OK');check('Task unlock never revives request',snapshot(doc)==before)
+        preview(rows);before=snapshot(doc);other=App.newDocument('Other');settle();App.setActiveDocument(doc.Name);settle();enter('OK')
+        check('document switch cancels exact request',dialog() is None and snapshot(doc)==before);App.closeDocument(other.Name)
+        preview(rows);before=snapshot(doc);Gui.activateWorkbench('NoneWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle();enter('OK')
+        check('workbench switch cancels pending preview',dialog() is None and snapshot(doc)==before)
+        saved=out/'readonly.FCStd';doc.saveAs(str(saved));names=[o.Name for o in rows];App.closeDocument(doc.Name)
+        os.chmod(str(saved),stat.S_IREAD);readonly=saved;doc=App.openDocument(str(saved));rows=[doc.getObject(n) for n in names];before=snapshot(doc)
+        select(rows);enter('Loft');enter()
+        check('readonly document never starts modeling transaction',dialog() is None and snapshot(doc)==before)
+        enter('Cancel');App.closeDocument(doc.Name);os.chmod(str(saved),stat.S_IWRITE);readonly=None
+        doc=App.openDocument(str(saved));doc.UndoMode=1;rows=[doc.getObject(n) for n in names]
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle()
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui();settle()
+        target=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport()
+        Gui.Selection.clearSelection();settle();action=window.findChild(QtGui.QAction,'OM9_SurfaceLoft');report['surface_actions']=[{'name':a.objectName(),'text':a.text(),'enabled':a.isEnabled()} for a in window.findChildren(QtGui.QAction) if 'loft' in (a.objectName()+a.text()).lower()];check('original Loft menu action enabled',action is not None and action.isEnabled());action.trigger();settle()
+        for row in rows:
+            p=view.getPointOnScreen(row.Shape.CenterOfMass);QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=QtCore.QPoint(round(p[0]),target.height()-round(p[1])));settle()
+        enter();d=dialog();check('real viewport picks reach shared Loft options',d is not None)
+        d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        result=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009')
+        check('menu mouse and CMD produce analytic native plane',result.Shape.isValid() and abs(result.Shape.Area-40)<1e-6)
+        for o in doc.Objects:
+            if o.isDerivedFrom('Part::Feature'):o.ViewObject.Visibility=False
+        source=App.newDocument('SolidSource');solids=[]
+        for x in [0,5]:
+            o=source.addObject('Part::Feature','Solid');o.Shape=Part.makeBox(10,10,10,App.Vector(x,0,0));solids.append(o)
+        source.recompute();path=out/'solids.3dm';ThreeDm.export_file(str(path),solids,modeling=True);App.closeDocument(source.Name);App.setActiveDocument(doc.Name)
+        solids=ThreeDm.import_file(str(path),doc,mode='modeling')
+        for o in solids:o.ViewObject.DisplayMode='Flat Lines'
+        area.setActiveSubWindow(sub);view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui();settle()
+        Gui.Selection.clearSelection();action=window.findChild(QtGui.QAction,'OM9_SolidDifference');check('original Difference menu enabled',action is not None and action.isEnabled());action.trigger();settle()
+        def click(p):
+            pixel=view.getPointOnScreen(p);pos=QtCore.QPoint(round(pixel[0]),target.height()-round(pixel[1]));report.setdefault('picks',[]).append({'world':list(p),'pixel':list(pixel),'height':target.height(),'hit':view.getObjectInfo((pos.x(),pos.y()))});QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pos);settle()
+        click(App.Vector(2,0,10));enter();click(App.Vector(13,0,10));enter()
+        d=next((d for d in window.findChildren(QtWidgets.QDialog,'OM9EditOptions') if d.isVisible()),None);report['transcript']=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript').toPlainText();check('real mouse Boolean selection uses shared options',d is not None)
+        d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        cut=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SOLID-001');check('menu mouse CMD Difference actual material',cut.Shape.isValid() and abs(cut.Shape.Volume-500)<1e-6)
+        report.update(ok=True,module=native.__file__,python_module=ThreeDm.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if readonly is not None:os.chmod(str(readonly),stat.S_IWRITE)
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for n in list(App.listDocuments()):App.closeDocument(n)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

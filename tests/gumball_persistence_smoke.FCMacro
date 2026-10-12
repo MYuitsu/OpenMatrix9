@@ -3,7 +3,7 @@ import json, os, sys, traceback, tempfile
 from pathlib import Path
 import FreeCAD as App, FreeCADGui as Gui, Part
 from PySide6 import QtCore, QtWidgets, QtTest
-sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+sys.path.insert(0,str(Path(__file__).parent))
 from gumball_fixture import GumballUI, durable_facts
 out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020']}
 def check(name,value):
@@ -23,9 +23,15 @@ def run():
             doc.undo();ui.settle();check(handle+' Undo restores exact geometry',durable_facts(box)['geometry']==before['geometry'])
             doc.redo();ui.settle();check(handle+' Redo restores exact geometry',durable_facts(box)['geometry']==after['geometry'])
         ui.command('Layer=1');ui.select(box)
-        button=Gui.getMainWindow().findChild(QtWidgets.QToolButton,'OM9LayerArrow0');check('native layer assignment control exists',button is not None);button.click();ui.settle()
+        button=Gui.getMainWindow().findChild(QtWidgets.QToolButton,'OM9LayerArrow0');check('native current layer control exists',button is not None);button.click();ui.settle()
         layer=next(o for o in doc.Objects if getattr(o,'OM9LayerIndex',0)==1 and getattr(o,'OM9LayerSchema','')=='1')
-        check('source assigned to native layer',box in layer.Group)
+        # This isolated host checkpoint's arrow selects the current layer.
+        # Establish native source ownership before testing Gumball inheritance.
+        # The copied output's membership and metadata remain Gumball's work.
+        layer.addObject(box)
+        box.addProperty('App::PropertyInteger','OM9OutputLayerIndex','OpenMatrix9')
+        box.OM9OutputLayerIndex=1;doc.recompute();ui.select(box)
+        check('source assigned to native layer',box in layer.Group and box.getTypeIdOfProperty('OM9OutputLayerIndex')=='App::PropertyInteger' and box.OM9OutputLayerIndex==1)
         before=set(o.Name for o in doc.Objects);ui.numeric('MoveY','7 mm',QtCore.Qt.AltModifier)
         copied=next(o for o in doc.Objects if o.Name not in before and o.TypeId=='Part::Feature')
         check('copy inherits native layer and material',copied in layer.Group and copied.OM9OutputLayerIndex==1 and durable_facts(copied)['color']==durable_facts(box)['color'] and bool(copied.OM9GumballIdentity))

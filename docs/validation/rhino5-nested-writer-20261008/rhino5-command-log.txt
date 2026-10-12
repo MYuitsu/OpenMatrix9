@@ -1,0 +1,66 @@
+Command: _Paste
+Command: _-RunPythonScript
+Python Script <H:\FreeCAD-src\build\opennurbs-nested-profiles-acceptance-20261007\rhino5-nested-profiles-probe.py> ( ResetEngine ): "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\rhino5-nested-writer-gui-probe.py"
+OM9 Rhino5 GUI exchange acceptance started (opens test documents)
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-0.3dm-moved-0.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-0.3dm-moved-0.3dm" successfully read
+OM9 GUI profile nested-nested-surface-0.3dm-moved-0.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-0.3dm-moved-1.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-0.3dm-moved-1.3dm" successfully read
+OM9 GUI profile nested-nested-surface-0.3dm-moved-1.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-1.3dm-moved-0.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-1.3dm-moved-0.3dm" successfully read
+OM9 GUI profile nested-nested-surface-1.3dm-moved-0.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-1.3dm-moved-1.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-1.3dm-moved-1.3dm" successfully read
+OM9 GUI profile nested-nested-surface-1.3dm-moved-1.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-2.3dm-moved-0.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-2.3dm-moved-0.3dm" successfully read
+OM9 GUI profile nested-nested-surface-2.3dm-moved-0.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-2.3dm-moved-1.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-2.3dm-moved-1.3dm" successfully read
+OM9 GUI profile nested-nested-surface-2.3dm-moved-1.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-3.3dm-moved-0.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-3.3dm-moved-0.3dm" successfully read
+OM9 GUI profile nested-nested-surface-3.3dm-moved-0.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-3.3dm-moved-1.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-3.3dm-moved-1.3dm" successfully read
+OM9 GUI profile nested-nested-surface-3.3dm-moved-1.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-4.3dm-moved-0.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-4.3dm-moved-0.3dm" successfully read
+OM9 GUI profile nested-nested-surface-4.3dm-moved-0.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-4.3dm-moved-1.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-4.3dm-moved-1.3dm" successfully read
+OM9 GUI profile nested-nested-surface-4.3dm-moved-1.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-5.3dm-moved-0.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-5.3dm-moved-0.3dm" successfully read
+OM9 GUI profile nested-nested-surface-5.3dm-moved-0.3dm: True
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\nested-nested-surface-5.3dm-moved-1.3dm" successfully read
+No objects added to selection.
+No bad objects selected.
+File "H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713\gui-resaved-nested-nested-surface-5.3dm-moved-1.3dm" successfully read
+OM9 GUI profile nested-nested-surface-5.3dm-moved-1.3dm: True
+OM9 Rhino5 GUI exchange output: H:\FreeCAD-src\build\opennurbs-nested-writer-acceptance-20261008\gui-output-20261008-064713
+OM9 Rhino5 GUI exchange acceptance completed: True

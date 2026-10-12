@@ -1,0 +1,95 @@
+{
+    "checks":  [
+                   {
+                       "name":  "import and export visible directly at top of OpenMatrix9 menu",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "one visible 3DM toolbar with named import/export actions",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "both toolbar icons present",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "active empty project allows import and disables export",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Import3dm actual user file dialog shown",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "cancel import leaves document unchanged",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "whole-object selection enables export",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Export3dm actual user file dialog shown",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "cancel export leaves geometry unchanged",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "export defaults to preserving source data",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Export3dm actual user file dialog shown",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "menu export writes a valid Rhino5 BRep file",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Import3dm actual user file dialog shown",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "menu import exposes preserve mode and creates editable geometry",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "workbench switches keep one 3DM toolbar",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "actual exchange menu screenshot saved",
+                       "passed":  true
+                   }
+               ],
+    "top_menu_actions":  [
+                             "Import 3DM...",
+                             "Export Selected 3DM...",
+                             "Workspace",
+                             "Info \u0026 Settings",
+                             "Snaps",
+                             "Tập tin",
+                             "Chế độ xem",
+                             "Tiện ích",
+                             "Đo đạc",
+                             "Curve",
+                             "Surface",
+                             "Solid",
+                             "Transform",
+                             "Clayoo",
+                             "Emboss",
+                             "Builder",
+                             "Tools",
+                             "Gems",
+                             "Settings",
+                             "Cutters",
+                             "Render"
+                         ],
+    "ok":  true,
+    "module":  "H:\\FreeCAD-src\\build\\om9-ui-3dm-sdk\\bin\\OpenMatrix9Gui.pyd",
+    "exported_file":  "H:\\FreeCAD-src\\build\\om9-dev\\build\\three_dm_exchange_menu_smoke-1\\252669dbe797425b861430b71251e7cb\\menu-export.3dm"
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_exchange_menu_smoke-1\252669dbe797425b861430b71251e7cb

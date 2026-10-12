@@ -38,9 +38,13 @@ def run():
         check('curve Object alignment follows native tangent',abs(f['frame'][3])<1e-8 and abs(f['frame'][4]+1)<1e-8)
         f=native.gumballGeometryFacts(doc.Name,[wire.Name],'MoveX','5','Object')
         check('single-edge wire Object alignment follows rotated native tangent',abs(f['frame'][3]-.5)<1e-8 and abs(f['frame'][4]+3**.5/2)<1e-8)
-        try:native.gumballGeometryFacts(doc.Name,[circle.Name,box.Name],'MoveX','5','Object')
-        except RuntimeError:check('ambiguous Object alignment reports unresolved',True)
-        else:check('ambiguous Object alignment reports unresolved',False)
+        f=native.gumballGeometryFacts(doc.Name,[circle.Name,box.Name],'MoveX','5','Object')
+        check('whole-owner Object selection uses its shared bounds center and construction basis',
+              max(abs(a-b) for a,b in zip(f['frame'],[3.5,9,17,1,0,0,0,1,0,0,0,1]))<1e-5)
+        staged={row['name']:row for row in f['staged']}
+        check('shared Object move stages both native occurrences exactly once',
+              set(f['selected_roots'])=={'Circle','Box'} and len(f['staged'])==2 and
+              abs(staged['Circle']['xmin'])<1e-5 and abs(staged['Box']['xmin']-15)<1e-5)
         f=native.gumballGeometryFacts(doc.Name,[box.Name],'MoveX','5 mm','World')
         check('nested placement included exactly once',abs(f['staged'][0]['xmin']-15)<1e-5)
         f=native.gumballGeometryFacts(doc.Name,[group.Name,box.Name],'MoveX','5','World')

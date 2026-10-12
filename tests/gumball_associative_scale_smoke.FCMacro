@@ -1,9 +1,10 @@
 """Real Gumball actions retain native definitions through associative Scale graphs.
 
 Set OM9_ASSOCIATIVE_COLD to the warm report directory for a fresh-process reopen.
-The saved graph contains only standard FreeCAD types and expressions.
+The saved graph uses standard FreeCAD types and the registered native OM9 Compound helper.
 """
-import json, os, sys, traceback
+import json, os, sys, traceback, zipfile
+import xml.etree.ElementTree as XML
 from pathlib import Path
 import FreeCAD as App, FreeCADGui as Gui, Part
 from PySide6 import QtCore, QtWidgets
@@ -11,6 +12,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 from gumball_fixture import GumballUI
 out=Path(os.environ['OM9_SMOKE_OUTPUT'])
 report={'checks':[], 'feature_ids':['OM9-INFO-020']}
+COMPOUND_TYPE='OpenMatrix9Gui::GumballScaleCompound'
+COMPOUND_PROVIDER='PartGui::ViewProviderPartExt'
 def checkpoint(stage):
     report['last_checkpoint']=stage
     (out/'progress.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
@@ -128,8 +131,31 @@ def same_shape(actual,expected):
 def result_for(doc,source):
     matches=[obj for obj in doc.Objects if getattr(obj,'OM9GumballScaleSource',None)==source]
     return matches[-1] if matches else None
+def saved_compound_providers(path,names):
+    with zipfile.ZipFile(path) as archive:objects=XML.fromstring(archive.read('Document.xml')).findall('./Objects/Object')
+    saved={obj.get('name'):dict(obj.attrib) for obj in objects}
+    return [{'name':name,'saved':saved.get(name)} for name in names]
+
+def check_saved_compound_providers(path,helpers,name):
+    facts=saved_compound_providers(path,[helper.Name for helper in helpers])
+    report.setdefault('native_compound_provider_diagnostics',[]).append({'case':name,'saved_objects':facts})
+    # Omitted ViewType means the registered object's native default provider.
+    # A lost stored override on a stock Compound instead saves its stock type.
+    check(name+' saves the durable native Compound provider identity',bool(facts) and all(
+          item['saved'] is not None and item['saved'].get('type')==COMPOUND_TYPE and
+          item['saved'].get('ViewType',COMPOUND_PROVIDER)==COMPOUND_PROVIDER for item in facts))
+
+def check_compound_redo_provider(doc,created,name,filename):
+    helpers=[doc.getObject(key) for key in created if doc.getObject(key) is not None and
+             doc.getObject(key).TypeId==COMPOUND_TYPE]
+    check(name+' retains the non-hiding native Compound provider after Redo',bool(helpers) and all(
+          helper.isDerivedFrom('Part::Compound') and helper.ViewObject.TypeId==COMPOUND_PROVIDER and
+          'Proxy' not in helper.PropertiesList for helper in helpers))
+    path=out/filename;doc.saveCopy(str(path))
+    check_saved_compound_providers(path,helpers,name+' after Redo')
+
 def occurrence_bridge(normalizer,source):
-    if normalizer is None or normalizer.TypeId!='Part::Compound' or len(normalizer.Links)!=1:return None
+    if normalizer is None or normalizer.TypeId!=COMPOUND_TYPE or len(normalizer.Links)!=1:return None
     bridge=normalizer.Links[0]
     return bridge if bridge.TypeId=='App::Link' and bridge.LinkedObject==source else None
 
@@ -141,7 +167,7 @@ def bridge_is_durable(bridge,normalizer,source):
 def graph_has_native_local_scopes(result):
     scale=result.LinkedObject;inp=scale.Base;parent=result.getParentGeoFeatureGroup();normalizer=inp.LinkedObject
     helpers=[scale,inp]
-    if normalizer.TypeId=='Part::Compound':
+    if normalizer.TypeId==COMPOUND_TYPE:
         helpers.extend([normalizer]+list(normalizer.Links))
         if any(target.getParentGeoFeatureGroup()!=normalizer.getParentGeoFeatureGroup() for target in normalizer.Links):return False
     # Input.LinkedObject is a native Global occurrence; its definition may
@@ -156,7 +182,7 @@ def assert_graph(doc,source,expected,name,selected=True):
     check(name+' creates a native associative result',result is not None and result.TypeId=='App::Link' and
           result.LinkedObject.TypeId=='Part::Scale' and result.LinkedObject.Base.TypeId=='App::Link' and
           native_source)
-    if input_owner.TypeId=='Part::Compound':
+    if input_owner.TypeId==COMPOUND_TYPE:
         check(name+' normalizer uses the native non-hiding Part view provider',input_owner.ViewObject.TypeId=='PartGui::ViewProviderPartExt')
         check(name+' uses a durable native occurrence bridge in the helper coordinate system',bridge_is_durable(bridge,input_owner,source))
     check(name+' keeps native local graph dependencies within the result coordinate system',graph_has_native_local_scopes(result))
@@ -182,14 +208,14 @@ def cold_reopen():
 def verify_cold_reopen(doc,manifest):
     for obj in doc.Objects:obj.touch()
     doc.recompute()
-    check('cold graph uses only registered standard native types',all(obj.TypeId in
+    check('cold graph uses registered native FreeCAD and OM9 Compound types',all(obj.TypeId in
           ('App::FeaturePython','Part::Box','Part::Sphere','Part::Cylinder','Part::Cut','App::Part','App::DocumentObjectGroup',
-           'App::Link','App::Origin','App::Point','App::Line','App::Plane','Part::Scale','Part::Compound','PartDesign::Body','PartDesign::AdditiveBox','PartDesign::ShapeBinder','PartDesign::SubShapeBinder') for obj in doc.Objects))
+           'App::Link','App::Origin','App::Point','App::Line','App::Plane','Part::Scale','Part::Compound',COMPOUND_TYPE,'PartDesign::Body','PartDesign::AdditiveBox','PartDesign::ShapeBinder','PartDesign::SubShapeBinder') for obj in doc.Objects))
     for item in manifest:
         source=doc.getObject(item['source']);result=doc.getObject(item['output'])
         check('cold '+item['output']+' retains original source association',result.OM9GumballScaleSource==source)
         input_owner=result.LinkedObject.Base.LinkedObject
-        if input_owner.TypeId=='Part::Compound':
+        if input_owner.TypeId==COMPOUND_TYPE:
             check('cold '+item['output']+' normalizer retains the native non-hiding Part view provider',input_owner.ViewObject.TypeId=='PartGui::ViewProviderPartExt')
             check('cold '+item['output']+' retains its durable native occurrence bridge',bridge_is_durable(occurrence_bridge(input_owner,source),input_owner,source))
         check('cold '+item['output']+' retains native local dependency coordinate systems',graph_has_native_local_scopes(result))
@@ -210,7 +236,7 @@ def verify_cold_reopen(doc,manifest):
         for consumer_name,subelement in item.get('legacy_consumers',[]):
             consumer=doc.getObject(consumer_name);target=consumer.Support[0][0]
             check('cold '+consumer_name+' native Part owner retains the non-hiding Part view provider',target.ViewObject.TypeId=='PartGui::ViewProviderPartExt')
-            check('cold '+consumer_name+' follows native Part result with unchanged subelement',target.TypeId=='Part::Compound' and target.Links==[result] and
+            check('cold '+consumer_name+' follows native Part result with unchanged subelement',target.TypeId==COMPOUND_TYPE and target.Links==[result] and
                   same_shape(consumer.Shape,source.Shape.getElement(subelement).transformGeometry(App.Matrix(*item['matrix']))))
         for consumer_name in item.get('scalar_consumers',[]):
             consumer=doc.getObject(consumer_name)
@@ -289,7 +315,7 @@ def run():
               obj.getTypeOfProperty('Support')==[] and 'Immutable' not in obj.getPropertyStatus('Support') for obj in (face,edge)))
         legacy_target=legacy_face.Support[0][0]
         check('legacy native Part result owner uses the non-hiding Part view provider',legacy_target.ViewObject.TypeId=='PartGui::ViewProviderPartExt')
-        check('legacy Face2 Edge5 consumers follow a native Part owner of the visible result',legacy_target.TypeId=='Part::Compound' and
+        check('legacy Face2 Edge5 consumers follow a native Part owner of the visible result',legacy_target.TypeId==COMPOUND_TYPE and
               legacy_target.Links==[result] and legacy_edge.Support[0][0]==legacy_target and
               same_shape(legacy_face.Shape,source.Shape.getElement('Face2').transformGeometry(matrix)) and
               same_shape(legacy_edge.Shape,source.Shape.getElement('Edge5').transformGeometry(matrix)))
@@ -300,6 +326,7 @@ def run():
               dependent.Base==source and face.Support[0][0]==source and edge.Support[0][0]==source and legacy_face.Support[0][0]==source and legacy_edge.Support[0][0]==source and source.Visibility)
         doc.redo();doc.recompute();ui.settle();result=doc.getObject(output_name)
         check('Redo restores the graph geometry and source owner',result.OM9GumballScaleSource==source and same_shape(world_shape(result),expected))
+        check_compound_redo_provider(doc,created,'legacy result owner','native-compound-redo-legacy.FCStd')
         for _ in range(3):
             for name in created:doc.getObject(name).touch()
             doc.recompute()
@@ -610,6 +637,7 @@ def run():
             doc.redo();doc.recompute();ui.settle();group_copy,box_copy,cylinder_copy=[doc.getObject(name) for name in copy_names]
             check('Alt group Redo restores private ownership and exact affine geometry',box_copy in group_copy.Group and cylinder_copy in group_copy.Group and
                   same_shape(world_shape(box_copy),baseline_box.transformGeometry(group_matrix)) and same_shape(world_shape(cylinder_copy),baseline_cylinder.transformGeometry(group_matrix)))
+            if geo:check_compound_redo_provider(doc,created,'Alt nested occurrence normalizer','native-compound-redo-alt-group.FCStd')
             for original,output in ((grouped_box,box_copy),(grouped_cylinder,cylinder_copy)):
                 manifest.append({'source':original.Name,'output':output.Name,'matrix':list(group_matrix.A)})
             if grouped_occurrence is not None:
@@ -805,6 +833,8 @@ def run():
               (doc.UndoCount,doc.RedoCount,geometry_source.Placement,geometry_source.Length.Value,geometry_consumer.ExpressionEngine)==before and
               'expression governed geometry' in rejection)
         doc.saveAs(str(out/'associative-scale.FCStd'))
+        check_saved_compound_providers(out/'associative-scale.FCStd',
+              [obj for obj in doc.Objects if obj.TypeId==COMPOUND_TYPE],'final associative graph')
         (out/'cold-manifest.json').write_text(json.dumps(manifest,indent=2))
         report['saved']=str(out/'associative-scale.FCStd');report['ok']=True
     except Exception:

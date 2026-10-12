@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 // FreeCAD object/property ownership bridge. Rust validates exact affine policy.
 #include "GumballAssociativeScale.h"
+#include <string_view>
 #include <App/Application.h>
 #include <App/Document.h>
 #include <App/DocumentObject.h>
@@ -24,6 +25,7 @@
 
 extern "C" unsigned om9_gumball_associative_scale(const double*,const double*,double*);
 namespace OpenMatrix9Gui {
+PROPERTY_SOURCE(OpenMatrix9Gui::GumballScaleCompound,Part::Compound)
 namespace {
 [[noreturn]] void unsupported(const std::string& reason){
     throw std::runtime_error("UnsupportedOwner: associative Gumball Scale "+reason);
@@ -159,18 +161,18 @@ bool incomingWritable(const App::DocumentObject& owner,const std::string& key,
     // Admit that exact built-in input without clearing any property flags;
     // arbitrary read-only, immutable, static read-only and output fields stay
     // protected. Legacy ShapeBinder.Support is normally writable already.
-    return owner.getTypeId().getName()=="PartDesign::SubShapeBinder"&&key=="Support"
+    return std::string_view(owner.getTypeId().getName())=="PartDesign::SubShapeBinder"&&key=="Support"
         &&property.getContainer()==&owner
-        &&property.getTypeId().getName()=="App::PropertyXLinkSubList"
+        &&std::string_view(property.getTypeId().getName())=="App::PropertyXLinkSubList"
         &&property.getType()==App::Prop_None
         &&!property.testStatus(App::Property::Immutable)
         &&!property.testStatus(App::Property::Output);
 }
 bool legacyShapeSupport(const App::DocumentObject& owner,const std::string& key,
     const App::Property& property){
-    return owner.getTypeId().getName()=="PartDesign::ShapeBinder"&&key=="Support"
+    return std::string_view(owner.getTypeId().getName())=="PartDesign::ShapeBinder"&&key=="Support"
         &&property.getContainer()==&owner
-        &&property.getTypeId().getName()=="App::PropertyLinkSubListGlobal";
+        &&std::string_view(property.getTypeId().getName())=="App::PropertyLinkSubListGlobal";
 }
 std::string placementExpression(App::DocumentObject& object){
     const std::string name=object.getNameInDocument();
@@ -276,19 +278,19 @@ GumballAssociativeScaleResult createGumballAssociativeScale(
     result.document=&document;result.documentName=document.getName();
     result.source=plan.source;result.groups=plan.groups;
     const std::string stem=plan.source->getNameInDocument();
-    // These internal Compounds use the native PartExt renderer, whose exact
-    // type permits native view-provider overrides. The
+    // These internal native Compounds default to the stock PartExt renderer;
+    // this survives transaction replay and does not need a provider override. The
     // specialized Compound view provider hides its Links synchronously;
     // source/output visibility belongs to the caller's publication guard.
     auto* sourceBridge=plan.normalizeOccurrence?dynamic_cast<App::Link*>(
         document.addObject("App::Link",(stem+"ScaleSourceBridge").c_str())):nullptr;
     auto* normalizer=plan.normalizeOccurrence?dynamic_cast<Part::Compound*>(
-        document.addObject("Part::Compound",(stem+"ScaleGeometry").c_str(),true,"PartGui::ViewProviderPartExt")):nullptr;
+        document.addObject("OpenMatrix9Gui::GumballScaleCompound",(stem+"ScaleGeometry").c_str())):nullptr;
     auto* input=dynamic_cast<App::Link*>(document.addObject("App::Link",(stem+"ScaleInput").c_str()));
     auto* scale=dynamic_cast<Part::Scale*>(document.addObject("Part::Scale",(stem+"Scale").c_str()));
     auto* output=dynamic_cast<App::Link*>(document.addObject("App::Link",(stem+"Scaled").c_str()));
     auto* shapeOwner=plan.requiresShapeOwner?dynamic_cast<Part::Compound*>(
-        document.addObject("Part::Compound",(stem+"ScaledShape").c_str(),true,"PartGui::ViewProviderPartExt")):nullptr;
+        document.addObject("OpenMatrix9Gui::GumballScaleCompound",(stem+"ScaledShape").c_str())):nullptr;
     if(!input||!scale||!output||(plan.normalizeOccurrence&&(!sourceBridge||!normalizer))||(plan.requiresShapeOwner&&!shapeOwner))
         unsupported("native Compound, Link or Part::Scale type is unavailable");
     result.sourceBridge=sourceBridge;result.normalizer=normalizer;result.input=input;result.scale=scale;result.output=output;result.shapeOwner=shapeOwner;

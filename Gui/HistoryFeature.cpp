@@ -192,13 +192,13 @@ HistoryJoin* createHistoryJoin(App::Document& d,const std::vector<std::string>& 
     for(const auto& input:inputs){CurvePyRef faces(PyObject_GetAttrString(input.shape->value,"Faces"));if(PySequence_Size(faces.value)!=0)throw std::runtime_error("Join History accepts curves only");}
     auto result=buildEdit(inputs,1,inputs.size(),0,tolerance);
     if(result.size()!=1)throw std::runtime_error("Join History requires a single connected result");
-    d.openTransaction("Join History");
+    om9OpenTransaction(d,"Join History");
     try{
         auto* s=historySettings(d);auto* j=dynamic_cast<HistoryJoin*>(d.addObject("OpenMatrix9Gui::HistoryJoin","JoinHistory"));
         j->Tolerance.setValue(tolerance);j->setInitialShape(result.front()->value);
         if(s->Record.getValue()){j->Parents.setValues(parents);j->Recorded.setValue(true);}
         d.recompute();if(j->isError())throw std::runtime_error("Join History recompute failed");
-        d.commitTransaction();return j;
-    }catch(...){d.abortTransaction();throw;}
+        om9CommitTransaction(d);return j;
+    }catch(...){om9AbortTransaction(d);throw;}
 }
 }

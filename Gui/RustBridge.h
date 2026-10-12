@@ -1,3 +1,6 @@
+#include "Phase3RustBridge.h"
+#include "LayerRustAbi.h"
+#include "Phase2Rust.h"
 #pragma once
 #include "GumballRust.h"
 #include <cstddef>

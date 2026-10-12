@@ -24,7 +24,7 @@ protected:
 private:
     SurfaceController();
     bool valid()const;void prompt(const QString&);void refresh();
-    void add(const std::string&,const std::string&);void optionsDialog();void preview(PyObject* prepared=nullptr);void commit();void clearPreview();
+    bool add(const std::string&,const std::string&);void optionsDialog();void preview(PyObject* prepared=nullptr);void commit();void clearPreview();
     void bindOptions();void renderOptionControls();SurfaceOptions optionValues(bool candidate)const;
     CommandOptionsBridge optionBridge;bool optionErrorPending=false;
     void error(const std::exception&);

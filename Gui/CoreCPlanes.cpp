@@ -224,7 +224,7 @@ MenuContext menuContext(QPointer<Gui::View3DInventor> view) {
     guiThread();
     auto* gui=view?view->getGuiDocument():nullptr;
     if(!gui||gui->isAboutToClose()||gui!=Gui::Application::Instance->activeDocument()||!view->property("om9ViewSlot").isValid())throw std::runtime_error("The CPlane viewport is no longer active");
-    auto* doc=gui->getDocument();if(!doc||doc->testStatus(App::Document::Restoring)||!Gui::Control().isAllowedAlterView(doc))throw std::runtime_error("The viewport does not allow construction-plane changes");
+    auto* doc=gui->getDocument();if(!doc||doc->testStatus(App::Document::Restoring)||!om9AlterView(doc))throw std::runtime_error("The viewport does not allow construction-plane changes");
     const auto slot=view->property("om9ViewSlot").toUInt();store().ensure(*doc,slot,defaultFrame(slot));
     return {doc,slot,store().identity(*doc)};
 }

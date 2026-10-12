@@ -77,17 +77,17 @@ void ViewProviderGumballFrameObject::updateData(const App::Property* property){
     try{int offset=0,index=0;for(const auto& line:localLines(*getObject())){lines->numVertices.set1Value(index++,int(line.size()));for(auto p:line)coordinates->point.set1Value(offset++,float(p.x),float(p.y),float(p.z));}}catch(...){coordinates->point.setNum(0);lines->numVertices.setNum(0);}
 }
 std::string createGumballFrameObject(const std::string& kind){
-    auto* doc=App::GetApplication().getActiveDocument();if(!doc||!Gui::Application::Instance||!Gui::Control().isAllowedAlterDocument(doc))throw std::runtime_error("Open an editable document before creating a camera/light");
+    auto* doc=App::GetApplication().getActiveDocument();if(!doc||!Gui::Application::Instance||!om9AlterDocument(doc))throw std::runtime_error("Open an editable document before creating a camera/light");
     if(kind!="Camera"&&kind!="Light")throw std::runtime_error("Frame object kind must be Camera or Light");
-    doc->openTransaction(("Create gumball "+kind).c_str());try{
+    om9OpenTransaction(*doc,("Create gumball "+kind).c_str());try{
         auto* object=doc->addObject(("OpenMatrix9Gui::Gumball"+kind).c_str(),("Gumball"+kind).c_str());
         if(auto* camera=dynamic_cast<GumballCamera*>(object))if(auto* gui=Gui::Application::Instance->getDocument(doc))if(auto* view=dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())){
             auto* node=view->getViewer()?view->getViewer()->getCamera():nullptr;if(!node)throw std::runtime_error("Active viewport has no native camera");auto p=node->position.getValue();auto q=node->orientation.getValue();const float* values=q.getValue();camera->Placement.setValue(Base::Placement(Base::Vector3d(p[0],p[1],p[2]),Base::Rotation(values[0],values[1],values[2],values[3])));camera->FocalDistance.setValue(node->focalDistance.getValue());
             if(auto* perspective=dynamic_cast<SoPerspectiveCamera*>(node))camera->HeightAngle.setValue(perspective->heightAngle.getValue()*180/pi);
             else if(auto* ortho=dynamic_cast<SoOrthographicCamera*>(node)){camera->Perspective.setValue(false);camera->Height.setValue(ortho->height.getValue());}
         }
-        doc->recompute();std::string name=object->getNameInDocument();doc->commitTransaction();return name;
-    }catch(...){doc->abortTransaction();throw;}
+        doc->recompute();std::string name=object->getNameInDocument();om9CommitTransaction(*doc);return name;
+    }catch(...){om9AbortTransaction(*doc);throw;}
 }
 void initializeGumballFrameTypes(){GumballCamera::init();GumballLight::init();ViewProviderGumballFrameObject::init();}
 void addGumballFrameObjectMethods(PyObject* module){static PyMethodDef methods[]={{"createGumballFrameObject",createAPI,METH_VARARGS,"Create a selectable native document Camera or Light from the viewport."},{nullptr,nullptr,0,nullptr}};PyModule_AddFunctions(module,methods);}

@@ -1,0 +1,199 @@
+{
+    "checks":  [
+                   {
+                       "name":  "four native viewports have original small title labels",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "four native dropdown menus are present",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native MDI title chrome is suppressed inside OM9",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "presentation preserves line widths and point marker sizes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "presentation preserves line widths and point marker sizes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "presentation preserves line widths and point marker sizes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "presentation preserves line widths and point marker sizes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "double-click maximizes only slot 0",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "single viewport survives resize 0",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "double-click restores four normal views 0",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "double-click maximizes only slot 1",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "single viewport survives resize 1",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "double-click restores four normal views 1",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "double-click maximizes only slot 2",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "single viewport survives resize 2",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "double-click restores four normal views 2",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "double-click maximizes only slot 3",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "single viewport survives resize 3",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "double-click restores four normal views 3",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "dropdown Maximize targets its own inactive view",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "dropdown Restore 4V returns four views",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "original display mode names are retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "unimplemented modes are disabled",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native Wireframe style reconciles title modes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Shaded changes only the requested viewport",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "display radio marks track current viewport mode",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Wireframe and Shaded render differently",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "changing display keeps other view rendering unchanged",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native Shaded resets all local mode marks",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "local Wireframe preserves other Shaded modes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native Shaded resets a lone first-view Wireframe",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "title and mode actions preserve geometry selection and Undo",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "title layout actions preserve camera pose and zoom",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "new geometry retains shared shaded topology with mixed view modes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "new geometry renders filled in the Shaded view",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "dropdown display change preserves the active point command",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "maximize does not cancel the active point command",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "restricted task blocks title maximize",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "restricted task disables dropdown actions",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "workbench exit hides custom labels and restores native title chrome",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "reactivation reuses one header per view",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "reentry restores original native Wireframe provider topology",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "new document has four own labels",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "document switch returns correct visible four views",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "closed viewport rebuilds a single title and menu",
+                       "passed":  true
+                   }
+               ],
+    "camera_before":  [
+                          "#Inventor V2.1 ascii\n\n\nOrthographicCamera {\n  viewportMapping ADJUST_CAMERA\n  position -0 -0 100\n  orientation 0 0 1  0\n  nearDistance 0.1\n  farDistance 1000\n  aspectRatio 1\n  focalDistance 100\n  height 50\n\n}\n",
+                          "#Inventor V2.1 ascii\n\n\nPerspectiveCamera {\n  viewportMapping ADJUST_CAMERA\n  position 57.73505 -57.73502 57.735027\n  orientation 0.74290609 0.30772209 0.59447283  1.2171158\n  nearDistance 0.1\n  farDistance 1000\n  aspectRatio 1\n  focalDistance 100\n  heightAngle 0.78539819\n\n}\n",
+                          "#Inventor V2.1 ascii\n\n\nOrthographicCamera {\n  viewportMapping ADJUST_CAMERA\n  position 100 -0 -0\n  orientation 0.57735026 0.57735026 0.57735026  2.0943952\n  nearDistance 0.1\n  farDistance 1000\n  aspectRatio 1\n  focalDistance 100\n  height 50\n\n}\n",
+                          "#Inventor V2.1 ascii\n\n\nOrthographicCamera {\n  viewportMapping ADJUST_CAMERA\n  position -0 -99.999992 5.9604645e-006\n  orientation 1 0 0  1.5707964\n  nearDistance 0.1\n  farDistance 1000\n  aspectRatio 1\n  focalDistance 100\n  height 50\n\n}\n"
+                      ],
+    "camera_after":  [
+                         "#Inventor V2.1 ascii\n\n\nOrthographicCamera {\n  viewportMapping ADJUST_CAMERA\n  position -0 -0 100\n  orientation 0 0 1  0\n  nearDistance 89.336121\n  farDistance 100.67503\n  aspectRatio 1\n  focalDistance 100\n  height 50\n\n}\n",
+                         "#Inventor V2.1 ascii\n\n\nPerspectiveCamera {\n  viewportMapping ADJUST_CAMERA\n  position 57.73505 -57.73502 57.735027\n  orientation 0.74290609 0.30772209 0.59447283  1.2171158\n  nearDistance 70.192375\n  farDistance 124.08786\n  aspectRatio 1\n  focalDistance 100\n  heightAngle 0.78539819\n\n}\n",
+                         "#Inventor V2.1 ascii\n\n\nOrthographicCamera {\n  viewportMapping ADJUST_CAMERA\n  position 100 -0 -0\n  orientation 0.57735026 0.57735026 0.57735026  2.0943952\n  nearDistance 85.331833\n  farDistance 100.68333\n  aspectRatio 1\n  focalDistance 100\n  height 50\n\n}\n",
+                         "#Inventor V2.1 ascii\n\n\nOrthographicCamera {\n  viewportMapping ADJUST_CAMERA\n  position -0 -99.999992 5.9604645e-006\n  orientation 1 0 0  1.5707964\n  nearDistance 99.315353\n  farDistance 115.70084\n  aspectRatio 1\n  focalDistance 100\n  height 50\n\n}\n"
+                     ],
+    "ok":  true
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\viewport_title_smoke-1\7b06bc5c1e2e4fb9bdd3300ad6dc30d7
+

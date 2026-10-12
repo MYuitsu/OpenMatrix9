@@ -19,8 +19,6 @@ For parsing difficulties, read Guide `03_PARSING_VB_OUTPUT.md` or `04_PARSING_GH
 
 Return a behavioral contract for the Rust feature: verified inputs/state changes/calls/error paths, uncertainties, and the smallest next evidence read. Do not label approximate C pseudocode as original C++ source or compilable recovered VB6.
 
-When this work includes implementation, finish with [progress synchronization](../openmatrix9-workflow/references/progress.md): check Spec v1 acceptance items and update status, the project README and the ledger. Mapping evidence alone records analysis progress, not completed command implementation.
-
 ## Cập nhật nghiệp vụ sau khi code
 
 Sau khi hoàn tất code và kiểm tra, nếu có đổi nghiệp vụ, hỏi người dùng có cập nhật nghiệp vụ đó vào skill không. Chỉ ghi quy tắc mới khi có đồng ý; nếu người dùng đã yêu cầu cập nhật skill cho chính thay đổi này thì không hỏi lại. Áp dụng [quy tắc xác nhận cập nhật nghiệp vụ](../openmatrix9-workflow/references/business-rule-updates.md) để phân biệt nghiệp vụ mới với sửa kỹ thuật, chuẩn bị đề xuất cụ thể và đồng bộ skill sau khi được đồng ý.

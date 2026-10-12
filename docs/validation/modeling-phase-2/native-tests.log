@@ -1,0 +1,1025 @@
+Start testing: Oct 09 07:42 SE Asia Standard Time
+----------------------------------------------------------
+1/49 Testing: OM9-FILE-012.Phase2Periodic
+1/49 Test: OM9-FILE-012.Phase2Periodic
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmPhase2PeriodicTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Phase2Periodic" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+OCCT poles=6 knots=7 seamMultiplicity=1;ON poles=9 knots=11 periodic=1
+OCCT poles=6 knots=7 seamMultiplicity=1;ON poles=9 knots=11 periodic=1
+OCCT poles=6 knots=7 seamMultiplicity=1;ON poles=11 knots=15 periodic=1
+OCCT poles=6 knots=7 seamMultiplicity=1;ON poles=11 knots=15 periodic=1
+Phase2 periodic import/export: 4 fixtures / 276 checks passed
+<end of output>
+Test time =   0.43 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Phase2Periodic" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.Phase2Periodic" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/49 Testing: OM9-FILE-012.NativeThreadPool
+2/49 Test: OM9-FILE-012.NativeThreadPool
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmThreadPoolTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.NativeThreadPool" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Native thread pool: concurrency, join-on-error, ordered CAD equivalence PASS
+<end of output>
+Test time =  12.27 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.NativeThreadPool" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.NativeThreadPool" time elapsed: 00:00:12
+----------------------------------------------------------
+
+3/49 Testing: OM9-FILE-012.ModelingExchange
+3/49 Test: OM9-FILE-012.ModelingExchange
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmModelingExchangeTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.ModelingExchange" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Modeling native: mm/cm, NURBS/arc/trimmed BRep/cloud, current selection and opaque preflight PASS
+<end of output>
+Test time =   0.65 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.ModelingExchange" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.ModelingExchange" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/49 Testing: OM9-FILE-012.CoverageRuntime
+4/49 Test: OM9-FILE-012.CoverageRuntime
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCoverageTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CoverageRuntime" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Coverage runtime PASS: 128 registered classes
+<end of output>
+Test time =   0.44 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CoverageRuntime" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.CoverageRuntime" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/49 Testing: OM9-FILE-012.TrimInteriorMapping
+5/49 Test: OM9-FILE-012.TrimInteriorMapping
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmTrimMappingTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.TrimInteriorMapping" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Native nonlinear trim mapping PASS 152 checks
+<end of output>
+Test time =   0.43 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.TrimInteriorMapping" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.TrimInteriorMapping" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/49 Testing: OM9-FILE-012.MultiShellSolid
+6/49 Test: OM9-FILE-012.MultiShellSolid
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmMultiShellTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.MultiShellSolid" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Multi-shell fixture kind=0 direction=1 positive_valid=1
+Multi-shell fixture kind=0 direction=-1 positive_valid=1
+Multi-shell fixture kind=1 direction=1 positive_valid=1
+Multi-shell fixture kind=1 direction=-1 positive_valid=1
+Multi-shell fixture kind=2 direction=1 positive_valid=1
+Multi-shell fixture kind=2 direction=-1 positive_valid=1
+Multi-shell BRep PASS 32 checks
+<end of output>
+Test time =   2.99 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.MultiShellSolid" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.MultiShellSolid" time elapsed: 00:00:02
+----------------------------------------------------------
+
+7/49 Testing: OM9-FILE-012.CoherentReferenceTarget
+7/49 Test: OM9-FILE-012.CoherentReferenceTarget
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmReferenceTargetTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CoherentReferenceTarget" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Inspect coherent fixture 0
+Basic read passed
+Inspect coherent fixture 1
+Basic read passed
+Inspect coherent fixture 2
+Basic read passed
+Inspect coherent fixture 3
+Basic read passed
+Coherent reference target fixtures PASS4 coherent and12 standalone native controls
+<end of output>
+Test time =   0.49 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CoherentReferenceTarget" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.CoherentReferenceTarget" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/49 Testing: OM9-FILE-012.SurfaceCurveTargetMatrix
+8/49 Test: OM9-FILE-012.SurfaceCurveTargetMatrix
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmSurfaceCurveTargetMatrixTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.SurfaceCurveTargetMatrix" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Surface-curve target matrix PASS30 coherent,6 original nested and90 expanded native profiles
+<end of output>
+Test time =   0.98 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.SurfaceCurveTargetMatrix" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.SurfaceCurveTargetMatrix" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/49 Testing: OM9-FILE-012.CurvedShells
+9/49 Test: OM9-FILE-012.CurvedShells
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCurvedShellsTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CurvedShells" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Curved shell kind=0 faces=6
+Imported valid=1 volume=395.84067406027793 expected=395.84067435231395
+Curved shell kind=1 faces=6
+Imported valid=1 volume=615.75215964932136 expected=615.75216010359941
+Curved shell kind=2 faces=2
+Imported valid=1 volume=410.5014396147883 expected=410.50144006906629
+Curved shell kind=3 faces=2
+Imported valid=1 volume=592.17626341002142 expected=592.17626406536147
+Four independent curved shell profiles PASS
+<end of output>
+Test time =   1.39 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CurvedShells" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.CurvedShells" time elapsed: 00:00:01
+----------------------------------------------------------
+
+10/49 Testing: OM9-FILE-012.SourceRingOrientation
+10/49 Test: OM9-FILE-012.SourceRingOrientation
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmSourceOrientationTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.SourceRingOrientation" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+diamond source direction=1
+Diamond_Marquise/Diamond_Marquise placement=3 signed volume=-1.25718
+Diamond_Marquise/Diamond_Marquise placement=2 signed volume=1.25718
+Diamond_Marquise/Diamond_Marquise placement=1 signed volume=1.25718
+Diamond_Marquise/Diamond_Marquise placement=0 signed volume=-1.25718
+<end of output>
+Test time =   9.11 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.SourceRingOrientation" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.SourceRingOrientation" time elapsed: 00:00:09
+----------------------------------------------------------
+
+11/49 Testing: OM9-FILE-012.SignedSolidOrientation
+11/49 Test: OM9-FILE-012.SignedSolidOrientation
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmRingPrecisionTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.SignedSolidOrientation" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Signed solid orientation PASS including unknown SDK +2
+<end of output>
+Test time =   2.17 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.SignedSolidOrientation" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.SignedSolidOrientation" time elapsed: 00:00:02
+----------------------------------------------------------
+
+12/49 Testing: OM9-FILE-012.RevolutionParameterization
+12/49 Test: OM9-FILE-012.RevolutionParameterization
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmRingPrecisionTests.exe" "--uv"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.RevolutionParameterization" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Analytic area transpose=0 arc=0 span=0 expected=4.3800000000000008 actual=4.3800000000000203
+BRep path transpose=0 arc=0 span=0 expected=4.3800000000000008 import=4.3800000000000203 reimport=4.3800000000000203
+Analytic area transpose=0 arc=0 span=1 expected=25.98 actual=25.980000650655665
+BRep path transpose=0 arc=0 span=1 expected=25.98 import=25.980000650655665 reimport=25.980000650655661
+Analytic area transpose=0 arc=1 span=0 expected=1.5765232724050269 actual=1.576523272405022
+BRep path transpose=0 arc=1 span=0 expected=1.5765232724050269 import=1.576523272405022 reimport=1.5765232724050202
+Analytic area transpose=0 arc=1 span=1 expected=9.3511585883750215 actual=9.3511588225699533
+BRep path transpose=0 arc=1 span=1 expected=9.3511585883750215 import=9.3511588225699533 reimport=9.3511588225699676
+Analytic area transpose=1 arc=0 span=0 expected=4.3800000000000008 actual=4.3800000000000203
+BRep path transpose=1 arc=0 span=0 expected=4.3800000000000008 import=4.3800000000000203 reimport=4.3800000000000203
+Analytic area transpose=1 arc=0 span=1 expected=25.98 actual=25.980000650655665
+BRep path transpose=1 arc=0 span=1 expected=25.98 import=25.980000650655665 reimport=25.980000650655661
+Analytic area transpose=1 arc=1 span=0 expected=1.5765232724050269 actual=1.5765232724050313
+BRep path transpose=1 arc=1 span=0 expected=1.5765232724050269 import=1.5765232724050313 reimport=1.5765232724050309
+Analytic area transpose=1 arc=1 span=1 expected=9.3511585883750215 actual=9.3511588225699782
+BRep path transpose=1 arc=1 span=1 expected=9.3511585883750215 import=9.3511588225699782 reimport=9.3511588225699676
+Native revolution parameter evaluation PASS: 12 source revolution faces, 12 synthetic scaled/transposed line/arc surfaces and rational trims
+<end of output>
+Test time =   2.13 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.RevolutionParameterization" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.RevolutionParameterization" time elapsed: 00:00:02
+----------------------------------------------------------
+
+13/49 Testing: OM9-FILE-012.TrimDomains
+13/49 Test: OM9-FILE-012.TrimDomains
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmTrimDomainTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.TrimDomains" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Trim domains PASS32 domain +5 tolerance cases
+<end of output>
+Test time =   0.62 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.TrimDomains" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.TrimDomains" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/49 Testing: OM9-FILE-012.ReferenceGraphIntegrity
+14/49 Test: OM9-FILE-012.ReferenceGraphIntegrity
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmReferenceGraphIntegrityTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.ReferenceGraphIntegrity" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Reference graph integrity PASS
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.ReferenceGraphIntegrity" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.ReferenceGraphIntegrity" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/49 Testing: OM9-FILE-012.NativeReferenceResolution
+15/49 Test: OM9-FILE-012.NativeReferenceResolution
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmNativeReferenceResolutionTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.NativeReferenceResolution" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Native source-model reference resolution PASS
+<end of output>
+Test time =   0.50 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.NativeReferenceResolution" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.NativeReferenceResolution" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/49 Testing: OM9-FILE-012.StandaloneReferences
+16/49 Test: OM9-FILE-012.StandaloneReferences
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmStandaloneReferenceTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.StandaloneReferences" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Standalone native reference/target guard PASS 825 checks
+<end of output>
+Test time =   0.97 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.StandaloneReferences" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.StandaloneReferences" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/49 Testing: OM9-FILE-012.MixedReferences
+17/49 Test: OM9-FILE-012.MixedReferences
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmMixedReferenceTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.MixedReferences" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Mixed reference native retention PASS 363 checks
+<end of output>
+Test time =   0.81 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.MixedReferences" end time: Oct 09 07:42 SE Asia Standard Time
+"OM9-FILE-012.MixedReferences" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/49 Testing: OM9-FILE-012.ReferenceRemap
+18/49 Test: OM9-FILE-012.ReferenceRemap
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmReferenceRemapTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.ReferenceRemap" start time: Oct 09 07:42 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+2611 reference remap checks passed
+<end of output>
+Test time =   8.58 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.ReferenceRemap" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.ReferenceRemap" time elapsed: 00:00:08
+----------------------------------------------------------
+
+19/49 Testing: OM9-FILE-012.SeamProfiles
+19/49 Test: OM9-FILE-012.SeamProfiles
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmSeamProfileTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.SeamProfiles" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+229 seam profile checks passed
+<end of output>
+Test time =   0.51 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.SeamProfiles" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.SeamProfiles" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/49 Testing: OM9-FILE-012.SeamRhino5
+20/49 Test: OM9-FILE-012.SeamRhino5
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmSeamRhino5Tests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.SeamRhino5" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+200 actual seam target checks passed
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.SeamRhino5" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.SeamRhino5" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/49 Testing: OM9-FILE-012.UvReferenceRemap
+21/49 Test: OM9-FILE-012.UvReferenceRemap
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmUvReferenceRemapTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.UvReferenceRemap" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+895 UV reference remap checks passed
+<end of output>
+Test time =   1.00 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.UvReferenceRemap" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.UvReferenceRemap" time elapsed: 00:00:00
+----------------------------------------------------------
+
+22/49 Testing: OM9-FILE-012.UvReferenceRhino5
+22/49 Test: OM9-FILE-012.UvReferenceRhino5
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmUvReferenceRhinoTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.UvReferenceRhino5" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+507 UV actual target/refusal checks passed
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.UvReferenceRhino5" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.UvReferenceRhino5" time elapsed: 00:00:00
+----------------------------------------------------------
+
+23/49 Testing: OM9-FILE-012.SeamTrimApplicability
+23/49 Test: OM9-FILE-012.SeamTrimApplicability
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmSeamTrimTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.SeamTrimApplicability" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+211 seam/singular BRep applicability checks passed
+<end of output>
+Test time =   0.60 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.SeamTrimApplicability" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.SeamTrimApplicability" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/49 Testing: OM9-FILE-012.SeamTrimRhino5
+24/49 Test: OM9-FILE-012.SeamTrimRhino5
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmSeamTrimRhino5Tests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.SeamTrimRhino5" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+1800 actual BRep seam/pole/edit checks passed
+<end of output>
+Test time =   0.66 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.SeamTrimRhino5" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.SeamTrimRhino5" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/49 Testing: OM9-FILE-012.CurveOnSurfaceSchema
+25/49 Test: OM9-FILE-012.CurveOnSurfaceSchema
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCurveOnSurfaceSchemaTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CurveOnSurfaceSchema" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+CurveOnSurface native schema 10 direct/model field paths, 8 reference paths, 7 refusals PASS
+<end of output>
+Test time =   0.52 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CurveOnSurfaceSchema" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.CurveOnSurfaceSchema" time elapsed: 00:00:00
+----------------------------------------------------------
+
+26/49 Testing: OM9-FILE-012.CurveOnSurfaceTransform.Nurbs
+26/49 Test: OM9-FILE-012.CurveOnSurfaceTransform.Nurbs
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCurveOnSurfaceTransformTests.exe" "0"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CurveOnSurfaceTransform.Nurbs" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+surface=0 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=0 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=0 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=0 variant=0 dimension=3 optional=1 arc=1 transform=3
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=3
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=4
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=2
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=3
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=4
+surface=0 variant=0 dimension=2 optional=1 arc=1 transform=0
+surface=0 variant=0 dimension=2 optional=1 arc=1 transform=1
+surface=0 variant=0 dimension=2 optional=1 arc=1 transform=2
+surface=0 variant=0 dimension=2 optional=1 arc=1 transform=3
+surface=0 variant=0 dimension=2 optional=1 arc=0 transform=0
+surface=0 variant=0 dimension=2 optional=1 arc=0 transform=1
+surface=0 variant=0 dimension=2 optional=1 arc=0 transform=2
+surface=0 variant=0 dimension=2 optional=1 arc=0 transform=3
+surface=0 variant=0 dimension=2 optional=1 arc=0 transform=4
+surface=0 variant=0 dimension=2 optional=0 arc=1 transform=0
+surface=0 variant=0 dimension=2 optional=0 arc=1 transform=1
+surface=0 variant=0 dimension=2 optional=0 arc=1 transform=2
+surface=0 variant=0 dimension=2 optional=0 arc=1 transform=3
+surface=0 variant=0 dimension=2 optional=0 arc=1 transform=4
+surface=0 variant=1 dimension=3 optional=1 arc=1 transform=0
+surface=0 variant=1 dimension=3 optional=1 arc=1 transform=1
+surface=0 variant=1 dimension=3 optional=1 arc=1 transform=2
+surface=0 variant=1 dimension=3 optional=1 arc=1 transform=3
+surface=0 variant=1 dimension=3 optional=1 arc=0 transform=0
+surface=0 variant=1 dimension=3 optional=1 arc=0 transform=1
+surface=0 variant=1 dimension=3 optional=1 arc=0 transform=2
+surface=0 variant=1 dimension=3 optional=1 arc=0 transform=3
+surface=0 variant=1 dimension=3 optional=1 arc=0 transform=4
+surface=0 variant=1 dimension=3 optional=0 arc=1 transform=0
+surface=0 variant=1 dimension=3 optional=0 arc=1 transform=1
+surface=0 variant=1 dimension=3 optional=0 arc=1 transform=2
+surface=0 variant=1 dimension=3 optional=0 arc=1 transform=3
+surface=0 variant=1 dimension=3 optional=0 arc=1 transform=4
+surface=0 variant=1 dimension=2 optional=1 arc=1 transform=0
+surface=0 variant=1 dimension=2 optional=1 arc=1 transform=1
+surface=0 variant=1 dimension=2 optional=1 arc=1 transform=2
+surface=0 variant=1 dimension=2 optional=1 arc=1 transform=3
+surface=0 variant=1 dimension=2 optional=1 arc=0 transform=0
+surface=0 variant=1 dimension=2 optional=1 arc=0 transform=1
+surface=0 variant=1 dimension=2 optional=1 arc=0 transform=2
+surface=0 variant=1 dimension=2 optional=1 arc=0 transform=3
+surface=0 variant=1 dimension=2 optional=1 arc=0 transform=4
+surface=0 variant=1 dimension=2 optional=0 arc=1 transform=0
+surface=0 variant=1 dimension=2 optional=0 arc=1 transform=1
+surface=0 variant=1 dimension=2 optional=0 arc=1 transform=2
+surface=0 variant=1 dimension=2 optional=0 arc=1 transform=3
+surface=0 variant=1 dimension=2 optional=0 arc=1 transform=4
+surface=0 variant=2 dimension=3 optional=1 arc=1 transform=0
+surface=0 variant=2 dimension=3 optional=1 arc=1 transform=1
+surface=0 variant=2 dimension=3 optional=1 arc=1 transform=2
+surface=0 variant=2 dimension=3 optional=1 arc=1 transform=3
+surface=0 variant=2 dimension=3 optional=1 arc=0 transform=0
+surface=0 variant=2 dimension=3 optional=1 arc=0 transform=1
+surface=0 variant=2 dimension=3 optional=1 arc=0 transform=2
+surface=0 variant=2 dimension=3 optional=1 arc=0 transform=3
+surface=0 variant=2 dimension=3 optional=1 arc=0 transform=4
+surface=0 variant=2 dimension=3 optional=0 arc=1 transform=0
+surface=0 variant=2 dimension=3 optional=0 arc=1 transform=1
+surface=0 variant=2 dimension=3 optional=0 arc=1 transform=2
+surface=0 variant=2 dimension=3 optional=0 arc=1 transform=3
+surface=0 variant=2 dimension=3 optional=0 arc=1 transform=4
+surface=0 variant=2 dimension=2 optional=1 arc=1 transform=0
+surface=0 variant=2 dimension=2 optional=1 arc=1 transform=1
+surface=0 variant=2 dimension=2 optional=1 arc=1 transform=2
+surface=0 variant=2 dimension=2 optional=1 arc=1 transform=3
+surface=0 variant=2 dimension=2 optional=1 arc=0 transform=0
+surface=0 variant=2 dimension=2 optional=1 arc=0 transform=1
+surface=0 variant=2 dimension=2 optional=1 arc=0 transform=2
+surface=0 variant=2 dimension=2 optional=1 arc=0 transform=3
+surface=0 variant=2 dimension=2 optional=1 arc=0 transform=4
+surface=0 variant=2 dimension=2 optional=0 arc=1 transform=0
+surface=0 variant=2 dimension=2 optional=0 arc=1 transform=1
+surface=0 variant=2 dimension=2 optional=0 arc=1 transform=2
+surface=0 variant=2 dimension=2 optional=0 arc=1 transform=3
+surface=0 variant=2 dimension=2 optional=0 arc=1 transform=4
+surface=0 variant=3 dimension=3 optional=1 arc=1 transform=0
+surface=0 variant=3 dimension=3 optional=1 arc=1 transform=1
+surface=0 variant=3 dimension=3 optional=1 arc=1 transform=2
+surface=0 variant=3 dimension=3 optional=1 arc=1 transform=3
+surface=0 variant=3 dimension=3 optional=1 arc=0 transform=0
+surface=0 variant=3 dimension=3 optional=1 arc=0 transform=1
+surface=0 variant=3 dimension=3 optional=1 arc=0 transform=2
+surface=0 variant=3 dimension=3 optional=1 arc=0 transform=3
+surface=0 variant=3 dimension=3 optional=1 arc=0 transform=4
+surface=0 variant=3 dimension=3 optional=0 arc=1 transform=0
+surface=0 variant=3 dimension=3 optional=0 arc=1 transform=1
+surface=0 variant=3 dimension=3 optional=0 arc=1 transform=2
+surface=0 variant=3 dimension=3 optional=0 arc=1 transform=3
+surface=0 variant=3 dimension=3 optional=0 arc=1 transform=4
+surface=0 variant=3 dimension=2 optional=1 arc=1 transform=0
+surface=0 variant=3 dimension=2 optional=1 arc=1 transform=1
+surface=0 variant=3 dimension=2 optional=1 arc=1 transform=2
+surface=0 variant=3 dimension=2 optional=1 arc=1 transform=3
+surface=0 variant=3 dimension=2 optional=1 arc=0 transform=0
+surface=0 variant=3 dimension=2 optional=1 arc=0 transform=1
+surface=0 variant=3 dimension=2 optional=1 arc=0 transform=2
+surface=0 variant=3 dimension=2 optional=1 arc=0 transform=3
+surface=0 variant=3 dimension=2 optional=1 arc=0 transform=4
+surface=0 variant=3 dimension=2 optional=0 arc=1 transform=0
+surface=0 variant=3 dimension=2 optional=0 arc=1 transform=1
+surface=0 variant=3 dimension=2 optional=0 arc=1 transform=2
+surface=0 variant=3 dimension=2 optional=0 arc=1 transform=3
+surface=0 variant=3 dimension=2 optional=0 arc=1 transform=4
+Coupled CurveOnSurface 112 native transform paths and 9 atomic refusals PASS
+<end of output>
+Test time =   0.44 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CurveOnSurfaceTransform.Nurbs" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.CurveOnSurfaceTransform.Nurbs" time elapsed: 00:00:00
+----------------------------------------------------------
+
+27/49 Testing: OM9-FILE-012.CurveOnSurfaceTransform.Plane
+27/49 Test: OM9-FILE-012.CurveOnSurfaceTransform.Plane
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCurveOnSurfaceTransformTests.exe" "1"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CurveOnSurfaceTransform.Plane" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+surface=1 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=1 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=1 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=1 variant=0 dimension=3 optional=1 arc=1 transform=3
+surface=1 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=1 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=1 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=1 variant=0 dimension=3 optional=1 arc=0 transform=3
+surface=1 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=1 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=1 variant=0 dimension=3 optional=0 arc=1 transform=2
+surface=1 variant=0 dimension=3 optional=0 arc=1 transform=3
+Coupled CurveOnSurface 12 native transform paths and 6 atomic refusals PASS
+<end of output>
+Test time =   0.39 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CurveOnSurfaceTransform.Plane" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.CurveOnSurfaceTransform.Plane" time elapsed: 00:00:00
+----------------------------------------------------------
+
+28/49 Testing: OM9-FILE-012.CurveOnSurfaceTransform.Rev
+28/49 Test: OM9-FILE-012.CurveOnSurfaceTransform.Rev
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCurveOnSurfaceTransformTests.exe" "2"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CurveOnSurfaceTransform.Rev" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+surface=2 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=2 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=2 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=2 variant=0 dimension=3 optional=1 arc=1 transform=3
+surface=2 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=2 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=2 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=2 variant=0 dimension=3 optional=1 arc=0 transform=3
+surface=2 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=2 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=2 variant=0 dimension=3 optional=0 arc=1 transform=2
+surface=2 variant=0 dimension=3 optional=0 arc=1 transform=3
+Coupled CurveOnSurface 12 native transform paths and 6 atomic refusals PASS
+<end of output>
+Test time =   0.33 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CurveOnSurfaceTransform.Rev" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.CurveOnSurfaceTransform.Rev" time elapsed: 00:00:00
+----------------------------------------------------------
+
+29/49 Testing: OM9-FILE-012.CurveOnSurfaceTransform.Sum
+29/49 Test: OM9-FILE-012.CurveOnSurfaceTransform.Sum
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCurveOnSurfaceTransformTests.exe" "3"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CurveOnSurfaceTransform.Sum" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+surface=3 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=3 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=3 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=3 variant=0 dimension=3 optional=1 arc=1 transform=3
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=3
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=4
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=2
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=3
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=4
+Coupled CurveOnSurface 14 native transform paths and 5 atomic refusals PASS
+<end of output>
+Test time =   0.37 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CurveOnSurfaceTransform.Sum" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.CurveOnSurfaceTransform.Sum" time elapsed: 00:00:00
+----------------------------------------------------------
+
+30/49 Testing: OM9-FILE-012.CurveOnSurfaceTransform.Extrusion
+30/49 Test: OM9-FILE-012.CurveOnSurfaceTransform.Extrusion
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCurveOnSurfaceTransformTests.exe" "4"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CurveOnSurfaceTransform.Extrusion" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+surface=4 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=4 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=4 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=4 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=4 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=4 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=4 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=4 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=4 variant=0 dimension=3 optional=0 arc=1 transform=2
+Coupled CurveOnSurface 9 native transform paths and 6 atomic refusals PASS
+<end of output>
+Test time =   0.40 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CurveOnSurfaceTransform.Extrusion" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.CurveOnSurfaceTransform.Extrusion" time elapsed: 00:00:00
+----------------------------------------------------------
+
+31/49 Testing: OM9-FILE-012.CurveOnSurfaceArchive
+31/49 Test: OM9-FILE-012.CurveOnSurfaceArchive
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCurveOnSurfaceArchiveTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CurveOnSurfaceArchive" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+CurveOnSurface exact archive recovery12 valid,2 deferred references,0 independent legacy and 117 malformed/truncated cases PASS
+<end of output>
+Test time =   0.55 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CurveOnSurfaceArchive" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.CurveOnSurfaceArchive" time elapsed: 00:00:00
+----------------------------------------------------------
+
+32/49 Testing: OM9-FILE-012.Merge
+32/49 Test: OM9-FILE-012.Merge
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmMergeTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Merge" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+File was not written with this version of the topology
+merge selection and atomic rejection PASS
+<end of output>
+Test time =   3.09 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Merge" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.Merge" time elapsed: 00:00:03
+----------------------------------------------------------
+
+33/49 Testing: OM9-FILE-012.SurfaceCurveV5Profile
+33/49 Test: OM9-FILE-012.SurfaceCurveV5Profile
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmSurfaceCurveV5Tests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.SurfaceCurveV5Profile" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+CurveOnSurface scoped V5 profile PASS 359 checks
+<end of output>
+Test time =   4.01 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.SurfaceCurveV5Profile" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.SurfaceCurveV5Profile" time elapsed: 00:00:04
+----------------------------------------------------------
+
+34/49 Testing: OM9-FILE-012.NativeTransform
+34/49 Test: OM9-FILE-012.NativeTransform
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmNativeTransformTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.NativeTransform" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Native retained transforms and selected members passed: rational2D/3D, TextDot and point cloud coordinates, normals, colors, userdata, mm/cm, atomic invalid matrices
+<end of output>
+Test time =   0.84 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.NativeTransform" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.NativeTransform" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/49 Testing: OM9-FILE-012.TextDot
+35/49 Test: OM9-FILE-012.TextDot
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmTextDotTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.TextDot" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Native TextDot fields mm/cm, member/copy, Unicode, exact setters, userdata and atomic guards passed
+<end of output>
+Test time =   0.82 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.TextDot" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.TextDot" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/49 Testing: OM9-FILE-012.PointCloud
+36/49 Test: OM9-FILE-012.PointCloud
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmPointCloudTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.PointCloud" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Native PointCloud fields, identity, dormant plane, mm/cm member/copy and atomic gates passed
+<end of output>
+Test time =   0.52 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.PointCloud" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.PointCloud" time elapsed: 00:00:00
+----------------------------------------------------------
+
+37/49 Testing: OM9-FILE-012.CloudGeometry
+37/49 Test: OM9-FILE-012.CloudGeometry
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmCloudGeometryTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.CloudGeometry" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+mm: cloud mixed nested affine native doubles and intensity atomic gate PASS
+cm: cloud mixed nested affine native doubles and intensity atomic gate PASS
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.CloudGeometry" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.CloudGeometry" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/49 Testing: OM9-FILE-012.Hatch
+38/49 Test: OM9-FILE-012.Hatch
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmHatchTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Hatch" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+mm: selected native hatch rational loops, exact pattern reference and spacing PASS
+cm: selected native hatch rational loops, exact pattern reference and spacing PASS
+<end of output>
+Test time =   0.39 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Hatch" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.Hatch" time elapsed: 00:00:00
+----------------------------------------------------------
+
+39/49 Testing: OM9-FILE-012.Preservation
+39/49 Test: OM9-FILE-012.Preservation
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmPreservationTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Preservation" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+preservation PASS
+<end of output>
+Test time =   0.53 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Preservation" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.Preservation" time elapsed: 00:00:00
+----------------------------------------------------------
+
+40/49 Testing: OM9-FILE-012.Inventory
+40/49 Test: OM9-FILE-012.Inventory
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmInventoryTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Inventory" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+inventory PASS; fixture "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-inventory.3dm"
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Inventory" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.Inventory" time elapsed: 00:00:00
+----------------------------------------------------------
+
+41/49 Testing: OM9-FILE-012.Geometry
+41/49 Test: OM9-FILE-012.Geometry
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmGeometryTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Geometry" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+curved volumes 502.655 502.655
+curved volumes 268.083 268.083
+OM9-FILE-012 geometry PASS
+<end of output>
+Test time =   0.44 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Geometry" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.Geometry" time elapsed: 00:00:00
+----------------------------------------------------------
+
+42/49 Testing: OM9-FILE-012.Archive
+42/49 Test: OM9-FILE-012.Archive
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmArchiveTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Archive" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+metadata PASS
+inch written
+extrusion volume 502.65482465286311 expected 502.6548245743669
+OM9-FILE-012 archive PASS; fixtures "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-3dm-native"
+<end of output>
+Test time =   0.77 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Archive" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.Archive" time elapsed: 00:00:00
+----------------------------------------------------------
+
+43/49 Testing: OM9-FILE-012.UserRing
+43/49 Test: OM9-FILE-012.UserRing
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmRingTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.UserRing" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+OM9-FILE-012 user ring PASS: 101 objects
+<end of output>
+Test time =   6.76 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.UserRing" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.UserRing" time elapsed: 00:00:06
+----------------------------------------------------------
+
+44/49 Testing: OM9-FILE-012.Blocks
+44/49 Test: OM9-FILE-012.Blocks
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmBlockTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Blocks" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+nested and mixed shear blocks PASS
+<end of output>
+Test time =   0.52 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Blocks" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.Blocks" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/49 Testing: OM9-FILE-012.HatchAffine
+45/49 Test: OM9-FILE-012.HatchAffine
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmHatchAffineTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.HatchAffine" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+tilt0 unit1 affine0 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit1 affine1 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit1 affine2 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit1 affine3 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit1 affine4 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine0 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine1 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine2 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine3 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine4 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine0 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine1 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine2 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine3 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine4 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit10 affine0 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit10 affine1 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit10 affine2 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit10 affine3 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit10 affine4 exact world loops/pattern/sibling/stable IDs PASS
+<end of output>
+Test time =   1.59 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.HatchAffine" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.HatchAffine" time elapsed: 00:00:01
+----------------------------------------------------------
+
+46/49 Testing: OM9-FILE-012.HatchCurrent
+46/49 Test: OM9-FILE-012.HatchCurrent
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmHatchCurrentTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.HatchCurrent" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+current native hatch fields/plane/pattern/tiny scale mm/cm PASS
+current native hatch fields/plane/pattern/tiny scale mm/cm PASS
+<end of output>
+Test time =   0.51 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.HatchCurrent" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.HatchCurrent" time elapsed: 00:00:00
+----------------------------------------------------------
+
+47/49 Testing: OM9-FILE-012.HatchLoops
+47/49 Test: OM9-FILE-012.HatchLoops
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmHatchLoopTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.HatchLoops" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+unsafe preflight: Unsafe native Hatch loop userdata [ON_PolyCurve / LoopPluginData]
+unsafe preflight: Unsafe native Hatch loop userdata [ON_PolyCurve / LoopPluginData]
+Hatch loop8 subtype mm/cm roundtrips; recursive userdata/refs/inactive gradients/atomic guards PASS
+<end of output>
+Test time =   0.51 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.HatchLoops" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.HatchLoops" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/49 Testing: OM9-FILE-012.HatchLoopEdit
+48/49 Test: OM9-FILE-012.HatchLoopEdit
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmHatchLoopEditTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.HatchLoopEdit" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+native typed loop edit8 cases/topology PASS
+<end of output>
+Test time =   0.56 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.HatchLoopEdit" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.HatchLoopEdit" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/49 Testing: OM9-FILE-012.Unmeshed
+49/49 Test: OM9-FILE-012.Unmeshed
+Command: "H:/FreeCAD-src/build/clipboard-native/ThreeDmUnmeshedTests.exe"
+Directory: H:/FreeCAD-src/build/clipboard-native
+"OM9-FILE-012.Unmeshed" start time: Oct 09 07:43 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+count 135 tolerance 0.001 scale 1
+Accurate volume object 5: 59.44329333599798 -> 59.44329333778601 difference 1.788031056548789e-09
+Accurate volume object 6: 59.44329333599798 -> 59.44329333778601 difference 1.788031056548789e-09
+unmeshed fixture PASS
+<end of output>
+Test time =  20.30 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.Unmeshed" end time: Oct 09 07:43 SE Asia Standard Time
+"OM9-FILE-012.Unmeshed" time elapsed: 00:00:20
+----------------------------------------------------------
+
+End testing: Oct 09 07:43 SE Asia Standard Time

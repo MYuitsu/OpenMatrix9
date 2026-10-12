@@ -2,7 +2,8 @@
 import json, math, os, sys, traceback
 from pathlib import Path
 import FreeCAD as App, FreeCADGui as Gui, Part
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets, QtTest
+from pivy import coin
 sys.path.insert(0, str(Path(__file__).parent))
 from gumball_fixture import GumballUI
 out = Path(os.environ['OM9_SMOKE_OUTPUT'])
@@ -64,8 +65,40 @@ def run():
             for key, value in initial.items():
                 setattr(obj, key, value)
             doc.recompute(); ui.select(obj)
-            ui.numeric(handle, '2', QtCore.Qt.ShiftModifier if uniform else QtCore.Qt.NoModifier)
+            if type_name == 'Part::Ellipsoid':
+                # The host adjusts clipping while repainting curved geometry.
+                # Clip-plane updates must not count as navigation and dismiss
+                # the real numeric editor before it commits native parameters.
+                pos = ui.target(handle); viewport = ui.viewport; viewport.setFocus()
+                QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, pos)
+                camera = Gui.activeDocument().activeView().getCameraNode()
+                camera.nearDistance = camera.nearDistance.getValue()*1.1
+                camera.farDistance = camera.farDistance.getValue()*1.1
+                native.gumballState(); ui.settle()
+                fields = [w for w in ui.main_window.findChildren(QtWidgets.QLineEdit, 'OM9GumballNumeric') if w.isVisible()]
+                assert native.gumballState()['phase'] == 2 and len(fields) == 1, 'clip-plane update cancelled numeric Scale'
+                QtTest.QTest.keyClicks(fields[0], '2')
+                QtTest.QTest.keyClick(fields[0], QtCore.Qt.Key_Return); ui.settle()
+            else:
+                ui.numeric(handle, '2', QtCore.Qt.ShiftModifier if uniform else QtCore.Qt.NoModifier)
             doc.recompute()
+            if type_name == 'Part::Ellipsoid':
+                # Genuine perspective zoom and rotation must still cancel an
+                # uncommitted numeric gesture, without changing the model.
+                for change in ('zoom', 'rotation'):
+                    pos = ui.target(handle); viewport = ui.viewport; viewport.setFocus()
+                    QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, pos)
+                    assert native.gumballState()['phase'] == 2
+                    undo = doc.UndoCount
+                    camera = Gui.activeDocument().activeView().getCameraNode()
+                    angle = camera.heightAngle.getValue(); rotation = camera.orientation.getValue()
+                    if change == 'zoom': camera.heightAngle = angle*1.05
+                    else: camera.orientation = coin.SbRotation(coin.SbVec3f(0,0,1),0.05)*rotation
+                    native.gumballState(); ui.settle()
+                    assert native.gumballState()['phase'] == 1 and doc.UndoCount == undo, change+' did not cancel numeric Scale'
+                    assert not any(w.isVisible() for w in ui.main_window.findChildren(QtWidgets.QLineEdit, 'OM9GumballNumeric'))
+                    camera.heightAngle = angle; camera.orientation = rotation
+                    native.gumballState(); ui.settle()
             check(type_name+' scales through native parameters', obj.TypeId == type_name and obj.Shape.isValid() and
                   all(close(getattr(obj, key).Value, value) for key, value in expected.items()))
         driver = doc.addObject('App::FeaturePython', 'Driver')

@@ -9,7 +9,7 @@
     },
     "ui-menu": {
       "skill": "openmatrix9-ui",
-      "read_now": ["docs/superpowers/specs/2026-10-03-matrix9-menu-design.md", "docs/superpowers/plans/2026-10-03-matrix9-menu.md", "ref/MainMenu.ini", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-iface-001-matrix-interface.md", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-main-001-main-menu.md", "rust/src/lib.rs", "rust/src/workbench.rs", "Gui/RustBridge.h", "Gui/Workbench.cpp"],
+      "read_now": ["docs/superpowers/specs/2026-10-03-matrix9-menu-design.md", "docs/superpowers/plans/2026-10-03-matrix9-menu.md", "Resources/menu/MainMenu.ini", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-iface-001-matrix-interface.md", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-main-001-main-menu.md", "rust/src/lib.rs", "rust/src/workbench.rs", "Gui/RustBridge.h", "Gui/Workbench.cpp"],
       "read_if": [
         {"when": "Extracting menu icon images or checking icon-to-command mapping", "paths": ["ref/Matrix.rui", "ref/matrix9/vb6-lite/Matrix90/frmMenuTools.frm", "ref/matrix9/vb6-lite/Matrix90/ctrTitleBar.123", "ref/matrix9/vb6-lite/Matrix90/ctrTitleBar.ctx"]},
         {"when": "Implementing F6 or right-click menu", "paths": ["ref/ContextMenu.xml", "ref/RightClick.ini", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-f6-001-f6-context-menu.md"]}

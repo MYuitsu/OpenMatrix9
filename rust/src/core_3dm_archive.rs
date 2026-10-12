@@ -217,9 +217,15 @@ pub fn validate_export_manifest(raw: &str) -> Result<(), &'static str> {
     let Json::Object(root) = parse_document(raw, MAX_MANIFEST_BYTES, MAX_MANIFEST_NODES)? else {
         return Err("export manifest object required");
     };
+    let canonical = match root.get("schema_version") {
+        None | Some(Json::Number(1.)) => false,
+        Some(Json::Number(2.)) => true,
+        _ => return Err("unsupported export schema version"),
+    };
     if root
         .keys()
-        .any(|key| !matches!(key.as_str(), "items" | "tolerance"))
+        .any(|key| !matches!(key.as_str(), "items" | "tolerance" | "schema_version")
+            && !(canonical && key == "layer_session"))
     {
         return Err("unsupported export manifest field");
     }
@@ -232,15 +238,28 @@ pub fn validate_export_manifest(raw: &str) -> Result<(), &'static str> {
     let Some(Json::Array(items)) = root.get("items") else {
         return Err("export items required");
     };
-    if items.is_empty() {
+    let layers = if canonical {
+        // The bounded strict parser above rejects duplicate keys before serde
+        // sees the canonical metadata envelope. Preserve geometry validation
+        // below; canonical layer policy never grants malformed geometry access.
+        let value: serde_json::Value = serde_json::from_str(raw)
+            .map_err(|_| "invalid canonical export JSON")?;
+        let encoded = serde_json::to_vec(value.get("layer_session")
+            .ok_or("canonical layer session required")?)
+            .map_err(|_| "invalid canonical layer session")?;
+        Some(crate::layer_codec::decode_snapshot(&encoded)
+            .map_err(|_| "invalid canonical layer session")?)
+    } else { None };
+    if items.is_empty() && layers.as_ref().is_none_or(|state| state.layers.is_empty() || !state.objects.is_empty()) {
         return Err("no geometry to export");
     }
+    let mut bindings = std::collections::HashSet::new();
     for item in items {
         let Json::Object(item) = item else {
             return Err("export item object required");
         };
         if item.keys().any(|key| {
-            !matches!(
+            !(canonical && key == "layer_object_id") && !matches!(
                 key.as_str(),
                 "name"
                     | "layer"
@@ -256,6 +275,14 @@ pub fn validate_export_manifest(raw: &str) -> Result<(), &'static str> {
             )
         }) {
             return Err("unsupported geometry-only item field");
+        }
+        if canonical {
+            let Some(Json::String(id)) = item.get("layer_object_id") else {
+                return Err("canonical geometry object binding required");
+            };
+            if id.is_empty() || id.len() > 1024 || id.contains('\0') || !bindings.insert(id.as_str()) {
+                return Err("invalid or duplicate canonical geometry binding");
+            }
         }
         for key in ["name", "layer"] {
             if let Some(value) = item.get(key) {
@@ -335,6 +362,12 @@ pub fn validate_export_manifest(raw: &str) -> Result<(), &'static str> {
             {
                 return Err("mesh face must contain four in-range integer indices");
             }
+        }
+    }
+    if let Some(state) = layers {
+        if state.objects.len() != bindings.len()
+            || state.objects.iter().any(|object| !bindings.contains(object.id.as_str())) {
+            return Err("canonical geometry and layer inventory disagree");
         }
     }
     Ok(())

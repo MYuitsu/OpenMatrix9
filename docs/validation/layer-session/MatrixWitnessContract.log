@@ -1,0 +1,4 @@
+
+Unhandled Exception: System.InvalidOperationException: Rollback witness commit failed
+   at OM9LayerTransfer.NativeLayerWitness.Restore(RhinoDoc doc, Guid id, String value)
+   at MatrixWitnessContract.Main()

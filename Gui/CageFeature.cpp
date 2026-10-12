@@ -50,7 +50,7 @@ App::DocumentObject* native(PyObject* p){
 }
 void editable(App::Document& d){
     auto* g=Gui::Application::Instance->activeDocument();
-    if(App::GetApplication().getActiveDocument()!=&d||!g||g->getDocument()!=&d||g->getInEdit()||g->isAboutToClose()||!Gui::Control().isAllowedAlterDocument(&d))
+    if(App::GetApplication().getActiveDocument()!=&d||!g||g->getDocument()!=&d||g->getInEdit()||g->isAboutToClose()||!om9AlterDocument(&d))
         throw std::runtime_error("The active document is not editable");
 }
 Base::Matrix4D frame(App::DocumentObject* o){return App::GeoFeature::getGlobalPlacement(o).toMatrix();}
@@ -176,9 +176,9 @@ PyObject* capture(PyObject*,PyObject* args){
         validateCageGeometryInput(*c,"CageEdit",[&](unsigned representation){validateNativeCageCapability(representation,controlRequest,"CageEdit",c->getNameInDocument());});
         auto handle=cageHandle(*c);std::vector<Prepared> prepared;for(auto* o:selected){auto p=prepare(o,*c,handle,request);if(std::string(region)=="Local"&&!p.mesh&&p.vertices.empty())throw std::runtime_error("Local cage deformation requires a mesh, single edge or rectangular face");prepared.push_back(std::move(p));}
         // Fully decode and invert before any native transaction or source write.
-        d.openTransaction("Cage Edit capture");try{CurvePyRef out(insertBindings(*c,prepared,handle,region,falloff));
-            d.recompute();for(Py_ssize_t i=0;i<PyList_Size(out.value);++i){auto* b=native(PyList_GetItem(out.value,i));if(b->isError()){const char* error=d.getErrorDescription(b);throw std::runtime_error(std::string("Cage binding recompute failed: ")+(error?error:"unknown recompute error"));}}d.commitTransaction();auto* result=out.value;out.value=nullptr;return result;
-        }catch(...){d.abortTransaction();throw;}
+        om9OpenTransaction(d,"Cage Edit capture");try{CurvePyRef out(insertBindings(*c,prepared,handle,region,falloff));
+            d.recompute();for(Py_ssize_t i=0;i<PyList_Size(out.value);++i){auto* b=native(PyList_GetItem(out.value,i));if(b->isError()){const char* error=d.getErrorDescription(b);throw std::runtime_error(std::string("Cage binding recompute failed: ")+(error?error:"unknown recompute error"));}}om9CommitTransaction(d);auto* result=out.value;out.value=nullptr;return result;
+        }catch(...){om9AbortTransaction(d);throw;}
     }catch(const Base::Exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(const std::exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(...){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,"Native cage operation failed");return nullptr;}
 }
 PyObject* restoreArchive(PyObject*,PyObject* args){PyObject* source;if(!PyArg_ParseTuple(args,"O",&source))return nullptr;
@@ -201,7 +201,7 @@ PyObject* restoreArchive(PyObject*,PyObject* args){PyObject* source;if(!PyArg_Pa
         Base::Matrix4D reference;
         if(decoded.originalReference){const auto& m=decoded.originalReference->worldMmToParameters;for(int i=0;i<4;++i)for(int j=0;j<4;++j)reference[i][j]=m[i*4+j];auto inverse=parent;inverse.inverseGauss();reference=reference*inverse;
             for(int axis=0;axis<3;++axis){auto start=data.fullKnots[axis][data.degrees[axis]],end=data.fullKnots[axis][data.counts[axis]];for(int j=0;j<4;++j)reference[axis][j]/=(end-start);reference[axis][3]-=start/(end-start);}}
-        d.openTransaction("Restore Rhino cage relationships");try{
+        om9OpenTransaction(d,"Restore Rhino cage relationships");try{
             auto* c=dynamic_cast<CageControl*>(d.addObject("OpenMatrix9Gui::CageControl","Cage"));c->Counts.setValues(std::vector<long>(data.counts.begin(),data.counts.end()));c->Degrees.setValues(std::vector<long>(data.degrees.begin(),data.degrees.end()));c->ControlPoints.setValues(points);c->Weights.setValues(weights);c->UKnots.setValues(data.fullKnots[0]);c->VKnots.setValues(data.fullKnots[1]);c->WKnots.setValues(data.fullKnots[2]);c->ReferenceFrame.setValue(reference);
             c->Placement.setValue(Base::Placement(parent));
             QJsonObject metadata{{"source_record_uuid",QString::fromStdString(verified.sourceUuid)},{"import_namespace",QString::fromStdString(verified.importNamespace)},{"source_class",QString::fromStdString(decoded.sourceClass)},{"bind_geometry","current_archive_output"},{"preserve_structure",decoded.preserveStructure},{"quick_preview",decoded.quickPreview},{"scale_mm",decoded.scaleMm}};
@@ -229,7 +229,7 @@ PyObject* create(PyObject*,PyObject* args){const char* document;PyObject *minimu
         for(int i=0;i<3;++i)k[i].resize(nativeCounts[i]+nativeDegrees[i]+1);
         if(om9_cage_box_fill(nativeCounts.data(),nativeDegrees.data(),lo.data(),hi.data(),coordinates.data(),size,k[0].data(),k[0].size(),k[1].data(),k[1].size(),k[2].data(),k[2].size(),matrix.data())!=0)throw std::runtime_error("Cage requires a finite positive box");
         auto points=vectors(coordinates);Base::Matrix4D reference;for(int i=0;i<4;++i)for(int j=0;j<4;++j)reference[i][j]=matrix[i*4+j];
-        d->openTransaction("Create Cage");try{auto* c=dynamic_cast<CageControl*>(d->addObject("OpenMatrix9Gui::CageControl","Cage"));c->Counts.setValues(n);c->Degrees.setValues(p);c->UKnots.setValues(k[0]);c->VKnots.setValues(k[1]);c->WKnots.setValues(k[2]);c->ControlPoints.setValues(points);c->Weights.setValues(std::vector<double>(size,1));c->ReferenceFrame.setValue(reference);d->recompute();if(c->isError())throw std::runtime_error("Cannot build cage");d->commitTransaction();return c->getPyObject();}catch(...){d->abortTransaction();throw;}
+        om9OpenTransaction(*d,"Create Cage");try{auto* c=dynamic_cast<CageControl*>(d->addObject("OpenMatrix9Gui::CageControl","Cage"));c->Counts.setValues(n);c->Degrees.setValues(p);c->UKnots.setValues(k[0]);c->VKnots.setValues(k[1]);c->WKnots.setValues(k[2]);c->ControlPoints.setValues(points);c->Weights.setValues(std::vector<double>(size,1));c->ReferenceFrame.setValue(reference);d->recompute();if(c->isError())throw std::runtime_error("Cannot build cage");om9CommitTransaction(*d);return c->getPyObject();}catch(...){om9AbortTransaction(*d);throw;}
     }catch(const Base::Exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(const std::exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(...){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,"Native cage operation failed");return nullptr;}
 }
 }

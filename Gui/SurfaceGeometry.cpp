@@ -1,3 +1,4 @@
+#include "LayerDocumentAdapter.h"
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "SurfaceGeometry.h"
 #include "CoreLayers.h"
@@ -91,6 +92,7 @@ namespace {
 void verifySurfaceInput(App::Document& doc,const SurfaceInput& input,const char* operation) {
     // Empty guards are intentional for persistent History reconstruction and
     // transient type probes. Accepted interactive selections always carry guards.
+    for(const auto& guard:input.phase3Guards)verifyPhase3Object(doc,guard);
     for(const auto& guard:input.guards)try{verifyObject(doc,guard);}
     catch(const std::exception& error){throw std::runtime_error(std::string("StaleGeometry: ")+operation+" input "+guard.objectName+(guard.subelement.empty()?"":"."+guard.subelement)+": "+error.what());}
 }
@@ -284,6 +286,7 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
     }else {
         Ref api(PyObject_GetAttrString(part.p,"BRepOffsetAPI"));Ref constructor(PyObject_GetAttrString(api.p,"MakePipeShell"));
         Ref pipe(PyObject_CallFunctionObjArgs(constructor.p,PyList_GetItem(wires.p,0),nullptr));
+        const double accuracy=om9_phase3_kernel_tolerance();Ref precision(PyObject_CallMethod(pipe.p,"setTolerance","ddd",accuracy,accuracy,accuracy));
         Ref mode(PyObject_CallMethod(pipe.p,"setFrenetMode","O",options.frenet?Py_True:Py_False));
         if(rails==2){
             Ref auxiliary(PyObject_CallMethod(pipe.p,"setAuxiliarySpine","OOi",PyList_GetItem(wires.p,1),Py_True,int(om9_surface_sweep2_contact(inputs.size()-rails))));
@@ -299,6 +302,7 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
     return shape.release();
 }
 void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
+    requireLayerGeometryEditable(doc);
     const char* name=options.kind==1?"Sweep1":options.kind==2?"Sweep2":"Loft";
     const char* feature=options.kind==1?"OM9-SURFACE-001":options.kind==2?"OM9-SURFACE-003":"OM9-SURFACE-009";
     for(const auto& input:inputs)verifySurfaceInput(doc,input,name);
@@ -307,8 +311,13 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
     const auto prepared=prepareSurfaceOutput(doc,shape,evidence,outputName);
     const auto layer=CoreLayers::captureCircle(doc);verifySurfaceOutput(doc,prepared);
     const auto commitContext=surfacePublicationContext(name,inputs);
-    if(!doc.openTransactionPreservingRedo(name))throw std::runtime_error(std::string("StaleGeometry: ")+name+" input "+surfaceInputIdentity(inputs)+": Surface publication transaction could not be opened");
+    const std::string documentName=doc.getName(),documentUid=doc.Uid.getValueStr();
+    const int transaction=doc.openTransactionPreservingRedo(name);
+    if(!transaction)throw std::runtime_error(std::string("StaleGeometry: ")+name+" input "+surfaceInputIdentity(inputs)+": Surface publication transaction could not be opened");
+    const auto owns=[&]{auto* current=App::GetApplication().getDocument(documentName.c_str());return current==&doc&&current&&current->Uid.getValueStr()==documentUid&&ownsLayerGeometryTransaction(*current,transaction);};
     try {
+        std::unique_ptr<LayerGeometryTransaction> layers;
+        if(hasCanonicalLayerDocument(doc))layers=std::make_unique<LayerGeometryTransaction>(doc,transaction);
         verifySurfaceOutput(doc,prepared);
         if(options.history){
             auto* feature=createSurfaceHistory(doc,prepared,inputs,options);Ref object(feature->getPyObject());
@@ -316,6 +325,8 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
             if(layer.index)CoreLayers::applyCircle(doc,*feature,layer);
             doc.recomputeFeature(feature,false);if(!feature->isValid()||feature->Shape.getShape().isNull())throw std::runtime_error("Surface History recompute failed before commit");
             verifySurfaceOutput(doc,prepared);
+            if(layers)layers->finish();
+            if(!owns())throw std::runtime_error("Surface transaction ownership changed");
             commitSurfacePublication(doc,commitContext);return;
         }
         Ref pyDoc(doc.getPyObject()),object(PyObject_CallMethod(pyDoc.p,"addObject","ss","Part::Feature",outputName.c_str()));
@@ -335,7 +346,9 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
         if(layer.index){Ref outputName(PyObject_GetAttrString(object.p,"Name"));auto* native=doc.getObject(PyUnicode_AsUTF8(outputName.p));if(!native)throw std::runtime_error("Surface output identity missing");CoreLayers::applyCircle(doc,*native,layer);}
         Ref actualName(PyObject_GetAttrString(object.p,"Name"));auto* native=doc.getObject(PyUnicode_AsUTF8(actualName.p));
         if(!native||!doc.recomputeFeature(native,false)||!native->isValid())throw std::runtime_error("Surface output recompute failed before commit");
-        verifySurfaceOutput(doc,prepared);commitSurfacePublication(doc,commitContext);
-    }catch(...){doc.abortTransaction();throw;}
+        verifySurfaceOutput(doc,prepared);if(layers)layers->finish();
+        if(!owns())throw std::runtime_error("Surface transaction ownership changed");
+        commitSurfacePublication(doc,commitContext);
+    }catch(...){if(owns())doc.abortTransaction();throw;}
 }
 }

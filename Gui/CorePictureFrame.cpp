@@ -60,7 +60,7 @@ CorePictureFrame::CorePictureFrame():QObject(qApp) {
 bool CorePictureFrame::handles(std::size_t index){const auto* name=om9_command_id(index);return name&&QString::fromUtf8(name)=="PictureFrame";}
 bool CorePictureFrame::available()const {
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&view()&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&view()&&om9AlterDocument(doc);
 }
 bool CorePictureFrame::valid()const{return running&&document==App::GetApplication().getActiveDocument()&&available();}
 bool CorePictureFrame::checkContext(){
@@ -146,7 +146,7 @@ void CorePictureFrame::finish(const double* p,const CoordinateInput& input) {
         // Serialize the complete candidate before opening the native transaction.
         auto inputs=acceptedInputs;inputs.push_back(input);coordinateInputReport(inputs);
         if(!checkContext())return;
-        const auto transactionId=doc->openTransaction("PictureFrame");
+        const auto transactionId=om9OpenTransaction(*doc,"PictureFrame");
         if(!transactionId)throw Base::RuntimeError("PictureFrame: Cannot open transaction; retry when the document is ready");
         transactionOpen=true;
         auto* object=dynamic_cast<Image::ImagePlane*>(doc->addObject("Image::ImagePlane","PictureFrame"));
@@ -159,13 +159,13 @@ void CorePictureFrame::finish(const double* p,const CoordinateInput& input) {
         persistCoordinateProvenance(*object,inputs);
         addUnitContextProvenance(*object,coordinateContext.unitContext);
         doc->recompute();if(object->isError())throw Base::RuntimeError("PictureFrame recompute failed");
-        doc->commitTransaction();transactionOpen=false;
+        om9CommitTransaction(*doc);transactionOpen=false;
         CoreSnaps::acceptedPoint(true);om9_sidebar_record_execution(command,true);cancel();
         CurveController::instance().setPrompt("PictureFrame created");
         CurveController::instance().logMessage("PictureFrame created");
-    }catch(const Base::Exception& error){if(transactionOpen)doc->abortTransaction();if(checkContext())prompt(QString::fromUtf8(error.what()));}
-    catch(const std::exception& error){if(transactionOpen)doc->abortTransaction();if(checkContext())prompt(QString::fromUtf8(error.what()));}
-    catch(...){if(transactionOpen)doc->abortTransaction();if(checkContext())prompt("PictureFrame: Creation failed");}
+    }catch(const Base::Exception& error){if(transactionOpen)om9AbortTransaction(*doc);if(checkContext())prompt(QString::fromUtf8(error.what()));}
+    catch(const std::exception& error){if(transactionOpen)om9AbortTransaction(*doc);if(checkContext())prompt(QString::fromUtf8(error.what()));}
+    catch(...){if(transactionOpen)om9AbortTransaction(*doc);if(checkContext())prompt("PictureFrame: Creation failed");}
 }
 void CorePictureFrame::submit(const QString& text) {
     if(!valid()){cancel();return;}const auto input=text.trimmed();

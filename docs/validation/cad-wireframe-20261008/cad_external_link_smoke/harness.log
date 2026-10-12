@@ -1,0 +1,43 @@
+{
+    "checks":  [
+                   {
+                       "name":  "inactive external curved source receives isocurves",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "external reflected link contains source isocurves",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "external model shape remains unchanged",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "workbench exit restores external provider override",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "workbench exit removes external transient nodes",
+                       "passed":  true
+                   }
+               ],
+    "switches_before":  [
+                            1,
+                            0,
+                            -1,
+                            0,
+                            -1,
+                            -1
+                        ],
+    "switches_after":  [
+                           1,
+                           0,
+                           -1,
+                           0,
+                           -1,
+                           -1
+                       ],
+    "ok":  true
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\cad_external_link_smoke-1\2efa659dc9e946a6a67880b74fcc464a
+

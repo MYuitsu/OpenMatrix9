@@ -1,0 +1,22 @@
+test_each_stage_handoff_resolves_a_real_companion_skill (test_skill_reference_index.ReferenceIndexTests.test_each_stage_handoff_resolves_a_real_companion_skill) ... ok
+test_exact_feature_resolves_source_page_and_existing_spec (test_skill_reference_index.ReferenceIndexTests.test_exact_feature_resolves_source_page_and_existing_spec) ... ok
+test_feature_path_cannot_escape_spec_package (test_skill_reference_index.ReferenceIndexTests.test_feature_path_cannot_escape_spec_package) ... ok
+test_missing_catalog_does_not_fallback_to_another_project (test_skill_reference_index.ReferenceIndexTests.test_missing_catalog_does_not_fallback_to_another_project) ... ok
+test_search_keeps_subd_distinct_from_tsplines (test_skill_reference_index.ReferenceIndexTests.test_search_keeps_subd_distinct_from_tsplines) ... ok
+test_status_distinguishes_plan_and_implementation (test_skill_reference_index.ReferenceIndexTests.test_status_distinguishes_plan_and_implementation) ... ok
+test_ui_route_does_not_require_full_ghidra_export (test_skill_reference_index.ReferenceIndexTests.test_ui_route_does_not_require_full_ghidra_export) ... FAIL
+test_unknown_feature_is_a_clear_error (test_skill_reference_index.ReferenceIndexTests.test_unknown_feature_is_a_clear_error) ... ok
+
+======================================================================
+FAIL: test_ui_route_does_not_require_full_ghidra_export (test_skill_reference_index.ReferenceIndexTests.test_ui_route_does_not_require_full_ghidra_export)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_skill_reference_index.py", line 38, in test_ui_route_does_not_require_full_ghidra_export
+    self.assertTrue(all(x["exists"] for x in data["read_now"]))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.870s
+
+FAILED (failures=1)

@@ -1,0 +1,45 @@
+"""Exact native reimport of actual Rhino5 GUI nested writer SaveAs outputs."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,hashlib,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/om9-dev/docs/validation/rhino5-nested-writer-20261008')
+        proof=json.loads((root/'rhino5-gui-profile-results.json').read_text());oracle=json.loads((root/'oracle.json').read_text())
+        check('actual Rhino GUI twelve-case result binds exact independent writer oracle',proof['ok'] and len(proof['cases'])==len(oracle['cases'])==12 and proof['oracle_sha256']==sha(root/'oracle.json'))
+        for expected,row in zip(oracle['cases'],proof['cases']):
+            source=root/row['fixture'];saved=root/Path(row['saved_fixture']).name;label=source.name
+            check(label+' immutable source and actual GUI saved hashes',expected['fixture']==row['fixture'] and sha(source)==row['source_sha256']==expected['source_sha256'] and sha(saved)==row['saved_sha256'])
+            check(label+' actual GUI valid geometry and seventeen physical samples',row['passed'] and row['bad_objects']==0 and all(phase['passed'] and len(phase['objects'])==1 and phase['objects'][0]['valid'] and phase['objects'][0]['uuid']==expected['objects'][0]['uuid'] and phase['objects'][0]['domain']==expected['objects'][0]['domain'] and all(c['passed'] and c['maximum_sample_deviation_mm']<=1e-9 for c in phase['comparisons']) for phase in [row['first_read'],row['reread']]))
+            before=json.loads(native.inspect3dm(str(source)));after=json.loads(native.inspect3dm(str(saved)))
+            a,b=before['records'][0],after['records'][0]
+            check(label+' complete native UUID, class, nested UV tree and graph CRC after GUI SaveAs',after['source_version']==50 and not after['issues'] and len(after['records'])==1 and a['class_name']==b['class_name']=='ON_CurveOnSurface' and a['source_uuid']==b['source_uuid']==expected['objects'][0]['uuid'] and a['curve_on_surface_native']==b['curve_on_surface_native'] and a['dependencies']==b['dependencies'] and a['geometry_crc']==b['geometry_crc'])
+            result.setdefault('gui_plugin_tables',{})[label]=after['settings']['plugin_userdata']
+            external=out/saved.name;external.write_bytes(saved.read_bytes());doc=App.newDocument('RhinoNestedGUI')
+            obj=ThreeDm.import_file(str(external),doc,mode='preserve')[0];baseline=obj.OM9SourceRecord;name=obj.Name
+            check(label+' source record retains every decoded child without substituting a preview',json.loads(baseline)==b and obj.OM9Capability=='retained' and not hasattr(obj,'Shape'))
+            archive=out/(label+'.FCStd');doc.saveAs(str(archive));external.unlink();App.closeDocument(doc.Name)
+            doc=App.openDocument(str(archive));obj=doc.getObject(name)
+            check(label+' source-deleted FCStd retains entire GUI archive, plugin tables and native record',sha(Path(obj.OM9ArchiveOwner.OM9SourceArchive))==row['saved_sha256'] and obj.OM9SourceRecord==baseline)
+            target=out/(label+'-protected.3dm');target.write_bytes(b'keep target');count=len(doc.Objects);error=''
+            try:ThreeDm.export_file(str(target),[obj])
+            except Exception as exc:error=str(exc)
+            check(label+' opaque GUI plugin dependencies retain atomic export guard','Opaque plugin table dependencies' in error and target.read_bytes()==b'keep target' and len(doc.Objects)==count and obj.OM9SourceRecord==baseline)
+            App.closeDocument(doc.Name)
+        result['rhino_report_sha256']=sha(root/'rhino5-gui-profile-results.json');result['ok']=True
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

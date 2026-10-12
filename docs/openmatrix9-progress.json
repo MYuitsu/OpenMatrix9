@@ -7514,6 +7514,315 @@
       ],
       "next_document": "User Box default-video native test",
       "next_action": "Test default three picks including Top-height drag, plus explicit options in reopened native window"
+    },
+    {
+      "key": "gumball-core-release-candidate-20261012",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "approved_om9_gumball_core_complete",
+      "specification_status": "approved_scope_complete_native_gates_passed",
+      "updated_at": "2026-10-12T06:06:00+07:00",
+      "outputs": [
+        "OpenMatrix9_Codex_Spec_v1/FEATURES.json",
+        "OpenMatrix9_Codex_Spec_v1/FEATURES.yaml",
+        "OpenMatrix9_Codex_Spec_v1/FEATURE_LOOKUP.json",
+        "OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md",
+        "OpenMatrix9_Codex_Spec_v1/MANIFEST.json",
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-020-gumball.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-021-gumball-alignment.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-022-relocate-gumball.md",
+        "README.md",
+        "docs/features/OM9-INFO-020.md",
+        "docs/features/OM9-INFO-021.md",
+        "docs/features/OM9-INFO-022.md",
+        "docs/gumball-user-guide.md",
+        "docs/openmatrix9-progress.json",
+        "docs/validation/2026-10-12-gumball-core-completion.json",
+        "docs/validation/2026-10-12-gumball-core-completion.md",
+        "docs/validation/2026-10-12-gumball-core-release-candidate.md"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-core-completion.md",
+        "docs/validation/2026-10-12-gumball-core-completion.json",
+        "docs/validation/2026-10-12-gumball-core-release-candidate.md"
+      ],
+      "tests": [
+        {
+          "command": "Scoped Gumball candidate metadata/links/manifest verification",
+          "result": "pass; JSON/YAML607 equal,604 unrelated entries unchanged,3 source designs/code guides and partial statuses preserved,6 manifest hashes,30 links; historical ledger/release.json unchanged. Native gates pending."
+        },
+        {
+          "command": "rtk proxy python tools/public_source_audit.py --project-root H:/FreeCAD-src/build/om9-gumball-release-0.3.4",
+          "result": "exit0; source_files2284, icon_bindings511, svg_files510, errors0. Documentation/source audit only."
+        },
+        {
+          "command": "rtk git diff --check",
+          "result": "exit0. No native verification claim."
+        },
+        {
+          "command": "Exact30 native cohort guard",
+          "result": "pass;30 unique expected cases / 955 nonempty passing checks; one initial/current plugin and host SHA; per-case exit0/reports/bootstrap/feature identity checked."
+        }
+      ],
+      "uncertainties": [
+        "Stock FreeCAD1.1.4 GitHub Actions remains pending for this exact source; no published release claim.",
+        "Approved process-local pivot cache and FreeCAD failed posttransaction old-Redo loss remain host limits.",
+        "Unsupported native graph/geometry or ambiguous frames reject. Clayoo/SmartTargets, Rhino internal roll, full Render/live host camera widgets and exact original-host parity excluded."
+      ],
+      "next_document": "docs/validation/2026-10-12-gumball-core-completion.md",
+      "next_action": "Run exact committed source through stock FreeCAD1.1.4 GitHub Actions; preserve native host limits and record actual Action result separately.",
+      "approved_scope_complete": true,
+      "stock_ci_status": "pending",
+      "native_processes": 30,
+      "native_checks": 955,
+      "plugin_sha256": "559e0dca08e3535174879dd81c598d4a894e70e43989d22dba8b6d77a8db6b20",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "version_label": "0.3.4-202610120606"
+    },
+    {
+      "id": "gumball-stock-rendering-and-parametric-clipping-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "scope": "approved_gumball_core_stock_runtime_repair",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "summary": "Official stock FreeCAD native cohort passes after shared bundled Mesa selection, exposed owned Qt windows and native FBO captures. Perspective clip-plane changes retain numeric Scale; real zoom/rotation still cancel. Native Binder names use value comparisons on stock and development APIs, preserving all permission flags. Primitive dimensions, expressions, admitted associative dependencies and Object Alignment remain covered by the full cohort.",
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-stock-rendering.md"
+      ],
+      "tests": [
+        {
+          "command": "tools/ci/run-gumball.ps1 against an isolated official stock host",
+          "result": "pass; 30 native processes / 955 named checks; one host/plugin hash; DPI100/150/200; real pointer, Undo/Redo and warm/cold FCStd"
+        },
+        {
+          "command": "Parametric clipping regression, previous and rebuilt plugins",
+          "result": "red reproduced; green 22 checks; real perspective zoom/rotation still cancel without model changes"
+        },
+        {
+          "command": "CI renderer/profile deployment regression",
+          "result": "17 checks pass; isolated fake hosts; matching alias, ownership, conflict and reparse guards"
+        },
+        {
+          "command": "Native Binder compatibility regression",
+          "result": "red reproduced; green 127 checks; exact type-name value comparisons; ReadOnly retained and unsupported protected properties rejected"
+        },
+        {
+          "command": "Development SDK syntax checks for GumballOverlay.cpp and GumballAssociativeScale.cpp",
+          "result": "pass; syntax only; no development-host DLL rebuild claimed"
+        },
+        {
+          "command": "Public package/version/source-audit regressions",
+          "result": "4 package + 3 version + 11 audit tests pass"
+        }
+      ],
+      "native_processes": 30,
+      "native_checks": 955,
+      "plugin_sha256": "71f8431d71f6abfb36c45e9fd2a128f1d8f232368e2e5c1faf5dd3a6ff58b987",
+      "suite_sha256": "800c4c9730f85c20582eee1b352cfb4701520e74d03c1acb2e78b7dff0b9ee7a",
+      "version_label": "0.3.4-202610120606",
+      "stock_ci_status": "exact_commit_action_authoritative",
+      "uncertainties": [
+        "Local stock results do not certify the exact GitHub runner build; its actual Action and artifacts are authoritative.",
+        "Approved native host limits remain as documented in the core completion report."
+      ],
+      "next_document": "docs/validation/2026-10-12-gumball-stock-rendering.md",
+      "next_action": "Push the reviewed candidate and verify the exact commit GitHub Action and packaged plugin/SetupLauncher artifacts."
+    },
+    {
+      "id": "gumball-ci-logical-window-fixture-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "scope": "approved_gumball_core_ci_fixture_repair",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "summary": "Controlled owned logical window geometry fixes desktop-dependent FBO magnification. The unchanged complete stock native suite passes at DPI100/150/200; production Gumball geometry and pixel bounds are unchanged.",
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-ci-window-fixture.md"
+      ],
+      "tests": [
+        {
+          "command": "Small-window native core reproduction",
+          "result": "red: same compact-widget assertion at1024x726; green:68 checks at1800x1000"
+        },
+        {
+          "command": "tools/ci/run-gumball.ps1 against isolated official stock host",
+          "result": "pass;30 native processes/955 checks; recorded client geometry and actual DPI; one host/plugin"
+        },
+        {
+          "command": "Private exact-head Actions evidence inspector regressions",
+          "result": "15 guards pass; missing window metadata, wrong geometry/exposure/DPI are rejected"
+        }
+      ],
+      "native_processes": 30,
+      "native_checks": 955,
+      "suite_sha256": "eb8e76a4698e17e7ffccf895d6f510bc761af48bf6a3fba3b32858c054b679f1",
+      "plugin_sha256": "71f8431d71f6abfb36c45e9fd2a128f1d8f232368e2e5c1faf5dd3a6ff58b987",
+      "version_label": "0.3.4-202610120606",
+      "stock_ci_status": "exact_commit_action_authoritative",
+      "next_document": "docs/validation/2026-10-12-gumball-ci-window-fixture.md",
+      "next_action": "Verify the reviewed pushed commit through its actual GitHub Action, native evidence and both packaged ZIP files."
+    },
+    {
+      "id": "gumball-local-tests-ci-build-only-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "scope": "release_build_policy",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "summary": "User requested local tests and CI build/package only. Native code unchanged; local30/955 stock cohort retained. CI packages explicit build-only provenance and forbids runtime-test claims.",
+      "evidence": [
+        "docs/validation/2026-10-12-local-tests-ci-build-only.md"
+      ],
+      "tests": [
+        {
+          "command": "Local native report integrity inspection",
+          "result": "30 processes/955 passing checks; exact suite hash; existing native implementation unchanged"
+        },
+        {
+          "command": "Local release packaging/build-record tests",
+          "result": "8 package +4 build-record checks pass"
+        }
+      ],
+      "native_processes": 30,
+      "native_checks": 955,
+      "plugin_sha256": "71f8431d71f6abfb36c45e9fd2a128f1d8f232368e2e5c1faf5dd3a6ff58b987",
+      "suite_sha256": "eb8e76a4698e17e7ffccf895d6f510bc761af48bf6a3fba3b32858c054b679f1",
+      "version_label": "0.3.4-202610120606",
+      "stock_ci_status": "build_only_action_authoritative",
+      "uncertainties": [
+        "Previous CI component-pointer fixture failure retained as a runner evidence gap; no CI runtime-test success is claimed."
+      ],
+      "next_document": "docs/validation/2026-10-12-local-tests-ci-build-only.md",
+      "next_action": "Push reviewed source; verify exact-commit build-only Action and both actual ZIP artifacts."
+    },
+    {
+      "id": "gumball-main-integration-release-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "scope": "merged_gumball_release_and_selected_regressions",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "summary": "Merged candidate with current main; preserves CAD modules, canonical Layer/clipboard and Phase2/3. Verified native helper identities, independent Selectable intent, legacy output RGB/Off/lock metadata, native Rebuild, periodic and segmented exchange. Source review found no remaining scoped blockers.",
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-main-release.md",
+        "docs/validation/2026-10-12-gumball-main-local-evidence.json",
+        "docs/validation/2026-10-12-main-pre-gumball-progress.json"
+      ],
+      "native_processes": 46,
+      "native_checks": 1564,
+      "gumball_native_processes": 30,
+      "gumball_native_checks": 955,
+      "rust_tests": 846,
+      "plugin_sha256": "e2a65fa874b294ad3e873188d63d1ac6513f7a02b1d4397f6b4fbd49ceb61717",
+      "host_sha256": "7b38c5d5aa2c74f830539c1c5c44cbf6e3e8e157292c718f9ee24ac6d3e12cf6",
+      "version_label": "0.3.4-202610120606",
+      "uncertainties": [
+        "Local reports do not certify CI DLL runtime execution. GitHub Actions only builds and packages.",
+        "Selected stock FCStd fixtures record and clear stale Windows CRT errno before save; ordinary stock empty-document reproduction confirms host Writer limitation. No host save fix is claimed.",
+        "Stock FreeCAD automatically commits another document draft before starting a native transaction. The new creation fixture explicitly completes the foreign draft first; the original dev multi-pending fixture remains intact.",
+        "Full P0/core catalog, full Rhino/Matrix parity, Clayoo/SubD and SmartTargets are not part of this acceptance."
+      ],
+      "stock_ci_status": "build_only_action_authoritative",
+      "next_document": "docs/validation/2026-10-12-gumball-main-release.md",
+      "next_action": "Push reviewed merge on main; publish matching version tag; verify actual Action ZIPs and public Release digests separately."
+    },
+    {
+      "id": "gumball-multi-selection-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "scope": "whole_object_multi_selection_gumball",
+      "summary": "Whole-object Shift/window selection shares one Gumball in every view, including Object Alignment; common-pivot MSR, Undo/Redo and component protection verified.",
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-multi-selection.md",
+        "docs/validation/2026-10-12-gumball-multi-selection.json"
+      ],
+      "outputs": [
+        "Gui/GumballFrame.cpp",
+        "Gui/GumballRust.h",
+        "rust/src/gumball.rs",
+        "rust/src/gumball_ffi.rs",
+        "rust/tests/gumball_ffi.rs",
+        "tests/gumball_geometry_smoke.FCMacro",
+        "tests/gumball_multi_selection_smoke.FCMacro",
+        "tools/ci/run-gumball.ps1"
+      ],
+      "tests": [
+        {
+          "command": "cargo test --locked",
+          "result": "848 passing tests"
+        },
+        {
+          "command": "tools/ci/run-gumball.ps1 (local only)",
+          "result": "31 processes / 1099 passing checks; multi-selection143"
+        }
+      ],
+      "native_processes": 31,
+      "native_checks": 1099,
+      "rust_tests": 848,
+      "plugin_sha256": "c013417b56abe9cc2613d88047161660fbb7957cba5aace3578889440aa1af33",
+      "host_sha256": "7b38c5d5aa2c74f830539c1c5c44cbf6e3e8e157292c718f9ee24ac6d3e12cf6",
+      "version_label": "0.3.5-202610121520",
+      "stock_ci_status": "build_only_action_authoritative",
+      "uncertainties": [
+        "Object multi-owner CPlane basis is an explicit OM9 policy, not Rhino internals certification.",
+        "Ambiguous/mixed components retain native UnsupportedFrame protection.",
+        "Local tests do not assert runtime execution of the distinct CI binary.",
+        "Known stock host save/transaction and unsupported graph limits remain as documented.",
+        "Existing Rust SourceAttributes::decode dead-code warning remains."
+      ],
+      "next_document": "docs/validation/2026-10-12-gumball-multi-selection.md",
+      "next_action": "Verify exact-source build-only Action packages and public Release, then install/launch the matching bundle."
+    },
+    {
+      "key": "main-command-integration-20261012",
+      "stage": "build-validation",
+      "status": "validated_supported_slice",
+      "feature_ids": [
+        "RCORE-04",
+        "OM9-BUILDERCORE-001",
+        "OM9-SOLID-012",
+        "OM9-CURVE-009"
+      ],
+      "scope": "all OM9 source snapshot/main integration, selected native regression cohort",
+      "evidence": [
+        "docs/validation/2026-10-12-main-command-integration.md",
+        "docs/validation/2026-10-12-main-command-integration.json"
+      ],
+      "rust_tests": 1218,
+      "native_processes": 20,
+      "native_checks": 1066,
+      "plugin_sha256": "247afa60deee6b11fc2a7e12209a1540716e84936e24ecb29ca8a284585ad328",
+      "freecad_core_separate": true,
+      "uncertainties": [
+        "Selected native cohort does not certify the entire feature catalog or Rhino/Matrix parity.",
+        "This development source uses the matching custom native App SDK; FreeCAD core stays separate by user instruction. Stock FreeCAD and CI binaries are not certified by this local proof.",
+        "Historical RED receipts remain historical; the repaired Rebuild preview and 3DM prepared-dictionary cases pass in native02."
+      ]
     }
   ],
   "merge_context": {

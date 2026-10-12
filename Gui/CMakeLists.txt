@@ -61,12 +61,14 @@ add_custom_command(
         "CARGO_TARGET_DIR=${OPENMATRIX9_RUST_TARGET_DIR}"
         ${CARGO_EXECUTABLE}
         build
+        --locked
         --release
         --manifest-path
         "${OPENMATRIX9_RUST_DIR}/Cargo.toml"
 
     DEPENDS
         "${OPENMATRIX9_RUST_DIR}/Cargo.toml"
+        "${OPENMATRIX9_RUST_DIR}/Cargo.lock"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Resources/menu/MainMenu.ini"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Resources/menu/CommandNames.txt"
         ${OPENMATRIX9_RUST_SOURCES}
@@ -115,7 +117,7 @@ add_dependencies(
 # the import helper and standalone consumers as well as the GUI module.
 target_link_libraries(OM9ThreeDm PUBLIC OpenMatrix9RustLib)
 if(WIN32)
-    target_link_libraries(OM9ThreeDm PUBLIC ws2_32 userenv ntdll bcrypt)
+    target_link_libraries(OM9ThreeDm PUBLIC ws2_32 userenv ntdll bcrypt ole32 user32)
 endif()
 
 
@@ -183,12 +185,40 @@ set(
     CoreTolerance.h
     CoreCoordinates.cpp
     CoreCoordinates.h
+    CoreSourceAttributes.cpp
+    CoreSourceAttributes.h
+    CoreDiscreteSnapshot.cpp
+    CoreDiscreteSnapshot.h
     CoreCPlanes.cpp
     CoreCPlanes.h
 
+    LayerClipboard.cpp
+    LayerClipboard.h
+    LayerClipboardPython.cpp
+    LayerDocumentAdapter.cpp
+    LayerCollectionAdapter.cpp
+    LayerCollectionAdapter.h
+    LayerCollectionAbi.h
+    LayerSourceArchiveAdapter.cpp
+    LayerSourceArchiveAdapter.h
+    LayerSourcePayloadAbi.h
+    LayerDocumentAdapter.h
+    LayerDocumentPython.cpp
+    LayerController.cpp
+    LayerController.h
+    Phase3Inputs.cpp
+    ModelingCurveEditor.cpp
+    ModelingCurveEditor.h
+    ModelingCurveEditorDialog.cpp
+    ModelingCurveEditorDialog.h
+    CurveBasisTransfer.h
+    Phase2Rust.h
+    SnapObjectInfo.cpp
+    SnapObjectInfo.h
+    SnapQueryIndex.cpp
+    SnapQueryIndex.h
     AppOpenMatrix9Gui.cpp
     ThreeDmPython.cpp
-    ThreeDmModeling.cpp
     ThreeDmModeling.h
     ThreeDmHatchDialog.cpp
     ThreeDmHatchDialog.h
@@ -364,8 +394,18 @@ if(MSVC)
     target_link_options(OpenMatrix9Gui PRIVATE "/DELAYLOAD:Points.pyd")
     target_link_libraries(OpenMatrix9Gui PRIVATE delayimp)
 endif()
+if(TARGET Mesh)
+    target_link_libraries(OpenMatrix9Gui PRIVATE Mesh)
+else()
+    find_library(OM9_MESH_LIBRARY NAMES Mesh
+        HINTS "${FREECAD_SDK_BUILD}/src/Mod/Mesh/App" REQUIRED)
+    target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_MESH_LIBRARY}")
+endif()
+if(MSVC)
+    target_link_options(OpenMatrix9Gui PRIVATE "/DELAYLOAD:Mesh.pyd")
+endif()
 if(WIN32)
-    target_link_libraries(OpenMatrix9Gui PRIVATE ws2_32 userenv ntdll bcrypt)
+    target_link_libraries(OpenMatrix9Gui PRIVATE ws2_32 userenv ntdll bcrypt ole32 user32)
 endif()
 # Mesh exports its STL storage readers on MSVC. Reuse the matching SDK module;
 # delay loading keeps the plugin usable before any Mesh module is selected.
@@ -387,10 +427,16 @@ foreach(om9_occ_lib TKGeomAlgo TKGeomBase TKG2d TKG3d TKMath TKernel)
     target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_${om9_occ_lib}_LIBRARY}")
 endforeach()
 if(MSVC)
-    target_compile_options(OpenMatrix9Gui PRIVATE /utf-8 /FIFCGlobal.h /FIFCConfig.h)
+    target_compile_options(OpenMatrix9Gui PRIVATE /utf-8 /FIFCGlobal.h /FIFCConfig.h /FIHostCompatibility.h)
     # Rust static archives and the native adapters are linked together. A full
     # link avoids retaining obsolete type records in the incremental PDB.
     target_link_options(OpenMatrix9Gui PRIVATE /INCREMENTAL:NO)
+else()
+    target_compile_options(OpenMatrix9Gui PRIVATE -include HostCompatibility.h)
+endif()
+target_include_directories(OpenMatrix9Gui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../compat")
+if(OPENMATRIX9_STOCK_HOST)
+    target_compile_definitions(OpenMatrix9Gui PRIVATE OM9_STOCK_FREECAD=1)
 endif()
 
 
@@ -437,3 +483,9 @@ install(
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}
 )
+
+# Exchange worker shares the one Rust layer and geometry policy core.
+target_link_libraries(OM9ThreeDm PUBLIC OpenMatrix9RustLib)
+if(WIN32)
+    target_link_libraries(OM9ThreeDm PUBLIC ws2_32 userenv ntdll bcrypt)
+endif()

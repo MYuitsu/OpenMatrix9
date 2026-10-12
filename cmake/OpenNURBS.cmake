@@ -9,6 +9,10 @@ FetchContent_MakeAvailable(om9_opennurbs)
 if(NOT TARGET opennurbsStatic)
     add_subdirectory("${om9_opennurbs_SOURCE_DIR}" "${om9_opennurbs_BINARY_DIR}" EXCLUDE_FROM_ALL)
 endif()
+# The bundled zlib has prefixed symbols and belongs to openNURBS. Its public
+# include path otherwise shadows the host zlib used by FreeCAD/zipios++.
+# Keep the library's own include directories and transitive static linkage.
+set_property(TARGET zlib PROPERTY INTERFACE_INCLUDE_DIRECTORIES "")
 set_target_properties(opennurbsStatic PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 include(${CMAKE_CURRENT_LIST_DIR}/PolyEdgeArchive.cmake)
 om9_repair_polyedge_read(opennurbsStatic "${om9_opennurbs_SOURCE_DIR}")
@@ -19,6 +23,9 @@ om9_repair_rdk_document_write(opennurbsStatic "${om9_opennurbs_SOURCE_DIR}")
 find_package(OpenCASCADE REQUIRED COMPONENTS FoundationClasses ModelingData ModelingAlgorithms)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 add_library(OM9ThreeDm STATIC
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmModeling.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmThreadPool.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/LayerExchangeAdapter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmStaging.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmImportJobs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmCurves.cpp
@@ -49,6 +56,12 @@ target_link_libraries(OM9ThreeDm PUBLIC Qt6::Core)
 if(MSVC)
     target_compile_options(OM9ThreeDm PRIVATE /utf-8 /bigobj)
     target_compile_definitions(OM9ThreeDm PUBLIC NOMINMAX)
+    find_package(ZLIB REQUIRED)
+    add_executable(OM9ThreeDmHeaderOrderTest EXCLUDE_FROM_ALL
+        ${CMAKE_CURRENT_LIST_DIR}/../tests/native/three_dm_header_order.cpp)
+    target_include_directories(OM9ThreeDmHeaderOrderTest PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../compat)
+    target_link_libraries(OM9ThreeDmHeaderOrderTest PRIVATE OM9ThreeDm ZLIB::ZLIB)
+    set_target_properties(OM9ThreeDmHeaderOrderTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 endif()
 
 add_executable(OM9ThreeDmExplodeTest EXCLUDE_FROM_ALL ${CMAKE_CURRENT_LIST_DIR}/../tests/native/three_dm_explode.cpp)

@@ -1,0 +1,109 @@
+{
+    "checks":  [
+                   {
+                       "name":  "different host without this module does not block installation",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "target host process blocks update",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "first run installs a complete bundle",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "new isolated installation is allowed while another host is open",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "unchanged bundle avoids copy and backup",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "update installs new native and preserves prior module",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "user settings survive installation and update",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "launcher-only update does not replace loaded native module",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "launcher metadata change preserves installed native hash",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "removed bundled helper is a real payload update and respects host guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "host refusal retains previous helper and native",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "complete payload replacement removes obsolete bundled helper",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "corrupt bundle is rejected before destination mutation",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "corrupt source leaves installed native intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "failed promotion rolls back complete previous module",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "rollback restores exact native and settings",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "update refuses while FreeCAD is open",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "running host rejection leaves installed module intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "entry rejects incomplete launcher bundle",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "incomplete bootstrap cannot replace installed native",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "cache promotion failure rejects complete entry update",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "cache failure restores installed native and every old cache file",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "failed entry leaves existing shortcut unchanged",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "complete entry updates plugin and persistent bootstrap together",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "manifest path traversal is rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "backups and failed stages stay outside Mod",
+                       "passed":  true
+                   }
+               ],
+    "ok":  true
+}

@@ -77,6 +77,23 @@ fn call(f: impl FnOnce() -> u32) -> u32 {
     catch_unwind(AssertUnwindSafe(f)).unwrap_or(1)
 }
 /// # Safety
+/// Output is writable and aligned for one u32. No native references are retained.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_selection_alignment(
+    requested: u32, roots: usize, components: u32, out: *mut u32,
+) -> u32 {
+    call(|| {
+        if out.is_null() || components > 1 { return 1; }
+        let alignment = match requested {
+            0 => Alignment::CPlane, 1 => Alignment::Object, 2 => Alignment::World,
+            _ => return 2,
+        };
+        let Ok(effective) = alignment.for_selection(roots, components != 0) else { return 2; };
+        unsafe { *out = effective as u32; }
+        0
+    })
+}
+/// # Safety
 /// Matrices and old factors are readable; output writable, aligned and nonoverlapping.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_gumball_owner_scale(affine:*const f64,world:*const f64,old_scale:*const f64,kind:u32,out:*mut crate::gumball_owner::OwnerScale)->u32 {

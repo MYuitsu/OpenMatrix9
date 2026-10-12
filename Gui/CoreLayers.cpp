@@ -155,12 +155,17 @@ bool flag(App::DocumentObject& object,const char* name,bool fallback=false) {
     if(auto* p=property<App::PropertyBool>(&object,name))return p->getValue();return fallback;
 }
 int memberIndex(App::DocumentObject& object) {
+    int result=0;
     for(auto* parent:object.getInList())if(tag(parent,"OM9LayerSchema")) {
-        auto* group=dynamic_cast<App::DocumentObjectGroup*>(parent);
+        auto* owner=dynamic_cast<App::DocumentObjectGroup*>(parent);
         auto* index=property<App::PropertyInteger>(parent,"OM9LayerIndex");
-        if(group&&index&&group->hasObject(&object))return int(index->getValue());
+        if(!owner||!index||!object.getDocument()||owner->getDocument()!=object.getDocument()
+           ||index->getValue()<1||index->getValue()>33
+           ||group(*object.getDocument(),int(index->getValue()))!=owner||!owner->hasObject(&object)||result)
+            throw std::runtime_error("Invalid or ambiguous native layer membership");
+        result=int(index->getValue());
     }
-    return 0;
+    return result;
 }
 bool drawable(App::DocumentObject& object) {
     return !dynamic_cast<App::DocumentObjectGroup*>(&object)&&view(object)
@@ -284,12 +289,12 @@ bool CoreLayers::assignSelected(int index) {
         }
     });
 }
-bool CoreLayers::objectEditable(App::DocumentObject* object) {
-    if(!object||tag(object,"OM9LayerSchema")||tag(object,"OM9LayerStateSchema"))return false;
+bool CoreLayers::objectEditable(App::DocumentObject* object,bool requireVisible) {
+    if(!object||!object->getDocument()||tag(object,"OM9LayerSchema")||tag(object,"OM9LayerStateSchema"))return false;
     try {
         auto* provider=view(*object);if(!provider)return false;
         const int index=memberIndex(*object);const auto s=index?read(*object->getDocument(),index):SidebarLayerState{};
-        const bool visible=provider->Visibility.getValue()&&(!index||s.visible)&&!flag(*object,"OM9ObjectHidden");
+        const bool visible=(!requireVisible||provider->Visibility.getValue())&&(!index||s.visible)&&!flag(*object,"OM9ObjectHidden");
         return om9_layer_effective_selectable(visible,provider->isSelectable(),false,index&&s.locked);
     }
     catch(...){return false;}

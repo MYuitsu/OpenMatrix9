@@ -3,7 +3,7 @@ import json, os, sys, traceback
 from pathlib import Path
 import FreeCAD as App, FreeCADGui as Gui, Part, Mesh, Points
 from PySide6 import QtCore, QtTest
-sys.path.insert(0, 'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+sys.path.insert(0, str(Path(__file__).parent))
 from gumball_fixture import GumballUI
 out = Path(os.environ['OM9_SMOKE_OUTPUT'])
 report = {'checks': [], 'feature_ids': ['OM9-INFO-020', 'OM9-INFO-021', 'OM9-INFO-022']}

@@ -1,9 +1,10 @@
 """OM9-INFO-020/021/022: one session, real native handles in four views."""
-import json, os, traceback
+import json, os, sys, traceback
 from pathlib import Path
 import FreeCAD as App, FreeCADGui as Gui, Part
 from PySide6 import QtCore, QtWidgets, QtTest, QtGui
 from pivy import coin
+sys.path.insert(0,str(Path(__file__).parent));from gumball_capture import capture_view
 
 out = Path(os.environ['OM9_SMOKE_OUTPUT'])
 report = {'checks': [], 'feature_ids': ['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
@@ -126,7 +127,7 @@ def run():
         canvas=QtGui.QImage(1280,960,QtGui.QImage.Format_RGB32);canvas.fill(QtGui.QColor(100,100,100))
         painter=QtGui.QPainter(canvas)
         for slot,view in sorted(views.items()):
-            image=view.getViewer().renderToImage(width=640,height=480,samples=0)
+            image=capture_view(view,640,480)
             image.save(str(out/('view-%d.png'%slot)));painter.drawImage((slot%2)*640,(slot//2)*480,image)
         painter.end();canvas.save(str(out/'four-views.png'))
         command('Gumball Off');check('Off removes every overlay',not any(overlay(v) for v in views.values()))
