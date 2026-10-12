@@ -20,7 +20,9 @@ Ví dụ chương trình đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.ex
 
 Khi cập nhật, chạy `Start-OM9.cmd` trong gói mới. Script giữ bản cũ ở `%APPDATA%\FreeCAD\v1-1\OM9-backups`, bỏ qua chép plugin nếu không đổi và yêu cầu lưu/đóng FreeCAD đang dùng plugin nếu cần thay bản. Log ở `%APPDATA%\FreeCAD\v1-1\OM9-launcher`. Gói thiếu/hỏng hoặc cập nhật thất bại sẽ không thay bản đang dùng. Kiểm tra ZIP này bằng **SHA256SUMS.txt** trên release.
 
-Khi mở, launcher tự kiểm tra release mới trên GitHub ở tiến trình nền. Có phiên bản/plugin hoặc revision launcher mới thì báo link tải, mỗi bản chỉ báo một lần; mất mạng vẫn mở OM9. Tải gói mới, giải nén và chạy lại `Start-OM9.cmd` để cập nhật. Launcher không tự tải/cài plugin. Nếu chỉ đổi launcher, không chép lại plugin và không cần đóng OM9. Kết quả kiểm tra nằm trong `OM9-launcher\update-check.json`.
+**Launcher mới trong source (0.0.3 / r2):** chỉ kiểm tra GitHub một lần khi mở OM9 bằng icon/`Start-OM9.cmd`, không kiểm tra định kỳ khi đang dùng. Khi có bản mới, nhấn **Update** để tự tải gói SetupLauncher cùng checksum, xác minh rồi cài. Nếu OM9/FreeCAD đang mở, hãy lưu và đóng; bộ cập nhật chờ rồi tự cài và mở lại cùng host/profile, không buộc đóng ứng dụng. **Later** giữ bản hiện tại và cho phép cập nhật ở lần mở sau; **Cancel** hủy tải/chờ. Gói hỏng bị từ chối, cài lỗi thì khôi phục bản cũ; mất mạng vẫn mở OM9. Kết quả nằm trong `OM9-launcher\update-check.json`. Xem [hướng dẫn launcher mới](launcher/README.md).
+
+ZIP **v0.0.3 đã phát hành** ở link trên vẫn chứa launcher **r1**, chỉ mở trang tải. Cần cài gói launcher r2 mới một lần để có nút Update tự tải/cài; thay đổi source không tự sửa các ZIP đã phát hành.
 
 **Cài thủ công** nếu muốn tự quản lý thư mục:
 

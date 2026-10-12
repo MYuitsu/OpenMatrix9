@@ -1,0 +1,55 @@
+name: Verify and package Windows launcher
+
+on:
+  push:
+    branches: [main, codex/launcher-startup-update]
+    paths: ['launcher/**', 'tools/build-launcher-bundle.py', 'tools/tests/launcher*.ps1', 'tools/tests/test_release_package.py', 'tools/ci/package-launcher-only.ps1', 'release.json', '.github/workflows/launcher-windows.yml']
+  pull_request:
+    branches: [main]
+    paths: ['launcher/**', 'tools/build-launcher-bundle.py', 'tools/tests/launcher*.ps1', 'tools/tests/test_release_package.py', 'tools/ci/package-launcher-only.ps1', 'release.json', '.github/workflows/launcher-windows.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launcher:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Check installer, startup updater and release packaging
+        run: |
+          & ./tools/tests/launcher-tests.ps1 -OutputRoot "$env:RUNNER_TEMP/launcher-tests"
+          & ./tools/tests/launcher-update-tests.ps1 -OutputRoot "$env:RUNNER_TEMP/launcher-update-tests"
+          & ./tools/tests/launcher-auto-update-tests.ps1 -OutputRoot "$env:RUNNER_TEMP/launcher-auto-update-tests"
+          python -m unittest discover -s tools/tests -p test_release_package.py
+          if ($LASTEXITCODE -ne 0) { throw 'Release package tests failed' }
+          python -m unittest discover -s tools/tests -p test_public_source_audit.py
+          if ($LASTEXITCODE -ne 0) { throw 'Public source audit failed' }
+      - name: Package updated bootstrap with verified public native payload
+        run: ./tools/ci/package-launcher-only.ps1
+      - name: Attest launcher archive provenance
+        if: github.event_name != 'pull_request'
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: '${{ runner.temp }}/om9-launcher-package/*-Windows-x64.zip'
+      - name: Upload launcher and verification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: om9-startup-update-launcher
+          path: |
+            ${{ runner.temp }}/om9-launcher-package/*-Windows-x64.zip
+            ${{ runner.temp }}/om9-launcher-package/Launcher-SHA256SUMS.txt
+            ${{ runner.temp }}/om9-launcher-package/launcher-build.json
+            ${{ runner.temp }}/launcher-tests/**/results.json
+            ${{ runner.temp }}/launcher-update-tests/**/results.json
+            ${{ runner.temp }}/launcher-auto-update-tests/**/results.json
+          if-no-files-found: error

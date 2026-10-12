@@ -21,7 +21,8 @@ class ReleasePackageTests(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stderr)
             manifest=json.loads((root/'bundle/launcher-manifest.json').read_text())
             self.assertEqual(manifest['version'],'0.0.3','must package the approved new release')
-            archive=root/'OpenMatrix9-0.0.3-SetupLauncher-Windows-x64.zip'
+            self.assertEqual(manifest['launcher_revision'],2)
+            archive=root/'OpenMatrix9-0.0.3-SetupLauncher-r2-Windows-x64.zip'
             self.assertTrue(archive.is_file(),'versioned name must be discoverable by the updater')
             with zipfile.ZipFile(archive) as package:
                 self.assertIsNone(package.testzip())

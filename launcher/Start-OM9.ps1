@@ -208,6 +208,8 @@ function Find-OM9Update($Releases,[string]$CurrentVersion,[int]$CurrentRevision)
   $number=$Matches[1];$version=[version]$number
   $page='https://github.com/MYuitsu/OpenMatrix9/releases/tag/v'+$number
   if($release.html_url -cne $page){continue}
+  $checksum='https://github.com/MYuitsu/OpenMatrix9/releases/download/v'+$number+'/SHA256SUMS.txt'
+  if(@($release.assets|Where-Object{$_.name -ceq 'SHA256SUMS.txt' -and $_.browser_download_url -ceq $checksum}).Count -ne 1){continue}
   foreach($asset in $release.assets){
    $pattern='^OpenMatrix9-'+[regex]::Escape($number)+'-SetupLauncher(?:-r([1-9][0-9]{0,3}))?-Windows-x64\.zip$'
    if($asset.name -notmatch $pattern){continue}
@@ -216,7 +218,7 @@ function Find-OM9Update($Releases,[string]$CurrentVersion,[int]$CurrentRevision)
    if($asset.browser_download_url -cne $download){continue}
    if($version -lt $current -or ($version -eq $current -and $revision -le $CurrentRevision)){continue}
    if(-not $best -or $version -gt [version]$best.version -or ($version -eq [version]$best.version -and $revision -gt $best.revision)){
-    $best=[pscustomobject]@{version=$number;revision=$revision;prerelease=[bool]$release.prerelease;release_url=$page;download_url=$download;key=($number+'/r'+$revision)}
+    $best=[pscustomobject]@{version=$number;revision=$revision;prerelease=[bool]$release.prerelease;release_url=$page;download_url=$download;checksum_url=$checksum;asset_name=$asset.name;digest=$asset.digest;key=($number+'/r'+$revision)}
    }
   }
  }
@@ -241,26 +243,186 @@ function Get-OM9ReleaseFeed {
 function Show-OM9Update($Update) {
  Add-Type -AssemblyName System.Windows.Forms
  $kind=if($Update.prerelease){' (experimental)'}else{''}
- $message='OpenMatrix9 '+$Update.version+' / launcher r'+$Update.revision+$kind+' is available.'+[Environment]::NewLine+[Environment]::NewLine+'Download and extract the new package, then run Start-OM9.cmd to update. Save and close OM9 first if the plugin changes.'+[Environment]::NewLine+[Environment]::NewLine+'Open the download page?'
- $answer=[Windows.Forms.MessageBox]::Show($message,'OpenMatrix9 update',[Windows.Forms.MessageBoxButtons]::YesNo,[Windows.Forms.MessageBoxIcon]::Information,[Windows.Forms.MessageBoxDefaultButton]::Button2)
- if($answer -eq [Windows.Forms.DialogResult]::Yes){Start-Process $Update.release_url|Out-Null}
- return $true
+ $form=New-Object Windows.Forms.Form
+ $form.Text='OpenMatrix9 update';$form.ClientSize=New-Object Drawing.Size(460,180)
+ $form.StartPosition='CenterScreen';$form.FormBorderStyle='FixedDialog';$form.MaximizeBox=$false;$form.MinimizeBox=$false
+ $label=New-Object Windows.Forms.Label;$label.Location=New-Object Drawing.Point(18,16);$label.Size=New-Object Drawing.Size(424,105)
+ $label.Text='OpenMatrix9 '+$Update.version+' / launcher r'+$Update.revision+$kind+' is available.'+[Environment]::NewLine+[Environment]::NewLine+'Update downloads, verifies and installs the new version. Save and close OM9 when asked; it will reopen after installation.'
+ $form.Controls.Add($label)
+ $apply=New-Object Windows.Forms.Button;$apply.Text='Update';$apply.Location=New-Object Drawing.Point(240,135);$apply.DialogResult=[Windows.Forms.DialogResult]::OK
+ $later=New-Object Windows.Forms.Button;$later.Text='Later';$later.Location=New-Object Drawing.Point(350,135);$later.DialogResult=[Windows.Forms.DialogResult]::Cancel
+ $form.Controls.Add($apply);$form.Controls.Add($later);$form.CancelButton=$later
+ try{if($form.ShowDialog() -eq [Windows.Forms.DialogResult]::OK){return 'Update'};return 'Later'}finally{$form.Dispose()}
 }
-function Invoke-OM9UpdateCheck([string]$Cache,[string]$CurrentVersion,[int]$CurrentRevision,[bool]$Silent) {
+function Assert-OM9Update($Update) {
+ if([string]$Update.version -cnotmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' -or $Update.revision -lt 1 -or $Update.revision -gt 9999){throw 'Invalid update version'}
+ $suffix=if($Update.revision -gt 1){'-r'+$Update.revision}else{''}
+ $name='OpenMatrix9-'+$Update.version+'-SetupLauncher'+$suffix+'-Windows-x64.zip'
+ $base='https://github.com/MYuitsu/OpenMatrix9/releases/download/v'+$Update.version+'/'
+ if($Update.asset_name -cne $name -or $Update.download_url -cne ($base+$name) -or $Update.checksum_url -cne ($base+'SHA256SUMS.txt')){throw 'Update must use official OM9 release assets'}
+ if($Update.digest -and $Update.digest -cnotmatch '^sha256:[a-f0-9]{64}$'){throw 'Unsupported GitHub asset digest'}
+}
+function Test-OM9DownloadUri([uri]$Uri) {
+ return ($Uri.Scheme -ceq 'https' -and $Uri.Port -eq 443 -and -not $Uri.UserInfo -and $Uri.Host -in @('github.com','release-assets.githubusercontent.com','objects.githubusercontent.com'))
+}
+function Wait-OM9DownloadResponse($Pending,[scriptblock]$Progress=$null,[int]$TimeoutMilliseconds=30000) {
+ $clock=[Diagnostics.Stopwatch]::StartNew()
+ while(-not $Pending.AsyncWaitHandle.WaitOne(100)){
+  if($clock.ElapsedMilliseconds -ge $TimeoutMilliseconds){throw [TimeoutException]::new('GitHub download connection timed out; installed version was retained')}
+  if($Progress){&$Progress 'Connecting to GitHub...'}
+ }
+}
+function Save-OM9ReleaseAsset([string]$Url,[string]$Path,[long]$Limit,[scriptblock]$Progress=$null) {
+ [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+ $uri=[uri]$Url;$response=$null;$stream=$null;$output=$null
+ $part=$Path+'.part';Assert-OM9PlainPath $part
+ try {
+  for($hop=0;$hop -lt 5;$hop++){
+   if(-not (Test-OM9DownloadUri $uri)){throw 'Unsupported release download redirect'}
+   $request=[Net.HttpWebRequest]::Create($uri);$request.UserAgent='OpenMatrix9-Windows-Launcher'
+   $request.Timeout=30000;$request.ReadWriteTimeout=30000;$request.AllowAutoRedirect=$false
+   $pending=$request.BeginGetResponse($null,$null)
+   try{Wait-OM9DownloadResponse $pending $Progress;$response=$request.EndGetResponse($pending)}
+   catch{$request.Abort();throw}finally{$pending.AsyncWaitHandle.Close()}
+   if([int]$response.StatusCode -in @(301,302,303,307,308)){
+    $next=New-Object Uri($uri,$response.Headers['Location']);$response.Dispose();$response=$null;$uri=$next;continue
+   }
+   break
+  }
+  if(-not $response -or [int]$response.StatusCode -ne 200){throw 'Release download did not return a file'}
+  if($response.ContentLength -gt $Limit){throw 'Release download exceeds size limit'}
+  $stream=$response.GetResponseStream();$output=[IO.File]::Open($part,[IO.FileMode]::CreateNew)
+  $buffer=New-Object byte[] 65536;$total=0L
+  while(($count=$stream.Read($buffer,0,$buffer.Length)) -gt 0){
+   $total+=$count;if($total -gt $Limit){throw 'Release download exceeds size limit'}
+   $output.Write($buffer,0,$count)
+   if($Progress){&$Progress ('Downloading: '+[Math]::Round($total/1MB,1)+' MB')}
+  }
+  if($response.ContentLength -ge 0 -and $total -ne $response.ContentLength){throw 'Release download was truncated'}
+  $output.Dispose();$output=$null;[IO.File]::Move($part,$Path)
+ } finally {
+  if($output){$output.Dispose()};if($stream){$stream.Dispose()};if($response){$response.Dispose()}
+  if([IO.File]::Exists($part)){[IO.File]::Delete($part)}
+ }
+}
+function Expand-OM9UpdateArchive([string]$Archive,[string]$Root,[scriptblock]$Progress=$null) {
+ Add-Type -AssemblyName System.IO.Compression.FileSystem
+ Assert-OM9PlainPath $Root
+ if([IO.Directory]::Exists($Root)){throw 'Update extraction requires a fresh folder'}
+ if((Get-Item -LiteralPath $Archive).Length -gt 256MB){throw 'Update archive exceeds size limit'}
+ $zip=[IO.Compression.ZipFile]::OpenRead($Archive)
+ try {
+  if($zip.Entries.Count -gt 12000){throw 'Too many update archive entries'}
+  $seen=@{};$total=0L
+  # Validate the complete archive before writing the first file.
+  foreach($entry in $zip.Entries){
+   $name=$entry.FullName.Replace('\','/');$relative=$name.TrimEnd('/')
+   $target=Get-OM9SafeFile $Root $relative
+   foreach($component in $relative.Split('/')){
+    if($component.IndexOfAny([IO.Path]::GetInvalidFileNameChars()) -ge 0 -or $component.TrimEnd('.',' ') -cne $component -or $component -match '^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)'){throw 'Invalid Windows archive filename'}
+   }
+   if($seen.ContainsKey($relative.ToLowerInvariant())){throw 'Duplicate update archive path'};$seen[$relative.ToLowerInvariant()]=$true
+   if(($entry.ExternalAttributes -band 0x400) -ne 0 -or (($entry.ExternalAttributes -shr 16) -band 0xF000) -eq 0xA000){throw 'Linked archive entry is unsupported'}
+   $total+=$entry.Length;if($total -gt 1GB){throw 'Expanded update exceeds size limit'}
+  }
+  [IO.Directory]::CreateDirectory($Root)|Out-Null
+  foreach($entry in $zip.Entries){
+   if($Progress){&$Progress 'Extracting verified update...'}
+   $name=$entry.FullName.Replace('\','/');$target=Get-OM9SafeFile $Root $name.TrimEnd('/')
+   if($name.EndsWith('/')){[IO.Directory]::CreateDirectory($target)|Out-Null;continue}
+   [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($target))|Out-Null
+   [IO.Compression.ZipFileExtensions]::ExtractToFile($entry,$target,$false)
+  }
+ } finally{$zip.Dispose()}
+}
+function Get-OM9UpdateBundle($Update,[string]$Cache,[scriptblock]$Progress=$null) {
+ Assert-OM9Update $Update
+ $folder=Join-Path $Cache ('updates/'+[guid]::NewGuid().ToString('N'));Assert-OM9PlainPath $folder
+ [IO.Directory]::CreateDirectory($folder)|Out-Null
+ $checksum=Join-Path $folder 'SHA256SUMS.txt';$archive=Join-Path $folder $Update.asset_name
+ Save-OM9ReleaseAsset $Update.checksum_url $checksum 65536 $Progress
+ $matches=@([IO.File]::ReadAllLines($checksum)|Where-Object{$_ -cmatch ('^[a-f0-9]{64}  '+[regex]::Escape($Update.asset_name)+'$')})
+ if($matches.Count -ne 1){throw 'Release checksum does not identify exactly one launcher archive'}
+ Save-OM9ReleaseAsset $Update.download_url $archive 256MB $Progress
+ $expected=$matches[0].Substring(0,64);$hash=Get-OM9Hash $archive
+ if($hash -cne $expected -or ($Update.digest -and $Update.digest -cne ('sha256:'+$hash))){throw 'Downloaded release checksum mismatch; installation was not changed'}
+ $bundle=Join-Path $folder 'bundle';Expand-OM9UpdateArchive $archive $bundle $Progress
+ $manifest=Read-OM9Manifest (Join-Path $bundle 'launcher-manifest.json')
+ if($manifest.version -cne $Update.version -or [int]$manifest.launcher_revision -ne $Update.revision){throw 'Downloaded manifest does not match the selected release'}
+ # Check every payload and bootstrap byte before asking the user to close OM9.
+ foreach($row in $manifest.files){$file=Get-OM9SafeFile (Join-Path $bundle 'OpenMatrix9') $row.path;if(-not [IO.File]::Exists($file) -or (Get-OM9Hash $file) -cne $row.sha256){throw 'Downloaded plugin file is damaged'}}
+ foreach($name in @('Start-OM9.ps1','Start-OM9.cmd','Start-OM9.FCMacro','OpenMatrix9.ico','README.md')){
+  $rows=@($manifest.launcher_files|Where-Object{$_.path -ceq $name});$file=Get-OM9SafeFile $bundle $name
+  if($rows.Count -ne 1 -or (Get-OM9Hash $file) -cne $rows[0].sha256){throw 'Downloaded launcher file is damaged'}
+ }
+ return $bundle
+}
+function Install-OM9UpdateBundle([string]$Bundle,$Update,[string]$Cache,[string]$HostExecutable) {
+ Assert-OM9Update $Update
+ $om9UserRoot=[IO.Path]::GetDirectoryName([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($Cache)))
+ $lockHash=[BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($om9UserRoot.ToLowerInvariant()))).Replace('-','')
+ $mutex=New-Object Threading.Mutex($false,('Local\OM9-Launcher-'+$lockHash));$locked=$false
+ try{
+  $locked=$mutex.WaitOne(0);if(-not $locked){throw 'Another OM9 launcher is running; please retry the update'}
+  $oldPath=Join-Path $Cache 'launcher-manifest.json'
+  if([IO.File]::Exists($oldPath)){
+   $current=Read-OM9Manifest $oldPath
+   if([version]$current.version -gt [version]$Update.version -or ($current.version -eq $Update.version -and [int]$current.launcher_revision -gt $Update.revision)){throw 'A newer version is already installed; downgrade refused'}
+  }
+  $manifest=Read-OM9Manifest (Join-Path $Bundle 'launcher-manifest.json')
+  if($manifest.version -cne $Update.version -or [int]$manifest.launcher_revision -ne $Update.revision){throw 'Update version changed before installation'}
+  return Invoke-OM9BundleInstall $Bundle $om9UserRoot $Cache $HostExecutable
+ }finally{if($locked){$mutex.ReleaseMutex()};$mutex.Dispose()}
+}
+function Start-OM9UpdatedHost([string]$Cache,[string]$HostExecutable) {
+ $om9UserRoot=[IO.Path]::GetDirectoryName([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($Cache)))
+ $powershell=Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
+ $arguments='-NoLogo -NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $Cache 'Start-OM9.ps1')+'" -Installed -SkipUpdateCheck -FreeCADPath "'+$HostExecutable+'" -UserHome "'+$om9UserRoot+'"'
+ Start-Process $powershell -ArgumentList $arguments -WindowStyle Hidden|Out-Null
+}
+function Invoke-OM9Update($Update,[string]$Cache,[string]$HostExecutable) {
+ Add-Type -AssemblyName System.Windows.Forms
+ $form=New-Object Windows.Forms.Form;$form.Text='Updating OpenMatrix9';$form.ClientSize=New-Object Drawing.Size(470,145)
+ $form.StartPosition='CenterScreen';$form.FormBorderStyle='FixedDialog';$form.MaximizeBox=$false;$form.MinimizeBox=$false
+ $label=New-Object Windows.Forms.Label;$label.Location=New-Object Drawing.Point(18,18);$label.Size=New-Object Drawing.Size(434,70);$form.Controls.Add($label)
+ $cancel=New-Object Windows.Forms.Button;$cancel.Text='Cancel';$cancel.Location=New-Object Drawing.Point(350,100);$form.Controls.Add($cancel)
+ $state=@{cancelled=$false};$cancel.Add_Click({$state.cancelled=$true}.GetNewClosure())
+ $form.Add_FormClosing({$state.cancelled=$true}.GetNewClosure());$form.Show()
+ $progress={param($message) $label.Text=$message;[Windows.Forms.Application]::DoEvents();if($state.cancelled){throw [OperationCanceledException]::new('Update cancelled; installed version was retained')}}.GetNewClosure()
+ try{
+  $om9UserRoot=[IO.Path]::GetDirectoryName([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($Cache)))
+  if(-not $HostExecutable){$HostExecutable=Get-OM9Host '' $om9UserRoot}
+  $bundle=Get-OM9UpdateBundle $Update $Cache $progress
+  $native=Join-Path $om9UserRoot 'v1-1/Mod/OpenMatrix9/bin/OpenMatrix9Gui.pyd'
+  $deadline=[DateTime]::UtcNow.AddMinutes(30)
+  while(@(Get-OM9RunningFreeCAD $HostExecutable $native).Count){
+   &$progress 'Download verified. Save your work and close OM9 / FreeCAD. Installation and reopening will follow automatically.'
+   if([DateTime]::UtcNow -gt $deadline){throw 'Update wait timed out; installed version was retained. Retry on the next OM9 launch.'}
+   Start-Sleep -Milliseconds 250
+  }
+  &$progress 'Installing verified update...';$cancel.Enabled=$false;$form.ControlBox=$false
+  $receipt=Install-OM9UpdateBundle $bundle $Update $Cache $HostExecutable
+  Start-OM9UpdatedHost $Cache $HostExecutable
+  return [pscustomobject]@{status='installed';version=$Update.version;revision=$Update.revision;backup=$receipt.backup}
+ }finally{$form.Dispose()}
+}
+function Invoke-OM9UpdateCheck([string]$Cache,[string]$CurrentVersion,[int]$CurrentRevision,[bool]$Silent,[string]$HostExecutable='') {
  $hash=Get-OM9Hash (Join-Path $Cache 'Start-OM9.ps1')
  $mutex=New-Object Threading.Mutex($false,('Local\OM9-Update-'+$hash));$locked=$false
  try {
   $locked=$mutex.WaitOne(0);if(-not $locked){return [pscustomobject]@{status='busy'}}
-  $path=Join-Path $Cache 'update-check.json';$notified=$null
-  if([IO.File]::Exists($path)){try{$notified=([IO.File]::ReadAllText($path)|ConvertFrom-Json).notified}catch{}}
-  $result=[ordered]@{checked_at=[DateTime]::UtcNow.ToString('o');current_version=$CurrentVersion;current_revision=$CurrentRevision;status='current';notified=$notified;update=$null}
+  $path=Join-Path $Cache 'update-check.json'
+  $result=[ordered]@{checked_at=[DateTime]::UtcNow.ToString('o');current_version=$CurrentVersion;current_revision=$CurrentRevision;status='current';update=$null}
   try {
    $update=Find-OM9Update (Get-OM9ReleaseFeed) $CurrentVersion $CurrentRevision
    if($update){
     $result.status='available';$result.update=$update
-    if(-not $Silent -and $notified -ne $update.key -and (Show-OM9Update $update)){$result.notified=$update.key}
+    if(-not $Silent -and (Show-OM9Update $update) -eq 'Update'){$result.install=Invoke-OM9Update $update $Cache $HostExecutable;$result.status='installed'}
    }
-  } catch {$result.status='unavailable';$result.error=$_.Exception.Message}
+  } catch {
+   $result.status=if($result.update){'update-failed'}else{'unavailable'};$result.error=$_.Exception.Message
+   if(-not $Silent -and $result.update){Add-Type -AssemblyName System.Windows.Forms;[Windows.Forms.MessageBox]::Show($result.error,'OpenMatrix9 update',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Warning)|Out-Null}
+  }
   [IO.File]::WriteAllText($path,($result|ConvertTo-Json -Depth 5))
   return [pscustomobject]$result
  } finally{if($locked){$mutex.ReleaseMutex()};$mutex.Dispose()}
@@ -274,7 +436,7 @@ function Start-OM9 {
  if($CheckUpdatesOnly){
   $manifest=Read-OM9Manifest (Join-Path $cache 'launcher-manifest.json')
   $revision=if($manifest.launcher_revision){[int]$manifest.launcher_revision}else{1}
-  Invoke-OM9UpdateCheck $cache $manifest.version $revision ([bool]$NoDialogs)|Out-Null
+  Invoke-OM9UpdateCheck $cache $manifest.version $revision ([bool]$NoDialogs) $FreeCADPath|Out-Null
   return
  }
  $lockHash=[BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($om9UserRoot.ToLowerInvariant()))).Replace('-','')
@@ -311,7 +473,7 @@ function Start-OM9 {
   if(-not $SkipUpdateCheck){
    try {
     $powershell=Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
-    $arguments='-NoLogo -NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $cache 'Start-OM9.ps1')+'" -CheckUpdatesOnly'
+    $arguments='-NoLogo -NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $cache 'Start-OM9.ps1')+'" -CheckUpdatesOnly -FreeCADPath "'+$hostExe+'"'
     if($customHome){$arguments+=' -UserHome "'+$om9UserRoot+'"'}
     if($NoDialogs){$arguments+=' -NoDialogs'}
     Start-Process $powershell -ArgumentList $arguments -WindowStyle Hidden|Out-Null

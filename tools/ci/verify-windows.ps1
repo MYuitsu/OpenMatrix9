@@ -10,6 +10,7 @@ foreach($test in @('test_release_package.py','test_public_source_audit.py')){
 }
 & (Join-Path $source 'tools/tests/launcher-tests.ps1') -OutputRoot (Join-Path $evidence 'installer')
 & (Join-Path $source 'tools/tests/launcher-update-tests.ps1') -OutputRoot (Join-Path $evidence 'updater')
+& (Join-Path $source 'tools/tests/launcher-auto-update-tests.ps1') -OutputRoot (Join-Path $evidence 'auto-updater')
 & (Join-Path $source 'tools/tests/stock-host-tests.ps1') -OutputRoot (Join-Path $evidence 'stock-host')
 & (Join-Path $source 'tools/tests/ci-gui-profile-tests.ps1') -OutputRoot (Join-Path $evidence 'gui-profile')
 $env:CARGO_TARGET_DIR=Join-Path $paths.build 'Gui/rust-target'

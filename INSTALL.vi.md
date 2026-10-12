@@ -1,5 +1,7 @@
 # Cài OpenMatrix9 0.0.3 cho FreeCAD chính thức
 
+**Launcher mới trong source (0.0.3 / r2):** chỉ kiểm tra GitHub khi mở OM9 bằng icon hoặc `Start-OM9.cmd`, không kiểm tra định kỳ. Nhấn **Update** để tự tải, xác minh và cài; nếu OM9/FreeCAD đang mở, lưu và đóng rồi bộ cập nhật tự cài và mở lại. **Later** cho phép cập nhật ở lần mở sau; **Cancel** giữ bản đang dùng. Xem [hướng dẫn launcher mới](launcher/README.md). ZIP v0.0.3 đã phát hành ở link phía dưới vẫn chứa r1 và chỉ mở trang tải; cần cài gói launcher r2 mới một lần để có Update tự tải/cài. ZIP release cũ được giữ nguyên.
+
 Bản thử nghiệm này dành cho **Windows x64, FreeCAD 1.1.4 chính thức** (Python 3.11, Qt 6.8.3, OCCT 7.8.1). Không cần source FreeCAD, Rust hay Visual Studio để sử dụng.
 
 ## 1. Cài FreeCAD

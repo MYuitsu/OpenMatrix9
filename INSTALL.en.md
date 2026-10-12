@@ -12,6 +12,8 @@ The launcher checks GitHub releases in the background whenever OM9 starts. New a
 
 ## Manual installation
 
+**Updated launcher in source (0.0.3 / r2):** checks GitHub only once when opening OM9 through its icon or Start-OM9.cmd. There is no periodic background monitoring. Click **Update** to download, verify checksums and install automatically; save and close OM9 when asked, then it installs and reopens with the same host/profile. **Later** offers the update on the next start; **Cancel** retains the installed version. See [launcher instructions](launcher/README.md). The existing published v0.0.3 ZIP above contains r1 and still opens the download page; install the new r2 launcher bundle once to enable automatic download/install. Existing release assets have not been replaced.
+
 1. Download the Windows x64 installer from the [official FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4). Install and start FreeCAD once. Check Help → About FreeCAD: **1.1.4**. The installation directory may simply be named `FreeCAD 1.1`.
 2. Close FreeCAD before replacing a plugin.
 3. Download [OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.3/OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip) and extract its **OpenMatrix9** folder.
