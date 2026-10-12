@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T08:23:49.812659+00:00",
+  "updated_at": "2026-10-12T08:45:37.466491+00:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": "launcher-startup-update",
   "items": [
@@ -2681,12 +2681,15 @@
         "launcher/Start-OM9.ps1",
         ".github/workflows/launcher-windows.yml",
         "tools/ci/package-launcher-only.ps1",
-        "docs/validation/2026-10-12-startup-update.json"
+        "docs/validation/2026-10-12-startup-update.json",
+        "skills/openmatrix9-workflow/SKILL.md",
+        "docs/validation/2026-10-12-startup-update-skill.md"
       ],
       "evidence": [
         "Human approved startup-only check and Update download/install on 2026-10-12.",
         "Hosted CI https://github.com/MYuitsu/OpenMatrix9/actions/runs/38222547986; strict source/workflow/ref/commit and GitHub-hosted provenance verified.",
-        "80 PowerShell installer/update/auto-update checks; 8 packaging and 11 public audit tests pass; 6 live GitHub/FreeCAD reopen checks and 21 downloaded-CI launcher checks pass."
+        "80 PowerShell installer/update/auto-update checks; 8 packaging and 11 public audit tests pass; 6 live GitHub/FreeCAD reopen checks and 21 downloaded-CI launcher checks pass.",
+        "2026-10-12 human approved saving startup-only/automatic install/save-close/rollback business contract in workflow skill; source and installed added sections match, both quick_validate pass, five baseline gaps resolved in independent forward pressure scenarios."
       ],
       "tests": [
         {

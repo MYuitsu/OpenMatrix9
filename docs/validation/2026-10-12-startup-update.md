@@ -59,4 +59,6 @@ outside virtualized Local AppData; the standard CI runner also passes it.
 Published release ZIPs/tags remain unchanged. Install r2 once to enable this flow;
 future release builds inherit the updater. The verified package was extracted
 under Downloads/OpenMatrix9-startup-update-38222547986 for first installation.
-No reusable business-rule skill or feature catalog completion was changed.
+No feature catalog completion was changed. At runtime verification the reusable
+skill had not been updated; the user subsequently approved recording the contract.
+See [skill update verification](2026-10-12-startup-update-skill.md).
