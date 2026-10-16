@@ -1,0 +1,1763 @@
+{
+  "scope": "geometry_only_current_authored_conversion",
+  "binary_sha256": "2a6ca0eeea07403553debf76501b890a5f816daf0180b37761ec3baf96f1db47",
+  "pe_imports": [
+    "ADVAPI32.dll",
+    "DWrite.dll",
+    "GDI32.dll",
+    "KERNEL32.dll",
+    "MSVCP140.dll",
+    "RPCRT4.dll",
+    "SHELL32.dll",
+    "SHLWAPI.dll",
+    "USER32.dll",
+    "VCRUNTIME140.dll",
+    "VCRUNTIME140_1.dll",
+    "api-ms-win-crt-convert-l1-1-0.dll",
+    "api-ms-win-crt-environment-l1-1-0.dll",
+    "api-ms-win-crt-filesystem-l1-1-0.dll",
+    "api-ms-win-crt-heap-l1-1-0.dll",
+    "api-ms-win-crt-locale-l1-1-0.dll",
+    "api-ms-win-crt-math-l1-1-0.dll",
+    "api-ms-win-crt-runtime-l1-1-0.dll",
+    "api-ms-win-crt-stdio-l1-1-0.dll",
+    "api-ms-win-crt-string-l1-1-0.dll",
+    "api-ms-win-crt-time-l1-1-0.dll",
+    "api-ms-win-crt-utility-l1-1-0.dll",
+    "bcrypt.dll",
+    "ole32.dll"
+  ],
+  "runner_sha256": "2c3923ea0f8501052abc7eacf1a7a20009d2746815f5405c35cceed26d02ef5f",
+  "authored_sources": [
+    {
+      "path": "standalone/native/native_exchange.cpp",
+      "sha256": "c527dbb0f1644f0f8ab4fabea990ca2415f51b5bee7fdb36a3741e35a961c59b"
+    },
+    {
+      "path": "standalone/native/retained_merge.hpp",
+      "sha256": "0cb564af07eee577ad89b9b409287b24f1593472811c492607638acdfa803d00"
+    },
+    {
+      "path": "standalone/native/CMakeLists.txt",
+      "sha256": "a0ccf4caef12c0ae127ab80dcdbb9779e828a75d380db8409234737a509dda4e"
+    },
+    {
+      "path": "tools/validate_native_exchange_conversion.py",
+      "sha256": "20dbbf81522b2522ccd86dd60dd0963f74356a2025942d9fd039b02af241b386"
+    }
+  ],
+  "dependencies": {
+    "opennurbs_commit": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "opennurbs_worktree_clean": true,
+    "opennurbs_license_sha256": "ca1a15f52b3eef950b4d0e0ffe90ef3e4ac0dedcefe32049ff22253cb32ba2a4",
+    "json_version": "3.11.3",
+    "json_header_sha256": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+    "json_license_sha256": "86b998c792894ccb911a1cb7994f7a9652894e7a094c0b5e45be2f553f45cf14"
+  },
+  "native_packet_limits": {
+    "bytes": 16777216,
+    "depth": 32,
+    "nodes": 262144,
+    "container_entries": 65536,
+    "string_bytes": 4096,
+    "objects_layers_definitions": 4096,
+    "degree": 16
+  },
+  "supported_native_families": [
+    "ON_Point",
+    "ON_LineCurve",
+    "ON_ArcCurve full Circle",
+    "ON_NurbsCurve",
+    "ON_PolyCurve contiguous segments",
+    "ON_NurbsSurface",
+    "ON_Mesh triangle/quad",
+    "ON_PointCloud",
+    "ON_InstanceRef shared/nested"
+  ],
+  "inventory": {
+    "archive_version": 50,
+    "current_layer": "10000000-0000-4000-8000-000000000001",
+    "definitions": [
+      {
+        "id": "10000000-0000-4000-8000-00000000001e",
+        "label": "Master",
+        "linked": false,
+        "members": [
+          "10000000-0000-4000-8000-000000000028"
+        ],
+        "model_unit": "Millimeter"
+      },
+      {
+        "id": "10000000-0000-4000-8000-00000000001f",
+        "label": "NestedMaster",
+        "linked": false,
+        "members": [
+          "10000000-0000-4000-8000-000000000029"
+        ],
+        "model_unit": "Millimeter"
+      }
+    ],
+    "diagnostics": [],
+    "layers": [
+      {
+        "color": [
+          100,
+          110,
+          120,
+          200
+        ],
+        "id": "10000000-0000-4000-8000-000000000001",
+        "locked": false,
+        "name": "Parent",
+        "native_index": 0,
+        "parent": null,
+        "visible": true
+      },
+      {
+        "color": [
+          200,
+          210,
+          220,
+          255
+        ],
+        "id": "10000000-0000-4000-8000-000000000002",
+        "locked": true,
+        "name": "Con",
+        "native_index": 1,
+        "parent": "10000000-0000-4000-8000-000000000001",
+        "visible": false
+      }
+    ],
+    "model_unit": "Millimeter",
+    "objects": [
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Point": [
+            2.0,
+            2.0,
+            3.0
+          ]
+        },
+        "id": "10000000-0000-4000-8000-000000000028",
+        "is_definition_member": true,
+        "label": "Member",
+        "native_kind": "ON_Point",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Instance": "10000000-0000-4000-8000-00000000001e"
+        },
+        "id": "10000000-0000-4000-8000-000000000029",
+        "is_definition_member": true,
+        "label": "NestedMember",
+        "native_kind": "ON_InstanceRef",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            5.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Point": [
+            11.0,
+            22.0,
+            33.0
+          ]
+        },
+        "id": "10000000-0000-4000-8000-00000000000a",
+        "is_definition_member": false,
+        "label": "\u0110i\u1ec3m",
+        "native_kind": "ON_Point",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": true,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Curve": {
+            "Line": {
+              "domain": [
+                7.0,
+                9.0
+              ],
+              "end": [
+                3.0,
+                4.0,
+                0.0
+              ],
+              "start": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "id": "10000000-0000-4000-8000-00000000000b",
+        "is_definition_member": false,
+        "label": "Line",
+        "native_kind": "ON_LineCurve",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": null,
+          "color_source": "layer",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": false
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Curve": {
+            "Circle": {
+              "angle_domain": [
+                0.0,
+                6.283185307179586
+              ],
+              "center": [
+                2.0,
+                3.0,
+                4.0
+              ],
+              "domain": [
+                0.0,
+                8.0
+              ],
+              "radius": 6.0,
+              "x": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "y": [
+                0.0,
+                1.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "id": "10000000-0000-4000-8000-00000000000c",
+        "is_definition_member": false,
+        "label": "Circle",
+        "native_kind": "ON_ArcCurve",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Curve": {
+            "Nurbs": {
+              "degree": 2,
+              "domain": [
+                2.0,
+                4.0
+              ],
+              "knots": [
+                2.0,
+                2.0,
+                2.0,
+                4.0,
+                4.0,
+                4.0
+              ],
+              "periodic": false,
+              "poles": [
+                [
+                  10.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  10.0,
+                  10.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  10.0,
+                  0.0
+                ]
+              ],
+              "reversed": false,
+              "seam": null,
+              "weights": [
+                1.0,
+                0.7071067811865476,
+                1.0
+              ]
+            }
+          }
+        },
+        "id": "10000000-0000-4000-8000-00000000000d",
+        "is_definition_member": false,
+        "label": "RationalArc",
+        "native_kind": "ON_NurbsCurve",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Surface": {
+            "degree": [
+              1,
+              1
+            ],
+            "domain": [
+              [
+                0.0,
+                2.0
+              ],
+              [
+                3.0,
+                5.0
+              ]
+            ],
+            "knots": [
+              [
+                0.0,
+                0.0,
+                2.0,
+                2.0
+              ],
+              [
+                3.0,
+                3.0,
+                4.0,
+                5.0,
+                5.0
+              ]
+            ],
+            "periodic": [
+              false,
+              false
+            ],
+            "poles": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                1.0
+              ],
+              [
+                0.0,
+                2.0,
+                0.0
+              ],
+              [
+                5.0,
+                0.0,
+                2.0
+              ],
+              [
+                5.0,
+                1.0,
+                3.0
+              ],
+              [
+                5.0,
+                2.0,
+                2.0
+              ]
+            ],
+            "reversed": false,
+            "size": [
+              2,
+              3
+            ],
+            "weights": [
+              1.0,
+              2.0,
+              1.0,
+              1.0,
+              3.0,
+              1.0
+            ]
+          }
+        },
+        "id": "10000000-0000-4000-8000-00000000000e",
+        "is_definition_member": false,
+        "label": "Surface",
+        "native_kind": "ON_NurbsSurface",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Mesh": {
+            "colors": [
+              [
+                50,
+                100,
+                150,
+                210
+              ],
+              [
+                50,
+                100,
+                150,
+                210
+              ],
+              [
+                50,
+                100,
+                150,
+                210
+              ],
+              [
+                50,
+                100,
+                150,
+                210
+              ]
+            ],
+            "faces": [
+              [
+                0,
+                1,
+                2
+              ],
+              [
+                0,
+                1,
+                2,
+                3
+              ]
+            ],
+            "normals": [
+              [
+                0.0,
+                0.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "vertices": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                2.0,
+                0.0,
+                0.0
+              ],
+              [
+                2.0,
+                2.0,
+                0.0
+              ],
+              [
+                0.0,
+                2.0,
+                0.0
+              ]
+            ]
+          }
+        },
+        "id": "10000000-0000-4000-8000-00000000000f",
+        "is_definition_member": false,
+        "label": "Mesh",
+        "native_kind": "ON_Mesh",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [
+          "cloud hidden flags are runtime-only and absent from native 3DM"
+        ],
+        "geometry": {
+          "Cloud": {
+            "colors": [
+              [
+                255,
+                0,
+                0,
+                255
+              ],
+              [
+                0,
+                255,
+                0,
+                128
+              ]
+            ],
+            "hidden": [],
+            "normals": [
+              [
+                0.0,
+                0.0,
+                1.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0
+              ]
+            ],
+            "points": [
+              [
+                2.0,
+                3.0,
+                4.0
+              ],
+              [
+                5.0,
+                6.0,
+                7.0
+              ]
+            ]
+          }
+        },
+        "id": "10000000-0000-4000-8000-000000000010",
+        "is_definition_member": false,
+        "label": "Cloud",
+        "native_kind": "ON_PointCloud",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Curve": {
+            "Polycurve": {
+              "reversed": false,
+              "segments": [
+                {
+                  "Line": {
+                    "domain": [
+                      0.0,
+                      1.0
+                    ],
+                    "end": [
+                      1.0,
+                      0.0,
+                      0.0
+                    ],
+                    "start": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  }
+                },
+                {
+                  "Line": {
+                    "domain": [
+                      1.0,
+                      2.0
+                    ],
+                    "end": [
+                      1.0,
+                      1.0,
+                      0.0
+                    ],
+                    "start": [
+                      1.0,
+                      0.0,
+                      0.0
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "id": "10000000-0000-4000-8000-000000000011",
+        "is_definition_member": false,
+        "label": "Polycurve",
+        "native_kind": "ON_PolyCurve",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Instance": "10000000-0000-4000-8000-00000000001f"
+        },
+        "id": "10000000-0000-4000-8000-000000000012",
+        "is_definition_member": false,
+        "label": "Nested",
+        "native_kind": "ON_InstanceRef",
+        "placement": [
+          [
+            -2.0,
+            0.0,
+            0.0,
+            10.0
+          ],
+          [
+            0.0,
+            3.0,
+            0.0,
+            20.0
+          ],
+          [
+            0.0,
+            0.0,
+            4.0,
+            30.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "attributes": {
+          "color": [
+            11,
+            22,
+            33,
+            200
+          ],
+          "color_source": "object",
+          "layer": "10000000-0000-4000-8000-000000000001",
+          "locked": false,
+          "visible": true
+        },
+        "diagnostics": [],
+        "geometry": {
+          "Instance": "10000000-0000-4000-8000-00000000001e"
+        },
+        "id": "10000000-0000-4000-8000-000000000013",
+        "is_definition_member": false,
+        "label": "Shared",
+        "native_kind": "ON_InstanceRef",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "page_unit": "Inch",
+    "schema_version": 1,
+    "status": "inspected"
+  },
+  "rejection_cases": [
+    "duplicate-key",
+    "nested-duplicate-key",
+    "trailing",
+    "depth",
+    "unknown",
+    "schema",
+    "mode",
+    "selectable",
+    "hidden-locked",
+    "hidden",
+    "mesh-index",
+    "seam",
+    "periodic",
+    "reversed",
+    "missing-definition",
+    "cycle",
+    "layer-cycle",
+    "nonuniform-circle",
+    "singular",
+    "bad-frame",
+    "bad-uuid",
+    "bad-knots",
+    "outer-knots",
+    "trim-domain",
+    "unknown-geometry",
+    "negative-revision",
+    "member-locked",
+    "layer-selectable",
+    "surface-reversed",
+    "curve-extra-field",
+    "definition-name-normalization",
+    "string-budget",
+    "array-budget",
+    "node-budget",
+    "nonfinite",
+    "default-collision",
+    "definition-depth",
+    "existing-output",
+    "truncated-archive",
+    "corrupt-archive"
+  ],
+  "runs": [
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 408,
+        "exited": true,
+        "peak_committed_bytes": 27873280,
+        "pid": 13656
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"definitions\":2,\"diagnostics\":[],\"layers\":2,\"objects\":12,\"schema_version\":1,\"status\":\"written\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 466,
+        "exited": true,
+        "peak_committed_bytes": 34291712,
+        "pid": 83576
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"archive_version\":50,\"current_layer\":\"10000000-0000-4000-8000-000000000001\",\"definitions\":[{\"id\":\"10000000-0000-4000-8000-00000000001e\",\"label\":\"Master\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000028\"],\"model_unit\":\"Millimeter\"},{\"id\":\"10000000-0000-4000-8000-00000000001f\",\"label\":\"NestedMaster\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000029\"],\"model_unit\":\"Millimeter\"}],\"diagnostics\":[],\"layers\":[{\"color\":[100,110,120,200],\"id\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"name\":\"Parent\",\"native_index\":0,\"parent\":null,\"visible\":true},{\"color\":[200,210,220,255],\"id\":\"10000000-0000-4000-8000-000000000002\",\"locked\":true,\"name\":\"Con\",\"native_index\":1,\"parent\":\"10000000-0000-4000-8000-000000000001\",\"visible\":false}],\"model_unit\":\"Millimeter\",\"objects\":[{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[2.0,2.0,3.0]},\"id\":\"10000000-0000-4000-8000-000000000028\",\"is_definition_member\":true,\"label\":\"Member\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000029\",\"is_definition_member\":true,\"label\":\"NestedMember\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,5.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[11.0,22.0,33.0]},\"id\":\"10000000-0000-4000-8000-00000000000a\",\"is_definition_member\":false,\"label\":\"\u0110i\u1ec3m\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":true,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Line\":{\"domain\":[7.0,9.0],\"end\":[3.0,4.0,0.0],\"start\":[0.0,0.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000b\",\"is_definition_member\":false,\"label\":\"Line\",\"native_kind\":\"ON_LineCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":null,\"color_source\":\"layer\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":false},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Circle\":{\"angle_domain\":[0.0,6.283185307179586],\"center\":[2.0,3.0,4.0],\"domain\":[0.0,8.0],\"radius\":6.0,\"x\":[1.0,0.0,0.0],\"y\":[0.0,1.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000c\",\"is_definition_member\":false,\"label\":\"Circle\",\"native_kind\":\"ON_ArcCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Nurbs\":{\"degree\":2,\"domain\":[2.0,4.0],\"knots\":[2.0,2.0,2.0,4.0,4.0,4.0],\"periodic\":false,\"poles\":[[10.0,0.0,0.0],[10.0,10.0,0.0],[0.0,10.0,0.0]],\"reversed\":false,\"seam\":null,\"weights\":[1.0,0.7071067811865476,1.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000d\",\"is_definition_member\":false,\"label\":\"RationalArc\",\"native_kind\":\"ON_NurbsCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Surface\":{\"degree\":[1,1],\"domain\":[[0.0,2.0],[3.0,5.0]],\"knots\":[[0.0,0.0,2.0,2.0],[3.0,3.0,4.0,5.0,5.0]],\"periodic\":[false,false],\"poles\":[[0.0,0.0,0.0],[0.0,1.0,1.0],[0.0,2.0,0.0],[5.0,0.0,2.0],[5.0,1.0,3.0],[5.0,2.0,2.0]],\"reversed\":false,\"size\":[2,3],\"weights\":[1.0,2.0,1.0,1.0,3.0,1.0]}},\"id\":\"10000000-0000-4000-8000-00000000000e\",\"is_definition_member\":false,\"label\":\"Surface\",\"native_kind\":\"ON_NurbsSurface\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Mesh\":{\"colors\":[[50,100,150,210],[50,100,150,210],[50,100,150,210],[50,100,150,210]],\"faces\":[[0,1,2],[0,1,2,3]],\"normals\":[[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0]],\"vertices\":[[0.0,0.0,0.0],[2.0,0.0,0.0],[2.0,2.0,0.0],[0.0,2.0,0.0]]}},\"id\":\"10000000-0000-4000-8000-00000000000f\",\"is_definition_member\":false,\"label\":\"Mesh\",\"native_kind\":\"ON_Mesh\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[\"cloud hidden flags are runtime-only and absent from native 3DM\"],\"geometry\":{\"Cloud\":{\"colors\":[[255,0,0,255],[0,255,0,128]],\"hidden\":[],\"normals\":[[0.0,0.0,1.0],[0.0,1.0,0.0]],\"points\":[[2.0,3.0,4.0],[5.0,6.0,7.0]]}},\"id\":\"10000000-0000-4000-8000-000000000010\",\"is_definition_member\":false,\"label\":\"Cloud\",\"native_kind\":\"ON_PointCloud\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Polycurve\":{\"reversed\":false,\"segments\":[{\"Line\":{\"domain\":[0.0,1.0],\"end\":[1.0,0.0,0.0],\"start\":[0.0,0.0,0.0]}},{\"Line\":{\"domain\":[1.0,2.0],\"end\":[1.0,1.0,0.0],\"start\":[1.0,0.0,0.0]}}]}}},\"id\":\"10000000-0000-4000-8000-000000000011\",\"is_definition_member\":false,\"label\":\"Polycurve\",\"native_kind\":\"ON_PolyCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001f\"},\"id\":\"10000000-0000-4000-8000-000000000012\",\"is_definition_member\":false,\"label\":\"Nested\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[-2.0,0.0,0.0,10.0],[0.0,3.0,0.0,20.0],[0.0,0.0,4.0,30.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000013\",\"is_definition_member\":false,\"label\":\"Shared\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]}],\"page_unit\":\"Inch\",\"schema_version\":1,\"status\":\"inspected\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 476,
+        "exited": true,
+        "peak_committed_bytes": 33947648,
+        "pid": 7952
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"definitions\":2,\"diagnostics\":[],\"layers\":2,\"objects\":11,\"schema_version\":1,\"status\":\"written\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 460,
+        "exited": true,
+        "peak_committed_bytes": 34238464,
+        "pid": 50132
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"archive_version\":50,\"current_layer\":\"10000000-0000-4000-8000-000000000001\",\"definitions\":[{\"id\":\"10000000-0000-4000-8000-00000000001e\",\"label\":\"Master\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000028\"],\"model_unit\":\"Millimeter\"},{\"id\":\"10000000-0000-4000-8000-00000000001f\",\"label\":\"NestedMaster\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000029\"],\"model_unit\":\"Millimeter\"}],\"diagnostics\":[],\"layers\":[{\"color\":[100,110,120,200],\"id\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"name\":\"Parent\",\"native_index\":0,\"parent\":null,\"visible\":true},{\"color\":[200,210,220,255],\"id\":\"10000000-0000-4000-8000-000000000002\",\"locked\":true,\"name\":\"Con\",\"native_index\":1,\"parent\":\"10000000-0000-4000-8000-000000000001\",\"visible\":false}],\"model_unit\":\"Millimeter\",\"objects\":[{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[2.0,2.0,3.0]},\"id\":\"10000000-0000-4000-8000-000000000028\",\"is_definition_member\":true,\"label\":\"Member\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000029\",\"is_definition_member\":true,\"label\":\"NestedMember\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,5.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[14.0,25.0,36.0]},\"id\":\"10000000-0000-4000-8000-00000000000a\",\"is_definition_member\":false,\"label\":\"\u0110i\u1ec3m\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":null,\"color_source\":\"layer\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":false},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Circle\":{\"angle_domain\":[0.0,6.283185307179586],\"center\":[2.0,3.0,4.0],\"domain\":[0.0,8.0],\"radius\":6.0,\"x\":[1.0,0.0,0.0],\"y\":[0.0,1.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000c\",\"is_definition_member\":false,\"label\":\"Circle\",\"native_kind\":\"ON_ArcCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Nurbs\":{\"degree\":2,\"domain\":[2.0,4.0],\"knots\":[2.0,2.0,2.0,4.0,4.0,4.0],\"periodic\":false,\"poles\":[[10.0,0.0,0.0],[10.0,10.0,0.0],[0.0,10.0,0.0]],\"reversed\":false,\"seam\":null,\"weights\":[1.0,0.7071067811865476,1.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000d\",\"is_definition_member\":false,\"label\":\"RationalArc\",\"native_kind\":\"ON_NurbsCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Surface\":{\"degree\":[1,1],\"domain\":[[0.0,2.0],[3.0,5.0]],\"knots\":[[0.0,0.0,2.0,2.0],[3.0,3.0,4.0,5.0,5.0]],\"periodic\":[false,false],\"poles\":[[0.0,0.0,0.0],[0.0,1.0,1.0],[0.0,2.0,0.0],[5.0,0.0,2.0],[5.0,1.0,3.0],[5.0,2.0,2.0]],\"reversed\":false,\"size\":[2,3],\"weights\":[1.0,2.0,1.0,1.0,3.0,1.0]}},\"id\":\"10000000-0000-4000-8000-00000000000e\",\"is_definition_member\":false,\"label\":\"Surface\",\"native_kind\":\"ON_NurbsSurface\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Mesh\":{\"colors\":[[50,100,150,210],[50,100,150,210],[50,100,150,210],[50,100,150,210]],\"faces\":[[0,1,2],[0,1,2,3]],\"normals\":[[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0]],\"vertices\":[[0.0,0.0,0.0],[2.0,0.0,0.0],[2.0,2.0,0.0],[0.0,2.0,0.0]]}},\"id\":\"10000000-0000-4000-8000-00000000000f\",\"is_definition_member\":false,\"label\":\"Mesh\",\"native_kind\":\"ON_Mesh\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[\"cloud hidden flags are runtime-only and absent from native 3DM\"],\"geometry\":{\"Cloud\":{\"colors\":[[255,0,0,255],[0,255,0,128]],\"hidden\":[],\"normals\":[[0.0,0.0,1.0],[0.0,1.0,0.0]],\"points\":[[2.0,3.0,4.0],[5.0,6.0,7.0]]}},\"id\":\"10000000-0000-4000-8000-000000000010\",\"is_definition_member\":false,\"label\":\"Cloud\",\"native_kind\":\"ON_PointCloud\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Polycurve\":{\"reversed\":false,\"segments\":[{\"Line\":{\"domain\":[0.0,1.0],\"end\":[1.0,0.0,0.0],\"start\":[0.0,0.0,0.0]}},{\"Line\":{\"domain\":[1.0,2.0],\"end\":[1.0,1.0,0.0],\"start\":[1.0,0.0,0.0]}}]}}},\"id\":\"10000000-0000-4000-8000-000000000011\",\"is_definition_member\":false,\"label\":\"Polycurve\",\"native_kind\":\"ON_PolyCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001f\"},\"id\":\"10000000-0000-4000-8000-000000000012\",\"is_definition_member\":false,\"label\":\"Nested\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[-2.0,0.0,0.0,10.0],[0.0,3.0,0.0,20.0],[0.0,0.0,4.0,30.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000013\",\"is_definition_member\":false,\"label\":\"Shared\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]}],\"page_unit\":\"Inch\",\"schema_version\":1,\"status\":\"inspected\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 519,
+        "exited": true,
+        "peak_committed_bytes": 34168832,
+        "pid": 28704
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"definitions\":2,\"diagnostics\":[],\"layers\":2,\"objects\":12,\"schema_version\":1,\"status\":\"written\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 472,
+        "exited": true,
+        "peak_committed_bytes": 34066432,
+        "pid": 8276
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"archive_version\":50,\"current_layer\":\"10000000-0000-4000-8000-000000000001\",\"definitions\":[{\"id\":\"10000000-0000-4000-8000-00000000001e\",\"label\":\"Master\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000028\"],\"model_unit\":\"Millimeter\"},{\"id\":\"10000000-0000-4000-8000-00000000001f\",\"label\":\"NestedMaster\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000029\"],\"model_unit\":\"Millimeter\"}],\"diagnostics\":[],\"layers\":[{\"color\":[100,110,120,200],\"id\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"name\":\"Parent\",\"native_index\":0,\"parent\":null,\"visible\":true},{\"color\":[200,210,220,255],\"id\":\"10000000-0000-4000-8000-000000000002\",\"locked\":true,\"name\":\"Con\",\"native_index\":1,\"parent\":\"10000000-0000-4000-8000-000000000001\",\"visible\":false}],\"model_unit\":\"Millimeter\",\"objects\":[{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[2.0,2.0,3.0]},\"id\":\"10000000-0000-4000-8000-000000000028\",\"is_definition_member\":true,\"label\":\"Member\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000029\",\"is_definition_member\":true,\"label\":\"NestedMember\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,5.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[11.0,22.0,33.0]},\"id\":\"10000000-0000-4000-8000-00000000000a\",\"is_definition_member\":false,\"label\":\"\u0110i\u1ec3m\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":true,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Line\":{\"domain\":[7.0,9.0],\"end\":[3.0,4.0,0.0],\"start\":[0.0,0.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000b\",\"is_definition_member\":false,\"label\":\"Line\",\"native_kind\":\"ON_LineCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":null,\"color_source\":\"layer\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":false},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Circle\":{\"angle_domain\":[0.0,6.283185307179586],\"center\":[6.0,26.0,38.0],\"domain\":[0.0,8.0],\"radius\":12.0,\"x\":[-1.0,0.0,0.0],\"y\":[0.0,1.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000c\",\"is_definition_member\":false,\"label\":\"Circle\",\"native_kind\":\"ON_ArcCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Nurbs\":{\"degree\":2,\"domain\":[0.0,3.0],\"knots\":[-1.0,-1.0,0.0,1.0,2.0,3.0,4.0,4.0],\"periodic\":true,\"poles\":[[0.0,0.0,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,0.0],[1.0,0.0,0.0]],\"reversed\":false,\"seam\":null,\"weights\":[1.0,1.0,1.0,1.0,1.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000d\",\"is_definition_member\":false,\"label\":\"RationalArc\",\"native_kind\":\"ON_NurbsCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Surface\":{\"degree\":[2,1],\"domain\":[[0.0,3.0],[3.0,5.0]],\"knots\":[[-1.0,-1.0,0.0,1.0,2.0,3.0,4.0,4.0],[3.0,3.0,4.0,5.0,5.0]],\"periodic\":[true,false],\"poles\":[[0.0,0.0,0.0],[0.0,0.0,1.0],[0.0,0.0,2.0],[1.0,0.0,0.0],[1.0,0.0,1.0],[1.0,0.0,2.0],[0.0,1.0,0.0],[0.0,1.0,1.0],[0.0,1.0,2.0],[0.0,0.0,0.0],[0.0,0.0,1.0],[0.0,0.0,2.0],[1.0,0.0,0.0],[1.0,0.0,1.0],[1.0,0.0,2.0]],\"reversed\":false,\"size\":[5,3],\"weights\":[1.0,1.0,1.0,2.0,2.0,2.0,3.0,3.0,3.0,1.0,1.0,1.0,2.0,2.0,2.0]}},\"id\":\"10000000-0000-4000-8000-00000000000e\",\"is_definition_member\":false,\"label\":\"Surface\",\"native_kind\":\"ON_NurbsSurface\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Mesh\":{\"colors\":[[50,100,150,210],[50,100,150,210],[50,100,150,210],[50,100,150,210]],\"faces\":[[0,1,2],[0,1,2,3]],\"normals\":[[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0]],\"vertices\":[[10.0,20.0,30.0],[10.0,24.0,30.0],[4.0,24.0,30.0],[4.0,20.0,30.0]]}},\"id\":\"10000000-0000-4000-8000-00000000000f\",\"is_definition_member\":false,\"label\":\"Mesh\",\"native_kind\":\"ON_Mesh\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[\"cloud hidden flags are runtime-only and absent from native 3DM\"],\"geometry\":{\"Cloud\":{\"colors\":[[255,0,0,255],[0,255,0,128]],\"hidden\":[],\"normals\":[[0.0,0.0,1.0],[-1.0,0.0,0.0]],\"points\":[[1.0,24.0,46.0],[-8.0,30.0,58.0]]}},\"id\":\"10000000-0000-4000-8000-000000000010\",\"is_definition_member\":false,\"label\":\"Cloud\",\"native_kind\":\"ON_PointCloud\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Polycurve\":{\"reversed\":false,\"segments\":[{\"Line\":{\"domain\":[0.0,1.0],\"end\":[1.0,0.0,0.0],\"start\":[0.0,0.0,0.0]}},{\"Line\":{\"domain\":[1.0,2.0],\"end\":[1.0,1.0,0.0],\"start\":[1.0,0.0,0.0]}}]}}},\"id\":\"10000000-0000-4000-8000-000000000011\",\"is_definition_member\":false,\"label\":\"Polycurve\",\"native_kind\":\"ON_PolyCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001f\"},\"id\":\"10000000-0000-4000-8000-000000000012\",\"is_definition_member\":false,\"label\":\"Nested\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[-2.0,0.0,0.0,10.0],[0.0,3.0,0.0,20.0],[0.0,0.0,4.0,30.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000013\",\"is_definition_member\":false,\"label\":\"Shared\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]}],\"page_unit\":\"Inch\",\"schema_version\":1,\"status\":\"inspected\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 469,
+        "exited": true,
+        "peak_committed_bytes": 34238464,
+        "pid": 30748
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"definitions\":2,\"diagnostics\":[],\"layers\":2,\"objects\":12,\"schema_version\":1,\"status\":\"written\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 468,
+        "exited": true,
+        "peak_committed_bytes": 34148352,
+        "pid": 8732
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"archive_version\":50,\"current_layer\":\"10000000-0000-4000-8000-000000000001\",\"definitions\":[{\"id\":\"10000000-0000-4000-8000-00000000001e\",\"label\":\"Master\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000028\"],\"model_unit\":\"Millimeter\"},{\"id\":\"10000000-0000-4000-8000-00000000001f\",\"label\":\"NestedMaster\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000029\"],\"model_unit\":\"Millimeter\"}],\"diagnostics\":[],\"layers\":[{\"color\":[100,110,120,200],\"id\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"name\":\"Parent\",\"native_index\":0,\"parent\":null,\"visible\":true},{\"color\":[200,210,220,255],\"id\":\"10000000-0000-4000-8000-000000000002\",\"locked\":true,\"name\":\"Con\",\"native_index\":1,\"parent\":\"10000000-0000-4000-8000-000000000001\",\"visible\":false}],\"model_unit\":\"Millimeter\",\"objects\":[{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[2.0,2.0,3.0]},\"id\":\"10000000-0000-4000-8000-000000000028\",\"is_definition_member\":true,\"label\":\"Member\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000029\",\"is_definition_member\":true,\"label\":\"NestedMember\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,5.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[11.0,22.0,33.0]},\"id\":\"10000000-0000-4000-8000-00000000000a\",\"is_definition_member\":false,\"label\":\"\u0110i\u1ec3m\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":true,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Line\":{\"domain\":[7.0,9.0],\"end\":[3.0,4.0,0.0],\"start\":[0.0,0.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000b\",\"is_definition_member\":false,\"label\":\"Line\",\"native_kind\":\"ON_LineCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":null,\"color_source\":\"layer\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":false},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Circle\":{\"angle_domain\":[0.0,6.283185307179586],\"center\":[2.0,3.0,4.0],\"domain\":[0.0,8.0],\"radius\":6.0,\"x\":[1.0,0.0,0.0],\"y\":[0.0,1.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000c\",\"is_definition_member\":false,\"label\":\"Circle\",\"native_kind\":\"ON_ArcCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Nurbs\":{\"degree\":2,\"domain\":[2.0,4.0],\"knots\":[2.0,2.0,2.0,4.0,4.0,4.0],\"periodic\":false,\"poles\":[[10.0,0.0,0.0],[10.0,10.0,0.0],[0.0,10.0,0.0]],\"reversed\":false,\"seam\":null,\"weights\":[1.0,0.7071067811865476,1.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000d\",\"is_definition_member\":false,\"label\":\"RationalArc\",\"native_kind\":\"ON_NurbsCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Surface\":{\"degree\":[1,1],\"domain\":[[0.0,2.0],[3.0,5.0]],\"knots\":[[0.0,0.0,2.0,2.0],[3.0,3.0,4.0,5.0,5.0]],\"periodic\":[false,false],\"poles\":[[0.0,0.0,0.0],[0.0,1.0,1.0],[0.0,2.0,0.0],[5.0,0.0,2.0],[5.0,1.0,3.0],[5.0,2.0,2.0]],\"reversed\":false,\"size\":[2,3],\"weights\":[1.0,2.0,1.0,1.0,3.0,1.0]}},\"id\":\"10000000-0000-4000-8000-00000000000e\",\"is_definition_member\":false,\"label\":\"Surface\",\"native_kind\":\"ON_NurbsSurface\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Mesh\":{\"colors\":[[50,100,150,210],[50,100,150,210],[50,100,150,210],[50,100,150,210]],\"faces\":[[0,1,2],[0,1,2,3]],\"normals\":[[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0]],\"vertices\":[[7.530864219754,20.0,30.0],[6.0,20.0,30.0],[6.0,26.0,30.0],[10.0,26.0,30.0]]}},\"id\":\"10000000-0000-4000-8000-00000000000f\",\"is_definition_member\":false,\"label\":\"Mesh\",\"native_kind\":\"ON_Mesh\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[\"cloud hidden flags are runtime-only and absent from native 3DM\"],\"geometry\":{\"Cloud\":{\"colors\":[[255,0,0,255],[0,255,0,128]],\"hidden\":[],\"normals\":[[0.0,0.0,1.0],[0.0,1.0,0.0]],\"points\":[[2.0,3.0,4.0],[5.0,6.0,7.0]]}},\"id\":\"10000000-0000-4000-8000-000000000010\",\"is_definition_member\":false,\"label\":\"Cloud\",\"native_kind\":\"ON_PointCloud\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Polycurve\":{\"reversed\":false,\"segments\":[{\"Line\":{\"domain\":[0.0,1.0],\"end\":[1.0,0.0,0.0],\"start\":[0.0,0.0,0.0]}},{\"Line\":{\"domain\":[1.0,2.0],\"end\":[1.0,1.0,0.0],\"start\":[1.0,0.0,0.0]}}]}}},\"id\":\"10000000-0000-4000-8000-000000000011\",\"is_definition_member\":false,\"label\":\"Polycurve\",\"native_kind\":\"ON_PolyCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001f\"},\"id\":\"10000000-0000-4000-8000-000000000012\",\"is_definition_member\":false,\"label\":\"Nested\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[-2.0,0.0,0.0,10.0],[0.0,3.0,0.0,20.0],[0.0,0.0,4.0,30.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"10000000-0000-4000-8000-000000000001\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000013\",\"is_definition_member\":false,\"label\":\"Shared\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]}],\"page_unit\":\"Inch\",\"schema_version\":1,\"status\":\"inspected\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 473,
+        "exited": true,
+        "peak_committed_bytes": 34095104,
+        "pid": 68408
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"definitions\":2,\"diagnostics\":[\"unlayered entities mapped to native default layer\",\"current_layer=None mapped to native first/default layer\"],\"layers\":1,\"objects\":12,\"schema_version\":1,\"status\":\"written\"}\r\n"
+    },
+    {
+      "limits": {
+        "native_committed_bytes": 134217728,
+        "reservation_bytes": 167968768,
+        "stderr_bytes": 16384,
+        "stdout_bytes": 16777216
+      },
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 477,
+        "exited": true,
+        "peak_committed_bytes": 34025472,
+        "pid": 2656
+      },
+      "status": "native_owner_result",
+      "stderr": "",
+      "stdout": "{\"archive_version\":50,\"current_layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"definitions\":[{\"id\":\"10000000-0000-4000-8000-00000000001e\",\"label\":\"Master\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000028\"],\"model_unit\":\"Millimeter\"},{\"id\":\"10000000-0000-4000-8000-00000000001f\",\"label\":\"NestedMaster\",\"linked\":false,\"members\":[\"10000000-0000-4000-8000-000000000029\"],\"model_unit\":\"Millimeter\"}],\"diagnostics\":[],\"layers\":[{\"color\":[0,0,0,255],\"id\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"name\":\"Default\",\"native_index\":0,\"parent\":null,\"visible\":true}],\"model_unit\":\"Millimeter\",\"objects\":[{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[2.0,2.0,3.0]},\"id\":\"10000000-0000-4000-8000-000000000028\",\"is_definition_member\":true,\"label\":\"Member\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000029\",\"is_definition_member\":true,\"label\":\"NestedMember\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,5.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Point\":[11.0,22.0,33.0]},\"id\":\"10000000-0000-4000-8000-00000000000a\",\"is_definition_member\":false,\"label\":\"\u0110i\u1ec3m\",\"native_kind\":\"ON_Point\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":true,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Line\":{\"domain\":[7.0,9.0],\"end\":[3.0,4.0,0.0],\"start\":[0.0,0.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000b\",\"is_definition_member\":false,\"label\":\"Line\",\"native_kind\":\"ON_LineCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":null,\"color_source\":\"layer\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":false},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Circle\":{\"angle_domain\":[0.0,6.283185307179586],\"center\":[2.0,3.0,4.0],\"domain\":[0.0,8.0],\"radius\":6.0,\"x\":[1.0,0.0,0.0],\"y\":[0.0,1.0,0.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000c\",\"is_definition_member\":false,\"label\":\"Circle\",\"native_kind\":\"ON_ArcCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Nurbs\":{\"degree\":2,\"domain\":[2.0,4.0],\"knots\":[2.0,2.0,2.0,4.0,4.0,4.0],\"periodic\":false,\"poles\":[[10.0,0.0,0.0],[10.0,10.0,0.0],[0.0,10.0,0.0]],\"reversed\":false,\"seam\":null,\"weights\":[1.0,0.7071067811865476,1.0]}}},\"id\":\"10000000-0000-4000-8000-00000000000d\",\"is_definition_member\":false,\"label\":\"RationalArc\",\"native_kind\":\"ON_NurbsCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Surface\":{\"degree\":[1,1],\"domain\":[[0.0,2.0],[3.0,5.0]],\"knots\":[[0.0,0.0,2.0,2.0],[3.0,3.0,4.0,5.0,5.0]],\"periodic\":[false,false],\"poles\":[[0.0,0.0,0.0],[0.0,1.0,1.0],[0.0,2.0,0.0],[5.0,0.0,2.0],[5.0,1.0,3.0],[5.0,2.0,2.0]],\"reversed\":false,\"size\":[2,3],\"weights\":[1.0,2.0,1.0,1.0,3.0,1.0]}},\"id\":\"10000000-0000-4000-8000-00000000000e\",\"is_definition_member\":false,\"label\":\"Surface\",\"native_kind\":\"ON_NurbsSurface\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Mesh\":{\"colors\":[[50,100,150,210],[50,100,150,210],[50,100,150,210],[50,100,150,210]],\"faces\":[[0,1,2],[0,1,2,3]],\"normals\":[[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0,1.0]],\"vertices\":[[0.0,0.0,0.0],[2.0,0.0,0.0],[2.0,2.0,0.0],[0.0,2.0,0.0]]}},\"id\":\"10000000-0000-4000-8000-00000000000f\",\"is_definition_member\":false,\"label\":\"Mesh\",\"native_kind\":\"ON_Mesh\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[\"cloud hidden flags are runtime-only and absent from native 3DM\"],\"geometry\":{\"Cloud\":{\"colors\":[[255,0,0,255],[0,255,0,128]],\"hidden\":[],\"normals\":[[0.0,0.0,1.0],[0.0,1.0,0.0]],\"points\":[[2.0,3.0,4.0],[5.0,6.0,7.0]]}},\"id\":\"10000000-0000-4000-8000-000000000010\",\"is_definition_member\":false,\"label\":\"Cloud\",\"native_kind\":\"ON_PointCloud\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Curve\":{\"Polycurve\":{\"reversed\":false,\"segments\":[{\"Line\":{\"domain\":[0.0,1.0],\"end\":[1.0,0.0,0.0],\"start\":[0.0,0.0,0.0]}},{\"Line\":{\"domain\":[1.0,2.0],\"end\":[1.0,1.0,0.0],\"start\":[1.0,0.0,0.0]}}]}}},\"id\":\"10000000-0000-4000-8000-000000000011\",\"is_definition_member\":false,\"label\":\"Polycurve\",\"native_kind\":\"ON_PolyCurve\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001f\"},\"id\":\"10000000-0000-4000-8000-000000000012\",\"is_definition_member\":false,\"label\":\"Nested\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[-2.0,0.0,0.0,10.0],[0.0,3.0,0.0,20.0],[0.0,0.0,4.0,30.0],[0.0,0.0,0.0,1.0]]},{\"attributes\":{\"color\":[11,22,33,200],\"color_source\":\"object\",\"layer\":\"ffffffff-ffff-4fff-8fff-ffffffffffff\",\"locked\":false,\"visible\":true},\"diagnostics\":[],\"geometry\":{\"Instance\":\"10000000-0000-4000-8000-00000000001e\"},\"id\":\"10000000-0000-4000-8000-000000000013\",\"is_definition_member\":false,\"label\":\"Shared\",\"native_kind\":\"ON_InstanceRef\",\"placement\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]}],\"page_unit\":\"Inch\",\"schema_version\":1,\"status\":\"inspected\"}\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 494,
+        "exited": true,
+        "peak_committed_bytes": 33910784,
+        "pid": 35656
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): duplicate JSON key\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 471,
+        "exited": true,
+        "peak_committed_bytes": 33923072,
+        "pid": 43788
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): duplicate JSON key\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 479,
+        "exited": true,
+        "peak_committed_bytes": 34013184,
+        "pid": 59776
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): invalid/trailing JSON bytes\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 467,
+        "exited": true,
+        "peak_committed_bytes": 34091008,
+        "pid": 69476
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): packet depth budget\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 476,
+        "exited": true,
+        "peak_committed_bytes": 33951744,
+        "pid": 66096
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): missing/unknown record fields\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 493,
+        "exited": true,
+        "peak_committed_bytes": 34070528,
+        "pid": 25316
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): integer count budget\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 486,
+        "exited": true,
+        "peak_committed_bytes": 34009088,
+        "pid": 75848
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): unsupported export mode\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 513,
+        "exited": true,
+        "peak_committed_bytes": 34107392,
+        "pid": 9820
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000a): unsupported independent selectable=false\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 499,
+        "exited": true,
+        "peak_committed_bytes": 34025472,
+        "pid": 53368
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000b): unsupported independently hidden and locked entity\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 497,
+        "exited": true,
+        "peak_committed_bytes": 34295808,
+        "pid": 34724
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-000000000010): unsupported runtime-only cloud hidden=true\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 475,
+        "exited": true,
+        "peak_committed_bytes": 33959936,
+        "pid": 43588
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000f): mesh face indices\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 469,
+        "exited": true,
+        "peak_committed_bytes": 34058240,
+        "pid": 572
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000d): unsupported curve seam metadata\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 472,
+        "exited": true,
+        "peak_committed_bytes": 34213888,
+        "pid": 66720
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000d): unsupported unmatched curve periodic metadata\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 466,
+        "exited": true,
+        "peak_committed_bytes": 34021376,
+        "pid": 14380
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000d): unsupported reversed curve metadata\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 461,
+        "exited": true,
+        "peak_committed_bytes": 34086912,
+        "pid": 17916
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-000000000013): missing/unordered definition dependency\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 474,
+        "exited": true,
+        "peak_committed_bytes": 33959936,
+        "pid": 26984
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (definition graph 10000000-0000-4000-8000-00000000001f): missing definition/definition cycle\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 505,
+        "exited": true,
+        "peak_committed_bytes": 34082816,
+        "pid": 53608
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (layer 10000000-0000-4000-8000-000000000001): layer missing parent/cycle/depth\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 473,
+        "exited": true,
+        "peak_committed_bytes": 34107392,
+        "pid": 25100
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000c): unsupported nonuniform analytic circle parameter conversion\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 471,
+        "exited": true,
+        "peak_committed_bytes": 34013184,
+        "pid": 81052
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000a): singular affine matrix\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 408,
+        "exited": true,
+        "peak_committed_bytes": 34062336,
+        "pid": 61472
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000c): circle orthonormal frame\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 337,
+        "exited": true,
+        "peak_committed_bytes": 30482432,
+        "pid": 17724
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): UUID format\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 311,
+        "exited": true,
+        "peak_committed_bytes": 23482368,
+        "pid": 58016
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000d): NURBS sorted knots\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 268,
+        "exited": true,
+        "peak_committed_bytes": 20119552,
+        "pid": 38292
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000d): unsupported noncanonical expanded outer knots\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 356,
+        "exited": true,
+        "peak_committed_bytes": 31522816,
+        "pid": 61880
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000d): unsupported trimmed NURBS domain\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 444,
+        "exited": true,
+        "peak_committed_bytes": 29573120,
+        "pid": 21896
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000a): unsupported geometry variant\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 520,
+        "exited": true,
+        "peak_committed_bytes": 34099200,
+        "pid": 73708
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000a): invalid revision\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 498,
+        "exited": true,
+        "peak_committed_bytes": 34136064,
+        "pid": 15936
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-000000000028): unsupported locked instance-definition member\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 480,
+        "exited": true,
+        "peak_committed_bytes": 34025472,
+        "pid": 12868
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (layer 10000000-0000-4000-8000-000000000001): unsupported independent layer selectable=false\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 492,
+        "exited": true,
+        "peak_committed_bytes": 33873920,
+        "pid": 41748
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000e): unsupported reversed surface metadata\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 484,
+        "exited": true,
+        "peak_committed_bytes": 34119680,
+        "pid": 12640
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (entity 10000000-0000-4000-8000-00000000000b): missing/unknown record fields\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 487,
+        "exited": true,
+        "peak_committed_bytes": 34263040,
+        "pid": 59592
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (definition 10000000-0000-4000-8000-00000000001e): unsupported native definition ID/name normalization\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 475,
+        "exited": true,
+        "peak_committed_bytes": 33988608,
+        "pid": 82548
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): packet string budget/NUL\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 514,
+        "exited": true,
+        "peak_committed_bytes": 34168832,
+        "pid": 14984
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): packet container budget\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 496,
+        "exited": true,
+        "peak_committed_bytes": 33996800,
+        "pid": 29912
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): packet node budget\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 483,
+        "exited": true,
+        "peak_committed_bytes": 34066432,
+        "pid": 10772
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): invalid/trailing JSON bytes\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 481,
+        "exited": true,
+        "peak_committed_bytes": 34209792,
+        "pid": 34804
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (layer 10000000-0000-4000-8000-000000000002): layer missing parent/cycle/depth\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 440,
+        "exited": true,
+        "peak_committed_bytes": 34238464,
+        "pid": 28140
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (definition graph 10000000-0000-4000-8000-00000000005c): definition cached depth budget\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 380,
+        "exited": true,
+        "peak_committed_bytes": 26824704,
+        "pid": 81180
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (write private archive): output already exists; private unique destination required\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 349,
+        "exited": true,
+        "peak_committed_bytes": 23461888,
+        "pid": 18608
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (inspect archive): native archive read\r\n"
+    },
+    {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 468,
+        "exited": true,
+        "peak_committed_bytes": 34246656,
+        "pid": 47896
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (inspect archive): native archive read\r\n"
+    }
+  ],
+  "limitations": [
+    "No retained merge",
+    "No Rhino 5 UI acceptance",
+    "No native memory-safety claim",
+    "Independent selectable=false, hidden+locked entities, locked definition members refused",
+    "Direct nonuniform circles with nonidentity angle correspondence refused",
+    "Reversed/seam metadata, unmatched periodicity, trimmed NURBS domains and noncanonical outer knots refused",
+    "Cloud hidden=true refused; false-only runtime flags absent from native archive",
+    "Native normal channels normalized by inverse transpose; mesh normals use native single precision"
+  ]
+}

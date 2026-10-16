@@ -4,14 +4,14 @@
 
 ## Tra cứu phạm vi hiện hành
 
-Trong checkout đang làm việc, lấy `spec_path` theo exact ID từ catalog/feature lookup. Package có thể ở `OpenMatrix9_Codex_Spec_v1/` hoặc `ref/matrix9/OpenMatrix9_Codex_Spec_v1/`; dùng vị trí tồn tại và phù hợp checkout. Đọc implementation notes của spec đã chọn, phân biệt supported slice với hợp đồng mục tiêu và code mẫu request-planner.
+Trong checkout đang làm việc, lấy `spec_path` theo exact ID từ catalog/feature lookup. Package là `OpenMatrix9_Codex_Spec_v2/` trực tiếp trong checkout; không fallback v1/ref/matrix9. Đọc implementation notes của spec đã chọn, phân biệt supported slice với hợp đồng mục tiêu và code mẫu request-planner.
 
 - Box: `specs/04-solid/om9-solid-012-box.md`.
 - Sphere: `specs/04-solid/om9-solid-014-sphere.md`.
 - Bằng chứng: `docs/validation/2026-10-09-solid-box-sphere-options.md`, ledger `docs/openmatrix9-progress.json`; fixtures `rust/tests/solid_options.rs`, `tests/solid_options_smoke.FCMacro` cùng các test core.
 - Box hiện hành: `docs/validation/2026-10-12-box-documented-workflow.md` và `.json`; `rust/tests/box_documented_workflow.rs`, `tests/box_documented_workflow_smoke.FCMacro`. Nội dung chọn phương pháp bắt buộc của báo cáo này đã được supersede bởi correction Box mặc định theo video; xem báo cáo hiện hành dưới đây.
 
-Trước khi thay đổi hoặc tuyên bố thêm capability, đối chiếu code/spec và chạy fixture liên quan trên đúng native module. Kết quả validator/code mẫu không thay thế nghiệm thu hình học FreeCAD. Catalog vẫn là `partially_implemented / validated_supported_slice` khi còn các giới hạn dưới đây.
+Trước khi thay đổi hoặc tuyên bố thêm capability, đối chiếu code/spec và chạy fixture liên quan trên đúng native module. Kết quả validator/code mẫu không thay thế nghiệm thu hình học trên OM9 standalone. Những status/supported families dưới đây là scope FreeCAD lịch sử; catalog v2 vẫn not_implemented_on_standalone_om9 cho đến evidence mới.
 
 ## Box: luồng mặc định, các option và frame
 
@@ -60,8 +60,8 @@ Matching OCCT solver phải kiểm tra contact nằm trên bounded edges, radial
 
 ## Output, lifecycle và giới hạn dùng chung
 
-Rust giữ input state/pure construction math; typed C++/Qt Part/OCCT adapter giữ native references và tạo một document-root `Part::Feature`, valid/closed BRep, đúng một solid, volume dương trong một transaction. Không đánh giá CMD như mã Python. Metadata lưu exact ID/command/mode, dimensions/frame đã chuẩn hóa và tên references.
+Rust giữ input state/pure construction math; typed OM9 geometry/selected OCCT adapter dùng owned references; OM9 document/journal publish một typed root geometry object, valid/closed BRep, đúng một solid, volume dương trong một transaction. Không đánh giá CMD như mã Python. Metadata lưu exact ID/command/mode, dimensions/frame đã chuẩn hóa và tên references.
 
-Đơn vị mm, dimension suffix mm/cm/in, coordinates/final extents trong +/-1e9 mm; dimensions không zero, từ 1e-7 đến 1e9 mm, Sphere radius dương. Preview là Coin scene node không pick được, không tạo document object. FitPoints preview fit cùng điểm hover; Tangent giải sau constraint cuối, không có live preview mọi nhánh.
+Đơn vị mm, dimension suffix mm/cm/in, coordinates/final extents trong +/-1e9 mm; dimensions không zero, từ 1e-7 đến 1e9 mm, Sphere radius dương. Preview là OM9 scene node không pick được, không tạo document object. FitPoints preview fit cùng điểm hover; Tangent giải sau constraint cuối, không có live preview mọi nhánh.
 
-Revalidate BRep và global placement của references trước commit; source đổi/xóa hoặc lỗi không để output dở dang. Giữ nguồn; kết quả là snapshot độc lập, không regenerate theo nguồn sau commit. Cancel/Esc, đổi/đóng document hoặc rời workbench dọn input/preview. Input Undo tách khỏi native Undo/Redo; save/reload giữ geometry và metadata. Associative History, active-layer/Builder/Styles và toàn bộ foundation compatibility vẫn chưa được chứng minh.
+Revalidate BRep và global placement của references trước commit; source đổi/xóa hoặc lỗi không để output dở dang. Giữ nguồn; kết quả là snapshot độc lập, không regenerate theo nguồn sau commit. Cancel/Esc, đổi/đóng document hoặc đóng/deactivate workspace dọn input/preview. Input Undo tách khỏi OM9 document Undo/Redo; save/reload giữ geometry và metadata. Associative History, active-layer/Builder/Styles và toàn bộ foundation compatibility vẫn chưa được chứng minh.

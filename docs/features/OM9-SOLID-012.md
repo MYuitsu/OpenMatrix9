@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-SOLID-012](../../OpenMatrix9_Codex_Spec_v2/specs/04-solid/om9-solid-012-box.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-SOLID-012 — Box
 
 <!-- box-default-video:start -->

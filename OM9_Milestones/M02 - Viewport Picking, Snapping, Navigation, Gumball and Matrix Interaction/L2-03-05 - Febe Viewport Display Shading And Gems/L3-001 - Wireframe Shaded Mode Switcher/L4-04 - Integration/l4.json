@@ -1,0 +1,284 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-03-05-001-04",
+  "milestone": "M02",
+  "parent_l3_id": "OM9-L3-03-05-001",
+  "owner_l2_id": "OM9-L2-03-05",
+  "title": "INTEGRATE: Wireframe Shaded Mode Switcher",
+  "planning_state": "NOT_STARTED",
+  "task": {
+    "task_id": "OM9-L4-03-05-001-04",
+    "parent_l3_id": "OM9-L3-03-05-001",
+    "owner_module_id": "OM9-L2-03-05",
+    "title": "INTEGRATE: Wireframe Shaded Mode Switcher",
+    "milestone_id": "M02",
+    "execution_stage": "E03",
+    "mini_gate_id": "G02-D",
+    "role": "INTEGRATE",
+    "tag": "febe",
+    "risk": "NORMAL",
+    "source_sha": "746a17f127897e921a57118b6caad08968602bf5",
+    "m01_gate_required": true,
+    "human_review": false,
+    "purpose": "wireframe/shaded modes for jewelry viewports",
+    "positive_case": "Box BRep hiển thị wireframe và shaded cùng bbox, không mutate model",
+    "negative_case": "Chuyển mode không thay đổi document dirty/undo journal",
+    "implementation_algorithm": "Toggle draw pipeline/prefs per viewport; shared tessellation cache",
+    "depends_on_task_ids": [
+      "OM9-L4-03-05-001-03"
+    ],
+    "source_anchors": [
+      {
+        "path": "crates/qymcad-render/src/lib.rs",
+        "purpose": "draw overlays",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-render/src/lib.rs",
+        "blob_sha": "8ca9c5ef80155cbca7a90ae1c0cec52c33f61d28",
+        "review_state": "CONTENT_READ"
+      },
+      {
+        "path": "crates/qymcad/src/viewport_gpu.rs",
+        "purpose": "3D GPU render",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/viewport_gpu.rs",
+        "blob_sha": "3098ad046972390794f6c534a26e561287b02f46",
+        "review_state": "CONTENT_READ"
+      },
+      {
+        "path": "crates/qymcad-ui-state/src/scene.rs",
+        "purpose": "scene display state",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/scene.rs",
+        "blob_sha": "cf4eb2eb6855507befaaecd1cbfba101c10d0a01",
+        "review_state": "CONTENT_READ"
+      }
+    ],
+    "external_owner_interfaces": [
+      "OM9-L2-01-06:GPU renderer",
+      "OM9-L2-01-04:native project codec",
+      "OM9-L2-01-03:layer and semantic tags"
+    ],
+    "deferred_integration": null,
+    "fixture_id": "G02-D-03-05-001",
+    "steps": [
+      "Kết nối logic vào UI hoặc command owner theo đúng tag=febe, không duplicate core: Toggle draw pipeline/prefs per viewport; shared tessellation cache.",
+      "Test per-viewport context, command focus, selection ID, hidden/locked và Esc/no-op theo đúng chức năng.",
+      "Kiểm tra thao tác người dùng đạt: Box BRep hiển thị wireframe và shaded cùng bbox, không mutate model.",
+      "Kiểm tra khả năng từ chối phù hợp: Chuyển mode không thay đổi document dirty/undo journal.",
+      "Kiểm thử hồi quy command/undo hoặc renderer có liên quan, lưu artifact trước/sau và trạng thái view."
+    ],
+    "outputs": [
+      "implementation/tests/M02/OM9-L3-03-05-001/integration-report.json"
+    ],
+    "blocked_states": [
+      "BLOCKED_M00",
+      "BLOCKED_M01",
+      "BLOCKED_SOURCE",
+      "BLOCKED_DEPENDENCY",
+      "BLOCKED_FIXTURE",
+      "BLOCKED_ENV",
+      "BLOCKED_APPROVAL"
+    ],
+    "candidate_symbol_hints_require_local_verification": "qymcad-render/src/lib.rs: renderer overlays; qymcad/src/viewport_gpu.rs: GPU path"
+  },
+  "implementation_contract": {
+    "expected_outputs": [
+      "implementation/tests/M02/OM9-L3-03-05-001/integration-report.json"
+    ],
+    "required_capture_purpose": "focused_test",
+    "test_command_template_NOT_RUN": "cargo test --workspace <integration_filter> -- --nocapture",
+    "never_claim_actual_test_from_fixture": true
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "agent_runbook_markdown": "# OM9-L4-03-05-001-04 — Wireframe Shaded Mode Switcher / INTEGRATE\n\n> **STATUS = PLANNED_NOT_EXECUTED.** Không tự đánh dấu PASS. Một phiên Codex/Luna = một L4. Bắt buộc M00 + M01 VERIFIED_PASS; `--preview` không mở khóa.\n\n- Owner: `OM9-L2-03-05` · L3 `OM9-L3-03-05-001` · mini-gate `G02-D` · risk `NORMAL`.\n- Canonical L3: `M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-05 - Febe Viewport Display Shading And Gems/L3-001 - Wireframe Shaded Mode Switcher/l3.json`. Không sửa `l3_id`, `module_id`, `stable_owner_key`, `execution_stage` của nguồn.\n- QymCAD revision (khóa): `746a17f127897e921a57118b6caad08968602bf5`. Code chỉ là gợi ý tái sử dụng, không chứng minh parity Matrix.\n- Phụ thuộc L4 (cần VERIFIED_PASS): `OM9-L4-03-05-001-03`.\n- Phụ thuộc ngoài M02: OM9-L2-01-06:GPU renderer, OM9-L2-01-04:native project codec, OM9-L2-01-03:layer and semantic tags. Nếu chưa nghiệm thu thì dừng BLOCKED_DEPENDENCY.\n- Human approval: **Không bắt buộc ở L4 này**.\n\n## Chứng cứ mã nguồn cần đọc\n- **Gợi ý symbols (chưa chứng minh parity):** qymcad-render/src/lib.rs: renderer overlays; qymcad/src/viewport_gpu.rs: GPU path\n- `crates/qymcad-render/src/lib.rs` — draw overlays; blob `0a7621a992bfa2e2222415d9aa58d2a5f223a619`\n- `crates/qymcad/src/viewport_gpu.rs` — 3D GPU render; blob `23fb25940b4c48e071484348e15ab52c94f0bd33`\n- `crates/qymcad-ui-state/src/scene.rs` — scene display state; blob `87fb909f0165145843b9c62dbd75c2ec3b9a399c`\n\n## Hợp đồng chức năng\n- Mục tiêu: wireframe/shaded modes for jewelry viewports.\n- Quy tắc thuật toán/tích hợp: **Toggle draw pipeline/prefs per viewport; shared tessellation cache**.\n- Positive oracle đề xuất: **Box BRep hiển thị wireframe và shaded cùng bbox, không mutate model**.\n- Negative oracle đề xuất: **Chuyển mode không thay đổi document dirty/undo journal**.\n- Fixture ID: `G02-D-03-05-001` (`planning/M02/fixtures/G02-D.json`). Đây là test blueprint, chưa là chứng cứ runtime.\n\n## Các bước thực hiện tuần tự\n1. Kết nối logic vào UI hoặc command owner theo đúng tag=febe, không duplicate core: Toggle draw pipeline/prefs per viewport; shared tessellation cache.\n2. Test per-viewport context, command focus, selection ID, hidden/locked và Esc/no-op theo đúng chức năng.\n3. Kiểm tra thao tác người dùng đạt: Box BRep hiển thị wireframe và shaded cùng bbox, không mutate model.\n4. Kiểm tra khả năng từ chối phù hợp: Chuyển mode không thay đổi document dirty/undo journal.\n5. Kiểm thử hồi quy command/undo hoặc renderer có liên quan, lưu artifact trước/sau và trạng thái view.\n\n## Thực thi an toàn và bằng chứng\n- Cài QymCAD vào thư mục local dưới root OpenMatrix9 trước khi chạy capture; `git rev-parse HEAD` phải đúng commit; nếu không → `BLOCKED_SOURCE`.\n- Lệnh khung **chỉ là gợi ý**, phải thay phần placeholder bằng test thật trước khi chạy: `cargo test --workspace <integration_filter> -- --nocapture`.\n- Capture: `python tools/m02_capture.py --task OM9-L4-03-05-001-04 --cwd . --label unique-label -- <command> <args...>`.\n- Lưu `oracle_report` có **positive + negative** với expected/actual đo từ test; mọi đường dẫn/hashes phải do lệnh thật tạo.\n- Bằng chứng: `implementation/evidence/M02/OM9-L3-03-05-001/OM9-L4-03-05-001-04.evidence.json`. Khả năng tự kiểm chứng: `python tools/validate_m02_execution.py`.\n- `SOURCE_AUDIT` chỉ xác nhận path/symbol và lựa chọn reuse; `CONTRACT_TEST` xác nhận fixture cấu trúc; cả hai không chứng minh CAD implemented.\n- Bất kỳ kiểm thử lệnh nào thất bại, placeholder test chưa thay, log trống, hoặc sai oracle phải dừng và lưu FAIL/BLOCKED; tuyệt đối không ghi PASS giả.\n\n## Nguồn tham chiếu bắt buộc đối chiếu (Matrix9 / Rhino 5) — v0.16\n\n**Trạng thái bổ sung:** `requirements_only_not_runtime_evidence` — chỉ là yêu cầu đối chiếu, không phải nghiệm thu.\n\n**Trọng tâm đối chiếu:** Wireframe/Shaded per viewport; đổi mode không mutate model/dirty/undo journal.\n\n### Chương Rhino 5 core phải đọc trước\n\n- `RCORE-12` — Display, render và resource lifecycle · Guide PDF 39-43 / in 31-35; 101-104 / in 93-96 · fixture đại diện `RCORE-12.T01, RCORE-12.T02, RCORE-12.T04, RCORE-12.T05, RCORE-12.T06, RCORE-12.T08, RCORE-12.T13`\n  - Help chính thức: [SetDisplayMode](https://docs.mcneel.com/rhino/5/help/en-us/commands/setdisplaymode.htm); [Render / render-window commands](https://docs.mcneel.com/rhino/5/help/en-us/commands/render.htm)\n  - Capability: `RCORE-12.C01, RCORE-12.C02, RCORE-12.C03, RCORE-12.C04, RCORE-12.C05, RCORE-12.C06, RCORE-12.C07, RCORE-12.C08`\n\n### Nguồn Matrix9 đã index phải mở (private reference, không copy)\n\n- `Matrix/UserInterface/Display/DisplayCommand.cs` (Matrix (managed plugin), `DisplayCommand`, `PATH_INDEXED_SYMBOL_CANDIDATE`) — ShadeModeForm/ShadeModeDisplayConduit\n  - Vai trò nguồn: display command and forms. Managed display family: DisplayCommand, ShadeModeForm, ShadeModeDisplayConduit, ShadeModeEventWatcher, MeshDensityForm, MeshDensityEventWatcher.\n  - Identifier đã index: `DisplayCommand, ShadeModeForm, ShadeModeDisplayConduit, ShadeModeEventWatcher, MeshDensityForm, MeshDensityEventWatcher`\n- `Matrix90/frmDialogShadeSelect.frm` (Matrix90 (VB6 EXE), `frmDialogShadeSelect`, `IDENTIFIER_INDEXED`) — Shade Select chooser\n  - Vai trò nguồn: shade mode chooser. Shade Select dialog: image-based mode chooser (imgMeshMode) with LEAD control; caption observed as 'Shade Select'.\n  - Identifier đã index: `frmDialogShadeSelect, imgMeshMode, ShowMe, LEADLib.LEAD`\n- `Matrix90/frmCMenuDisplay.frm` (Matrix90 (VB6 EXE), `frmCMenuDisplay`, `IDENTIFIER_INDEXED`) — Display sidebar section\n  - Vai trò nguồn: display sidebar section. Sidebar section with caption 'Display'; UpdateHistory plus CmdIcon handlers, and the AIFCmp1/Matrix.ctrTitleBar shell used by every sidebar section.\n  - Identifier đã index: `frmCMenuDisplay, UpdateHistory, CmdIcon, AICFmp1.asxGenericContainer`\n\n### Quy tắc sử dụng nguồn tham chiếu\n\n- Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.\n- Không copy mã, ảnh, resource hay nội dung manual vào repository.\n- Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.\n- Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.\n- Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.\n- Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native.\n\n### Điều các nguồn này KHÔNG chứng minh\n\n- Không chứng minh Matrix9 parity cho capability này.\n- Không xác nhận API Rust nào đã tồn tại trong QymCAD.\n- Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.\n- Không chứng minh default/option đã đúng cho bản Matrix9 đang cài.\n\n> Symbol/identifier ở trên là điểm tra cứu; phải kiểm lại tại checkout/manifest trước khi viết mã. PASS vẫn chỉ đến từ command receipt và oracle positive/negative đo được.\n\n## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "execution_policy": {
+    "status": "NOT_RUN",
+    "evidence": "Not included: no implementation has been performed",
+    "prerequisites": "M00 must be signed off before M01; M01 before M02; per-task dependencies also apply",
+    "must_not_fake_pass": true,
+    "test_command_status": "SUGGESTED_NOT_EXECUTED",
+    "planned_output_paths_refer_to_future_implementation": true
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Wireframe/Shaded per viewport; đổi mode không mutate model/dirty/undo journal.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-12",
+        "kind": "rhino5_core_chapter",
+        "title": "Display, render và resource lifecycle",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "39-43 / in 31-35; 101-104 / in 93-96",
+        "capability_ids": [
+          "RCORE-12.C01",
+          "RCORE-12.C02",
+          "RCORE-12.C03",
+          "RCORE-12.C04",
+          "RCORE-12.C05",
+          "RCORE-12.C06",
+          "RCORE-12.C07",
+          "RCORE-12.C08"
+        ],
+        "fixture_ids": [
+          "RCORE-12.T01",
+          "RCORE-12.T02",
+          "RCORE-12.T04",
+          "RCORE-12.T05",
+          "RCORE-12.T06",
+          "RCORE-12.T08",
+          "RCORE-12.T13"
+        ],
+        "official_help": [
+          {
+            "label": "SetDisplayMode",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/setdisplaymode.htm"
+          },
+          {
+            "label": "Render / render-window commands",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/render.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-display-net",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/UserInterface/Display/DisplayCommand.cs",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "DisplayCommand",
+        "role_for_this_task": "ShadeModeForm/ShadeModeDisplayConduit",
+        "source_role": "display command and forms",
+        "detail": "Managed display family: DisplayCommand, ShadeModeForm, ShadeModeDisplayConduit, ShadeModeEventWatcher, MeshDensityForm, MeshDensityEventWatcher.",
+        "observed_identifiers": [
+          "DisplayCommand",
+          "ShadeModeForm",
+          "ShadeModeDisplayConduit",
+          "ShadeModeEventWatcher",
+          "MeshDensityForm",
+          "MeshDensityEventWatcher"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      },
+      {
+        "anchor_id": "mx-frm-dialog-shade-select",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix90 (VB6 EXE)",
+        "path": "Matrix90/frmDialogShadeSelect.frm",
+        "root": "ref/matrix/vb6-lite",
+        "unit": "frmDialogShadeSelect",
+        "role_for_this_task": "Shade Select chooser",
+        "source_role": "shade mode chooser",
+        "detail": "Shade Select dialog: image-based mode chooser (imgMeshMode) with LEAD control; caption observed as 'Shade Select'.",
+        "observed_identifiers": [
+          "frmDialogShadeSelect",
+          "imgMeshMode",
+          "ShowMe",
+          "LEADLib.LEAD"
+        ],
+        "verification_state": "IDENTIFIER_INDEXED"
+      },
+      {
+        "anchor_id": "mx-frm-cmenu-display",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix90 (VB6 EXE)",
+        "path": "Matrix90/frmCMenuDisplay.frm",
+        "root": "ref/matrix/vb6-lite",
+        "unit": "frmCMenuDisplay",
+        "role_for_this_task": "Display sidebar section",
+        "source_role": "display sidebar section",
+        "detail": "Sidebar section with caption 'Display'; UpdateHistory plus CmdIcon handlers, and the AIFCmp1/Matrix.ctrTitleBar shell used by every sidebar section.",
+        "observed_identifiers": [
+          "frmCMenuDisplay",
+          "UpdateHistory",
+          "CmdIcon",
+          "AICFmp1.asxGenericContainer"
+        ],
+        "verification_state": "IDENTIFIER_INDEXED"
+      }
+    ],
+    "manual_reference_sheets": [],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "INTEGRATE",
+    "role_label_on_record": "INTEGRATE",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-03-05",
+    "goal": "wireframe/shaded modes for jewelry viewports",
+    "algorithm_on_record": "Toggle draw pipeline/prefs per viewport; shared tessellation cache",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "compose owners; re-check each owner's contract at its own revision",
+    "sketch": "// INTEGRATE: Wireframe Shaded Mode Switcher\n// ROLE: INTEGRATE - wire owners together; do not reimplement their logic.\n//\n// Purpose: wireframe/shaded modes for jewelry viewports\n// Boundary: this task may only orchestrate; each step below must already be owned\n//           and tested by the module named in the record's external_owner_interfaces.\n//\n// Order: Toggle draw pipeline/prefs per viewport; shared tessellation cache\n//\n// Integration checklist:\n//   1. resolve owners through the parent service contract, not through UI handles\n//   2. keep one transaction boundary: either the whole sequence commits or nothing does\n//   3. on any step error, roll back what this sequence already changed and report the failing step\n//   4. assert identity survives: same stable IDs before and after, no stale scene reference\n//\n// Contract under test: (see owner contracts)\n// Oracle: measured positive oracle\n// Negative oracle: typed error with unchanged state"
+  }}

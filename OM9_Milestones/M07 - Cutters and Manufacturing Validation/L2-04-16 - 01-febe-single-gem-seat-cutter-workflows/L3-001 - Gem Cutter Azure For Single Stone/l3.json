@@ -1,0 +1,137 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-04-16-001",
+  "milestone": "M07",
+  "parent_l2_id": "OM9-L2-04-16",
+  "title": "Gem Cutter Azure For Single Stone",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "target_implementation_milestone": "M07",
+  "execution_stage": "E12",
+  "source_original_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/001-febe-gem-cutter-azure-for-single-stone/l3.json",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-04-16-001",
+    "capability_id": "cap.04-16.gem-cutter-azure-for-single-stone",
+    "stable_owner_key": "OM9-L2-04-16/gem-cutter-azure-for-single-stone",
+    "title": "Gem Cutter Azure For Single Stone",
+    "slug": "gem-cutter-azure-for-single-stone",
+    "module_id": "OM9-L2-04-16",
+    "module_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/",
+    "l3_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/001-febe-gem-cutter-azure-for-single-stone/",
+    "tag": "febe",
+    "implementation_role": "ui_command_adapter",
+    "milestone_id": "M07",
+    "target_milestone": "M07",
+    "delivery": "mainline",
+    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "origin_source_taxonomy": "04-matrix8-book2",
+    "goal": "gemstone relief/azure cutter under stone",
+    "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
+    "parent_scope": "Gem Seat/Gem Cutters cho 1 viên đá",
+    "parent_exclusions": "Không duplicate BRep boolean.",
+    "depends_on_module_ids": [
+      "OM9-L2-04-09",
+      "OM9-L2-01-10",
+      "OM9-L2-04-14"
+    ],
+    "reuses_or_dispatches_to_module_ids": [
+      "OM9-L2-04-09",
+      "OM9-L2-01-10"
+    ],
+    "downstream_consumers": [
+      "jewelry-cutters-seats"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_page": 500,
+        "pdf_page_1based": 274,
+        "precision": "section_heading"
+      },
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          498,
+          518
+        ],
+        "pdf_pages_1based": [
+          272,
+          292
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Gem Cutter Azure For Single Stone” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M07: run OpenMatrix9 UI; perform “Gem Cutter Azure For Single Stone”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M07-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "execution_stage": "E12",
+    "planning_release": "CORE_MVP",
+    "planning_risk": "HIGH",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
+    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+  },
+  "children_l4": [
+    {
+      "id": "OM9-L4-04-16-001-01",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-001 - Gem Cutter Azure For Single Stone/L4-01 - Contract And Source Preflight/l4.json",
+      "title": "Contract And Source Preflight — Gem Cutter Azure For Single Stone",
+      "role": "CONTRACT_FIXTURE",
+      "depends_on_l4_ids": []
+    },
+    {
+      "id": "OM9-L4-04-16-001-02",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-001 - Gem Cutter Azure For Single Stone/L4-02 - Domain Integration/l4.json",
+      "title": "Domain Integration — Gem Cutter Azure For Single Stone",
+      "role": "IMPLEMENT",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-16-001-01"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-16-001-03",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-001 - Gem Cutter Azure For Single Stone/L4-03 - UI Or External Acceptance/l4.json",
+      "title": "UI Or External Acceptance — Gem Cutter Azure For Single Stone",
+      "role": "ACCEPTANCE",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-16-001-02"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-16-001-04",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-001 - Gem Cutter Azure For Single Stone/L4-04 - Adversarial Release Evidence/l4.json",
+      "title": "Adversarial Release Evidence — Gem Cutter Azure For Single Stone",
+      "role": "ADVERSARIAL",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-16-001-03"
+      ]
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED"
+}

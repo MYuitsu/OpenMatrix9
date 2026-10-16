@@ -1,0 +1,72 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-07-02-004",
+  "milestone": "AFTER",
+  "parent_l2_id": "OM9-L2-07-02",
+  "title": "Save Filter Presets",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "target_implementation_milestone": "AFTER",
+  "execution_stage": "AFTER",
+  "source_original_path": "specs/90-after/02-rhino5-after/02-febe-advanced-selection-filters/004-febe-save-filter-presets/l3.json",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-07-02-004",
+    "capability_id": "cap.07-02.save-filter-presets",
+    "stable_owner_key": "OM9-L2-07-02/save-filter-presets",
+    "title": "Save Filter Presets",
+    "slug": "save-filter-presets",
+    "module_id": "OM9-L2-07-02",
+    "module_path": "specs/90-after/02-rhino5-after/02-febe-advanced-selection-filters/",
+    "l3_path": "specs/90-after/02-rhino5-after/02-febe-advanced-selection-filters/004-febe-save-filter-presets/",
+    "tag": "febe",
+    "implementation_role": "interactive_feature",
+    "milestone_id": "AFTER",
+    "target_milestone": "AFTER",
+    "delivery": "after",
+    "status": "L3_SPEC_ONLY_L4_NOT_CREATED",
+    "origin_source_taxonomy": "07-rhino5-after",
+    "goal": "keep user filter profiles across sessions",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Rhino detailed selection filters beyond jewelry Super Select.",
+    "parent_exclusions": "Picking/selected objects essential remain core.",
+    "depends_on_module_ids": [],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [],
+    "origin_manual_refs": [],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Save Filter Presets” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: save/reload or import transaction preserves object IDs, units, layer assignments and declared metadata."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate AFTER: run OpenMatrix9 UI; perform “Save Filter Presets”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "AFTER-UI",
+    "invariants": [
+      "AFTER only: do not place this on the M01–M09 critical path.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "l4_status": "NOT_CREATED",
+    "execution_stage": "AFTER",
+    "planning_release": "DEFERRED",
+    "planning_risk": "NORMAL",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
+    "execution_status": "SPEC_ONLY; NOT READY TO CODE UNTIL M00 AND TASK L4 AUDIT"
+  },
+  "children_l4": [],
+  "l4_status": "NOT_PLANNED_YET"
+}

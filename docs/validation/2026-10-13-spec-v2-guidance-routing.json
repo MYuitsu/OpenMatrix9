@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-13",
+  "status": "passed",
+  "counts": {
+    "source_skills": 8,
+    "installed_skills": 8,
+    "skill_validations": 16,
+    "synced_files": 35,
+    "skill_links_checked": 92,
+    "core_requirement_items": 131,
+    "v1_files_unchanged": 665
+  },
+  "skill_validations": [
+    {
+      "skill": "openmatrix9-build-validation",
+      "location": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-build-validation",
+      "location": "C:\\Users\\nguye\\.codex\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-feature-port",
+      "location": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-feature-port",
+      "location": "C:\\Users\\nguye\\.codex\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-icons",
+      "location": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-icons",
+      "location": "C:\\Users\\nguye\\.codex\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-layers-contract",
+      "location": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-layers-contract",
+      "location": "C:\\Users\\nguye\\.codex\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-native-mapping",
+      "location": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-native-mapping",
+      "location": "C:\\Users\\nguye\\.codex\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-ui",
+      "location": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-ui",
+      "location": "C:\\Users\\nguye\\.codex\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-workflow",
+      "location": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-workflow",
+      "location": "C:\\Users\\nguye\\.codex\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-workspace-contract",
+      "location": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "skill": "openmatrix9-workspace-contract",
+      "location": "C:\\Users\\nguye\\.codex\\skills",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    }
+  ],
+  "router_checks": [
+    {
+      "router": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills\\openmatrix9-workflow\\scripts\\reference_index.py",
+      "command": [
+        "audit"
+      ],
+      "exit_code": 0,
+      "summary": {
+        "feature_count": 607,
+        "domain_count": 16,
+        "stage_count": 7,
+        "invalid_specs": [],
+        "missing_required_documents": [],
+        "missing_conditional_documents": [],
+        "ok": true
+      }
+    },
+    {
+      "router": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills\\openmatrix9-workflow\\scripts\\reference_index.py",
+      "command": [
+        "feature",
+        "OM9-GEM-001"
+      ],
+      "exit_code": 0,
+      "summary": {
+        "exists": true,
+        "spec_file": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v2\\specs\\10-gems\\om9-gem-001-gem-loader.md"
+      }
+    },
+    {
+      "router": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills\\openmatrix9-workflow\\scripts\\reference_index.py",
+      "command": [
+        "route",
+        "standalone-foundation"
+      ],
+      "exit_code": 0,
+      "summary": {
+        "exists": true,
+        "spec_file": null
+      }
+    },
+    {
+      "router": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-workflow\\scripts\\reference_index.py",
+      "command": [
+        "audit"
+      ],
+      "exit_code": 0,
+      "summary": {
+        "feature_count": 607,
+        "domain_count": 16,
+        "stage_count": 7,
+        "invalid_specs": [],
+        "missing_required_documents": [],
+        "missing_conditional_documents": [],
+        "ok": true
+      }
+    },
+    {
+      "router": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-workflow\\scripts\\reference_index.py",
+      "command": [
+        "feature",
+        "OM9-GEM-001"
+      ],
+      "exit_code": 0,
+      "summary": {
+        "exists": true,
+        "spec_file": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v2\\specs\\10-gems\\om9-gem-001-gem-loader.md"
+      }
+    },
+    {
+      "router": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-workflow\\scripts\\reference_index.py",
+      "command": [
+        "route",
+        "standalone-foundation"
+      ],
+      "exit_code": 0,
+      "summary": {
+        "exists": true,
+        "spec_file": null
+      }
+    }
+  ],
+  "errors": [],
+  "scope": "guidance/routing only; not standalone runtime, UI parity or performance acceptance",
+  "router_unittests": {
+    "command": "python -m unittest tools.tests.test_skill_reference_index",
+    "result": "9 passed"
+  },
+  "public_source_audit": {
+    "command": "python tools/public_source_audit.py",
+    "result": "0 errors",
+    "source_files": 4422
+  },
+  "package_integrity": {
+    "v1_files_unchanged": 665,
+    "v2_manifest_records_unchanged": 677
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-09",
+  "milestone": "AFTER",
+  "title": "09-febe-clayoo-jewelry-subd-builders",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Clayoo Ring, Signet, Bezel builders.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/09-febe-clayoo-jewelry-subd-builders/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-09",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/09-febe-clayoo-jewelry-subd-builders/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/09-febe-clayoo-jewelry-subd-builders/",
+    "scope": "Clayoo Ring, Signet, Bezel builders.",
+    "exclude": "Toàn bộ hoãn; không chặn NURBS jewelry MVP.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          2,
+          50
+        ],
+        "pdf_pages_1based": [
+          8,
+          56
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 4,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/09-febe-clayoo-jewelry-subd-builders/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-09-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-09 - 09-febe-clayoo-jewelry-subd-builders/L3-001 - Clayoo Ring Builder/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-09-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-09 - 09-febe-clayoo-jewelry-subd-builders/L3-002 - Clayoo Signet Ring Builder/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-09-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-09 - 09-febe-clayoo-jewelry-subd-builders/L3-003 - Clayoo Bezel Around Gem/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-09-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-09 - 09-febe-clayoo-jewelry-subd-builders/L3-004 - Clayoo Jewelry Builder Handles/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

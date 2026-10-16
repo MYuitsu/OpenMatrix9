@@ -1,0 +1,337 @@
+### Сообщения об ошибках. Ядро сообщает КОД; здесь — слова к нему.
+error-thicken-added-nothing = Пластина ушла внутрь тела и ничего не добавила — задайте толщину больше нуля
+error-draft-angle-zero = Уклон 0 градусов ничего не наклоняет — задайте угол, отличный от нуля
+error-torus-through-itself = Трубка не тоньше кольца — такой тор проходит сквозь себя; задайте радиус трубки меньше радиуса кольца
+error-primitive-size-not-above-zero = Размер примитива равен нулю или меньше — тела из ничего не бывает; задайте каждый размер больше нуля
+error-offset-past-radius = Круглая грань, смещённая к своей оси на радиус ({ $r } мм) или больше, сходится на оси и выворачивается; задайте расстояние меньше { $r } мм или смещайте в другую сторону
+error-array-of-one = Массив из одной копии — это само тело; задайте две копии или больше
+error-pattern-too-large = Массив из { $asked } экземпляров больше предела в { $limit } — уменьшите количество
+error-too-many-starts = { $starts } заходов — слишком много; не больше { $limit }
+### Подстановки { $name } несут данные из ядра — их нельзя выкидывать, это не украшение.
+
+## Операция не удалась в геометрическом ядре.
+## Подсказка в скобках — обычная причина; она экономит обращение в поддержку.
+
+error-op-failed-extrude = Выдавливание не удалось
+error-op-failed-extrude-profile = Выдавливание не удалось (проверьте профиль)
+error-op-failed-extrude-contour = Выдавливание не удалось (проверьте контур)
+error-op-failed-revolve = Вращение не удалось
+error-op-failed-revolve-profile = Вращение не удалось (проверьте профиль)
+error-op-failed-revolve-axis = Вращение вокруг датум-оси не удалось (ось в плоскости эскиза?)
+error-op-failed-sweep = Протягивание не удалось (профиль в начале пути и примерно перпендикулярен ему?)
+error-op-failed-loft = Лофт не удался (сечения должны быть замкнуты и согласованы)
+error-op-failed-loft-boolean = Лофт-булева над телом не удалась
+error-op-failed-boolean = Булева не удалась
+error-op-failed-body-boolean = Булева тел не удалась (нет пересечения или тела не связаны?)
+error-op-failed-fillet = Скругление не удалось (радиус велик или рёбра?)
+error-op-failed-fillet-var = Переменное скругление не удалось (радиусы или рёбра?)
+error-op-failed-chamfer = Фаска не удалась (размер велик или рёбра?)
+error-op-failed-chamfer-asym = Асимметричная фаска не удалась (катет или угол велик?)
+error-op-failed-shell = Оболочка не удалась (толщина или грань?)
+error-op-failed-shell-center = Оболочка по центру не удалась (смещение или грань?)
+error-op-failed-draft = Уклон не удался (эта грань наклоняема под таким углом от такой нейтрали?)
+error-op-failed-push-face = Грань не тянется (кривая грань или самопересечение)
+error-op-failed-remove-faces = Грани не убрать
+error-op-failed-replace-faces = Поверхность не закрыла отверстие — грань не заменяется
+error-op-failed-copy-faces = Грань не копируется отдельной поверхностью
+error-op-failed-offset-surface = Смещение не строится: грань на этом расстоянии выворачивается или исчезает — возьмите расстояние меньше
+error-op-failed-stitch = Листы не сшиваются: ни одна кромка не совпала — похоже, они друг друга не касаются
+error-op-failed-mesh-recognise = Распознать сетку не вышло: ни одной грани не построилось
+error-op-failed-mesh-solid = Сетка не стала телом: в ней нет ни одного треугольника с площадью
+error-op-failed-trim = Обрезка не удалась: поверхность и инструмент не пересекаются или резать нечего
+error-op-failed-thicken = Грань не утолщается (офсет сам себя пересёк?)
+error-op-failed-split-body = Плоскость не режет тело (прошла мимо или лежит по грани)
+error-op-failed-split-faces = Плоскость не делит ни одной грани (прошла мимо тела)
+error-op-failed-hole = Отверстие не удалось (диаметры или глубины?)
+error-op-failed-holes = Отверстия не удались (точки, диаметры или глубины?)
+error-op-failed-thread = Резьба не удалась
+error-op-failed-helix = Винтовая протяжка не удалась
+error-op-failed-auger = Шнек не удался
+error-op-failed-mirror = Зеркало не удалось
+error-op-failed-mirror-plane = Зеркало по плоскости не удалось
+error-op-failed-array = Массив не удался
+error-op-failed-move = Перенос не удался
+error-op-failed-transform = Преобразование не удалось
+error-op-failed-cylinder = Цилиндр не удался
+error-op-failed-sphere = Сфера не удалась
+error-op-failed-cone = Конус не удался
+error-op-failed-torus = Тор не удался
+error-op-failed-prism = Призма не удалась
+error-op-failed-fuse-profiles = Слияние контуров не удалось
+error-op-failed-place = Размещение не удалось
+
+## Операции нужно настоящее ядро OCCT (ответила заглушка).
+## Пользователь обычно этого не видит — значит, сборка без ядра.
+
+error-kernel-required-extrude = Выдавливание умеет только ядро OCCT
+error-kernel-required-mesh-recognise = Распознавать сетку умеет только ядро OCCT
+error-kernel-required-mesh-solid = Превращать сетку в тело умеет только ядро OCCT
+error-kernel-required-extrude-profile = Выдавливание умеет только ядро OCCT
+error-kernel-required-extrude-contour = Выдавливание умеет только ядро OCCT
+error-kernel-required-revolve = Вращение умеет только ядро OCCT
+error-kernel-required-revolve-profile = Вращение умеет только ядро OCCT
+error-kernel-required-revolve-axis = Вращение умеет только ядро OCCT
+error-kernel-required-sweep = Протягивание умеет только ядро OCCT
+error-kernel-required-loft = Лофт умеет только ядро OCCT
+error-kernel-required-loft-boolean = Лофт-булева умеет только ядро OCCT
+error-kernel-required-boolean = Булева умеет только ядро OCCT
+error-kernel-required-body-boolean = Булева тел умеет только ядро OCCT
+error-kernel-required-fillet = Скругление умеет только ядро OCCT
+error-kernel-required-fillet-var = Переменное скругление умеет только ядро OCCT
+error-kernel-required-chamfer = Фаска умеет только ядро OCCT
+error-kernel-required-chamfer-asym = Асимметричная фаска умеет только ядро OCCT
+error-kernel-required-shell = Оболочка умеет только ядро OCCT
+error-kernel-required-shell-center = Оболочка по центру умеет только ядро OCCT
+error-kernel-required-draft = Уклон умеет только ядро OCCT
+error-kernel-required-push-face = Тянуть грань умеет только ядро OCCT
+error-kernel-required-remove-faces = Удаление граней умеет только ядро OCCT
+error-kernel-required-replace-faces = Замена грани поверхностью умеет только ядро OCCT
+error-kernel-required-copy-faces = Копия грани умеет только ядро OCCT
+error-kernel-required-offset-surface = Смещение поверхности умеет только ядро OCCT
+error-kernel-required-thicken = Утолщение умеет только ядро OCCT
+error-kernel-required-stitch = Сшивку умеет только ядро OCCT
+error-kernel-required-trim = Обрезку умеет только ядро OCCT
+error-kernel-required-patch = Заплатку умеет только ядро OCCT
+error-kernel-required-split-body = Разделить тело умеет только ядро OCCT
+error-kernel-required-split-faces = Деление граней умеет только ядро OCCT
+error-kernel-required-hole = Отверстие умеет только ядро OCCT
+error-kernel-required-holes = Отверстия умеет только ядро OCCT
+error-kernel-required-thread = Резьба умеет только ядро OCCT
+error-kernel-required-helix = Винтовая протяжка умеет только ядро OCCT
+error-kernel-required-auger = Шнек умеет только ядро OCCT
+error-kernel-required-mirror = Зеркало умеет только ядро OCCT
+error-kernel-required-mirror-plane = Зеркало умеет только ядро OCCT
+error-kernel-required-array = Массив умеет только ядро OCCT
+error-kernel-required-move = Перенос умеет только ядро OCCT
+error-kernel-required-transform = Преобразование умеет только ядро OCCT
+error-kernel-required-cylinder = Цилиндр умеет только ядро OCCT
+error-kernel-required-sphere = Сфера умеет только ядро OCCT
+error-kernel-required-cone = Конус умеет только ядро OCCT
+error-kernel-required-torus = Тор умеет только ядро OCCT
+error-kernel-required-prism = Призма умеет только ядро OCCT
+error-kernel-required-fuse-profiles = Слияние контуров умеет только ядро OCCT
+error-kernel-required-place = Размещение умеет только ядро OCCT
+
+## Входы, которых нет или которые устарели
+
+error-source-body-not-built = Тело-источник не построено — сначала почините построение выше по ленте
+error-source-body-deleted = То, на чём оно построено, удалено — выберите другое тело или удалите это построение
+error-body-in-pieces = Операция разбивает деталь на отдельные куски — деталь это одно тело; сделайте, чтобы добавка касалась тела, или создайте новую деталь
+error-body-in-one-piece = Тело из одного куска — отделять в деталь нечего
+error-source-part-has-no-body = У детали-источника нет тела
+error-body-a-not-built = Тело A не построено
+error-body-b-not-built = Тело B не построено
+error-face-not-found = Грани больше нет в теле-источнике — ссылка устарела
+error-faces-not-found = Граней больше нет в теле-источнике — ссылки устарели
+error-profile-not-found = Профиль эскиза не найден
+error-revolve-profile-crosses-axis = Профиль пересекает ось вращения — так тело вращения не строится ни в одном CAD. Прижмите профиль к оси (половина сечения: полукруг вместо круга) или отодвинь ось за профиль.
+error-sweep-profile-missing = Профиль протяжки не найден
+error-sweep-path-missing = Траектория протяжки не найдена
+error-no-isolated-points-for-holes = В эскизе нет изолированных точек, куда ставить отверстия
+error-no-points-for-holes = Нет точек, куда ставить отверстия
+
+## Плоскости-ссылки
+
+error-cut-plane-deleted = Плоскость реза удалена — выберите другую или удалите разрез
+error-sketch-face-gone = Грань, на которой стоит эскиз, пропала: тело, которому она принадлежала, удалено. Перенесите эскиз на другую грань или плоскость, или отмените удаление
+error-sketch-plane-gone = Рабочая плоскость, на которой стоит эскиз, удалена. Перенесите эскиз на другую плоскость или грань, или отмените удаление
+error-mirror-plane-deleted = Плоскость зеркала удалена — выберите другую или удалите зеркало
+error-split-plane-deleted = Плоскость деления удалена — выберите другую или удалите операцию
+error-mirror-plane-unset = Плоскость зеркала не задана — создайте зеркальную деталь заново
+error-zero-normal = Нормаль плоскости нулевая — направление не задано
+
+## Значения, в которых нет смысла
+
+error-zero-thickness = Нулевая толщина — пластины не выйдет
+error-zero-push-distance = Нулевое смещение — тянуть грань некуда
+error-broken-solid = Ядро вернуло негодное тело — операция отменена, деталь осталась прежней. Чаще всего так выходит, когда грань граничит со скруглением или фаской: попробуйте меньше смещение или поставьте операцию в ленте ДО скругления
+error-split-piece-count = Плоскость режет тело на { $got } части вместо { $want } — верните плоскость или создайте разрез заново
+error-loft-needs-two-sections = Лофту нужно минимум два замкнутых сечения
+error-draft-needs-faces = Уклону нужны наклоняемые грани и нейтральная грань
+error-no-contours = Нет контуров для операции
+error-all-edges-smooth = Все выбранные рёбра — гладкие стыки (границы скруглений): скруглять и снимать фаску нечего
+error-fillet-radius-too-big = Скругление R{ $radius } не взялось: { $issues }{ $smooth }
+# Одно ребро из этого списка. «берёт до» подсказывает наибольший радиус, который бы прошёл.
+error-fillet-edge-takes-up-to = ребро { $edge } (берёт до { $max })
+error-fillet-edge-takes-none = ребро { $edge } (не берёт ни один радиус — упирается в касательный стык прежнего скругления; снимите это ребро или скруглите соседнее раньше)
+error-fillet-smooth-skipped = ; гладких стыков пропущено автоматически: { $n }
+error-fillet-edges-one-by-one = Скругление R{ $radius }: эти рёбра берутся только по одному — соседние скругления пересекаются
+error-chamfer-too-big = Фаска { $dist } мм не удалась — катет больше стороны
+error-surface-does-not-close = Поверхность не совпала с проёмом: { $n } кромок остались без пары. Похоже, выбраны разные границы — строить заплатку надо по тем же кромкам, что обводят заменяемую грань
+error-push-face-on-sheet = Тянуть грань поверхности нечем: это операция для тел. Чтобы дать поверхности толщину, примените «Утолщение»
+error-needs-solid-not-sheet = Это инструмент для тел: к поверхности он не применяется. Дайте поверхности толщину — и работайте с ней как с обычным телом
+error-draft-failed = Уклон { $angle }° не взялся на этих гранях. Чаще всего мешает тонкая стенка: после оболочки наклонять почти нечего — поставьте уклон ДО оболочки или возьмите угол меньше
+
+## Резьба и шнек
+
+error-thread-rim-not-found = Обод цилиндра или отверстия (круглое ребро) не найден
+error-thread-length-unset = Длина резьбы не задана
+error-thread-pitch-too-small = Шаг { $pitch } мм слишком мал
+error-thread-too-many-turns = { $turns } витков — слишком много; увеличьте шаг или укоротите резьбу
+error-thread-longer-than-face = Резьба длиной { $length } мм длиннее цилиндра ({ $face } мм). Укоротите резьбу
+error-thread-depth-too-deep = Глубина витка { $depth } мм не меньше радиуса { $radius } мм: для Ø{ $dia } шаг { $pitch } слишком крупный
+error-thread-not-its-size = Резьба Ø{ $nominal } не подходит к грани Ø{ $face } — выберите размер по грани или грань по размеру
+warn-edges-dropped = { $dropped } из { $asked } рёбер не взялись и остались острыми, остальные сделаны — откройте узел двойным щелчком, чтобы выбрать другие рёбра или другой размер
+warn-import-kept-as-it-came = Тело из файла не прошло проверки и не исправилось, поэтому оставлено таким, каким его хранит файл; операция над ним может отказать — откройте файл в программе, где он сделан, и выведите заново либо проверьте его допуск
+error-thread-removed-nothing = Резьба ничего не сняла ({ $before } -> { $after } мм³) — проверьте выбранную грань, шаг и длину
+error-thread-failed = Резьба не построилась (проверьте шаг, длину и диаметр)
+error-auger-rim-not-found = Обод вала (круглое ребро) не найден
+error-auger-bad-pitch-or-length = У шнека шаг и длина обязаны быть больше нуля
+error-auger-outer-not-bigger = Наружный Ø{ $outer } шнека не больше вала Ø{ $shaft }
+error-auger-added-nothing = Лента шнека ничего не добавила ({ $before } -> { $after } мм³) — проверьте наружный Ø и выбранный вал
+error-auger-flight-failed = Лента шнека не построилась (проверьте шаг, толщину и наружный диаметр)
+
+## Изоляция: геометрия принадлежит детали
+
+error-body-only-in-part = Тело можно строить только внутри Детали (Сборка тел не держит)
+error-cross-component-input = Кросс-компонентная ссылка запрещена: вход { $input } принадлежит другому компоненту
+error-sketch-on-foreign-face = Эскиз входа { $input } посажен на грань тела другого компонента без внешней ссылки
+error-sketch-face-ref-lost = Опорная грань эскиза на теле { $body } не найдена по имени после пересборки — взят ближайший матч, проверьте посадку фичи
+
+## Пустые результаты
+
+error-array-empty = Массив ничего не дал
+error-empty-result = Результат — пустое тело
+error-remove-faces-failed = Грани не убрать: { $why }
+
+## Сборка
+
+error-joint-unsatisfied = Связь не выполнена — невязка { $residual } мм
+
+## Выражения
+
+error-expr-unknown-char = Неизвестный символ «{ $what }»
+error-expr-unknown-fn = Неизвестная функция «{ $what }»
+error-expr-unknown-name = неизвестное имя: { $what } — нет такого параметра
+error-expr-needs-one-arg = { $what }() ждёт один аргумент
+error-expr-needs-two-args = { $what }() ждёт два аргумента
+error-expr-expected-paren = Ожидалась «)»
+error-expr-expected-paren-after-args = Ожидалась «)» после аргументов
+error-expr-unexpected-token = Неожиданный токен { $what }
+error-expr-unexpected-end = выражение обрывается: ждали число или имя
+error-expr-trailing-input = Лишний ввод у «{ $what }»
+error-expr-not-a-number = Результат не число (деление на ноль?)
+error-expr-too-deep = Формула вложена глубже { $limit } уровней — скобки, функции, знаки или степени друг в друге
+
+## Сообщение самого ядра — не переводится: это диагностика, а не фраза для пользователя.
+
+error-kernel-message = Ядро: { $message }
+
+# ── МОСТ К ЯДРУ ГЕОМЕТРИИ (OCCT): ядро языка не имеет, оно отдаёт коды ──
+cad-no-faces-picked = не выбрано ни одной грани
+cad-faces-not-in-body = выбранных граней нет в теле (ссылка устарела)
+cad-neighbours-not-extendable = соседние поверхности не продлеваются — снимается цельный элемент (отверстие, бобышка)
+cad-file-not-found = Файл не найден: { $v }
+cad-step-no-shapes = STEP: не удалось прочитать тела
+cad-step-nothing-to-export = STEP: нет тел для экспорта
+cad-step-write-failed = STEP: запись не удалась (код { $v })
+cad-step-read-failed = STEP: не удалось прочитать или передать геометрию
+cad-iges-no-shapes = IGES: не удалось прочитать тела
+cad-iges-read-failed = IGES: не удалось прочитать или передать геометрию
+cad-iges-empty-tessellation = IGES: в файле нет поверхности, которую можно показать
+cad-iges-nothing-to-export = IGES: записывать нечего
+cad-iges-write-failed = IGES: запись не удалась (код { $v })
+io-iges-read-failed = IGES: файл не читается ({ $v })
+io-iges-not-iges = Это не IGES: в файле нет разделов, из которых он состоит
+io-iges-no-curves = IGES: в файле нет ни поверхностей, ни кривых, которые можно показать
+io-obj-read-failed = OBJ: файл не читается ({ $v })
+io-obj-bad-line = OBJ: строка { $v } не разобрана
+io-obj-bad-index = OBJ: в строке { $v } грань ссылается на вершину, которой нет
+io-obj-no-faces = OBJ: в файле нет ни одной грани
+io-obj-no-triangles = OBJ: записывать нечего
+io-obj-write-failed = OBJ: запись не удалась ({ $v })
+io-obj-not-finite-line = OBJ: значение в строке { $v } не является конечным числом ({ $w })
+io-ply-read-failed = PLY: файл не читается ({ $v })
+io-ply-not-ply = Это не PLY: файл не начинается с заголовка PLY
+io-ply-bad-header = PLY: заголовок не разобран
+io-ply-truncated = PLY: файл обрывается раньше, чем обещает его заголовок
+io-ply-bad-index = PLY: грань ссылается на вершину, которой нет
+io-ply-no-faces = PLY: в файле нет ни одной грани
+io-ply-no-triangles = PLY: записывать нечего
+io-ply-write-failed = PLY: запись не удалась ({ $v })
+io-ply-not-finite-line = PLY: значение в строке { $v } не является конечным числом ({ $w })
+io-ply-not-finite-vertex = PLY: координата вершины { $v } (байт { $w }) не является конечным числом ({ $x })
+io-gltf-read-failed = glTF: файл не читается ({ $v })
+io-gltf-not-gltf = Это не glTF: в файле нет описания сцены
+io-gltf-truncated = glTF: двоичный файл обрывается
+io-gltf-bad-node = glTF: узел сцены ссылается на то, чего нет
+io-gltf-no-positions = glTF: у сетки нет координат вершин
+io-gltf-bad-index = glTF: треугольник ссылается на вершину, которой нет
+io-gltf-bad-accessor = glTF: данные сетки описаны неверно
+io-gltf-no-buffer = glTF: у файла нет двоичной части, которую он называет
+io-gltf-bad-buffer = glTF: встроенные данные не расшифровываются
+io-gltf-missing-buffer = glTF: рядом с файлом нет его данных «{ $v }»
+io-gltf-no-meshes = glTF: в сцене нет ни одной сетки
+io-gltf-no-triangles = glTF: записывать нечего
+io-gltf-write-failed = glTF: запись не удалась ({ $v })
+io-gltf-not-finite = glTF: элемент { $w } аксессора { $v } (байт { $x }) не является конечным числом ({ $y })
+io-3mf-read-failed = 3MF: файл не читается ({ $v })
+io-3mf-not-3mf = Это не 3MF: файл не является архивом пакета
+io-3mf-no-model = 3MF: в пакете нет модели
+io-3mf-bad-model = 3MF: модель описана неверно
+io-3mf-unknown-unit = 3MF: неизвестная единица «{ $v }»
+io-3mf-bad-transform = 3MF: преобразование записано неверно
+io-3mf-no-object = 3MF: модель ссылается на объект { $v }, которого нет
+io-3mf-bad-index = 3MF: треугольник ссылается на вершину, которой нет
+io-3mf-no-meshes = 3MF: в модели нет ни одной сетки
+io-3mf-no-triangles = 3MF: записывать нечего
+io-3mf-write-failed = 3MF: запись не удалась ({ $v })
+io-3mf-not-finite-line = 3MF: значение в строке { $v } не является конечным числом ({ $w })
+io-amf-read-failed = AMF: файл не читается ({ $v })
+io-amf-not-amf = Это не AMF: в файле нет разметки AMF
+io-xml-too-deep = Файл вложен глубже { $v } уровней и не читается
+io-amf-unknown-unit = AMF: неизвестная единица «{ $v }»
+io-amf-bad-vertex = AMF: вершина записана неверно
+io-amf-bad-triangle = AMF: треугольник записан неверно
+io-amf-bad-index = AMF: треугольник ссылается на вершину, которой нет
+io-amf-bad-constellation = AMF: созвездие описано неверно
+io-amf-no-object = AMF: созвездие ссылается на объект { $v }, которого нет
+io-amf-no-meshes = AMF: в файле нет ни одной сетки
+io-amf-no-triangles = AMF: записывать нечего
+io-amf-write-failed = AMF: запись не удалась ({ $v })
+io-amf-not-finite-line = AMF: значение в строке { $v } не является конечным числом ({ $w })
+cad-step-empty-tessellation = STEP: пустая тесселяция (нет тел/граней?)
+cad-extrude-needs-3-points = профиль для выдавливания должен иметь >=3 точки
+cad-extrude-failed = OCCT: не удалось выдавить профиль (самопересечение?)
+cad-extrude-empty = выдавливание дало пустое тело
+cad-revolve-needs-3-points = профиль для вращения должен иметь >=3 точки
+cad-revolve-failed = OCCT: вращение не удалось (профиль пересекает ось?)
+cad-revolve-empty = вращение дало пустое тело
+cad-boolean-needs-3-points = оба профиля должны иметь >=3 точки
+cad-boolean-failed = OCCT: булева операция не удалась
+cad-boolean-empty = булева операция дала пустое тело
+
+# ── ФАЙЛОВЫЙ СЛОЙ: коды приходят из qymcad-io, аргумент — путь и текст ОС ──
+io-file-create = не удалось создать { $v }
+io-file-replace = не удалось заменить { $v }
+io-file-read = не удалось прочитать { $v }
+io-not-a-qpart = это не .qpart (не zip-контейнер)
+io-not-a-qcad = это не .qcad (не zip-контейнер): старый формат не поддерживается
+io-refuse-empty-over-full = отказ: пустой документ поверх непустого файла ({ $v } узлов) — сохрани как новый файл
+io-stl-read-failed = STL: файл не читается ({ $v })
+io-stl-truncated = STL: файл обрывается раньше, чем кончаются треугольники, которые считает его заголовок
+io-stl-bad-facet = STL: грань не разобрана
+io-stl-no-faces = STL: в файле нет ни одного треугольника
+io-stl-no-triangles = STL: нет треугольников для экспорта
+io-stl-too-many-triangles = STL: слишком много треугольников
+io-stl-write-failed = STL: запись не удалась: { $v }
+io-stl-not-finite-line = STL: значение в строке { $v } не является конечным числом ({ $w })
+io-stl-not-finite-triangle = STL: координата треугольника { $v } (байт { $w }) не является конечным числом ({ $x })
+io-body-corner-not-finite = Тело { $v }: вершина { $w } не является конечным числом ({ $x }); файл не открыт
+io-body-face-not-finite = Тело { $v }: грань { $w } не является конечным числом ({ $x }); файл не открыт
+
+io-svg-empty-sketch = SVG: пустой эскиз
+io-svg-too-deep = SVG: рисунок вложен глубже { $v } уровней и не читается
+io-svg-write-failed = SVG: запись не удалась: { $v }
+io-dxf-empty-sketch = DXF: пустой эскиз
+io-dxf-write-failed = DXF: запись не удалась: { $v }
+error-edges-not-found = Из { $asked } названных кромок в теле не осталось ни одной. Их имена выдала операция выше по ленте, и она изменилась — выберите кромки заново.
+error-described-edges-not-found = Кромки были выбраны через грань или кромку, которой в теле больше нет: её изменила операция выше по ленте — выберите кромки заново.
+error-op-failed-patch = Поверхность не натягивается на эти кромки
+error-shell-thickness-over-round = Стенка { $t } мм толще самого мелкого скругления на теле ({ $r } мм): смещение съедает его целиком, и оболочка не строится. Возьмите стенку тоньше { $r } мм либо увеличьте скругление
+error-operation-split-body = Операция развалила деталь на { $n } тел(а): в детали может быть только одно тело. Уменьшите значение или примените операцию к другой грани
+error-mirror-of-hollow-body = Зеркало полой детали по её собственной грани ядру пока не даётся: слияние половинок оставляет лишние оболочки. Отзеркальте деталь до оболочки либо выберите другую плоскость
+error-shell-of-multi-shell-body = Оболочку на теле из { $n } оболочек ядро не строит: тело уже полое либо собрано из копий (массив, зеркало). Сделайте оболочку раньше — до массива, зеркала или второй оболочки
+error-shell-not-built-here = Оболочку на этом теле построить не удалось: смещение граней падает внутри ядра. Попробуйте другую толщину стенки либо сделайте оболочку раньше в истории, пока тело проще
+error-cut-removed-nothing = Вырез не снял ничего: инструмент не пересекает деталь. Проверьте, где стоит инструмент и на какую глубину идёт вырез
+error-stitch-nothing-joined = Сшивать нечего: у выбранных поверхностей нет общих кромок — они не соприкасаются. После скруглений соседние грани разделены скруглённой полосой; берите поверхности, которые правда стыкуются

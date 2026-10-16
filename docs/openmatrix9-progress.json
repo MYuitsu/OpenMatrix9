@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T17:05:43+07:00",
+  "updated_at": "2026-10-16",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -7834,5 +7834,673 @@
     "validation_scope": "Entries retain historical validation from their source revisions. These test counts do not certify the merged revision; record post-merge checks separately. No full P0 or full Matrix/Rhino compatibility is claimed.",
     "overlap_policy": "Items are combined by stable key (legacy id is retained as an alias). The later CAD records supersede only their earlier Surface/Edit slices; independent 3DM evidence and remaining work are retained.",
     "post_merge_validation": "docs/validation/2026-10-09-main-merge.md"
-  }
+  },
+  "reference_updates": [
+    {
+      "date": "2026-10-14",
+      "spec_path": "specs/00-rhino-core/MATRIX9_SCREENSHOT_DETAILS_2026-10-14.md",
+      "source_ids": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "affected_feature_ids": [
+        "OM9-IFACE-001",
+        "OM9-MAIN-001",
+        "OM9-LAYER-001",
+        "OM9-PROJECT-001",
+        "OM9-PROJECTDB-001",
+        "OM9-VIEWPORT-001",
+        "OM9-INFO-008",
+        "OM9-INFO-010",
+        "OM9-DISPLAY-008",
+        "OM9-DISPLAY-001",
+        "OM9-DISPLAY-002",
+        "OM9-DISPLAY-004",
+        "OM9-DISPLAY-006",
+        "OM9-INFO-004",
+        "OM9-SOLID-012"
+      ],
+      "acceptance_cases": [
+        "M9IMG-01",
+        "M9IMG-02",
+        "M9IMG-03",
+        "M9IMG-04",
+        "M9IMG-05",
+        "M9IMG-06",
+        "M9IMG-07",
+        "M9IMG-08",
+        "M9IMG-09",
+        "M9IMG-10",
+        "M9IMG-11",
+        "M9IMG-12"
+      ],
+      "status": "requirements_only_not_runtime_evidence",
+      "images_copied_to_repository": false,
+      "implementation_status_promoted": false
+    },
+    {
+      "id": "m00-m07-l4-matrix9-rhino5-reference-supplements-2026-10-15",
+      "date": "2026-10-15",
+      "status": "requirements_only_not_runtime_evidence",
+      "scope": "M00+M01+M02+M03+M04+M05+M06+M07 L4 task records",
+      "scope_note": "every record also carries authored reference anchors; M01+M02 additionally carry implementation_samples",
+      "l4_records_updated": 2360,
+      "l3_capabilities_routed": 570,
+      "l3_with_rhino5_chapter": 561,
+      "l3_with_matrix9_source": 540,
+      "l3_with_manual_sheet": 375,
+      "matrix9_reference_anchors": 114,
+      "manual_reference_sheets": 337,
+      "rhino5_core_chapters": 12,
+      "merged_packages": [
+        "OpenMatrix9_M04_Only.zip",
+        "OpenMatrix9_M03_Execution_Hardened_Patch.zip",
+        "OpenMatrix9_M05_L4_Overlay (1).zip",
+        "OpenMatrix9_M06_L4_Patch.zip",
+        "OpenMatrix9_v013_M07_L4_Patch.zip"
+      ],
+      "crosswalk": "tools/matrix_ref_crosswalk.py",
+      "reference_roots": [
+        "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "ref/matrix",
+        "OM9_Milestones/**/reference/text/*.md"
+      ],
+      "validation_command": "python tools/validate_matrix_ref_crosswalk.py && python tools/validate_matrix_ref_supplements_applied.py && python tools/verify_merge.py m03 && python tools/verify_merge.py m04 && python tools/verify_l4_overlay_merge.py m05 && python tools/verify_l4_overlay_merge.py m06 && python tools/verify_l4_overlay_merge.py m07",
+      "evidence_report": "docs/validation/2026-10-15-l4-reference-supplements.md",
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false,
+      "implementation_samples": {
+        "l4_records": 822,
+        "milestones": [
+          "M01",
+          "M02"
+        ],
+        "language": "rust",
+        "status": "author_skeleton_untrusted",
+        "roles_covered": [
+          "SOURCE_AUDIT",
+          "CONTRACT_TEST",
+          "IMPLEMENT",
+          "INTEGRATE",
+          "ACCEPTANCE",
+          "REGRESSION_STRESS"
+        ],
+        "validation_command": "python tools/validate_implementation_samples.py",
+        "sketch_is_not_runtime_evidence": true
+      },
+      "unknowns": "Matrix9 identifiers and manual-sheet options are locators/documentation only; symbol re-verification at a checkout, defaults, tolerances and parity remain unproven. M05 gem cut/size semantics, M06 head/bezel/prong settings, M07 cutter/boolean/manufacturing rules and pave layout rules are manual-level only. M01/M02 implementation_samples are authored Rust skeletons: not compiled, not executed, and they name no symbol that is absent from the record."
+    },
+    {
+      "id": "m03-m04-l4-rhino5-geometry-anchors-2026-10-16",
+      "date": "2026-10-16",
+      "status": "applied_and_validated",
+      "scope": "M03 + M04 L4 task records that need an openNURBS / native C-ABI anchor",
+      "why": "Khảo sát ref/ cho thấy chưa L4 nào trỏ tới ref/rhino5, dù đây là nguồn duy nhất mô tả bề mặt type openNURBS và C ABI native mà lớp FFI của OM9 phải khớp. Rhino_DotNet cũng là cây code thật (898/2122 file nhiều compute hơn forward), không phải stub như kết luận ban đầu của tôi.",
+      "l3_capabilities_anchored": 35,
+      "l4_records_updated": 190,
+      "l4_records_per_milestone": {
+        "M00": 12,
+        "M04": 20,
+        "M03": 158
+      },
+      "rhino5_geometry_anchors": 20,
+      "rhino5_anchors_used": 18,
+      "anchor_families": {
+        "rhino_dotnet_types": 11,
+        "rhino_common_managed": 4,
+        "ghidra_native": 2
+      },
+      "highest_value_anchors": [
+        "rh5-common-unsafe-native: 3332 DllImport, 1166 tên ON_* phân biệt; tên method managed chính là symbol native (không có EntryPoint=), convention Cdecl",
+        "rh5-rh-util: RhUtil.cs 9482 dòng / 309 method, gồm boolean vùng phẳng 2D (RhPlanarRegionUnion/Difference/Intersection) và heal brep",
+        "rh5-on-binary-archive: 4512 dòng, bề mặt chunk read/write của định dạng 3dm",
+        "rh5-on-brep + rh5-on-brep-parts: B-rep có trim và topology face/edge/trim/loop/vertex",
+        "rh5-ghidra-opennurbs: 730 tên ON_* trong listing C đọc được"
+      ],
+      "known_limits": [
+        "Struct trong listing Ghidra là placeholder (175 marker, 49633 lần undefinedN): KHÔNG thu hồi được layout member hay offset.",
+        "Rhino.exe.c bị strip symbol (23415 hàm FUN_ ẩn danh): không dùng được cho hình học.",
+        "RhUtil/OnUtil là tiện ích tổng quát của Rhino, KHÔNG chứa thuật toán domain gem (prong/pave/halo/azure/milgrain) - phần đó ở code Matrix9.",
+        "Nguồn decompile không có file LICENSE/COPYING/NOTICE nào trong cây: chỉ dùng làm bằng chứng, không redistribute."
+      ],
+      "crosswalk": "tools/matrix_ref_crosswalk.py (RHINO5 registry + RHINO5_L3 mapping)",
+      "reference_roots": [
+        "ref/rhino5/dnspy/Rhino_DotNet",
+        "ref/rhino5/dnspy/RhinoCommon",
+        "ref/rhino5/ghidra"
+      ],
+      "known_defect_fixed": "strip_applied cắt runbook tại heading tham chiếu nên refresh xoá mục code mẫu M01/M02; đã sửa thành strip_reference_section (chỉ xoá đúng section), khôi phục 822 mục, và thêm test chống tái phát.",
+      "validation_command": "python tools/run_reference_checks.py",
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false
+    },
+    {
+      "id": "m01-m07-l4-implementation-samples-2026-10-16",
+      "date": "2026-10-16",
+      "status": "applied_and_validated",
+      "scope": "M01, M02, M04, M05, M06, M07 L4 task records",
+      "why": "Người dùng hỏi vì sao ref/ chưa được tận dụng làm code mẫu cho tập lệnh gem. Kết quả khảo sát cho thấy thuật toán gem KHÔNG nằm trong ref/rhino5 (đó là bề mặt type openNURBS + C ABI), nhưng mỗi bản ghi L4 đã mang sẵn dữ liệu domain dùng được: trang manual, option thật, invariant hình học, oracle. Mẫu được sinh từ chính dữ liệu đó.",
+      "l4_records_with_samples": 2287,
+      "per_milestone": {
+        "M01": {
+          "files": 516,
+          "with_samples": 516
+        },
+        "M02": {
+          "files": 306,
+          "with_samples": 306
+        },
+        "M03": {
+          "files": 854,
+          "with_samples": 854
+        },
+        "M04": {
+          "files": 340,
+          "with_samples": 340
+        },
+        "M05": {
+          "files": 126,
+          "with_samples": 126
+        },
+        "M06": {
+          "files": 76,
+          "with_samples": 76
+        },
+        "M07": {
+          "files": 69,
+          "with_samples": 69
+        }
+      },
+      "roles": {
+        "SOURCE_AUDIT": 353,
+        "CONTRACT_TEST": 485,
+        "IMPLEMENT": 392,
+        "ACCEPTANCE": 466,
+        "INTEGRATE": 357,
+        "REGRESSION_STRESS": 234
+      },
+      "role_labels_on_record": {
+        "SOURCE_AUDIT": 175,
+        "CONTRACT_TEST": 175,
+        "IMPLEMENT": 392,
+        "ACCEPTANCE": 415,
+        "INTEGRATE": 162,
+        "REGRESSION_STRESS": 11,
+        "SOURCE_MAP": 178,
+        "CONTRACT_FIXTURE": 123,
+        "REGRESSION": 154,
+        "INTEGRATION_STRESS": 26,
+        "DISPATCH_CONTRACT": 136,
+        "WIRE_UI": 195,
+        "API_FIXTURE": 51,
+        "ACCEPT": 51,
+        "ADVERSARIAL": 43
+      },
+      "warning_placement": {
+        "runbook_section": 822,
+        "dedicated_guide_member": 1465,
+        "note": "M01/M02 nối mục cảnh báo vào agent_runbook_markdown; M04-M07 không có trường runbook nên cảnh báo nằm ở member implementation_sample_guide."
+      },
+      "honesty_controls": [
+        "status = author_skeleton_untrusted",
+        "sketch_is_untested / not_runtime_evidence / must_not_be_reported_as_implemented = true",
+        "mẫu chỉ nêu symbol đã có trong bản ghi (proposed_contract / geometry_invariants / source_paths) hoặc thư viện chuẩn Rust",
+        "không chép thân hàm từ ref/ hay QymCAD; chỉ mô tả và trỏ nguồn",
+        "PASS vẫn cần command receipt exit 0 cộng oracle đo từ lần chạy thật"
+      ],
+      "defects_found_and_fixed": [
+        "task = record.get('task') or {} làm rỗng context với M04-M07 (trường nằm ở gốc bản ghi): đã sửa thành fallback về chính bản ghi.",
+        "strip_applied cắt runbook tại heading tham chiếu nên refresh xoá mục code mẫu M01/M02: đã sửa thành strip_reference_section + thêm test chống tái phát.",
+        "M06 dùng sai tên thư mục ('Head and Setting' thay vì 'Settings and Prongs'): đã sửa.",
+        "M04-M07 thiếu trường runbook nên cảnh báo bị bỏ im lặng: đã thêm implementation_sample_guide.",
+        "verify_merge / verify_l4_overlay_merge báo drift vì so bản ghi đã làm giàu với gói gốc: đã loại trừ ENRICHMENT chứ không nới lỏng phép so."
+      ],
+      "validation_command": "python tools/run_reference_checks.py",
+      "milestones_without_samples": {
+        "M00": "73 L4 bản ghi không có trường task_role nào (milestone khả thi/quản trị: provenance, workspace map, quyết định REUSE/ADAPT/ADD, license, gate). Không sinh mẫu vì không có vai trò triển khai để bám vào — để trống và ghi rõ, không bịa skeleton."
+      },
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false
+    },
+    {
+      "id": "rough-jewellery-algorithm-notes-2026-10-16",
+      "date": "2026-10-16",
+      "status": "extracted_and_validated",
+      "scope": "Chuỗi dựng trang sức thô (không render): vành/profile, thân, đặt đá theo curve, pave, halo/cluster/channel, prong/head, cutter",
+      "why": "Người dùng chốt ưu tiên dựng trang sức thô trước và chưa cần render. Các milestone M04/M05/M06 đã có implementation sample nhưng là khung chung; việc còn thiếu là THUẬT TOÁN DOMAIN có số liệu, để mẫu bám vào hành vi thật thay vì chỉ vào tên trường.",
+      "build_chain_order_evidence": {
+        "basis": "thứ tự trang trong sheet manual đã có trong repo (không phải suy đoán)",
+        "stages": [
+          "1. Vành và profile (ring rail / shank)",
+          "2. Thân và mặt (solid body)",
+          "3. Đặt đá theo curve",
+          "4. Đặt đá theo surface / flow",
+          "5. Pave",
+          "6. Halo / cluster / channel",
+          "7. Prong / head / setting",
+          "8. Cutter (trừ kim loại)"
+        ],
+        "files_mapped": 74,
+        "map_tool": "tools/map_rough_jewellery_chain.py"
+      },
+      "algorithm_notes": {
+        "count": 14,
+        "verified_facts": 251,
+        "algorithm_steps": 105,
+        "boundaries_recorded": 69,
+        "ids": [
+          "algo.builder.contract",
+          "algo.gem.on.curve.multi",
+          "algo.gemshape.offset",
+          "algo.geometry.kernel-calls",
+          "algo.builder.single-parameter",
+          "algo.csblock.channel-model",
+          "algo.gem.on.curve.family",
+          "algo.prong.placer",
+          "algo.sort.gems.and.graph",
+          "algo.cluster.halo.bezel",
+          "algo.rail.profile.body",
+          "algo.gem.block.data-model",
+          "algo.option.data-object",
+          "algo.cutter.is-library-data"
+        ],
+        "document": "docs/private-algorithm-notes.json",
+        "document_published": false,
+        "git_ignored": true
+      },
+      "negative_findings": [
+        "CSProngPlacerGC KHÔNG sinh vị trí đá và KHÔNG có phép kiểm chồng lấn; chống chồng là do cấu trúc đường tròn tiếp xúc, không do lặp.",
+        "Bảng tỉ trọng kim loại KHÔNG nằm trong mã Matrix: nó là user data parse từ file vật liệu V-Ray. OM9 phải tự chọn nguồn tỉ trọng.",
+        "KHÔNG có thuật toán cutter trong mã managed: cutter là dữ liệu thư viện, áp bằng boolean của host. Không thể 'port thuật toán cutter'.",
+        "Bốn builder đặt đá theo curve KHÁC NHAU thật (Advanced/Count/List/Multi); gộp chúng thành một hành vi sẽ lệch chỗ chèn đá.",
+        "Thuật toán panelling nằm trong plugin bên thứ ba (PanelingTools): chỉ thấy chữ ký hàm gọi.",
+        "Bảng 12 hệ ring-size của MatrixCommon không có hằng số đo được trong mã managed."
+      ],
+      "constants_that_must_be_remeasured": [
+        "ngưỡng đường may 0.2 / 0.8 (Advanced, Multi)",
+        "hệ số chia khoảng dư 0.5 và 1.0 (hai mẫu số khác nhau cho cùng thao tác)",
+        "bán kính đường tròn biên 10.0 và offset tâm 10.0 (prong placer)",
+        "trọng số điểm điều khiển 0.7071067811 của biên dạng chấu",
+        "dung sai cap 0.01 hard-code trong CylinderBuilder",
+        "hệ số 50 cho độ phân giải lấy mẫu curve (1/50 đơn vị dài)",
+        "hệ số 1.55517 đổi gram sang pennyweight, và 0.001 đổi mm khối sang cm khối",
+        "công thức cỡ vành US: chia 25.4, trừ 0.45518313724282067, chia 0.032467608390746645"
+      ],
+      "anti_copy_control": {
+        "validator": "tools/validate_algorithm_notes.py",
+        "rule": "chuỗi 12 từ liên tiếp trùng nguyên văn với file nguồn thì FAIL",
+        "also_checks": "mọi tên hàm được trích phải tồn tại trong file được trích",
+        "probe": "tools/probe_algorithm_notes_validation.py (bơm 14 từ thật -> validator fail)",
+        "defects_it_caught": [
+          "Utilities/GemBlock.cs vs PIM/GemBlock.cs là HAI tệp khác nhau cùng tên",
+          "GetNumber/GetBool nằm ở CS/Parametric/CSInputChannel.cs, không phải CS/CSBlock.cs"
+        ]
+      },
+      "not_yet_done": [
+        "Bước 4 (đá theo surface / flow) chưa có ghi chú thuật toán.",
+        "Pattern và lưới của panelling chưa có ghi chú vì thuật toán ở plugin bên thứ ba.",
+        "Chưa nối ghi chú thuật toán vào implementation_samples của L4."
+      ],
+      "validation_command": "python tools/run_reference_checks.py",
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false
+    },
+    {
+      "id": "m00-m02-l4-domain-algorithm-references-2026-10-16",
+      "date": "2026-10-16",
+      "status": "applied_and_validated",
+      "scope": "M00, M01, M02 L4 task records",
+      "why": "Người dùng yêu cầu cập nhật code/thuật toán vào M00 M01 M02. Ba milestone này là nền tảng nên không sở hữu thuật toán trang sức, nhưng chúng sở hữu đúng những mẫu kiến trúc mà ghi chú thuật toán đã trích: hợp đồng builder, đường ống tuỳ chọn, đồ thị tham số, ranh giới bền vững, bản đồ lời gọi kernel.",
+      "l4_records_with_samples": 2360,
+      "l4_records_with_domain_reference": 149,
+      "domain_reference_per_milestone": {
+        "M00": 23,
+        "M01": 76,
+        "M02": 50
+      },
+      "domain_notes_used": 10,
+      "l3_mapped": 32,
+      "l3_covered": 32,
+      "reference_content": [
+        "note_id",
+        "stage",
+        "why_for_this_task",
+        "om9_backend",
+        "steps_cited",
+        "algorithm_steps",
+        "source_file",
+        "source_methods",
+        "boundaries_carried"
+      ],
+      "algorithm_steps_rendered_into_sketch": true,
+      "m00_role_handling": {
+        "problem": "bản ghi M00 không có trường vai trò nào, nên trước đây bị bỏ qua hoàn toàn",
+        "solution": "suy vai trò từ chính tiêu đề bản ghi và ghi nguồn gốc vào role_provenance; không bịa vai trò rồi trình bày như thể bản ghi đã khai",
+        "distribution": {
+          "SOURCE_AUDIT": 46,
+          "CONTRACT_TEST": 27
+        }
+      },
+      "role_provenance_distribution": {
+        "inferred (default for a feasibility record (no role field on the record))": 46,
+        "inferred (title contains 'check')": 2,
+        "inferred (title contains 'test')": 13,
+        "inferred (title contains 'license')": 2,
+        "inferred (title contains 'audit')": 3,
+        "inferred (title contains 'proof')": 3,
+        "inferred (title contains 'decision')": 2,
+        "inferred (title contains 'notices')": 1,
+        "inferred (title contains 'gate')": 1,
+        "recorded_on_task": 2287
+      },
+      "defects_found_and_fixed": [
+        "Bảng ánh xạ đầu tiên viết từ ID ĐOÁN: các mục OM9-L3-03-* tưởng thuộc M02 nhưng thực ra thuộc M01, nên M02 không nhận được tham chiếu nào và M01 bị bỏ sót. Đã viết lại toàn bộ bảng (32 mục) từ danh sách L3 đọc ra từ inventory, mọi ID đã kiểm tồn tại.",
+        "Nhãn bước bị lặp thành 'D1. B1.' vì ghi chú tự đánh nhãn; đã bỏ nhãn gốc khi in vào sketch.",
+        "Ánh xạ vai trò M00 ban đầu đẩy 'strategy'/'license' sang ACCEPTANCE, sai bản chất: đó là ràng buộc cần kiểm, không phải ma trận assertion trên hình học đo được. Đã đổi sang CONTRACT_TEST.",
+        "M00 chưa có trong danh sách milestone của applier nên không bao giờ được xử lý."
+      ],
+      "validation_command": "python tools/run_reference_checks.py",
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false,
+      "not_yet_done": [
+        "Bước 4 (đá theo surface) vẫn chưa có ghi chú thuật toán nên chưa nối được.",
+        "Các milestone M03-M07 chưa được nối tham chiếu domain; chúng có mẫu nhưng không có domain_algorithm_reference."
+      ]
+    },
+    {
+      "id": "m03-m05-l4-domain-algorithm-references-2026-10-16",
+      "date": "2026-10-16",
+      "status": "applied_and_validated",
+      "scope": "M03, M04, M05 L4 task records",
+      "why": "Người dùng yêu cầu cập nhật code/thuật toán vào M03 M04 M05. Các milestone này sở hữu chính các thao tác mà ghi chú thuật toán đã trích: bản đồ lời gọi kernel, bốn rail và rail revolve, bốn biến thể đặt đá, pave/chấu, halo/cluster, khối lượng kim loại.",
+      "l4_records_with_domain_reference": 502,
+      "domain_reference_per_milestone": {
+        "M00": 23,
+        "M01": 76,
+        "M02": 50,
+        "M03": 154,
+        "M04": 130,
+        "M05": 69
+      },
+      "domain_notes_used": 13,
+      "l3_mapped": 103,
+      "l3_covered": 103,
+      "cumulative_note_reference_counts": {
+        "algo.geometry.kernel-calls": 96,
+        "algo.option.data-object": 61,
+        "algo.gem.block.data-model": 58,
+        "algo.rail.profile.body": 57,
+        "algo.builder.contract": 55,
+        "algo.gem.on.curve.family": 54,
+        "algo.builder.single-parameter": 30,
+        "algo.cluster.halo.bezel": 23,
+        "algo.csblock.channel-model": 21,
+        "algo.prong.placer": 20,
+        "algo.sort.gems.and.graph": 19,
+        "algo.gemshape.offset": 5,
+        "algo.gem.on.curve.multi": 3
+      },
+      "algorithm_steps_rendered_into_sketch": true,
+      "qymcad_revision_incident": {
+        "symptom": "ba verifier merge chuyển từ xanh sang đỏ trong khi kiểm chứng phần mẫu code",
+        "proved_not_the_applier": "build/prove_applier_scope.py: chạy chuỗi biến đổi của applier trong bộ nhớ và chứng minh nó chỉ đổi hai member của nó",
+        "cause": "cây milestone ghim một revision QymCAD, gói nguồn ghim revision khác",
+        "wrong_value_in_trees": "746a17f127897e921a57118b6caad08968602bf5",
+        "correct_value": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+        "evidence": "M00 records, gói M05/M06 (source_revision và source_revision_expected_from_M00), gói M07 đều dùng giá trị đúng",
+        "files_synced": 1669,
+        "occurrences_synced": 8498,
+        "left_alone": "128 lần ở M05/M07 nằm trong L1.json và manifest - không có file gói ghép cặp nên không thay; cần người quyết",
+        "remaining_per_milestone": {
+          "M03": {
+            "wrong_revision_remaining": 0,
+            "correct_revision": 8457
+          },
+          "M04": {
+            "wrong_revision_remaining": 0,
+            "correct_revision": 443
+          },
+          "M05": {
+            "wrong_revision_remaining": 127,
+            "correct_revision": 126
+          },
+          "M06": {
+            "wrong_revision_remaining": 0,
+            "correct_revision": 76
+          },
+          "M07": {
+            "wrong_revision_remaining": 1,
+            "correct_revision": 70
+          }
+        },
+        "tool": "tools/sync_qymcad_revision.py",
+        "tool_rule": "chỉ thay khi file gói ghép cặp thật sự chứa giá trị đúng"
+      },
+      "defects_found_and_fixed": [
+        "Bảng ánh xạ đầu tiên viết từ ID đoán nên gán sai milestone; đã viết lại toàn bộ từ danh sách L3 đọc ra từ inventory (103 mục, mọi ID đã kiểm tồn tại).",
+        "Hai mục trùng khoá (__B) cho cùng một L3: gộp bước trích thay vì bỏ im lặng.",
+        "Một tên ghi chú sai (algo.gem.count-on-curve không tồn tại) làm ánh xạ không giải quyết được; validator bắt và đã sửa.",
+        "Đường dẫn gói của M05/M06 trong công cụ đồng bộ sai nên không dựng được chỉ mục ghép cặp; đã sửa, và bổ sung ghép theo task_id/id/overlay_task_id cho gói overlay phẳng.",
+        "Một bản ghi M06 ghép nhầm file gói nên bị bỏ qua; đã sửa tay và ghi lại."
+      ],
+      "validation_command": "python tools/run_reference_checks.py",
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false,
+      "not_yet_done": [
+        "Bước 4 (đá theo surface) vẫn chưa có ghi chú thuật toán nên chưa nối được.",
+        "M06 và M07 chưa được nối tham chiếu domain.",
+        "128 lần revision sai còn lại trong L1.json/manifest của M05/M07 cần người quyết."
+      ]
+    },
+    {
+      "id": "m06-m07-l4-domain-algorithm-references-2026-10-16",
+      "date": "2026-10-16",
+      "status": "applied_and_validated",
+      "scope": "M06 and M07 L4 task records; completes all seven milestones",
+      "why": "Người dùng yêu cầu cập nhật code/thuật toán vào M06 M07. M06 sở hữu head, bezel, prong, bead - đúng các ghi chú cluster/bezel và prong placer. M07 là cutter, và ghi chú nói rõ KHÔNG có thuật toán cutter trong mã managed, nên các L3 cutter được nối với chính phát hiện phủ định đó thay vì một ghi chú bịa.",
+      "mappings_total": 141,
+      "mapped_l3_per_milestone": {
+        "M00": 6,
+        "M01": 17,
+        "M02": 9,
+        "M03": 28,
+        "M04": 19,
+        "M05": 24,
+        "M06": 19,
+        "M07": 19
+      },
+      "l4_records_with_domain_reference": 643,
+      "domain_reference_per_milestone": {
+        "M00": 23,
+        "M01": 76,
+        "M02": 50,
+        "M03": 154,
+        "M04": 130,
+        "M05": 69,
+        "M06": 76,
+        "M07": 65
+      },
+      "l3_covered": 141,
+      "distinct_notes_used": 14,
+      "notes_total_available": 14,
+      "all_notes_now_used": true,
+      "note_reference_counts": {
+        "algo.geometry.kernel-calls": 122,
+        "algo.gem.block.data-model": 76,
+        "algo.cluster.halo.bezel": 65,
+        "algo.rail.profile.body": 64,
+        "algo.option.data-object": 61,
+        "algo.builder.contract": 59,
+        "algo.gem.on.curve.family": 58,
+        "algo.prong.placer": 32,
+        "algo.builder.single-parameter": 30,
+        "algo.csblock.channel-model": 21,
+        "algo.cutter.is-library-data": 20,
+        "algo.sort.gems.and.graph": 19,
+        "algo.gemshape.offset": 13,
+        "algo.gem.on.curve.multi": 3
+      },
+      "m07_negative_finding_usage": "algo.cutter.is-library-data được dùng cho L3 cutter azure / microprong / bright cutter: mẫu code nói thẳng rằng phần việc là định nghĩa định dạng cutter và gọi boolean, không phải chép thuật toán có sẵn.",
+      "known_cosmetic_defect": "Các bước D1..Dn được chèn vào cùng danh sách đánh số với ghi chú thuật toán của bản ghi nên hiện ra như '// 5. D1. ...' thay vì tách khối riêng. Nội dung đúng và đủ; sửa sẽ cần refresh cả 2360 bản ghi nên ghi nhận thay vì làm ngay.",
+      "validation_command": "python tools/run_reference_checks.py",
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false,
+      "not_yet_done": [
+        "Bước 4 (đá theo surface/flow) vẫn chưa có ghi chú thuật toán nên chưa nối được; file là Commands/SmartFlow/gvSmartFlow.cs (1.063 dòng).",
+        "128 lần revision QymCAD sai còn lại trong L1.json/manifest của M05/M07 cần người quyết.",
+        "M10? không tồn tại; M08, M09 và ZAFTER chưa được nối tham chiếu domain."
+      ]
+    },
+    {
+      "id": "m08-e13-l4-package-merged-2026-10-16",
+      "date": "2026-10-16",
+      "status": "merged_planning_only_verified",
+      "scope": "M08 milestone tree plus the 22 M03-owned transform-toolbar L3 that E13 executes",
+      "why": "Người dùng yêu cầu giải nén và merge gói OpenMatrix9_v014_M08_L4_Patch.zip (M08 L4 cho Luna) vào M08. Gói chỉ chứa kế hoạch, không có mã.",
+      "source_archive": "C:/Users/nguye/Downloads/OpenMatrix9_v014_M08_L4_Patch.zip",
+      "source_archive_sha256": "926225E29743FEFF6397165081D4819374554279D5285DF517986A159CAC700E",
+      "staged_at": "build/m08-incoming/OpenMatrix9",
+      "l4_records_merged": 221,
+      "l3_covered": 73,
+      "placed_by_milestone": {
+        "M08": 177,
+        "M03": 44
+      },
+      "cross_milestone_note": "22 L3 thuộc OM9-L2-04-01 (M03) được E13 thực thi nhưng giữ nguyên milestone owner; kế hoạch M07/M08 của gói cũng ghi rõ 'no relocation'. Vì vậy 44 L4 adapter nằm trong cây M03, 177 L4 còn lại trong cây M08.",
+      "schema_and_ids": "Gói v0.14 đã dùng id dạng milestone OM9-L4-aabbccc-nn nên không phải đổi id; mỗi L4 nhận level, task_role, depends_on_l4_ids và reference_policy từ merger.",
+      "milestone_tree_changes": [
+        "221 thư mục L4-nn - <Role> với l4.json + TASK.md",
+        "73 l3.json: children_l4, l4_status=PLANNED_NOT_EXECUTED, planning_state=SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED, specification.l4_status/execution_status",
+        "9 L2.json: l4_status, planned_l4_count_m08, definition.l3_l4_status (M03 L2-04-01: 44 L4)",
+        "M08 L1.json: l4_count 221, l4_count_in_tree 177, l4_placed_by_milestone, l3_spec_tree_by_milestone, execution_readiness (gate E13, source_audit_status REMOTE_REVIEW_ONLY_NO_LOCAL_BUILD)",
+        "OM9_Milestones/M08 - Advanced Jewelry Modeling/reference/m08-l4/: 8 tài liệu gói (manifest JSON/CSV, packaging report, self review, release gate, Luna handoff, README)"
+      ],
+      "implementation_samples": "221 L4 M08 được sinh khối implementation_samples + implementation_sample_guide bằng tools/apply_implementation_samples.py (thêm M08 vào MILESTONES, alias MENU_BINDING→INTEGRATE). Vai trò: CONTRACT_TEST 73, ACCEPTANCE 73, IMPLEMENT 51, REGRESSION_STRESS 24.",
+      "tooling_changes": [
+        "tools/merge_l4_overlay.py: thêm gói m08, hỗ trợ nhiều milestone (extra_milestone_dirs) và không ghi lại L3 đã đúng (idempotent)",
+        "tools/merge_milestone_package.py: spec m03 nhận thêm planned_l4_count_m08, l4_status, l4_count_planned_m08",
+        "tools/verify_merge.py: miễn trừ đúng 22 L3 'DEFERRED_TO_M08' và kiểm chứng phần đóng góp của gói M08 (số con, số L4 theo module) thay vì đòi thân bản ghi gốc",
+        "tools/verify_m08_l4_merge.py: công cụ kiểm chứng mới cho gói M08"
+      ],
+      "validation_commands": [
+        {
+          "command": "python tools/merge_l4_overlay.py --package m08 --apply",
+          "result": "221 L4 / 73 L3 / 9 L2, 0 conflict, 0 skipped (chạy lại: 0 ghi mới)"
+        },
+        {
+          "command": "python tools/verify_m08_l4_merge.py",
+          "result": "OK: 221 L4 trên 73 L3, 0 failure"
+        },
+        {
+          "command": "python tools/verify_merge.py m03",
+          "result": "854 L4, 2790 tệp cục bộ giữ nguyên, 0 lỗi"
+        },
+        {
+          "command": "python tools/verify_merge.py m04",
+          "result": "0 lỗi"
+        },
+        {
+          "command": "python tools/run_reference_checks.py",
+          "result": "ALL CHECKS PASS (12/12)"
+        }
+      ],
+      "geometric_or_runtime_evidence": "NONE. Đây là merge kế hoạch: 221 L4 giữ status PLANNED_NOT_EXECUTED, readiness BLOCKED_BY_G00_E12_G_MVP_AND_LOCAL_SOURCE; không có dòng mã, không có test runtime, không có L3 nào được nâng lên executed.",
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false,
+      "not_yet_done": [
+        "M08 L3 chưa được nối reference_supplements (Rhino5/Matrix9/manual sheet) và chưa có ghi chú thuật toán domain trong DOMAIN_NOTE_MAP; cần bản đồ crosswalk cho 73 L3 E13.",
+        "Gói v0.14 đã được ghi hash SHA256 của tệp zip gốc (926225e2…700e) trong ledger; nội dung giải nén khớp 536/536 entry.",
+        "Chưa có source checkout QymCAD, OCCT hay G-MVP để bắt đầu bất kỳ L4 nào."
+      ]
+    },
+    {
+      "id": "m09-release-gate-l4-package-merged-2026-10-16",
+      "date": "2026-10-16",
+      "status": "merged_planning_only_verified",
+      "scope": "M09 milestone tree: 30 release-verification L4 over zero canonical L2/L3 owners",
+      "why": "Người dùng yêu cầu giải nén và merge OpenMatrix9_M09_L4_Patch.zip vào M09. Người dùng chọn đặt L4 theo quy ước reference/m09-l4 (như M05/M06/M07) và đưa 2 script của gói vào tools/ rồi viết lại cho cây milestone.",
+      "source_archive": "C:/Users/nguye/Downloads/OpenMatrix9_M09_L4_Patch.zip",
+      "source_archive_sha256": "ff962d452f8e081321b3ff25d9d9b382d71665fe9f911420c44968cd86094249",
+      "staged_at": "build/m09-incoming/OpenMatrix9",
+      "release_l4_records": 30,
+      "l4_by_gate": {
+        "G-MVP": 18,
+        "G-FULL": 12
+      },
+      "test_cases": 177,
+      "distinct_canonical_l3_refs": 59,
+      "canonical_l2_added": 0,
+      "canonical_l3_added": 0,
+      "files_merged": 77,
+      "manifest_path_rewrites": 60,
+      "layout_note": "M09 không sở hữu L2/L3 nên không thể đặt L4 theo L2-*/L3-*/L4-nn. Gói giữ nguyên layout riêng dưới OM9_Milestones/M09 .../reference/m09-l4/ (g-mvp/01..18, g-full/01..12 + manifest, checklist, template, tools); không tạo L2/L3 giả.",
+      "milestone_tree_changes": [
+        "L1.json: release_gate_plan (manifest path, schema, owner_type, gate graph G-MVP<-G00,E01..E12 và G-FULL<-G-MVP,E13, l4_by_gate kèm task_kind, 177 test case, 59 canonical ref, danh mục tài liệu, hash zip), gate_status NOT_TESTED cho cả hai gate, release_decision UNDECIDED, evidence_state NOT_CREATED; giữ nguyên module_count=0, l3_count=0 và ghi chú không phát sinh L2 owner",
+        "reference/m09-l4/: 30 cặp l4.json + TASK.md, M09_EXECUTION_MANIFEST.json|csv, M09_EXECUTION_TREE.txt, M09_TEST_CASES.csv (177 ca), M09_REVIEW_REPORT.md, 3 template (evidence, signoff, runtime state), G_MVP_CHECKLIST.md, G_FULL_CHECKLIST.md, GPT6_LUNA_EXECUTION_PROMPT.md, README.md, M09_RELEASE_GATES.md, PLANNING_README.md, tools/ (2 script gốc)",
+        "manifest path/task_path đổi từ planning/M09/... sang reference/m09-l4/... (60 lần) để mọi đường dẫn giải được trong checkout; CSV sinh lại từ manifest nên không thể lệch"
+      ],
+      "tooling_changes": [
+        "tools/merge_m09_package.py (mới): merge gói theo layout reference, ghi hash từng tệp, dry-run/--apply, không ghi đè tệp khác bytes",
+        "tools/verify_m09_l4_merge.py (mới): chứng minh byte-identical với gói, path giải được, CSV khớp manifest, L1 khớp manifest, không tạo evidence",
+        "tools/validate_m09_l4.py (mới, port từ gói): chỉnh 2 điểm có chủ đích - (1) inventory canonical L3 lấy từ OM9_Milestones/**/l3.json thay cho planning/EXECUTION_MANIFEST.json + specs/_meta/l3-registry.json (không tồn tại trong checkout), cho phép đúng 1 khai báo trùng OM9-L3-01-12-008 (M01/M07 giống nhau), chỉ kiểm hình dạng l3_path vì cây này đặt tên thư mục theo title; (2) bỏ assertion 'implementation/evidence/M09 phải không tồn tại' vì đó chính là thư mục mà kiểm định thật sẽ tạo. Mọi assertion còn lại giữ nguyên",
+        "tools/m09_next_task.py (mới, port từ gói): đọc manifest ở reference/m09-l4 nên đường dẫn in ra giải được; vẫn từ chối state template_only"
+      ],
+      "validation_commands": [
+        {
+          "command": "python tools/merge_m09_package.py --apply",
+          "result": "77 tệp, 60 path rewrite, 0 conflict, 0 tệp ghi đè"
+        },
+        {
+          "command": "python tools/validate_m09_l4.py",
+          "result": "PASS: 30 L4 / 177 cases / 59 canonical L3 refs / 2 gates / DAG acyclic"
+        },
+        {
+          "command": "python tools/verify_m09_l4_merge.py",
+          "result": "OK: byte-identical với gói, không trạng thái nào bị nâng"
+        },
+        {
+          "command": "python tools/m09_next_task.py --state <template> --gate G-MVP",
+          "result": "BLOCKED_STATE, exit 2 (đúng: template không phải evidence)"
+        },
+        {
+          "command": "python tools/m09_next_task.py --state <synthetic complete state> --gate G-MVP",
+          "result": "NEXT_ELIGIBLE_FOR_VERIFICATION: OM9-M09-L4-GMVP-001"
+        },
+        {
+          "command": "python tools/m09_next_task.py --state <synthetic MVP-only state> --gate G-FULL",
+          "result": "BLOCKED_GATE: G-MVP, E13 chưa có signed PASS, exit 2"
+        },
+        {
+          "command": "python tools/run_reference_checks.py",
+          "result": "ALL CHECKS PASS (12/12)"
+        },
+        {
+          "command": "python tools/verify_m08_l4_merge.py",
+          "result": "OK: 221 L4 / 73 L3; workspace_l4_total 2611 (gồm 30 L4 cổng M09)"
+        }
+      ],
+      "geometric_or_runtime_evidence": "NONE. Cả hai gate vẫn NOT_TESTED, release_decision UNDECIDED, evidence_state NOT_CREATED; 30/30 L4 PLANNED_NOT_EXECUTED với source_revision null, toolchain_verified false, estimated_effort null. Không tạo implementation/evidence/M09.",
+      "implementation_status_promoted": false,
+      "reference_content_copied": false,
+      "private_paths_included": false,
+      "not_yet_done": [
+        "Chưa có signed G00/E01..E12 (G-MVP) hay G-MVP+E13 (G-FULL), chưa có build SHA, OCCT ABI, fixture, external STL viewer hay reviewer người thật nên không L4 nào chạy được.",
+        "Gói này không chứa source ứng dụng (app_source_in_zip=false) và ZIP không kèm planning/EXECUTION_MANIFEST.json (772 L3) lẫn specs/_meta/l3-registry.json, nên validator port phải suy ra inventory từ cây milestone.",
+        "Đường dẫn canonical l3_path trong bản ghi là của gói spec (thư mục slug) không tồn tại trong checkout này (đặt tên theo title); bản ghi L3 đã được đối chiếu theo id/module/capability/stage.",
+        "Gói không có reference_supplements hay ghi chú thuật toán domain; M09 là milestone kiểm định nên không sinh implementation_samples."
+      ]
+    }
+  ]
 }

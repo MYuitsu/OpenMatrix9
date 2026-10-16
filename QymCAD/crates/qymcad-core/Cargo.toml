@@ -1,0 +1,25 @@
+[package]
+name = "qymcad-core"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Headless core: the document model, geometry, the feature timeline and assemblies"
+
+[dependencies]
+serde.workspace = true
+ron.workspace = true
+cavalier_contours = "0.9"
+ttf-parser = "0.25"
+nalgebra = "0.35"
+levenberg-marquardt = "0.15.0"
+petgraph = "0.8.3"
+num-dual = "0.15"
+# the sparse Cholesky of the sketch solver for a part too big for dense algebra (an array of 1 000 rectangles is one
+# part of 8 000 unknowns); without its own threads - the threads of a solve are the setting of the program
+faer = { version = "0.24", default-features = false, features = ["std", "sparse-linalg"] }
+
+[lints]
+workspace = true

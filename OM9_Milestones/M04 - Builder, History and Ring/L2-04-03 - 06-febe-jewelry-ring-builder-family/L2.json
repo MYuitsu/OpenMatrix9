@@ -1,0 +1,87 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-03",
+  "milestone": "M04",
+  "title": "06-febe-jewelry-ring-builder-family",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Eternity/Signet/Raised/Award ring builders theo NURBS",
+  "source_original_path": "specs/04-ms04-builder-history-ring/06-febe-jewelry-ring-builder-family/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-03",
+    "milestone_id": "M04",
+    "module_path": "specs/04-ms04-builder-history-ring/06-febe-jewelry-ring-builder-family/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/03-febe-jewelry-ring-builder-family/",
+    "scope": "Eternity/Signet/Raised/Award ring builders theo NURBS",
+    "exclude": "T-Spline Signet builder được hoãn sang 09 organic.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          340,
+          357
+        ],
+        "pdf_pages_1based": [
+          114,
+          131
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-04-02",
+      "OM9-L2-03-11",
+      "OM9-L2-01-04"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M04-UI",
+    "l3_count": 7,
+    "l3_catalog_path": "specs/04-ms04-builder-history-ring/06-febe-jewelry-ring-builder-family/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-03-001",
+      "file": "M04 - Builder, History and Ring/L2-04-03 - 06-febe-jewelry-ring-builder-family/L3-001 - Eternity Band Builder/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-03-002",
+      "file": "M04 - Builder, History and Ring/L2-04-03 - 06-febe-jewelry-ring-builder-family/L3-002 - Signet Ring Builder/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-03-003",
+      "file": "M04 - Builder, History and Ring/L2-04-03 - 06-febe-jewelry-ring-builder-family/L3-003 - Raised Band Builder/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-03-004",
+      "file": "M04 - Builder, History and Ring/L2-04-03 - 06-febe-jewelry-ring-builder-family/L3-004 - Award Ring Builder/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-03-005",
+      "file": "M04 - Builder, History and Ring/L2-04-03 - 06-febe-jewelry-ring-builder-family/L3-005 - Ring Builder Style Presets/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-03-006",
+      "file": "M04 - Builder, History and Ring/L2-04-03 - 06-febe-jewelry-ring-builder-family/L3-006 - Ring Builder History Updates/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-03-007",
+      "file": "M04 - Builder, History and Ring/L2-04-03 - 06-febe-jewelry-ring-builder-family/L3-007 - Ring Builder Final B-Rep Validation/l3.json",
+      "target_implementation_milestone": "M04"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m04": 48
+}

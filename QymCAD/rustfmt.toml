@@ -1,0 +1,15 @@
+# THE LAYOUT OF THE SOURCE, measured on 03.10.2026 by `cargo fmt --check` over the stable options of rustfmt
+# 1.9: at width 200 the tree differs from its hand layout in 481 files of 735, 2764 lines; at the former 140 and
+# `Max`, 601 files and 5251 lines. It goes no lower - the same construction is written on one line in one place
+# and in a column in another, and rustfmt keeps one form.
+max_width = 200
+use_small_heuristics = "Max"
+reorder_imports = false
+reorder_modules = false
+use_try_shorthand = true
+merge_derives = false
+short_array_element_width_threshold = 20
+array_width = 160
+single_line_if_else_max_width = 160
+# PINNED, so a newer rustfmt does not re-lay the tree on its own: the default follows the edition and moves with it.
+style_edition = "2021"

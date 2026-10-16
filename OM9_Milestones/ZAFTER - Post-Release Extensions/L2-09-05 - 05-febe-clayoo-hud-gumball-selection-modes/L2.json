@@ -1,0 +1,78 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-05",
+  "milestone": "AFTER",
+  "title": "05-febe-clayoo-hud-gumball-selection-modes",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Clayoo sub-object HUD/controls.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/05-febe-clayoo-hud-gumball-selection-modes/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-05",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/05-febe-clayoo-hud-gumball-selection-modes/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/05-febe-clayoo-hud-gumball-selection-modes/",
+    "scope": "Clayoo sub-object HUD/controls.",
+    "exclude": "Toàn bộ hoãn; không chặn NURBS jewelry MVP.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          2,
+          50
+        ],
+        "pdf_pages_1based": [
+          8,
+          56
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [
+      "clayoo-subd"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 6,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/05-febe-clayoo-hud-gumball-selection-modes/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-05-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-05 - 05-febe-clayoo-hud-gumball-selection-modes/L3-001 - Clayoo Clayedit Enable Hud/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-05-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-05 - 05-febe-clayoo-hud-gumball-selection-modes/L3-002 - Clayoo Object Vertex Edge Face Modes/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-05-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-05 - 05-febe-clayoo-hud-gumball-selection-modes/L3-003 - Clayoo Gumball Translation Scale Rotation/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-05-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-05 - 05-febe-clayoo-hud-gumball-selection-modes/L3-004 - Clayoo Box Smooth Visualization/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-05-005",
+      "file": "AFTER - Post-Release Extensions/L2-09-05 - 05-febe-clayoo-hud-gumball-selection-modes/L3-005 - Clayoo Hotkey Profiles/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-05-006",
+      "file": "AFTER - Post-Release Extensions/L2-09-05 - 05-febe-clayoo-hud-gumball-selection-modes/L3-006 - Clayoo Points On Surface Overlay/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

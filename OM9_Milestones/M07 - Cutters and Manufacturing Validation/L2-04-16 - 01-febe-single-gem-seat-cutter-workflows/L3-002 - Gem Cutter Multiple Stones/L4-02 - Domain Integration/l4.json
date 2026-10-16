@@ -1,0 +1,417 @@
+{
+  "schema_version": "om9.m07.l4.v1",
+  "task_id": "OM9-L4-04-16-002-02",
+  "parent_l3_id": "OM9-L3-04-16-002",
+  "owner_module_id": "OM9-L2-04-16",
+  "parent_capability_id": "cap.04-16.gem-cutter-multiple-stones",
+  "milestone_id": "M07",
+  "target_milestone": "M07",
+  "execution_stage": "E12",
+  "task_name": "Nối dịch vụ/thuật toán owner hiện hữu và geometry safety",
+  "title": "Gem Cutter Multiple Stones — Nối dịch vụ/thuật toán owner hiện hữu và geometry safety",
+  "tag": "febe",
+  "work_kind": "OWNER_INTEGRATION",
+  "phase": 2,
+  "status": "PLANNED_NOT_EXECUTED",
+  "readiness": "BLOCKED_BY_G00_E11_AND_LOCAL_SOURCE",
+  "source_repo": "https://github.com/QymIs-Tech/QymCAD",
+  "source_revision_candidate": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "source_paths_verified_locally": [],
+  "reuse_decision": "PENDING_LOCAL_SOURCE_AUDIT",
+  "estimated_scope": null,
+  "origin_manual_refs": [
+    {
+      "manual_id": "book2",
+      "filename": "matrix_8_manual_book2.pdf",
+      "printed_pages": [
+        500,
+        506
+      ],
+      "pdf_pages_1based": [
+        274,
+        280
+      ],
+      "precision": "verified_pdf_text_in_current_session"
+    }
+  ],
+  "purpose": "Áp dụng cutter từ owner 04-16-001 cho từng GemRef, dedup thông minh, thu hồi toàn bộ batch nếu một phần thất bại trong chế độ atomic; One preview chỉ render 1, không giảm số lượng commit.",
+  "inputs": [
+    "Canonical L3: specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/002-febe-gem-cutter-multiple-stones/l3.json",
+    "Owner module: specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/module.json",
+    "specs/00-contracts/MATRIX9_FIRST_CONTRACTS.md",
+    "specs/00-contracts/MATRIX_WORKBENCH_UI.md",
+    "planning/E12.md",
+    "planning/GATES_AND_EVIDENCE.md",
+    "planning/DEPENDENCY_AND_RELEASE_POLICY.md",
+    "planning/M00/SOURCE_AUDIT_V012.md",
+    "QymCAD checkout at pinned source SHA; local exists only if verified during execution",
+    "Danh sách GemRef không rỗng, mỗi gem có transform, tùy chọn chỉnh nhóm, batch preview mode All/One."
+  ],
+  "expected_domain_inputs": "Danh sách GemRef không rỗng, mỗi gem có transform, tùy chọn chỉnh nhóm, batch preview mode All/One.",
+  "outputs": [
+    "implementation/evidence/M07/OM9-L4-04-16-002-02/geometry-or-service-tests.json",
+    "implementation/evidence/M07/OM9-L4-04-16-002-02/source-diff-review.md"
+  ],
+  "api_contract_and_callers": [
+    "Caller capability: cap.04-16.gem-cutter-multiple-stones; owner OM9-L2-04-16.",
+    "Related modules: OM9-L2-04-09, OM9-L2-01-10, OM9-L2-04-14.",
+    "Final source-level function names must be pinned from local checkout before code; candidates are NOT claims.",
+    "Canonical geometry owner is OM9-L2-01-10; F6/menu/builder must call shared service not implement BRep/Boolean themselves."
+  ],
+  "steps": [
+    "Đọc contract PASS của phase 01, kiểm code owner khác có thật ở pinned working copy.",
+    "Viết thay đổi tối thiểu ở owner đã kiểm chứng; UI module chỉ điều phối, không copy OCCT Booleans, meshing, persistence hoặc history.",
+    "Dùng typed inputs; implement validation/explicit error/preview isolation/rollback; ghi retry policy, timeout/cancellation như source thật hỗ trợ.",
+    "Thêm test fixture tự tạo và assertions về hình học, units, IDs, transaction state; dùng tolerance/threshold từ G00.",
+    "Chạy formatter, linter, unit/integration tests target, regressions E07/E09–E11 liên quan; ghi exact command/exit/log."
+  ],
+  "preconditions": [
+    "G00-01 .. G00-07 PASS + reviewer/license sign-off",
+    "E01..E11 PASS with evidence; E11 source contracts available",
+    "Local QymCAD checkout, pinned SHA verified; OCCT/FFI build/golden fixtures reproducible",
+    "M07 source/legal and numeric tolerances approved before implementation"
+  ],
+  "depends_on_task_ids": [
+    "OM9-L4-04-16-001-02",
+    "OM9-L4-04-16-002-01"
+  ],
+  "depends_on_module_ids": [
+    "OM9-L2-04-09",
+    "OM9-L2-01-10",
+    "OM9-L2-04-14"
+  ],
+  "geometry_invariants": [
+    "BRep truth stays in OCCT, never GPU/render mesh.",
+    "Document EntityId/FeatureId/LayerId/InstanceId stability, world units mm at manufacturing export.",
+    "No unapproved geometry tweak (move/scale) to force Boolean; warn and block instead.",
+    "Preview/cancel cannot mutate canonical document. One commit = one undoable transaction.",
+    "Unexpected naked edges/non-manifold/crossing surfaces fail pre-export validation.",
+    "Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count."
+  ],
+  "error_cases": [
+    "No geometry / empty selection",
+    "Invalid or degenerate BRep",
+    "Unsupported/unknown unit or tolerance",
+    "Ambiguous/stale EntityId",
+    "Locked/hidden/wrong-type target",
+    "OCCT/FFI failure, cancellation, output write failure",
+    "Missing validated source or dependency: BLOCKED, not silent stub"
+  ],
+  "files_expected_to_touch": [
+    "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/module.json (READ ONLY for ownership/contract check)",
+    "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/002-febe-gem-cutter-multiple-stones/l3.json (READ ONLY; canonical requirement)",
+    "VERIFIED_SOURCE_PATHS_TO_BE_FILLED_AFTER_LOCAL_AUDIT (no invented crate/file paths)",
+    "implementation/evidence/M07/OM9-L4-04-16-002-02/*",
+    "tests/fixtures/m07/* (self-authored; proposed destination, create only after repo layout audit)"
+  ],
+  "automated_tests": [
+    "Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count.",
+    "Invalid input & OCCT failure: assert before/after document hash equality and no resource leak.",
+    "Expected numerical tolerances must come from signed G00 fixtures, not invented constants."
+  ],
+  "manual_steps_and_expected": [
+    "Open real Windows OpenMatrix9 build at tested SHA; invoke gvAzureCutter (multiple stones) through Cutters or registered contextual F6 entry. Expected: enabled only for valid typed selection.",
+    "Apply valid parameters (Danh sách GemRef không rỗng, mỗi gem có transform, tùy chọn chỉnh nhóm, batch preview mode All/One.) and move controls. Expected: preview changes deterministically; geometry uncommitted and inputs visible.",
+    "Click Cancel: expected identical document IDs, feature DAG, visibility and body count; repeat then Commit: exactly one undoable transaction.",
+    "Perform Undo/Redo then Save/Open; expected stable IDs, geometry and controls, no silent detach or success toast on errors.",
+    "Exercise failure case (Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count.); expected actionable warning and no partial write. Record tester/date/OS/GPU/screenshots/video/actual results."
+  ],
+  "fixture_ids": [
+    "M07-FX-04-16-002",
+    "M07-NEG-04-16-002",
+    "M07-FX-ROLLBACK"
+  ],
+  "pass_criteria": [
+    "Evidence outputs exist, include exact commands + exit codes and expected/actual assertions.",
+    "No silent no-op, no geometrical success by renderer only, and no rollback/Undo/Redo regressions.",
+    "Upstream source checked locally, pin SHA and actual touched files recorded, dependencies PASS.",
+    "Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count.",
+    "For FEBE: manual execution and independent human acceptance required before DONE."
+  ],
+  "release_evidence": [
+    "source_sha",
+    "tested_sha",
+    "timestamp_utc",
+    "os_arch_gpu",
+    "rust_toolchain",
+    "occt_version_build_hash",
+    "commands_exit_codes_logs",
+    "fixture_ids_units_tolerances",
+    "expected_actual_numeric_diffs",
+    "screenshot_video_paths_if_febe",
+    "tester",
+    "reviewer",
+    "known_limitations",
+    "regression_result"
+  ],
+  "failure_policy": "BLOCKED if G00/E11/source/fixture absent; FAIL on invalid geometry, wrong units, corruption, lost references or silent success; never mark DONE without evidence.",
+  "task_relpath": "planning/M07/04-16-002/02-02-domain-integration/l4.json",
+  "manual_command_verified_in_pdf": "gvAzureCutter",
+  "manual_command_verification_status": "EXACT_COMMAND_IN_MATRIX8_BOOK2",
+  "id": "OM9-L4-04-16-002-02",
+  "level": "L4",
+  "task_role": "IMPLEMENT",
+  "overlay_task_id": "OM9-L4-04-16-002-02",
+  "overlay_work_kind": "OWNER_INTEGRATION",
+  "owner_l2_id": "OM9-L2-04-16",
+  "depends_on_l4_ids": [
+    "OM9-L4-04-16-001-02",
+    "OM9-L4-04-16-002-01"
+  ],
+  "reference_policy": "Planning-only record: no build, runtime or geometry evidence is claimed. Anchor supplements are added by tools/apply_matrix_ref_supplements.py.",
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Phân bổ cutter cho nhóm đá: mỗi viên giữ cutter riêng hoặc dùng chung theo policy đã ghi.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-07",
+        "kind": "rhino5_core_chapter",
+        "title": "NURBS editing và modeling",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "53-67 / in 45-59; 69-71 / in 61-63; 73-91 / in 65-83",
+        "capability_ids": [
+          "RCORE-07.C01",
+          "RCORE-07.C02",
+          "RCORE-07.C03",
+          "RCORE-07.C04",
+          "RCORE-07.C05",
+          "RCORE-07.C06",
+          "RCORE-07.C07",
+          "RCORE-07.C08",
+          "RCORE-07.C09",
+          "RCORE-07.C10",
+          "RCORE-07.C11",
+          "RCORE-07.C12"
+        ],
+        "fixture_ids": [
+          "RCORE-07.T01",
+          "RCORE-07.T03",
+          "RCORE-07.T05",
+          "RCORE-07.T07",
+          "RCORE-07.T08",
+          "RCORE-07.T10"
+        ],
+        "official_help": [
+          {
+            "label": "PointsOn / PointsOff",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/pointson.htm"
+          },
+          {
+            "label": "Rebuild",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuild.htm"
+          },
+          {
+            "label": "FitCrv",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/fitcrv.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      },
+      {
+        "anchor_id": "RCORE-06",
+        "kind": "rhino5_core_chapter",
+        "title": "Selection, layer, group, block và Worksession",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "33-38 / in 25-30; 97-98 / in 89-90",
+        "capability_ids": [
+          "RCORE-06.C01",
+          "RCORE-06.C02",
+          "RCORE-06.C03",
+          "RCORE-06.C04",
+          "RCORE-06.C05",
+          "RCORE-06.C06",
+          "RCORE-06.C07",
+          "RCORE-06.C08",
+          "RCORE-06.C09",
+          "RCORE-06.C10"
+        ],
+        "fixture_ids": [
+          "RCORE-06.T01",
+          "RCORE-06.T03",
+          "RCORE-06.T04",
+          "RCORE-06.T06",
+          "RCORE-06.T08",
+          "RCORE-06.T10"
+        ],
+        "official_help": [
+          {
+            "label": "Selection commands / sub-object selection",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/selection_commands.htm"
+          },
+          {
+            "label": "Layer",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/layer.htm"
+          },
+          {
+            "label": "Block",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/block.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-cutter-forms",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix90 (VB6 EXE)",
+        "path": "Matrix90/frmICBuilderCutter.frm",
+        "root": "ref/matrix/vb6-lite",
+        "unit": "frmICBuilderCutter* panels",
+        "role_for_this_task": "multi-stone cutter allocation",
+        "source_role": "legacy cutter builder panels",
+        "detail": "Legacy cutter panels: frmICBuilderCutter, frmICBuilderCutterLibrary, frmICBuilderBezelCutter, frmICBuilderMicroProngCutter, frmICBuilderBrightCutter, frmICBuilderBrightCutChannel, frmBuilderBooleanBuilder.",
+        "observed_identifiers": [
+          "frmICBuilderCutter",
+          "frmICBuilderCutterLibrary",
+          "frmICBuilderBezelCutter",
+          "frmICBuilderMicroProngCutter",
+          "frmICBuilderBrightCutter",
+          "frmICBuilderBrightCutChannel",
+          "frmBuilderBooleanBuilder"
+        ],
+        "verification_state": "IDENTIFIER_INDEXED"
+      },
+      {
+        "anchor_id": "mx-gem-instance",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/MatrixData/MatrixGemInstance.cs",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "MatrixGemInstance(List) / MatrixGemBlock(List)",
+        "role_for_this_task": "gem instance group that the cutter targets",
+        "source_role": "typed gem instance records",
+        "detail": "Typed gem records carried in document data: MatrixGemInstance, MatrixGemInstanceList, MatrixGemBlock, MatrixGemBlockList.",
+        "observed_identifiers": [
+          "MatrixGemInstance",
+          "MatrixGemInstanceList",
+          "MatrixGemBlock",
+          "MatrixGemBlockList"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      }
+    ],
+    "manual_reference_sheets": [
+      {
+        "anchor_id": "mx-manual-gem-cutter",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 2",
+        "pages": "274-279",
+        "section": "Gem Cutter",
+        "topic": "Gem Cutter options for one or many stones",
+        "sheet_id": "m8book2__p274-279__gem-cutter",
+        "path": "OM9_Milestones/M07 - Cutters and Manufacturing Validation/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/reference/text/m8book2__p274-279__gem-cutter.md",
+        "role_for_this_task": "Gem Cutter multiple-stones behaviour",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      }
+    ],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "IMPLEMENT",
+    "role_label_on_record": "IMPLEMENT",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-04-16",
+    "goal": "Áp dụng cutter từ owner 04-16-001 cho từng GemRef, dedup thông minh, thu hồi toàn bộ batch nếu một phần thất bại trong chế độ atomic; One preview chỉ render 1, không giảm số lượng commit.",
+    "algorithm_on_record": "BRep truth stays in OCCT, never GPU/render mesh. Document EntityId/FeatureId/LayerId/InstanceId stability, world units mm at manufacturing export. No unapproved geometry tweak (move/scale) to force Boolean; warn and block instead. Preview/cancel cannot mutate canonical document. One commit = one undoable transaction. Unexpected naked edges/non-manifold/crossing surfaces fail pre-export validation. Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count. None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "adapt the pinned algorithm, do not copy it; licence scope comes from M00",
+    "sketch": "// Gem Cutter Multiple Stones — Nối dịch vụ/thuật toán owner hiện hữu và geometry safety\n// ROLE: IMPLEMENT - skeleton only; body is deliberately unimplemented.\n\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n///\n/// Owner: OM9-L2-04-16\n/// Positive fixture: Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count.\n/// Negative fixture: invalid, empty or degenerate input\n///\n/// Algorithm notes carried from the planning record:\n//   1. BRep truth stays in OCCT, never GPU/render mesh. Document EntityId/FeatureId/LayerId/InstanceId stability, world units mm at manufacturing export. No unapproved geometry tweak (move/scale) to force Boolean\n//   2. warn and block instead. Preview/cancel cannot mutate canonical document. One commit = one undoable transaction. Unexpected naked edges/non-manifold/crossing surfaces fail pre-export validation. Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count. None\n//   3. --- bước thuật toán domain đã trích (phải đo lại hằng số trước khi dùng) ---\n//   4. D1. Chọn cutter từ thư viện (dữ liệu), hoặc chọn một cutter đã có trong document.\n//   5. D2. Áp phép trừ bằng boolean của nhân hình học, không phải bằng thuật toán của Matrix.\n//   6. D3. Kiểm tra kết quả: phải sạch (không naked edge, hướng solid đúng); nếu không sạch thì không được coi là thành công.\npub fn om9_l4_04_16_002_02(/* typed inputs from the contract */) -> Result</* Output */, Error> {\n    // TODO(OM9-L4-04-16-002-02): implement exactly one owner's behaviour here.\n    //   1. validate typed inputs; reject empty/degenerate input with a typed error.\n    //   2. do the work through the owning kernel/domain service, never a second engine.\n    //   3. return a typed result; never report success on a partial write.\n    unimplemented!(\"OM9-L4-04-16-002-02 not implemented\")\n}\n\n#[cfg(test)]\nmod tests {\n    // Positive: Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count.\n    #[test]\n    fn positive_om9_l4_04_16_002_02() {\n        // RED until implemented: assert the measured oracle, not a smoke check.\n        // Oracle: Batch 1/12/100 gems, đảo selection, gems duplicate/locked, partial failure rollback, placement và group count.\n        unimplemented!()\n    }\n\n    // Negative: invalid, empty or degenerate input\n    #[test]\n    fn negative_om9_l4_04_16_002_02() {\n        // Oracle: No geometry / empty selection\n        // Assert a typed error and unchanged state (no partial document mutation).\n        unimplemented!()\n    }\n}",
+    "domain_algorithm_reference": {
+      "note_id": "algo.cutter.is-library-data",
+      "stage": "8. Cutter - PHÁT HIỆN: không có thuật toán cutter trong mã",
+      "why_for_this_task": "Cutter nhiều viên: cùng đường đi dữ liệu-thư-viện rồi boolean, chỉ khác số đối tượng bị trừ và việc kiểm sạch phải chạy trên kết quả gộp.",
+      "om9_backend": "OCCT cho boolean trừ; pure Rust cho việc chọn cutter, kiểm tra và lưu vết",
+      "steps_cited": [1, 3, 4],
+      "algorithm_steps": [
+        "C1. Chọn cutter từ thư viện (dữ liệu), hoặc chọn một cutter đã có trong document.",
+        "C3. Áp phép trừ bằng boolean của nhân hình học, không phải bằng thuật toán của Matrix.",
+        "C4. Kiểm tra kết quả: phải sạch (không naked edge, hướng solid đúng); nếu không sạch thì không được coi là thành công."
+      ],
+      "source_file": "MatrixData/MatrixBoolean.cs",
+      "source_methods": ["MatrixBoolean"],
+      "boundaries_carried": [
+        "KẾT LUẬN NÀY LÀ ÂM TÍNH: không tìm thấy thuật toán cutter trong mã, nhưng tôi chưa mở thư viện dữ liệu cutter để xem định dạng thật của biên dạng.",
+        "Chưa đọc lệnh xem trước trong thư mục Test, nên cách áp cutter tương tác là chưa rõ.",
+        "Dung sai của phép boolean là UNKNOWN - không thấy trong các tệp đã đọc.",
+        "Vì cutter là dữ liệu, OM9 KHÔNG thể 'port thuật toán cutter'; OM9 phải tự định nghĩa định dạng cutter của mình và dùng OCCT để trừ. Đây là điểm cần quyết định sản phẩm, không phải việc chép mã.",
+        "Chưa chứng minh gì về runtime."
+      ],
+      "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
+    }
+  },
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}

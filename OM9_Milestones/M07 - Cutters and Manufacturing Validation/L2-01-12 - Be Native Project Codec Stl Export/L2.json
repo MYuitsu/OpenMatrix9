@@ -1,0 +1,79 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-12",
+  "milestone": "M07",
+  "title": "Be Native Project Codec Stl Export",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Save/load native document đầy đủ geometry/history/layer/gem instance; xuất STL watertight và báo lỗi hình học.",
+  "ownership": {
+    "owner_milestone": "M01",
+    "owner_module_record": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L2.json",
+    "m07_role": "execution host for the M07-targeted child L3 only",
+    "note": "This M07 copy exists so the E12 queue is self-contained. L2-01-12 is owned and specified in M01; M07 only executes its target_milestone=M07 child L3. Do not diverge the two copies: edit the M01 record and re-derive here."
+  },
+  "source_original_path": "specs/01-ms01-workbench-shell/05-be-native-project-codec-stl-export/",
+  "definition": {
+    "module_id": "OM9-L2-01-12",
+    "milestone_id": "M01",
+    "module_path": "specs/01-ms01-workbench-shell/05-be-native-project-codec-stl-export/",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "legacy_v07_path": "specs/01-cad-base/12-be-native-project-codec-stl-export/",
+    "scope": "Save/load native document đầy đủ geometry/history/layer/gem instance; xuất STL watertight và báo lỗi hình học.",
+    "exclude": "Không xây thêm 3DM reader trong codec native; không làm STEP/IGES ở giai đoạn này.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          79,
+          86
+        ],
+        "pdf_pages_1based": [
+          89,
+          96
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          48,
+          56
+        ],
+        "pdf_pages_1based": [
+          58,
+          66
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-03"
+    ],
+    "downstream_contracts": [
+      "scene-save-and-stl"
+    ],
+    "early_slices": [
+      "M01: native snapshot, empty/fixture document save-load and versioned codec envelope.",
+      "M07: complete reliable STL export (same canonical owner) plus geometry validation."
+    ],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 10,
+    "l3_catalog_path": "specs/01-ms01-workbench-shell/05-be-native-project-codec-stl-export/l3-index.json",
+    "l4_execution_manifest": "planning/M07/M07_L4_EXECUTION_MANIFEST.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-12-008",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/l3.json"
+    }
+  ],
+  "m07_delegated_l3_count": 1,
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m07": 4
+}

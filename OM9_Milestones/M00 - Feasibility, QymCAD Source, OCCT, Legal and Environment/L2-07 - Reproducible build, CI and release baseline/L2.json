@@ -1,0 +1,45 @@
+{
+  "level": "L2",
+  "id": "OM9-M00-L2-07",
+  "milestone": "M00",
+  "title": "Reproducible build, CI and release baseline",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+  "definition": {
+    "module_id": "OM9-M00-L2-07",
+    "title": "Reproducible build, CI and release baseline",
+    "gate_id": "G00-07",
+    "role": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+    "l3_items": [
+      {
+        "l3_id": "OM9-M00-L3-07-01",
+        "title": "Windows 10/11 x64 baseline",
+        "l4_count": 4
+      },
+      {
+        "l3_id": "OM9-M00-L3-07-02",
+        "title": "Linux optional & packaged OCCT",
+        "l4_count": 3
+      },
+      {
+        "l3_id": "OM9-M00-L3-07-03",
+        "title": "Continuous verification and gate handoff",
+        "l4_count": 4
+      }
+    ]
+  },
+  "children_l3": [
+    {
+      "id": "OM9-M00-L3-07-01",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-07-02",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-02 - Linux optional & packaged OCCT/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-07-03",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-03 - Continuous verification and gate handoff/l3.json"
+    }
+  ]
+}

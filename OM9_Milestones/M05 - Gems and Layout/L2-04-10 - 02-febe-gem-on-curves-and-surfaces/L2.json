@@ -1,0 +1,110 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-10",
+  "milestone": "M05",
+  "title": "02-febe-gem-on-curves-and-surfaces",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Gems on Curve/Surface, spacing, orientation, history",
+  "source_original_path": "specs/05-ms05-gems-and-layout/02-febe-gem-on-curves-and-surfaces/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-10",
+    "milestone_id": "M05",
+    "module_path": "specs/05-ms05-gems-and-layout/02-febe-gem-on-curves-and-surfaces/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/10-febe-gem-on-curves-and-surfaces/",
+    "scope": "Gems on Curve/Surface, spacing, orientation, history",
+    "exclude": "Dùng arc-length / surface evaluator chung.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          403,
+          434
+        ],
+        "pdf_pages_1based": [
+          177,
+          208
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-04-09",
+      "OM9-L2-02-04",
+      "OM9-L2-02-05",
+      "OM9-L2-01-04"
+    ],
+    "downstream_contracts": [
+      "gem-placement-curves-surfaces"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M05-UI",
+    "l3_count": 11,
+    "l3_catalog_path": "specs/05-ms05-gems-and-layout/02-febe-gem-on-curves-and-surfaces/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-10-001",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-001 - Gem On Curve Basic/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-002",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-002 - Gem On Curve Advanced/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-003",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-003 - Gem Count On Curve/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-004",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-004 - Gem List On Curve/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-005",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-005 - Gem On Curve Multi/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-006",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-006 - Gem Profile Curve And Guides/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-007",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-007 - Gem On Surface/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-008",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-008 - Gem Follow Underlying Curve/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-009",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-009 - Gem Flow Placement/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-010",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-010 - Gem Splop On Surface/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-10-011",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-011 - Gem To Curve Surface History Links/l3.json",
+      "target_implementation_milestone": "M05"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m05": 33
+}

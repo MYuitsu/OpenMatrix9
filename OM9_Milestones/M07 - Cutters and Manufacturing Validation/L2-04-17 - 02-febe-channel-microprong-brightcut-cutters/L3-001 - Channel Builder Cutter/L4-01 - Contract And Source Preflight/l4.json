@@ -1,0 +1,373 @@
+{
+  "schema_version": "om9.m07.l4.v1",
+  "task_id": "OM9-L4-04-17-001-01",
+  "parent_l3_id": "OM9-L3-04-17-001",
+  "owner_module_id": "OM9-L2-04-17",
+  "parent_capability_id": "cap.04-17.channel-builder-cutter",
+  "milestone_id": "M07",
+  "target_milestone": "M07",
+  "execution_stage": "E12",
+  "task_name": "Khóa giao diện dữ liệu, nguồn và ranh giới module",
+  "title": "Channel Builder Cutter — Khóa giao diện dữ liệu, nguồn và ranh giới module",
+  "tag": "febe",
+  "work_kind": "SOURCE_AND_CONTRACT",
+  "phase": 1,
+  "status": "PLANNED_NOT_EXECUTED",
+  "readiness": "BLOCKED_BY_G00_E11_AND_LOCAL_SOURCE",
+  "source_repo": "https://github.com/QymIs-Tech/QymCAD",
+  "source_revision_candidate": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "source_paths_verified_locally": [],
+  "reuse_decision": "PENDING_LOCAL_SOURCE_AUDIT",
+  "estimated_scope": null,
+  "origin_manual_refs": [
+    {
+      "manual_id": "book2",
+      "filename": "matrix_8_manual_book2.pdf",
+      "printed_pages": [
+        506,
+        508
+      ],
+      "pdf_pages_1based": [
+        280,
+        282
+      ],
+      "precision": "verified_pdf_text_in_current_session"
+    }
+  ],
+  "purpose": "Làm rõ ordering, open vs closed curve, constraints liên tục mặt, profile points, zero-span, mirror A/B; không cho self crossing im lặng.",
+  "inputs": [
+    "Canonical L3: specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/001-febe-channel-builder-cutter/l3.json",
+    "Owner module: specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/module.json",
+    "specs/00-contracts/MATRIX9_FIRST_CONTRACTS.md",
+    "specs/00-contracts/MATRIX_WORKBENCH_UI.md",
+    "planning/E12.md",
+    "planning/GATES_AND_EVIDENCE.md",
+    "planning/DEPENDENCY_AND_RELEASE_POLICY.md",
+    "planning/M00/SOURCE_AUDIT_V012.md",
+    "QymCAD checkout at pinned source SHA; local exists only if verified during execution",
+    "Dãy GemRef được sắp theo curve/rail, profiles đầu-cuối, Surface to Attach optional, end orientation A/B."
+  ],
+  "expected_domain_inputs": "Dãy GemRef được sắp theo curve/rail, profiles đầu-cuối, Surface to Attach optional, end orientation A/B.",
+  "outputs": [
+    "implementation/evidence/M07/OM9-L4-04-17-001-01/source-audit.md",
+    "implementation/evidence/M07/OM9-L4-04-17-001-01/contract-review.md"
+  ],
+  "api_contract_and_callers": [
+    "Caller capability: cap.04-17.channel-builder-cutter; owner OM9-L2-04-17.",
+    "Related modules: OM9-L2-04-16, OM9-L2-04-15.",
+    "Final source-level function names must be pinned from local checkout before code; candidates are NOT claims.",
+    "Canonical geometry owner is OM9-L2-01-10; F6/menu/builder must call shared service not implement BRep/Boolean themselves."
+  ],
+  "steps": [
+    "Đối chiếu manual đúng từng trang và nội dung L3; ghi điểm lệch/version giới hạn.",
+    "Chỉ bắt đầu khi G00 PASS có reviewer và E01–E11 PASS; checkout QymCAD pinned SHA, kiểm AGENTS/rules, licenses và local source paths.",
+    "Lấy source code thật bằng ripgrep/cargo metadata; ghi file/struct/function và loại REUSE/ADAPT/ADD, không đoán API path.",
+    "Viết đề xuất request/response/errors, units, ownership, transaction, feature IDs, invariants và public boundary; đặt contract ở owner L2.",
+    "Chạy validation contract/smoke hiện có; ghi BLOCKED_CONTRACT nếu phụ thuộc chưa thực sự có."
+  ],
+  "preconditions": [
+    "G00-01 .. G00-07 PASS + reviewer/license sign-off",
+    "E01..E11 PASS with evidence; E11 source contracts available",
+    "Local QymCAD checkout, pinned SHA verified; OCCT/FFI build/golden fixtures reproducible",
+    "M07 source/legal and numeric tolerances approved before implementation"
+  ],
+  "depends_on_task_ids": [],
+  "depends_on_module_ids": [
+    "OM9-L2-04-16",
+    "OM9-L2-04-15"
+  ],
+  "geometry_invariants": [
+    "BRep truth stays in OCCT, never GPU/render mesh.",
+    "Document EntityId/FeatureId/LayerId/InstanceId stability, world units mm at manufacturing export.",
+    "No unapproved geometry tweak (move/scale) to force Boolean; warn and block instead.",
+    "Preview/cancel cannot mutate canonical document. One commit = one undoable transaction.",
+    "Unexpected naked edges/non-manifold/crossing surfaces fail pre-export validation.",
+    "Row 2/5/20 stones, curvature high, mismatch orientation, open/closed curve, no-rail; check seam/shape validity."
+  ],
+  "error_cases": [
+    "No geometry / empty selection",
+    "Invalid or degenerate BRep",
+    "Unsupported/unknown unit or tolerance",
+    "Ambiguous/stale EntityId",
+    "Locked/hidden/wrong-type target",
+    "OCCT/FFI failure, cancellation, output write failure",
+    "Missing validated source or dependency: BLOCKED, not silent stub"
+  ],
+  "files_expected_to_touch": [
+    "specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/module.json (READ ONLY for ownership/contract check)",
+    "specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/001-febe-channel-builder-cutter/l3.json (READ ONLY; canonical requirement)",
+    "VERIFIED_SOURCE_PATHS_TO_BE_FILLED_AFTER_LOCAL_AUDIT (no invented crate/file paths)",
+    "implementation/evidence/M07/OM9-L4-04-17-001-01/*",
+    "tests/fixtures/m07/* (self-authored; proposed destination, create only after repo layout audit)"
+  ],
+  "automated_tests": [
+    "Validate schema & invariants for gvChannelBuilder: invalid/null inputs and unit types; do not claim actual code tests unless run.",
+    "Review API owner/caller graph against canonical capability map."
+  ],
+  "manual_steps_and_expected": [
+    "Open real Windows OpenMatrix9 build at tested SHA; invoke gvChannelBuilder through Cutters or registered contextual F6 entry. Expected: enabled only for valid typed selection.",
+    "Apply valid parameters (Dãy GemRef được sắp theo curve/rail, profiles đầu-cuối, Surface to Attach optional, end orientation A/B.) and move controls. Expected: preview changes deterministically; geometry uncommitted and inputs visible.",
+    "Click Cancel: expected identical document IDs, feature DAG, visibility and body count; repeat then Commit: exactly one undoable transaction.",
+    "Perform Undo/Redo then Save/Open; expected stable IDs, geometry and controls, no silent detach or success toast on errors.",
+    "Exercise failure case (Row 2/5/20 stones, curvature high, mismatch orientation, open/closed curve, no-rail; check seam/shape validity.); expected actionable warning and no partial write. Record tester/date/OS/GPU/screenshots/video/actual results."
+  ],
+  "fixture_ids": [
+    "M07-FX-04-17-001",
+    "M07-NEG-04-17-001",
+    "M07-FX-ROLLBACK"
+  ],
+  "pass_criteria": [
+    "Evidence outputs exist, include exact commands + exit codes and expected/actual assertions.",
+    "No silent no-op, no geometrical success by renderer only, and no rollback/Undo/Redo regressions.",
+    "Upstream source checked locally, pin SHA and actual touched files recorded, dependencies PASS.",
+    "Row 2/5/20 stones, curvature high, mismatch orientation, open/closed curve, no-rail; check seam/shape validity.",
+    "For FEBE: manual execution and independent human acceptance required before DONE."
+  ],
+  "release_evidence": [
+    "source_sha",
+    "tested_sha",
+    "timestamp_utc",
+    "os_arch_gpu",
+    "rust_toolchain",
+    "occt_version_build_hash",
+    "commands_exit_codes_logs",
+    "fixture_ids_units_tolerances",
+    "expected_actual_numeric_diffs",
+    "screenshot_video_paths_if_febe",
+    "tester",
+    "reviewer",
+    "known_limitations",
+    "regression_result"
+  ],
+  "failure_policy": "BLOCKED if G00/E11/source/fixture absent; FAIL on invalid geometry, wrong units, corruption, lost references or silent success; never mark DONE without evidence.",
+  "task_relpath": "planning/M07/04-17-001/01-01-contract-source-preflight/l4.json",
+  "manual_command_verified_in_pdf": "gvChannelBuilder",
+  "manual_command_verification_status": "EXACT_COMMAND_IN_MATRIX8_BOOK2",
+  "id": "OM9-L4-04-17-001-01",
+  "level": "L4",
+  "task_role": "CONTRACT_FIXTURE",
+  "overlay_task_id": "OM9-L4-04-17-001-01",
+  "overlay_work_kind": "SOURCE_AND_CONTRACT",
+  "owner_l2_id": "OM9-L2-04-17",
+  "depends_on_l4_ids": [],
+  "reference_policy": "Planning-only record: no build, runtime or geometry evidence is claimed. Anchor supplements are added by tools/apply_matrix_ref_supplements.py.",
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Channel cutter qua dãy đá: profile và chiều sâu phải đo; test dãy đá cong.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-07",
+        "kind": "rhino5_core_chapter",
+        "title": "NURBS editing và modeling",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "53-67 / in 45-59; 69-71 / in 61-63; 73-91 / in 65-83",
+        "capability_ids": [
+          "RCORE-07.C01",
+          "RCORE-07.C02",
+          "RCORE-07.C03",
+          "RCORE-07.C04",
+          "RCORE-07.C05",
+          "RCORE-07.C06",
+          "RCORE-07.C07",
+          "RCORE-07.C08",
+          "RCORE-07.C09",
+          "RCORE-07.C10",
+          "RCORE-07.C11",
+          "RCORE-07.C12"
+        ],
+        "fixture_ids": [
+          "RCORE-07.T01",
+          "RCORE-07.T03",
+          "RCORE-07.T05",
+          "RCORE-07.T07",
+          "RCORE-07.T08",
+          "RCORE-07.T10"
+        ],
+        "official_help": [
+          {
+            "label": "PointsOn / PointsOff",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/pointson.htm"
+          },
+          {
+            "label": "Rebuild",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuild.htm"
+          },
+          {
+            "label": "FitCrv",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/fitcrv.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-cutter-forms",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix90 (VB6 EXE)",
+        "path": "Matrix90/frmICBuilderCutter.frm",
+        "root": "ref/matrix/vb6-lite",
+        "unit": "frmICBuilderCutter* panels",
+        "role_for_this_task": "channel builder cutter",
+        "source_role": "legacy cutter builder panels",
+        "detail": "Legacy cutter panels: frmICBuilderCutter, frmICBuilderCutterLibrary, frmICBuilderBezelCutter, frmICBuilderMicroProngCutter, frmICBuilderBrightCutter, frmICBuilderBrightCutChannel, frmBuilderBooleanBuilder.",
+        "observed_identifiers": [
+          "frmICBuilderCutter",
+          "frmICBuilderCutterLibrary",
+          "frmICBuilderBezelCutter",
+          "frmICBuilderMicroProngCutter",
+          "frmICBuilderBrightCutter",
+          "frmICBuilderBrightCutChannel",
+          "frmBuilderBooleanBuilder"
+        ],
+        "verification_state": "IDENTIFIER_INDEXED"
+      },
+      {
+        "anchor_id": "mx-prong-builders",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix90 (VB6 EXE)",
+        "path": "Matrix90/frmICBuilderProngEditor.frm",
+        "root": "ref/matrix/vb6-lite",
+        "unit": "frmICBuilderProng* panels",
+        "role_for_this_task": "frmICBuilderChannel from M06",
+        "source_role": "legacy prong builder and editor panels",
+        "detail": "Legacy prong panels: frmICBuilderProngEditor, frmICBuilderProngAdder, frmICBuilderProngOnSurface, frmICBuilderPaveProng, frmICBuilderMicroProngCutter, frmICBuilderChannel, frmICBuilderBrightCutChannel, frmICBuilderMetalPiece, with modPaveProng.bas and modIC* modules carrying the procedures.",
+        "observed_identifiers": [
+          "frmICBuilderProngEditor",
+          "frmICBuilderProngAdder",
+          "frmICBuilderProngOnSurface",
+          "frmICBuilderPaveProng",
+          "frmICBuilderMicroProngCutter",
+          "frmICBuilderChannel",
+          "frmICBuilderBrightCutChannel",
+          "frmICBuilderMetalPiece",
+          "modPaveProng"
+        ],
+        "verification_state": "IDENTIFIER_INDEXED"
+      }
+    ],
+    "manual_reference_sheets": [
+      {
+        "anchor_id": "mx-manual-channel-builder",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 2",
+        "pages": "280-282",
+        "section": "Channel Builder",
+        "topic": "channel cutter through a line of gems",
+        "sheet_id": "m8book2__p280-282__channel-builder",
+        "path": "OM9_Milestones/M07 - Cutters and Manufacturing Validation/L2-04-17 - 02-febe-channel-microprong-brightcut-cutters/L3-001 - Channel Builder Cutter/reference/text/m8book2__p280-282__channel-builder.md",
+        "role_for_this_task": "Channel Builder cutter through a gem line",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      }
+    ],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "CONTRACT_TEST",
+    "role_label_on_record": "CONTRACT_FIXTURE",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-04-17",
+    "goal": "Làm rõ ordering, open vs closed curve, constraints liên tục mặt, profile points, zero-span, mirror A/B; không cho self crossing im lặng.",
+    "algorithm_on_record": "BRep truth stays in OCCT, never GPU/render mesh. Document EntityId/FeatureId/LayerId/InstanceId stability, world units mm at manufacturing export. No unapproved geometry tweak (move/scale) to force Boolean; warn and block instead. Preview/cancel cannot mutate canonical document. One commit = one undoable transaction. Unexpected naked edges/non-manifold/crossing surfaces fail pre-export validation. Row 2/5/20 stones, curvature high, mismatch orientation, open/closed curve, no-rail; check seam/shape validity. None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "the fixture is authored data; upstream code is read, never executed as proof",
+    "sketch": "// Channel Builder Cutter — Khóa giao diện dữ liệu, nguồn và ranh giới module\n// ROLE: CONTRACT_TEST - freeze the contract, then write a test that fails first.\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n// Owner: OM9-L2-04-17\n//\n// 1. Freeze the typed signature and the error enum in the owner crate.\n// 2. Write the fixture harness for M07-FX-04-17-001:\n//      input:  Validate schema & invariants for gvChannelBuilder: invalid/null inputs and unit types; do not claim actual code tests unless run.\n//      expect: Validate schema & invariants for gvChannelBuilder: invalid/null inputs and unit types; do not claim actual code tests unless run.\n//      negative input: invalid, empty or degenerate input\n//      negative expect: No geometry / empty selection\n// 3. Run it: it must fail for the right reason (missing behaviour), not a compile accident.\n// 4. Only then hand the frozen type to the IMPLEMENT task of the same L3.\n\n#[test]\nfn om9_l4_04_17_001_01_contract_is_red_first() {\n    // Arrange: build the fixture input from authored data, not from the implementation.\n    // Act: call the frozen entry point.\n    // Assert: expected == actual for the positive fixture, and a typed error for the negative one.\n    // Record the failing output as the RED receipt for this task.\n    unimplemented!()\n}",
+    "domain_algorithm_reference": {
+      "note_id": "algo.cluster.halo.bezel",
+      "stage": "5/6. Halo, cluster, channel và bezel",
+      "why_for_this_task": "Channel builder cutter dùng mô hình kênh: profile chuẩn hoá vào hộp đơn vị, cắt hai tường, suy chiều cao mái rồi đặt sàn dưới đỉnh đúng GemSizeZ.",
+      "om9_backend": "pure Rust cho chọn cỡ đá, số viên và góc; OCCT cho dải kim loại, bezel và join",
+      "steps_cited": [7, 8],
+      "algorithm_steps": [
+        "H7. Dựng kênh kim loại: chuẩn hoá profile vào hộp đơn vị, scale theo bề rộng, cắt hai tường, suy chiều cao mái, đặt sàn dưới đỉnh đúng GemSizeZ, bo góc nếu đủ sâu.",
+        "H8. Dựng dải kim loại bằng cách cho các cột điểm điều khiển bám theo đường bao viên giữa và profile kênh."
+      ],
+      "source_file": "CS/CSBlocks/CSCluster.cs",
+      "source_methods": ["Update"],
+      "boundaries_carried": [
+        "Cluster KHÔNG có phép kiểm chồng lấn - chống chồng là do cấu trúc; nếu OM9 thêm phép kiểm thì hành vi sẽ khác Matrix.",
+        "Số viên phụ thuộc bề rộng kênh ở halo: đổi bề rộng kênh là đổi số đá. Đây là ghép nối có chủ ý, không phải lỗi.",
+        "Bảng 21 tên hình dạng và số curve của từng họ thì đọc được, nhưng HÌNH HỌC của từng curve offset theo chỉ số thì CHƯA xác minh đầy đủ.",
+        "Nội bộ offset curve theo hình dạng đá (trọng số blend, số cung) chỉ đọc được ở mức số curve và cách merge.",
+        "File preset halo (.hst) CHƯA mở, nên danh sách handle tuần tự hoá và đơn vị là UNKNOWN.",
+        "Công thức trọng lượng đá cho hình dạng không tròn CHƯA đọc.",
+        "Ý nghĩa chính xác các hàm trợ giúp dùng như hộp đen (định hướng 3 điểm, rail revolve gen, sweep, trim, blend) là UNKNOWN.",
+        "Chưa chứng minh gì về runtime."
+      ],
+      "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
+    }
+  },
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}

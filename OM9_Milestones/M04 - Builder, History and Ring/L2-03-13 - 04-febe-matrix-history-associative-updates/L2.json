@@ -1,0 +1,83 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-13",
+  "milestone": "M04",
+  "title": "04-febe-matrix-history-associative-updates",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "UI bật/tắt và chỉnh association của builder history",
+  "source_original_path": "specs/04-ms04-builder-history-ring/04-febe-matrix-history-associative-updates/module.json",
+  "definition": {
+    "module_id": "OM9-L2-03-13",
+    "milestone_id": "M04",
+    "module_path": "specs/04-ms04-builder-history-ring/04-febe-matrix-history-associative-updates/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "legacy_v07_path": "specs/03-matrix8-book1/13-febe-matrix-history-associative-updates/",
+    "scope": "UI bật/tắt và chỉnh association của builder history",
+    "exclude": "DAG/rebuild engine thuộc CAD Base.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          33,
+          43
+        ],
+        "pdf_pages_1based": [
+          43,
+          53
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-04",
+      "OM9-L2-03-11"
+    ],
+    "downstream_contracts": [
+      "matrix-history-controls"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M04-UI",
+    "l3_count": 6,
+    "l3_catalog_path": "specs/04-ms04-builder-history-ring/04-febe-matrix-history-associative-updates/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-13-001",
+      "file": "M04 - Builder, History and Ring/L2-03-13 - 04-febe-matrix-history-associative-updates/L3-001 - Matrix History Record Toggle/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-13-002",
+      "file": "M04 - Builder, History and Ring/L2-03-13 - 04-febe-matrix-history-associative-updates/L3-002 - Matrix History Update Toggle/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-13-003",
+      "file": "M04 - Builder, History and Ring/L2-03-13 - 04-febe-matrix-history-associative-updates/L3-003 - Matrix History Broken Link Report/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-13-004",
+      "file": "M04 - Builder, History and Ring/L2-03-13 - 04-febe-matrix-history-associative-updates/L3-004 - Matrix Clear Single Object History/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-13-005",
+      "file": "M04 - Builder, History and Ring/L2-03-13 - 04-febe-matrix-history-associative-updates/L3-005 - Edit Existing Builder By History/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-13-006",
+      "file": "M04 - Builder, History and Ring/L2-03-13 - 04-febe-matrix-history-associative-updates/L3-006 - History Commandline And Preview Status/l3.json",
+      "target_implementation_milestone": "M04"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m04": 40
+}

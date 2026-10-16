@@ -1,0 +1,99 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-14",
+  "milestone": "M06",
+  "title": "01-febe-head-and-bezel-brep-settings",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Head Builder, Bezel Builder với NURBS/BRep",
+  "source_original_path": "specs/06-ms06-settings-and-prongs/01-febe-head-and-bezel-brep-settings/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-14",
+    "milestone_id": "M06",
+    "module_path": "specs/06-ms06-settings-and-prongs/01-febe-head-and-bezel-brep-settings/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/14-febe-head-and-bezel-brep-settings/",
+    "scope": "Head Builder, Bezel Builder với NURBS/BRep",
+    "exclude": "T-Spline Bezel & ClayBezel thuộc 09 After.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          468,
+          497
+        ],
+        "pdf_pages_1based": [
+          242,
+          271
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-04-09",
+      "OM9-L2-01-09",
+      "OM9-L2-03-11"
+    ],
+    "downstream_contracts": [
+      "gem-settings-head-bezel"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M06-UI",
+    "l3_count": 9,
+    "l3_catalog_path": "specs/06-ms06-settings-and-prongs/01-febe-head-and-bezel-brep-settings/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-14-001",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-001 - Head Builder Basket/l3.json",
+      "target_implementation_milestone": "M06"
+    },
+    {
+      "id": "OM9-L3-04-14-002",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-002 - Head Builder Half Bezel Mode/l3.json",
+      "target_implementation_milestone": "M06"
+    },
+    {
+      "id": "OM9-L3-04-14-003",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-003 - Head Builder Prong Rail Level Edit/l3.json",
+      "target_implementation_milestone": "M06"
+    },
+    {
+      "id": "OM9-L3-04-14-004",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-004 - Bezel Builder Full/l3.json",
+      "target_implementation_milestone": "M06"
+    },
+    {
+      "id": "OM9-L3-04-14-005",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-005 - Bezel Builder Under Bezel And Gallery/l3.json",
+      "target_implementation_milestone": "M06"
+    },
+    {
+      "id": "OM9-L3-04-14-006",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-006 - Scallop Bezel Builder/l3.json",
+      "target_implementation_milestone": "M06"
+    },
+    {
+      "id": "OM9-L3-04-14-007",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-007 - Head Bezel Profile Browser/l3.json",
+      "target_implementation_milestone": "M06"
+    },
+    {
+      "id": "OM9-L3-04-14-008",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-008 - Head Bezel Girdle Seat Attachment/l3.json",
+      "target_implementation_milestone": "M06"
+    },
+    {
+      "id": "OM9-L3-04-14-009",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-009 - Head Bezel Geometry Validity And Update/l3.json",
+      "target_implementation_milestone": "M06"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m06": 36
+}

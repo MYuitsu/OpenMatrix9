@@ -1,0 +1,3216 @@
+{
+  "active_file_path": null,
+  "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+  "checks": [
+    "native New toolbar opens owned prompt preserves Line",
+    "native prompt Escape retains old document and draft",
+    "real Windows Save chooser Cancel preserves pending Line",
+    "native File menu Open Cancel preserves pending Line",
+    "native F6 New uses same owned prompt",
+    "native Discard replaces session only after button",
+    "real Windows Open chooser Cancel keeps fresh document",
+    "native CMD SaveAs uses real Windows chooser Cancel"
+  ],
+  "cmd": "Command: Line\nStart of line (BothSides=No): 0,0,0\nEnd of line (BothSides=No): 12,6,0\nCommand: Line\nStart of line (BothSides=No): 0,0,0\nCommand: Point\nLocation of point: 1,2,3\nCommand: SaveAs\nCommand: ",
+  "document": {
+    "context_revision": 1,
+    "current_layer": null,
+    "definitions": {},
+    "entities": {
+      "3d3e0e15-5166-4935-8905-186d7bf3ff60": {
+        "attributes": {
+          "color": null,
+          "layer": null,
+          "locked": false,
+          "selectable": true,
+          "visible": true
+        },
+        "attributes_revision": 1,
+        "generation": 1,
+        "geometry": {
+          "Point": [
+            1.0,
+            2.0,
+            3.0
+          ]
+        },
+        "geometry_revision": 1,
+        "id": "3d3e0e15-5166-4935-8905-186d7bf3ff60",
+        "label": "Point",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "epoch": 1,
+    "history": {
+      "recipes": {}
+    },
+    "id": "8c5cda46-59de-4680-b6ba-79e87fccb262",
+    "layer_order": [],
+    "layers": {},
+    "name": "Untitled",
+    "owner_session": "7a453e4c-2142-4d47-b604-455227c90cd2",
+    "page_unit": "Millimeter",
+    "results": {},
+    "revision": 2,
+    "session_generation": 1
+  },
+  "draft": "",
+  "file_operation_open": false,
+  "file_picker_receipts": [
+    {
+      "boundary": "same process/thread, direct owner, #32770 and exact title; WM_CLOSE; joined probe",
+      "close_posted": true,
+      "destroyed": true,
+      "elapsed_ms": 1225,
+      "observed": true,
+      "phase": "SavePath",
+      "pid": 56740,
+      "returned_cancel": true,
+      "ui_thread": 65284
+    },
+    {
+      "boundary": "same process/thread, direct owner, #32770 and exact title; WM_CLOSE; joined probe",
+      "close_posted": true,
+      "destroyed": true,
+      "elapsed_ms": 1061,
+      "observed": true,
+      "phase": "OpenPath",
+      "pid": 56740,
+      "returned_cancel": true,
+      "ui_thread": 65284
+    },
+    {
+      "boundary": "same process/thread, direct owner, #32770 and exact title; WM_CLOSE; joined probe",
+      "close_posted": true,
+      "destroyed": true,
+      "elapsed_ms": 1167,
+      "observed": true,
+      "phase": "SavePath",
+      "pid": 56740,
+      "returned_cancel": true,
+      "ui_thread": 65284
+    }
+  ],
+  "file_replay": [
+    {
+      "pointer_down": true,
+      "rect": [
+        301.0,
+        131.0,
+        323.0,
+        153.0
+      ],
+      "step": 11
+    },
+    {
+      "pointer_down": false,
+      "rect": [
+        301.0,
+        131.0,
+        323.0,
+        153.0
+      ],
+      "step": 12
+    },
+    {
+      "pointer_down": true,
+      "rect": [
+        349.0,
+        131.0,
+        371.0,
+        153.0
+      ],
+      "step": 16
+    },
+    {
+      "pointer_down": false,
+      "rect": [
+        349.0,
+        131.0,
+        371.0,
+        153.0
+      ],
+      "step": 17
+    },
+    {
+      "pointer_down": true,
+      "rect": [
+        2.0,
+        2.0,
+        23.15625,
+        19.0
+      ],
+      "step": 20
+    },
+    {
+      "pointer_down": false,
+      "rect": [
+        2.0,
+        2.0,
+        23.15625,
+        19.0
+      ],
+      "step": 21
+    },
+    {
+      "pointer_down": true,
+      "rect": [
+        23.0,
+        114.0,
+        51.34375,
+        131.0
+      ],
+      "step": 31
+    },
+    {
+      "pointer_down": false,
+      "rect": [
+        23.0,
+        114.0,
+        51.34375,
+        131.0
+      ],
+      "step": 32
+    },
+    {
+      "pointer_down": true,
+      "rect": [
+        650.59375,
+        519.0,
+        692.8125,
+        536.0
+      ],
+      "step": 34
+    },
+    {
+      "pointer_down": false,
+      "rect": [
+        650.59375,
+        519.0,
+        692.8125,
+        536.0
+      ],
+      "step": 35
+    },
+    {
+      "pointer_down": true,
+      "rect": [
+        2.0,
+        2.0,
+        23.15625,
+        19.0
+      ],
+      "step": 37
+    },
+    {
+      "pointer_down": false,
+      "rect": [
+        2.0,
+        2.0,
+        23.15625,
+        19.0
+      ],
+      "step": 38
+    },
+    {
+      "pointer_down": true,
+      "rect": [
+        9.0,
+        45.0,
+        60.96875,
+        62.0
+      ],
+      "step": 40
+    },
+    {
+      "pointer_down": false,
+      "rect": [
+        9.0,
+        45.0,
+        60.96875,
+        62.0
+      ],
+      "step": 41
+    }
+  ],
+  "limitations": [
+    "full Matrix9 UI acceptance pending",
+    "CAD native adapters pending",
+    "GPU geometry caching and performance acceptance pending",
+    "DPI/multi-monitor acceptance pending"
+  ],
+  "native_close_events": 0,
+  "objects": 1,
+  "passes": 58,
+  "scope": "owned_file_native_cancel_slice",
+  "screenshot": {
+    "path": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-close-native/workspace.png",
+    "sha256": "4c5131d7fe8041544db952e595005f95d639a93589e9c782d73b7673fca7e0ab",
+    "size": [
+      1600,
+      1000
+    ]
+  },
+  "screenshot_saved": true,
+  "undo": 1,
+  "view_rects": {
+    "Looking Down": [
+      300.0,
+      178.0,
+      649.0,
+      410.0
+    ],
+    "Perspective": [
+      951.0,
+      178.0,
+      649.0,
+      410.0
+    ],
+    "Side View": [
+      951.0,
+      590.0,
+      649.0,
+      410.0
+    ],
+    "Through Finger": [
+      300.0,
+      590.0,
+      649.0,
+      410.0
+    ]
+  },
+  "schema_version": 1,
+  "target": "OM9Standalone",
+  "status": "validated_owned_file_native_cancel_slice",
+  "goal_complete": false,
+  "harness": {
+    "path": "tools/validate_standalone_ui.py",
+    "sha256": "b7a79b7cb12358ae548010a95fa78ee7d14bef3be5d8e988ec3ef33f606ac353"
+  },
+  "timestamp": "2026-10-14T11:19:58+07:00",
+  "binary": {
+    "path": "standalone/target/release/om9.exe",
+    "sha256": "5b817d2115d812eaf94f56c579a928435e5e5be7be766c83d31dc6de4e245422"
+  },
+  "pe_imports": [
+    "KERNEL32.dll",
+    "USER32.dll",
+    "VCRUNTIME140.dll",
+    "advapi32.dll",
+    "api-ms-win-core-synch-l1-2-0.dll",
+    "api-ms-win-crt-heap-l1-1-0.dll",
+    "api-ms-win-crt-locale-l1-1-0.dll",
+    "api-ms-win-crt-math-l1-1-0.dll",
+    "api-ms-win-crt-runtime-l1-1-0.dll",
+    "api-ms-win-crt-stdio-l1-1-0.dll",
+    "api-ms-win-crt-string-l1-1-0.dll",
+    "bcryptprimitives.dll",
+    "combase.dll",
+    "dwmapi.dll",
+    "dxgi.dll",
+    "gdi32.dll",
+    "imm32.dll",
+    "kernel32.dll",
+    "ntdll.dll",
+    "ole32.dll",
+    "oleaut32.dll",
+    "opengl32.dll",
+    "setupapi.dll",
+    "shell32.dll",
+    "user32.dll",
+    "uxtheme.dll"
+  ],
+  "loaded_modules": [
+    "om9.exe",
+    "ntdll.dll",
+    "KERNEL32.DLL",
+    "KERNELBASE.dll",
+    "advapi32.dll",
+    "msvcrt.dll",
+    "sechost.dll",
+    "RPCRT4.dll",
+    "gdi32.dll",
+    "win32u.dll",
+    "gdi32full.dll",
+    "msvcp_win.dll",
+    "ucrtbase.dll",
+    "USER32.dll",
+    "ole32.dll",
+    "combase.dll",
+    "oleaut32.dll",
+    "shell32.dll",
+    "setupapi.dll",
+    "bcryptprimitives.dll",
+    "imm32.dll",
+    "dxgi.dll",
+    "opengl32.dll",
+    "dwmapi.dll",
+    "powrprof.dll",
+    "VCRUNTIME140.dll",
+    "uxtheme.dll",
+    "GLU32.dll",
+    "dxcore.dll",
+    "UMPDC.dll",
+    "uvh64.dll",
+    "MSCTF.dll",
+    "shcore.dll",
+    "kernel.appcore.dll",
+    "clbcatq.dll",
+    "dataexchange.dll",
+    "twinapi.appcore.dll",
+    "explorerframe.dll",
+    "SHLWAPI.dll",
+    "vulkan-1.dll",
+    "CFGMGR32.dll",
+    "windows.staterepositorycore.dll",
+    "directxdatabasehelper.dll",
+    "nvoglv64.dll",
+    "VERSION.dll",
+    "WTSAPI32.dll",
+    "CRYPT32.dll",
+    "SspiCli.dll",
+    "msasn1.dll",
+    "cryptnet.dll",
+    "cryptbase.dll",
+    "wldp.dll",
+    "drvstore.dll",
+    "devobj.dll",
+    "ntmarta.dll",
+    "WINTRUST.dll",
+    "imagehlp.dll",
+    "CRYPTSP.dll",
+    "rsaenh.dll",
+    "bcrypt.dll",
+    "nvgpucomp64.dll",
+    "WinTypes.dll",
+    "rometadata.dll",
+    "windows.storage.dll",
+    "profapi.dll",
+    "nvspcap64.dll",
+    "d3d12.dll",
+    "d3dcompiler_47.dll",
+    "WINSTA.dll",
+    "nvrtum64.dll",
+    "D3D12Core.dll",
+    "nvldumdx.dll",
+    "NvMemMapStoragex.dll",
+    "WINMM.dll",
+    "nvwgf2umx.dll",
+    "nvppex.dll",
+    "D3DSCache.dll",
+    "USERENV.dll",
+    "d3d10warp.dll",
+    "DispBroker.dll",
+    "nvapi64.dll",
+    "nvapi64_impl.dll",
+    "dcomp.dll",
+    "Microsoft.Internal.WarpPal.dll",
+    "textinputframework.dll",
+    "CoreMessaging.dll",
+    "CoreUIComponents.dll",
+    "comdlg32.dll",
+    "COMCTL32.dll",
+    "DUI70.dll",
+    "Comctl32.dll",
+    "DUser.dll",
+    "oleacc.dll",
+    "WindowsCodecs.dll",
+    "thumbcache.dll",
+    "TextShaping.dll",
+    "Windows.Globalization.dll",
+    "globinputhost.dll",
+    "Bcp47Langs.dll",
+    "PROPSYS.dll",
+    "XmlLite.dll",
+    "urlmon.dll",
+    "iertutil.dll",
+    "srvcli.dll",
+    "netutils.dll",
+    "virtdisk.dll",
+    "Windows.FileExplorer.Common.dll",
+    "apphelp.dll",
+    "NetworkExplorer.dll",
+    "Windows.System.Launcher.dll",
+    "Windows.StateRepositoryPS.dll",
+    "windows.staterepositoryclient.dll",
+    "LINKINFO.dll",
+    "Windows.Storage.Search.dll",
+    "icu.dll",
+    "StructuredQuery.dll",
+    "edputil.dll",
+    "uiautomationcore.dll",
+    "sxs.dll",
+    "atlthunk.dll",
+    "OneCoreUAPCommonProxyStub.dll",
+    "OneCoreCommonProxyStub.dll",
+    "windowsudk.shellcommon.dll",
+    "Windows.UI.dll",
+    "Windows.UI.Immersive.dll",
+    "Secur32.dll",
+    "samcli.dll",
+    "SAMLIB.dll",
+    "msIso.dll",
+    "policymanager.dll",
+    "coml2.dll",
+    "twinapi.dll",
+    "cldapi.dll",
+    "mssprxy.dll",
+    "FileSyncShell64.dll",
+    "WININET.dll",
+    "MPR.dll",
+    "NetworkItemFactory.dll",
+    "p9np.dll",
+    "drprov.dll",
+    "ntlanman.dll",
+    "davclnt.dll",
+    "wkscli.dll",
+    "cscapi.dll",
+    "dtsh.dll",
+    "FirewallAPI.dll",
+    "fwbase.dll",
+    "ASCSafeFolderShlExt.dll",
+    "VCRUNTIME140_1.dll",
+    "dlnashext.dll",
+    "PlayToDevice.dll",
+    "EhStorShell.dll",
+    "DevDispItemProvider.dll",
+    "FWPolicyIOMgr.dll",
+    "MMDevApi.dll",
+    "wpdshext.dll",
+    "gdiplus.dll",
+    "PortableDeviceApi.dll",
+    "EhStorAPI.dll",
+    "npmproxy.dll",
+    "FunDisc.dll",
+    "fdproxy.dll",
+    "fdwcn.dll",
+    "wcnapi.dll",
+    "ntshrui.dll",
+    "fdWNet.dll",
+    "WS2_32.dll",
+    "ATL.DLL",
+    "IPHLPAPI.DLL",
+    "dfscli.dll",
+    "browcli.dll",
+    "wslsupport.dll",
+    "ActXPrxy.dll"
+  ],
+  "children": [],
+  "native_window_observed": true,
+  "dialog_screenshots": [],
+  "sources": [
+    {
+      "path": "Resources/icons/builder-minimal/Builder_Rope.svg",
+      "sha256": "1fdcf6a7e59f4f6962fd2859a96faa1fe2ebfa2583dabb22806bfd2fe22ee888"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderAwardRingBuilder.svg",
+      "sha256": "b847e046b12142686cb86bce4b7124666ffd9594a41c21356f56e44c26f9a8f1"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderEternity.svg",
+      "sha256": "2dd440f6fbe4e54c97dcc7b735aeb34cbb151f08e22970c7b71534352d0706c7"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderFreeFormKnot.svg",
+      "sha256": "edc1cba52edf2535ccbdc98d759132530835731b78fb1a36129d5f41ad86cbfa"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderJump.svg",
+      "sha256": "6b469e6a569c588bb65d0391e40dbab0a6e55481b1eedd5cd698d8f24fa98a46"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderKnot.svg",
+      "sha256": "23a43022421781eb9468d2004ccdfbce49bf5e43d96a83b85148d34d3526591a"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderMillArea.svg",
+      "sha256": "3e573b839f582492dcc08a76ed6300ff1546c5f4bdcec5d85d2361e45f0d1ddb"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderMillWork.svg",
+      "sha256": "ba09440798ca2d9fddc1473eff915bfa43a41e139546b950ac8186e617565180"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderMillWorkC.svg",
+      "sha256": "bb118efdd6189d5f30898b4aed5d6aad5545296a4270307e2593574b3631e70f"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderNautilusBuilder.svg",
+      "sha256": "978a016becd577fb9e695d8ea6219b9e0bb9bb753ca21ac10a4ba268e97d2004"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderPatternBuilder.svg",
+      "sha256": "b047e3662ff9e840bc926fa423693748e1828adc13cbd2decff2f0ea9b05ec32"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderRaised.svg",
+      "sha256": "9032938a0b30224b8fa025aeec82b9ac513e2b6d4ddbfeed845744c87529e80d"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/BuilderSignet.svg",
+      "sha256": "87ef1c0b97d7f4b1231bbf04a9eccce8fafa3512949d572e6c93ac30c6d2f42b"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/ClayooCreationRing.svg",
+      "sha256": "d46c6e7ccfd1489519ebc1e35f137020284c47b6c6b459961763002653fae799"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/ClayooCreationSignetRing.svg",
+      "sha256": "38f21d70db8e53f1e3105ac1ed8c47834379f747a2244ab6f76238b65426eb7e"
+    },
+    {
+      "path": "Resources/icons/builder-minimal/TextOnCurve.svg",
+      "sha256": "bf1e169819335ace7fe8f7eec5dcd73f50f0e38ed645698c682cf4ff3fa7276f"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AllObjectInfo.svg",
+      "sha256": "ce2f553c03f629f1d131ce2e0057198b2d430ba37838d4556c6068e353b5d7db"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeAngle.svg",
+      "sha256": "13f9bb009b3c35521b225047bda62a3aae12241779a256ec78c17cb86c4db3c7"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeBoundingBox.svg",
+      "sha256": "74990ac534be8c5e4a3df5b06de048bd72c1fbdabb2239426a02cc4d7bb48690"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeCenterPoint.svg",
+      "sha256": "5929a8f69f39aa8b983d82cd42fffbadd9efe5d3c3f383dfc3e8de3a518329c2"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeDiagnosticsCheck.svg",
+      "sha256": "a0de5d3ab18e4304a7b71fdc3892940b31f6203c44dfc0d75cc9f29b08735faf"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeDiagnosticsSelectBadObjects.svg",
+      "sha256": "4a9935744ed66df01a1eabfe200ed254d3fce1628fce7f5ca950eabb8afefd9c"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeDirection.svg",
+      "sha256": "14cba4bb4a0c7a7ba49a658b6a70eaac071e9eeb5a916e949363ede16b5d9ffe"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeDistance.svg",
+      "sha256": "cc720941bcadb532616dab38ef736f2dab24710f48cea954933a33db63910884"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeEdgeToolsJoin2NakedEdges.svg",
+      "sha256": "00e64744e4fc1c1bb14b8c3052420620f5dd938f2953bb507d31e0ac06645a64"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeEdgeToolsMergeEdge.svg",
+      "sha256": "0ee398d2678ac081dde93f3e326125cdf688adc3ce92388c0b182da16940bbaf"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeEdgeToolsShowEdges.svg",
+      "sha256": "7ec38359a63c800e81c0680663b53071cef452329cb80427dd43cac2b1401260"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeEdgeToolsSplitEdge.svg",
+      "sha256": "beb99b6c80260016c955543c43d03097820e95dc8b63f0585313a8c15bd47f21"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeEdgeToolsUnjoinEdge.svg",
+      "sha256": "8b8d924cad11b98e26a80e7e21c4d68c62c8111eef7fdabb09f8c3bd88073998"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeLength.svg",
+      "sha256": "f20bbef6e3a19ed54537e53ea2db7760a1c6ba171462e4c81e039e843b029557"
+    },
+    {
+      "path": "Resources/icons/core-minimal/AnalyzeRadius.svg",
+      "sha256": "bc4f8d2fb6c043254ed006342a48b2338f10e560bc26d9b059da8bb06d2f884f"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ClayooCreationBlueprint.svg",
+      "sha256": "f717ac11897d2a2234ae56878083663fc8c1c4b339c52e4df22fa5db15acb896"
+    },
+    {
+      "path": "Resources/icons/core-minimal/CommandHistory.svg",
+      "sha256": "b753bcba854928488cde1a19d3faef548851188f90e1a26ce4fa1cd53d61b05d"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Delete.svg",
+      "sha256": "a560c79e49624a3195aaffa61dbc9c93fad1b48a8efc352cbd021bcd84eccc29"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Dial_Ghosted.svg",
+      "sha256": "f72628ad5ec3ab01acb9b2f27b316cd66cbc536c6438d62e77d18a5d723ad1fd"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Dial_Shaded.svg",
+      "sha256": "8a77511b51a405952dbb5d5c60a36c35a96e4a078ebdbc6d36e88f93054bdc0e"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Dial_Tech Shade.svg",
+      "sha256": "5ec89679061924d0780e3069aefd1d11741b8683b9d0a50f3864e029267c7c06"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Dial_Wireframe.svg",
+      "sha256": "00fae61be6b22b57f38a815d023fcac9048c0164a0edd1bc46b5b648fa67e6a0"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Dial_Working Render.svg",
+      "sha256": "7f99cf7a73a7e430d260d7e44a0e57a23a2e678f6ef5c00d7b0835faaae38efb"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Dial_Working Shade.svg",
+      "sha256": "7778efaa2e053ea655171f5285edadbe2284f70f93522e919e203fde7a7da70d"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionAlignedDimension.svg",
+      "sha256": "b9ee0be6bd4527762001867af03eb46fb68f86c313787398597841326027e3eb"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionAngleDimension.svg",
+      "sha256": "78f5d846787061293b17c5a9e0b761e141f0d510fdc24f32776874a88dbc99fb"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionDiameterDimension.svg",
+      "sha256": "a3d4887330e5ee849dcd458751dd82a5c3da597281af16db29d6bb0cb1c1548c"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionLeader.svg",
+      "sha256": "f8b89b1c75793e6cde0e66c1d3faafef92f3d50d555e8f53cb25349f1173f35b"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionMake2DDrawing.svg",
+      "sha256": "7b0fb13fb1ea7fc793baa57baea9d32773a18ea50a3815f479b856f322d065dd"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionRadialDimension.svg",
+      "sha256": "e68aaa586cdc5412030e1142c97ecff8e1d6b5301738bdc36103b622e5179ec8"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionRecenterDimensionText.svg",
+      "sha256": "2c31956b56089cca9fc8d9616448f7585b75446056b666700420098169490423"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionRotatedDimension.svg",
+      "sha256": "769c475887cc6e9477748c9c9af5149bac7e9396042bf1e12089d5bfd648a20d"
+    },
+    {
+      "path": "Resources/icons/core-minimal/DimensionTextBlock.svg",
+      "sha256": "100730614794db155b081af384d02567fceae622f8618e2af7b13b1d603cd239"
+    },
+    {
+      "path": "Resources/icons/core-minimal/EditGroupsGroup.svg",
+      "sha256": "4d29eb570fa0179c3b6fe55a966f2b9c15aafc8aabcc8ee5d8858ad9da1fe931"
+    },
+    {
+      "path": "Resources/icons/core-minimal/EditGroupsUnGroup.svg",
+      "sha256": "888aeeb6aa49b02c8365c06efa2f7150a57fcda49f26f92749b8a050c294b488"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileExportSelected.svg",
+      "sha256": "265fec14682d1fc5251acdc95d7034e404992b306921f5f14f66c8ac63361232"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileImport.svg",
+      "sha256": "64454524d9e8e43b3cfd01e1f1ec34ed146f3252fcf1c9f9e6f84cdf127a84c2"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileNew.svg",
+      "sha256": "d648f024a8ab2f79a0e9386ae1187ea3aa4bebd09db2d9813fe5c8cb67be32f6"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileNotes.svg",
+      "sha256": "2021b22b0be975da51f8293dda276f5cc96729be7bfa9208cad0e4984485488e"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileOpen.svg",
+      "sha256": "b141032aec60843c5be37310add989829aa7049961c502745a64ef876aa4326a"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FilePrint.svg",
+      "sha256": "8b1570a97b74f06e62fcea056fa7eac4c5570e4deb52e1ca296272dd2e00a2e1"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileSave.svg",
+      "sha256": "1a6e0748806c984a7d17179a9b3ed0132d52a114d57a4d5baa21cf3b41f2d596"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileSaveAs.svg",
+      "sha256": "f696592700acb0cdbbd8f248697ae4f302db1a9c041e05ee07fbdd096ae388e1"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileSaveSmall.svg",
+      "sha256": "c2ce2ca1791776708052bbf94a58bb3084d5bb8657efc4f6037c0345f478c571"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileSaveSmallAs.svg",
+      "sha256": "2318bfad0ee62c55626bf40eea8f8f816b67e0d9a38e443f017d787bab9145e3"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileStullerSubmit.svg",
+      "sha256": "58664e5647d7f9d192fabbc5f3da18851b5069ba3a8c653ab405be1a462e5573"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileUserLibrary.svg",
+      "sha256": "72d8d3d1c4dbfcbe3598b4f9aa307cec60471a461181f14bb1a0fec41ff85817"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FileUserLibraryAdd.svg",
+      "sha256": "f58a237e64a39e7355380a3ca3caa2c8eb77196d6af66f19bc14ef2ed6209e5d"
+    },
+    {
+      "path": "Resources/icons/core-minimal/FitAll.svg",
+      "sha256": "124ecfdbb4dd1fe94f47bcffd0bda6d75b82a8d5595468a63997f34999ddde6b"
+    },
+    {
+      "path": "Resources/icons/core-minimal/GridON.svg",
+      "sha256": "3250e0ccc5d09852dbc847cf61027690667553cf5bada11c5766b735bb3e74d2"
+    },
+    {
+      "path": "Resources/icons/core-minimal/GridSnapON.svg",
+      "sha256": "8cae80f259cb09a3c657538b0514ec916873e8a2fb3df61561c5b63b0049b1da"
+    },
+    {
+      "path": "Resources/icons/core-minimal/GVGemView_1.svg",
+      "sha256": "df7b087a4459fa3c67712daf448267f562f59d1c314de720662f20b771503b2e"
+    },
+    {
+      "path": "Resources/icons/core-minimal/GVHistoryRecordON.svg",
+      "sha256": "3a2adaa4e966c99a588e56cb7ab4c09f13dbe3f34a83ae5d9592913967081070"
+    },
+    {
+      "path": "Resources/icons/core-minimal/GVHistoryUpdateON.svg",
+      "sha256": "0d9c21f040f97642d5cff94b61cfc65014add21f9b0630066e7e14d14dc691ed"
+    },
+    {
+      "path": "Resources/icons/core-minimal/GVObjectInfo.svg",
+      "sha256": "119bfb228ef2f3080bb330d58a51d2d25763f043f0fac2aa8f5cb94a001c02fa"
+    },
+    {
+      "path": "Resources/icons/core-minimal/GVSurfaceView_1.svg",
+      "sha256": "f7904622b0cf946a304b29232c72373e62b3b4d8d8ffe99cf569130b475eb8bf"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsBoxEdit.svg",
+      "sha256": "153710f4f818422b9b0d78ee8a87e195db0d3ff8c5441bbc9862ac1f077bb9ee"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsDesignReport.svg",
+      "sha256": "f4f0eb8a0b6ff231de24cf91794ac9ecde75ed70837f3441db5edaf7addfc2a3"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsDisplayProperties.svg",
+      "sha256": "01265219b9e4af1d270d005088933e052cd4263b10c8c822efc80643187da8ff"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsGumballAlignment.svg",
+      "sha256": "e0a6fe5732fd350b894c15bf249500ece2fcbb89391508611c84dbe6e9f3135f"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsGumballON.svg",
+      "sha256": "9f5f6938d30a2c7264dd76ad7101909ffc62e520a3d04c4e42ed4911f06431a1"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsGVClearHistory.svg",
+      "sha256": "bc69b5866a7ab8003c5af035766a4f14ed65318718f7e2ce4728bbcf6a177539"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsLibraries.svg",
+      "sha256": "7db24df664dee8aeecdf369ce84d6b3ddd30715a4a4461b27047ac53d83d9094"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsRelocateGumball.svg",
+      "sha256": "80c986f1f61774e2ef133d4c9debc5e98aa2e0c7994e6583e7707e3f0e75768a"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsSelectionFilter.svg",
+      "sha256": "aa3f3cbbe1a3821e10a45b0f11511726daa98ca1db48791858b9e887b0d4dfb9"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsSmartTargetsGumballON.svg",
+      "sha256": "af7b8f69c169b39f17e488614c86c30fe20ca6c6322e7dca65a5a7f74dddc4ed"
+    },
+    {
+      "path": "Resources/icons/core-minimal/InfoSettingsViewportTabsToggle.svg",
+      "sha256": "be400bbb5907021fa2dd54f0099f97f0b43557bd6c42257313a2394557ae2c8e"
+    },
+    {
+      "path": "Resources/icons/core-minimal/LayerArrow.svg",
+      "sha256": "1fd46cae11b4cb2f758eafa92e1ba4ed1790012836ab6d5a1181a581f41c5bb6"
+    },
+    {
+      "path": "Resources/icons/core-minimal/LayerHide.svg",
+      "sha256": "adaed5eb53a08f338b1d1aae30e29782e0ffc7e51a4fcf1d3ecdd748e5224de0"
+    },
+    {
+      "path": "Resources/icons/core-minimal/LayerLock.svg",
+      "sha256": "555717532d3e92067005f9cd8b57fa4d8b6ac34af4dcbbe18472927c0849d028"
+    },
+    {
+      "path": "Resources/icons/core-minimal/LayerShow.svg",
+      "sha256": "18b47daade6d9246e036ebbfc8bda73162893a8e5495d499bae4b61d9cb1aade"
+    },
+    {
+      "path": "Resources/icons/core-minimal/LayerVisibility.svg",
+      "sha256": "2015ebc3b0b78387ffbfabc69ab1605f4df5cf25c8a9218bf2abde0d5054757f"
+    },
+    {
+      "path": "Resources/icons/core-minimal/MeshApplyMeshUVN.svg",
+      "sha256": "d9958750e41ca7eda718863977f70b05cd70dc42c9b23f846d334a365442dda5"
+    },
+    {
+      "path": "Resources/icons/core-minimal/MeshFromNURBSObject.svg",
+      "sha256": "a9f65217bdafa4e07d54928ee4ba07f90e4f96751797b992a62d0fb0c10dd081"
+    },
+    {
+      "path": "Resources/icons/core-minimal/MeshMeshEditToolsCollapseReduceVertexCount.svg",
+      "sha256": "b3cf0b5b66bf2c9d9c6ddb378009954f50a5ec3e43853b90e6e447a0f1a19ade"
+    },
+    {
+      "path": "Resources/icons/core-minimal/MeshMeshEditToolsExtractRenderMesh.svg",
+      "sha256": "dcaed0684967bd259f16d49696afc8d1b93baf702179f2747b3b2c4694b5d2e9"
+    },
+    {
+      "path": "Resources/icons/core-minimal/MeshMeshRepairToolsAlignMeshVertices.svg",
+      "sha256": "a65be507816ba27204acbf0a4f2c17b26b226aec7294e1319a1a3b8d29812267"
+    },
+    {
+      "path": "Resources/icons/core-minimal/MeshMeshRepairToolsFillHole.svg",
+      "sha256": "d4b89fedcf13fcbc8aa7700eea125445dd2d8374a906babb5fe35931412952d1"
+    },
+    {
+      "path": "Resources/icons/core-minimal/MeshMeshRepairToolsFillHoles.svg",
+      "sha256": "23c3f909ed13331bbf8beebb795f0744ed7c69041a2cbdf4e97a08c0610344db"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ObjectProperties.svg",
+      "sha256": "2971f0c1f75104decdb077dd9d3b78d0951114c36f6720f525c5c5f5d5e2a9a9"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OrthoSnapON.svg",
+      "sha256": "f29c4c73a1780d51c5ee0cb7bd22349a13a623b079eb55044ebebb107def6186"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersExtractBadSurface.svg",
+      "sha256": "a20bb2781ba8aff2bb7deb9b09b9bc2d661e5c03e2a4023b4af196073b4c6676"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersMeasureDimHorizontal.svg",
+      "sha256": "f6d1fffb47f972d283de080d460b74da3c4fd8f4b06599b99a259953c61d3e5f"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersMeasureDimOptions.svg",
+      "sha256": "340664d09c82df38d8a8bcbcbcb0a6dff515b810df3024f4b3478c8076594fb4"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersMeasureDimVertical.svg",
+      "sha256": "93e95c3ef065e2a89d0131ee3448754633473bf91ac4b0f359e134f7c84e3b79"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersMeasureEditDim.svg",
+      "sha256": "5c42dc723b6e3282ce26f8954b15420637bc2704be8a0e276680b9d23ffcc188"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersMeasureEditText.svg",
+      "sha256": "e2e6d3656be7355daea40499c2615c268161db3085cdfb77e115bc256e7a535e"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersSetCrosshairs.svg",
+      "sha256": "b0c9417b1540d90fa9296b83e5af59271326f43663137ea321f5aefc33f6d345"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersSystem6HD3View.svg",
+      "sha256": "5dcee6c1f391ab60bc4dbcbf784657825fcf4230f39b0996102171c0afea6c65"
+    },
+    {
+      "path": "Resources/icons/core-minimal/OthersViewSynchronizeViews.svg",
+      "sha256": "6fb4a05324121049f74428ee87c0c45340eeb798e497c676e3f8766440c84afb"
+    },
+    {
+      "path": "Resources/icons/core-minimal/PlanarSnapON.svg",
+      "sha256": "b40ad5fb54cfb8f556bf4bbae2fc3cccce600ee09e67a01a8f4b936f37e14d51"
+    },
+    {
+      "path": "Resources/icons/core-minimal/PreviewCutterON.svg",
+      "sha256": "fefec93a82bcc2dd3aad5215081b58c27875f92a0d6e58d876544577cb4dc970"
+    },
+    {
+      "path": "Resources/icons/core-minimal/PreviewShadeON.svg",
+      "sha256": "8e6ae27a321a293acc5bcba9a72481fb60a1fe99fb5b631ec30d17e81761392d"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ProjectAdd.svg",
+      "sha256": "e3aa9efaa3e2159cbaa4caff7606e11b366882c68cafdd2a24542e4fa1d49000"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ProjectDelete.svg",
+      "sha256": "8366116e224d475f004985617b647cb2fb384f8a252d76e995f9f748aae8e045"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ProjectIn.svg",
+      "sha256": "089fcc92a0f9ec26c098d8a1ae799b0ba106fc515cb3a2b1f6d765591a3201cc"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ProjectManager.svg",
+      "sha256": "6b2ad9a59133cd6ae8af94005783cb0af9832c041f5bac5443f9788fa8accb21"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ProjectNotes.svg",
+      "sha256": "24645fd05adf75ddc4f6b6615392f3f6630d585baed385ea603f533154727654"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ProjectOut.svg",
+      "sha256": "2dd95586c493717350894b611a52956def86db48278b7d4747eb8fd29b2f6024"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ProjectSave.svg",
+      "sha256": "b25d051017f5e99d7635ec38b37f22b53a8c8511e9462eeb6968b4182d1c3bcb"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ProjectSnapON.svg",
+      "sha256": "dbd49af5342c7315ed68f5b5d50fa0b7e5bd69a6851ea61d8d9724c4bdc2b9bc"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Redo.svg",
+      "sha256": "a69d9147849e0a3068ce9555bece7185c9db2ec4c70310fc0e3e01f181e5558b"
+    },
+    {
+      "path": "Resources/icons/core-minimal/RhinoHistoryON.svg",
+      "sha256": "90a61a9d84950903a3a2086ac55f6d566fd3761a36088e5199f1e65111a6c0be"
+    },
+    {
+      "path": "Resources/icons/core-minimal/RhinoOptions.svg",
+      "sha256": "64f4a65b742c4e13a30a87f6dcabf0d56dbfbfd0ecfffb122e01293026299d8f"
+    },
+    {
+      "path": "Resources/icons/core-minimal/RhinoSmartTrackON.svg",
+      "sha256": "00477df2aefe500d8a745332ac170d6574f2bfcd75ce28e6d5d1a5bd1d0478a6"
+    },
+    {
+      "path": "Resources/icons/core-minimal/SelectAll.svg",
+      "sha256": "62908a3c421a22e3bee4b3bc6233b621aa60c865a685d382aad6abd26f055909"
+    },
+    {
+      "path": "Resources/icons/core-minimal/SelectNone.svg",
+      "sha256": "fe401e644cfad9c3771730bd989ed694d48fd0c87bfc022d6f83ff5349ef7f82"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ShadeSelectedOnlyON.svg",
+      "sha256": "96b9a70413eb7fc0bdc949716416f8d5299d563da7cf1a3f8a6069638b4331d4"
+    },
+    {
+      "path": "Resources/icons/core-minimal/SnapBetween.svg",
+      "sha256": "8f5fb9066c91af7f1447a3a7853ee757f4d1458bb3cc58795d4e1f2626f08b07"
+    },
+    {
+      "path": "Resources/icons/core-minimal/SnapOnPolysurface.svg",
+      "sha256": "22a0ee9d7b2ef4716fb723e6726eeaf1e98a0e961e5a3f21cdb15393823c9719"
+    },
+    {
+      "path": "Resources/icons/core-minimal/SnapOnSurface.svg",
+      "sha256": "72572dd50e983e3b54aa4e77ab7add1bc526e091093ec6d581ed342fe5e48564"
+    },
+    {
+      "path": "Resources/icons/core-minimal/SuperSelect.svg",
+      "sha256": "bb4cee90df433a6a3c752b9d1a320c83c243c6dca1b9a1680339e0b5b2134ff7"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapCenter.svg",
+      "sha256": "420653da71498bb79488bd1ea41c7c0224e2f2635b537cc4be54c9789c3522c8"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapEnd.svg",
+      "sha256": "489091c6a11b06840eda2c753bf50fc2304d0b9cb6f5ecd61d0db2327a8e7d59"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapIntersection.svg",
+      "sha256": "8a1543ef2a30e49bd3cb06c2cc1e05911e8063151a90e62eb26793d48f3d62cb"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapKnot.svg",
+      "sha256": "df5c9ed0d97920f33944b8fd41477a2fba56470cb50d955b93d34f237ee700d2"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapMidpoint.svg",
+      "sha256": "bdb531b2e08e86949ce26d0f5d51c4b350b280ebb05d5e5419e9985c1d909653"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapNear.svg",
+      "sha256": "0cdc0a933e698615e42d0d668f5c61e372309fa464452608d46323d745e96751"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapPerpendicularTo.svg",
+      "sha256": "fe4df11fade11764b96214a6d293a0c0c05c534b908c8a3b287b5371769e84ba"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapPoint.svg",
+      "sha256": "acfeb1da82baa1b6599a0db438251404e27b4e249448bbe5847b4586bf42ee8b"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapQuadrant.svg",
+      "sha256": "2d89539cd2b6a225ec0f8502d0d036449b7010d361aad11d1829d123bff95232"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ToolsObjectSnapTangentTo.svg",
+      "sha256": "6f7b64f4aa98d0beb680c5568ce035efc2abff53915ed9eea1ed952829abc877"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconControlPointsOn.svg",
+      "sha256": "5d6d8ebe998e659d4a1f1f148e190583f34163e1b3e7b309d2a7ff0367c06f75"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconDuplicate.svg",
+      "sha256": "8426827065265baba721ecb8825df5432ed0824e7d7f061b1a8d7847dda1de5c"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconEditPointsOn.svg",
+      "sha256": "85b5bf1664b3f2edbb8add533898bf4dce0bb9cc670d3d3f1f841a4c4daa5991"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconExplode.svg",
+      "sha256": "b5fbebf694d0eb015146839c3d02c482f637e31c8be1347a315e05b9cb47f6f8"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconJoin.svg",
+      "sha256": "f318a2492fca2ce6d2c38cfdb12936920a242649015efc21bf7dea746ffd00e5"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconMirror.svg",
+      "sha256": "7caa4a4cf378be06d184cfbd924419b43a508ba0e96913525ccdd73fa8fe6ea5"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconMove.svg",
+      "sha256": "b2798aa791cc678fd6b3b7b75cf3021ed6446d9c162b70b6839f2ad79dee875e"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconRingRail.svg",
+      "sha256": "d152a9e3db5d4dc18aa3a3bc41caa5fe3b4a5675c22be6cb2bf366a4f69b0ecf"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconRotate.svg",
+      "sha256": "bcb695bc05293aafc7f6725cec2e6f8556d59be94f8bf8593926cd6e858063f4"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconSplit.svg",
+      "sha256": "451f80fa8693e687b1c85908c18b5fd1f3b6fb947a845a9dcb4e18c3ca3a6eaf"
+    },
+    {
+      "path": "Resources/icons/core-minimal/TopIconTrim.svg",
+      "sha256": "96fbcd4f635c5d698a8b02ca39b9da2b3624727986df72787a6b0526d3e43b0f"
+    },
+    {
+      "path": "Resources/icons/core-minimal/Undo.svg",
+      "sha256": "5bc40939123d98f57e468a431c0e26e0a41d0f354afa40bf14de2e3f58c61b07"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewBackgroundBitmapPictureFrame.svg",
+      "sha256": "c2965f2bcfcfb4598aa9817dd4623390394209648aacd9d03c37956388ffe983"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewBottom.svg",
+      "sha256": "204dbe4861331474f21eb3773273f1a716f61d10ccc521b7c7740d435cac7bb3"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewCaptureToFile.svg",
+      "sha256": "44b282aeccf0838390b1421d6faa6edc2dd50775b768aff1086531979b10ce96"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewFront.svg",
+      "sha256": "ef3c409bb06a86c38a611394f1bfee102cce304666344821a7459dd6436e5205"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewGridOptions.svg",
+      "sha256": "d3475871100d842aebcee5c94110c3411031512f2fe7cc87642e95c6136fff7f"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewIsometric.svg",
+      "sha256": "0fd915aca951c7ad959aada771f3940256ca2e34304030028536247843275a86"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewLeft.svg",
+      "sha256": "96be153f21fbcbcdfd43496b8f9c9a0c4dd284e3417e8795123c274b4fafb39b"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewManager.svg",
+      "sha256": "988131d3c21e3ab97cbdf3d54b0cdef9a57aea77973e00009bf6b70a6f4308bb"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewRear.svg",
+      "sha256": "3b4a511fbd0b7750cba96d389437f25a91b9e13029972649168dc5528425a71a"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewRestoreViewports.svg",
+      "sha256": "facdae6c8b4dcb3b7b26842c472e201686dd4b5c0d257aecef8fb5bb48dae20e"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewRight.svg",
+      "sha256": "e11e28b6c6a66159770cb5eabf36c2ba04b7cc150cb19a57f6900ed51c8c93b1"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewSetCameraCenterViewport.svg",
+      "sha256": "db8934820e9f778f3183d585a530744d43b14ba5e0420046738959e7dad20382"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewShowZBuffer.svg",
+      "sha256": "0fa7208ccafffd287a00fde7b409a17476fa97e617c518f001568a878051e612"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewTop.svg",
+      "sha256": "97c577de5f8b2cc7a5e027512f87d92ab19117f214af2dffdbc01d84b7dc59a7"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewZoomZoom1To1.svg",
+      "sha256": "65031b6d7072ee09cb2a8150bbf830e9e05b93aa3cc17f9ae7ca1c843b82e8c3"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewZoomZoom1To1Calibrate.svg",
+      "sha256": "86ab46b82a2214c757e49b1605740efa44ba65a26b772e7fd0964f750fd1c647"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewZoomZoomDynamic.svg",
+      "sha256": "78fad9a68aeed8be7ffc069cfe7a7c388b68b1b262dcc7709e36531397aa1a08"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewZoomZoomExtents.svg",
+      "sha256": "ebdd26eb95f41a50f96c2e78f0eb6dcd9cf35c95a9d57a4ec713e08ff35bace7"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewZoomZoomSelected.svg",
+      "sha256": "f8b4342eb70aeb10ea50eb64888253aaf254275f76820da842bbb2a268978745"
+    },
+    {
+      "path": "Resources/icons/core-minimal/ViewZoomZoomWindow.svg",
+      "sha256": "23a6369ba9cdbf6222cc0f9b22b6e602e4cc31ee1a8826d06535cac9cfbfdfd4"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/BuilderCrv2ViewHistory.svg",
+      "sha256": "600e745697b7eae1306f8b82c247ca5a3c1ffdffc0ca66ce1539c81931c14a50"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/BuilderPolylineOnSurface.svg",
+      "sha256": "77172b6785560db26312a6f2f36da808e19e2bd2537cfd0602ee3541d917b483"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveArcCenterStartAngle.svg",
+      "sha256": "b992d3ad773faf243518444c07f15b3261f382cf5d9cbce6d27feb5b2d118df7"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveArcStartEndDirection.svg",
+      "sha256": "6ebb48d83306dd68968b0282b2f2a6c3ed2534ca2816f6e5f86c8eaffd29b251"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveBlendCurvesArcBlend.svg",
+      "sha256": "28f1463e819e9bcef74516f61a5c994c6395af07dc56833cdc32ae728b3a79e1"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveBlendCurvesBlendCrv.svg",
+      "sha256": "ddd5e30eb8e04e53da24746b5d62e308c7fa3b6d55447e6c33c5df6e38a606e4"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveBlendCurvesBlendCurves.svg",
+      "sha256": "8271596ef38268a14d58d66a6a2075d9b39e20db73cf9578924986e7229d429e"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveChamferCurves.svg",
+      "sha256": "01b5c3a3e3f2959d683c0aef8ec915e2c6affbf640e08ca0c9e431c104b50cb0"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCircleCenterRadius.svg",
+      "sha256": "2bd6cb38ec32dbe59c56a558daa98204183145256890d7c51496d47908405f86"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveConvertCurveToLines.svg",
+      "sha256": "44a92c5e77d353ecc8df19d940d76ee68a85908c27eb4d1296d4694e3fce9112"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCrossSectionProfiles.svg",
+      "sha256": "516b75636cc767e2cb51b49853e1f04b95c34899cfd6ff83666dc5a5796fbe02"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveEditToolsAdjustClosedCurveSeam.svg",
+      "sha256": "39fbc993c7d3b363c6040da81179bed22102cb3557834e75fe4199d35047583d"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveEditToolsCurveBoolean.svg",
+      "sha256": "bfe9b611875e1043d5bbc565b1e239c05130c63d6169331a8853f7d7aa6e23fa"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveEditToolsMatch.svg",
+      "sha256": "0e5946ef2bf08bb1fa9e426599b4ada4d7d83466fb804ba25c5a643445ede438"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveEditToolsRefitToTolerance.svg",
+      "sha256": "ad2d56048b6863e636c692664425a9ace0eb7170a7f4a442831a4673b193073e"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveEditToolsSoftEdit.svg",
+      "sha256": "964bc2a80d945a2cd3f80a243e0c178390403ea40e970a8fea1bc637e4dcae55"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFrom2Views.svg",
+      "sha256": "e38b259baf79e70138e0d9f40854f10b006b021858ab5120609bcafda5a77abe"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsApplyUVCurves.svg",
+      "sha256": "33209a22717ada5f15ba57abf1824866eb4484dab65b092133f38221355083b9"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsCreateUVCurves.svg",
+      "sha256": "9c25f5c1f2c929aa1c654148ac42e13eaff2799b327a4cc2503756eb79a50821"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsDuplicateBorder.svg",
+      "sha256": "9f2170ad116e9c80d4659ae9701327cb4dfda0263f48c628da88636f1bfb44b7"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsDuplicateEdge.svg",
+      "sha256": "abccb0d5792402ff13e2c1b4452d495ea1c5d320aa561095ca6a9e7e53cb6a05"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsExtractIsocurve.svg",
+      "sha256": "dc98f1cb8ba83f33f3adfc60eef7aa614ed2d8f27dd22a6bd5da4c730c15eab6"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsExtractWireframe.svg",
+      "sha256": "ff6dd276ba0ea73d77de4f3e77a4aaaeb32b87dc2efd73c9112e6ab39e34c0e7"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsIntersection.svg",
+      "sha256": "bdac0a743652bba5fd16507b881fd516df2e89518cd680a68cb1eaa6702db8cd"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsIntersectTwoSets.svg",
+      "sha256": "6ca4d8d0b59081e749fbe5549fe93d373f59931256168508c12e07365f53cd33"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsProject.svg",
+      "sha256": "9ddb176faf6c28fcc216ffa0f658e95f50367314ea31bf8f0a869c9fd45d4f13"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsPullback.svg",
+      "sha256": "d320f86f7b189358a32db38d935c956f279dc8a60eedec578126b07ce4011d1b"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsSection.svg",
+      "sha256": "575c72a2c7de1d68cfd19697e6e78e965ede186bf95faca02eaa7a433f9c47d8"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveCurveFromObjectsSilhouette.svg",
+      "sha256": "00d12fd80b662662ee39a6f32ca62054e5d764d65e09212355f53cf1af18b79a"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveEllipseFromCenter.svg",
+      "sha256": "6414d14808e096d11b2a4bf9dc17528c43ebda56b3f09944fd285de9342dfb31"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveExtendCurveExtendCurve.svg",
+      "sha256": "19749411f51bb94626afcabc91907cdf6100db236e90d7da52dc051335cd891a"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFilletCorners.svg",
+      "sha256": "cacd6bbcb73e3a844070bd3ddc006a6c6f702e188d742c70f83d341648df0c76"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFilletCurves.svg",
+      "sha256": "b3ccb9091926547e3c289df2d7e77316c8478be3a7eec1958833d3b8fd0d933e"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormContinueCurve.svg",
+      "sha256": "c5cbbf4cfa559e18a50662b487a9bd6efbc15e67346d9fa3d2af6cbb0f3a1bad"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormContinueInterpCurve.svg",
+      "sha256": "0f75d554f306d642eee00109d5bab4bbbe0ac41a300e63264417d42065303fcb"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormControlPoints.svg",
+      "sha256": "5808e01a718c4291e76e7ac4ef95cc27774bb68ddbc2457edcf67a99ae86f451"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormInterpolateonSurface.svg",
+      "sha256": "bf5bf77f12c7640241e8f2856ca1b5cb3bb9a8ddd230a79549b5fde701c50af5"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormInterpolatePoints.svg",
+      "sha256": "98b7f90b8d7284fe79b933f46f8b4f5fdfb44bee137f8e3b6f2b1f3bd05ac783"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormSketch.svg",
+      "sha256": "4ca4506baeca0dba778adb5ea2fa6e86b58b79550180251f721f0ce4d860bbde"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormSketchonPolygonMesh.svg",
+      "sha256": "2fc02f5761bef55aa28a3b54e89bb1eee06bbffce7bfbf68af37402f9efd332e"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormSketchonSurface.svg",
+      "sha256": "13aa87154d7d384bb4fce3c910e177493fb4df60b6b5e83f54be7e6e6441abff"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveFreeFormThroughPoints.svg",
+      "sha256": "4884a0d2b97ba22c0e652f4515677f705c881240ac48200a5211c0622f8b40f9"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveGVExtractIsocurve.svg",
+      "sha256": "2e42138efca5e97ff815de9309d80be09e1361cd30a56534b869b596defbe8b9"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveHelix.svg",
+      "sha256": "f98927982e6993974e65482d10018a966b47040ec22a3a50fdd6f2462bf9efe7"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveLineSingleLine.svg",
+      "sha256": "a60243563ccc4c352274bbb960b27a2b1779a168acccd819f9ec76380b19abc3"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveOffsetCurve.svg",
+      "sha256": "ad0da1d35c75273fce548877abc28a9cba2e0f7e0096c1cb45ada25c6fcc833e"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveOffsetOffsetCrvNormalToSurface.svg",
+      "sha256": "7db2b68d3c7a5cbf7100cc281db6048e7ed759ccc4d84de5a4c21a79e82da0cc"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveOffsetOffsetCrvOnSrf.svg",
+      "sha256": "ab8ce784116024176fb4c67fdd7e279dcf2c7f2016ff618ab233dd7776ae3373"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurvePointObjectMarkCurveEnd.svg",
+      "sha256": "50b52cf4a52756a8020850a3060f1850ba6996641fc19eea9230c400ae5f5b20"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurvePointObjectMarkCurveStart.svg",
+      "sha256": "fe384cf54077a40d2373ceb9b76c0b9e848b499705b9962de3e88c53710bc8d6"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurvePointObjectSinglePoint.svg",
+      "sha256": "33e1572bec629d8e30f18da97d4274700a13065dc5ff5d8be6dfc7ba9ed3911e"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurvePolygonCenterRadius.svg",
+      "sha256": "c0b47934a4eae04ffaead5a0c5664e3793eddbe59e0fb99429c72c959dfc0318"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurvePolylinePolyline.svg",
+      "sha256": "945b8f5984140c245dfe260b44ab5f26a0b04d36f960c80d5f6bba37998a80aa"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveRectangleCornertoCorner.svg",
+      "sha256": "b1c3fb7c21f0ecdf09757f11856cd73d421dc769a0d16595033fdfaf1071b5bc"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveSpiral.svg",
+      "sha256": "56b8fdc868bf10d29cb2a9958e1474a6c24f11acb5d4e5a2f3fb163fe1908bf5"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/CurveTweenCurves.svg",
+      "sha256": "bbe9390b36ad970beb12e4c997dc4b6b81e31c4fd158433e61ca696f66434651"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/OthersCurveDivideCurve.svg",
+      "sha256": "bda20c639b6bdd54377dcdfd03e3f7b7fec6d7318c09196135d991663abc2175"
+    },
+    {
+      "path": "Resources/icons/curve-minimal/OthersCurveRebuild.svg",
+      "sha256": "2ccb112bc577d05a2245edb998ef39cc44ca3d73a70c4579de840061ab3b6566"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/BuilderBrightCutChannel.svg",
+      "sha256": "a927a6493a1720371ec1d616728c4a8a9953462ce4c9589536954fae94d2000d"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/BuilderBrightCutter.svg",
+      "sha256": "793356f993319f53b839050373d8fc7cc9c228930b4a03f17acf7d4db6e1e97a"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/BuilderChannelBuilder.svg",
+      "sha256": "9ebe08336664b59888f0bd5fea895baef23d02008a07e10b15bf78608d8fd3ce"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/BuilderGemCutter.svg",
+      "sha256": "2bbc4064c98c519aaf755ee19749700f41a9b4af538c4654cdd7d36600f408f9"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/BuilderGemCutterLibrary.svg",
+      "sha256": "8fb25eacffc9ecde57858a8164d8242380ffc0b504c96f174d9844836c9ded0d"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/BuilderMicroProngCutter.svg",
+      "sha256": "28723f37aecf0f75796850d06d7f630ef549043d334538af09597c47266dcd60"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/BuilderPlaneandCubeCutters.svg",
+      "sha256": "23721ed124fbdd16b63e1ab62b92462008c7d9e124c809751aaa1eaa8a551d0c"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/BuilderQuadFlip.svg",
+      "sha256": "7ff7a90603e0c9ce3f0d630905346831cb8742033545207b050e12365d11fc48"
+    },
+    {
+      "path": "Resources/icons/cutters-minimal/OthersCuttoFingerRail.svg",
+      "sha256": "f88de6959485ec36024f2341994a5a96cb87683c1e4b18053ee13b3c9abfc975"
+    },
+    {
+      "path": "Resources/icons/emboss-minimal/EmbossClayEmboss.svg",
+      "sha256": "2a47d1e861f0d0f6a3dc32a6c6a17d24563b9c95e4e2f0fadabc9fb4d1365249"
+    },
+    {
+      "path": "Resources/icons/emboss-minimal/EmbossClayEmbossResources.svg",
+      "sha256": "7bde4ecde202f3691f496b109c9e14adb30435cf73dd505a05f086a55c1dff6a"
+    },
+    {
+      "path": "Resources/icons/emboss-minimal/EmbossDecimator.svg",
+      "sha256": "ccab227e3d0bd2d4cb48eae0e56b0711dc3db9f3d3d2160e95b885ebd9ddc38e"
+    },
+    {
+      "path": "Resources/icons/emboss-minimal/EmbossHeightfieldImage.svg",
+      "sha256": "a84a998e13d1ae5d168a56dbf00879613e17984af4aa5a155b44636511cef63e"
+    },
+    {
+      "path": "Resources/icons/emboss-minimal/EmbossMatrixArt.svg",
+      "sha256": "d1a0c9bc362e1ef3653f0b765dbeafe4352b8b988f9e80683ac0a63cd890e852"
+    },
+    {
+      "path": "Resources/icons/emboss-minimal/EmbossSculpt.svg",
+      "sha256": "1e7c8caa99df0c63fd7800b00750dde4c6a229e1ee35cc745c0c1610b92bbd55"
+    },
+    {
+      "path": "Resources/icons/emboss-minimal/TextureBuilder.svg",
+      "sha256": "2c7e50c85859d0e3d61995b711e317431c384a066ea3022d02b67ae1a99b5588"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderBaguette.svg",
+      "sha256": "1df3523af2057be7e6071dfbf163ef9842bf0cfd00487c1cabb1d5d571ab571e"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderClusterBuilderOld.svg",
+      "sha256": "e5028d9919de093d6e851f0d47bc1a66285278cc7a96d3a522f7fd521bf6d87e"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderCustomGem.svg",
+      "sha256": "dcd46bf7d4c4ddba7e532294681f585b5f0e9fae92d988743bc16a1b3890dbfd"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderEmerald.svg",
+      "sha256": "089fbb0a9f37c6992c5dc1b2f0b3321edfb3fffbfd8ca43baffd1fb221f8a791"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemBetweenTwoCurves.svg",
+      "sha256": "354d935239f834086975d7a8471c4a7011b223a599eb5e9b9b82597af93de50f"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemControl.svg",
+      "sha256": "2f298e58bd85e0043f002cc6755fa379ab98ee30f679b0a0496d6fb52c92001f"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemCountOnCrv.svg",
+      "sha256": "3a29a3a6e568356fe3bd73125799315a24f1d56003e81e6367d2500eba397110"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemFollow.svg",
+      "sha256": "ea639a2ef777066afcaa406a121c7f1a94050dd331ba7faf734a2e6c72be3171"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemGuides.svg",
+      "sha256": "8cc4c1308bcbab0ad6ac21951229cfb18a0c2441d782567b10b23432923cb642"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemListOnCrv.svg",
+      "sha256": "d3bcd0f8fb7c213da442826dc8e1d3df5498f7ad3d572c7cfb974cc4ee80addc"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemLoader.svg",
+      "sha256": "90a9557f20dedbe8c01404729f935c3b015a03b7d659af6b0ef40ffe51d74ce8"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemMap.svg",
+      "sha256": "fac4b24d1dbaa8a59b12d4b0dc3dfad9d9e7d2d55ecdcb402e8b3b91970fdb86"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemOnCrv.svg",
+      "sha256": "4ec92804a6fe95c50303c937357e7cdb756ba678068bcc19119f309c7e3fc5b9"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemOnCrvAdvanced.svg",
+      "sha256": "4e23f79e4d038c00c7c57c1fb59a78975f6a226a4f75c0560d59221c00c40778"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemOnCrvMulti.svg",
+      "sha256": "d27ad48fa5b294fd54eaf62ba1926be4cb22b08cfad5eed629aa0abfc4a3908d"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemOnSurface.svg",
+      "sha256": "7be9452533c3605080ecd9a2885f553867eeb5ede18df188d05b6202ad576c88"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemPositioner.svg",
+      "sha256": "0fba4f1a7f15b5b52a1a975f8555778109eb1c82343f7c34d69bffe37506a812"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemProfile.svg",
+      "sha256": "35efd3a99052c8cb046e523e86572a66533efcb2c9330ea3db33e1ec1e7d0466"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemReporter.svg",
+      "sha256": "0e68c984ffea284aa7f2f4ef75e6707328be187c112c9e67d1b276005e62a3d2"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemSprings.svg",
+      "sha256": "867e8106c53ea022a6d1fb2a13066ebada61fdf01bead8d06fca8536709a9a31"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGemUpdate.svg",
+      "sha256": "97be390aa718d1012efbfd44e219b6b914893635047547e8d87a73c47d2667aa"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGVDGemFlow.svg",
+      "sha256": "c79c013e0d3cace3a35c601fa67d19bf349cfdd0b6b8d596dc9d1fc7958c09d3"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderGVDGemSplop.svg",
+      "sha256": "f1d152fa7eecaad0a6b7c244721ddbf1723dd7a53b388547886aebe216a05ac6"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderHalo.svg",
+      "sha256": "ab78328613e8a46a2beb12291851ec4ae399528633f4c36bc9a2c2be15fb7d41"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderOrientToGem.svg",
+      "sha256": "d8201ecc9940a3e272e81ba5327e7037e4bae109a7f896f1432ef2692a244639"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderPaveAzureBuilder.svg",
+      "sha256": "3ca4c305859079449ee8c2c45ae7d7faa2c75ba3650e8b60bf7ab08db5b999c3"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderPaveBuilder.svg",
+      "sha256": "40ce395f66cefeb8826862a98a58f2fa3589137504e2a11377f5335d03ae6399"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderPaveDialog.svg",
+      "sha256": "59a274e57aa9347930007b4b90425445c3586f19cd81d7464e4e42e23b053148"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderPaveProngBuilder.svg",
+      "sha256": "5b420ec561273f495cf18699db5b9d31ab2ac4e94bb96210450560a6cc97792e"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderPaveSphere.svg",
+      "sha256": "9863718452cf594d9da4d9fa02837bc02278e66fcf47d6b9014ebe47873d8bd8"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderTaperBagBetweenTwoCurves.svg",
+      "sha256": "8d8ecd4c4210b41cd7dbab393288ee842f39282202d6b58f9439960693fa4c4e"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/BuilderTaperBagChannel.svg",
+      "sha256": "02ac8f38ad6117ff9b6757e22176bb49261ea52aab4e5b0b7e60be0349e1c69b"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/OthersLoadStyle.svg",
+      "sha256": "b89ef3f4015c425efeab0d98b7b31c4f534e6530cc36a0c6f1dafe37126ef671"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/OthersMatchAttributes.svg",
+      "sha256": "b8db9e749974206ae79a84e07684cd7be74351969ff77abef5a24203eee8a868"
+    },
+    {
+      "path": "Resources/icons/gems-minimal/OthersSaveStyle.svg",
+      "sha256": "69224d3bbe38e7123eaf35ec25b4b3c355c657beb79c180bb7c0485daeebc86f"
+    },
+    {
+      "path": "Resources/icons/render-minimal/AnalyzeSurfaceEnvironmentMap.svg",
+      "sha256": "fd8f95666ab14266cfce59c600c670f7688464a01a592b1c9a0d672a97c3e8f4"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderAnimationBuilder.svg",
+      "sha256": "1ec3dcd19399fccb885b9a920bb16108281b261493d0287d4e8bd7d57e8d4447"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderAnimationBuilderAdvanced.svg",
+      "sha256": "009dc25cc34cde2b52f5eefb51b43cb9015cb1134066201a55fb7b3600de901f"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderBatchRender.svg",
+      "sha256": "55269106398ac140abcf0d8552586ebf71cb5064df559335078b3f799a029e09"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderFourViewCapture.svg",
+      "sha256": "824f7db2a718f5ea9c4edbd0130738bd3bc8643c126af83cbf7e1d97d677d1f4"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderLayoutTools.svg",
+      "sha256": "2917b758c710599d3d59a1881ee0bcdd829395bf6bd141c6f80187b212e3a253"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderProps.svg",
+      "sha256": "a2ffb3343731de98d5cf0a7bfd1078db4980ef044d43ff29bc2820455a4207f7"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderRenderEditor.svg",
+      "sha256": "a742bfecbfc7eb4ba57c28bc8350f5559b70dd5c86e54e5f4e833c819caa6d70"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderRenderScheduler.svg",
+      "sha256": "12d88a2084ccba964bb6e2e1336ee615865dfd8b3dc63114388f4ed83885113f"
+    },
+    {
+      "path": "Resources/icons/render-minimal/BuilderRenderVrayRenderStyler.svg",
+      "sha256": "8dfaaae019e39ef6390cc260a307a282cf1b0999b5c53bbcd81dbe0dc407f3a7"
+    },
+    {
+      "path": "Resources/icons/render-minimal/gvAlphaErase.svg",
+      "sha256": "5dfd8f97c4dc1316e7a4c664a0b1356d7b135a96f9fc7fb55e2ef1aac6181ffa"
+    },
+    {
+      "path": "Resources/icons/render-minimal/MatrixMovieMaker.svg",
+      "sha256": "e8047ba7c17080ab3dfa097c010e4fbe414dc663e78fbc97bc38d81dc910a316"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderCreateDirectionalLight.svg",
+      "sha256": "305fd9cfc6fce1b92c6b3125e76d4472776c3fcb50d0652dda8dd8e5d8bd3a01"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderCreateLinearLight.svg",
+      "sha256": "318ff61a081c4d2000fcfa45d08889824824fee151ac795d7a01d34c19f99b8a"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderCreatePointLight.svg",
+      "sha256": "9547a7f43e80b54c19db8d0d8cc300afe1aa7a68feb3dc50ca2fbc8662992464"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderCreateRectangularLight.svg",
+      "sha256": "402b581ee95742dc44ac07a4e1c97ad3b74413b189a4ea00cfef65c4ecc5f16c"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderCreateSpotlight.svg",
+      "sha256": "4de6383b15f57f139118a9652cad45a4d722ae13cc81d0034780e848d74bb90d"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderEffectsApplyDisplacement.svg",
+      "sha256": "d64e0ad329704a63f78183f7aae7e0d4f75ced9b54346dbfa2cba1788bb05821"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderEffectsApplyEdgeSoftening.svg",
+      "sha256": "da332bfc9f7dc4e06a938758987ab0e328126b5ebfac110fa2f1fc4d6430db60"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderSaveRenderWindowAs.svg",
+      "sha256": "858cc9c3a08405bfc81aa944c7611788ca05f28eee23d71cea1c4e760679e635"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderSetRenderer.svg",
+      "sha256": "2b56ed715b5a9f5fff79860658017edcac918919ddd4f2f84e77f7bd62d3e672"
+    },
+    {
+      "path": "Resources/icons/render-minimal/RenderSetSpotLighttoView.svg",
+      "sha256": "ee656f6fe71bb43f0fac4864aaf404057509d2921c27ad690b8eed99c5bc296a"
+    },
+    {
+      "path": "Resources/icons/render-minimal/WebViewer.svg",
+      "sha256": "65df5e6b373ff4d52b8d4be16dd31913e09309574027c96068a4d8f37c58b8aa"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderBeadOnCrv.svg",
+      "sha256": "1910fb8bd13af77f8f3d19e6b5fc15aafb3fe7a2f2a2d210ff2d7208e4b6a379"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderBeadOnSurface.svg",
+      "sha256": "275f8defe99e2372384fe547db34866df4d62e1e46ed6fc71af3415a336f23a6"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderBezel.svg",
+      "sha256": "d5aae88f60d775f65e9663865ae6ee25440c41cbdd902b0a4a57239ce540e79a"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderBezelCutter.svg",
+      "sha256": "88339e2d1b35472237afbe94224c79de265affaac7d4800d15c2f929be5d0616"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderChannelBorderCurve.svg",
+      "sha256": "66a360845ad70ecd35f79c78a63a57379b0e877f63cb904ca67a3ae4f140c008"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderHead.svg",
+      "sha256": "46fa04ea0c3b9b14dff4d7455201cde921f98fe355369b2ae33ae825241d023d"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderMetalPiece.svg",
+      "sha256": "bc2024c9f5a8561ad58f93650e14062f34217278f24d9ebb31d3201d2f9334f9"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderProngAdder.svg",
+      "sha256": "6549adb5790ad72b5e1a9df7433f0c9c9d62e07ec9e8ca4aad0d735233cbdfc6"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderProngEditor.svg",
+      "sha256": "3248b6396412491094fd8e85e2ef3c5e6fd3d467228dd52f84544b665e93a26e"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderProngOnSurface.svg",
+      "sha256": "cb619976f3b4037eb0f4544afa30ce4b177b79c2e4c9bca12a934c2cc1a0fd37"
+    },
+    {
+      "path": "Resources/icons/settings-minimal/BuilderPullToRail.svg",
+      "sha256": "4d1acc1e98a6b30beddd9d0072150586d1f62610ff14185a0a19335fea7a263d"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidBooleanTwoObjects.svg",
+      "sha256": "52747a444f426f83711913fe58193d984a1c4a6e70c9654d090fd6915acc92f8"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidBoss.svg",
+      "sha256": "80e5b0dbb3386c4dbcb61019ddc72af1383368d9c23a2d7a14c0f8130dd2766b"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidBoxCornertoCornerHeight.svg",
+      "sha256": "b19d3d2db8a317f05741b4a0988a5a1a94cc6b8fa2901024f40a8a5c5cf3e402"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidCapPlanarHoles.svg",
+      "sha256": "7f0292d677d55459928312cfe9f24b01d098e495bc4f7e12e0ca700595122737"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidCone.svg",
+      "sha256": "044fd78ff786219163c4e48b9b158e4afb9e9cda186c48bf2b3430963249f82a"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidCylinder.svg",
+      "sha256": "ffc7498f03dbee12d2aab247633a4ef8add1a10761159123d7308a9dcadd4ddb"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidDifference.svg",
+      "sha256": "12bb2aa5757aff8400435b8e716edede43f15a1947c1a48ad7a08d3435c81920"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidEllipsoidFromCenter.svg",
+      "sha256": "ec4217353b33d71691a1bfd32ce047614937ba1cad417fded1fd7f1bbf89464d"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidExtractSurface.svg",
+      "sha256": "44aeb0161b5ea543f03f28d057ff3928ffc532680f2277984888c47a50700384"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidExtrudePlanarCurveStraight.svg",
+      "sha256": "c796b464dbdf136d6937381f0a7f2b3564e76cea6ea734342c1356f57c29cef8"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidFilletEdgeFilletEdge.svg",
+      "sha256": "7655c96d248b93d1238b301ae13298541d09ba94c2e4e25d2efc1a09e7e820a1"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidGVDAllExtrude.svg",
+      "sha256": "0aa1faf3bc9b51879a9e454f3ea350a4bdce97477be737823028e6868db6d436"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidIntersection.svg",
+      "sha256": "24fb46e518c9e9f1b0da76aa06b2b0f90ff61a68c7d88af3206cce17d907d9b1"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidPipe.svg",
+      "sha256": "28579db3ba4c70e6c3184455456cf4ff309ce1498876089db8a532a5e28ef0c8"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidPtOn.svg",
+      "sha256": "07721c7eee32559f3517c64149fa18b8061c235bf97a6489b0f7c954a519fcf3"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidPyramid.svg",
+      "sha256": "056f3137ce2b198cacba559774628ec8f1c774b68a7f69492c7273b8b89fe6f0"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidRib.svg",
+      "sha256": "8cfee13bd75021c217f696b003c75c7e5f5751aef0b756b1c3e4211057c04bba"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidShell.svg",
+      "sha256": "fbc6efcc9285d9c21f6badbb2dbe03346a044dc4ef4088c7acd27018ff4043fd"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidSlab.svg",
+      "sha256": "ea1411dad39d034524b2ded5ba06b4915be63f59a39db1af6794c4415ffa3c0c"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidSolidEditToolsFacesMoveFace.svg",
+      "sha256": "f00193fb488474c3996d874c994e56657e6be8387aaaa0874bccdbe66f1e6dfd"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidSolidEditToolsHolesArrayHole.svg",
+      "sha256": "8000c01017cf855cceb97e057c9c91e289a85058a9b7b808f3d8817ea05d80a0"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidSolidEditToolsHolesArrayHolePolar.svg",
+      "sha256": "42dce76917c83ea252eb1f17521f24793ce84193668c04b8a8c0c72547b056a1"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidSolidEditToolsHolesMakeHole.svg",
+      "sha256": "c54cf0dde146b1bcb4ef297604fb53836f31a932ae5e7b37d38025a22b033141"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidSolidEditToolsHolesMoveHole.svg",
+      "sha256": "583c6703feb96ac7847f0b3b1e633bcbcc85f26cf2dd59a98409821bdce900be"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidSphereCenterRadius.svg",
+      "sha256": "b1444b9faf3fa3efb2c47cbabcb8f3af31422be4c8da7ef2db5891d35d0a8ead"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidText.svg",
+      "sha256": "035b386cbaa0e02b86e7d6a486babcfac4e19a96ac91c50050d022e884a201b0"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidTorus.svg",
+      "sha256": "6e316b2a2aa41ca647c52f15a3ada2d059e050d8f860e8513af10dc04be057e4"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidTruncatedCone.svg",
+      "sha256": "be32fee8050ea7ecb4d933833fa5c4cb3a7a24c4600ab7f63c6387f25fa29b03"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidTube.svg",
+      "sha256": "20555ad7cb7fb7bd37163a8ccd49a8ee1ac4a6e60be9b187b120278932a968c7"
+    },
+    {
+      "path": "Resources/icons/solid-minimal/SolidUnion.svg",
+      "sha256": "ae6585f0c02c074a2f8c6fc4241235b938744934fdf7391a8dd95b190429f893"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreateIsocurves.svg",
+      "sha256": "cf0f3264554b5cac9164941905c85a0a74bffac6af4ea452a8015132272f65a8"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationAppendFace.svg",
+      "sha256": "61f29e96fbb070611c9bc794904b120314cebc8b2e3dfad968be04ba9d9c4c70"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationClayooBezel.svg",
+      "sha256": "be1a1e236e93575ed2c1759d0d36f4f3160cfb9467983300260bf5be844dd55b"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationClayooLibrary.svg",
+      "sha256": "fd869e5f5f0f326d5f2afa170c17cbdd38c0cec68e309cc830d90fe299ab419c"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationFrom2Curves.svg",
+      "sha256": "1725e41b744d4358597a456481ca7a993c306a0c5bd46803a0cdac20e147e904"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationFromCurve.svg",
+      "sha256": "fefeb671b2d42da46e381ec79c83ec57984176ffd50d3bb00bfa97335307d380"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationFromMesh.svg",
+      "sha256": "a4f4a19e5d42418af593e0edd1cb4a4d854a2b3d16a0383d38e797c1b77128af"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationFromSurface.svg",
+      "sha256": "f2a1c9738e5a18c3278f3b7ccc25f6950038b45ae4cee3ecbcfea11f6e6ab0c0"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationFromTSplines.svg",
+      "sha256": "19bdff2f508977ecde8bc917dbd99bad3621850daad9bdd659748a6d002e2df9"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationLoft.svg",
+      "sha256": "626a956781caca4b65033d709e5d1ea14eef211daaf5c88894a9faf64868a18e"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationPipe.svg",
+      "sha256": "85b78099915f4ccc66c13e8a62b1174d0ae2d056afaaa0cac70865bdae172de3"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationRevolve.svg",
+      "sha256": "19c345f31928f232693044da001e7f46aaaf77f92ff9913b43d2028c7472919d"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationSweep1Rail.svg",
+      "sha256": "0c5cf8e4758a9139d1fef66f72fd95e955d9b9562183d2fc46ffe797b781ef67"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationSweep2Rails.svg",
+      "sha256": "e2b91522609d724c185b9e8ed1a289d7255331cf1321fcca3fd8b1c9c5fad5c6"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooCreationToNurbs.svg",
+      "sha256": "dac2e5d6839c84c4e67a091e137ca83a889d4d53698d7d163f195b96e8b9b1e0"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditBridge.svg",
+      "sha256": "7e5f2c74476343df10bdca9584db9d64d497e1ea3ea32c5d3114b259c073e9ab"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditCollapse.svg",
+      "sha256": "4c63309db7a0987b8b4a2a225f5c185fc118e9753e675924963e10a2b12e20b5"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditCrease.svg",
+      "sha256": "84096771054eab7d209bfab9a092e7570caf79e0a92b2c94133f25b7bc4410fd"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditDivide.svg",
+      "sha256": "bb224258191764d8e21cdc9f4594620d64f48b5e80b2dfa8e519ffe6ea5f1cdb"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditExtract.svg",
+      "sha256": "e4c667ca7a9c5cf748b3c618d2201909b2e66a831750e2d81cb2d87ff1191666"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditExtrude.svg",
+      "sha256": "b01e412efbed54565749c80201a5a900006059874348ed1cd7527338941f3652"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditFill.svg",
+      "sha256": "92bdb10fd8b0cd336168c79a96570244f14762663270b3b4be22aca05883fecf"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditFlipNormals.svg",
+      "sha256": "4f75abca654f2375135641abca5c8cf66c1a6f8d8d01fbc97afe4c47b21a14c5"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditInset.svg",
+      "sha256": "eeb87e6e3671a53a648cabd97021347ada714f214fdb1e39511791b340b8b57b"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditItem.svg",
+      "sha256": "07b56d41b116de59ad356c07909e9d7f3764b5d7a98b8e1ef449e29665e3edb2"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditKnife.svg",
+      "sha256": "392112629ab7a46427ff18b4c202327e2085f2d1fca717dd7d279238cd053772"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditMatch.svg",
+      "sha256": "7cd2d0fabd33184eacf75f637fd873785a53981cfccf6ea37383af227f3bfee2"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditOffset.svg",
+      "sha256": "9a1b5aecc4d5c0d320bd9ef5305e1995a55601a05bc7399e103b3bb6846aaa25"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditProjectToPlane.svg",
+      "sha256": "f229fcaa1b850ee3b50cb7f617ebad6c6c561db6c84ea32be6f4ee3161a8c85d"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditShell.svg",
+      "sha256": "bb7e5f929610a92fe77b6778330ea1c0cd354ab3161d3f2068c7fd12c134f36a"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditSplitSides.svg",
+      "sha256": "45a10d3819e539bfcfb3f28825a8b57d9afa47a1ece9cdb730fa5f45355e87cd"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditSubdivisionLevel.svg",
+      "sha256": "303f76c59b9b7216361f1549b00945989487b5930d78af49fc58e552ea3fe36e"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditSymmetry.svg",
+      "sha256": "b5c0da86f38ae7844240b361f112c8a98271c1af14fb032dce6bf46786b73e38"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditWeld.svg",
+      "sha256": "ede8ad70de25b5e249b6a4a26c1d209cf989d92c1492de1125e1d426e411197a"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooEditWrap.svg",
+      "sha256": "91253b2ff5b0dc6cebfdfdff3f83823c4f430901799e8a8b42aa5207bcfa1e6c"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooPrimitivesBox.svg",
+      "sha256": "6ad5731433fd10af22ce829cb598baf7e7beabe16f6fd873fb3a99c5a6c5d90b"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooPrimitivesCone.svg",
+      "sha256": "b72694ad5c52d86f0892b86ac8a05a20df7a8d318af83e7eb1b084954fc7e919"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooPrimitivesCylinder.svg",
+      "sha256": "20b59f6ca2e9e201d3157a9bfd255334ba26ad83aec5c3e4e103caf7ed2ffb42"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooPrimitivesPlane.svg",
+      "sha256": "6161f265d675c2321a4800ed41ed883c2de5c1d60493446262a8db29bf64565b"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooPrimitivesSphere.svg",
+      "sha256": "016e9248a4831a0e6632331393f36f87655a1f80d790932fffc3f54adc858f67"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooPrimitivesTorus.svg",
+      "sha256": "a8c29ca2b4e5f63682762ab292becaf715ff7b5cbbbc6ab596384d5c5944f04b"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionGrowSelection.svg",
+      "sha256": "01491ef89405659f33068f3d6f14d7cb2929ca63903d2126083e927d5647b59e"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionInvertSelection.svg",
+      "sha256": "b78d0da9e313dc541961dd44744330238dc5c81fd08f392fc50e09c9d255c480"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionPaintSelection.svg",
+      "sha256": "043074bbbd95de38089a227c8f6274c02c652bdd6a23194f8d2a65ca8248a6ad"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionResetPlane.svg",
+      "sha256": "b8dafacaa0d15a8887f3453c5e40edbee6cd71984ffcfbf50ef2313d970b9c7f"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSelectAll.svg",
+      "sha256": "bdb42bdf0e9b762d5912a892dede60e45a16bc10979ae2d5281bb31da629e0e6"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSelectCoplanar.svg",
+      "sha256": "307ac10469def67cdcaa05d41a602f0773f193b0a63fa44bde675d47a595ace5"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSelectCreased.svg",
+      "sha256": "e413ae328204cfa5e0f1a30e95894d251db7f97e3f404978296f9b42c3de5dd5"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSelectionSets.svg",
+      "sha256": "aade42ac97752c97468fd0cd48a73f95c1e27a90970fcbccfebe5847d9274d86"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSelectLoop.svg",
+      "sha256": "5f8f8d8ef8b3cdec94ad38e89737ca4711a38bf6d64830c40f8c308ab237f3a0"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSelectNaked.svg",
+      "sha256": "e8e6902bf48ecac07d099c0b2d92859ef02cc878320f7161e65cfbc8a1b93bed"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSelectNone.svg",
+      "sha256": "0fb0a9fd048a6b7e0ba75b6e72b3cecd7d36a496cf4ac73081ae01201c5342c9"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSelectRing.svg",
+      "sha256": "e5cb622aa1f4b07268b752d7e89c1016b9c493730e775e1117a9c20122e3b807"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionSetPlane.svg",
+      "sha256": "e291f0830da65bf201baa6feff9c254bd476f5a43a3a21d1b3914571ab0a926c"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectionShrink.svg",
+      "sha256": "12733be373b6fb7c16d4b526f8e53aabefaed9a37c4fbb15b8732454c28a278d"
+    },
+    {
+      "path": "Resources/icons/subd-minimal/ClayooSelectUV.svg",
+      "sha256": "ca1932afd8a5399e46572da4ea22800413dfe3b1150d3ed7e47c76d54ca6dd97"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/BuilderFourProfileSweep.svg",
+      "sha256": "0f84d769818d5352b49ce0862161ce8264cb2af243c7352251835c2433a77c10"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/OthersSurfaceRebuild.svg",
+      "sha256": "af8745e1cc0f736819ee0cefc41c2fe30cad24b2546bb6e79cd55aee9be095fe"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceBlendSurface.svg",
+      "sha256": "cf3b6157924544555f05a6c20e9f9db3c9742847f97289457804738e88d69aa5"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceChamferSurfaces.svg",
+      "sha256": "67e3ebb9368c4255fcae756528a1b8f7bfb43413765b82df718268f5ffd9318e"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceCurveNetwork.svg",
+      "sha256": "f199eedebca5686e4a0a1fc08c6c64cf137ff9e6d9f9bfef63b476548568b168"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceDrape.svg",
+      "sha256": "0c03213c5b1a335e21b18bb0cf0e17d2ba43e075aa1bbaf8606f5c2b10cb6218"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceEdgeCurves.svg",
+      "sha256": "c04e610e76a85bfb285f4105b9ed85c32e69a580285d10ab24cc038c01509892"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceExtendSurface.svg",
+      "sha256": "2d57703e5ef6db6cd848657da011d015dea9718eafa265523c3f4b3693084f9a"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceExtrudeCurveNormalToSurface.svg",
+      "sha256": "b5da0bd43291e13911c9191e16698388f59a794d569f7271f01ec5ee6110c594"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceFilletSurfaces.svg",
+      "sha256": "e741e8804ab7445fcd799d9500820aa5543498365f9cbf104c68f828607e8b84"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceGVDExtrudeAll.svg",
+      "sha256": "68277a06369f6da5760817424e4699fb890612614aad25699460599e2e765cbe"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceHeightfieldfromImage.svg",
+      "sha256": "bc4d2af74f7e21513e574e7fa6d67cb948901d6af53a27a91b5a2fe9f418c413"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceLoft.svg",
+      "sha256": "414b26ca01e32bf24f7022344171fb1bcf9cf410e282d223d889390798969b04"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceOffsetSurface.svg",
+      "sha256": "322f377b0b8af09b46d0c32bff993beb6ac09502e575b378562e0fb4e508030d"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfacePatch.svg",
+      "sha256": "0269097a2372c5a698d2a7beeeec26f898c393c6c292322232a22b4fdc48ecd9"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfacePlanarCurves.svg",
+      "sha256": "b672158336b71e79403db121063bd401e8fc573595d1937732d56dcb98ef85e3"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfacePlaneCornertoCorner.svg",
+      "sha256": "f1107c0c4d354c1788604a9edf61c3fbc5ddbd45ea5e17a2aba39d22c91b44be"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfacePlaneCuttingPlane.svg",
+      "sha256": "383f787f9045ecb7f48dc735e120cc0469b99c48b40606ffceb26a0fe8353c4c"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceRailRevolve.svg",
+      "sha256": "0753dddf3d212c97d6a63054aa2aabdef77fed24c5a03b119e5c02b89ece88a0"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceRevolve.svg",
+      "sha256": "6db818c5ad09cbe179b0ff6e890e7924987051127e77a040c1341a435ac67665"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSmash.svg",
+      "sha256": "29394ccf6d8d40776135aa906ec5a291534753075ddd9a32c4f60080c314b5ea"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsAdjustClosedSurfaceSeam.svg",
+      "sha256": "e7a8c83c662f775283f3732aeacd6ae687f79ce0e2b43ba67c59e229ee2b495c"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsMatch.svg",
+      "sha256": "8bd6cc289374246f88968072fa5795db28cb8d96087ab18c2e50d615d356ed83"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsMerge.svg",
+      "sha256": "cb900254b75e827df37aea314cf36cc9da4487a08d4e84d1ac05106c25b396ab"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsRefittoTolerance.svg",
+      "sha256": "2b75d3adbaea6d38155e1175d4c3a203fcc00f800fbf64096393e65be57c4c72"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsSetSurfaceTangent.svg",
+      "sha256": "f7539526332d0fd3cf8a99dbb108ead9da156161c28caf76e810103e40534125"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsShrinkTrimmedSurface.svg",
+      "sha256": "3d041431c9b2c9d3c263429df46293ad6c9bffde935799d848feb93ccf27f077"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsSoftEdit.svg",
+      "sha256": "902d51ed2fed7dc04b7e4572ed6b780c7462b669a8e31cbc7da19800c30757ce"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsSplitatIsocurve.svg",
+      "sha256": "a777684617184be977fbad27b3d2b4eb7852252dc518bf7070cf4efb9e708d1f"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSurfaceEditToolsUntrim.svg",
+      "sha256": "27c4759d2e62b735d702b57f39288e29a175eee802eddc9d15b783f19d8578c4"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSweepProfileSweep.svg",
+      "sha256": "4fe9e4eee5b79a772e3dba7493b9dc99a00fa047d6ad1c28d22ec4d102ffad2c"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSweepSweep1Rail.svg",
+      "sha256": "1aae24a0f0f743e44f2971dbe20b29d500fd20c8b90d744a6908137de04cc837"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSweepSweep2Rails.svg",
+      "sha256": "619cc61b911791c38dc0a1f10a2f536f2932bb02f9232acc97137bbfac40bf35"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceSweepSweepMultiRail.svg",
+      "sha256": "00d6a2d64a42c9775f048eea13403a1700c98cd1833da98a83ccce2afc9a34db"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceTweenSurfaces.svg",
+      "sha256": "562e9ab884cbb42420a4eae089d8b8f2ba8f85410fcda8419a28d30117f1cf84"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceUnrollDevelopableSrf.svg",
+      "sha256": "7e2f99a6cc06d6b19ad1eccdbad2c15a0de080c611f777fdb3a4e070586e326f"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceVariableFilletBlendChamferVariableBlendSurfaces.svg",
+      "sha256": "5e2122fea58bc25910f309f1684fe4a98db4613d296e49b480ba7b0bed68d2e4"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceVariableFilletBlendChamferVariableChamferSurfaces.svg",
+      "sha256": "7306c4b18dfce3e9d26faba15bb47846ed4ca0b16360d5ba15abf28618a1a7ce"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceVariableFilletBlendChamferVariableFilletSurfaces.svg",
+      "sha256": "445bcc057fc479c3866c343e0a953510d6de4b0b723e13fead66ee9e2d9e5fc2"
+    },
+    {
+      "path": "Resources/icons/surface-minimal/SurfaceVariableOffsetSurface.svg",
+      "sha256": "7c67ffab283c25e81093285caf6818708231bbac21f462ac7ba58e9db71e0d94"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/Builder3dPrinting.svg",
+      "sha256": "55f9284d05531bf6f078f90a8865518cc42808694871f3f841cd7f8416d7ed7b"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderBermarkLibrary.svg",
+      "sha256": "f98415735aac9ee9d3447d1c1cb2a313d0806b5dbf8d5a444ea10ddab18641b8"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderBooleanBuilder.svg",
+      "sha256": "43bd29e46952fabf8805346e14fe999856d3c24470d1b926fc6ecc4f3ca99595"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderCenterLine.svg",
+      "sha256": "35ebdad83b5222a0136d2d7c5b8c92f80d05a69d1a638f71d44a480ea8f850d7"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderCurveTransformTool.svg",
+      "sha256": "e56ee40bf392c726cee56dc7a0ef6436fa129a0ac8a73cfbf70a2717bfcacfdb"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderCustomRail.svg",
+      "sha256": "30eb8ea159f2faf37ce8c2e88254ea7ee404b15581573aaead39495d42b9bfc1"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderCustomRailAdvanced.svg",
+      "sha256": "62e0d4f9f7f651aad15747b3a32df44eae31e76fcca44cfb5f6b6e18bf96a51b"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderFourProfile.svg",
+      "sha256": "01a247ca0952d42ac4f6a580bb86f2cfe5f7e9bec9f1fe92fa425f4e696d6da4"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderImageTrace.svg",
+      "sha256": "0ec9d7ad990f7c1011edc9cb4b58bc86b05c5e784cead261b3132914eeb7bc64"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderMesh.svg",
+      "sha256": "80b26f8e36c5a22e8de5b2102dda331ad8b942ea1e587c145ccd3006b077440e"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderMeshReducer.svg",
+      "sha256": "4c41841d0f5f56503c4c99d7ee4ca63e5b9a4406140d8e5d7213325d2d512583"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderMeshRepair.svg",
+      "sha256": "e608320164e56117c9628d05e2aa8284078c48b701a85bdf109fd6fea5580850"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderMetalWeights.svg",
+      "sha256": "1ce0dedbeeedacb1cd5b3912220dbaeee31784d5929a15c3a5380ff049901c7a"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderObjectChecker.svg",
+      "sha256": "51697cab26a40f44e7eee18e5e18f8b57278ddce9f052db21c92921dceeff74f"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderObjectOnCrv.svg",
+      "sha256": "2cf659c1505fc704110ddf57bd791039288d75a87ebbf0ea6d2b70c1ffbd1d00"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderOutsideRingRail.svg",
+      "sha256": "0e3cfe923f4931986ca6fc03c52b72fc99a599badb636ab30b606f9b3a85d9e1"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderProfile.svg",
+      "sha256": "2be8e0bb5c82bddce486835d66a81d2b71fbe3af98cbd696fe752b5287f142d6"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderProfileEndCap.svg",
+      "sha256": "be42e3a644e963d3b1664785485b7b9704b9ce5b6f7c6be89de2b9a747545194"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderProfileMerge.svg",
+      "sha256": "6dc1d0dfb118d82442fe80862ae708cf8d43b0906911c3e0a2fd8b0a0e05608c"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderProfilePlacer.svg",
+      "sha256": "174a1dcd925d6dd81fff204e3d1ebcb4750f652161058ce40aa74f9303a0a700"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderResize.svg",
+      "sha256": "ea9393924bbc01782f7cc5a483db5636e7e69261c560c0746a6433af2b256600"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderRingRail.svg",
+      "sha256": "c07d39fb877c6243e0eba746299bb81f7ef30a44e7d64d9bde2a0c1283644a7c"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderStullerFindingsLibrary.svg",
+      "sha256": "0fc483e3834214f947017e70d982e4f1c521bab541741f61b52345d68074e2d4"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderSurfaceInset.svg",
+      "sha256": "4998c72176e4582732a0bfc27ece4fa4fb6496d358ea493c068473bb68988ef1"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/BuilderSurfacePullback.svg",
+      "sha256": "d81a6c10ac661dc1e37852e235ae97b764e3fd445465304e71a0a114b916430a"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/gvJoinHistory.svg",
+      "sha256": "8c6fef7aacc09c13d72e6359a0b625c45d6211e86ed379e412cd9d4e010a498b"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/gvSmartBlend.svg",
+      "sha256": "b30f444675ec0d62c965f0c3147ac0201d2702428addb631804d7dfecf103013"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/gvSmartMSR.svg",
+      "sha256": "a1d53ec39606a32fd6c9422b670c4f24c2a24265bd3d1234d861d5d28ae188a8"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/gvSmartTarget.svg",
+      "sha256": "a80042f5b466a7c432ed17abe002efb4075f3e779fff1d0b654e1b1accec3b02"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/gvSmartTargetAdd.svg",
+      "sha256": "555a74622953a8f31116c1d1298c1f62a9184b001474576553885e38731f3e66"
+    },
+    {
+      "path": "Resources/icons/tools-minimal/gvSmartTargetOnCrvEnd.svg",
+      "sha256": "2f9c9714f46822685d562cebee0f013f911c0d97edf7a655312a7f31637ae4cf"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/BuilderMakeDownFacing.svg",
+      "sha256": "71d5fc68af8b83b8bc8d9713fcdba8cfdf0c5a753706bd720f2033184d049b34"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/gvSmartFlow.svg",
+      "sha256": "3b6ab383273f5e0e066d5da95a36eadb3892f060eb0de54a42117583174ad19c"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/gvSmartFlowBreak.svg",
+      "sha256": "f0d91117b4cd4d19ad17518ad5ac4be9e51c68ca84435d766b82fb0757b4d3be"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/gvSmartFlowPullDownCurves.svg",
+      "sha256": "24fca5d74421c33963dd6bcbd14f2c17d5b743b08a711324858bab54b2c556ea"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/gvSmartFlowRigid.svg",
+      "sha256": "c884a3d4ce7935c6489dbaad052fee899966e8a79b3b11e895c2f410f9c89486"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformArrayAlongCurve.svg",
+      "sha256": "a1ab2feee826076a18652446cb7d6fe0e94138d2a0b4348e474bd13ad128791a"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformArrayAlongCurveonSurface.svg",
+      "sha256": "79f856dbff79c537cfbd28ffef6bb1a4aa50728a071b60e8f85de7094b0d0f67"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformArrayAlongSurface.svg",
+      "sha256": "ab4f8052e6741125c564df6b9942923863459f338ba1f1110cbcaeb7b5785884"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformArrayArrayLinear.svg",
+      "sha256": "755959a445d6209c529fe1b989ef4a5a9177a95977606d3f0d1de691f4f32395"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformArrayPolar.svg",
+      "sha256": "4ffb7130d9032cea26a09bd9eecb0bc12dc20c9ecfcb6e662e30bff12ec19259"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformArrayRectangular.svg",
+      "sha256": "ecde5c8c8835dbce1c533903d713f48a7865240a7106b7ed03aa9b54a53abdb7"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformBend.svg",
+      "sha256": "6413fc1f441ff4cf5b2990132f2832474abe6cbfc9bae06e6650c8280beb8df4"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformCageEditingCageEdit.svg",
+      "sha256": "30fdf788e8c615942a226235b655b2bef769c3e4eca3a09677751b4199b49478"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformCageEditingCreateCage.svg",
+      "sha256": "c7121096ef025732e7d02e4c48a20930928920d418fd8572b19e772d58fda54a"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformFlowAlongCurve.svg",
+      "sha256": "11113f449b247ad4ef7ebd3f51783ff0343d4d3a41c1b00cd96aaf76a019767a"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformFlowAlongSurface.svg",
+      "sha256": "748cd8e145411f2c005f5763ff7336ac894cb824e471989eabdc555fcd87ac40"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformMaelstrom.svg",
+      "sha256": "26a5cbfc65c56dd447f2fb629f509f879b11e0e8e1025b1b61d4a49ad5452764"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformMoveUVN.svg",
+      "sha256": "59cf0f323944c5ef38521b30b1adb2523bbe0e636dfb269cea7eb9bb4320e667"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformOrient2Points.svg",
+      "sha256": "0693a156b3aeb26a5d568dc9fc284f41876424be0f3877a2bce750925d0a6bc6"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformOrient3Points.svg",
+      "sha256": "35b395f646f9be636d183ad6a2aae6d1504036411c5b88f533fc0e2267af335f"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformOrientOnSurface.svg",
+      "sha256": "b223f1e2b10979e42aa744ac6fcc8ae12766d2efc0511712c5e791e530e383bf"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformOrientPerpendiculartoCurve.svg",
+      "sha256": "ec36ef5b841a8b77572690d2e45e7434a146115c5d0ac4c096726d6edb78e00e"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformOrientRemaptoCPlane.svg",
+      "sha256": "1eae1e973187b92d3a7186a90b556d84c94c0593e9ee0d71dbd4d58124c9b548"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformProjecttoCPlane.svg",
+      "sha256": "04b3ed9937bdea2d530c0526f1944fc3dc15ce6c645784dcbc9f19b2d4b8e8ad"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformRotate3D.svg",
+      "sha256": "767f2b56c1be9795ec380d93012c3dc4195164d122ac7f23517f965fe77fac37"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformScaleNonUniformScale.svg",
+      "sha256": "04a4805a3b1c94e30495c1556a14c31601b816e6ac7ad6ed5bc02463e0c450e1"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformScaleScale1D.svg",
+      "sha256": "fe08f9af78a9f717768f3d546810df90ef664f351bd03bfffb1c7e5e3d15789f"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformScaleScale2D.svg",
+      "sha256": "f83773f0436bd2ffd7a2fdc83277f1e4e8d75930b9bff35c54024746c2f5704c"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformScaleScale3D.svg",
+      "sha256": "f1650956912fee0dc34034684f8d3f9f3e5400aa822648e73f7eab27f49b855c"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformScaleScaleByPlane.svg",
+      "sha256": "1de94034f4b0fcba2d6beb810a1c646ec8fcb5c50c3cf1d3dbf74046c9abd80a"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformSetPoints.svg",
+      "sha256": "43f1a66328a2cf86a58d576d3a918b535c79239328b2a8076e916dfcf16c9245"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformShear.svg",
+      "sha256": "4d77665ff84b7db3ece8ef9f1e06979fb6f89b58dca642cbf7142ca2473ca103"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformSmartPattern.svg",
+      "sha256": "ca81149934fc37835ae68b4b6dfbab57e74a5afae914a8c4e6ab71af516bbd2b"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformSoftMove.svg",
+      "sha256": "62c890eb60531e0e39a73c95885d642e7ff3e12c2ab2b2de4b688c64b5d75eb2"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformSolidPtOn.svg",
+      "sha256": "2f6e2208556a5c292044cb48bf5a128939a2d8c0e50ac7c7b798d90b46269e2c"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformSplop.svg",
+      "sha256": "1c8178130035e4c4976521e2c1b772aacef2082f7f0f3eb7153c78bb9fc31534"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformStretch.svg",
+      "sha256": "9febce667e780d3a27c772647ffad93f5bd301da3d7390beb258797efbbb6a64"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformSymmetry.svg",
+      "sha256": "16961b272b40bf279391266a497b74fd73a769c53de792f3cebab182de69c794"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformTaper.svg",
+      "sha256": "c64ac02ad035fe62357a7dda51ff0cb55485b51a2d0e5775f58569b3b12ad718"
+    },
+    {
+      "path": "Resources/icons/transform-minimal/TransformTwist.svg",
+      "sha256": "2847fe39fb47ad6f187bd0fd55b9a30bee553dcddf2dc9020788eaf5f2023795"
+    },
+    {
+      "path": "standalone/Cargo.lock",
+      "sha256": "66ebdd8edcd36a746aed321580cf6481d346082443805b8b9fd97b3916475275"
+    },
+    {
+      "path": "standalone/Cargo.toml",
+      "sha256": "69e82c072979124b990977020403421b1b3395b33425f8bdf6c988489cc550c0"
+    },
+    {
+      "path": "standalone/crates/om9-app/assets/features.json",
+      "sha256": "87fba3e1ca2ed36f797c9477145230e759f96cf5416e91e3175d155042e0be44"
+    },
+    {
+      "path": "standalone/crates/om9-app/Cargo.toml",
+      "sha256": "2f732d90401279f39fc0595ff48d91e1ecd363445c4262773e6dd34ac91ee8e7"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/file_lifecycle.rs",
+      "sha256": "5dc049403247018d03e6e37a1171fa367b4568d82336482bfe3e6d152c63777d"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/icons.rs",
+      "sha256": "8ebacde541007928be37c618ab579535b8ae592a662e763e83e61b330c32466a"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/layer_command.rs",
+      "sha256": "0c4315edaa5ef76e12c0b36d9d78c5f7d7fb0da0a1c01ec85856cc27d5cf378a"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/layer_dialog.rs",
+      "sha256": "a9c4e47b2377d964e820ff6e56bcca01ee9cb659a0a474c044d551ae2d4b50e4"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/lib.rs",
+      "sha256": "66ec2118894c3876930bc1b597f5b7be23e596c173967ef25846ed4aebb88072"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/main.rs",
+      "sha256": "c4dd3c4e54c1e5d55f2ba8fb3a6ff5fabb0cb00b90c2d553acbe8c288f4ffbbc"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/native_picker.rs",
+      "sha256": "d9c777c5cc08352b65c2a74d2d74de7e36a9c2155511f3d584966f423fb84304"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/report.rs",
+      "sha256": "70f9b25aefc4eb9cbb2056a3a357446e8e41010746ac0bf0246a2e46ee760dd5"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/session/files.rs",
+      "sha256": "80e50f99808822f18f43c164d5110243dd6fb8d57ee4d9edeafd424ae75ff3c5"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/session/layer_dialogs.rs",
+      "sha256": "f767e39ee7986bb31d06775cb4cc9815aacaadc6974f222d84d04738e38011c4"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/session/layers.rs",
+      "sha256": "4b2fe839a09886afca710d2f1189294121fc57148c8e91eedc5e2695e6656ea6"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/session.rs",
+      "sha256": "83ba324a9f14f7b1f41b2492290fbe49a7300809ef4350e65b9724994afa0a33"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/transcript.rs",
+      "sha256": "000de98ce3f3324ec42c9ccb0d212174316c05f8e0f937f03f3032ec3a7cd7c4"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/chrome.rs",
+      "sha256": "df1cc542430b1b9c9b32b16324fa003ffa8168b549328317adb08c2b4569d35e"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/command.rs",
+      "sha256": "a68ea475fda958b4ce2dfd67e1ce81ae3178285a6ebc39ef1f69e928e7db62d2"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/file_audit.rs",
+      "sha256": "3707523f4eb98683b600c906778e2c6905223b280f5d552d1eb53a8d94a7129d"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/files.rs",
+      "sha256": "bcb1b78554593d104ab13ac884ff25a06c6a45d0f9915a5756aee92bc544fb63"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/layer_audit.rs",
+      "sha256": "99bcf7ac9c220769e80a752f049e6568870dc1d041e60595c61e58394a8d0e76"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/layer_dialog_audit.rs",
+      "sha256": "3285daa81af9c75426f5cd916253d1d51e8c5dc6562784625369eb323fde8be6"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/layer_dialogs.rs",
+      "sha256": "dc0e24b79ce2fbcf67f6c7ca79488ff45eebd3f8499b4e81cbafc90d56455798"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/layers.rs",
+      "sha256": "ed1451917515a9c28dc7d5de9236d67ecf9877edbafd9325f4e8f8f6f79bafd3"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/viewport_audit.rs",
+      "sha256": "475ea933ec6908e79346942b110d38da60fdda52e29bfb67be0bc58b7b6ca551"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/viewport_menu.rs",
+      "sha256": "debc0548d6f96e2dbc0ad8c681e1f65ee8345d9e9a0a856e3ab8d747b2b5de20"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui.rs",
+      "sha256": "f51f5be2ada667dcea3ecbe784d9f1e2cc0354a5dd7e407688d9d7c3a7d9ffcd"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/viewport_menu.rs",
+      "sha256": "fa206837c53a97991b15991a0ec9be70169e52625fd353889efd44fccbbbbcb3"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/chrome_actions.rs",
+      "sha256": "194f32421dfbdab2e6d3b4c6034417c6788e76e9af229e96ca65d27e4ac9b901"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/cold_layers.rs",
+      "sha256": "d34f1ac235ddfb6de79d6f596a0a8fe97eed6e4e60a368dd6cddf1cf8d68a582"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/cold_reopen.rs",
+      "sha256": "67b9287af14122cd49556a20ea0fbd1f786f355faed946ddb0e4c87c3acb2f40"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/command_sessions.rs",
+      "sha256": "0ec6ea6e39fbf8c499ef135cab1388d849ea437ca1b39c53270d1f0c75eef04c"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/command_transcript.rs",
+      "sha256": "261d3a9e6fcbca924666ef0b767f53d24e9786a59f482dbc6f3a89e6049e1e2b"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/file_lifecycle.rs",
+      "sha256": "176b331a22505d54db7fe7c8a7c9cdd17c2aa04c2e5d6ae703735849b3de8055"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/file_lifecycle_cold.rs",
+      "sha256": "6fefdb42b830a8e1ec4578e9b5020e250c88f4f8e16d8ffbd2ed7914591b3d6c"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/file_widgets.rs",
+      "sha256": "61b2a5e0b6d89fee60e11d810787a14b0fe31ae8f57fbc145f833cb2553d6242"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/layer_controller.rs",
+      "sha256": "5bfb99691cc1ea1945daba898d6bc3c0e99a2fd2949132d546d48ebb03b6d8d2"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/layer_dialogs.rs",
+      "sha256": "aa184e288b420b465f91844ab5285adb65be795122a9cdf64989ac4a7e328db7"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/layer_widgets.rs",
+      "sha256": "aa98b920623da4e44b2e707609255f33e3b9b089d7619de5331657e00dad5b73"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/pinned_command.rs",
+      "sha256": "adc4847f93f6331fa8c7eeb31bfc2184ed51f24ea96ae06381eddbff2bb6ba5c"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/scene_allocation_peak.rs",
+      "sha256": "2a47e1775b10910f8b50b009669c405fd70b42d42c6ea105d17470f63b46fb22"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/ui_events.rs",
+      "sha256": "e8d8966514c214583e1bba846a0e8ad89c420d09de2131d35cd68cc354afd3fe"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/viewport_title_menu.rs",
+      "sha256": "5146694d3e44096ce6b24242ce2de232cbf5852cd5a3488cea6a3376dd9a5a00"
+    },
+    {
+      "path": "standalone/crates/om9-archive/Cargo.toml",
+      "sha256": "7c93ab59ad64ccf9c6c8ab65354c8821efc8787324a76a80f8f1d7b6828d7498"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/atomic_file.rs",
+      "sha256": "77a7020592fca5ce3b2ead9fef4634d4fa81d464fd1f30f37652cc877ab2b89b"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/container.rs",
+      "sha256": "6bb2719370df625dbb03077693bc1fab7d7bd6c9900f3b52635c23aee67c2c25"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/json_admission.rs",
+      "sha256": "986be2450138b7279ac0f81e2d6e845e42c7cc8906eae830ee34abcb48d2e3dd"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/lib.rs",
+      "sha256": "303066cf970d2353ac84ab14b1de9ac963c072c41e5c0f5f371fdb582d4658d8"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/restore.rs",
+      "sha256": "1af17f63cf002d35951e59cd9ba965712bd9447e78ae95e9ba1c15ba1c45f6f7"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/atomic_save.rs",
+      "sha256": "6ba9b9c4c3a6554bd773daa4c2e3ae3981a85876a4b96975931dda7963a0d605"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/container_admission.rs",
+      "sha256": "9c69dbb0655092ef7483a72d3e363e4b4100120a6f3adca6f9d401ad96cd6c92"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/definition_units.rs",
+      "sha256": "745319f262926759afb0fc47dbd84aa4def422f6c477541a88f21533abb65b2a"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/layer_schema.rs",
+      "sha256": "e1db9532379d47fee309c366f89b47f1a584a2dd235511282264407d0217582e"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/resource_chunks.rs",
+      "sha256": "4885591ddd016c5c4ef3e9e457eed1e10958929ef57e364507815a24776506de"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/restore_modules.rs",
+      "sha256": "5ed0b4baa9c79e83541258a9218fb40401de3909ddc6d442aba0cf36340e83e7"
+    },
+    {
+      "path": "standalone/crates/om9-core/Cargo.toml",
+      "sha256": "1f100a097c871ab5dddf4894eb351c148974972aebbe21a8248cf10cc6685f74"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/budget.rs",
+      "sha256": "165bfd4a3003b09b0d9551e78829fcd4480daecfb9cd937a47d547f9383c4345"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/capability.rs",
+      "sha256": "6d0eb7d274ee013b90d2c25f37baa65dea3cc567789c357979893473b0178945"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/error.rs",
+      "sha256": "98e23a702a615a0be7e6eee18eac826c44d11ab79596570c878d3b97fad79941"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/evaluation.rs",
+      "sha256": "6087beb4a748228fe5409f5af1148c80db9df494989ddeeac6bc208e82c92a0d"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/geometry.rs",
+      "sha256": "f2111ebcd606a0898ec815abb124e3ad89afa09a92099030982ce07c1bfa43d6"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/history.rs",
+      "sha256": "3db1969a1afbe329db7e3629299570c725303b1fa39bf45fe666ff69bd544ffb"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/identity.rs",
+      "sha256": "c6b908be1335168b56715b0f5584c4a32c2f02bce8a5036736f5d0d96c126663"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/jobs.rs",
+      "sha256": "aec15fd4cabea567348d07752ab07815cf6b93860c0852611524f17ec5823078"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/layers/preset.rs",
+      "sha256": "d57069281adc5bfe2e494314594265e40714bfd5d05d74139be092bfa50e1407"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/layers.rs",
+      "sha256": "99ba2c6c5c680c3327931b76c448b846d2d9bbc7b6c990235075e87030eba1e8"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/lib.rs",
+      "sha256": "4cded3e9c0a6369605b5b3b25d19ed736c369dc3a66e79d149446ac952fe148b"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/model.rs",
+      "sha256": "3ea4f86fd216679c74f30b763beaf98c067618ad19c3a7f9b5b65544a4c31e5a"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/request.rs",
+      "sha256": "809c168efd9380cdd6eda0983a224d8d9094bf4f2d419274790bf5d3880728f7"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/resource.rs",
+      "sha256": "c094512acf7e18d1c56e3bc5c02c4675cbe12307b3028624817d07b84958d98a"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/result.rs",
+      "sha256": "30d9fb17059de833e864ec918ecc4eafe8e4d16cab8bf1b01cbcd51af9fc7d24"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/retained.rs",
+      "sha256": "1e2cc724dd1eb03bd2bfd284aea8a0702643c390c43b48d857d1808fee2a69b2"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/scope.rs",
+      "sha256": "50e332e91690b56157ed30453356b1f5a0db30f3a95c362e4a6aa5d2cfa866ab"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/transaction.rs",
+      "sha256": "ce1fd868e83ea4ded939202e1d0edf636085a0f89c5c9a13700e1c5f40bd7629"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/atomic_transactions.rs",
+      "sha256": "ae43ba8d9dd7cc00e3c83a9e62f1fcc2909107db77e3bd8bf53d4b73e0e8bca4"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/cancellation_links.rs",
+      "sha256": "d4b198dc2744caaae16c0fdde6f2eebdec0d2dbe9acc25e5eb3075e13e779a0f"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/capability_gates.rs",
+      "sha256": "044a03e7a1046b0810a13a99f6fa3ea7da2b5b38e95eed79d2e3d8b77abcd9ed"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/coordinator_authority.rs",
+      "sha256": "420021c3f4298c1169f687c6947de4bd5c187040533ea8f703248446bc54f6b2"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/coordinator_held_startup.rs",
+      "sha256": "1f492830fc74394c2333669ca9e5d29664fb1c42fd6dffc26097a65c2a293767"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/curve_oracles.rs",
+      "sha256": "ca458b9f6cfa61ab1f5b892623ad70c5346276ccda27fcae3a883b2e234b8226"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/definition_units.rs",
+      "sha256": "1f056e8ec3bc4ddd8e21140de99a02d9f1971922adf0a88671765077b94eb361"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/embedded_resources.rs",
+      "sha256": "b0040b82d4e15b2b35e8abc602259687706d9214a276b6566b356cade3f31c24"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/held_preparation.rs",
+      "sha256": "6f55fad33d8f5483bf7c5cfd6cdfb5e89cced5d13b1b2789cf1fa7279186eca5"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/history_replay.rs",
+      "sha256": "62699ea49074b1834851cb11050650485581863e482a6dc063dca80a816ab01c"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/job_lifecycle.rs",
+      "sha256": "aebc25bc07956ab5f8293bbec06cc2bb7dfcb677a3f4cb20c01879b89df07020"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/layer_state.rs",
+      "sha256": "0ab85f56d17960eab21b921383932d38f125e80967e6a9817d52411865a67e5c"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/layer_transactions.rs",
+      "sha256": "e58f7492da7c39f0441e98c52763ac50eb1f9f81f6e7c78d206cd325c90b1ef4"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/lazy_layer_assignment.rs",
+      "sha256": "3125ad613a1d84650ee39f1530375f51364867151e15c6b3f8d29a3e6d262bb1"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/model_admission.rs",
+      "sha256": "5e885449505a005dfc35c40fbdff7ea44442c04bcbe686acb3de837d30b631cd"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/resource_transactions.rs",
+      "sha256": "849a322eefeed6848b3451f8063758d47c2ab9e5a200e005f1f0d87333c7a580"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/retained_entity_baselines.rs",
+      "sha256": "ec7014b4748c7abe345399cee6dda5e72f2a73319ae34f1b111241ef280fd2fa"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/retained_imports.rs",
+      "sha256": "8fa804cb3690e53047bfa13cab067940cc7902ad056f2b8c8c733de307c509d6"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/retained_peak_review.rs",
+      "sha256": "cbcb4e2fab403a6dd9b06cf88b966d42bf098acdf40d9074e715d7195a6d0216"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/source_binding.rs",
+      "sha256": "6e11032fae4f00d686d2243d82e71a1031f7b8c2c83b45bbbe36e71f6b140cd9"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/startup_layers.rs",
+      "sha256": "132fbd34207d495080fcfb29780230aac5c84180e65de4ace523f7f0c38edeb4"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/transaction_scopes.rs",
+      "sha256": "0fbf232e67235b26fb563a5267338350a18aa684eb58eed665c38522a354cd8d"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/Cargo.toml",
+      "sha256": "9c8f4334bc6e541b15c868631dfe220f07f00ba832fdd72ccbaa4579a7e9480b"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/current_overlay.rs",
+      "sha256": "ddf2b8398138a7ee683a5b8e7cd7a088f3b8e2c15be2d5eba196327ef376e2cf"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/dependency_cache.rs",
+      "sha256": "3e032e55f255c127da5c65bd5cf4598ebd57cf02c03936baa6b77439d6b334d8"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/export_document.rs",
+      "sha256": "ce51e910e22f7f3ace21f882696b7104589111e8e6dc46819d1b1021fdc8e09c"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/import_capture.rs",
+      "sha256": "92f38622da55023877c5b648374c2773e949d9103d876fcf49a9864d7b0b0c59"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/import_dto.rs",
+      "sha256": "cd6af3b9f9017246fc538b569bba8b8d5084c8812753c0c7d8b6387abe5a7085"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/import_graph.rs",
+      "sha256": "d532aa7f99ffa3524fff470cae6078f42aebf7476a8f7a5cbba88ed9975c214b"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/imported.rs",
+      "sha256": "fbbbebcb0144b05036ab958f043c80758b3bacd490e3e0364ca87a5fc75f0be8"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/inspection.rs",
+      "sha256": "6ec2c55d137056f3886930afc42a80261f88a187640563f13faa9e26533b9598"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/lib.rs",
+      "sha256": "b447b3c98553d71250c062557c0a976e44ab92f985fdc6dd3677e811a205ac78"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/merge_inputs.rs",
+      "sha256": "7d5a1a394d5f7cfee3b6223693648f00a03e195e0fc88de94718217e51f11924"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/output_identity.rs",
+      "sha256": "8538489a8ec0190a9375950ad9e2445cd95359ccf511929ecb5cabe91e5ba5c2"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/retained_cold.rs",
+      "sha256": "fae28c8a00adbe654da48c02bfbcd959837ef03b90c66e91bac977e5c06502e5"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/retained_packet.rs",
+      "sha256": "52dc55801c95204f1d6af14168b89c13b6292307270bb2d60c7a877fd1101794"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/retained_stage.rs",
+      "sha256": "6958ae9bb6207794bcb8c199caa5030a1d55a64266ba0b3b63389b28df3ab996"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/retained_write.rs",
+      "sha256": "2276d6fa9aa1ba2c8829ebad3c78272e6af5dc1d85345d5b38ef972ada33ea9b"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/source_preparation.rs",
+      "sha256": "6afe7892979d88237966ca65fb48b08099963cc6c7a972063b06d6ce0d25eb95"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/staged.rs",
+      "sha256": "67a80a3b447971d9c6b5a3ac7fd8ff824f72c83717c0e88ca8ef707615844afb"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/wire_output.rs",
+      "sha256": "75e477dc3afe4995a6cc04ba8e58b77a05799976c5b9540938ea93f89a7c3552"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/current_overlay.rs",
+      "sha256": "99eeaeb9cb1403dba2bcaecbec7991406aed122df411819599ed4433e502de7c"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/current_overlay_review.rs",
+      "sha256": "bfa033df2fcbfe1e8e1a8fa2962790216fc06a8968d548c526b1e1667861de7a"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/export_authority.rs",
+      "sha256": "fd956d211748c7a128e008c6dfbf2e930d0a2a882e1f2669575acbdf79eb4d29"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/import_capture.rs",
+      "sha256": "585ff1daaa156d639c38baff6759ed2bc3caa74c5670d7db42921de03c674a16"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/layer_wire.rs",
+      "sha256": "ea054a2a8af71594836ae0a2be7314bcc5bdba8da11055e709f34b457e01e6f0"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_cold_review.rs",
+      "sha256": "f8ef9e082fecfb8b3d7b99929aacf3835860127e0105abbb3793a5b11e05d746"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_native_import.rs",
+      "sha256": "07a74e37f6f38db2fbba2fffde84dafb8d92e0c8a7f381d7da10a4f020535d63"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_native_inputs.rs",
+      "sha256": "326c9f767f2049a00b03b4936e945b63e827a1afb7d14347ad7fe33a17f8b50f"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_native_write.rs",
+      "sha256": "4cef57f9929644ea29c32cfa61fb42e4c7d99f2f18079ba44ad9a016414bd2c8"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_packet.rs",
+      "sha256": "9a627716740ca695c7c2ed2c3359e83c8c53d7cd66c86412077c35fa001ae861"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_packet_review.rs",
+      "sha256": "b14edc826e6e865d7e4e466a486cc1cb05a24458d1df3ed641361a7f4acf1066"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_stage.rs",
+      "sha256": "34029c7ab7e3c90ce523597002781af8bc43ec245a8db1a160ec6b412572c2e5"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_stage_review.rs",
+      "sha256": "e6c1a09a686505ba8c55576c0189fc136a7d068b0b339caa902860b4d9ffd262"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/source_preparation.rs",
+      "sha256": "9e5ca3e4c923b82939fbda3057cfde2a46f07f76522cea02084eeb1963df0faf"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/source_preparation_review.rs",
+      "sha256": "9139a415205b78cf068b80c97ba36696b51014fc09418ef77beca1fd72b4e689"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/staged_export.rs",
+      "sha256": "a571c685ec08e2832f10459dc7e72b1cea1f82fc0ab6bdf3b02bd62c5ae7f371"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/wire_capture.rs",
+      "sha256": "99437151171b39a319456f61b131fac931248ae92f27936bef274bbda20b0582"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/wire_output_review.rs",
+      "sha256": "fa7616d58fc49e28e2e29d7ea079a0f34e71379d986ea69b86aac9eea6302f41"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/Cargo.toml",
+      "sha256": "e9c2e7f19a26cbee333614055ff8893e85c3217da5427faf33efdc22c819107c"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/bin/native_runner.rs",
+      "sha256": "4c8892e951aa323a154507d180c1039d671658d541202e86cf807a71aea9b838"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/bin/process_fixture.rs",
+      "sha256": "b4b78ca9a73627d39cd43db4613361e48a3b4e48ebb809cb145a2d2071d8c9e9"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/dialog_probe.rs",
+      "sha256": "ad5bb800735d3bf46db89e67bb8fedb51f82a1a6f38b4b1c7bbd3729a53c7891"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/file_dialog.rs",
+      "sha256": "51a394ab8ba2fdb09f422e18ac2f39155a4c023d99cb6aea88a6606d3f5261ef"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/lib.rs",
+      "sha256": "c7045a3e665517b8d6d37eb23e502bafae428f96fe2332c387383cc05394863c"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/verified_file.rs",
+      "sha256": "80cfcda63211ca8897272e73babfd9097a3a43050a8f215952ca9f14a7923799"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/windows.rs",
+      "sha256": "d0b5be38d6418617e7c20fadad094a5d9703105344bf76192ed80f8dff9e16c9"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/tests/process_owner.rs",
+      "sha256": "605062d78f0a4e9d814b0b2553c5b2b69766f1b84fd24e6168a00cb00b00dba9"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/tests/teardown.rs",
+      "sha256": "ef61b002482f5ea4d619b176daf3ca90b99c5a71da0da853a1b00e62f59ef86a"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/tests/verified_file.rs",
+      "sha256": "d9dbcd2edcca3f4004addf36cd5de86ec512ecf3559378a69f6ebb55844e4f66"
+    },
+    {
+      "path": "standalone/crates/om9-scene/Cargo.toml",
+      "sha256": "8de3c442d11278d033a719197e3495c0fc04a66a0b5e812a43ffcfb394cf189d"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/affine.rs",
+      "sha256": "8e2d720f8e1fcdcaab8658bbc6834b794d2597391a01aa19afb013c7727aa660"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/camera.rs",
+      "sha256": "39322474e9527456c5fa4eeba251e28288a63087c1c54e2b39c6381950a461a3"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/grid.rs",
+      "sha256": "19ff0db7e01d399e439b20421a6dc1ee4e513f768909c7add0cc5d44b5b47ccf"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/lib.rs",
+      "sha256": "4404c21a98722ff59d8a0b36c613d9915b4721df5b9142e8c1b87de41fefd0d0"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/picking.rs",
+      "sha256": "1aec15fb4c01c96ac5a11a92cc470839738bbbd85f89e52daa07b8febba1f9b5"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/scene/admission.rs",
+      "sha256": "91440e1ee37fd2d80f77ce682e22c9de44afd71a9bfc911a526855353af3e2d8"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/scene.rs",
+      "sha256": "b0f4167f7e19f9df1336a3a103d9e414e93f63544b8c5b968668658b6ce3df11"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/workspace.rs",
+      "sha256": "3154230bf8177a8207a4b76b022571877d336c072f6d713a04eb0362c0e3a3d9"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/affine_gesture.rs",
+      "sha256": "aae21024632b72ce7eccb5a6dccddc657652cb0d0e44fb78cac27f501d754e87"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/camera_grid.rs",
+      "sha256": "5954928e0bd2d6b082e1a56c67cd8f7c8d4b3d1e21f2a20c056dbd7575254310"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/instance_admission.rs",
+      "sha256": "88d282cb9d6728491df6f234a9df9e49f75b25893598448fd517b2295e0635b8"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/layer_colors.rs",
+      "sha256": "e94b146f01772a6992f86f52b7874d93725237597b19c19f59d42437c2ad7baa"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/metadata_cache.rs",
+      "sha256": "8de7c197ac0b764fafc2632d42765f628d30efef54cdb067520a8c763137c2f2"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/reference_workspace.rs",
+      "sha256": "92c843d8959997149df16244ef7165bf5aa807c01b465ea05098b1f6102d5dec"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/world_picking.rs",
+      "sha256": "77dd71b406aa2441115ce4b51e5553249fbddaf7101403d172fc440ca49594bb"
+    },
+    {
+      "path": "standalone/provenance.json",
+      "sha256": "de203f8c778fb5061d90f88aa2df0c0c2737b6e26ff51079660736a8708e141f"
+    }
+  ]
+}

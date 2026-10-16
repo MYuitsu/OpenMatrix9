@@ -1,0 +1,80 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-09",
+  "milestone": "M02",
+  "title": "Febe Matrix F6 Context Actions",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "F6 menu theo selection type, auto-prefill builder",
+  "definition": {
+    "module_id": "OM9-L2-03-09",
+    "milestone_id": "M02",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "scope": "F6 menu theo selection type, auto-prefill builder",
+    "exclude": "Không xây selection backend mới.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          9,
+          11
+        ],
+        "pdf_pages_1based": [
+          19,
+          21
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-02",
+      "OM9-L2-03-07",
+      "OM9-L2-01-07"
+    ],
+    "downstream_contracts": [
+      "command-f6-adapter"
+    ],
+    "early_slices": [
+      "M02: F6 for empty and selected generic object, with no fabricated executable commands.",
+      "M03–M08: add per-object menu entries by registry as individual commands are delivered."
+    ],
+    "manual_test_required": true,
+    "acceptance_gate": "M02-UI",
+    "l3_count": 8
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-09-001",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-09 - Febe Matrix F6 Context Actions/L3-001 - F6 Selected Object Class Dispatch/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-09-002",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-09 - Febe Matrix F6 Context Actions/L3-002 - F6 Default General Mode/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-09-003",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-09 - Febe Matrix F6 Context Actions/L3-003 - F6 Curve And Surface Modes/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-09-004",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-09 - Febe Matrix F6 Context Actions/L3-004 - F6 Gem And Report Modes/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-09-005",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-09 - Febe Matrix F6 Context Actions/L3-005 - F6 Custom User Mode/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-09-006",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-09 - Febe Matrix F6 Context Actions/L3-006 - F6 Builder Input Prefill/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-09-007",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-09 - Febe Matrix F6 Context Actions/L3-007 - F6 Floating Pin And Position/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-09-008",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-09 - Febe Matrix F6 Context Actions/L3-008 - F6 Disabled Unimplemented Actions/l3.json"
+    }
+  ]
+}

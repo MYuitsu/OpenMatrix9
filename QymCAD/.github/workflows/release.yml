@@ -1,0 +1,401 @@
+# Building the release packages in CI: the Windows portable zip and MSI, the Linux AppImage and the macOS
+# .app for Apple Silicon and for Intel.
+#
+# ONE TRIGGER: the button (Actions -> Run workflow). Nothing builds by itself - not on a push, not on a
+# tag. Commits may arrive daily; a package is made when it is asked for, and asking is a person pressing
+# a button.
+#
+# Run it against a BRANCH -> the artifacts, downloadable by whoever is signed in, kept 90 days. That is a
+# build for oneself.
+#
+# Run it against a TAG (the ref selector accepts one) -> the same files, plus a Release page anyone can
+# download from without an account, kept for ever, named by the tag. That is a build for other people.
+# Nothing is marked a pre-release - the reason is written out at the `publish` job.
+#
+# RUN IT AGAINST THE BRANCH FIRST, AND THE TAG AFTER. A run can restore caches made on its own ref or on
+# the default branch, and nothing else. A cache saved by a run on a tag therefore belongs to THAT tag and
+# is invisible to the next one: measured on two consecutive tag builds, where the second rebuilt the very
+# kernel the first had cached and spent forty-five minutes doing it. One run against the branch puts the
+# kernels where every later tag can reach them.
+#
+# Windows: MSVC, the mainstream target for Rust there and the compiler every desktop CAD is built with.
+# The kernel is built from source by the same compiler, because the C++ ABI does not mix: a bridge
+# compiled by one toolchain cannot link against a library built by another.
+#
+# It used to be MSYS2/MinGW, chosen because OCCT was one `pacman` line away. That path broke on a link
+# error that has been open upstream since 2019 (rust-lang/rust#60912): Rust carries a libmsvcrt.a of its
+# own, MSYS2 updated libmingwex.a, and the halves drifted apart.
+#
+# Linux: the very same Docker image a local build uses (`just pkg-linux`), so what CI produces and
+# what is built by hand are the same artifact. The image compiles OCCT 7.9.3 FROM SOURCE - apt on Ubuntu
+# 22.04 carries only 7.5, while build.rs needs the merged modules of 7.8+ - and that is slow, so the layers are
+# cached in the Actions cache. The first run pays for the compilation; the rest reuse it.
+name: release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # to attach the file to a Release on a tag
+
+jobs:
+  # FIFTEEN SECONDS BEFORE A QUARTER OF AN HOUR. A tag saying v0.2.0 while the manifest says 0.1.0 gives a
+  # package named by the tag and a program that calls itself the older number in its own About window - and
+  # the two are found out by whoever downloads it. Refused here, before anything is built.
+  agree:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: The tag and the manifest must agree
+        run: |
+          VER=$(grep -m1 '^version' Cargo.toml | sed 's/[^0-9.]//g')
+          echo "the manifest says $VER"
+          if [ "${{ github.ref_type }}" != "tag" ]; then
+            echo "not a tag - there is nothing to agree with"
+            exit 0
+          fi
+          TAG="${{ github.ref_name }}"
+          case "$TAG" in
+            "v$VER" | "v$VER-"*)
+              echo "the tag $TAG agrees" ;;
+            *)
+              echo "!!! the tag $TAG does not start with v$VER"
+              echo "!!! raise the version in Cargo.toml, or tag it v$VER (a suffix after a hyphen is allowed)"
+              exit 1 ;;
+          esac
+
+  windows:
+    needs: agree
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # THE KERNEL IS BUILT FROM SOURCE, exactly as it is for Linux: the same 7.9.3, the same modules
+      # switched off. The alternatives were binaries from Open Cascade (a download behind a registration,
+      # which no automated build can walk through) and vcpkg (whose port decides the version and the module
+      # set for us). One kernel for all three systems beats three different ones.
+      #
+      # `INSTALL_DIR_LAYOUT=Unix` matters more than it looks: by default OCCT installs into `inc` and
+      # `win64/vc14/lib` on Windows, and then Windows would need different paths in every place that
+      # names them. With Unix the layout is the one Linux and macOS have.
+      - name: Restore the kernel build
+        id: occt
+        uses: actions/cache/restore@v6
+        with:
+          path: C:\occt
+          key: occt-7.9.3-msvc-x64-v2
+
+      - name: Build OCCT 7.9.3 (only when the cache missed)
+        if: steps.occt.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          curl.exe -sSL -o occt.tar.gz https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_9_3.tar.gz
+          tar xf occt.tar.gz
+          # THE NAME OF THE UNPACKED DIRECTORY IS NOT OURS TO ASSUME. GitHub strips the leading `V` from a
+          # tag when it names the folder inside an archive, so `V7_9_3` arrives as `OCCT-7_9_3`. The Linux
+          # build always matched it by pattern; this one spelled it out and failed on the first run.
+          $src = (Get-ChildItem -Directory -Filter 'OCCT-*' | Select-Object -First 1).FullName
+          if (-not $src) { throw "the archive unpacked into nothing that looks like OCCT-*" }
+          Write-Host ">>> sources at $src"
+          # Parts of OCCT's own tree declare compatibility with CMake older than 3.5, and current CMake has dropped
+          # support for saying that at all - the runner here carries the one shipped with Visual Studio
+          # 2026. This is the escape hatch CMake itself names in the refusal. On Linux the question never
+          # comes up: the builder image is Ubuntu 22.04, whose CMake is old enough to accept it as written.
+          # EVERY ARGUMENT IS QUOTED. PowerShell tore `-DCMAKE_POLICY_VERSION_MINIMUM=3.5` in half - CMake
+          # received `3` and complained about a stray path `.5` - while the neighbouring flags survived
+          # only because none of them contains a dot. Quoting settles it whatever the parser was thinking.
+          cmake -S $src -B occt-build -A x64 `
+            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" `
+            "-DBUILD_LIBRARY_TYPE=Shared" `
+            "-DINSTALL_DIR=C:/occt" `
+            "-DINSTALL_DIR_LAYOUT=Unix" `
+            "-DBUILD_RELEASE_DISABLE_EXCEPTIONS=OFF" `
+            "-DBUILD_MODULE_Draw=OFF" `
+            "-DBUILD_MODULE_Visualization=OFF" `
+            "-DBUILD_DOC_Overview=OFF" `
+            "-DUSE_FREETYPE=OFF" "-DUSE_TK=OFF" "-DUSE_FREEIMAGE=OFF" `
+            "-DUSE_RAPIDJSON=OFF" "-DUSE_DRACO=OFF" "-DUSE_OPENGL=OFF" "-DUSE_GLES2=OFF"
+          if ($LASTEXITCODE -ne 0) { throw "the kernel would not configure" }
+          cmake --build occt-build --config Release --target install -- /m
+          Get-ChildItem C:\occt
+
+      # SAVED BEFORE THE APPLICATION IS BUILT, on purpose. Put after it, a failure in our own code would
+      # throw away the kernel too, and every attempt at a fix would pay for it again.
+      - name: Save the kernel build
+        if: steps.occt.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: C:\occt
+          key: occt-7.9.3-msvc-x64-v2
+
+      # THE TAG IS STAMPED INTO THE BINARY HERE, at the step that compiles it - not at the one that packs
+      # it. `build.rs` reads `QYMCAD_VERSION`, so a build step without it produces a program that cannot
+      # say which release it is, however the file is named afterwards.
+      - name: Build (release)
+        env:
+          QYMCAD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          OCCT_INCLUDE_DIR: C:\occt\include\opencascade
+          OCCT_LIB_DIR: C:\occt\lib
+        run: cargo build --release --locked --bin qymcad
+
+      # THE TAG NAMES THE PACKAGE when the button was pressed against one; every other build is named by
+      # the manifest version plus the commit. Two dev builds three days apart must not share a file name.
+      - name: Bundle portable zip
+        shell: pwsh
+        env:
+          QYMCAD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          OCCT_ROOT: C:\occt
+        run: pwsh -File packaging/win/bundle.ps1
+
+      # THE INSTALLER, FROM THE SAME FOLDER THE ZIP WAS MADE OF. Two collections of files for one version
+      # would differ by exactly the thing nobody thinks to check, so the MSI packs `dist\qymcad` - what
+      # bundle.ps1 has just assembled - rather than gathering its own.
+      #
+      # WHY BOTH. The zip is unpacked wherever a person likes and nothing knows it is there; the MSI is
+      # listed in "Apps & features", upgrades in place, and is what winget installs.
+      # THE VERSION IS PINNED, and this one is not a matter of taste.
+      #
+      # `dotnet tool install --global wix` takes the newest, and on 09.09.2026 that became v7, which stops
+      # with "WIX7015: You must accept the Open Source Maintenance Fee (OSMF) EULA". The fee was introduced
+      # in v6 and is asked of everyone who earns money from the toolset; accepting the EULA means declaring
+      # it paid. Version 5 predates all of that and builds the same `.wxs` (schema v4).
+      #
+      # The floating version is the actual fault here: a build that worked yesterday broke because somebody
+      # else released something. Every other tool in this repository is pinned - the Rust toolchain, OCCT -
+      # and this one was not.
+      - name: Install WiX
+        run: dotnet tool install --global wix --version 5.0.2
+
+      - name: Build the MSI installer
+        shell: pwsh
+        env:
+          QYMCAD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+        run: pwsh -File packaging/win/build-msi.ps1
+
+      # NOT AN ARCHIVE INSIDE AN ARCHIVE. By default this action zips whatever it is given, so a package
+      # that is already a `.zip` arrived as `qymcad-win64.zip` holding `qymcad-0.1.0-...-win64.zip`
+      # holding the program - two unpackings for one download. `archive: false` uploads the single file
+      # as it is; the file's own name becomes the artifact name, which says the version besides.
+      #
+      # Zipping it OURSELVES is still right: this action does not keep file permissions ("all files will
+      # have 644"), and a program that arrives without its executable bit does not start. The `.app` and
+      # the AppImage carry that bit inside our own archive.
+      #
+      # TWO STEPS BECAUSE THERE ARE TWO FILES, and `archive: false` takes exactly one. Reported behaviour:
+      # "When 'archive' is set to false, only a single file can be uploaded. Found 2 files to upload." -
+      # the installer was added to the same step as the portable zip and the job died at the upload, after
+      # everything had been built. The two cannot share a step, and merging them under `archive: true`
+      # would put a zip inside a zip again.
+      - name: Upload the portable zip (for workflow_dispatch)
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/*.zip
+          archive: false
+
+      - name: Upload the installer (for workflow_dispatch)
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/*.msi
+          archive: false
+
+  linux:
+    needs: agree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # buildx, because only it can keep the layers in the Actions cache. Without that every run would
+      # recompile OCCT from source.
+      - uses: docker/setup-buildx-action@v4
+
+      # The build record this action uploads by itself is a 30 KB artifact nobody opens, sitting next to the
+      # 35 MB one that people came for. Off: the list of artifacts is read by a person looking for a package.
+      - name: Builder image (OCCT 7.9.3 from source, Ubuntu 22.04 base)
+        uses: docker/build-push-action@v7
+        env:
+          DOCKER_BUILD_RECORD_UPLOAD: false
+          DOCKER_BUILD_SUMMARY: false
+        with:
+          context: packaging/linux
+          tags: qymcad-appimage-builder:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # The sources are mounted rather than copied into the image: the image is the toolchain, the checkout is
+      # the code. That is exactly how `just pkg-linux` runs it, so the two paths cannot drift.
+      - name: Build the AppImage
+        env:
+          QYMCAD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+        run: |
+          mkdir -p dist
+          docker run --rm -e QYMCAD_VERSION \
+            -v "$PWD":/src -v "$PWD/dist":/dist \
+            qymcad-appimage-builder:latest bash packaging/linux/build-appimage.sh
+
+      # A single file, uploaded as it is - see the reason at the Windows job.
+      - name: Upload artifact (for workflow_dispatch)
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/*.AppImage
+          archive: false
+
+
+  # macOS: TWO BUILDS, ONE PER PROCESSOR - Apple Silicon (arm64) and Intel (x86_64). Each is built
+  # natively on a runner of its own kind rather than cross-compiled, so OCCT and the bridge go through
+  # the very same commands on both.
+  #
+  # THE INTEL RUNNER HAS A DATE. `macos-15-intel` is the last x86_64 image GitHub offers, supported until
+  # August 2027; the one before it, macos-13, was retired in December 2025. When it goes, this row goes
+  # with it - or turns into a cross-build on the arm64 runner (`CMAKE_OSX_ARCHITECTURES=x86_64` for the
+  # kernel, `--target x86_64-apple-darwin` for cargo).
+  #
+  # The kernel is built from source here as well: one OCCT 7.9.3 with one set of modules for all three
+  # systems beats three different ones. The cache is per architecture - a kernel built for one processor
+  # is of no use to the other.
+  macos:
+    needs: agree
+    strategy:
+      # One processor failing must not cancel the other: the other one still finishes, saves its kernel
+      # to the cache and leaves its package on the run. The Release is not made short by this - `publish`
+      # waits for both and does not run when either fails.
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Restore the kernel build
+        id: occt
+        uses: actions/cache/restore@v6
+        with:
+          path: /Users/runner/occt
+          key: occt-7.9.3-macos-${{ matrix.arch }}-v2
+
+      - name: Build OCCT 7.9.3 (only when the cache missed)
+        if: steps.occt.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o occt.tar.gz https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_9_3.tar.gz
+          tar xf occt.tar.gz
+          src=$(ls -d OCCT-* | head -1)
+          echo ">>> sources at $src"
+          cmake -S "$src" -B occt-build \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_LIBRARY_TYPE=Shared \
+            -DINSTALL_DIR=/Users/runner/occt \
+            -DINSTALL_DIR_LAYOUT=Unix \
+            -DBUILD_RELEASE_DISABLE_EXCEPTIONS=OFF \
+            -DBUILD_MODULE_Draw=OFF \
+            -DBUILD_MODULE_Visualization=OFF \
+            -DBUILD_DOC_Overview=OFF \
+            -DUSE_FREETYPE=OFF -DUSE_TK=OFF -DUSE_FREEIMAGE=OFF \
+            -DUSE_RAPIDJSON=OFF -DUSE_DRACO=OFF -DUSE_OPENGL=OFF -DUSE_GLES2=OFF
+          cmake --build occt-build --target install -j"$(sysctl -n hw.ncpu)"
+
+      # Saved BEFORE the application is built: a failure in our own code must not throw the kernel away.
+      - name: Save the kernel build
+        if: steps.occt.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: /Users/runner/occt
+          key: occt-7.9.3-macos-${{ matrix.arch }}-v2
+
+      # The tag is stamped at the compiling step - see the same step in the Windows job.
+      - name: Build (release)
+        env:
+          QYMCAD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          OCCT_INCLUDE_DIR: /Users/runner/occt/include/opencascade
+          OCCT_LIB_DIR: /Users/runner/occt/lib
+        run: cargo build --release --locked --bin qymcad
+
+      - name: Bundle the .app
+        env:
+          QYMCAD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          OCCT_ROOT: /Users/runner/occt
+          MACOS_ARCH: ${{ matrix.arch }}
+        run: bash packaging/macos/bundle.sh
+
+      # A single file, uploaded as it is - see the reason at the Windows job.
+      - name: Upload artifact (for workflow_dispatch)
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/*.zip
+          archive: false
+
+  # ONE JOB PUBLISHES, AND ONLY WHEN A TAG WAS BUILT.
+  #
+  # Both build jobs used to attach their own file to the Release. Two jobs finishing at the same second
+  # would then race to CREATE that Release, and the loser fails with a conflict - after a quarter of an
+  # hour of building. Here the files are collected first and the page is made once.
+  # THIS JOB RUNS EVERY TIME, AND ONLY ITS LAST STEP WAITS FOR A TAG.
+  #
+  # It used to be gated as a whole, so the only occasion it ever ran was a release - and a mistake in it
+  # showed up there and nowhere else. Reported behaviour: three builds went green, this job then unpacked
+  # the very packages it was meant to attach, and the release page was left with nothing. Half an hour of
+  # building, found at the last step, on the day the release was wanted.
+  #
+  # Now every run downloads the packages and checks them; only the page is made on a tag. A branch run
+  # costs a minute of downloading and proves the whole path.
+  publish:
+    needs: [windows, linux, macos]
+    runs-on: ubuntu-latest
+    steps:
+      # THE SOURCES ARE NEEDED HERE TOO, for one file: the text that goes onto the release page. This job
+      # never checked anything out - it only moved artifacts - and `body_path` would have pointed at
+      # nothing.
+      - uses: actions/checkout@v7
+
+      # THE PACKAGES ARE FILES, NOT SOMETHING TO UNPACK. They are uploaded as they are (`archive: false`
+      # at each build), and on the way back this action looks at the name: a `.zip` is decompressed unless
+      # it is told otherwise. Reported behaviour: the Windows and macOS packages arrived UNPACKED and
+      # merged into one pile - `QymCAD.app` as a directory, the Windows DLLs beside it - and there was
+      # nothing left to attach to the release. The AppImage came through untouched, being no archive.
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+          skip-decompress: true
+
+      # FIVE FILES, AND ALL FIVE ACTUALLY FILES. The packages are uploaded unzipped, and the release
+      # step below attaches `dist/*` - a directory among them would be attached as nothing at all, and
+      # the Release page would go up with a download missing. Fifteen seconds against that.
+      #
+      # Five, not three: Windows produces two (the portable zip and the MSI installer), and macOS two (one
+      # per processor, from the one upload step the matrix runs twice). The number
+      # is written out rather than counted from the jobs on purpose - a package that silently stopped
+      # being built is exactly what this step exists to catch.
+      - name: What was built
+        run: |
+          ls -lh dist
+          for f in dist/*; do
+            [ -f "$f" ] || { echo "!!! not a file, so it cannot be attached: $f"; exit 1; }
+          done
+          n=$(ls dist | wc -l)
+          [ "$n" -eq 5 ] || { echo "!!! five packages were expected, $n arrived"; exit 1; }
+
+      # NOT MARKED A PRE-RELEASE, and that is a decision rather than an oversight.
+      #
+      # The rule used to be the one semantic versioning suggests: a hyphen in the tag means a pre-release.
+      # It cost more than it gave. The Releases box on a repository's front page shows only the latest
+      # ORDINARY release and skips pre-releases entirely - so with every build being a development build,
+      # that box stayed empty and whoever arrived looking for a download found nothing but a tag count.
+      #
+      # Hiding the only thing there is to download is worse than the confusion the flag was meant to
+      # prevent, and the confusion is handled anyway: the tag says `dev`, the file name says `dev`, and
+      # the README says so in its second paragraph. Bring the flag back when there is a stable release for
+      # a newcomer to land on instead.
+      - uses: softprops/action-gh-release@v3
+        if: github.ref_type == 'tag'
+        with:
+          files: dist/*
+          # WHAT TO DOWNLOAD AND HOW TO START IT, ON THE PAGE ITSELF. Generated notes alone are a line
+          # saying "Full Changelog" - which tells whoever arrives from a link neither which of the files
+          # is theirs nor, on a mac, why the system calls the download damaged.
+          body_path: packaging/release-body.md
+          generate_release_notes: true

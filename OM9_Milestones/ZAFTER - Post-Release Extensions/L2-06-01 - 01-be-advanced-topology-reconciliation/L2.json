@@ -1,0 +1,58 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-06-01",
+  "milestone": "AFTER",
+  "title": "01-be-advanced-topology-reconciliation",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Remap tham chiếu faces/edges khi hình học thay đổi phức tạp.",
+  "source_original_path": "specs/90-after/01-cad-base-after/01-be-advanced-topology-reconciliation/module.json",
+  "definition": {
+    "module_id": "OM9-L2-06-01",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/01-cad-base-after/01-be-advanced-topology-reconciliation/",
+    "tag": "be",
+    "delivery": "after",
+    "original_l1": "06-cad-base-after",
+    "legacy_v07_path": "specs/06-cad-base-after/01-be-advanced-topology-reconciliation/",
+    "scope": "Remap tham chiếu faces/edges khi hình học thay đổi phức tạp.",
+    "exclude": "Core vẫn phải có semantic reference tối thiểu; after không chặn core.",
+    "manual_references": [],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/90-after/01-cad-base-after/01-be-advanced-topology-reconciliation/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-06-01-001",
+      "file": "AFTER - Post-Release Extensions/L2-06-01 - 01-be-advanced-topology-reconciliation/L3-001 - Advanced Topological Name Recovery/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-01-002",
+      "file": "AFTER - Post-Release Extensions/L2-06-01 - 01-be-advanced-topology-reconciliation/L3-002 - Shape History Graph Reconciliation/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-01-003",
+      "file": "AFTER - Post-Release Extensions/L2-06-01 - 01-be-advanced-topology-reconciliation/L3-003 - Subshape Geometric Signature Matching/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-01-004",
+      "file": "AFTER - Post-Release Extensions/L2-06-01 - 01-be-advanced-topology-reconciliation/L3-004 - Ambiguous Reference User Remapping Policy/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-01-005",
+      "file": "AFTER - Post-Release Extensions/L2-06-01 - 01-be-advanced-topology-reconciliation/L3-005 - Topology Remap Regression Library/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

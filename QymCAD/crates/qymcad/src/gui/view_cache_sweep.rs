@@ -1,0 +1,116 @@
+//! THE PICTURE MUST CHANGE WHEN WHAT IS DRAWN ON IT CHANGES.
+//!
+//! The viewport is cached: the raster (and the GPU buffer) are rebuilt only if the KEY changed. The
+//! key is a contract — "here is what the picture depends on". Everything that affects the picture and
+//! did not make it into the key produces one and the same class of complaint: the model is intact and
+//! the screen shows something else.
+//!
+//! Reported behaviour on a freshly opened project: enter the edit of a fillet, leave with Esc — the
+//! fillet is gone and the chamfer under it too, and the features are not failing, they are simply not
+//! drawn. The model was intact the whole time. Editing a modifier HIDES its result and the whole
+//! descendant chain (the state BEFORE the feature is shown) — and that was not part of the key: on
+//! the way in the raster was redrawn by a heavy rebuild that happened to flip `geom_rev`, and on the
+//! way out there was nothing left to change the key, so the frame from edit mode stayed on screen.
+//!
+//! So the guard checks not "is such-and-such a field in the key" but a PROPERTY: if the set of drawn
+//! bodies changed, the key must change. Both paths, the CPU raster and the GPU scene.
+#[cfg(test)]
+mod tests {
+    use super::super::{App, Sel};
+
+    fn rect() -> egui::Rect {
+        egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(900.0, 700.0))
+    }
+
+    /// What is actually drawn right now — the list of body ids.
+    fn drawn(app: &App) -> Vec<u64> {
+        {
+            let pn = app.painting();
+            qymcad_ui_state::visible_mesh_items(&pn).iter().filter_map(|m| pn.project.mesh_id(m.index)).collect()
+        }
+    }
+
+    /// A part: a plate with a fillet on it. Returns (application, id of the fillet node).
+    fn plate_with_fillet() -> (App, u64) {
+        let mut app = App::default();
+        let part = app.project.add_part("part");
+        app.enter_component(part);
+        let si = app.create_sketch_on(qymcad_core::feature::SketchPlane::default());
+        app.project.add_rect_entity(si, 0.0, 0.0, 60.0, 40.0, qymcad_core::feature::Purpose::Real);
+        app.project.regen_sketch(si);
+        app.finish_sketch_edit();
+        app.chosen.sel = Sel::Sketch(si);
+        app.start_feat_cmd(1);
+        if let Some(p) = app.tools.cmd.params.iter_mut().find(|p| p.key == "height") {
+            p.val = 12.0;
+            p.txt = "12".into();
+        }
+        app.apply_feat_cmd();
+        qymcad_ui_state::rebuild_if_dirty(&mut app.rebuild_ctx());
+
+        let body = app.project.timeline.iter().rev().find_map(|n| n.kind.body()).expect("the body");
+        qymcad_ui_state::select_body(&mut app.project, &mut app.chosen.sel, &mut app.viewing.view, body);
+        app.start_feat_cmd(4); // fillet
+        crate::gui::commands::refresh_edges(&mut app.part_ctx());
+        let edge = app.edges.ids.iter().copied().find(|e| *e != 0).expect("an edge");
+        app.tools.gsel.edges.insert(edge);
+        app.apply_feat_cmd();
+        qymcad_ui_state::rebuild_if_dirty(&mut app.rebuild_ctx());
+
+        let fillet = app.project.timeline.iter().find(|n| matches!(n.kind, qymcad_core::feature::FeatureKind::Fillet { .. })).map(|n| n.id).expect("the fillet in the timeline");
+        (app, fillet)
+    }
+
+    /// ENTERING AN EDIT AND LEAVING IT CHANGE THE CACHE KEY — BOTH DRAWING PATHS.
+    #[test]
+    fn entering_and_leaving_a_feature_edit_invalidates_the_viewport() {
+        let (mut app, fillet) = plate_with_fillet();
+        app.viewing.mode_3d = true;
+        app.viewing.cam.init = true;
+        app.viewing.cam.scale = 8.0;
+        let r = rect();
+
+        let before = (drawn(&app), qymcad_ui_state::view_key(&app.painting(), r, 1.0), qymcad_ui_state::gpu_scene_key(&app.painting()));
+
+        crate::gui::commands::start_feat_cmd_edit(&mut app.part_ctx(), fillet);
+        let editing = (drawn(&app), qymcad_ui_state::view_key(&app.painting(), r, 1.0), qymcad_ui_state::gpu_scene_key(&app.painting()));
+        assert_ne!(before.0, editing.0, "setup: an edit must change the set of drawn bodies");
+        assert_ne!(before.1, editing.1, "the set of drawn bodies changed — the RASTER key must change, otherwise the previous frame stays on screen");
+        assert_ne!(before.2, editing.2, "the same for the GPU scene");
+
+        app.cancel_all_tools(); // Esc
+        let after = (drawn(&app), qymcad_ui_state::view_key(&app.painting(), r, 1.0), qymcad_ui_state::gpu_scene_key(&app.painting()));
+        assert_eq!(before.0, after.0, "setup: leaving the edit brings back the previous set of bodies");
+        assert_ne!(editing.1, after.1, "the edit was left — the RASTER key must change, otherwise the fillet never gets drawn");
+        assert_ne!(editing.2, after.2, "the same for the GPU scene");
+        assert_eq!(before.1, after.1, "and come back to the previous one: the picture is the same as it was before the edit");
+        assert_eq!(before.2, after.2, "the same for the GPU scene");
+    }
+
+    /// PICKING CHANGES THE RASTER. What is picked is lit on the picture - a body lights itself, a component its whole
+    /// subtree - so the set of lit bodies belongs to the raster's key. A click on a row of the tree changes that set,
+    /// with the camera standing still.
+    #[test]
+    fn picking_in_the_tree_changes_the_raster() {
+        use crate::gui::a_component_stepped_into_is_not_lit::tests::calm;
+        use crate::gui::import_door::tests::{answer, click, frame, running, settle, spot};
+        let (mut app, ctx) = running();
+        answer(&mut app, &ctx, qymcad_ui_state::Want::Anything, concat!(env!("CARGO_MANIFEST_DIR"), "/../qymcad-kernel/tests/data/assembly.step"));
+        settle(&mut app, &ctx);
+        calm(&mut app, &ctx);
+        let lit = |app: &App| qymcad_ui_state::visible_mesh_items(&app.painting()).iter().filter(|m| m.hot).count();
+        let cam = |app: &App| (app.viewing.cam.yaw, app.viewing.cam.pitch, app.viewing.cam.scale, app.viewing.cam.target);
+        let r = rect();
+        let before = (lit(&app), qymcad_ui_state::view_key(&app.painting(), r, 1.0), cam(&app));
+        // the empty part the document starts with: picking it lights nothing
+        let part = crate::i18n::name("name-part-n#1");
+        let texts = frame(&mut app, &ctx, Vec::new());
+        let row = spot(&texts, &part).unwrap_or_else(|| panic!("no row {part:?}; the screen shows {:?}", texts.iter().map(|(t, _)| t).collect::<Vec<_>>()));
+        let _ = frame(&mut app, &ctx, click(row));
+        let _ = frame(&mut app, &ctx, Vec::new());
+        let after = (lit(&app), qymcad_ui_state::view_key(&app.painting(), r, 1.0), cam(&app));
+        assert_ne!(before.0, after.0, "setup: the click must change what is lit ({} lit before, {} after)", before.0, after.0);
+        assert_eq!(before.2, after.2, "setup: the camera must stand still, or the key changes for another reason");
+        assert_ne!(before.1, after.1, "what is lit changed and the RASTER key did not - the old highlight stays on the picture until the camera moves");
+    }
+}

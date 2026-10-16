@@ -1,0 +1,44 @@
+{
+  "level": "L1",
+  "id": "OM9-M05",
+  "milestone": "M05",
+  "title": "Gems và Layout",
+  "planning_state": "L1_L4_SPECIFIED_NOT_IMPLEMENTED",
+  "planning_only": true,
+  "module_count": 5,
+  "l3_count": 43,
+  "l4_count": 126,
+  "modules": [
+    {
+      "id": "OM9-L2-04-09",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-10",
+      "file": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-11",
+      "file": "M05 - Gems and Layout/L2-04-11 - 03-febe-gem-halo-cluster-baguette-layouts/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-12",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-13",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L2.json"
+    }
+  ],
+  "implementation_targets_by_milestone": {
+    "M05": 43
+  },
+  "execution_readiness": {
+    "target": "GPT-6 Luna one L4 per run; planning-only records, no binary or runtime receipts",
+    "source_pin": "746a17f127897e921a57118b6caad08968602bf5",
+    "blocked_until": "G00-01..G00-07 and E01..E09 actual approvals",
+    "upstream_baseline_status": "FROZEN_NOT_MODIFIED",
+    "l4_planned": 126,
+    "l3_covered": 43
+  }
+}

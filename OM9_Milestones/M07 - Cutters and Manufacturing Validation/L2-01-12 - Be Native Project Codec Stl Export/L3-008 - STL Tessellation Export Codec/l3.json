@@ -1,0 +1,142 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-01-12-008",
+  "milestone": "M07",
+  "parent_l2_id": "OM9-L2-01-12",
+  "title": "STL Tessellation Export Codec",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "target_implementation_milestone": "M07",
+  "execution_stage": "E12",
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "source_original_path": "specs/01-ms01-workbench-shell/05-be-native-project-codec-stl-export/008-be-stl-tessellation-export-codec/l3.json",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-01-12-008",
+    "capability_id": "cap.01-12.stl-tessellation-export-codec",
+    "stable_owner_key": "OM9-L2-01-12/stl-tessellation-export-codec",
+    "title": "STL Tessellation Export Codec",
+    "slug": "stl-tessellation-export-codec",
+    "module_id": "OM9-L2-01-12",
+    "module_path": "specs/01-ms01-workbench-shell/05-be-native-project-codec-stl-export/",
+    "l3_path": "specs/01-ms01-workbench-shell/05-be-native-project-codec-stl-export/008-be-stl-tessellation-export-codec/",
+    "tag": "be",
+    "implementation_role": "backend_framework",
+    "milestone_id": "M01",
+    "target_milestone": "M07",
+    "delivery": "mainline",
+    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "origin_source_taxonomy": "01-cad-base",
+    "goal": "BRep to watertight STL through shared tessellator",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Save/load native document đầy đủ geometry/history/layer/gem instance; xuất STL watertight và báo lỗi hình học.",
+    "parent_exclusions": "Không xây thêm 3DM reader trong codec native; không làm STEP/IGES ở giai đoạn này.",
+    "depends_on_module_ids": [
+      "OM9-L2-01-03"
+    ],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [
+      "scene-save-and-stl"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          79,
+          86
+        ],
+        "pdf_pages_1based": [
+          89,
+          96
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          48,
+          56
+        ],
+        "pdf_pages_1based": [
+          58,
+          66
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “STL Tessellation Export Codec” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: save/reload or import transaction preserves object IDs, units, layer assignments and declared metadata."
+    ],
+    "acceptance_tests_manual": [],
+    "requires_manual_test": false,
+    "manual_test_gate": "AUTO_ONLY",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "execution_stage": "E12",
+    "planning_release": "CORE_MVP",
+    "planning_risk": "HIGH",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
+    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+  },
+  "children_l4": [
+    {
+      "id": "OM9-L4-01-12-008-01",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/L4-01 - Contract And Source Preflight/l4.json",
+      "title": "Contract And Source Preflight — STL Tessellation Export Codec",
+      "role": "CONTRACT_FIXTURE",
+      "depends_on_l4_ids": []
+    },
+    {
+      "id": "OM9-L4-01-12-008-02",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/L4-02 - Domain Integration/l4.json",
+      "title": "Domain Integration — STL Tessellation Export Codec",
+      "role": "IMPLEMENT",
+      "depends_on_l4_ids": [
+        "OM9-L4-01-12-008-01"
+      ]
+    },
+    {
+      "id": "OM9-L4-01-12-008-03",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/L4-03 - Export Acceptance/l4.json",
+      "title": "Export Acceptance — STL Tessellation Export Codec",
+      "role": "ACCEPTANCE",
+      "depends_on_l4_ids": [
+        "OM9-L4-01-12-008-02"
+      ]
+    },
+    {
+      "id": "OM9-L4-01-12-008-04",
+      "file": "M07 - Cutters and Manufacturing Validation/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/L4-04 - Adversarial Release Evidence/l4.json",
+      "title": "Adversarial Release Evidence — STL Tessellation Export Codec",
+      "role": "ADVERSARIAL",
+      "depends_on_l4_ids": [
+        "OM9-L4-01-12-008-03",
+        "OM9-L4-04-18-006-03"
+      ]
+    }
+  ],
+  "ownership": {
+    "owner_milestone": "M01",
+    "target_milestone": "M07",
+    "owner_record": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/l3.json",
+    "note": "Delegated L3: M01 owns the specification, M07 hosts the E12 execution queue."
+  }
+}

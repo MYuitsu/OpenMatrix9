@@ -1,6 +1,6 @@
 # Read by UI component
 
-Paths below are relative to the OpenMatrix9 checkout. Form filenames are inside `ref/matrix9/vb6-lite/Matrix90/`; feature IDs resolve through the workflow helper `feature ID`.
+Paths below are relative to the OpenMatrix9 checkout. Form filenames are resolved through recovered_inputs in `docs/openmatrix9-reference-locations.json`; feature IDs resolve through the workflow helper `feature ID`.
 
 For layout, read form header/control declarations only, stopping at `Attribute VB_Name`. Locate that boundary with `rg -n 'Attribute VB_Name' <form>`, then inspect the relevant control range. These forms can contain thousands of assembly lines after the designer metadata; search one named event only when behavior remains unresolved.
 
@@ -9,15 +9,15 @@ For an entire small UI family, request enough bounded search results: `search OM
 | Work being done | Read next | Verify before enabling |
 |---|---|---|
 | Overall startup/sidebar | Accepted menu design, OM9-IFACE-001; selected screenshot; `frmMaster.frm` only for shell/control identity | Sidebar order, document editing, dock restoration |
-| ICON HISTORY | `frmMenuIconHistory.frm`, accepted design | Latest successful commands only, capacity 20 in current design, host Undo/Redo availability |
+| ICON HISTORY | `frmMenuIconHistory.frm`, accepted design | Latest successful commands only, nine recent commands per v2 UI contract; legacy capacity20 does not override it; own Undo/Redo availability |
 | MAIN MENU | `Resources/menu/MainMenu.ini`, OM9-MAIN-001, `frmMenuTools.frm` | Current INI: 18 groups, 11 quick icons, Custom and Reset; remeasure if changed |
 | DISPLAY | `frmCMenuDisplay.frm`; search `OM9-DISPLAY` within `01-core` then select one ID | Native view mode/grid command identity and document requirements |
 | SNAPS | `frmMenuSnaps.frm`; search `OM9-SNAP` within `01-core` then select one ID | Actual geometric snapping integration; a toggle drawing alone is insufficient |
-| INFO & SETTINGS | `frmMenuInfoSettings.frm`; specific `OM9-INFO` spec | FreeCAD property/options equivalents; no execution of Rhino macro text |
+| INFO & SETTINGS | `frmMenuInfoSettings.frm`; specific `OM9-INFO` spec | own OM9 property/settings contracts; no execution of Rhino macro text |
 | LAYERS | `frmMenuLayers.frm`, OM9-LAYER-001 | Visibility, selection, color and save behavior; leave unsupported semantics disabled |
 | PROJECTS | `frmMenuProjects.frm`, OM9-PROJECT-001; OM9-PROJECTDB-001 only when implementing database behavior | Files/database are a separate behavior slice |
 | F6/context menu | OM9-F6-001, `ref/ContextMenu.xml`, `ref/RightClick.ini` | Selection-sensitive command availability |
-| Four views/grid/theme | OM9-VIEWPORT-001, [accepted command/grid theme](command-grid-theme.md), packaged reference screenshot and live FreeCAD view APIs | Real camera/model interaction, black canvases, world-space major/minor grid and theme restoration |
+| Four views/grid/theme | OM9-VIEWPORT-001, [accepted command/grid theme](command-grid-theme.md), packaged reference screenshot and own scene/view/camera APIs | Real camera/model interaction, black canvases, world-space major/minor grid and theme restoration |
 | Command region | [accepted command/grid theme](command-grid-theme.md), OM9-IFACE-001 and CommandHistory spec | Top green transcript + inline input, shared native geometry, recall/draft/Esc and focus guards |
 | Section title styling | `ctrTitleBar.123`, `.ctx` | Parent/control units, font, color encoding and runtime dimensions |
 | One icon | `ref/Matrix.rui` macro/GUID/bitmap metadata; selected `.frx`/`.ctx` pointer from form | Resource identity and image dimensions match the command |
@@ -36,6 +36,6 @@ INI currently uses Clayoo/Emboss/Settings; the screenshot uses SubD/Art/Setting.
 - Sidebar starts at 300 Qt logical pixels; title/icon dimensions come from the design and are checked visually. Wrap/scroll in small windows; record tested DPI values.
 - GUI-thread-only widgets, clear ownership, stable ABI string lifetimes, bounded indices, no Rust unwind across C ABI.
 - Successful command acknowledgment precedes history insertion. Reset restores UI state and hidden sections.
-- Three workbench switch cycles produce one sidebar and restore altered docks. Test no-document and document-open states.
-- Missing icons have a consistent fallback/tooltip; distinguish verified extraction from fallback in the report.
+- Three workspace activate/deactivate cycles produce one sidebar and restore altered docks. Test no-document and document-open states.
+- Missing authored icons have a consistent fallback/tooltip; do not distribute extracted proprietary artwork.
 - Use actual screenshots to state similarity. Read the accepted command/grid theme for current workspace targets and the live ledger for verified behavior; visual similarity does not complete the remaining Matrix tools.

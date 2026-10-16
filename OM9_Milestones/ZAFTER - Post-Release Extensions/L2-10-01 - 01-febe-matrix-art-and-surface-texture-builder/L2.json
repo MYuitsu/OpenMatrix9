@@ -1,0 +1,83 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-10-01",
+  "milestone": "AFTER",
+  "title": "01-febe-matrix-art-and-surface-texture-builder",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Bitmap/heightfield Matrix Art + Texture Builder mesh-on-surface theo grayscale, dùng shared heightfield utilities.",
+  "source_original_path": "specs/90-after/05-jewelry-finishing-after/01-febe-matrix-art-and-surface-texture-builder/module.json",
+  "definition": {
+    "module_id": "OM9-L2-10-01",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/05-jewelry-finishing-after/01-febe-matrix-art-and-surface-texture-builder/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "10-jewelry-finishing-after",
+    "legacy_v07_path": "specs/10-jewelry-finishing-after/01-febe-matrix-art-and-surface-texture-builder/",
+    "scope": "Bitmap/heightfield Matrix Art + Texture Builder mesh-on-surface theo grayscale, dùng shared heightfield utilities.",
+    "exclude": "Không lặp thành hai image→heightfield kernels; ClayEmboss là 09 riêng.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          325,
+          339
+        ],
+        "pdf_pages_1based": [
+          99,
+          113
+        ]
+      },
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          81,
+          82
+        ],
+        "pdf_pages_1based": [
+          87,
+          88
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/90-after/05-jewelry-finishing-after/01-febe-matrix-art-and-surface-texture-builder/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-10-01-001",
+      "file": "AFTER - Post-Release Extensions/L2-10-01 - 01-febe-matrix-art-and-surface-texture-builder/L3-001 - Matrix Art Bitmap To Heightfield/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-10-01-002",
+      "file": "AFTER - Post-Release Extensions/L2-10-01 - 01-febe-matrix-art-and-surface-texture-builder/L3-002 - Matrix Art Relief Region Mask/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-10-01-003",
+      "file": "AFTER - Post-Release Extensions/L2-10-01 - 01-febe-matrix-art-and-surface-texture-builder/L3-003 - Matrix Texture Builder On Surface/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-10-01-004",
+      "file": "AFTER - Post-Release Extensions/L2-10-01 - 01-febe-matrix-art-and-surface-texture-builder/L3-004 - Matrix Texture Builder UV Layout/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-10-01-005",
+      "file": "AFTER - Post-Release Extensions/L2-10-01 - 01-febe-matrix-art-and-surface-texture-builder/L3-005 - Heightfield Result To Mesh/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "om9.m00.l2_01.pin_identity.v1",
+  "pin_sha": "746a17f127897e921a57118b6caad08968602bf5",
+  "timestamp_utc": "2026-10-15T19:09:19Z",
+  "method": "git ls-tree blob sha (pinned revision) vs git hash-object (local working tree)",
+  "counts": {
+    "pin_files": 1698,
+    "local_files": 1698,
+    "common": 1698,
+    "matched": 1698,
+    "content_drift": 0,
+    "local_only": 0,
+    "pin_only": 0
+  },
+  "identical": true,
+  "content_drift": [],
+  "local_only": [],
+  "pin_only": []
+}

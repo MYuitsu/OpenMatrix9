@@ -1,0 +1,67 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-07-01",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-07",
+  "title": "Windows 10/11 x64 baseline",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-07-01",
+    "module_id": "OM9-M00-L2-07",
+    "gate_id": "G00-07",
+    "title": "Windows 10/11 x64 baseline",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-07-01-01",
+        "title": "Khảo sát build Windows MSVC & OCCT 7.8.1",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/L4-01 - Khảo sát build Windows MSVC & OCCT 7.8.1/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-07-01-02",
+        "title": "Build release portable Windows from clean checkout",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/L4-02 - Build release portable Windows from clean/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-07-01-03",
+        "title": "Test cold-start + create/open/save in Windows",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/L4-03 - Test cold-start + create - open - save in/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-07-01-04",
+        "title": "Định nghĩa Windows support matrix và fallback",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/L4-04 - Định nghĩa Windows support matrix và fallback/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-07-01-01",
+    "OM9-M00-L4-07-01-02",
+    "OM9-M00-L4-07-01-03",
+    "OM9-M00-L4-07-01-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-07-01-01",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/L4-01 - Khảo sát build Windows MSVC & OCCT 7.8.1/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-07-01-02",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/L4-02 - Build release portable Windows from clean/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-07-01-03",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/L4-03 - Test cold-start + create - open - save in/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-07-01-04",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline/L4-04 - Định nghĩa Windows support matrix và fallback/l4.json"
+    }
+  ]
+}

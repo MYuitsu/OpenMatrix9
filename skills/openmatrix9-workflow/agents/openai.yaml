@@ -1,4 +1,4 @@
 interface:
   display_name: "OpenMatrix9 · Định tuyến tài liệu"
   short_description: "Chọn tài liệu theo giai đoạn và kiểm tra tiến độ thực tế"
-  default_prompt: "Dùng $openmatrix9-workflow để xác định tiến độ OpenMatrix9 và tài liệu cần đọc cho bước tiếp theo."
+  default_prompt: "Dùng $openmatrix9-workflow để chọn spec v2 và bước tiếp theo cho OM9 độc lập, giữ UI Matrix9 và đối chiếu ledger theo evidence."

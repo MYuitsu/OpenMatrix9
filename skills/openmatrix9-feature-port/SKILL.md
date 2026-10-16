@@ -1,30 +1,24 @@
 ---
 name: openmatrix9-feature-port
-description: Use when implementing or specifying OM9 features in Rust and FreeCAD, including Rhino 5 3DM exchange, Copy/Paste and worker defaults, Gem Loader, builders, settings, cutters, render, Clayoo/SubD or Emboss.
+description: Implement or specify OpenMatrix9 standalone Rust features using specs v2, including Rhino 5 3DM, Copy/Paste, Box/Sphere, Gems, Builders, cutters, render, SubD and Emboss; retain Matrix9 UI behavior.
 ---
 
-# One feature at a time
+# Exact OM9 feature trên nền độc lập
 
-Rust là ưu tiên số 1 khi triển khai hoặc chuyển code OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Safe Rust sở hữu logic, validation và dữ liệu độc lập; C++ chỉ là bridge cho API native bắt buộc, Python cho bootstrap/test/tool khi cần. Ghi rõ lý do và owner của mọi ngoại lệ; không coi native FFI là memory-safe hoặc skill update là migration hoàn tất.
+Đọc [đích specs v2 và hợp đồng UI Matrix9](../openmatrix9-workflow/references/spec-v2-target.md). Resolve checkout, dùng workflow `search` rồi `feature <exact-ID>` và `route feature-port`; đọc spec trả về, migration/backend requirements và options/unknowns của đúng feature.
 
-Resolve the OpenMatrix9 checkout and use openmatrix9-workflow `search`, then `feature <exact-ID>`. Read the returned spec, not all 607 entries. Run `route feature-port` for implementation rules, source map and terminology.
+- Rust trước; [ownership/FFI](../openmatrix9-workflow/references/rust-first.md). OM9 sở hữu model/session/transaction/history, UI đúng Matrix9; kernel adapter không giữ document. Chọn routine QymCAD và OCCT theo capability, không cả host/UI.
+- Local specs v2 là nguồn triển khai người dùng đã chọn; không yêu cầu đọc lại PDF cho semantics đã mô tả. Chỉ đọc đúng manual/procedure khi có unknown thật sự ảnh hưởng quyết định. Giữ nguồn, inference và quyết định OM9 riêng; không bịa defaults hoặc bật nhánh chưa có solver.
+- Viết record `docs/features/<ID>.md` theo [feature-contract](references/feature-contract.md). Inputs/units/geometry/ownership/error/preview/commit/cancel/History/Undo/Redo/.om9 và UI routes phải có evidence theo đúng effect.
+- Builder/History/Styles chỉ đọc khi workflow thực cần. T-Splines khác Clayoo/SubD; MatrixArt khác Emboss. ID/alias/context giữ nguyên, menu/CMD/F6/control dùng cùng dispatcher.
+- Các native C++/FreeCAD slices là nguồn port adapter và replay intent; không phải target đã hoàn thành. Dùng build-validation cho executable mới khi đã có target/build config thật; chưa có thì ghi chưa triển khai, không dùng plugin load để đóng gate standalone.
+- Đồng bộ [progress](../openmatrix9-workflow/references/progress.md): v2 spec/checklist/catalog/lookup/status/manifest, README và ledger đúng phạm vi đã kiểm. Không ghi kết quả standalone vào v1.
 
-Before geometry-critical work, verify the cited manual page and follow the command's continuation pages until the next feature heading. Record the verified page range. `source_page_pdf` is 1-based; printed page is separate. Option cues and detected mentions are retrieval hints, not defaults or dependency graphs. Local manual locations are in `docs/openmatrix9-reference-locations.json`; check existence when used.
+## Nghiệp vụ đã duyệt cần đọc theo feature
 
-Create the feature's implementation record under `docs/features/<ID>.md`, preserving source-derived statements separately from OpenMatrix9 decisions. Use [feature-contract.md](references/feature-contract.md) to normalize selection/inputs, units/defaults, output, applicable lifecycle, error handling, undo/history/persistence and tolerances. Preserve original reference files.
-
-Read Builder/History/Styles framework specs only when applicable to this feature. A detected word “Builder” does not establish an interactive builder lifecycle. For an unresolved original event, use openmatrix9-native-mapping on its exact procedure.
-
-Implement the verified slice in Rust with native FreeCAD integration. Keep exact OM9 IDs in code/test/command mapping; Rhino command text alone is not a FreeCAD implementation. Use semantic tests for geometry/state and native host integration, then openmatrix9-build-validation for runtime proof.
-
-If the manual is absent, identify the exact file/page and leave unproven semantics as `TODO_EVIDENCE`. Continue independent menu/infrastructure work; ask for missing evidence when it blocks the chosen geometry decision. A new OpenMatrix9 design choice must be labeled as such rather than claimed as recovered behavior.
-
-After implementation and checks, follow [progress synchronization](../openmatrix9-workflow/references/progress.md): check the exact Spec v1 acceptance items, update implementation status and the project README, then reconcile the live ledger and its next document. An unchanged catalog `implementation_status: not_started` is not evidence that code is absent. Keep Clayoo/SubD (`14-subd`) distinct from T-Splines (`06-tsplines`), and Emboss (`15-emboss`) distinct from Matrix Art (`07-matrix-art`).
-
-## Rhino 5 3DM exchange — OM9-FILE-012
-
-Khi triển khai hoặc kiểm tra import/export 3DM, Copy/Paste Rhino 5 ↔ OM9, phân loại CAD/mesh/cloud để xét lệnh khả dụng hoặc worker đa luồng, đọc [quy tắc 3DM, clipboard và worker đã được duyệt](references/rhino5-3dm-contract.md). Áp dụng trong phạm vi OpenMatrix9; không coi đây là hành vi Matrix gốc hoặc bằng chứng đã hỗ trợ toàn bộ openNURBS.
+- 3DM, clipboard, CAD/mesh/cloud, worker60%: [rhino5-3dm-contract](references/rhino5-3dm-contract.md). Giữ semantics đã duyệt; old native scope là historical, v2 có representation/block gates riêng.
+- Box/Sphere `OM9-SOLID-012/014`: [solid-box-sphere-contract](references/solid-box-sphere-contract.md). Giữ correction Box mặc định, frames/Cube/FitPoints/AroundCurve/Tangent/chọn nghiệm; replay trên own geometry/identity.
 
 ## Cập nhật nghiệp vụ sau khi code
 
-Sau khi hoàn tất code và kiểm tra, nếu có đổi nghiệp vụ, hỏi người dùng có cập nhật nghiệp vụ đó vào skill không. Chỉ ghi quy tắc mới khi có đồng ý; nếu người dùng đã yêu cầu cập nhật skill cho chính thay đổi này thì không hỏi lại. Áp dụng [quy tắc xác nhận cập nhật nghiệp vụ](../openmatrix9-workflow/references/business-rule-updates.md) để phân biệt nghiệp vụ mới với sửa kỹ thuật, chuẩn bị đề xuất cụ thể và đồng bộ skill sau khi được đồng ý.
+Sau code và kiểm tra, nếu nghiệp vụ đổi, trình bày nội dung trước/sau và hỏi có lưu vào skill không. Yêu cầu cập nhật skill đã có cho chính thay đổi là đủ, không hỏi lại. Xem [quy tắc chung](../openmatrix9-workflow/references/business-rule-updates.md). Ghi evidence kỹ thuật riêng, không coi nó là đồng ý nghiệp vụ mới.

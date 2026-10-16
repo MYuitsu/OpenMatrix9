@@ -1,0 +1,126 @@
+{
+  "schema": "om9.m00.source_provenance.v1",
+  "task_id": "OM9-M00-L4-01-01-01",
+  "gate_id": "G00-01",
+  "produced_by": "tools/record_m00_l2_01_baseline.py",
+  "timestamp_utc": "2026-10-15T23:37:29Z",
+  "access": {
+    "method": "git ls-remote + git clone --no-checkout --filter=blob:none --revision",
+    "host": "Windows 11 AMD64",
+    "toolchain": "git version 2.55.0.windows.3"
+  },
+  "repository": {
+    "repo_full_name": "QymIs-Tech/QymCAD",
+    "upstream_url": "https://github.com/QymIs-Tech/QymCAD",
+    "default_branch": "main",
+    "default_branch_tip_at_audit": "a171295aff9315ce5306ec2f3a25f4703f486781",
+    "license_identifier": "AGPL-3.0-or-later",
+    "license_file": "LICENSE",
+    "license_evidence": "GNU AFFERO GENERAL PUBLIC LICENSE",
+    "third_party_notices": "THIRD-PARTY-NOTICES.md (OCCT 7.8.1, LGPL-2.1 with Open CASCADE Exception, dynamically linked)"
+  },
+  "pinned_sha": "746a17f127897e921a57118b6caad08968602bf5",
+  "pinned_checkout": "vendor-research/QymCAD",
+  "pinned_checkout_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "pinned_checkout_tracked_files": 1698,
+  "inventory": {
+    "path": "implementation/evidence/M00/G00-01/source-file-inventory.csv",
+    "rows": 1698,
+    "locally_verified": 1698
+  },
+  "revisions_in_play": [
+    {
+      "sha": "09a7f09ebeb87fab7c43e26774f7eb0eb88907dd",
+      "role": "revision consulted by the 2026-10-13 standalone-foundation work",
+      "ref": "refs/pull/207/head"
+    },
+    {
+      "sha": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "role": "former M00 pin, retired on 2026-10-15 (was a PR head)",
+      "ref": "refs/pull/238/head"
+    },
+    {
+      "sha": "746a17f127897e921a57118b6caad08968602bf5",
+      "role": "adopted M00 baseline pin; identical to the vendored QymCAD tree",
+      "ref": "on main"
+    },
+    {
+      "sha": "a171295aff9315ce5306ec2f3a25f4703f486781",
+      "role": "upstream default branch tip at audit time",
+      "ref": "refs/heads/main"
+    }
+  ],
+  "identity_evidence": {
+    "vendored_copy_vs_adopted_pin": {
+      "report": "implementation/evidence/M00/G00-01/pin-identity-746a17f1.json",
+      "counts": {
+        "pin_files": 1698,
+        "local_files": 1698,
+        "common": 1698,
+        "matched": 1698,
+        "content_drift": 0,
+        "local_only": 0,
+        "pin_only": 0
+      },
+      "identical": true
+    },
+    "vendored_copy_vs_retired_pin": {
+      "report": "implementation/evidence/M00/G00-01/pin-identity-c116f8f2.json",
+      "counts": {
+        "pin_files": 1689,
+        "local_files": 1698,
+        "common": 1689,
+        "matched": 1656,
+        "content_drift": 33,
+        "local_only": 9,
+        "pin_only": 0
+      },
+      "identical": false
+    },
+    "vendored_copy_vs_consulted_revision": {
+      "report": "implementation/evidence/M00/G00-01/pin-identity-09a7f09.json",
+      "counts": {
+        "pin_files": 1412,
+        "local_files": 1698,
+        "common": 1372,
+        "matched": 1206,
+        "content_drift": 166,
+        "local_only": 326,
+        "pin_only": 40
+      },
+      "identical": false
+    },
+    "vendored_copy_vs_main_tip": {
+      "report": "implementation/evidence/M00/G00-01/pin-identity-main-tip.json",
+      "counts": {
+        "pin_files": 1705,
+        "local_files": 1698,
+        "common": 1698,
+        "matched": 1662,
+        "content_drift": 36,
+        "local_only": 0,
+        "pin_only": 7
+      },
+      "identical": false
+    }
+  },
+  "baseline_status": "BASELINE_ADOPTED_AND_FROZEN",
+  "baseline_decision": {
+    "decided_utc": "2026-10-15",
+    "choice": "option (b) - adopt the revision that matches the working copy",
+    "why": "746a17f127897e921a57118b6caad08968602bf5 is the tree actually in use (blob-identical to QymCAD/) and sits on main; the retired pin c116f8f224ebffe0ada049c91c0d15df3634f00d was a pull-request head and differed from the working copy in 33 files, with 9 files present only locally.",
+    "propagated_to": [
+      "OM9_Milestones/** (19642 SHA references and 1096 blob_sha values)",
+      "standalone/provenance.json (m00_baseline_pin added; the consulted revision stays as history)"
+    ],
+    "tool": "tools/repin_qymcad_baseline.py"
+  },
+  "unresolved": [
+    "A human must still review and sign the executed L4 records before any PASS is claimed.",
+    "746a17f127897e921a57118b6caad08968602bf5 and 09a7f09ebeb87fab7c43e26774f7eb0eb88907dd are commits in the upstream history; the repository publishes no tags, so a future re-pin should again be recorded with a checkout and blob-identity proof."
+  ],
+  "not_established": [
+    "No QymCAD build, cargo test, OCCT runtime, GPU or 3DM conversion was executed.",
+    "No license approval; AGPL-3.0-or-later and the OCCT exception still need a reviewer."
+  ]
+}

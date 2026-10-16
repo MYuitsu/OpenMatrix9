@@ -1,0 +1,206 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-02-01-002",
+  "milestone": "M01",
+  "parent_l2_id": "OM9-L2-02-01",
+  "title": "NURBS Curve Control Points Knots Weights",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-L3-02-01-002",
+    "capability_id": "cap.02-01.nurbs-curve-control-points-knots-weights",
+    "stable_owner_key": "OM9-L2-02-01/nurbs-curve-control-points-knots-weights",
+    "title": "NURBS Curve Control Points Knots Weights",
+    "slug": "nurbs-curve-control-points-knots-weights",
+    "module_id": "OM9-L2-02-01",
+    "tag": "be",
+    "implementation_role": "backend_framework",
+    "milestone_id": "M01",
+    "target_milestone": "M01",
+    "delivery": "mainline",
+    "origin_source_taxonomy": "02-rhino5",
+    "goal": "control point, degree, knot, weight semantics",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Định nghĩa Rhino-like Curve/Surface/TrimmedSurface/Polysurface/solid/block và seam, UV/normal.",
+    "parent_exclusions": "Không triển khai lại phép tính OCCT trong Rhino adapter.",
+    "depends_on_module_ids": [
+      "OM9-L2-01-05"
+    ],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [
+      "nurbs-and-trimmed-brep-semantics"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          17,
+          23
+        ],
+        "pdf_pages_1based": [
+          25,
+          31
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          120,
+          234
+        ],
+        "pdf_pages_1based": [
+          130,
+          244
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “NURBS Curve Control Points Knots Weights” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
+    ],
+    "acceptance_tests_manual": [],
+    "requires_manual_test": false,
+    "manual_test_gate": "AUTO_ONLY",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "execution_stage": "E02",
+    "planning_risk": "HIGH",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT"
+  },
+  "execution_design": {
+    "l3_id": "OM9-L3-02-01-002",
+    "module_id": "OM9-L2-02-01",
+    "owner_key": "OM9-L2-02-01/nurbs-curve-control-points-knots-weights",
+    "title": "NURBS Curve Control Points Knots Weights",
+    "goal_from_canonical": "control point, degree, knot, weight semantics",
+    "execution_stage": "E02",
+    "tag": "be",
+    "risk": "HIGH",
+    "manual_references_inherited": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          17,
+          23
+        ],
+        "pdf_pages_1based": [
+          25,
+          31
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          120,
+          234
+        ],
+        "pdf_pages_1based": [
+          130,
+          244
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "manual_reference_precision": "PARENT_L2_RANGE_NOT_EXACT_COMMAND_CONFIRM_BEFORE_IMPLEMENTING_UI",
+    "positive_oracle_proposed": "Cubic NURBS curve stores degree=3, knot vector, weights/control point count correctly",
+    "negative_oracle_proposed": "Mismatch knot cardinality/zero weights rejected before OCCT conversion",
+    "canonical_api_contract_state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+    "source_evidence_class": "PINNED_GITHUB_CONTENT_READ_WITH_CANDIDATES",
+    "source_anchors": [
+      {
+        "path": "crates/qymcad-core/src/feature.rs",
+        "purpose": "NURBS/Feature semantics",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/feature.rs",
+        "blob_sha": null,
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-core/src/geom.rs",
+        "purpose": "geom primitives",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/geom.rs",
+        "blob_sha": null,
+        "evidence": "CANDIDATE_RECHECK_LOCAL"
+      },
+      {
+        "path": "crates/qymcad-kernel/src/shape/exchange.rs",
+        "purpose": "STEP/IGES exact conversion",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/shape/exchange.rs",
+        "blob_sha": "014e7a7905248669c061fcd9a10d34412f144502",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-core/src/refs.rs",
+        "purpose": "geometry references",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/refs.rs",
+        "blob_sha": null,
+        "evidence": "CANDIDATE_RECHECK_LOCAL"
+      }
+    ],
+    "reuse_decision_provisional": "ADAPT",
+    "reuse_approval_condition": "Audit local checkout at pinned SHA, compile/tests, M00 human legal approval; do not infer ready from static GitHub read.",
+    "implementation_owner_policy": "One owning L2, UI modules dispatch only. No source code changes in vendor-research/ unless approved fork.",
+    "l4_task_ids": [
+      "OM9-L4-02-01-002-01",
+      "OM9-L4-02-01-002-02",
+      "OM9-L4-02-01-002-03",
+      "OM9-L4-02-01-002-04",
+      "OM9-L4-02-01-002-05"
+    ],
+    "objectives": [
+      "Define typed seam + explicitly testable oracle",
+      "Implement one capability at its canonical owner",
+      "Verify failure rollback, stable IDs/units/geometry as relevant",
+      "Preserve manual approval for FEBE"
+    ]
+  },
+  "task_ids": [
+    "OM9-L4-02-01-002-01",
+    "OM9-L4-02-01-002-02",
+    "OM9-L4-02-01-002-03",
+    "OM9-L4-02-01-002-04",
+    "OM9-L4-02-01-002-05"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-L4-02-01-002-01",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-002 - NURBS Curve Control Points Knots Weights/L4-01 - Source Audit/l4.json"
+    },
+    {
+      "id": "OM9-L4-02-01-002-02",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-002 - NURBS Curve Control Points Knots Weights/L4-02 - API Contract and Test Design/l4.json"
+    },
+    {
+      "id": "OM9-L4-02-01-002-03",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-002 - NURBS Curve Control Points Knots Weights/L4-03 - Implementation/l4.json"
+    },
+    {
+      "id": "OM9-L4-02-01-002-04",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-002 - NURBS Curve Control Points Knots Weights/L4-04 - Integration/l4.json"
+    },
+    {
+      "id": "OM9-L4-02-01-002-05",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-002 - NURBS Curve Control Points Knots Weights/L4-05 - Acceptance Test/l4.json"
+    }
+  ]
+}

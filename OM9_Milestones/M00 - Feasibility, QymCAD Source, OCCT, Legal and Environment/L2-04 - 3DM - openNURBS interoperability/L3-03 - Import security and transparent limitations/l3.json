@@ -1,0 +1,56 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-04-03",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-04",
+  "title": "Import security and transparent limitations",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-04-03",
+    "module_id": "OM9-M00-L2-04",
+    "gate_id": "G00-04",
+    "title": "Import security and transparent limitations",
+    "l4_count": 3,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-04-03-01",
+        "title": "Kiểm thử file lỗi/corrupt/unsupported userdata",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-03 - Import security and transparent limitations/L4-01 - Kiểm thử file lỗi - corrupt - unsupported/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-04-03-02",
+        "title": "Thiết kế báo cáo import partial success",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-03 - Import security and transparent limitations/L4-02 - Thiết kế báo cáo import partial success/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-04-03-03",
+        "title": "Chốt phạm vi 3DM của MVP",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-03 - Import security and transparent limitations/L4-03 - Chốt phạm vi 3DM của MVP/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-04-03-01",
+    "OM9-M00-L4-04-03-02",
+    "OM9-M00-L4-04-03-03"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-04-03-01",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-03 - Import security and transparent limitations/L4-01 - Kiểm thử file lỗi - corrupt - unsupported/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-04-03-02",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-03 - Import security and transparent limitations/L4-02 - Thiết kế báo cáo import partial success/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-04-03-03",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-03 - Import security and transparent limitations/L4-03 - Chốt phạm vi 3DM của MVP/l4.json"
+    }
+  ]
+}

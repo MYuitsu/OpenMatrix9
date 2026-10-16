@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 
-SPEC = Path("ref/matrix9/OpenMatrix9_Codex_Spec_v1")
+SPEC = Path("OpenMatrix9_Codex_Spec_v2")
 ROUTES = Path(__file__).resolve().parents[1] / "references/stages.json"
 
 
@@ -79,10 +79,14 @@ def status(root):
     ledger = read_json(ledger_path) if ledger_path.exists() else None
     return {
         "project_root": str(root),
+        "spec_package": str((root / SPEC).resolve()),
+        "target": "OM9Standalone",
+        "ui_contract": "matrix9_described_v1",
+        "observations_scope": "legacy source hints; not standalone completion",
         "ledger_file": str(ledger_path),
         "ledger": ledger,
         "observations": {key: (root / path).is_file() for key, path in paths.items()},
-        "note": "Presence checks are hints. Reconcile ledger with code, tests and runtime evidence.",
+        "note": "Read specs v2 and reconcile target-scoped evidence. Legacy FreeCAD source/plan presence is not standalone progress.",
     }
 
 
@@ -95,9 +99,9 @@ def feature(root, identifier):
         "feature": entry,
         "spec_file": spec_file(root, entry),
         "read_next": [path_record(root, str(SPEC / name)) for name in (
-            "IMPLEMENTATION_RULES.md", "SOURCES.md"
+            "IMPLEMENTATION_RULES.md", "CODE_GUIDE.md", "MATRIX9_UI_CONTRACT.md", "MIGRATION_LEDGER.json"
         )],
-        "note": "Catalog status and option cues do not establish live progress or option defaults. PDF pages are 1-based.",
+        "note": "Specs v2 is the active target; never fallback to v1. Source/legacy passes do not establish standalone completion. Unknowns require bounded evidence, not assumed defaults.",
     }
 
 

@@ -1,0 +1,23 @@
+[package]
+name = "qymcad-acceptance"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Acceptance checks: every tool and function of the program, touched from outside through its session alone"
+publish = false
+
+# THE PROGRAM IS THE ONLY DEPENDENCY, and of the program only its session is visible. A second crate here would
+# be a door around the window; `the_checks_reach_the_program_through_its_session_alone` holds it.
+[dependencies]
+qymcad = { path = "../qymcad" }
+
+# ONE BINARY FOR ALL THE CHECKS: every file under `tests/` would otherwise link the whole program again.
+[[test]]
+name = "acceptance"
+path = "tests/acceptance/main.rs"
+
+[lints]
+workspace = true

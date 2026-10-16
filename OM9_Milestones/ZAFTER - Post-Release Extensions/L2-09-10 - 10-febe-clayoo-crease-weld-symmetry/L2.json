@@ -1,0 +1,76 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-10",
+  "milestone": "AFTER",
+  "title": "10-febe-clayoo-crease-weld-symmetry",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Clayoo crease/weld/symmetry.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/10-febe-clayoo-crease-weld-symmetry/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-10",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/10-febe-clayoo-crease-weld-symmetry/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/10-febe-clayoo-crease-weld-symmetry/",
+    "scope": "Clayoo crease/weld/symmetry.",
+    "exclude": "Toàn bộ hoãn; không chặn NURBS jewelry MVP.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          2,
+          50
+        ],
+        "pdf_pages_1based": [
+          8,
+          56
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 6,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/10-febe-clayoo-crease-weld-symmetry/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-10-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-10 - 10-febe-clayoo-crease-weld-symmetry/L3-001 - Clayoo Crease And Uncrease Edges/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-10-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-10 - 10-febe-clayoo-crease-weld-symmetry/L3-002 - Clayoo Weld Vertices With Tolerance/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-10-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-10 - 10-febe-clayoo-crease-weld-symmetry/L3-003 - Clayoo Match Edges To Curve/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-10-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-10 - 10-febe-clayoo-crease-weld-symmetry/L3-004 - Clayoo Symmetry Plane And Loop/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-10-005",
+      "file": "AFTER - Post-Release Extensions/L2-09-10 - 10-febe-clayoo-crease-weld-symmetry/L3-005 - Clayoo Project To Plane/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-10-006",
+      "file": "AFTER - Post-Release Extensions/L2-09-10 - 10-febe-clayoo-crease-weld-symmetry/L3-006 - Clayoo Flip Normals And Winding/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

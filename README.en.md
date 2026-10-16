@@ -1,5 +1,8 @@
 # OpenMatrix9
 
+**Active direction (2026-10-13):** [specs v2](OpenMatrix9_Codex_Spec_v2/README.md) define standalone Rust OM9, selected QymCAD code/routines and capability-scoped OCCT/openNURBS. [Matrix9 UI contract](OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md) preserves the currently described interface/workflow. Existing FreeCAD support tables/runtime reports below are legacy evidence, not standalone completion.
+
+
 **Open-source jewelry CAD for FreeCAD.** Rust owns the logic; FreeCAD provides native geometry and UI.
 
 [Tiếng Việt](README.vi.md) · [Installation](#installation) · [Releases](https://github.com/MYuitsu/OpenMatrix9/releases)
@@ -178,7 +181,7 @@ rather than full features. Identifiers can repeat across groups. Consult the Rel
 
 - [Release 0.3.5-202610121520](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.5-202610121520): changes, downloads and release-specific limitations.
 - [Development checkpoints](docs/releases/2026-10-12-development.md): command tables, history and evidence moved from the README; includes Vietnamese notes.
-- [Ledger](docs/openmatrix9-progress.json) · [Native reports](docs/validation/) · [Spec](OpenMatrix9_Codex_Spec_v1/INDEX.md).
+- [Ledger](docs/openmatrix9-progress.json) · [Native reports](docs/validation/) · [Spec](OpenMatrix9_Codex_Spec_v2/INDEX.md).
 
 <a id="license"></a>
 ## License
@@ -187,3 +190,29 @@ rather than full features. Identifiers can repeat across groups. Consult the Rel
 OpenMatrix9 is an independent project using Matrix9 as a functional reference;
 it does not claim vendor affiliation, clean-room development or legal clearance.
 [Source context](docs/public-source-review.md).
+
+Owned Layers widget checkpoint: 414 workspace tests/37 focused subsets;13 actual native Layers checks and6 viewport-menu regressions, four bounded cold OM9 children. [Measured scope](docs/validation/2026-10-14-owned-layers-ui.md). Advanced dialogs, other command families and full Layers/M9IMG/RCORE gates remain open; earlier SDK/UI receipts retain historical checkpoints.
+
+## Owned Layers modal checkpoint — 2026-10-14
+
+Owned Advanced Rename/Color and selective Show now have [measured modal evidence](docs/validation/2026-10-14-owned-layer-modals.md): 439 workspace tests/61 focused subsets;10 native dialog checks plus13 Layers and6 viewport regressions;five bounded cold OM9 children. The earlier unavailable-dialog limitation is historical for this owned-root slice. Token/session/stale guards, Cancel/no-op/Undo/Redo, bounded RGB and snapshot storage, fixed single-line rows and reusable UI owners are verified. Full Layer output families, interactive Save/Open, OS IME/DPI, async capture/global budgets and complete Layers/M9IMG/RCORE gates remain open.
+
+## Owned File lifecycle service — 2026-10-14
+
+[Controller/I/O evidence](docs/validation/2026-10-14-owned-file-service.md): 458 workspace tests/80 focused subset;17 File service checks and two new bounded cold OM9 children. New/Open/Save/SaveAs ownership, dirty fingerprints, per-response tokens and atomic archive I/O are implemented as Task1 prerequisites. File menu/CMD/native chooser remain disabled/unaccepted; .3dm and full view/material persistence remain required. Existing native Layers/viewport regressions are separate from File UI evidence. Full feature/M01–M12 gates and catalog statuses remain open.
+
+## Owned File UI and native cancellation — 2026-10-14
+
+[Current scoped evidence](docs/validation/2026-10-14-owned-file-ui.md): 475 workspace tests/96 focused subset;16 File widgets;8 native File checks and3 real Windows picker cancellations, distinct from scripted path delivery. Native `.om9` menu/CMD/F6/Standard routes and owned prompts are connected.10+13+6 Layers/viewport regressions and7 cold children are separate. OS successful selection/save/open, native backend diagnostics/single overwrite UX, UI/native peak ownership, native startup, close/async/full persistence/.3dm remain required. All full feature/RCORE/M9IMG gates and catalog statuses remain open.
+
+## Selected Win32 File adapter and replay guards — 2026-10-14
+
+[Current scoped evidence](docs/validation/2026-10-14-owned-file-win32.md): 483 workspace/104 focused subsets; selected authored Win32 adapter exposes HRESULT errors and disables OS overwrite prompt for the existing owned confirmation.4 audit+3 native+1 UI-error checks;8 native File checks/3 real Windows cancels;10+13+6 regressions/7 cold children. Readiness guards prevent missing-modal events from editing CMD; original missed-click cause remains unknown. OS selection/save/open/overwrite/native startup, full budgets/close/async/persistence/.3dm and all full feature/RCORE/Matrix9 gates remain required.
+
+## Owned window close — 2026-10-14
+
+[Scoped close evidence](docs/validation/2026-10-14-owned-file-close.md): 494 workspace/115 focused subset. Owned Save/Discard/Cancel controls window closing in normal UI and minimized logic; stale consent/save failure/chooser Cancel cannot approve shutdown. Native replay11 checks includes2 root WM_CLOSE requests and4 real picker cancels; original File8 and Layers10+13/viewport6 are separate overlapping regressions;7 cold children exit. Successful OS selection/save/open/overwrite/startup, native Save-success/Discard-button shutdown, complete teardown/budgets/async/persistence/.3dm and full gates remain required.
+
+## Native File selection and startup — 2026-10-14
+
+[Scoped native File evidence](docs/validation/2026-10-14-owned-file-selection.md): 498 workspace/119 focused subset;3 real Windows Show/GetResult selections, alternate SaveAs/owned Replace adopts path only after acceptance with original/seed SHA256 preservation. Native actual --ui path clean startup3checks and cold report match. Success5/close11/File8/Layers10+13/viewport6 are separate overlapping replays;7 Job-owned cold children plus2 bounded CLI inspections. Missing-module native startup, native success/Discard shutdown, complete persistence/.3dm/async/budgets/disposal and all full gates remain open.

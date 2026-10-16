@@ -1,0 +1,20 @@
+[package]
+name = "qymcad-help"
+version = "0.1.0"
+edition = "2021"
+license.workspace = true
+
+# THE HELP IS A RESOURCE, like the dictionary: articles in a catalogue, one per language. It draws nothing
+# and knows no panel - it hands out text, and whoever has a window shows it.
+[dependencies]
+include_dir = "0.7"
+qymcad-i18n = { path = "../qymcad-i18n" }
+
+# ONLY THE CHECKS KNOW ABOUT THE INTERFACE STATE, and only to hold the articles to it: the text describes
+# the mouse layouts, and a text describing a layout the program does not offer is worse than none. The crate
+# itself stays what it is - articles and nothing else.
+[dev-dependencies]
+qymcad-ui-state = { path = "../qymcad-ui-state" }
+
+[lints]
+workspace = true

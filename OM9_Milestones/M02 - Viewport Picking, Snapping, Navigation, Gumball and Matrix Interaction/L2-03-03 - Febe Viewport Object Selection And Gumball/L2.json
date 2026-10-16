@@ -1,0 +1,78 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-03",
+  "milestone": "M02",
+  "title": "Febe Viewport Object Selection And Gumball",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Chọn đối tượng theo khung và Gumball trực quan",
+  "definition": {
+    "module_id": "OM9-L2-03-03",
+    "milestone_id": "M02",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "scope": "Chọn đối tượng theo khung và Gumball trực quan",
+    "exclude": "Picker và selection state dùng CAD Base.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          34,
+          37
+        ],
+        "pdf_pages_1based": [
+          44,
+          47
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-07",
+      "OM9-L2-03-01"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "manual_test_required": true,
+    "acceptance_gate": "M02-UI",
+    "l3_count": 6
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-03-001",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-03 - Febe Viewport Object Selection And Gumball/L3-001 - Matrix Click Shift Ctrl Select/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-03-002",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-03 - Febe Viewport Object Selection And Gumball/L3-002 - Matrix Left Right Drag Selection/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-03-003",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-03 - Febe Viewport Object Selection And Gumball/L3-003 - Matrix Ambiguous Selection Popup/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-03-004",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-03 - Febe Viewport Object Selection And Gumball/L3-004 - Matrix Gumball Axis Drag/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-03-005",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-03 - Febe Viewport Object Selection And Gumball/L3-005 - Matrix Gumball Alignment And Relocate/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-03-006",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-03 - Febe Viewport Object Selection And Gumball/L3-006 - Matrix Gumball Numeric Edit/l3.json"
+    }
+  ]
+}

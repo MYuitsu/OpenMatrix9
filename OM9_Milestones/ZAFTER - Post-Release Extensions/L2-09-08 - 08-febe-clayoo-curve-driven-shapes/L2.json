@@ -1,0 +1,76 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-08",
+  "milestone": "AFTER",
+  "title": "08-febe-clayoo-curve-driven-shapes",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Clayoo Sweep/Loft/Pipe curve-driven meshes.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/08-febe-clayoo-curve-driven-shapes/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-08",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/08-febe-clayoo-curve-driven-shapes/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/08-febe-clayoo-curve-driven-shapes/",
+    "scope": "Clayoo Sweep/Loft/Pipe curve-driven meshes.",
+    "exclude": "Toàn bộ hoãn; không chặn NURBS jewelry MVP.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          2,
+          50
+        ],
+        "pdf_pages_1based": [
+          8,
+          56
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 6,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/08-febe-clayoo-curve-driven-shapes/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-08-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-08 - 08-febe-clayoo-curve-driven-shapes/L3-001 - Clayoo Pipe From Curves/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-08-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-08 - 08-febe-clayoo-curve-driven-shapes/L3-002 - Clayoo Sweep One Rail/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-08-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-08 - 08-febe-clayoo-curve-driven-shapes/L3-003 - Clayoo Sweep Two Rails/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-08-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-08 - 08-febe-clayoo-curve-driven-shapes/L3-004 - Clayoo Loft And Revolve/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-08-005",
+      "file": "AFTER - Post-Release Extensions/L2-09-08 - 08-febe-clayoo-curve-driven-shapes/L3-005 - Clayoo Wrap Curves And Mesh/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-08-006",
+      "file": "AFTER - Post-Release Extensions/L2-09-08 - 08-febe-clayoo-curve-driven-shapes/L3-006 - Clayoo Create By One Two Curves/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-07-04",
+  "milestone": "AFTER",
+  "title": "04-febe-zebra-curvature-surface-analysis",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Zebra, EMap, heatmap curvature và các visual analysis nâng cao.",
+  "source_original_path": "specs/90-after/02-rhino5-after/04-febe-zebra-curvature-surface-analysis/module.json",
+  "definition": {
+    "module_id": "OM9-L2-07-04",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/02-rhino5-after/04-febe-zebra-curvature-surface-analysis/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "07-rhino5-after",
+    "legacy_v07_path": "specs/07-rhino5-after/04-febe-zebra-curvature-surface-analysis/",
+    "scope": "Zebra, EMap, heatmap curvature và các visual analysis nâng cao.",
+    "exclude": "Core vẫn có Check BRep, normals, validity.",
+    "manual_references": [],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/90-after/02-rhino5-after/04-febe-zebra-curvature-surface-analysis/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-07-04-001",
+      "file": "AFTER - Post-Release Extensions/L2-07-04 - 04-febe-zebra-curvature-surface-analysis/L3-001 - Zebra Surface Continuity Analysis/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-04-002",
+      "file": "AFTER - Post-Release Extensions/L2-07-04 - 04-febe-zebra-curvature-surface-analysis/L3-002 - Curvature Heatmap Analysis/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-04-003",
+      "file": "AFTER - Post-Release Extensions/L2-07-04 - 04-febe-zebra-curvature-surface-analysis/L3-003 - Curvature Graph Analysis/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-04-004",
+      "file": "AFTER - Post-Release Extensions/L2-07-04 - 04-febe-zebra-curvature-surface-analysis/L3-004 - Environment Reflection Surface Analysis/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-04-005",
+      "file": "AFTER - Post-Release Extensions/L2-07-04 - 04-febe-zebra-curvature-surface-analysis/L3-005 - Draft Angle Visual Analysis/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

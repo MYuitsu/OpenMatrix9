@@ -1,0 +1,130 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-04-14-008",
+  "milestone": "M06",
+  "parent_l2_id": "OM9-L2-04-14",
+  "title": "Head Bezel Girdle Seat Attachment",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "target_implementation_milestone": "M06",
+  "execution_stage": "E11",
+  "source_original_path": "specs/06-ms06-settings-and-prongs/01-febe-head-and-bezel-brep-settings/008-febe-head-bezel-girdle-seat-attachment/l3.json",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-04-14-008",
+    "capability_id": "cap.04-14.head-bezel-girdle-seat-attachment",
+    "stable_owner_key": "OM9-L2-04-14/head-bezel-girdle-seat-attachment",
+    "title": "Head Bezel Girdle Seat Attachment",
+    "slug": "head-bezel-girdle-seat-attachment",
+    "module_id": "OM9-L2-04-14",
+    "module_path": "specs/06-ms06-settings-and-prongs/01-febe-head-and-bezel-brep-settings/",
+    "l3_path": "specs/06-ms06-settings-and-prongs/01-febe-head-and-bezel-brep-settings/008-febe-head-bezel-girdle-seat-attachment/",
+    "tag": "febe",
+    "implementation_role": "ui_command_adapter",
+    "milestone_id": "M06",
+    "target_milestone": "M06",
+    "delivery": "mainline",
+    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "origin_source_taxonomy": "04-matrix8-book2",
+    "goal": "maintain geometric relationship to source gem",
+    "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
+    "parent_scope": "Head Builder, Bezel Builder với NURBS/BRep",
+    "parent_exclusions": "T-Spline Bezel & ClayBezel thuộc 09 After.",
+    "depends_on_module_ids": [
+      "OM9-L2-04-09",
+      "OM9-L2-01-09",
+      "OM9-L2-03-11"
+    ],
+    "reuses_or_dispatches_to_module_ids": [
+      "OM9-L2-04-09",
+      "OM9-L2-01-10"
+    ],
+    "downstream_consumers": [
+      "gem-settings-head-bezel"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          468,
+          497
+        ],
+        "pdf_pages_1based": [
+          242,
+          271
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Head Bezel Girdle Seat Attachment” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M06: run OpenMatrix9 UI; perform “Head Bezel Girdle Seat Attachment”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M06-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "execution_stage": "E11",
+    "planning_release": "CORE_MVP",
+    "planning_risk": "MEDIUM",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
+    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+  },
+  "children_l4": [
+    {
+      "id": "OM9-L4-14-008-01",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-008 - Head Bezel Girdle Seat Attachment/L4-01 - Contract And Fixture/l4.json",
+      "title": "Contract And Fixture — Head Bezel Girdle Seat Attachment",
+      "role": "CONTRACT_FIXTURE",
+      "depends_on_l4_ids": []
+    },
+    {
+      "id": "OM9-L4-14-008-02",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-008 - Head Bezel Girdle Seat Attachment/L4-02 - Backend Implementation/l4.json",
+      "title": "Backend Implementation — Head Bezel Girdle Seat Attachment",
+      "role": "IMPLEMENT",
+      "depends_on_l4_ids": [
+        "OM9-L4-14-008-01"
+      ]
+    },
+    {
+      "id": "OM9-L4-14-008-03",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-008 - Head Bezel Girdle Seat Attachment/L4-03 - Frontend Integration/l4.json",
+      "title": "Frontend Integration — Head Bezel Girdle Seat Attachment",
+      "role": "WIRE_UI",
+      "depends_on_l4_ids": [
+        "OM9-L4-14-008-02"
+      ]
+    },
+    {
+      "id": "OM9-L4-14-008-04",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-008 - Head Bezel Girdle Seat Attachment/L4-04 - Regression And Acceptance/l4.json",
+      "title": "Regression And Acceptance — Head Bezel Girdle Seat Attachment",
+      "role": "REGRESSION",
+      "depends_on_l4_ids": [
+        "OM9-L4-14-008-03"
+      ]
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED"
+}

@@ -1,0 +1,78 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-10",
+  "milestone": "M01",
+  "title": "Febe Matrix Commandline Feedback Adapter",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Command Line kiểu Rhino/Matrix, prompt, options/history",
+  "definition": {
+    "module_id": "OM9-L2-03-10",
+    "milestone_id": "M01",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "scope": "Command Line kiểu Rhino/Matrix, prompt, options/history",
+    "exclude": "Command execution engine thuộc CAD Base.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          1,
+          3
+        ],
+        "pdf_pages_1based": [
+          11,
+          13
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          17,
+          19
+        ],
+        "pdf_pages_1based": [
+          27,
+          29
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-02",
+      "OM9-L2-03-07"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "manual_test_required": true,
+    "acceptance_gate": "M01-UI",
+    "l3_count": 6
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-10-001",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-001 - Commandline Entry And Submit/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-10-002",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-002 - Interactive Command Prompts/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-10-003",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-003 - Command Options Clickable Tokens/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-10-004",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-004 - Numeric And Coordinate Feedback/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-10-005",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-005 - Command History Readable Panel/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-10-006",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-006 - Commandline Escape Repeat Shortcuts/l3.json"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-02-03",
+  "milestone": "M02",
+  "title": "Febe Osnaps And Basic Smarttrack",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "End/Mid/Cen/Near/Point/Int/Tan/Perp/Quad và SmartTrack cơ bản.",
+  "definition": {
+    "module_id": "OM9-L2-02-03",
+    "milestone_id": "M02",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "02-rhino5",
+    "scope": "End/Mid/Cen/Near/Point/Int/Tan/Perp/Quad và SmartTrack cơ bản.",
+    "exclude": "Không tạo picking engine thứ hai; GUI toggle Matrix thuộc 03.",
+    "manual_references": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          37,
+          40
+        ],
+        "pdf_pages_1based": [
+          45,
+          48
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          57,
+          62
+        ],
+        "pdf_pages_1based": [
+          67,
+          72
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-02-02",
+      "OM9-L2-01-07"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "manual_test_required": true,
+    "acceptance_gate": "M02-UI",
+    "l3_count": 7
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-02-03-001",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-001 - Osnap End Mid Center Quadrant/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-03-002",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-002 - Osnap Near Point Intersection/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-03-003",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-003 - Osnap Tangent Perpendicular/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-03-004",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-004 - Osnap Surface And Polysurface/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-03-005",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-005 - Osnap Priority And One Shot Overrides/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-03-006",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-006 - Smarttrack Inferred Alignment Lines/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-03-007",
+      "file": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-007 - Osnap Debug Marker And Tooltip/l3.json"
+    }
+  ]
+}

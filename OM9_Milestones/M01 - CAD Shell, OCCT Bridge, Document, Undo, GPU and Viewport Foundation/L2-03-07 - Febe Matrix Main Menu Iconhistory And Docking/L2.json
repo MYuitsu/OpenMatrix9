@@ -1,0 +1,79 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-07",
+  "milestone": "M01",
+  "title": "Febe Matrix Main Menu Iconhistory And Docking",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Main Menu, Icon History, panel arrangement Matrix",
+  "definition": {
+    "module_id": "OM9-L2-03-07",
+    "milestone_id": "M01",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "scope": "Main Menu, Icon History, panel arrangement Matrix",
+    "exclude": "Không dựng lại app docking kernel.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          1,
+          8
+        ],
+        "pdf_pages_1based": [
+          11,
+          18
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-01",
+      "OM9-L2-01-02"
+    ],
+    "downstream_contracts": [
+      "matrix-layout-and-panel-presets"
+    ],
+    "early_slices": [
+      "M01: geometry-agnostic docking, Icon History, Main Menu, palette containers.",
+      "M02/M03/M04+: commands become enabled only when their owning backend is complete."
+    ],
+    "manual_test_required": true,
+    "acceptance_gate": "M01-UI",
+    "l3_count": 8
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-07-001",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-001 - Matrix Left Sidebar Stack And Order/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-07-002",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-002 - Matrix Main Menu Category Tabs/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-07-003",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-003 - Command Icon Tooltip And Rightclick Slot/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-07-004",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-004 - Menu Scrolling And Icon Grid/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-07-005",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-005 - Recent Command Icon History/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-07-006",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-006 - Main Menu Collapse Reorder And Float/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-07-007",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-007 - Default Menu Layout Reset/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-07-008",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-008 - Disabled Menu Action Visibility/l3.json"
+    }
+  ]
+}

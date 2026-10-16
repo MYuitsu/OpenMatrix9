@@ -1,0 +1,226 @@
+{
+  "task_id": "OM9-M00-L4-01-03-04",
+  "source_sha": "746a17f127897e921a57118b6caad08968602bf5",
+  "status": "BLOCKED_DEPENDENCY",
+  "actual_execution": false,
+  "probe_result": null,
+  "evidence_kind": "BOUNDED_LOCAL_REAUDIT_BLOCKED_STATUS_NOT_PASS",
+  "timestamp_utc": "2026-10-15T23:37:30Z",
+  "os_arch": "Windows 11 AMD64",
+  "toolchain": {
+    "rustc": "1.98.1 (48a229cea 2026-09-01)",
+    "cargo": "1.98.1 (797e8a9bc 2026-08-05)",
+    "git": "2.55.0.windows.3",
+    "occt_sdk": null
+  },
+  "commands": [
+    {
+      "command": "git -C QymCAD rev-parse HEAD",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "returns the OpenMatrix9 HEAD, not the pinned QymCAD revision"
+    },
+    {
+      "command": "git -C QymCAD rev-parse --show-toplevel",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "resolves to H:/OpenMatrix9; no independent checkout"
+    },
+    {
+      "command": "Test-Path QymCAD/.git",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "False - vendored tree carries no VCS metadata"
+    },
+    {
+      "command": "git -C H:/OpenMatrix9 ls-files QymCAD | Measure-Object",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "0 tracked files - copy sits outside the OM9 index"
+    },
+    {
+      "command": "Test-Path vendor-research",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "False - the l4.json commands_preview path does not exist"
+    },
+    {
+      "command": "Test-Path tools/validate_m00_v013.py, tools/next_m00_task.py, tools/validate_m00_execution.py",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "all False - the M00 execution protocol tooling is absent"
+    },
+    {
+      "command": "(Get-ChildItem QymCAD/crates -Directory).Count",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "19 crates, matching the planned workspace shape"
+    },
+    {
+      "command": "Get-Content QymCAD/LICENSE -TotalCount 1",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "GNU AFFERO GENERAL PUBLIC LICENSE (v3 full text, 34523 bytes)"
+    },
+    {
+      "command": "rustc --version; cargo --version; git --version",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "rustc/cargo 1.98.1, git 2.55.0.windows.3 available"
+    },
+    {
+      "command": "Test-Path C:/OpenCASCADE, C:/OCCT, H:/OpenCASCADE, build/occt",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "all False and OCCT_ROOT is empty - no OCCT SDK to build qymcad-kernel"
+    },
+    {
+      "command": "Select-String QymCAD/crates/qymcad-io/src/formats.rs -Pattern 'pub const ALL'",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "10 formats, no 3DM at the inspected revision"
+    },
+    {
+      "command": "missing-output scan for the 12 declared L4 outputs",
+      "exit_code": 0,
+      "stdout_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "stderr_path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "observed": "all 12 MISSING outside implementation/evidence/"
+    }
+  ],
+  "command_output_note": "stdout and stderr were merged with 2>&1 into audit-session.log",
+  "artifacts": [
+    {
+      "path": "QymCAD/Cargo.toml",
+      "sha256": "f79a262a467ef328a44deb7fe46fed684c7720b4adc19172118620bc3347ac9f"
+    },
+    {
+      "path": "QymCAD/Cargo.lock",
+      "sha256": "a27cbdafe89709d1cb449f1bf4b0a3a6c95fa8b89d8b059bf9299b98634d474f"
+    },
+    {
+      "path": "QymCAD/LICENSE",
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+    },
+    {
+      "path": "QymCAD/THIRD-PARTY-NOTICES.md",
+      "sha256": "e0dd30910a66d8f40b3bff803d688aec0f8b374902199340abd5f3c41d65481c"
+    },
+    {
+      "path": "QymCAD/AGENTS.md",
+      "sha256": "60d6b01d49acff22b87efd0347c8ea7f470acd53ffed1eaa438ae9fa6cffd783"
+    },
+    {
+      "path": "QymCAD/CLAUDE.md",
+      "sha256": "58082a1ff605a54d9a5054cf8817edb7f1191b19fcc17dd520109e5a23cef9bd"
+    },
+    {
+      "path": "QymCAD/rust-toolchain.toml",
+      "sha256": "a6a0bbd29ffaa8182dc22d1d9149709f1091e47df40ed96eb8a78a711c66a4ce"
+    },
+    {
+      "path": "QymCAD/crates/qymcad-io/src/formats.rs",
+      "sha256": "797b811e8dd43c53b542cd0d2181bbe1ba4847fe934acee89e05f301f937d129"
+    },
+    {
+      "path": "QymCAD/crates/qymcad-core/src/refs.rs",
+      "sha256": "ff012aee8be8451b463667af63725a22029a9fd5e1a9af789cc2dbe7949535fa"
+    },
+    {
+      "path": "QymCAD/crates/qymcad-kernel/src/naming.rs",
+      "sha256": "0c5281693d621f94261caeb07d5eff7a310f8e17b29712f7f5af1ac11fd210ff"
+    },
+    {
+      "path": "QymCAD/crates/qymcad-kernel/build.rs",
+      "sha256": "5eeaa6b040df7fa15f2b8b9bde70fab36a4d523eec7fdcae752246caa9cb7223"
+    },
+    {
+      "path": "standalone/provenance.json",
+      "sha256": "72d5d15059d1098deef1b7048c81c7bcdf5c9c7e16575760b68cd50bfabf2351"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-13-standalone-foundation.md",
+      "sha256": "5fa29f4a17cfd3c8f3c7166b1928f23f0614e0f93a3491760ccb8dd0839a4033"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-10-13-standalone-foundation-design.md",
+      "sha256": "0a1d743b168880ea7417f1f9179d7c5be850a4c0c613ff3c786429ac8ec4be12"
+    },
+    {
+      "path": "docs/validation/2026-10-13-standalone-foundation-progress.md",
+      "sha256": "8620a852719a3ba57df88cee09260debcbd115fcb3c29618d29c633476366afe"
+    },
+    {
+      "path": "docs/core-requirements.json",
+      "sha256": "be61cb0c3f447a49f0e71a0fda2a81310ad9a5d60d56fc6387bd3bfe8469a4cf"
+    },
+    {
+      "path": "OM9_Milestones/M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L1.json",
+      "sha256": "f1417cd67c487a3f39ed0030e2f6ec5bb7bdc817734b87244f4ccbca34670583"
+    },
+    {
+      "path": "implementation/evidence/M00/G00-01/audit-session.log",
+      "sha256": "ba6b073a182476fce850416ebcfed43c9f588c58f218e71fbb0590d4baf45fdc"
+    },
+    {
+      "path": "implementation/evidence/M00/G00-01/source-provenance.json",
+      "sha256": "f5ecc323eda796a754590c02dd4520a363a84b2524ab34f0ab38a5709c1063ab"
+    },
+    {
+      "path": "implementation/evidence/M00/G00-01/source-checkout.log",
+      "sha256": "c5a5b243b4e5843772d2b5326a093813523e207115521f0079ac1871f13d27d2"
+    },
+    {
+      "path": "implementation/evidence/M00/G00-01/source-file-inventory.csv",
+      "sha256": "57c62dc7209322f281ef95818b3c1661d8f230669fc0bab11b0d013655b5fdc0"
+    },
+    {
+      "path": "implementation/evidence/M00/G00-01/pin-identity-c116f8f2.json",
+      "sha256": "918efe99724c8b6879e7fc4ab540cfd3fbca268fcee31af1b062c6ed52d6b413"
+    },
+    {
+      "path": "implementation/evidence/M00/G00-01/pin-identity-746a17f1.json",
+      "sha256": "7df479ad12fb5f157c88ef5a6641efb1dfe4d3e67b52a6fa634e10607f98ccc8"
+    },
+    {
+      "path": "implementation/evidence/M00/G00-01/pin-identity-09a7f09.json",
+      "sha256": "d59331050bf6a383a4bcccd59b2bcc3a4fcdf165ccfc029dc3af6bd90fa2e983"
+    },
+    {
+      "path": "implementation/evidence/M00/G00-01/pin-identity-main-tip.json",
+      "sha256": "43157b359c072ee37b8bb728ad0e918a218515ec7b5e09fb5dd40ac2af9c7dbd"
+    }
+  ],
+  "fixtures": [],
+  "expected": [
+    "e01-source-handoff.md làm hợp đồng bàn giao cho E01",
+    "phạm vi dùng lại/khoảng trống/điều kiện tiên quyết được chốt"
+  ],
+  "actual": [
+    "Chưa có e01-source-handoff.md.",
+    "Handoff cần ADR đã ký (01-03-03) và mapping 95 L2 (01-03-01) làm đầu vào, cả hai đều chưa đạt."
+  ],
+  "review": {
+    "decision": "PENDING",
+    "reviewer": null,
+    "evidence_checked": false,
+    "signed_record_path": null
+  },
+  "scope_decision": null,
+  "blockers": [
+    "prerequisite trong chuỗi L4 của L2-01 chưa PASS"
+  ],
+  "task_was_attempted": false,
+  "note": "Task cuối chuỗi; không thể bắt đầu trước khi các task trước PASS."
+}

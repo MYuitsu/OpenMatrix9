@@ -1,0 +1,111 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-10",
+  "milestone": "M03",
+  "title": "02-be-occt-boolean-fillet-shell-ops",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Union/Difference/Intersection, trim/split support, fillet/chamfer, shell/offset cần cho nhẫn và cutter.",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/02-be-occt-boolean-fillet-shell-ops/module.json",
+  "definition": {
+    "module_id": "OM9-L2-01-10",
+    "milestone_id": "M03",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/02-be-occt-boolean-fillet-shell-ops/",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "legacy_v07_path": "specs/01-cad-base/10-be-occt-boolean-fillet-shell-ops/",
+    "scope": "Union/Difference/Intersection, trim/split support, fillet/chamfer, shell/offset cần cho nhẫn và cutter.",
+    "exclude": "Không triển khai machining toolpath/industrial hole feature timeline.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          166,
+          234
+        ],
+        "pdf_pages_1based": [
+          176,
+          244
+        ]
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          61,
+          64
+        ],
+        "pdf_pages_1based": [
+          69,
+          72
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-05"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "M03_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 9,
+    "l3_catalog_path": "specs/03-ms03-curve-surface-solid-3dm/02-be-occt-boolean-fillet-shell-ops/l3-index.json",
+    "l3_deferred_count": 0,
+    "l3_m03_owner_count": 9,
+    "l4_count_planned_m03": 50
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-10-001",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-001 - B-Rep Boolean Union/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-10-002",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-002 - B-Rep Boolean Difference/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-10-003",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-003 - B-Rep Boolean Intersection/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-10-004",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-004 - Curve And Face Split Intersections/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-10-005",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-005 - Planar Cap And Close Solid/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-10-006",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-006 - Fillet And Chamfer B-Rep Edges/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-10-007",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-007 - Offset Face And Thicken Shell/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-10-008",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-008 - Face Extract Unjoin And Rejoin/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-10-009",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-009 - Geometry Health And Naked Edge Query/l3.json",
+      "target_implementation_milestone": "M03"
+    }
+  ],
+  "m03_l4_planned_count": 50,
+  "execution_state": "NOT_STARTED",
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+}

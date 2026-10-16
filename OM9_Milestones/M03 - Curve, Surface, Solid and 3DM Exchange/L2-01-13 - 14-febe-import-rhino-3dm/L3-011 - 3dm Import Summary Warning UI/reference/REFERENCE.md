@@ -1,0 +1,11 @@
+# Reference - L3-011 - 3dm Import Summary Warning UI
+
+- Folder id: OM9-L3-01-13-011 (L3)
+- Milestone: M03
+
+| Section | Source manual | Pages | Confidence | Placement | Text | Images | Why mapped |
+|---|---|---|---|---|---|---|---|
+| Open | Matrix 8 Instruction Manual Book 1 | 91-91 | medium | L3 | [m8book1__p91-91__open.md](text/m8book1__p91-91__open.md) | 3 | Import UI |
+| Import | Matrix 8 Instruction Manual Book 1 | 92-92 | medium | link_to_L2 | [L2 copy](../../reference/text/m8book1__p92-92__import.md) | 1 (in L2 images/) | Import UI |
+
+Usage: these sections were split from the Matrix 8 / Matrix 9 / Rhino 5 manuals (text in text/, figures in images/, same file stem prefix = source PDF key + page range) to guide implementing and verifying this function. Read high-confidence rows first for exact command behaviour, options and prompts; treat medium/low rows as related background only. Rows marked link_to_L2 are stored once in the parent L2 reference folder (../../reference) and are not duplicated here. Page ranges are TOC-based and boundary pages can be shared with neighbouring sections, so images on those pages may belong to the neighbour. Manual content is private reference material: do not publish it.

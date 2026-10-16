@@ -1,0 +1,92 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-06",
+  "milestone": "M01",
+  "title": "Febe Viewport Gpu Draw Backend",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "GPU viewport wireframe/shaded, gem display, camera draw, overlays và mesh tessellation.",
+  "definition": {
+    "module_id": "OM9-L2-01-06",
+    "milestone_id": "M01",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "scope": "GPU viewport wireframe/shaded, gem display, camera draw, overlays và mesh tessellation.",
+    "exclude": "Không bao gồm offline render/V-Ray studio.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          63,
+          70
+        ],
+        "pdf_pages_1based": [
+          73,
+          80
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-01",
+      "OM9-L2-01-05"
+    ],
+    "downstream_contracts": [
+      "viewport-render-and-overlay"
+    ],
+    "early_slices": [],
+    "manual_test_required": true,
+    "acceptance_gate": "M01-UI",
+    "l3_count": 9
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-06-001",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-001 - GPU Device And Render Loop/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-06-002",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-002 - Shared Scene Graphics Resources/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-06-003",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-003 - NURBS B-Rep Display Tessellation Cache/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-06-004",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-004 - Wireframe And Isocurve Pass/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-06-005",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-005 - Shaded Face And Solid Pass/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-06-006",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-006 - Depth Clipping And Grid Overlays/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-06-007",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-007 - Selection Highlight Render Pass/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-06-008",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-008 - Viewport Invalidation And Redraw/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-06-009",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-009 - GPU Device Loss Graceful Recovery/l3.json"
+    }
+  ]
+}

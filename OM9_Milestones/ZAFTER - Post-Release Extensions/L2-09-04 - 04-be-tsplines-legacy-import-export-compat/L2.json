@@ -1,0 +1,66 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-04",
+  "milestone": "AFTER",
+  "title": "04-be-tsplines-legacy-import-export-compat",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Legacy T-spline conversion/interoperability.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/04-be-tsplines-legacy-import-export-compat/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-04",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/04-be-tsplines-legacy-import-export-compat/",
+    "tag": "be",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/04-be-tsplines-legacy-import-export-compat/",
+    "scope": "Legacy T-spline conversion/interoperability.",
+    "exclude": "Không phải OCCT native NURBS; không nằm trên critical path.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          267,
+          324
+        ],
+        "pdf_pages_1based": [
+          41,
+          98
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 4,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/04-be-tsplines-legacy-import-export-compat/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-04-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-04 - 04-be-tsplines-legacy-import-export-compat/L3-001 - T-Spline To Rhino Surface Converter/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-04-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-04 - 04-be-tsplines-legacy-import-export-compat/L3-002 - Rhino Surface To T-Spline Eligibility/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-04-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-04 - 04-be-tsplines-legacy-import-export-compat/L3-003 - T-Spline To Mesh Tessellation Export/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-04-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-04 - 04-be-tsplines-legacy-import-export-compat/L3-004 - Legacy T-Spline File Data Bridge/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

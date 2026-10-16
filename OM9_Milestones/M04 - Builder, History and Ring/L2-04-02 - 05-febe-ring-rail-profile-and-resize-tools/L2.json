@@ -1,0 +1,99 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-02",
+  "milestone": "M04",
+  "title": "05-febe-ring-rail-profile-and-resize-tools",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Ring rail, outside rail, profile placer, ring resizer",
+  "source_original_path": "specs/04-ms04-builder-history-ring/05-febe-ring-rail-profile-and-resize-tools/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-02",
+    "milestone_id": "M04",
+    "module_path": "specs/04-ms04-builder-history-ring/05-febe-ring-rail-profile-and-resize-tools/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/02-febe-ring-rail-profile-and-resize-tools/",
+    "scope": "Ring rail, outside rail, profile placer, ring resizer",
+    "exclude": "Không viết lại Rhino Sweep toán học.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          358,
+          397
+        ],
+        "pdf_pages_1based": [
+          132,
+          171
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-02-04",
+      "OM9-L2-02-05",
+      "OM9-L2-03-11"
+    ],
+    "downstream_contracts": [
+      "matrix-ring-rails-and-profile-placement"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M04-UI",
+    "l3_count": 9,
+    "l3_catalog_path": "specs/04-ms04-builder-history-ring/05-febe-ring-rail-profile-and-resize-tools/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-02-001",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-001 - Ring Rail Jewelry Size Standard/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-02-002",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-002 - Outside Ring Rail Generator/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-02-003",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-003 - Profile Placer On Rail/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-02-004",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-004 - Custom Rail And Advanced Rail/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-02-005",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-005 - Four Rail Profile Tool/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-02-006",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-006 - Profile Edit Merge And Endcap/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-02-007",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-007 - Ring Resizer Builder/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-02-008",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-008 - Rail Profile Sweep Associative Output/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-04-02-009",
+      "file": "M04 - Builder, History and Ring/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-009 - Rail And Profile Viewport Handles/l3.json",
+      "target_implementation_milestone": "M04"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m04": 60
+}

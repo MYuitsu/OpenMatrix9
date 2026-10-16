@@ -1,0 +1,59 @@
+# Rust build artifacts
+/target
+**/target
+
+# What packaging produces (AppImage, zip): binaries are not committed
+/dist
+*.AppImage
+
+# Backups / debug
+**/*.rs.bk
+*.pdb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python bytecode (the gate scripts live in tools/)
+__pycache__/
+*.pyc
+
+# Editor
+*.swp
+*.swo
+.idea/
+*~
+
+# NOTE: Cargo.lock IS committed - this is a workspace with a binary, and a reproducible build matters more.
+# Not ignored.
+
+# Generated G-code (the examples)
+examples/*.tap
+*.tap
+
+# SCRATCH MEASUREMENTS AGAINST PERSONAL DOCUMENTS - they do not belong in the repository.
+# They reach into files outside the tree by absolute paths and build nowhere except on one machine. Such a
+# file once went into a commit through `git add -A`, so what holds the rule now is this line rather than
+# memory. The crate that held them is gone; the pattern stays, because the habit is what it guards against.
+**/zzz_*.rs
+**/the_users_*.rs
+
+# Crash reports and gathered problem reports, if anyone ever points the program at the tree.
+crashes/
+reports/
+
+# The list of crate sources for Flatpak: generated from Cargo.lock by packaging/flatpak/update-manifest.sh
+# before a submission. Not kept here - it goes stale at every change of the lock file, and a stale list of
+# sources is worse than none: the build stops halfway with a message about being offline.
+packaging/flatpak/cargo-sources.json
+
+# autosaves the program writes beside an open project (a probe opening a sample writes them too)
+*.autosave.qcad
+# the copy the program keeps of a document before saving over it, and the one `convert_qcad.py` keeps
+*.bak
+
+# Personal notes for the coding assistant, kept on the owner's machine
+CLAUDE.local.md
+
+# Samples that cannot be distributed: a link to them in a working copy, checks pass them over when absent
+/samples

@@ -1,0 +1,98 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-12",
+  "milestone": "M01",
+  "title": "Be Native Project Codec Stl Export",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Save/load native document đầy đủ geometry/history/layer/gem instance; xuất STL watertight và báo lỗi hình học.",
+  "definition": {
+    "module_id": "OM9-L2-01-12",
+    "milestone_id": "M01",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "scope": "Save/load native document đầy đủ geometry/history/layer/gem instance; xuất STL watertight và báo lỗi hình học.",
+    "exclude": "Không xây thêm 3DM reader trong codec native; không làm STEP/IGES ở giai đoạn này.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          79,
+          86
+        ],
+        "pdf_pages_1based": [
+          89,
+          96
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          48,
+          56
+        ],
+        "pdf_pages_1based": [
+          58,
+          66
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-03"
+    ],
+    "downstream_contracts": [
+      "scene-save-and-stl"
+    ],
+    "early_slices": [
+      "M01: native snapshot, empty/fixture document save-load and versioned codec envelope.",
+      "M07: complete reliable STL export (same canonical owner) plus geometry validation."
+    ],
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 10
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-12-001",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-001 - Native Project Container Format/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-002",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-002 - Scene And Layer State Encoding/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-003",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-003 - B-Rep Mesh And Instance Encoding/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-004",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-004 - Builder History Stub Persistence/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-005",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-005 - Atomic Save And Write Failure Recovery/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-006",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-006 - Project Load Validation And Compatibility/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-007",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-007 - Document Reload And Restoration/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-008",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-009",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-009 - Export Mesh Units And Winding/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-010",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/L3-010 - Project Roundtrip Regression Fixtures/l3.json"
+    }
+  ]
+}

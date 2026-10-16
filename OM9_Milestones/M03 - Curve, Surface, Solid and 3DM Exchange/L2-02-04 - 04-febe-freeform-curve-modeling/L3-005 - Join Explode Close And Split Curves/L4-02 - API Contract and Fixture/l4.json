@@ -1,0 +1,576 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-02-04-005-02",
+  "milestone": "M03",
+  "parent_l3_id": "OM9-L3-02-04-005",
+  "owner_l2_id": "OM9-L2-02-04",
+  "title": "Contract Fixture — Join Explode Close And Split Curves",
+  "task_role": "CONTRACT_FIXTURE",
+  "planning_state": "NOT_STARTED",
+  "execution_stage": "E05",
+  "mini_gate_id": "G03-B",
+  "risk": "CRITICAL",
+  "purpose": "Define typed API and executable positive/negative fixture",
+  "parent_l3_file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04-febe-freeform-curve-modeling/L3-005 - Join Explode Close And Split Curves/l3.json",
+  "preconditions": {
+    "milestone": "M00,M01,M02 approved and passing actual tests; previous M03 mini-gates approved",
+    "required_l4_verified_ids": [
+      "OM9-L4-02-04-005-01"
+    ],
+    "technical_environment": "Real OpenMatrix9 fork, pinned QymCAD audit checkout, Rust/OCCT toolchain, test fixtures",
+    "owners": [],
+    "unresolved_owner_policy": "BLOCKED_OWNER until an existing backend service is verified; never implement a duplicate geometry kernel in GUI"
+  },
+  "source_context": {
+    "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+    "source_revision_opennurbs": null,
+    "files_to_inspect": [
+      "crates/qymcad-core/src/geom.rs",
+      "crates/qymcad-core/src/feature/kind.rs",
+      "crates/qymcad-kernel/src/shape.rs"
+    ],
+    "source_links": [
+      {
+        "path": "crates/qymcad-core/src/geom.rs",
+        "reference": "https://github.com/QymIs-Tech/QymCAD/blob/c116f8f224ebffe0ada049c91c0d15df3634f00d/crates/qymcad-core/src/geom.rs",
+        "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+        "review": "CONTENT_READ_AT_PINNED_REVISION"
+      },
+      {
+        "path": "crates/qymcad-core/src/feature/kind.rs",
+        "reference": "https://github.com/QymIs-Tech/QymCAD/blob/c116f8f224ebffe0ada049c91c0d15df3634f00d/crates/qymcad-core/src/feature/kind.rs",
+        "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+        "review": "CONTENT_READ_AT_PINNED_REVISION"
+      },
+      {
+        "path": "crates/qymcad-kernel/src/shape.rs",
+        "reference": "https://github.com/QymIs-Tech/QymCAD/blob/c116f8f224ebffe0ada049c91c0d15df3634f00d/crates/qymcad-kernel/src/shape.rs",
+        "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+        "review": "CONTENT_READ_AT_PINNED_REVISION"
+      }
+    ],
+    "review_state": "SOURCE_REFERENCE_ONLY_REQUIRES_LOCAL_SIGNATURE_BUILD_VERIFICATION",
+    "resolution_rule": "Pin git checkout; record real path:symbol:line; classify REUSE/ADAPT/ADD or BLOCKED; no fabricated symbol certainty"
+  },
+  "work_plan": {
+    "steps": [
+      "Write concrete fixture for Join Explode Close And Split Curves using `m03_luna_execution_contract.golden_test_design.input` and expected observable; serialize input units, object IDs, tolerance, and deterministic expected values.",
+      "Add independently computed positive assertions and negative atomicity checks for `m03_02_04_005`; verify fixture can be constructed without assuming this operation already works.",
+      "For BRep measure IsValid/volume/area/bbox/topology. For NURBS compare degree/knots/weights/end-derivatives. For import hash real binary .3dm. Record the test binary command that will execute these oracles."
+    ],
+    "role_checklist": [
+      "Define typed inputs/outputs and error variants for: curve composition and split behavior. Include units/tolerances and undo transaction boundaries.",
+      "Create executable Rust test fixtures with independent expected values from positive and negative scenario; explicit metrics, not screenshots alone.",
+      "Write failure-first tests and run them; failure before implementation is expected and must be recorded as such, not task PASS without approved test design."
+    ],
+    "input_fixture": "two coincident-end lines A-B and B-C",
+    "expected_positive": "join returns ordered composite curve, explode returns source pieces with stable refs",
+    "expected_negative": "noncoincident endpoints beyond tolerance cannot report success",
+    "required_technical_decisions": [
+      "Ưu tiên curve exact qua OCCT Geom_Curve/Geom_BSplineCurve; tessellation chỉ để display không dùng làm dữ liệu nguồn.",
+      "Một curve chứa domain, degree, knots, weights, control points, closed flag và tolerance; validate end/periodic, ordering và singularities.",
+      "Test endpoints/tangents, projection/intersection/tolerance, serialization và undo; không claim G2 nếu chỉ G1 trên viewport."
+    ],
+    "suggested_commands": [
+      "cargo metadata --no-deps --format-version 1"
+    ],
+    "commands_not_executed": true,
+    "fixture_schema_path": "m03_luna_execution_contract.golden_test_design"
+  },
+  "acceptance": {
+    "positive_fixture_id": "OM9-L3-02-04-005-POSITIVE",
+    "negative_fixture_id": "OM9-L3-02-04-005-NEGATIVE",
+    "required_receipts": [
+      "api_contract",
+      "fixture_spec",
+      "test_registration_plan"
+    ],
+    "required_artifact_after_execution": "implementation/M03/OM9-L3-02-04-005/02_contract_fixture.json",
+    "required_evidence_after_execution": "implementation/evidence/M03/OM9-L4-02-04-005-02.json",
+    "expected_observable": "Define typed API and executable positive/negative fixture",
+    "negative_observable": "Explicit domain error; document IDs, BRep cache, selection and undo journal unchanged",
+    "gate": "DOCUMENT_REVIEW_ONLY",
+    "checklist": [
+      "Define API owner and a concrete proposed signature; confirm cross-crate boundary",
+      "Specify deterministic fixture parameters, units, tolerance and positive/negative expected outputs",
+      "Specify exact test name, proposed crate and how an independent oracle will be checked",
+      "Mark fixture unmaterialized until binary/source exists; do not claim runtime pass"
+    ],
+    "pass_rule": "DOCUMENT_READY only: role artifact is complete, internally consistent, reviewed and hashed; not permission to claim geometry feature works.",
+    "never_claim_success_if_fixture_missing": true,
+    "role_specific_success": "Complete auditable source/API/test design is the artifact; do not claim the CAD feature itself works yet.",
+    "runtime_feature_success_required_for_this_role": false,
+    "design_complete_does_not_mark_feature_implemented": true,
+    "evidence_schema_at_execution": {
+      "task_id": "OM9-L4-02-04-005-02",
+      "source_revision": "actual checkout sha",
+      "artifact_paths": [
+        "actual output path(s)"
+      ],
+      "artifact_sha256": "calculate from actual bytes",
+      "commands": [
+        {
+          "argv": "actual command",
+          "cwd": "actual checkout",
+          "exit_code": "observed integer",
+          "stdout_log_sha256": "actual digest"
+        }
+      ],
+      "observed": "actual outputs",
+      "expected": "documented oracles",
+      "effective_tolerance": "numeric if measured",
+      "prerequisite_verified_ids": "validated receipts",
+      "reviewer": "required for GUI/legal acceptance when applicable",
+      "status": "NOT_RUN; never preset PASS"
+    }
+  },
+  "execution_policy": {
+    "mode": "PLANNING_SPEC_READY_EXECUTION_REQUIRES_ENVIRONMENT",
+    "one_task_per_agent_run": true,
+    "status_transitions": [
+      "NOT_STARTED",
+      "IN_PROGRESS",
+      "BLOCKED",
+      "READY_FOR_REVIEW",
+      "VERIFIED_PASS"
+    ],
+    "stop_codes": [
+      "BLOCKED_M02",
+      "BLOCKED_MINIGATE",
+      "BLOCKED_DEPENDENCY",
+      "BLOCKED_SOURCE",
+      "BLOCKED_OWNER",
+      "BLOCKED_FIXTURE",
+      "BLOCKED_ENV",
+      "BLOCKED_APPROVAL"
+    ],
+    "deferred_work": "Never introduce M04/M08 capabilities or unapproved license/API dependencies inside this task",
+    "no_implementation_or_tests_claimed": true
+  },
+  "ui_backend_separation": {
+    "frontend": "Thin command routing, selection validation, feedback and UI state only",
+    "backend": "Must reuse one verified owning geometry handler; do not copy BRep math into command menu",
+    "ownership_candidates_are_not_implementation_proof": true,
+    "missing_implementation": "Disabled action with user-visible reason until backend exists and tests pass"
+  },
+  "execution_handoff": {
+    "schema": "om9.m03.luna.hardened.task",
+    "read_l3_file_first": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04-febe-freeform-curve-modeling/L3-005 - Join Explode Close And Split Curves/l3.json",
+    "task_role": "CONTRACT_FIXTURE",
+    "role_artifact_kind": "api_and_deterministic_fixture_spec",
+    "mandatory_artifact_fields": [
+      "proposed_api_signature",
+      "owner_crate",
+      "input_units",
+      "positive_case",
+      "negative_case",
+      "oracle",
+      "tolerances",
+      "fixture_generation_procedure",
+      "test_name_to_create",
+      "dependencies"
+    ],
+    "proof_scope": "Acceptance of documented API/fixture design, never feature success.",
+    "specific_task_title": "Contract Fixture — Join Explode Close And Split Curves",
+    "domain": "BOOLEAN_TRIM",
+    "parent_fixture_reference": "m03_luna_execution_contract.golden_test_design",
+    "focused_test_reference": "m03_luna_execution_contract.focused_test_handoff",
+    "proposed_command_only_not_verified": "cargo test -p qymcad m03_02_04_005 -- --exact",
+    "source_paths_are_candidates_not_proven_implementation": true,
+    "upstream_revision_required": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+    "local_resolution_sequence": [
+      "1. Confirm M00/M01/M02 actual gate evidence and required predecessor tasks; if unavailable STOP BLOCKED_GATE",
+      "2. Open real source checkout, confirm SHA and verify file:symbol:signature:callsite:test; if missing STOP BLOCKED_SOURCE",
+      "3. Confirm exact owner crate, test registration and fixture provenance; do not assume speculative crate/command exists",
+      "4. Execute only this role and produce mandatory artifact; runtime tasks require actual compilation and focused receipts",
+      "5. Compare observed with expected (and numeric tolerance), preserve document/Undo on rejection; record receipt/hash",
+      "6. If approval is required, mark READY_FOR_REVIEW and await human reviewer, never self-approve"
+    ],
+    "proposed_command_templates_not_bundled_or_run": [
+      "cargo metadata --no-deps --format-version 1"
+    ],
+    "required_prerequisite_scope": "All required IDs and previous gates must be independently VERIFIED_PASS; this archive is planning-only",
+    "role_satisfaction_policy": "Document-only roles can be reviewed without feature runtime; runtime roles require actual tests and binary fixture where applicable",
+    "stop_if": [
+      "missing source or symbol owner",
+      "missing runtime toolchain for runtime role",
+      "missing registered test or fixture binary for runtime role",
+      "test non-zero exit or value outside tolerance",
+      "inconsistent Undo/Redo or lost topology",
+      "license approval pending",
+      "unverified previous-gate approval"
+    ],
+    "output_location_after_execution": "implementation/M03/OM9-L3-02-04-005/02_contract_fixture.json",
+    "evidence_location_after_execution": "implementation/evidence/M03/OM9-L4-02-04-005-02.json",
+    "not_executed": true,
+    "ui_owner_policy": {
+      "enabled_only_with_verified_backend": true,
+      "fallback": "disabled UI with explicit reason, not fake success",
+      "dispatch_owner_module": "verify command catalog and backend service before enabling",
+      "test_negative": "locked layer or empty selection; command disabled and document unmodified"
+    }
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Tạo/sửa curve tự do: locus, degree/knot, continuity phải đo; không suy từ tên lệnh trong menu.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-07",
+        "kind": "rhino5_core_chapter",
+        "title": "NURBS editing và modeling",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "53-67 / in 45-59; 69-71 / in 61-63; 73-91 / in 65-83",
+        "capability_ids": [
+          "RCORE-07.C01",
+          "RCORE-07.C02",
+          "RCORE-07.C03",
+          "RCORE-07.C04",
+          "RCORE-07.C05",
+          "RCORE-07.C06",
+          "RCORE-07.C07",
+          "RCORE-07.C08",
+          "RCORE-07.C09",
+          "RCORE-07.C10",
+          "RCORE-07.C11",
+          "RCORE-07.C12"
+        ],
+        "fixture_ids": [
+          "RCORE-07.T01",
+          "RCORE-07.T03",
+          "RCORE-07.T05",
+          "RCORE-07.T07",
+          "RCORE-07.T08",
+          "RCORE-07.T10"
+        ],
+        "official_help": [
+          {
+            "label": "PointsOn / PointsOff",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/pointson.htm"
+          },
+          {
+            "label": "Rebuild",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuild.htm"
+          },
+          {
+            "label": "FitCrv",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/fitcrv.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      },
+      {
+        "anchor_id": "RCORE-04",
+        "kind": "rhino5_core_chapter",
+        "title": "Command engine và vòng đời tương tác",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "11-23 / in 3-15",
+        "capability_ids": [
+          "RCORE-04.C01",
+          "RCORE-04.C02",
+          "RCORE-04.C03",
+          "RCORE-04.C04",
+          "RCORE-04.C05",
+          "RCORE-04.C06",
+          "RCORE-04.C07",
+          "RCORE-04.C08"
+        ],
+        "fixture_ids": [
+          "RCORE-04.T01",
+          "RCORE-04.T02",
+          "RCORE-04.T04",
+          "RCORE-04.T05",
+          "RCORE-04.T08"
+        ],
+        "official_help": [
+          {
+            "label": "Undo / Redo",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/undo.htm"
+          },
+          {
+            "label": "Aliases",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/options/aliases.htm"
+          },
+          {
+            "label": "Rhino scripting / command macros",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/information/rhinoscripting.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-matrixdata",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/MatrixData/MatrixPoint.cs",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "MatrixData family",
+        "role_for_this_task": "M03 OM9-L2-02-04 reference source",
+        "source_role": "typed Rhino object data wrappers",
+        "detail": "Typed Matrix data wrappers: MatrixPoint, MatrixCurve, MatrixSurface, MatrixProfile, MatrixBoolean, MatrixDouble(Length/Angle/PointOnCrv), MatrixGemInstance(List), MatrixGemBlock(List), MatrixList - i.e. the Matrix9 view of Rhino-like object types.",
+        "observed_identifiers": [
+          "MatrixPoint",
+          "MatrixCurve",
+          "MatrixSurface",
+          "MatrixProfile",
+          "MatrixBoolean",
+          "MatrixDouble",
+          "MatrixDoubleLength",
+          "MatrixDoubleAngle",
+          "MatrixDoublePointOnCrv",
+          "MatrixGemInstance",
+          "MatrixGemInstanceList",
+          "MatrixGemBlock",
+          "MatrixGemBlockList",
+          "MatrixList"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      },
+      {
+        "anchor_id": "mx-matrixbuilder",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/MatrixBuilder",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "MatrixBuilder/* family",
+        "role_for_this_task": "M03 OM9-L2-02-04 reference source",
+        "source_role": "managed builder family",
+        "detail": "Managed builder family under Matrix/MatrixBuilder: CSHalo (HaloBuilder, StylePicker), CylinderBuilder, FourRailProfile (FourRailProfileBuilder/Command), GemCountOnCurve, GemListOnCurve, GemOnCurveAdvanced, GemOnCurveMulti, ImageTrace, Panelling (PanelBuilder), Rope (RopeBuilder), TextureCreator (TextureBuilder), TSplineBezel, TSplineSignet, TSplineTubeFromCurves, TSplineUnderBezel, UnderGallery - each with a matching *Command entry point.",
+        "observed_identifiers": [
+          "HaloBuilder",
+          "StylePicker",
+          "CylinderBuilder",
+          "FourRailProfileBuilder",
+          "GemCountOnCurveBuilder",
+          "GemListOnCurveBuilder",
+          "GemOnCurveAdvancedBuilder",
+          "GemOnCurveMultiBuilder",
+          "ImageTraceBuilder",
+          "PanelBuilder",
+          "RopeBuilder",
+          "TextureBuilder",
+          "TSplineBezelBuilder",
+          "TSplineSignetBuilder",
+          "TSplineTubeFromCurvesBuilder",
+          "TSplineUnderBezelBuilder",
+          "UnderGalleryBuilder"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      }
+    ],
+    "manual_reference_sheets": [
+      {
+        "anchor_id": "mx-sheet-m8book1-p130-131-curve-tools",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 1",
+        "pages": "130-131",
+        "section": "Curve Tools",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "m8book1__p130-131__curve-tools",
+        "path": "OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-09 - 01-be-occt-geometry-creation-ops/reference/text/m8book1__p130-131__curve-tools.md",
+        "role_for_this_task": "authored sheet in this L3: m8book1__p130-131__curve-tools",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      },
+      {
+        "anchor_id": "mx-sheet-m8book1-p84-85-explode",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 1",
+        "pages": "84-85",
+        "section": "Explode",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "m8book1__p84-85__explode",
+        "path": "OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-008 - Face Extract Unjoin And Rejoin/reference/text/m8book1__p84-85__explode.md",
+        "role_for_this_task": "authored sheet in this L3: m8book1__p84-85__explode",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      },
+      {
+        "anchor_id": "mx-sheet-m8book1-p85-86-join",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 1",
+        "pages": "85-86",
+        "section": "Join",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "m8book1__p85-86__join",
+        "path": "OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-008 - Face Extract Unjoin And Rejoin/reference/text/m8book1__p85-86__join.md",
+        "role_for_this_task": "authored sheet in this L3: m8book1__p85-86__join",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      },
+      {
+        "anchor_id": "mx-sheet-m8book1-p86-86-split",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 1",
+        "pages": "86-86",
+        "section": "Split",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "m8book1__p86-86__split",
+        "path": "OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-004 - Curve And Face Split Intersections/reference/text/m8book1__p86-86__split.md",
+        "role_for_this_task": "authored sheet in this L3: m8book1__p86-86__split",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      },
+      {
+        "anchor_id": "mx-sheet-rhino5-p69-69-explode",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Rhino 5 for Windows User's Guide",
+        "pages": "69-69",
+        "section": "Explode",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "rhino5__p69-69__explode",
+        "path": "OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-008 - Face Extract Unjoin And Rejoin/reference/text/rhino5__p69-69__explode.md",
+        "role_for_this_task": "authored sheet in this L3: rhino5__p69-69__explode",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      },
+      {
+        "anchor_id": "mx-sheet-rhino5-p69-69-join",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Rhino 5 for Windows User's Guide",
+        "pages": "69-69",
+        "section": "Join",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "rhino5__p69-69__join",
+        "path": "OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-008 - Face Extract Unjoin And Rejoin/reference/text/rhino5__p69-69__join.md",
+        "role_for_this_task": "authored sheet in this L3: rhino5__p69-69__join",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      },
+      {
+        "anchor_id": "mx-sheet-rhino5-p69-69-trim-and-split",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Rhino 5 for Windows User's Guide",
+        "pages": "69-69",
+        "section": "Trim And Split",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "rhino5__p69-69__trim-and-split",
+        "path": "OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-004 - Curve And Face Split Intersections/reference/text/rhino5__p69-69__trim-and-split.md",
+        "role_for_this_task": "authored sheet in this L3: rhino5__p69-69__trim-and-split",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      }
+    ],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "CONTRACT_TEST",
+    "role_label_on_record": "CONTRACT_FIXTURE",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-02-04",
+    "goal": "Define typed API and executable positive/negative fixture",
+    "algorithm_on_record": "None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "the fixture is authored data; upstream code is read, never executed as proof",
+    "sketch": "// Contract Fixture — Join Explode Close And Split Curves\n// ROLE: CONTRACT_TEST - freeze the contract, then write a test that fails first.\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n// Owner: OM9-L2-02-04\n//\n// 1. Freeze the typed signature and the error enum in the owner crate.\n// 2. Write the fixture harness for the L3 fixture:\n//      input:  valid input from the fixture\n//      expect: measured positive oracle\n//      negative input: invalid, empty or degenerate input\n//      negative expect: typed error with unchanged state\n// 3. Run it: it must fail for the right reason (missing behaviour), not a compile accident.\n// 4. Only then hand the frozen type to the IMPLEMENT task of the same L3.\n\n#[test]\nfn om9_l4_02_04_005_02_contract_is_red_first() {\n    // Arrange: build the fixture input from authored data, not from the implementation.\n    // Act: call the frozen entry point.\n    // Assert: expected == actual for the positive fixture, and a typed error for the negative one.\n    // Record the failing output as the RED receipt for this task.\n    unimplemented!()\n}",
+    "domain_algorithm_reference": {
+      "note_id": "algo.rail.profile.body",
+      "stage": "1/2. Vành, profile bốn rail và thân",
+      "why_for_this_task": "Nối, nổ, đóng và cắt curve dùng chung nhóm tiện ích curve với trim và merge, trong đó dung sai merge là hằng số hard-code 0.01.",
+      "om9_backend": "pure Rust cho tham số hoá và trật tự; OCCT cho sweep hai rail, loft, pipe và join",
+      "steps_cited": [11],
+      "algorithm_steps": ["F11. Cỡ vành: từ đường kính rail suy cỡ theo công thức US rồi làm tròn tới phần tư."],
+      "source_file": "MatrixBuilder/FourRailProfile/FourRailProfileBuilder.cs",
+      "source_methods": [
+        "Initialize",
+        "UpdateBuilder",
+        "UpdateHandles",
+        "GetValues",
+        "AddToDocument",
+        "OptionPicked",
+        "ConduitPostDrawObjects",
+        "Cancel"
+      ],
+      "boundaries_carried": [
+        "Phần lưới/định hướng/trim của PanelBuilder nằm trong PLUGIN bên thứ ba: chỉ thấy chữ ký hàm gọi, KHÔNG thấy thuật toán. Đây là lỗ hổng lớn nhất của bước này.",
+        "Nội bộ hàm dựng dây xoắn quanh curve là helper bên ngoài, chưa đọc: cách threads/twists/spacing kết hợp thành sợi xoắn là UNKNOWN.",
+        "Mặc định định hướng/scale của overload sweep hai rail 5 tham số là UNKNOWN.",
+        "Ý nghĩa chính xác tham số direction trong rail revolve so với U/V mà caller mong đợi là UNKNOWN.",
+        "Việc cỡ vành có được suy NGƯỢC từ cỡ ngón không thì trong cây chỉ có chiều rail sang cỡ, không có chiều ngược lại.",
+        "Công thức cỡ ở trên là fit theo hệ US; các bảng theo vùng nằm ở chỗ khác và chưa đọc hết.",
+        "Chưa chứng minh gì về runtime."
+      ],
+      "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
+    }
+  },
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}

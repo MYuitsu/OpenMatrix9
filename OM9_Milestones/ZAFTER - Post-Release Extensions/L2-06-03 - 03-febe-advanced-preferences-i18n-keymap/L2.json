@@ -1,0 +1,58 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-06-03",
+  "milestone": "AFTER",
+  "title": "03-febe-advanced-preferences-i18n-keymap",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Cấu hình giao diện chi tiết, hệ phím tắt và bản dịch mở rộng.",
+  "source_original_path": "specs/90-after/01-cad-base-after/03-febe-advanced-preferences-i18n-keymap/module.json",
+  "definition": {
+    "module_id": "OM9-L2-06-03",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/01-cad-base-after/03-febe-advanced-preferences-i18n-keymap/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "06-cad-base-after",
+    "legacy_v07_path": "specs/06-cad-base-after/03-febe-advanced-preferences-i18n-keymap/",
+    "scope": "Cấu hình giao diện chi tiết, hệ phím tắt và bản dịch mở rộng.",
+    "exclude": "Hotkeys Matrix mặc định vẫn là core.",
+    "manual_references": [],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/90-after/01-cad-base-after/03-febe-advanced-preferences-i18n-keymap/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-06-03-001",
+      "file": "AFTER - Post-Release Extensions/L2-06-03 - 03-febe-advanced-preferences-i18n-keymap/L3-001 - Advanced Preferences Dialog/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-03-002",
+      "file": "AFTER - Post-Release Extensions/L2-06-03 - 03-febe-advanced-preferences-i18n-keymap/L3-002 - Hotkey Mapping Editor/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-03-003",
+      "file": "AFTER - Post-Release Extensions/L2-06-03 - 03-febe-advanced-preferences-i18n-keymap/L3-003 - Language Resource Localization/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-03-004",
+      "file": "AFTER - Post-Release Extensions/L2-06-03 - 03-febe-advanced-preferences-i18n-keymap/L3-004 - Custom Toolbar And Menu Workspaces/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-03-005",
+      "file": "AFTER - Post-Release Extensions/L2-06-03 - 03-febe-advanced-preferences-i18n-keymap/L3-005 - Preference Profile Import Export/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

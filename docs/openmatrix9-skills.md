@@ -1,6 +1,6 @@
 # Bộ skill OpenMatrix9
 
-Nguồn skill được quản lý trong `skills/` của repository. Bản dùng cho Codex được cài vào `C:/Users/Admin/.codex/skills/`. Tài liệu gốc trong `ref/matrix9/` được giữ nguyên, đọc theo nhu cầu thay vì sao chép tất cả vào từng skill.
+Nguồn skill được quản lý trong `skills/` của repository. Bản dùng cho Codex được cài vào `C:/Users/nguye/.codex/skills/`. Specs đích ở `OpenMatrix9_Codex_Spec_v2/`; tài liệu gốc/private registry được giữ nguyên, đọc theo nhu cầu thay vì sao chép tất cả vào từng skill.
 
 | Khi làm việc này | Skill | Tài liệu được chọn |
 |---|---|---|
@@ -8,8 +8,8 @@ Nguồn skill được quản lý trong `skills/` của repository. Bản dùng 
 | Menu, sidebar, icon, màn hình khởi động, viewport | `openmatrix9-ui` | Thiết kế/kế hoạch đã có, INI/RUI, đúng form VB6 và đặc tả UI |
 | Nghiệp vụ workspace đã duyệt: grid, Command, viewport | `openmatrix9-workspace-contract` | Quy tắc theo nhóm workspace và ảnh Matrix do người dùng cung cấp |
 | Một event/hàm gốc chưa rõ | `openmatrix9-native-mapping` | Guide đối chiếu địa chỉ, đúng procedure VB6 và đúng hàm Ghidra |
-| Một chức năng trang sức/hình học | `openmatrix9-feature-port` | Mã `OM9-*`, file spec của chức năng, đúng manual/trang, framework liên quan |
-| Build Rust + native FreeCAD và nghiệm thu | `openmatrix9-build-validation` | Cargo/CMake/ABI, cấu hình máy hiện tại, bằng chứng runtime |
+| Một chức năng trang sức/hình học | `openmatrix9-feature-port` | Mã `OM9-*`, spec v2 của chức năng, migration/backend requirements; manual chỉ cho unknown |
+| Build Rust OM9 độc lập + selective native backend và nghiệm thu | `openmatrix9-build-validation` | Cargo/CMake/ABI, cấu hình máy hiện tại, bằng chứng runtime |
 
 ## Cách gọi
 
@@ -27,18 +27,18 @@ Các description cũng hỗ trợ chọn skill tự động. Nếu catalog của
 Chạy ở thư mục OpenMatrix9:
 
 ```powershell
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root D:/FreeCAD-src/Mod/OpenMatrix9 status
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root D:/FreeCAD-src/Mod/OpenMatrix9 route ui-menu
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root D:/FreeCAD-src/Mod/OpenMatrix9 search "Gem Loader"
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root D:/FreeCAD-src/Mod/OpenMatrix9 feature OM9-GEM-001
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root D:/FreeCAD-src/Mod/OpenMatrix9 audit
+python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 status
+python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 route ui-menu
+python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 search "Gem Loader"
+python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 feature OM9-GEM-001
+python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 audit
 ```
 
-`route` trả về tài liệu phải đọc ngay, tài liệu chỉ đọc khi điều kiện phù hợp và tiêu chí kết thúc giai đoạn. Các giai đoạn gồm `inventory`, `ui-menu`, `ui-viewports`, `native-mapping`, `feature-port`, `build-validation`.
+`route` trả về tài liệu phải đọc ngay, tài liệu chỉ đọc khi điều kiện phù hợp và tiêu chí kết thúc giai đoạn. Các giai đoạn gồm `inventory`, `standalone-foundation`, `ui-menu`, `ui-viewports`, `native-mapping`, `feature-port`, `build-validation`.
 
-`search` chỉ trả tối đa 5 kết quả mặc định; xem `total`, tăng `--limit` và lọc `--domain` khi cần. `feature` tra đúng ID và trả file spec, lệnh gốc, manual cùng số trang. `audit` kiểm tra toàn bộ đường dẫn đặc tả và tài liệu định tuyến, không chứng minh code đã hoạt động.
+`search` chỉ trả tối đa 5 kết quả mặc định; xem `total`, tăng `--limit` và lọc `--domain` khi cần. `feature` tra exact ID và trả file spec v2/command cùng các hướng dẫn target thực có. `audit` kiểm tra toàn bộ đường dẫn đặc tả và tài liệu định tuyến, không chứng minh code đã hoạt động.
 
-`status` đọc [openmatrix9-progress.json](openmatrix9-progress.json), sau đó đối chiếu dấu hiệu file. Tiến độ phải được cập nhật theo code/test/runtime, không dựa vào `implementation_status` của bộ spec. Hiện menu có thiết kế và kế hoạch; phần Rust/sidebar còn cần triển khai. Giữ mục tiêu Rust cho logic/trạng thái và C++/Qt để tích hợp FreeCAD.
+`status` đọc [openmatrix9-progress.json](openmatrix9-progress.json), sau đó đối chiếu dấu hiệu file. Tiến độ phải được cập nhật theo code/test/runtime, không dựa vào `implementation_status` của bộ spec. Old menu/native evidence là historical. Target v2 có own Rust document/session/history/UI; selected OCCT/openNURBS adapters và Matrix9 UI theo hợp đồng, QymCAD chỉ là code mẫu/routine.
 
 ## Khi có tài liệu mới
 
@@ -53,3 +53,7 @@ Ngày 2026-10-06, người dùng duyệt lưu grid/Command/viewport vào skill n
 Ngày2026-10-09, theo yêu cầu rõ của người dùng,7 skill OM9 ưu tiên Safe Rust số1 cho logic/state/validation/dữ liệu/index/cache/worker; C++ giữ bridge native, Python giữ bootstrap/API/test/tool khi cần. Đọc [quy tắc chung](../skills/openmatrix9-workflow/references/rust-first.md) trước lựa chọn ngôn ngữ/FFI/ownership. Đã kiểm chứng17 bản hiện hữu và3 reference đồng nhất; [bằng chứng](validation/2026-10-09-rust-first-skills.md). Thiết kế/kế hoạch chuyển logic Phase2 hiện tại sang Rust đã được duyệt; việc cập nhật skill không đồng nghĩa code đã chuyển xong.
 
 Phase2 Rust migration đã được kiểm chứng riêng bằng code/native/application gates; xem [báo cáo](validation/2026-10-09-phase2-rust-owned-core.md). Việc kiểm tra skill chỉ đánh giá policy/routing.
+
+## Đích mặc định 2026-10-13
+
+Tất cả 8 skill nguồn và agents/openai.yaml dùng specs v2 và UI Matrix9; cả 8 skill được sync sang bản cài Codex để các liên kết chuyển giai đoạn hoạt động. Không fallback v1. Xem [quy tắc target chung](../skills/openmatrix9-workflow/references/spec-v2-target.md). Launcher/Box/Sphere và progress synchronization đã hợp nhất từ bản cài mới hơn, không làm mất nghiệp vụ đã duyệt.

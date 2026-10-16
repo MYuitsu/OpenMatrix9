@@ -1,0 +1,86 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "title": "Febe Application Shell Docking",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Khởi động/đóng ứng dụng, cửa sổ chính, docking cơ bản để bố trí giao diện Matrix.",
+  "definition": {
+    "module_id": "OM9-L2-01-01",
+    "milestone_id": "M01",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "scope": "Khởi động/đóng ứng dụng, cửa sổ chính, docking cơ bản để bố trí giao diện Matrix.",
+    "exclude": "Không xây bộ giao diện CAD cơ khí hay Main Menu Matrix lần hai.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          1,
+          3
+        ],
+        "pdf_pages_1based": [
+          11,
+          13
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          17,
+          19
+        ],
+        "pdf_pages_1based": [
+          27,
+          29
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-02",
+      "OM9-L2-01-03"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "manual_test_required": true,
+    "acceptance_gate": "M01-UI",
+    "l3_count": 8
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-01-001",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-01 - Febe Application Shell Docking/L3-001 - Application Startup And Main Window/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-01-002",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-01 - Febe Application Shell Docking/L3-002 - Workbench Docking Regions/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-01-003",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-01 - Febe Application Shell Docking/L3-003 - Reorder Collapse And Float Panels/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-01-004",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-01 - Febe Application Shell Docking/L3-004 - Docking Layout Default Restore/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-01-005",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-01 - Febe Application Shell Docking/L3-005 - Docking Layout Persistence/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-01-006",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-01 - Febe Application Shell Docking/L3-006 - Active Document Window State/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-01-007",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-01 - Febe Application Shell Docking/L3-007 - Global Status And Error Surface/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-01-008",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-01 - Febe Application Shell Docking/L3-008 - Builder Panel Docking Slot/l3.json"
+    }
+  ]
+}

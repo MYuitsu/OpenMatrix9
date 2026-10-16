@@ -1,0 +1,12 @@
+{
+  "template_only": true,
+  "warning": "This is not evidence or signed release approval. Replace with externally collected and independently verified records.",
+  "gate_evidence": {
+    "G00": {"status": "NOT_TESTED", "reviewer": null, "signature_reference": null, "source_sha": null},
+    "E12": {"status": "NOT_TESTED", "reviewer": null, "signature_reference": null, "source_sha": null},
+    "G-MVP": {"status": "NOT_TESTED", "reviewer": null, "signature_reference": null, "source_sha": null},
+    "E13": {"status": "NOT_TESTED", "reviewer": null, "signature_reference": null, "source_sha": null}
+  },
+  "task_evidence": {},
+  "note": "For G-MVP, supply all G00 and E01..E12 signed gate records; for G-FULL, G-MVP and E13. Helper does not authenticate reviewer signatures."
+}

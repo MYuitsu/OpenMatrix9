@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-13T19:47:47+00:00",
+  "status": "recorded_retained_infrastructure_measurements",
+  "goal_complete": false,
+  "batches": [
+    {
+      "id": "rcore00-retained-infrastructure-retained-infrastructure-checkpoint",
+      "native_runs": 52,
+      "expected_rejections": 14,
+      "status": "passed_scoped",
+      "fixture_count_definition": "Four authored candidate outputs and one accepted sparse-source case; feasibility only.",
+      "receipt": "build/native-retained-prototype/receipt.json",
+      "receipt_sha256": "0eafb200e75d22b21035e7e774b912c75ea20e6c0a09e787512a8dcbff02ab85",
+      "hashes_at_measurement": {
+        "prototype_sha256": "1533c5bf8a9b7e782e0b40628e75f7f9ee6c572e3ae5b6bd870eb4db4b16ff0b",
+        "prototype_source_sha256": "3b7cf8e38e14f9590e222a774c1bce413b4f4e37c4ad571cfbe51662f617e7f7",
+        "infrastructure_probe_sha256": "42da72d98d9290ae1b66f972a8a586115c4bfdd0cf11c66ae2be2243ebf10e47",
+        "retained_header_sha256": "03b187740147e41f7f4a7893843afb5056db5e01e078d2c42aaaa38bedc2879d",
+        "native_source_sha256": "161bc0b3c59e349c83f126c850a14cce10951e750d13e020647b7fb0cd85ebb0",
+        "validator_sha256": "4290fa537fd11b88f4dfd8df56c98dcd19a8f1f84aad7cbdaa864cf306f94c30",
+        "native_sha256": "cf7d99b43fc2aeccf1819b91daa1f0714a4d1203f729db2256237d1b3e4d04ce",
+        "fixture_sha256": "050808ef71e104ffd3d7996a6294ed71dbf0f27d14b3b8f08406264e2df7aa64",
+        "runner_sha256": "92639edd12a54f00f66783b61e0922dd36d31c3d3a26cb65d6a8ad166a0fb418"
+      },
+      "peak_committed_bytes": 34856960
+    },
+    {
+      "id": "rcore00-source-inventory-retained-infrastructure-checkpoint",
+      "native_runs": 68,
+      "expected_rejections": 17,
+      "status": "passed_scoped",
+      "fixture_count_definition": "Five positive inventory views; selected source2 compatibility.",
+      "receipt": "build/standalone-native/native-source-inventory-preparation-compatibility.json",
+      "receipt_sha256": "7d1f327350ef161ab589d8a63942ee69032c5a036453e3d9992685ba2d0563d2",
+      "hashes_at_measurement": {
+        "runner_sha256": "92639edd12a54f00f66783b61e0922dd36d31c3d3a26cb65d6a8ad166a0fb418",
+        "binary_sha256": "cf7d99b43fc2aeccf1819b91daa1f0714a4d1203f729db2256237d1b3e4d04ce",
+        "fixture_binary_sha256": "050808ef71e104ffd3d7996a6294ed71dbf0f27d14b3b8f08406264e2df7aa64",
+        "source_sha256": "161bc0b3c59e349c83f126c850a14cce10951e750d13e020647b7fb0cd85ebb0",
+        "fixture_source_sha256": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+        "validator_sha256": "c08b313710e8d08d8114d63dfcdcfcbc1c12933e15c91db1114fdfb036f5379c"
+      },
+      "peak_committed_bytes": 75001856
+    },
+    {
+      "id": "rcore00-source-projection-retained-infrastructure-checkpoint",
+      "native_runs": 82,
+      "expected_rejections": 32,
+      "status": "passed_scoped",
+      "fixture_count_definition": "Eleven positive projection views; selected source3 compatibility.",
+      "receipt": "build/standalone-native/native-source-projection-preparation-compatibility.json",
+      "receipt_sha256": "14563189d3ef5ad1254042190adcb1ebba9df035e81f7379e03696adad5460d8",
+      "hashes_at_measurement": {
+        "binary_sha256": "cf7d99b43fc2aeccf1819b91daa1f0714a4d1203f729db2256237d1b3e4d04ce",
+        "fixture_binary_sha256": "050808ef71e104ffd3d7996a6294ed71dbf0f27d14b3b8f08406264e2df7aa64",
+        "runner_sha256": "92639edd12a54f00f66783b61e0922dd36d31c3d3a26cb65d6a8ad166a0fb418",
+        "source_sha256": "161bc0b3c59e349c83f126c850a14cce10951e750d13e020647b7fb0cd85ebb0",
+        "fixture_source_sha256": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+        "validator_sha256": "4bb2c3ac1d292596cdbf0aa988d42febea4308003450c44c7d54f7e98655d24b"
+      },
+      "peak_committed_bytes": 36630528
+    },
+    {
+      "id": "rcore00-current-conversion-retained-infrastructure-checkpoint",
+      "native_runs": 50,
+      "expected_rejections": 40,
+      "status": "passed_scoped",
+      "fixture_count_definition": "One current-geometry fixture and forty negative variants; selected source1 compatibility.",
+      "receipt": "build/standalone-native/native-conversion-preparation-compatibility.json",
+      "receipt_sha256": "113199b7f9df6b9f08f0dd496f2b7bb10ec2e5c92d147820fcd50ebaafa5d8a3",
+      "hashes_at_measurement": {
+        "binary_sha256": "cf7d99b43fc2aeccf1819b91daa1f0714a4d1203f729db2256237d1b3e4d04ce",
+        "runner_sha256": "92639edd12a54f00f66783b61e0922dd36d31c3d3a26cb65d6a8ad166a0fb418"
+      },
+      "peak_committed_bytes": null
+    },
+    {
+      "id": "rcore00-native-source-preparation-v4-retained-infrastructure-checkpoint",
+      "native_runs": 65,
+      "expected_rejections": 20,
+      "status": "passed_scoped",
+      "fixture_count_definition": "Eleven positive source-preparation views, twenty expected refusal cases, and a deterministic same-held-FILE oracle.",
+      "receipt": "build/standalone-native/native-retained-source-preparation-validation.json",
+      "receipt_sha256": "a686531d2eeb7e6accbaba8d62b6b96e940e15794b53a264a075044726d4542e",
+      "hashes_at_measurement": {
+        "binary_sha256": "cf7d99b43fc2aeccf1819b91daa1f0714a4d1203f729db2256237d1b3e4d04ce",
+        "fixture_binary_sha256": "050808ef71e104ffd3d7996a6294ed71dbf0f27d14b3b8f08406264e2df7aa64",
+        "retained_fixture_binary_sha256": "5c35e7020055058b97bdd3c5e90622c4db7edc8a0c9539a4a56d112216378a10",
+        "runner_sha256": "92639edd12a54f00f66783b61e0922dd36d31c3d3a26cb65d6a8ad166a0fb418",
+        "source_sha256": "161bc0b3c59e349c83f126c850a14cce10951e750d13e020647b7fb0cd85ebb0",
+        "header_sha256": "03b187740147e41f7f4a7893843afb5056db5e01e078d2c42aaaa38bedc2879d",
+        "retained_fixture_source_sha256": "38fb766ec2666f06cada1cfc8878a3ac498995811f4caafcce9a945d2154f0b5",
+        "validator_sha256": "7274cd42504887f4e90f15a8df6db3c836962849ba0b37ae3c461ea5d8282546"
+      },
+      "peak_committed_bytes": 79773696
+    }
+  ],
+  "native_runs": 317,
+  "expected_rejections": 123,
+  "proven": [
+    "Private native source owners retain original component/attribute attachments and complete original byte spans.",
+    "Selected public table fragments plus original raw table replay can assemble scoped authored candidates, including edit A/delete B/new C.",
+    "Cold source scans reject corruption, dangling references and invalid native structures; sparse wire indices differ from decoded host indices.",
+    "Writing the final archive cursor omits unused old buffer tails; byte-identical unchanged tables preserve source metadata in these fixtures.",
+    "Read-only schema4 preparation verifies same-held-FILE scan/reference map and original native owners, including copy-count-zero attachments."
+  ],
+  "limitations": [
+    "Infrastructure feasibility is not a production retained merge writer, full native remap policy or Rhino5 acceptance.",
+    "Each receipt remains bound to the binary/source hashes recorded at its own measurement; later preparation ABI edits supersede the native binary.",
+    "All twelve full RCORE-00 gates and broader openNURBS packages2–8 remain open; total future batch count is unknown."
+  ]
+}

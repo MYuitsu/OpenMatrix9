@@ -1,0 +1,124 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-04-01-013",
+  "milestone": "M03",
+  "parent_l2_id": "OM9-L2-04-01",
+  "title": "Transform · Smart Flow Break — menu binding",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "target_implementation_milestone": "M08",
+  "execution_stage": "E13",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/13-febe-matrix-transform-toolbar-bridges/013-febe-transform-command-smart-flow-break/l3.json",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-04-01-013",
+    "capability_id": "cap.04-01.transform-command-smart-flow-break",
+    "stable_owner_key": "OM9-L2-04-01/transform-command-smart-flow-break",
+    "title": "Transform · Smart Flow Break — menu binding",
+    "slug": "transform-command-smart-flow-break",
+    "module_id": "OM9-L2-04-01",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/13-febe-matrix-transform-toolbar-bridges/",
+    "l3_path": "specs/03-ms03-curve-surface-solid-3dm/13-febe-matrix-transform-toolbar-bridges/013-febe-transform-command-smart-flow-break/",
+    "tag": "febe",
+    "implementation_role": "ui_command_adapter",
+    "milestone_id": "M03",
+    "target_milestone": "M08",
+    "delivery": "mainline",
+    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "origin_source_taxonomy": "04-matrix8-book2",
+    "goal": "Bind menu/commandline for documented Transform Tools command “Smart Flow Break”; reuse owning geometry service rather than reimplement its algorithm",
+    "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
+    "parent_scope": "Matrix Transform menu binds to Rhino/OCCT transforms",
+    "parent_exclusions": "Không toán học transform trùng.",
+    "depends_on_module_ids": [
+      "OM9-L2-02-06",
+      "OM9-L2-03-07"
+    ],
+    "reuses_or_dispatches_to_module_ids": [
+      "OM9-L2-02-06",
+      "OM9-L2-01-11",
+      "OM9-L2-04-05",
+      "OM9-L2-04-08"
+    ],
+    "downstream_consumers": [],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_page": 245,
+        "pdf_page_1based": 19,
+        "precision": "toc_exact"
+      },
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          235,
+          266
+        ],
+        "pdf_pages_1based": [
+          9,
+          40
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": "Smart Flow Break",
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Transform · Smart Flow Break — menu binding” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M08: run OpenMatrix9 UI; perform “Transform · Smart Flow Break — menu binding”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M08-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "execution_stage": "E13",
+    "planning_release": "ADVANCED",
+    "planning_risk": "HIGH",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
+    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+  },
+  "children_l4": [
+    {
+      "id": "OM9-L4-04-01-013-01",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe-matrix-transform-toolbar-bridges/L3-013 - Transform · Smart Flow Break - menu binding/L4-01 - Source And Interface Contract/l4.json",
+      "title": "Source And Interface Contract — Transform · Smart Flow Break",
+      "role": "CONTRACT_FIXTURE",
+      "depends_on_l4_ids": []
+    },
+    {
+      "id": "OM9-L4-04-01-013-02",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe-matrix-transform-toolbar-bridges/L3-013 - Transform · Smart Flow Break - menu binding/L4-02 - Menu Binding Acceptance/l4.json",
+      "title": "Menu Binding Acceptance — Transform · Smart Flow Break",
+      "role": "ACCEPTANCE",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-01-013-01",
+        "OM9-L4-04-05-005-03"
+      ]
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planning_handoff": {
+    "implementation_owner_milestone": "M08",
+    "reason": "Original implementation schedule is authoritative; do not implement twice in M03",
+    "scope": "No M03 L4 assigned"
+  }
+}

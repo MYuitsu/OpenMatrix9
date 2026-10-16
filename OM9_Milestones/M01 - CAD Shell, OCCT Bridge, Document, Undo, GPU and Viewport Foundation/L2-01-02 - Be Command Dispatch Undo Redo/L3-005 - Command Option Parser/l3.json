@@ -1,0 +1,191 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-01-02-005",
+  "milestone": "M01",
+  "parent_l2_id": "OM9-L2-01-02",
+  "title": "Command Option Parser",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-L3-01-02-005",
+    "capability_id": "cap.01-02.command-option-parser",
+    "stable_owner_key": "OM9-L2-01-02/command-option-parser",
+    "title": "Command Option Parser",
+    "slug": "command-option-parser",
+    "module_id": "OM9-L2-01-02",
+    "tag": "be",
+    "implementation_role": "backend_framework",
+    "milestone_id": "M01",
+    "target_milestone": "M01",
+    "delivery": "mainline",
+    "origin_source_taxonomy": "01-cad-base",
+    "goal": "parse flags and numeric option values at runtime",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Registry lệnh, state-machine nhận điểm/đối tượng, transaction, Undo/Redo/Cancel thống nhất.",
+    "parent_exclusions": "Không viết hai command engine giữa Rhino/Matrix.",
+    "depends_on_module_ids": [],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [
+      "command-dispatch"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          1,
+          11
+        ],
+        "pdf_pages_1based": [
+          11,
+          21
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          3,
+          15
+        ],
+        "pdf_pages_1based": [
+          11,
+          23
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Command Option Parser” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [],
+    "requires_manual_test": false,
+    "manual_test_gate": "AUTO_ONLY",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "execution_stage": "E01",
+    "planning_risk": "NORMAL",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT"
+  },
+  "execution_design": {
+    "l3_id": "OM9-L3-01-02-005",
+    "module_id": "OM9-L2-01-02",
+    "owner_key": "OM9-L2-01-02/command-option-parser",
+    "title": "Command Option Parser",
+    "goal_from_canonical": "parse flags and numeric option values at runtime",
+    "execution_stage": "E01",
+    "tag": "be",
+    "risk": "NORMAL",
+    "manual_references_inherited": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          1,
+          11
+        ],
+        "pdf_pages_1based": [
+          11,
+          21
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          3,
+          15
+        ],
+        "pdf_pages_1based": [
+          11,
+          23
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "manual_reference_precision": "PARENT_L2_RANGE_NOT_EXACT_COMMAND_CONFIRM_BEFORE_IMPLEMENTING_UI",
+    "positive_oracle_proposed": "Option parser reads length=2.5mm angle=90deg from typed descriptors",
+    "negative_oracle_proposed": "Unknown options, malformed numeric, NaN/Infinity report parse error",
+    "canonical_api_contract_state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+    "source_evidence_class": "PINNED_GITHUB_CONTENT_READ_WITH_CANDIDATES",
+    "source_anchors": [
+      {
+        "path": "crates/qymcad/src/command_catalog.rs",
+        "purpose": "command catalog",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/command_catalog.rs",
+        "blob_sha": "070bf5f33f7c86b7f64e62f46b0d1b66be535972",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-core/src/feature.rs",
+        "purpose": "feature model",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/feature.rs",
+        "blob_sha": null,
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad/src/gui.rs",
+        "purpose": "GUI app state",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/gui.rs",
+        "blob_sha": "8f6ab517f24792f7feeda644163182754db493a3",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      }
+    ],
+    "reuse_decision_provisional": "ADAPT",
+    "reuse_approval_condition": "Audit local checkout at pinned SHA, compile/tests, M00 human legal approval; do not infer ready from static GitHub read.",
+    "implementation_owner_policy": "One owning L2, UI modules dispatch only. No source code changes in vendor-research/ unless approved fork.",
+    "l4_task_ids": [
+      "OM9-L4-01-02-005-01",
+      "OM9-L4-01-02-005-02",
+      "OM9-L4-01-02-005-03",
+      "OM9-L4-01-02-005-05"
+    ],
+    "objectives": [
+      "Define typed seam + explicitly testable oracle",
+      "Implement one capability at its canonical owner",
+      "Verify failure rollback, stable IDs/units/geometry as relevant",
+      "Preserve manual approval for FEBE"
+    ]
+  },
+  "task_ids": [
+    "OM9-L4-01-02-005-01",
+    "OM9-L4-01-02-005-02",
+    "OM9-L4-01-02-005-03",
+    "OM9-L4-01-02-005-05"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-L4-01-02-005-01",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-02 - Be Command Dispatch Undo Redo/L3-005 - Command Option Parser/L4-01 - Source Audit/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-02-005-02",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-02 - Be Command Dispatch Undo Redo/L3-005 - Command Option Parser/L4-02 - API Contract and Test Design/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-02-005-03",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-02 - Be Command Dispatch Undo Redo/L3-005 - Command Option Parser/L4-03 - Implementation/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-02-005-05",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-02 - Be Command Dispatch Undo Redo/L3-005 - Command Option Parser/L4-05 - Acceptance Test/l4.json"
+    }
+  ]
+}

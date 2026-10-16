@@ -1,0 +1,343 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-01-06-001-04",
+  "milestone": "M01",
+  "parent_l3_id": "OM9-L3-01-06-001",
+  "owner_l2_id": "OM9-L2-01-06",
+  "title": "Tích hợp qua đúng owner và kiểm tra lỗi — GPU Device And Render Loop",
+  "planning_state": "NOT_STARTED",
+  "task": {
+    "task_id": "OM9-L4-01-06-001-04",
+    "parent_l3_id": "OM9-L3-01-06-001",
+    "owner_module_id": "OM9-L2-01-06",
+    "title": "Tích hợp qua đúng owner và kiểm tra lỗi — GPU Device And Render Loop",
+    "milestone_id": "M01",
+    "execution_stage": "E02",
+    "role": "INTEGRATE",
+    "l3_risk": "HIGH",
+    "owner_tag": "febe",
+    "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+    "m00_gate_required": true,
+    "manual_test_required": false,
+    "manual_refs_from_l3": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          63,
+          70
+        ],
+        "pdf_pages_1based": [
+          73,
+          80
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "manual_ref_precision": "PARENT_L2_RANGE_REFERENCE_NOT_COMMAND_EXACT",
+    "purpose": "initialize graphics backend and viewport frame loop",
+    "positive_case": "valid device draws reference box without empty frame",
+    "negative_case": "device absent triggers CPU fallback or visible error",
+    "steps": [
+      "Kết nối service **GPU Device And Render Loop** với adapter/scene/document chuẩn qua public typed contract; UI không được gọi trực tiếp raw OCCT.",
+      "Thực hiện vòng xuyên suốt data → command → document → render/save cho ca: Initialize wgpu renderer, render a deterministic test triangle and return frame metrics.",
+      "Thêm test lỗi xuyên lớp (invalid input, cancel, stale selection, state restore) theo: Unsupported GPU adapter falls back to configured CPU path/explicit diagnostic.",
+      "Kiểm tra không có duplicate ownership; nếu cần thay đổi API upstream, ghi blocker và đề xuất diff nhỏ để reviewer chấp thuận."
+    ],
+    "microsteps": [
+      {
+        "micro_id": "OM9-L4-01-06-001-04.S01",
+        "instruction": "Kết nối service **GPU Device And Render Loop** với adapter/scene/document chuẩn qua public typed contract; UI không được gọi trực tiếp raw OCCT.",
+        "completion_check": "Captured target-specific artifact step S01 and observed actual result; no assumed PASS."
+      },
+      {
+        "micro_id": "OM9-L4-01-06-001-04.S02",
+        "instruction": "Thực hiện vòng xuyên suốt data → command → document → render/save cho ca: Initialize wgpu renderer, render a deterministic test triangle and return frame metrics.",
+        "completion_check": "Captured target-specific artifact step S02 and observed actual result; no assumed PASS."
+      },
+      {
+        "micro_id": "OM9-L4-01-06-001-04.S03",
+        "instruction": "Thêm test lỗi xuyên lớp (invalid input, cancel, stale selection, state restore) theo: Unsupported GPU adapter falls back to configured CPU path/explicit diagnostic.",
+        "completion_check": "Captured target-specific artifact step S03 and observed actual result; no assumed PASS."
+      },
+      {
+        "micro_id": "OM9-L4-01-06-001-04.S04",
+        "instruction": "Kiểm tra không có duplicate ownership; nếu cần thay đổi API upstream, ghi blocker và đề xuất diff nhỏ để reviewer chấp thuận.",
+        "completion_check": "Captured target-specific artifact step S04 and observed actual result; no assumed PASS."
+      }
+    ],
+    "depends_on_task_ids": [
+      "OM9-L4-01-06-001-03"
+    ],
+    "source_paths": [
+      {
+        "path": "crates/qymcad/src/viewport_gpu.rs",
+        "purpose": "wgpu scene pass",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/viewport_gpu.rs",
+        "blob_sha": "3098ad046972390794f6c534a26e561287b02f46",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-render/src/lib.rs",
+        "purpose": "render/draw layer",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-render/src/lib.rs",
+        "blob_sha": "8ca9c5ef80155cbca7a90ae1c0cec52c33f61d28",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-ui-state/src/scene.rs",
+        "purpose": "scene state",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/scene.rs",
+        "blob_sha": null,
+        "evidence": "CANDIDATE_RECHECK_LOCAL"
+      },
+      {
+        "path": "crates/qymcad/src/gui/a_machine_with_no_graphics.rs",
+        "purpose": "GPU fallback checks",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/gui/a_machine_with_no_graphics.rs",
+        "blob_sha": "22fe0b5b2aea983ec2ea62153b27ba5df656fc5b",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      }
+    ],
+    "provisional_decision": "ADAPT",
+    "proposed_code_owner": "OM9-L2-01-06",
+    "test_oracle": "Initialize wgpu renderer, render a deterministic test triangle and return frame metrics",
+    "negative_oracle": "Unsupported GPU adapter falls back to configured CPU path/explicit diagnostic",
+    "outputs": [
+      "implementation/evidence/M01/OM9-L3-01-06-001/OM9-L4-01-06-001-04.integration.log"
+    ],
+    "stop_conditions": [
+      "M00 not PASS => BLOCKED_M00",
+      "Wrong upstream commit SHA => BLOCKED_SOURCE",
+      "Prerequisite task missing PASS => BLOCKED_DEPENDENCY",
+      "No independent fixture/test harness => BLOCKED_FIXTURE",
+      "Missing Rust/OCCT/GPU/Windows => BLOCKED_ENV",
+      "License/fork permission not approved => BLOCKED_APPROVAL"
+    ],
+    "approval_required": false,
+    "hardened_spec_path": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-001 - GPU Device And Render Loop/l3.json",
+    "proposed_api_not_verified": "GpuRenderer::create(adapter: Adapter) -> Result<GpuRenderer, RenderError>",
+    "source_symbol_lookup_path": "crates/qymcad/src/viewport_gpu.rs",
+    "mini_gate_id": "G01-C"
+  },
+  "implementation_contract": {
+    "target_milestone": "M01",
+    "checkout_repo": "QymIs-Tech/QymCAD",
+    "required_source_paths": [
+      "crates/qymcad/src/viewport_gpu.rs",
+      "crates/qymcad-render/src/lib.rs",
+      "crates/qymcad-ui-state/src/scene.rs",
+      "crates/qymcad/src/gui/a_machine_with_no_graphics.rs"
+    ],
+    "preconditions": {
+      "m00_pass": true,
+      "stage": "E02",
+      "dependencies_pass": true,
+      "owner_legal_approved": true
+    },
+    "positive_expected": "Initialize wgpu renderer, render a deterministic test triangle and return frame metrics",
+    "negative_expected": "Unsupported GPU adapter falls back to configured CPU path/explicit diagnostic",
+    "fixture_name": "OM9-L3-01-06-001",
+    "review": {
+      "human_required": false,
+      "reason": "Automated/test reviewer only"
+    },
+    "output_paths": [
+      "implementation/evidence/M01/OM9-L3-01-06-001/OM9-L4-01-06-001-04.integration.log"
+    ],
+    "test_commands_preview": [
+      "python tools/validate_m01_spec.py",
+      "cargo test --workspace",
+      "git status --porcelain"
+    ],
+    "note": "Commands are to be run in the actual implementation/fork workspace if available; spec workspace has no Rust application source. No command is evidence until captured.",
+    "required_oracle_schema": "om9.m01.oracle.v1.5",
+    "global_e01_barrier_required": false
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "agent_runbook_markdown": "# OM9-L4-01-06-001-04 — Tích hợp qua đúng owner và kiểm tra lỗi — GPU Device And Render Loop\n\n**Trạng thái:** `NOT_RUN` · **Stage:** `E02` · **Role:** `INTEGRATE` · **L3:** `OM9-L3-01-06-001` · **Owner:** `OM9-L2-01-06` · **Manual gate:** `False`.\n\n## 0. Chặn thực thi trước tiên\n\n- Bắt buộc `python tools/validate_m00_execution.py --require-ready` **PASS thật** trước khi sửa mã M01. Nếu không: ghi `BLOCKED_M00` rồi dừng.\n- Repo QymCAD upstream chỉ để nghiên cứu tại `746a17f127897e921a57118b6caad08968602bf5`; chưa có quyền sao chép code nếu thiếu phê duyệt G00-06. Không tự `git checkout main`.\n- Mỗi phiên chỉ thực hiện **một** L4 `OM9-L4-01-06-001-04`. Đọc `M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L1.json` và parent `l3_execution.json`.\n- Với E02: chỉ được chạy nếu mini-gate hiện tại đã mở và toàn bộ dependency verified. Không dùng barrier E01 toàn cục. Spec này **không** kèm mã nguồn OpenMatrix9; không tự báo build PASS.\n\n## 1. Phụ thuộc\n\n- `OM9-L4-01-06-001-03`\n\n## 2. Nguồn mã ghim — bắt buộc mở trước\n\n- `crates/qymcad/src/viewport_gpu.rs` — wgpu scene pass; **CONTENT_READ_AT_PINNED_SHA**\n- `crates/qymcad-render/src/lib.rs` — render/draw layer; **CONTENT_READ_AT_PINNED_SHA**\n- `crates/qymcad-ui-state/src/scene.rs` — scene state; **CANDIDATE_RECHECK_LOCAL**\n- `crates/qymcad/src/gui/a_machine_with_no_graphics.rs` — GPU fallback checks; **CONTENT_READ_AT_PINNED_SHA**\n\nNếu có `CANDIDATE_RECHECK_LOCAL` thì phải kiểm file thực tồn tại và symbol/line trước khi áp dụng. Nếu QymCAD chưa hỗ trợ mục tiêu, ghi `ADD`, **không** tự gán `REUSE`.\n\n## 3. Hợp đồng đúng của nhiệm vụ\n\n- **Mục tiêu:** initialize graphics backend and viewport frame loop.\n- **PASS kỳ vọng (chưa chạy):** Initialize wgpu renderer, render a deterministic test triangle and return frame metrics.\n- **Negative bắt buộc:** Unsupported GPU adapter falls back to configured CPU path/explicit diagnostic.\n- **Ranh giới:** chỉ sửa owner `OM9-L2-01-06` và các adapter được phép; không nhân đôi backend trong menu/panel Matrix.\n- **Manual:** các trang trong canonical `l3.json` phần lớn là phạm vi L2, **chưa** chứng minh đúng từng lệnh Matrix 9.\n\n## 4. Các bước triển khai chính xác\n\n1. Kết nối service **GPU Device And Render Loop** với adapter/scene/document chuẩn qua public typed contract; UI không được gọi trực tiếp raw OCCT.\n2. Thực hiện vòng xuyên suốt data → command → document → render/save cho ca: Initialize wgpu renderer, render a deterministic test triangle and return frame metrics.\n3. Thêm test lỗi xuyên lớp (invalid input, cancel, stale selection, state restore) theo: Unsupported GPU adapter falls back to configured CPU path/explicit diagnostic.\n4. Kiểm tra không có duplicate ownership; nếu cần thay đổi API upstream, ghi blocker và đề xuất diff nhỏ để reviewer chấp thuận.\n\n## Microsteps cho mô hình nhỏ\n- `OM9-L4-01-06-001-04.S01`: Kết nối service **GPU Device And Render Loop** với adapter/scene/document chuẩn qua public typed contract; UI không được gọi trực tiếp raw OCCT.\n- `OM9-L4-01-06-001-04.S02`: Thực hiện vòng xuyên suốt data → command → document → render/save cho ca: Initialize wgpu renderer, render a deterministic test triangle and return frame metrics.\n- `OM9-L4-01-06-001-04.S03`: Thêm test lỗi xuyên lớp (invalid input, cancel, stale selection, state restore) theo: Unsupported GPU adapter falls back to configured CPU path/explicit diagnostic.\n- `OM9-L4-01-06-001-04.S04`: Kiểm tra không có duplicate ownership; nếu cần thay đổi API upstream, ghi blocker và đề xuất diff nhỏ để reviewer chấp thuận.\n\n## 5. Lệnh có thể dùng (không mặc định đã chạy)\n\n```bash\npython tools/validate_m01_spec.py\npython tools/next_m01_task.py\npython tools/m01_init_evidence.py OM9-L4-01-06-001-04\n# Trong môi trường thực, chạy lệnh với capture (ví dụ):\npython tools/m01_capture.py --task OM9-L4-01-06-001-04 --cwd vendor-research/QymCAD --label sha -- git rev-parse HEAD\n```\n\nNếu thao tác thay đổi OpenMatrix9 Rust source thì capture phải chạy trong workspace implementation/fork thật. Lệnh `cargo test --workspace` và `cargo check --workspace --all-targets` chỉ thực thi ở workspace có Cargo.toml, không thử giả trong thư mục spec.\n\n## 6. Artifacts yêu cầu\n\n- `implementation/evidence/M01/OM9-L3-01-06-001/OM9-L4-01-06-001-04.integration.log`\n- Evidence: `implementation/evidence/M01/OM9-L3-01-06-001/OM9-L4-01-06-001-04.evidence.json` (bao gồm source SHA, thời gian UTC, OS, lệnh thật, exit code, stdout/stderr SHA256, expected, actual, digest của sản phẩm, reviewer).\n\n## 7. Nghiệm thu và dừng\n\n- Không thể hoàn thành chỉ với các đường dẫn GitHub; cần thử nghiệm và bằng chứng tại máy.\n- Nếu test sai kỳ vọng: `FAIL`; thiếu fixture `BLOCKED_FIXTURE`; thiếu môi trường `BLOCKED_ENV`.\n- **PASS chỉ khi test tự động/artefact đã được đối chiếu độc lập; không tự đoán kết quả.**\n- Sau khi viết evidence và chạy `python tools/validate_m01_execution.py`, **dừng phiên**. Không tự chuyển nhiệm vụ kế tiếp.\n\n## v0.15 — chỉ dẫn bắt buộc\nĐọc `M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-001 - GPU Device And Render Loop/l3.json` trước khi viết mã. API là đề xuất cần đối chiếu QymCAD pin. Mọi PASS phải có command receipt exit=0 và oracle positive/negative độc lập.\n\n**v0.15 mini-gate:** `G01-C`. Chỉ thực hiện khi các mini-gate trước VERIFIED_PASS; dùng `python tools/next_m01_task.py`. Không dựa trên raw status.\n\n## Nguồn tham chiếu bắt buộc đối chiếu (Matrix9 / Rhino 5) — v0.16\n\n**Trạng thái bổ sung:** `requirements_only_not_runtime_evidence` — chỉ là yêu cầu đối chiếu, không phải nghiệm thu.\n\n**Trọng tâm đối chiếu:** Init backend + frame loop phải có fallback chẩn đoán; đối chiếu cách Matrix9 báo lỗi adapter.\n\n### Chương Rhino 5 core phải đọc trước\n\n- `RCORE-12` — Display, render và resource lifecycle · Guide PDF 39-43 / in 31-35; 101-104 / in 93-96 · fixture đại diện `RCORE-12.T01, RCORE-12.T02, RCORE-12.T04, RCORE-12.T05, RCORE-12.T06, RCORE-12.T08, RCORE-12.T13`\n  - Help chính thức: [SetDisplayMode](https://docs.mcneel.com/rhino/5/help/en-us/commands/setdisplaymode.htm); [Render / render-window commands](https://docs.mcneel.com/rhino/5/help/en-us/commands/render.htm)\n  - Capability: `RCORE-12.C01, RCORE-12.C02, RCORE-12.C03, RCORE-12.C04, RCORE-12.C05, RCORE-12.C06, RCORE-12.C07, RCORE-12.C08`\n\n### Nguồn Matrix9 đã index phải mở (private reference, không copy)\n\n- `Matrix90/frmDialogVGADisplay.frm` (Matrix90 (VB6 EXE), `frmDialogVGADisplay`, `IDENTIFIER_INDEXED`) — adapter failure diagnostic surface\n  - Vai trò nguồn: graphics adapter diagnostic. VGA/display diagnostics dialog (7 declarations) - the Matrix9 surface for graphics adapter problems, relevant to device-loss and unsupported-adapter policy.\n  - Identifier đã index: `frmDialogVGADisplay`\n- `Matrix/UserInterface/Display/DisplayCommand.cs` (Matrix (managed plugin), `DisplayCommand`, `PATH_INDEXED_SYMBOL_CANDIDATE`) — display pipeline owner\n  - Vai trò nguồn: display command and forms. Managed display family: DisplayCommand, ShadeModeForm, ShadeModeDisplayConduit, ShadeModeEventWatcher, MeshDensityForm, MeshDensityEventWatcher.\n  - Identifier đã index: `DisplayCommand, ShadeModeForm, ShadeModeDisplayConduit, ShadeModeEventWatcher, MeshDensityForm, MeshDensityEventWatcher`\n\n### Quy tắc sử dụng nguồn tham chiếu\n\n- Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.\n- Không copy mã, ảnh, resource hay nội dung manual vào repository.\n- Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.\n- Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.\n- Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.\n- Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native.\n\n### Điều các nguồn này KHÔNG chứng minh\n\n- Không chứng minh Matrix9 parity cho capability này.\n- Không xác nhận API Rust nào đã tồn tại trong QymCAD.\n- Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.\n- Không chứng minh default/option đã đúng cho bản Matrix9 đang cài.\n\n> Symbol/identifier ở trên là điểm tra cứu; phải kiểm lại tại checkout/manifest trước khi viết mã. PASS vẫn chỉ đến từ command receipt và oracle positive/negative đo được.\n\n## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "execution_policy": {
+    "status": "NOT_RUN",
+    "evidence": "Not included: no implementation has been performed",
+    "prerequisites": "M00 must be signed off before M01; M01 before M02; per-task dependencies also apply",
+    "must_not_fake_pass": true,
+    "test_command_status": "SUGGESTED_NOT_EXECUTED",
+    "planned_output_paths_refer_to_future_implementation": true
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Init backend + frame loop phải có fallback chẩn đoán; đối chiếu cách Matrix9 báo lỗi adapter.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-12",
+        "kind": "rhino5_core_chapter",
+        "title": "Display, render và resource lifecycle",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "39-43 / in 31-35; 101-104 / in 93-96",
+        "capability_ids": [
+          "RCORE-12.C01",
+          "RCORE-12.C02",
+          "RCORE-12.C03",
+          "RCORE-12.C04",
+          "RCORE-12.C05",
+          "RCORE-12.C06",
+          "RCORE-12.C07",
+          "RCORE-12.C08"
+        ],
+        "fixture_ids": [
+          "RCORE-12.T01",
+          "RCORE-12.T02",
+          "RCORE-12.T04",
+          "RCORE-12.T05",
+          "RCORE-12.T06",
+          "RCORE-12.T08",
+          "RCORE-12.T13"
+        ],
+        "official_help": [
+          {
+            "label": "SetDisplayMode",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/setdisplaymode.htm"
+          },
+          {
+            "label": "Render / render-window commands",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/render.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-frm-dialog-vga",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix90 (VB6 EXE)",
+        "path": "Matrix90/frmDialogVGADisplay.frm",
+        "root": "ref/matrix/vb6-lite",
+        "unit": "frmDialogVGADisplay",
+        "role_for_this_task": "adapter failure diagnostic surface",
+        "source_role": "graphics adapter diagnostic",
+        "detail": "VGA/display diagnostics dialog (7 declarations) - the Matrix9 surface for graphics adapter problems, relevant to device-loss and unsupported-adapter policy.",
+        "observed_identifiers": [
+          "frmDialogVGADisplay"
+        ],
+        "verification_state": "IDENTIFIER_INDEXED"
+      },
+      {
+        "anchor_id": "mx-display-net",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/UserInterface/Display/DisplayCommand.cs",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "DisplayCommand",
+        "role_for_this_task": "display pipeline owner",
+        "source_role": "display command and forms",
+        "detail": "Managed display family: DisplayCommand, ShadeModeForm, ShadeModeDisplayConduit, ShadeModeEventWatcher, MeshDensityForm, MeshDensityEventWatcher.",
+        "observed_identifiers": [
+          "DisplayCommand",
+          "ShadeModeForm",
+          "ShadeModeDisplayConduit",
+          "ShadeModeEventWatcher",
+          "MeshDensityForm",
+          "MeshDensityEventWatcher"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      }
+    ],
+    "manual_reference_sheets": [],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "INTEGRATE",
+    "role_label_on_record": "INTEGRATE",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-01-06",
+    "goal": "initialize graphics backend and viewport frame loop",
+    "algorithm_on_record": "None",
+    "proposed_signature_on_record": "GpuRenderer::create(adapter: Adapter) -> Result<GpuRenderer, RenderError>",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "compose owners; re-check each owner's contract at its own revision",
+    "sketch": "// Tích hợp qua đúng owner và kiểm tra lỗi — GPU Device And Render Loop\n// ROLE: INTEGRATE - wire owners together; do not reimplement their logic.\n//\n// Purpose: initialize graphics backend and viewport frame loop\n// Boundary: this task may only orchestrate; each step below must already be owned\n//           and tested by the module named in the record's external_owner_interfaces.\n//\n// Order: None\n//\n// Integration checklist:\n//   1. resolve owners through the parent service contract, not through UI handles\n//   2. keep one transaction boundary: either the whole sequence commits or nothing does\n//   3. on any step error, roll back what this sequence already changed and report the failing step\n//   4. assert identity survives: same stable IDs before and after, no stale scene reference\n//\n// Contract under test: GpuRenderer::create(adapter: Adapter) -> Result<GpuRenderer, RenderError>\n// Oracle: Initialize wgpu renderer, render a deterministic test triangle and return frame metrics\n// Negative oracle: Unsupported GPU adapter falls back to configured CPU path/explicit diagnostic"
+  }}

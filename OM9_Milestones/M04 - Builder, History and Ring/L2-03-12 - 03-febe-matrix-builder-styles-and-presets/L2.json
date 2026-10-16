@@ -1,0 +1,83 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-12",
+  "milestone": "M04",
+  "title": "03-febe-matrix-builder-styles-and-presets",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Preset/Style theo Builder, snapshot các tham số thiết kế",
+  "source_original_path": "specs/04-ms04-builder-history-ring/03-febe-matrix-builder-styles-and-presets/module.json",
+  "definition": {
+    "module_id": "OM9-L2-03-12",
+    "milestone_id": "M04",
+    "module_path": "specs/04-ms04-builder-history-ring/03-febe-matrix-builder-styles-and-presets/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "legacy_v07_path": "specs/03-matrix8-book1/12-febe-matrix-builder-styles-and-presets/",
+    "scope": "Preset/Style theo Builder, snapshot các tham số thiết kế",
+    "exclude": "User Library toàn mẫu thiết kế Matrix9 tách tại 05.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          20,
+          21
+        ],
+        "pdf_pages_1based": [
+          30,
+          31
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-03-11",
+      "OM9-L2-01-12"
+    ],
+    "downstream_contracts": [
+      "builder-parameter-presets"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M04-UI",
+    "l3_count": 6,
+    "l3_catalog_path": "specs/04-ms04-builder-history-ring/03-febe-matrix-builder-styles-and-presets/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-12-001",
+      "file": "M04 - Builder, History and Ring/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L3-001 - Builder Style Param Snapshot Schema/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-12-002",
+      "file": "M04 - Builder, History and Ring/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L3-002 - Builder Style Browser And Thumbnail/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-12-003",
+      "file": "M04 - Builder, History and Ring/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L3-003 - Builder Style Apply And Preview/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-12-004",
+      "file": "M04 - Builder, History and Ring/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L3-004 - Builder Style Save New Name/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-12-005",
+      "file": "M04 - Builder, History and Ring/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L3-005 - Builder Style Mode And Shape Filter/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-12-006",
+      "file": "M04 - Builder, History and Ring/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L3-006 - Builder Style Match Attributes/l3.json",
+      "target_implementation_milestone": "M04"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m04": 39
+}

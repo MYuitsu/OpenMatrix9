@@ -1,0 +1,80 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-20",
+  "milestone": "M03",
+  "title": "12-febe-matrix-measure-and-model-statistics",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Distance/Angle/Length/Radius, kích thước và thống kê mẫu",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/12-febe-matrix-measure-and-model-statistics/module.json",
+  "definition": {
+    "module_id": "OM9-L2-03-20",
+    "milestone_id": "M03",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/12-febe-matrix-measure-and-model-statistics/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "legacy_v07_path": "specs/03-matrix8-book1/20-febe-matrix-measure-and-model-statistics/",
+    "scope": "Distance/Angle/Length/Radius, kích thước và thống kê mẫu",
+    "exclude": "Không triển khai mechanical page drawing/drafting.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          110,
+          119
+        ],
+        "pdf_pages_1based": [
+          120,
+          129
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-09",
+      "OM9-L2-03-07"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "M03_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M03-UI",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/03-ms03-curve-surface-solid-3dm/12-febe-matrix-measure-and-model-statistics/l3-index.json",
+    "l3_deferred_count": 0,
+    "l3_m03_owner_count": 5,
+    "l4_count_planned_m03": 25
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-20-001",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-20 - 12-febe-matrix-measure-and-model-statistics/L3-001 - Distance And Length Measurement/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-20-002",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-20 - 12-febe-matrix-measure-and-model-statistics/L3-002 - Angle And Radius Measurement/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-20-003",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-20 - 12-febe-matrix-measure-and-model-statistics/L3-003 - Bounding Size And Center Measurement/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-20-004",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-20 - 12-febe-matrix-measure-and-model-statistics/L3-004 - Jewelry Object Count And Type Summary/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-20-005",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-20 - 12-febe-matrix-measure-and-model-statistics/L3-005 - Measurement Label And Command Feedback/l3.json",
+      "target_implementation_milestone": "M03"
+    }
+  ],
+  "m03_l4_planned_count": 25,
+  "execution_state": "NOT_STARTED",
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+}

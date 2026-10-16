@@ -1,0 +1,131 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-13",
+  "milestone": "M03",
+  "title": "14-febe-import-rhino-3dm",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Đọc file Rhino .3dm (NURBS/trimmed BRep, layers, units, blocks, meshes), chuyển sang scene OCCT, giao dịch atomic; lệnh Import được gắn qua File Menu Matrix.",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/14-febe-import-rhino-3dm/module.json",
+  "definition": {
+    "module_id": "OM9-L2-01-13",
+    "milestone_id": "M03",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/14-febe-import-rhino-3dm/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "legacy_v07_path": "specs/01-cad-base/13-febe-import-rhino-3dm/",
+    "scope": "Đọc file Rhino .3dm (NURBS/trimmed BRep, layers, units, blocks, meshes), chuyển sang scene OCCT, giao dịch atomic; lệnh Import được gắn qua File Menu Matrix.",
+    "exclude": "Không tự xây menu File thứ hai; không cam kết khôi phục userdata proprietary của Matrix/Clayoo.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          79,
+          86
+        ],
+        "pdf_pages_1based": [
+          89,
+          96
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          48,
+          56
+        ],
+        "pdf_pages_1based": [
+          58,
+          66
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-03",
+      "OM9-L2-01-05",
+      "OM9-L2-01-07",
+      "OM9-L2-02-01"
+    ],
+    "downstream_contracts": [
+      "3dm-import-reader-and-import-transaction"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "M03_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M03-UI",
+    "l3_count": 12,
+    "l3_catalog_path": "specs/03-ms03-curve-surface-solid-3dm/14-febe-import-rhino-3dm/l3-index.json",
+    "l3_deferred_count": 0,
+    "l3_m03_owner_count": 12,
+    "l4_count_planned_m03": 66
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-13-001",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-001 - 3dm File Signature And Version Probe/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-002",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-002 - Opennurbs Reader Bridge Contract/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-003",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-003 - 3dm Document Units Tolerance Mapping/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-004",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-004 - 3dm Layer And Object Attribute Mapping/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-005",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-005 - 3dm Analytic And NURBS Curves/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-006",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-006 - 3dm NURBS Surface And Trimmed B-Rep/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-007",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-007 - 3dm Mesh And Instance Blocks/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-008",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-008 - 3dm Unsupported Proprietary Object Policy/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-009",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-009 - 3dm Import Atomic Scene Transaction/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-010",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-010 - 3dm File Picker And Options Dialog/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-011",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-011 - 3dm Import Summary Warning UI/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-01-13-012",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-13 - 14-febe-import-rhino-3dm/L3-012 - 3dm Golden Roundtrip Fixtures/l3.json",
+      "target_implementation_milestone": "M03"
+    }
+  ],
+  "m03_l4_planned_count": 66,
+  "execution_state": "NOT_STARTED",
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+}

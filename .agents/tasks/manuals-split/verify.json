@@ -1,0 +1,9 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "[non-blocking] Reference folders are not git-ignored: add a /OM9_Milestones/**/reference/ ignore (or confirm local-only) so ~448 MB of Matrix manual excerpts and bitmaps are not staged, per the AGENTS.md publication rule.",
+    "[non-blocking] Longest created path is 249 chars (limit 250); keep the repo root short or enable Windows long paths.",
+    "[non-blocking] Boundary-page text can include neighbouring sections (e.g. m8book1 p40 SmartTrack also contains Selection Filter and Library text, plus a dedup-artifact image m8book1_p34_img01.png); treat shared-page excerpts as approximate."
+  ],
+  "reviewDoc": "h:\\OpenMatrix9\\.agents\\tasks\\manuals-split\\review.md"
+}

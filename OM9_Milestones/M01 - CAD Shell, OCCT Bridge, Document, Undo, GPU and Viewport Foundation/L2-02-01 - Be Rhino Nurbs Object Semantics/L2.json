@@ -1,0 +1,95 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-02-01",
+  "milestone": "M01",
+  "title": "Be Rhino Nurbs Object Semantics",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Định nghĩa Rhino-like Curve/Surface/TrimmedSurface/Polysurface/solid/block và seam, UV/normal.",
+  "definition": {
+    "module_id": "OM9-L2-02-01",
+    "milestone_id": "M01",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "02-rhino5",
+    "scope": "Định nghĩa Rhino-like Curve/Surface/TrimmedSurface/Polysurface/solid/block và seam, UV/normal.",
+    "exclude": "Không triển khai lại phép tính OCCT trong Rhino adapter.",
+    "manual_references": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          17,
+          23
+        ],
+        "pdf_pages_1based": [
+          25,
+          31
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          120,
+          234
+        ],
+        "pdf_pages_1based": [
+          130,
+          244
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-05"
+    ],
+    "downstream_contracts": [
+      "nurbs-and-trimmed-brep-semantics"
+    ],
+    "early_slices": [],
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 10
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-02-01-001",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-001 - Point And Polyline Semantic Types/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-002",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-002 - NURBS Curve Control Points Knots Weights/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-003",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-003 - Open Closed And Planar Curve Rules/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-004",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-004 - Surface UV Domain And Seam Rules/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-005",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-005 - Trimmed Vs Underlying Surface Model/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-006",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-006 - Surface Edge And Isocurve Semantics/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-007",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-007 - Polysurface And Closed Solid Semantics/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-008",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-008 - Extrusion Vs Full B-Rep Representations/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-009",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-009 - Mesh Vs NURBS Object Type Rules/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-010",
+      "file": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-010 - Instance And Block Semantic Type/l3.json"
+    }
+  ]
+}

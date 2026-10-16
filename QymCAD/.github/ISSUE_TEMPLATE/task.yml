@@ -1,0 +1,42 @@
+# A change that is not a fault: something new, or something that works and should work better. The criterion of
+# done is what the pull request is checked against and what its tests are written from.
+name: Improvement
+description: Something new, or something that works and should work better
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Write in English or Russian — both are read.
+
+        Something large (a new tool, a file format, a workbench) is best talked over here before the code is
+        written: the issue is where the shape of it is agreed.
+  - type: textarea
+    id: what
+    attributes:
+      label: What should there be
+      description: What a person does and what the program does in answer. A picture or a file helps.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: How to tell it is done
+      description: What can be tried by hand to see it works — the checks of the pull request are written from this.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where in the program
+      options:
+        - Sketch
+        - Part
+        - Assembly
+        - Import and export
+        - Viewport
+        - CAM
+        - Packaging and install
+        - Not sure
+    validations:
+      required: false

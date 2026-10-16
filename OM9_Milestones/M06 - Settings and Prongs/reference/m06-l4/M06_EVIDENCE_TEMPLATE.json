@@ -1,0 +1,38 @@
+{
+  "task_id": "OM9-M06-L4-14-001-01",
+  "status": "NOT_RUN",
+  "source_sha": null,
+  "tested_sha": null,
+  "timestamp_utc": null,
+  "os_arch": null,
+  "rustc_version": null,
+  "occt_version_build": null,
+  "commands_executed": [],
+  "exit_codes": [],
+  "stdout_stderr_paths": [],
+  "fixtures": [
+    {
+      "id": "OM9-M06-FX-14-001-VALID",
+      "provenance": null,
+      "unit": null,
+      "gold": null,
+      "tolerance_from_G00": null
+    }
+  ],
+  "expected": null,
+  "actual": null,
+  "brep_checks": {
+    "is_valid": null,
+    "solid_count": null,
+    "open_edges": null,
+    "volume": null,
+    "bounding_box": null
+  },
+  "undo_cancel_roundtrip": null,
+  "screenshots": [],
+  "blockers": [],
+  "reviewer": null,
+  "human_signoff": null,
+  "release_gate": "E11",
+  "notes": "Do not record PASS without an actual run."
+}

@@ -1,0 +1,122 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-04-06-004",
+  "milestone": "M08",
+  "parent_l2_id": "OM9-L2-04-06",
+  "title": "Nautilus Builder",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "target_implementation_milestone": "M08",
+  "execution_stage": "E13",
+  "source_original_path": "specs/08-ms08-advanced-jewelry-modeling/03-febe-jewelry-ornament-builder-family/004-febe-nautilus-builder/l3.json",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-04-06-004",
+    "capability_id": "cap.04-06.nautilus-builder",
+    "stable_owner_key": "OM9-L2-04-06/nautilus-builder",
+    "title": "Nautilus Builder",
+    "slug": "nautilus-builder",
+    "module_id": "OM9-L2-04-06",
+    "module_path": "specs/08-ms08-advanced-jewelry-modeling/03-febe-jewelry-ornament-builder-family/",
+    "l3_path": "specs/08-ms08-advanced-jewelry-modeling/03-febe-jewelry-ornament-builder-family/004-febe-nautilus-builder/",
+    "tag": "febe",
+    "implementation_role": "interactive_feature",
+    "milestone_id": "M08",
+    "target_milestone": "M08",
+    "delivery": "mainline",
+    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "origin_source_taxonomy": "04-matrix8-book2",
+    "goal": "nautilus spiral style curve/form generator",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Knot/FreeformKnot/JumpRing/Nautilus và pattern ornaments",
+    "parent_exclusions": "T-Splines/Clayoo organic không nằm ở nhánh này.",
+    "depends_on_module_ids": [
+      "OM9-L2-04-02",
+      "OM9-L2-03-11"
+    ],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_page": 357,
+        "pdf_page_1based": 131,
+        "precision": "section_heading"
+      },
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          353,
+          357
+        ],
+        "pdf_pages_1based": [
+          127,
+          131
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Nautilus Builder” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M08: run OpenMatrix9 UI; perform “Nautilus Builder”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M08-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "execution_stage": "E13",
+    "planning_release": "ADVANCED",
+    "planning_risk": "MEDIUM",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
+    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+  },
+  "children_l4": [
+    {
+      "id": "OM9-L4-04-06-004-01",
+      "file": "M08 - Advanced Jewelry Modeling/L2-04-06 - 03-febe-jewelry-ornament-builder-family/L3-004 - Nautilus Builder/L4-01 - Source And Interface Contract/l4.json",
+      "title": "Source And Interface Contract — Nautilus Builder",
+      "role": "CONTRACT_FIXTURE",
+      "depends_on_l4_ids": []
+    },
+    {
+      "id": "OM9-L4-04-06-004-02",
+      "file": "M08 - Advanced Jewelry Modeling/L2-04-06 - 03-febe-jewelry-ornament-builder-family/L3-004 - Nautilus Builder/L4-02 - Owner Operation Or Dispatch/l4.json",
+      "title": "Owner Operation Or Dispatch — Nautilus Builder",
+      "role": "IMPLEMENT",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-06-004-01"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-06-004-03",
+      "file": "M08 - Advanced Jewelry Modeling/L2-04-06 - 03-febe-jewelry-ornament-builder-family/L3-004 - Nautilus Builder/L4-03 - Transaction And UI Acceptance/l4.json",
+      "title": "Transaction And UI Acceptance — Nautilus Builder",
+      "role": "ACCEPTANCE",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-06-004-02"
+      ]
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED"
+}

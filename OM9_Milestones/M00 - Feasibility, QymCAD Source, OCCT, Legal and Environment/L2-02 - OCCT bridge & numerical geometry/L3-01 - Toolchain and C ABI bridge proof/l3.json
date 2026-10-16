@@ -1,0 +1,67 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-02-01",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-02",
+  "title": "Toolchain and C ABI bridge proof",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-02-01",
+    "module_id": "OM9-M00-L2-02",
+    "gate_id": "G00-02",
+    "title": "Toolchain and C ABI bridge proof",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-02-01-01",
+        "title": "Audit OCCT build.rs và ABI C++",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L3-01 - Toolchain and C ABI bridge proof/L4-01 - Audit OCCT build.rs và ABI C++/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-01-02",
+        "title": "Thử compile qymcad-kernel tại revision pin",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L3-01 - Toolchain and C ABI bridge proof/L4-02 - Thử compile qymcad-kernel tại revision pin/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-01-03",
+        "title": "Xác nhận C ABI ownership và ngoại lệ",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L3-01 - Toolchain and C ABI bridge proof/L4-03 - Xác nhận C ABI ownership và ngoại lệ/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-01-04",
+        "title": "Proof gọi OCCT từ ứng dụng Rust tối giản",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L3-01 - Toolchain and C ABI bridge proof/L4-04 - Proof gọi OCCT từ ứng dụng Rust tối giản/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-02-01-01",
+    "OM9-M00-L4-02-01-02",
+    "OM9-M00-L4-02-01-03",
+    "OM9-M00-L4-02-01-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-02-01-01",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L3-01 - Toolchain and C ABI bridge proof/L4-01 - Audit OCCT build.rs và ABI C++/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-01-02",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L3-01 - Toolchain and C ABI bridge proof/L4-02 - Thử compile qymcad-kernel tại revision pin/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-01-03",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L3-01 - Toolchain and C ABI bridge proof/L4-03 - Xác nhận C ABI ownership và ngoại lệ/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-01-04",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L3-01 - Toolchain and C ABI bridge proof/L4-04 - Proof gọi OCCT từ ứng dụng Rust tối giản/l4.json"
+    }
+  ]
+}

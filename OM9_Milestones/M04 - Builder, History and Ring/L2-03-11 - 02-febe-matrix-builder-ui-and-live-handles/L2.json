@@ -1,0 +1,99 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-11",
+  "milestone": "M04",
+  "title": "02-febe-matrix-builder-ui-and-live-handles",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Builder panel, live preview, viewport control handles",
+  "source_original_path": "specs/04-ms04-builder-history-ring/02-febe-matrix-builder-ui-and-live-handles/module.json",
+  "definition": {
+    "module_id": "OM9-L2-03-11",
+    "milestone_id": "M04",
+    "module_path": "specs/04-ms04-builder-history-ring/02-febe-matrix-builder-ui-and-live-handles/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "legacy_v07_path": "specs/03-matrix8-book1/11-febe-matrix-builder-ui-and-live-handles/",
+    "scope": "Builder panel, live preview, viewport control handles",
+    "exclude": "Không tạo geometry engine trong UI.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          17,
+          19
+        ],
+        "pdf_pages_1based": [
+          27,
+          29
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-02",
+      "OM9-L2-01-04",
+      "OM9-L2-03-07"
+    ],
+    "downstream_contracts": [
+      "builder-editor-ui"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M04-UI",
+    "l3_count": 9,
+    "l3_catalog_path": "specs/04-ms04-builder-history-ring/02-febe-matrix-builder-ui-and-live-handles/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-11-001",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-001 - Builder Typed Input Boxes/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-11-002",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-002 - Builder Mode Tabs And Context/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-11-003",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-003 - Builder Parameter Controls And Sliders/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-11-004",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-004 - Builder Live Preview Lifecycle/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-11-005",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-005 - Builder Viewport Control Handles/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-11-006",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-006 - Builder Handle And Panel Bidirectional Sync/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-11-007",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-007 - Builder Profile Selector Window/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-11-008",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-008 - Builder Accept Cancel Reset And Undo/l3.json",
+      "target_implementation_milestone": "M04"
+    },
+    {
+      "id": "OM9-L3-03-11-009",
+      "file": "M04 - Builder, History and Ring/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L3-009 - Builder F6 And Commandline Input Binding/l3.json",
+      "target_implementation_milestone": "M04"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m04": 59
+}

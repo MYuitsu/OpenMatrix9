@@ -1,0 +1,264 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-03-06-003-01",
+  "milestone": "M02",
+  "parent_l3_id": "OM9-L3-03-06-003",
+  "owner_l2_id": "OM9-L2-03-06",
+  "title": "SOURCE_AUDIT: Reference Image Transparency And Lock",
+  "planning_state": "NOT_STARTED",
+  "task": {
+    "task_id": "OM9-L4-03-06-003-01",
+    "parent_l3_id": "OM9-L3-03-06-003",
+    "owner_module_id": "OM9-L2-03-06",
+    "title": "SOURCE_AUDIT: Reference Image Transparency And Lock",
+    "milestone_id": "M02",
+    "execution_stage": "E03",
+    "mini_gate_id": "G02-D",
+    "role": "SOURCE_AUDIT",
+    "tag": "febe",
+    "risk": "NORMAL",
+    "source_sha": "746a17f127897e921a57118b6caad08968602bf5",
+    "m01_gate_required": true,
+    "human_review": false,
+    "purpose": "opacity, selection and lock controls",
+    "positive_case": "Opacity 50%, locked prevents edits/selection nhưng vẫn visible",
+    "negative_case": "Unlock/hidden flags không làm hỏng dữ liệu asset hoặc lock state",
+    "implementation_algorithm": "Visibility/selection policies reuse M01 layers & attributes",
+    "depends_on_task_ids": [],
+    "source_anchors": [
+      {
+        "path": "crates/qymcad-core/src/model.rs",
+        "purpose": "document and entity records",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/model.rs",
+        "blob_sha": "74d971c5f0211bf66f96ae673128189f334ffb20",
+        "review_state": "CONTENT_READ"
+      },
+      {
+        "path": "crates/qymcad-io/src/project_file.rs",
+        "purpose": "project assets",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/project_file.rs",
+        "blob_sha": "caf559c0b338d08498146f92b53b8a366f4468e2",
+        "review_state": "CONTENT_READ"
+      },
+      {
+        "path": "crates/qymcad-ui-state/src/scene.rs",
+        "purpose": "reference quad rendering",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/scene.rs",
+        "blob_sha": "cf4eb2eb6855507befaaecd1cbfba101c10d0a01",
+        "review_state": "CONTENT_READ"
+      }
+    ],
+    "external_owner_interfaces": [
+      "OM9-L2-01-06:GPU renderer",
+      "OM9-L2-01-04:native project codec",
+      "OM9-L2-01-03:layer and semantic tags"
+    ],
+    "deferred_integration": null,
+    "fixture_id": "G02-D-03-06-003",
+    "steps": [
+      "Đọc M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-06 - Febe Viewport Pictureframe And Calibration/L3-003 - Reference Image Transparency And Lock/l3.json cùng scope của OM9-L2-03-06; giữ nguyên ID/owner và chốt hành vi: opacity, selection and lock controls.",
+      "Kiểm tra git rev-parse HEAD đúng 746a17f127897e921a57118b6caad08968602bf5; mở từng source_anchors trong bản checkout local, tìm symbol bằng rg, ghi file:line và trạng thái REUSE/ADAPT/ADD; không tự suy từ tên file.",
+      "Xác minh các entrypoint chính và boundary UI ↔ domain; ghi rõ API chưa tìm được là GAP, không coi là đã implement.",
+      "Ghi traceability source→design cho oracle tốt 'Opacity 50%, locked prevents edits/selection nhưng vẫn visible' và oracle lỗi 'Unlock/hidden flags không làm hỏng dữ liệu asset hoặc lock state'."
+    ],
+    "outputs": [
+      "implementation/design/M02/OM9-L3-03-06-003/source_crosswalk.json"
+    ],
+    "blocked_states": [
+      "BLOCKED_M00",
+      "BLOCKED_M01",
+      "BLOCKED_SOURCE",
+      "BLOCKED_DEPENDENCY",
+      "BLOCKED_FIXTURE",
+      "BLOCKED_ENV",
+      "BLOCKED_APPROVAL"
+    ],
+    "candidate_symbol_hints_require_local_verification": "qymcad-core/src/model.rs: Project; qymcad-io/src/project_file.rs: save_project_with_brep"
+  },
+  "implementation_contract": {
+    "expected_outputs": [
+      "implementation/design/M02/OM9-L3-03-06-003/source_crosswalk.json"
+    ],
+    "required_capture_purpose": "source_revision",
+    "test_command_template_NOT_RUN": "git rev-parse HEAD; rg -n <symbol> <source_path> (thay <symbol> bằng symbol tìm thấy)",
+    "never_claim_actual_test_from_fixture": true
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "agent_runbook_markdown": "# OM9-L4-03-06-003-01 — Reference Image Transparency And Lock / SOURCE_AUDIT\n\n> **STATUS = PLANNED_NOT_EXECUTED.** Không tự đánh dấu PASS. Một phiên Codex/Luna = một L4. Bắt buộc M00 + M01 VERIFIED_PASS; `--preview` không mở khóa.\n\n- Owner: `OM9-L2-03-06` · L3 `OM9-L3-03-06-003` · mini-gate `G02-D` · risk `NORMAL`.\n- Canonical L3: `M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-06 - Febe Viewport Pictureframe And Calibration/L3-003 - Reference Image Transparency And Lock/l3.json`. Không sửa `l3_id`, `module_id`, `stable_owner_key`, `execution_stage` của nguồn.\n- QymCAD revision (khóa): `746a17f127897e921a57118b6caad08968602bf5`. Code chỉ là gợi ý tái sử dụng, không chứng minh parity Matrix.\n- Phụ thuộc L4 (cần VERIFIED_PASS): **không có trong M02**.\n- Phụ thuộc ngoài M02: OM9-L2-01-06:GPU renderer, OM9-L2-01-04:native project codec, OM9-L2-01-03:layer and semantic tags. Nếu chưa nghiệm thu thì dừng BLOCKED_DEPENDENCY.\n- Human approval: **Không bắt buộc ở L4 này**.\n\n## Chứng cứ mã nguồn cần đọc\n- **Gợi ý symbols (chưa chứng minh parity):** qymcad-core/src/model.rs: Project; qymcad-io/src/project_file.rs: save_project_with_brep\n- `crates/qymcad-core/src/model.rs` — document and entity records; blob `74d971c5f0211bf66f96ae673128189f334ffb20`\n- `crates/qymcad-io/src/project_file.rs` — project assets; blob `caf559c0b338d08498146f92b53b8a366f4468e2`\n- `crates/qymcad-ui-state/src/scene.rs` — reference quad rendering; blob `87fb909f0165145843b9c62dbd75c2ec3b9a399c`\n\n## Hợp đồng chức năng\n- Mục tiêu: opacity, selection and lock controls.\n- Quy tắc thuật toán/tích hợp: **Visibility/selection policies reuse M01 layers & attributes**.\n- Positive oracle đề xuất: **Opacity 50%, locked prevents edits/selection nhưng vẫn visible**.\n- Negative oracle đề xuất: **Unlock/hidden flags không làm hỏng dữ liệu asset hoặc lock state**.\n- Fixture ID: `G02-D-03-06-003` (`planning/M02/fixtures/G02-D.json`). Đây là test blueprint, chưa là chứng cứ runtime.\n\n## Các bước thực hiện tuần tự\n1. Đọc M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction/L2-03-06 - Febe Viewport Pictureframe And Calibration/L3-003 - Reference Image Transparency And Lock/l3.json cùng scope của OM9-L2-03-06; giữ nguyên ID/owner và chốt hành vi: opacity, selection and lock controls.\n2. Kiểm tra git rev-parse HEAD đúng 746a17f127897e921a57118b6caad08968602bf5; mở từng source_anchors trong bản checkout local, tìm symbol bằng rg, ghi file:line và trạng thái REUSE/ADAPT/ADD; không tự suy từ tên file.\n3. Xác minh các entrypoint chính và boundary UI ↔ domain; ghi rõ API chưa tìm được là GAP, không coi là đã implement.\n4. Ghi traceability source→design cho oracle tốt 'Opacity 50%, locked prevents edits/selection nhưng vẫn visible' và oracle lỗi 'Unlock/hidden flags không làm hỏng dữ liệu asset hoặc lock state'.\n\n## Thực thi an toàn và bằng chứng\n- Cài QymCAD vào thư mục local dưới root OpenMatrix9 trước khi chạy capture; `git rev-parse HEAD` phải đúng commit; nếu không → `BLOCKED_SOURCE`.\n- Lệnh khung **chỉ là gợi ý**, phải thay phần placeholder bằng test thật trước khi chạy: `git rev-parse HEAD; rg -n <symbol> <source_path> (thay <symbol> bằng symbol tìm thấy)`.\n- Capture: `python tools/m02_capture.py --task OM9-L4-03-06-003-01 --cwd . --label unique-label -- <command> <args...>`.\n- Lưu `oracle_report` có **positive + negative** với expected/actual đo từ test; mọi đường dẫn/hashes phải do lệnh thật tạo.\n- Bằng chứng: `implementation/evidence/M02/OM9-L3-03-06-003/OM9-L4-03-06-003-01.evidence.json`. Khả năng tự kiểm chứng: `python tools/validate_m02_execution.py`.\n- `SOURCE_AUDIT` chỉ xác nhận path/symbol và lựa chọn reuse; `CONTRACT_TEST` xác nhận fixture cấu trúc; cả hai không chứng minh CAD implemented.\n- Bất kỳ kiểm thử lệnh nào thất bại, placeholder test chưa thay, log trống, hoặc sai oracle phải dừng và lưu FAIL/BLOCKED; tuyệt đối không ghi PASS giả.\n\n## Nguồn tham chiếu bắt buộc đối chiếu (Matrix9 / Rhino 5) — v0.16\n\n**Trạng thái bổ sung:** `requirements_only_not_runtime_evidence` — chỉ là yêu cầu đối chiếu, không phải nghiệm thu.\n\n**Trọng tâm đối chiếu:** Opacity/lock/select của ảnh phải tách khỏi layer lock của geometry.\n\n### Chương Rhino 5 core phải đọc trước\n\n- `RCORE-12` — Display, render và resource lifecycle · Guide PDF 39-43 / in 31-35; 101-104 / in 93-96 · fixture đại diện `RCORE-12.T01, RCORE-12.T02, RCORE-12.T04, RCORE-12.T05, RCORE-12.T06, RCORE-12.T08, RCORE-12.T13`\n  - Help chính thức: [SetDisplayMode](https://docs.mcneel.com/rhino/5/help/en-us/commands/setdisplaymode.htm); [Render / render-window commands](https://docs.mcneel.com/rhino/5/help/en-us/commands/render.htm)\n  - Capability: `RCORE-12.C01, RCORE-12.C02, RCORE-12.C03, RCORE-12.C04, RCORE-12.C05, RCORE-12.C06, RCORE-12.C07, RCORE-12.C08`\n- `RCORE-06` — Selection, layer, group, block và Worksession · Guide PDF 33-38 / in 25-30; 97-98 / in 89-90 · fixture đại diện `RCORE-06.T01, RCORE-06.T03, RCORE-06.T04, RCORE-06.T06, RCORE-06.T08, RCORE-06.T10`\n  - Help chính thức: [Selection commands / sub-object selection](https://docs.mcneel.com/rhino/5/help/en-us/commands/selection_commands.htm); [Layer](https://docs.mcneel.com/rhino/5/help/en-us/commands/layer.htm); [Block](https://docs.mcneel.com/rhino/5/help/en-us/commands/block.htm)\n  - Capability: `RCORE-06.C01, RCORE-06.C02, RCORE-06.C03, RCORE-06.C04, RCORE-06.C05, RCORE-06.C06, RCORE-06.C07, RCORE-06.C08, RCORE-06.C09, RCORE-06.C10`\n\n### Quy tắc sử dụng nguồn tham chiếu\n\n- Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.\n- Không copy mã, ảnh, resource hay nội dung manual vào repository.\n- Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.\n- Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.\n- Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.\n- Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native.\n\n### Điều các nguồn này KHÔNG chứng minh\n\n- Không chứng minh Matrix9 parity cho capability này.\n- Không xác nhận API Rust nào đã tồn tại trong QymCAD.\n- Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.\n- Không chứng minh default/option đã đúng cho bản Matrix9 đang cài.\n\n> Symbol/identifier ở trên là điểm tra cứu; phải kiểm lại tại checkout/manifest trước khi viết mã. PASS vẫn chỉ đến từ command receipt và oracle positive/negative đo được.\n\n## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `SOURCE_AUDIT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "execution_policy": {
+    "status": "NOT_RUN",
+    "evidence": "Not included: no implementation has been performed",
+    "prerequisites": "M00 must be signed off before M01; M01 before M02; per-task dependencies also apply",
+    "must_not_fake_pass": true,
+    "test_command_status": "SUGGESTED_NOT_EXECUTED",
+    "planned_output_paths_refer_to_future_implementation": true
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Opacity/lock/select của ảnh phải tách khỏi layer lock của geometry.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-12",
+        "kind": "rhino5_core_chapter",
+        "title": "Display, render và resource lifecycle",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "39-43 / in 31-35; 101-104 / in 93-96",
+        "capability_ids": [
+          "RCORE-12.C01",
+          "RCORE-12.C02",
+          "RCORE-12.C03",
+          "RCORE-12.C04",
+          "RCORE-12.C05",
+          "RCORE-12.C06",
+          "RCORE-12.C07",
+          "RCORE-12.C08"
+        ],
+        "fixture_ids": [
+          "RCORE-12.T01",
+          "RCORE-12.T02",
+          "RCORE-12.T04",
+          "RCORE-12.T05",
+          "RCORE-12.T06",
+          "RCORE-12.T08",
+          "RCORE-12.T13"
+        ],
+        "official_help": [
+          {
+            "label": "SetDisplayMode",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/setdisplaymode.htm"
+          },
+          {
+            "label": "Render / render-window commands",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/render.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      },
+      {
+        "anchor_id": "RCORE-06",
+        "kind": "rhino5_core_chapter",
+        "title": "Selection, layer, group, block và Worksession",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "33-38 / in 25-30; 97-98 / in 89-90",
+        "capability_ids": [
+          "RCORE-06.C01",
+          "RCORE-06.C02",
+          "RCORE-06.C03",
+          "RCORE-06.C04",
+          "RCORE-06.C05",
+          "RCORE-06.C06",
+          "RCORE-06.C07",
+          "RCORE-06.C08",
+          "RCORE-06.C09",
+          "RCORE-06.C10"
+        ],
+        "fixture_ids": [
+          "RCORE-06.T01",
+          "RCORE-06.T03",
+          "RCORE-06.T04",
+          "RCORE-06.T06",
+          "RCORE-06.T08",
+          "RCORE-06.T10"
+        ],
+        "official_help": [
+          {
+            "label": "Selection commands / sub-object selection",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/selection_commands.htm"
+          },
+          {
+            "label": "Layer",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/layer.htm"
+          },
+          {
+            "label": "Block",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/block.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [],
+    "manual_reference_sheets": [],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "SOURCE_AUDIT",
+    "role_label_on_record": "SOURCE_AUDIT",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-03-06",
+    "goal": "opacity, selection and lock controls",
+    "algorithm_on_record": "Visibility/selection policies reuse M01 layers & attributes",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "read the pinned file and record symbol + line range; no runtime claim",
+    "sketch": "// SOURCE_AUDIT: Reference Image Transparency And Lock\n// ROLE: SOURCE_AUDIT - this task produces an inventory, not code.\n// source: crates/qymcad-core/src/model.rs — document and entity records\n// source: crates/qymcad-io/src/project_file.rs — project assets\n// source: crates/qymcad-ui-state/src/scene.rs — reference quad rendering\n//\n// Capability: opacity, selection and lock controls\n// Proposed contract on record: (none frozen yet)\n//\n// Inventory to fill from the pinned checkout (record file, symbol, line range, verdict):\n    // - Visibility/selection policies reuse M01 layers & attributes\n//\n// Decision skeleton to complete with real evidence:\n//   reuse_decision: REUSE | ADAPT | ADD | BLOCKED_SOURCE\n//   evidence: <path>:<line-range> at pinned SHA\n//   license: <reviewed scope from M00>\n//\n// Do not claim \"implemented\", \"works\" or a PASS from this file."
+  }}

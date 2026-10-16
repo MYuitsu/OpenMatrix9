@@ -1,0 +1,90 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-12",
+  "milestone": "M05",
+  "title": "04-febe-gem-pave-layout-and-azure",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Auto Pavé/Pavé/Azure layout",
+  "source_original_path": "specs/05-ms05-gems-and-layout/04-febe-gem-pave-layout-and-azure/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-12",
+    "milestone_id": "M05",
+    "module_path": "specs/05-ms05-gems-and-layout/04-febe-gem-pave-layout-and-azure/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/12-febe-gem-pave-layout-and-azure/",
+    "scope": "Auto Pavé/Pavé/Azure layout",
+    "exclude": "Không duplicate gem placement primitive.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          451,
+          464
+        ],
+        "pdf_pages_1based": [
+          225,
+          238
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-04-10"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M05-UI",
+    "l3_count": 8,
+    "l3_catalog_path": "specs/05-ms05-gems-and-layout/04-febe-gem-pave-layout-and-azure/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-12-001",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-001 - Auto Pave Builder/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-12-002",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-002 - Manual Pave Builder/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-12-003",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-003 - Pave Azure Builder/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-12-004",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-004 - Pave Prong Layout/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-12-005",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-005 - Pave Sphere Layout/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-12-006",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-006 - Gem Springs And Relaxation/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-12-007",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-007 - Pave Region Controls And Preview/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-12-008",
+      "file": "M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-008 - Pave History Geometry Refresh/l3.json",
+      "target_implementation_milestone": "M05"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m05": 24
+}
