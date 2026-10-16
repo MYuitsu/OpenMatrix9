@@ -334,7 +334,7 @@
         "section": "Baguette Channel",
         "topic": "baguette line inside a channel",
         "sheet_id": "m8book2__p217-218__baguette-channel",
-        "path": "OM9_Milestones/M05 - Gems and Layout/L2-04-11 - 03-febe-gem-halo-cluster-baguette-layouts/L3-003 - Baguette Channel Layout/reference/text/m8book2__p217-218__baguette-channel.md",
+        "path": "OM9_Milestones/M05 - Gems and Layout/L2-04-11 - 03-febe-gem-halo-cluster/L3-003 - Baguette Channel Layout/reference/text/m8book2__p217-218__baguette-channel.md",
         "role_for_this_task": "channel/prong context",
         "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
         "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."

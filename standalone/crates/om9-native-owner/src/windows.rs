@@ -51,6 +51,38 @@ fn bool_result(value: i32) -> Result<()> {
         Ok(())
     }
 }
+/// Show one owned startup-failure dialog and return whether the call was made.
+///
+/// The application owns the decision to display it; audits and automation
+/// suppress it through `OM9_STARTUP_DIALOG=0`. Text is bounded before it reaches
+/// Win32 and no application state crosses this boundary.
+pub fn report_startup_failure(title: &str, message: &str) -> bool {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        MB_ICONERROR, MB_OK, MB_SETFOREGROUND, MessageBoxW,
+    };
+    const MAX_CHARS: usize = 512;
+    fn wide(text: &str) -> Vec<u16> {
+        text.chars()
+            .take(MAX_CHARS)
+            .collect::<String>()
+            .encode_utf16()
+            .chain(std::iter::once(0))
+            .collect()
+    }
+    let caption = wide(title);
+    let body = wide(message);
+    // SAFETY: both UTF-16 buffers are NUL terminated and outlive the call; a null
+    // owner window is valid for a task-modal message box that returns no data.
+    unsafe {
+        MessageBoxW(
+            std::ptr::null_mut(),
+            body.as_ptr(),
+            caption.as_ptr(),
+            MB_OK | MB_ICONERROR | MB_SETFOREGROUND,
+        );
+    }
+    true
+}
 fn pipe() -> Result<(Handle, Handle)> {
     let attributes = SECURITY_ATTRIBUTES {
         nLength: size_of::<SECURITY_ATTRIBUTES>() as u32,

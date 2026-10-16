@@ -38,6 +38,8 @@ Thumbs.db
 # Authored algorithm notes derived from reading the decompiled Matrix9 source: they
 # cite private paths and describe commercial behaviour, so they are not published.
 /docs/private-algorithm-notes.json
+# Local vendor checkouts kept for reading only; never published from this repository.
+/vendor-research/QymCAD/
 
 *.pdf
 *.chm

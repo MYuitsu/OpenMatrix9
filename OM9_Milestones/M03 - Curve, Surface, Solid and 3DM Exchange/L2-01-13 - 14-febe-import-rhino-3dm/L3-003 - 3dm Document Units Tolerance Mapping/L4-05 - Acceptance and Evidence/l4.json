@@ -388,7 +388,7 @@
         "section": "The File Menu",
         "topic": "authored Matrix manual section",
         "sheet_id": "m8book1__p89-90__the-file-menu",
-        "path": "OM9_Milestones/M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation/L2-01-12 - Be Native Project Codec Stl Export/reference/text/m8book1__p89-90__the-file-menu.md",
+        "path": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/reference/text/m8book1__p89-90__the-file-menu.md",
         "role_for_this_task": "authored sheet in this L3: m8book1__p89-90__the-file-menu",
         "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
         "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
@@ -402,7 +402,7 @@
         "section": "Import",
         "topic": "authored Matrix manual section",
         "sheet_id": "m8book1__p92-92__import",
-        "path": "OM9_Milestones/M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-01 - 3DM capability gap and dependency candidate/reference/text/m8book1__p92-92__import.md",
+        "path": "OM9_Milestones/M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/reference/text/m8book1__p92-92__import.md",
         "role_for_this_task": "authored sheet in this L3: m8book1__p92-92__import",
         "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
         "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."

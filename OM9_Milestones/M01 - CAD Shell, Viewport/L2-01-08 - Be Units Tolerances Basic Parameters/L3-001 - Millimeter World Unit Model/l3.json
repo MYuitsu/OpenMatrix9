@@ -1,0 +1,194 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-01-08-001",
+  "milestone": "M01",
+  "parent_l2_id": "OM9-L2-01-08",
+  "title": "Millimeter World Unit Model",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-L3-01-08-001",
+    "capability_id": "cap.01-08.millimeter-world-unit-model",
+    "stable_owner_key": "OM9-L2-01-08/millimeter-world-unit-model",
+    "title": "Millimeter World Unit Model",
+    "slug": "millimeter-world-unit-model",
+    "module_id": "OM9-L2-01-08",
+    "tag": "be",
+    "implementation_role": "backend_framework",
+    "milestone_id": "M01",
+    "target_milestone": "M01",
+    "delivery": "mainline",
+    "origin_source_taxonomy": "01-cad-base",
+    "goal": "canonical internal lengths in millimeters",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Millimeter, degrees, tolerances, numeric input và tham số builder đơn giản.",
+    "parent_exclusions": "Không cần solver phác thảo cơ khí hay formula dependency phức tạp.",
+    "depends_on_module_ids": [],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [
+      "coordinate-and-units"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          37,
+          43
+        ],
+        "pdf_pages_1based": [
+          45,
+          51
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Millimeter World Unit Model” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [],
+    "requires_manual_test": false,
+    "manual_test_gate": "AUTO_ONLY",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "execution_stage": "E01",
+    "planning_risk": "NORMAL",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT"
+  },
+  "execution_design": {
+    "l3_id": "OM9-L3-01-08-001",
+    "module_id": "OM9-L2-01-08",
+    "owner_key": "OM9-L2-01-08/millimeter-world-unit-model",
+    "title": "Millimeter World Unit Model",
+    "goal_from_canonical": "canonical internal lengths in millimeters",
+    "execution_stage": "E01",
+    "tag": "be",
+    "risk": "NORMAL",
+    "manual_references_inherited": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          37,
+          43
+        ],
+        "pdf_pages_1based": [
+          45,
+          51
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "manual_reference_precision": "PARENT_L2_RANGE_NOT_EXACT_COMMAND_CONFIRM_BEFORE_IMPLEMENTING_UI",
+    "positive_oracle_proposed": "Nhap gia tri 2.5 mm tao LengthMm(2.5); serialize 2.5 mm khong mat precision",
+    "negative_oracle_proposed": "Gia tri NaN, vo cuc, va don vi khong ho tro bi tu choi co kieu",
+    "canonical_api_contract_state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+    "source_evidence_class": "PINNED_GITHUB_CONTENT_READ_WITH_CANDIDATES",
+    "source_anchors": [
+      {
+        "path": "crates/qymcad-core/src/model.rs",
+        "purpose": "Units",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/model.rs",
+        "blob_sha": "74d971c5f0211bf66f96ae673128189f334ffb20",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-io/src/units.rs",
+        "purpose": "Unit conversions",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/units.rs",
+        "blob_sha": null,
+        "evidence": "CANDIDATE_RECHECK_LOCAL"
+      },
+      {
+        "path": "crates/qymcad-core/src/geom.rs",
+        "purpose": "Point/vector primitive",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/geom.rs",
+        "blob_sha": null,
+        "evidence": "CANDIDATE_RECHECK_LOCAL"
+      }
+    ],
+    "reuse_decision_provisional": "ADAPT",
+    "reuse_approval_condition": "Audit local checkout at pinned SHA, compile/tests, M00 human legal approval; do not infer ready from static GitHub read.",
+    "implementation_owner_policy": "One owning L2, UI modules dispatch only. No source code changes in vendor-research/ unless approved fork.",
+    "l4_task_ids": [
+      "OM9-L4-01-08-001-01",
+      "OM9-L4-01-08-001-02",
+      "OM9-L4-01-08-001-03",
+      "OM9-L4-01-08-001-05"
+    ],
+    "objectives": [
+      "Define typed seam + explicitly testable oracle",
+      "Implement one capability at its canonical owner",
+      "Verify failure rollback, stable IDs/units/geometry as relevant",
+      "Preserve manual approval for FEBE"
+    ],
+    "execution_hardening": "M01_V015_CONCRETE_BOUNDARY_AND_ORACLES",
+    "hardened_spec_path": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-001 - Millimeter World Unit Model/l3.json"
+  },
+  "task_ids": [
+    "OM9-L4-01-08-001-01",
+    "OM9-L4-01-08-001-02",
+    "OM9-L4-01-08-001-03",
+    "OM9-L4-01-08-001-05"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-L4-01-08-001-01",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-001 - Millimeter World Unit Model/L4-01 - Source Audit/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-08-001-02",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-001 - Millimeter World Unit Model/L4-02 - API Contract and Test Design/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-08-001-03",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-001 - Millimeter World Unit Model/L4-03 - Implementation/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-08-001-05",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-001 - Millimeter World Unit Model/L4-05 - Acceptance Test/l4.json"
+    }
+  ],
+  "hardening_notes": "# OM9-L3-01-08-001 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-01-08`.\n- Luồng/đối tượng: typed finite millimetres.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-core/src/model.rs`.\n- API Rust dự kiến: `LengthMm::try_new(f64) -> Result<LengthMm, UnitError>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** 2.5 mm serializes and reloads exactly.\n- **Negative:** NaN/Inf rejected before mutating Document.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n"
+}

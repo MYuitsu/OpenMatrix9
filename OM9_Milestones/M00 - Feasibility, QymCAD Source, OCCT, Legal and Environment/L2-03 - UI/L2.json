@@ -1,0 +1,45 @@
+{
+  "level": "L2",
+  "id": "OM9-M00-L2-03",
+  "milestone": "M00",
+  "title": "UI/Viewport/GPU technology",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+  "definition": {
+    "module_id": "OM9-M00-L2-03",
+    "title": "UI/Viewport/GPU technology",
+    "gate_id": "G00-03",
+    "role": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+    "l3_items": [
+      {
+        "l3_id": "OM9-M00-L3-03-01",
+        "title": "Source UI architecture and constraints",
+        "l4_count": 3
+      },
+      {
+        "l3_id": "OM9-M00-L3-03-02",
+        "title": "GPU renderer stability and performance",
+        "l4_count": 4
+      },
+      {
+        "l3_id": "OM9-M00-L3-03-03",
+        "title": "Picking + transactional selection",
+        "l4_count": 3
+      }
+    ]
+  },
+  "children_l3": [
+    {
+      "id": "OM9-M00-L3-03-01",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-03 - UI/L3-01 - Source UI architecture and constraints/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-03-02",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-03 - UI/L3-02 - GPU renderer stability and performance/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-03-03",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-03 - UI/L3-03 - Picking + transactional selection/l3.json"
+    }
+  ]
+}

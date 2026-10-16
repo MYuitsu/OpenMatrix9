@@ -20,8 +20,8 @@ from pathlib import Path
 
 ROOT = Path("H:/OpenMatrix9")
 M01 = (ROOT / "OM9_Milestones" /
-       "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation")
-M07 = ROOT / "OM9_Milestones" / "M07 - Cutters and Manufacturing Validation"
+       "M01 - CAD Shell, Viewport")
+M07 = ROOT / "OM9_Milestones" / "M07 - Cutters"
 PATCH = ROOT / "build" / "m07-incoming" / "OpenMatrix9" / "specs"
 L2_SRC = (PATCH / "01-ms01-workbench-shell" /
           "05-be-native-project-codec-stl-export")
@@ -73,7 +73,7 @@ def main():
         "definition": patch_definition,
         "children_l3": [
             {"id": L3_ID,
-             "file": f"M07 - Cutters and Manufacturing Validation/{L2_DIRNAME}/{L3_DIRNAME}/l3.json"}
+             "file": f"M07 - Cutters/{L2_DIRNAME}/{L3_DIRNAME}/l3.json"}
         ],
         "m07_delegated_l3_count": 1,
     }

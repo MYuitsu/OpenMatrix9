@@ -1,0 +1,34 @@
+task: OM9-L4-01-01-001-03 (implementation)
+utc: 2026-10-16T02:34:46Z
+source_revision_om9: 7349d4ae469a078b4104e8b4bf93b7137bc02ec1
+
+ M docs/openmatrix9-progress.json
+ M standalone/crates/om9-app/src/lib.rs
+ M standalone/crates/om9-app/src/main.rs
+ M standalone/crates/om9-app/src/ui.rs
+ M standalone/crates/om9-app/src/ui/chrome.rs
+ M standalone/crates/om9-native-owner/src/lib.rs
+ M standalone/crates/om9-native-owner/src/windows.rs
+?? docs/validation/2026-10-16-m01-l2-01-01-docking-implementation.md
+?? docs/validation/2026-10-16-m01-l2-01-01-docking/
+?? docs/validation/2026-10-16-m01-l2-01-01-source-audit.md
+?? implementation/design/
+?? implementation/evidence/M01/
+?? implementation/fixtures/
+?? standalone/crates/om9-app/src/dock_layout.rs
+?? standalone/crates/om9-app/src/startup.rs
+?? standalone/crates/om9-app/src/status_surface.rs
+?? standalone/crates/om9-app/src/window_identity_guard.rs
+?? standalone/crates/om9-app/tests/shell_docking.rs
+?? standalone/crates/om9-app/tests/startup_contract.rs
+
+== git diff --stat ==
+ docs/openmatrix9-progress.json                    |  90 +++
+ standalone/crates/om9-app/src/lib.rs              |   4 +
+ standalone/crates/om9-app/src/main.rs             | 154 ++--
+ standalone/crates/om9-app/src/ui.rs               | 536 +++++++++++++-
+ standalone/crates/om9-app/src/ui/chrome.rs        | 833 ++++++++++++++++------
+ standalone/crates/om9-native-owner/src/lib.rs     |   8 +
+ standalone/crates/om9-native-owner/src/windows.rs |  32 +
+ 7 files changed, 1319 insertions(+), 338 deletions(-)
+

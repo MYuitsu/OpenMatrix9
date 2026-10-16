@@ -25,14 +25,14 @@ import apply_matrix_ref_supplements as refs  # noqa: E402
 
 MILESTONES = {
     "M00": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment",
-    "M01": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation",
-    "M02": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction",
+    "M01": "M01 - CAD Shell, Viewport",
+    "M02": "M02 - Viewport, Gumball",
     "M03": "M03 - Curve, Surface, Solid and 3DM Exchange",
-    "M04": "M04 - Builder, History and Ring",
+    "M04": "M04 - Builder and History",
     "M05": "M05 - Gems and Layout",
     "M06": "M06 - Settings and Prongs",
-    "M07": "M07 - Cutters and Manufacturing Validation",
-    "M08": "M08 - Advanced Jewelry Modeling",
+    "M07": "M07 - Cutters",
+    "M08": "M08 - Jewelry Modeling",
 }
 
 # The M03/M04/M05/M06/M07 records label their tasks with a different role

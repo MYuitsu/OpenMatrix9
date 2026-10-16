@@ -11,7 +11,7 @@
   "modules": [
     {
       "id": "OM9-L2-01-09",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-09 - 01-be-occt-geometry-creation-ops/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-09 - 01-be-occt-geometry/L2.json"
     },
     {
       "id": "OM9-L2-01-10",
@@ -19,7 +19,7 @@
     },
     {
       "id": "OM9-L2-01-11",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-11 - 03-be-occt-transforms-and-pattern-ops/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-11 - 03-be-occt/L2.json"
     },
     {
       "id": "OM9-L2-01-13",
@@ -27,43 +27,43 @@
     },
     {
       "id": "OM9-L2-02-04",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04-febe-freeform-curve-modeling/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L2.json"
     },
     {
       "id": "OM9-L2-02-05",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-05 - 05-febe-freeform-surface-modeling/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-05 - 05/L2.json"
     },
     {
       "id": "OM9-L2-02-06",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino-transform-orient-workflows/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino/L2.json"
     },
     {
       "id": "OM9-L2-03-08",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-08 - 07-febe-matrix-top11-and-shortcut-actions/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-08 - 07-febe-matrix-top11/L2.json"
     },
     {
       "id": "OM9-L2-03-16",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-16 - 08-febe-matrix-curve-menu-workflows/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-16 - 08/L2.json"
     },
     {
       "id": "OM9-L2-03-17",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-17 - 09-febe-matrix-surface-menu-workflows/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-17 - 09-febe/L2.json"
     },
     {
       "id": "OM9-L2-03-18",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-18 - 10-febe-matrix-solid-menu-workflows/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-18 - 10-febe/L2.json"
     },
     {
       "id": "OM9-L2-03-19",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-19 - 11-febe-matrix-utilities-and-mesh-health/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-19 - 11-febe-matrix/L2.json"
     },
     {
       "id": "OM9-L2-03-20",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-20 - 12-febe-matrix-measure-and-model-statistics/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-20 - 12-febe-matrix/L2.json"
     },
     {
       "id": "OM9-L2-04-01",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe-matrix-transform-toolbar-bridges/L2.json"
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L2.json"
     }
   ],
   "implementation_targets_by_milestone": {

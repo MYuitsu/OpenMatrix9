@@ -1,0 +1,67 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-01-02",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-01",
+  "title": "Workspace map and dependency audit",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-01-02",
+    "module_id": "OM9-M00-L2-01",
+    "gate_id": "G00-01",
+    "title": "Workspace map and dependency audit",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-01-02-01",
+        "title": "Lập sơ đồ workspace 19 crates",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L3-02 - Workspace map/L4-01 - Lập sơ đồ workspace 19 crates/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-01-02-02",
+        "title": "Khảo sát core, kernel, io, render, pick",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L3-02 - Workspace map/L4-02 - Khảo sát core, kernel, io, render, pick/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-01-02-03",
+        "title": "Kiểm tra phạm vi chức năng bằng test thực có",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L3-02 - Workspace map/L4-03 - Kiểm tra phạm vi chức năng bằng test thực có/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-01-02-04",
+        "title": "Khoanh vùng thay đổi gây rủi ro license và upstream update",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L3-02 - Workspace map/L4-04 - Khoanh vùng thay đổi gây rủi ro license và upstream/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-01-02-01",
+    "OM9-M00-L4-01-02-02",
+    "OM9-M00-L4-01-02-03",
+    "OM9-M00-L4-01-02-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-01-02-01",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L3-02 - Workspace map/L4-01 - Lập sơ đồ workspace 19 crates/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-01-02-02",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L3-02 - Workspace map/L4-02 - Khảo sát core, kernel, io, render, pick/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-01-02-03",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L3-02 - Workspace map/L4-03 - Kiểm tra phạm vi chức năng bằng test thực có/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-01-02-04",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L3-02 - Workspace map/L4-04 - Khoanh vùng thay đổi gây rủi ro license và upstream/l4.json"
+    }
+  ]
+}

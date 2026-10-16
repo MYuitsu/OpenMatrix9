@@ -362,7 +362,7 @@
         "section": "History",
         "topic": "Matrix History family: record, update, clear and reporting",
         "sheet_id": "m8book1__p48-53__031-history",
-        "path": "OM9_Milestones/M04 - Builder, History and Ring/L2-01-04 - 01-be-associative-dependency-rebuild/reference/text/m8book1__p48-53__031-history.md",
+        "path": "OM9_Milestones/M04 - Builder and History/L2-01-04 - 01-be-associative-dependency-rebuild/reference/text/m8book1__p48-53__031-history.md",
         "role_for_this_task": "associative update contract",
         "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
         "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."

@@ -66,17 +66,17 @@
     },
     {
       "id": "OM9-L3-01-10-002",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-002 - B-Rep Boolean Difference/l3.json",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-002 - B-Rep Boolean/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-01-10-003",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-003 - B-Rep Boolean Intersection/l3.json",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-003 - B-Rep Boolean/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-01-10-004",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-004 - Curve And Face Split Intersections/l3.json",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-004 - Curve And Face Split/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
@@ -86,22 +86,22 @@
     },
     {
       "id": "OM9-L3-01-10-006",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-006 - Fillet And Chamfer B-Rep Edges/l3.json",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-006 - Fillet And Chamfer B-Rep/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-01-10-007",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-007 - Offset Face And Thicken Shell/l3.json",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-007 - Offset Face And Thicken/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-01-10-008",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-008 - Face Extract Unjoin And Rejoin/l3.json",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-008 - Face Extract Unjoin/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-01-10-009",
-      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-009 - Geometry Health And Naked Edge Query/l3.json",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-009 - Geometry Health/l3.json",
       "target_implementation_milestone": "M03"
     }
   ],

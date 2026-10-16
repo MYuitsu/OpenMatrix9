@@ -309,7 +309,7 @@
         "section": "Load Styles",
         "topic": "load/apply style workflow",
         "sheet_id": "m8book2__p236-236__211-load-styles",
-        "path": "OM9_Milestones/M04 - Builder, History and Ring/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L3-003 - Builder Style Apply And Preview/reference/text/m8book2__p236-236__211-load-styles.md",
+        "path": "OM9_Milestones/M04 - Builder and History/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L3-003 - Builder Style Apply And Preview/reference/text/m8book2__p236-236__211-load-styles.md",
         "role_for_this_task": "Load Styles command and options",
         "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
         "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."

@@ -1,0 +1,196 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-01-001-01",
+  "l3_id": "OM9-L3-01-01-001",
+  "l3_title": "Application Startup And Main Window",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD in the pinned checkout, then file reads with line numbers; decisions are OM9-owned and no upstream code is copied",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "blob_sha": "8f6ab517f24792f7feeda644163182754db493a3",
+      "present": true,
+      "lines": 2419,
+      "observed_symbols": [
+        "gui.rs:178 impl App",
+        "gui.rs:1391 impl eframe::App for App",
+        "gui.rs:1393 fn save(&mut self, storage: &mut dyn eframe::Storage)",
+        "gui.rs:1401 fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame)",
+        "gui.rs:1406 impl App",
+        "gui.rs:1407 comment: the whole frame in one method a test can call"
+      ],
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/ui.rs (MatrixApp::show, impl eframe::App::ui)"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "lines": 67,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:12 name = \"qymcad\"",
+        "qymcad/Cargo.toml:15 [[bin]]",
+        "qymcad/Cargo.toml:24 eframe = { version = \"0.35\", features = [\"persistence\", \"wgpu\"] }",
+        "qymcad/Cargo.toml:25 egui = \"0.35\""
+      ],
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml (eframe 0.36.2 wgpu, own features, no persistence)"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "lines": 258,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:37 impl Slot",
+        "qymcad-shell/src/lib.rs:59 pub struct Place",
+        "qymcad-shell/src/lib.rs:104 pub struct Shell",
+        "qymcad-shell/src/lib.rs:111 impl Shell"
+      ],
+      "decision": "NOT_APPLICABLE_FOR_STARTUP",
+      "note": "the upstream Shell is a panel registry for its own workbenches; OM9 owns its dock/menu model in dock_layout.rs and adapts no shell code here"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "lines": 988,
+      "observed_symbols": [
+        "qymcad-ui-state/src/lib.rs:87 pub fn cmd_val",
+        "qymcad-ui-state/src/lib.rs:388 pub fn set_step_recorder",
+        "qymcad-ui-state/src/lib.rs:395 pub fn note_step",
+        "qymcad-ui-state/src/lib.rs:594 pub fn pressed_chord",
+        "qymcad-ui-state/src/lib.rs:615 pub fn hotkey_action"
+      ],
+      "decision": "NOT_APPLICABLE_FOR_STARTUP",
+      "note": "tool parameter/state helpers, not process bootstrap; no OM9 start path consumes them"
+    }
+  ],
+  "additional_anchors_found": [
+    {
+      "path": "crates/qymcad/src/gui/startup.rs",
+      "lines": 317,
+      "observed_symbols": [
+        "gui/startup.rs:164 pub fn launch() -> eframe::Result<()>",
+        "gui/startup.rs:174 let mut options = eframe::NativeOptions {",
+        "gui/startup.rs:175 viewport: egui::ViewportBuilder::default()",
+        "gui/startup.rs:176 .with_inner_size([1280.0, 800.0])",
+        "gui/startup.rs:180 .with_title(APP_NAME)",
+        "gui/startup.rs:181 .with_icon(app_icon())",
+        "gui/startup.rs:184 renderer: eframe::Renderer::Wgpu",
+        "gui/startup.rs:189 persistence_path: qymcad_paths::settings_file()",
+        "gui/startup.rs:192 choose_the_adapter_ourselves(&mut options)",
+        "gui/startup.rs:194 eframe::run_native(APP_ID, options, ...)",
+        "gui/startup.rs:201-215 wgpu render state -> adapter info recorded, else glow fallback noted",
+        "gui/startup.rs:216-225 status line says the processor is drawing and why a step down happened",
+        "gui/startup.rs:229-236 a failed start is written down instead of vanishing (windowed build has no stderr)",
+        "gui/startup.rs:256 pub(crate) fn choose_the_adapter_ourselves(options: &mut eframe::NativeOptions)",
+        "gui/startup.rs:264 setup.native_adapter_selector = Some(...) - every adapter recorded, CPU adapter accepted"
+      ],
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/startup.rs (AppConfig, StartupFailure, adapter_note) + ui::launch_with",
+      "why": "same problem, OM9-owned solution: title/identity, size, adapter choice and a written failed start"
+    },
+    {
+      "path": "crates/qymcad/src/window_identity_guard.rs",
+      "lines": 80,
+      "observed_symbols": [
+        "window_identity_guard.rs:14 const OPENING: &str = \"egui::Window::new(\"",
+        "window_identity_guard.rs:17 fn windows_without_id(text: &str) -> Vec<usize>",
+        "window_identity_guard.rs:52 fn every_window_has_an_identity_of_its_own()"
+      ],
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/ui.rs (F6 window .id(\"om9-command-search\"), float menus .id((\"om9-float-menu\", key))) and the ported guard test",
+      "why": "a window named only by its title takes its identity from that title, so a renamed/translated title moves the window and loses its stored size"
+    },
+    {
+      "path": "crates/qymcad/src/app_identity.rs",
+      "lines": 83,
+      "observed_symbols": [
+        "app_identity.rs:31 fn the_program_is_called_the_same_thing_everywhere()",
+        "app_identity.rs:32 let id = qymcad_paths::APP_ID"
+      ],
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/startup.rs (AppConfig.app_title) + the startup fixture expectation"
+    },
+    {
+      "path": "crates/qymcad/src/safe_graphics.rs",
+      "lines": 298,
+      "observed_symbols": [
+        "safe_graphics.rs:85 pub fn take(previous: Option<&str>) -> Step",
+        "safe_graphics.rs:111 pub fn samples(setting: u32) -> u32",
+        "safe_graphics.rs:149 pub fn take_choice(choice: Choice)",
+        "safe_graphics.rs:160 pub fn said(step: Step) -> Option<&'static str>"
+      ],
+      "decision": "ADD_IN_OM9",
+      "note": "OM9 has no automatic step-down between runs yet; the immediate fallback explanation lives in adapter_note + StatusSurface"
+    },
+    {
+      "path": "crates/qymcad/src/crash.rs",
+      "lines": 514,
+      "observed_symbols": [
+        "crash.rs:66 pub fn install()",
+        "crash.rs:98 pub fn begin_journal() -> PreviousRun",
+        "crash.rs:248 pub fn note_failed_start(reason: &str) -> Option<PathBuf>"
+      ],
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/startup.rs (StartupFailure::write_receipt/report) + src/main.rs",
+      "why": "a failed windowed start must leave an owned, readable record"
+    },
+    {
+      "path": "crates/qymcad/src/diagnostics.rs",
+      "observed_symbols": [
+        "diagnostics.rs:51 pub fn note_gpu(line: String)",
+        "diagnostics.rs:59 pub fn note_adapters(lines: &[String])",
+        "diagnostics.rs:98 pub fn drawing_on_the_processor() -> Option<String>",
+        "diagnostics.rs:112 pub fn note_start_failure(reason: &str, report: Option<&Path>)"
+      ],
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/status_surface.rs + ui.rs (adapter recorded in the audit receipt, fallback explained on the status line)",
+      "lines": 196
+    }
+  ],
+  "missing_in_upstream_added_by_om9": [
+    {
+      "item": "typed startup failure with a bounded receipt",
+      "om9_owner": "standalone/crates/om9-app/src/startup.rs"
+    },
+    {
+      "item": "Matrix dock/menu layout model (sections, dock right, float, roll-up, Set as Default/Reset/Reload)",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs"
+    },
+    {
+      "item": "always-visible status/error surface that survives a later successful command",
+      "om9_owner": "standalone/crates/om9-app/src/status_surface.rs"
+    },
+    {
+      "item": "own-app UI audit receipts (window title, view rects, dock state, adapter, screenshot hash)",
+      "om9_owner": "standalone/crates/om9-app/src/ui.rs (UiAudit, audit_receipt)"
+    },
+    {
+      "item": "app-scoped layout store with schema gate",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs (default_store_path, load/save)"
+    }
+  ],
+  "license": {
+    "upstream": "AGPL-3.0-or-later (QymCAD)",
+    "copied_code": false,
+    "basis": "reads and pattern adaptation only; OM9 files are authored independently",
+    "approval_state": "G00-06 human approval still pending - copying upstream code remains BLOCKED_APPROVAL"
+  },
+  "gate_state": {
+    "m00_signed": false,
+    "plan_coding_gate": "BLOCKED_M00",
+    "note": "implemented under the user's explicit instruction for the standalone app; no OM9_Milestones status promoted"
+  },
+  "result": {
+    "decision": "ADAPT",
+    "verified": true,
+    "unverified": [
+      "no upstream build or test run was performed (read-only checkout; M00 approval absent)"
+    ]
+  }
+}

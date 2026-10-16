@@ -1,0 +1,67 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-06-02",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-06",
+  "title": "Assets, trademarks and release notices",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-06-02",
+    "module_id": "OM9-M00-L2-06",
+    "gate_id": "G00-06",
+    "title": "Assets, trademarks and release notices",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-06-02-01",
+        "title": "Phân loại assets bị ràng buộc thương hiệu",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L3-02 - Assets, trademarks and release/L4-01 - Phân loại assets bị ràng buộc thương hiệu/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-06-02-02",
+        "title": "Thiết kế third-party notices và source offer",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L3-02 - Assets, trademarks and release/L4-02 - Thiết kế third-party notices và source offer/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-06-02-03",
+        "title": "Kiểm tra rủi ro phân phối manual/test datasets",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L3-02 - Assets, trademarks and release/L4-03 - Kiểm tra rủi ro phân phối manual - test/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-06-02-04",
+        "title": "Ký gate legal readiness",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L3-02 - Assets, trademarks and release/L4-04 - Ký gate legal readiness/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-06-02-01",
+    "OM9-M00-L4-06-02-02",
+    "OM9-M00-L4-06-02-03",
+    "OM9-M00-L4-06-02-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-06-02-01",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L3-02 - Assets, trademarks and release/L4-01 - Phân loại assets bị ràng buộc thương hiệu/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-06-02-02",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L3-02 - Assets, trademarks and release/L4-02 - Thiết kế third-party notices và source offer/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-06-02-03",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L3-02 - Assets, trademarks and release/L4-03 - Kiểm tra rủi ro phân phối manual - test/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-06-02-04",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L3-02 - Assets, trademarks and release/L4-04 - Ký gate legal readiness/l4.json"
+    }
+  ]
+}

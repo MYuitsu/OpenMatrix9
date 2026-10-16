@@ -20,8 +20,8 @@ ENRICHMENT = {"implementation_samples", "implementation_sample_guide"}
 # from that package, so the merge proof checks the contribution instead of
 # demanding the shipped "deferred, not planned here" body.
 M08_DEFERRAL = "DEFERRED_TO_M08"
-M08_L3 = ROOT / "OM9_Milestones" / "M08 - Advanced Jewelry Modeling"
-M08_MANIFEST = ROOT / "OM9_Milestones" / "M08 - Advanced Jewelry Modeling" / \
+M08_L3 = ROOT / "OM9_Milestones" / "M08 - Jewelry Modeling"
+M08_MANIFEST = ROOT / "OM9_Milestones" / "M08 - Jewelry Modeling" / \
     "reference" / "m08-l4" / "M08_L4_EXECUTION_MANIFEST.json"
 
 

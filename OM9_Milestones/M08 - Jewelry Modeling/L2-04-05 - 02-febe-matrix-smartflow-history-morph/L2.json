@@ -1,0 +1,92 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-05",
+  "milestone": "M08",
+  "title": "02-febe-matrix-smartflow-history-morph",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Smart Flow auto-base/surface mapping, rigid objects, associative history",
+  "source_original_path": "specs/08-ms08-advanced-jewelry-modeling/02-febe-matrix-smartflow-history-morph/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-05",
+    "milestone_id": "M08",
+    "module_path": "specs/08-ms08-advanced-jewelry-modeling/02-febe-matrix-smartflow-history-morph/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/05-febe-matrix-smartflow-history-morph/",
+    "scope": "Smart Flow auto-base/surface mapping, rigid objects, associative history",
+    "exclude": "Không coi là thao tác cơ khí.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          242,
+          245
+        ],
+        "pdf_pages_1based": [
+          16,
+          19
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-02-05",
+      "OM9-L2-01-04",
+      "OM9-L2-04-07"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M08-UI",
+    "l3_count": 8,
+    "l3_catalog_path": "specs/08-ms08-advanced-jewelry-modeling/02-febe-matrix-smartflow-history-morph/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-05-001",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L3-001 - Smartflow Autobase Surface Generation/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-05-002",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L3-002 - Smartflow Mapping Base To Target/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-05-003",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L3-003 - Smartflow Rigid Object Placement/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-05-004",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L3-004 - Smartflow History Recompute/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-05-005",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L3-005 - Smartflow Break And Reconnect/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-05-006",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L3-006 - Smartflow Pulldown Reference Curves/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-05-007",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L3-007 - Smartflow UV Normal Align Assistance/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-05-008",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L3-008 - Smartflow Overhang Tolerance Controls/l3.json",
+      "target_implementation_milestone": "M08"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m08": 32
+}

@@ -1,0 +1,97 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-02-06",
+  "milestone": "M03",
+  "title": "06-febe-rhino-transform-orient-workflows",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Command sessions cho Move/Scale/Rotate/Array/Orient với pivot/ref/copy/preview kiểu Rhino.",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/06-febe-rhino-transform-orient-workflows/module.json",
+  "definition": {
+    "module_id": "OM9-L2-02-06",
+    "milestone_id": "M03",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/06-febe-rhino-transform-orient-workflows/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "02-rhino5",
+    "legacy_v07_path": "specs/02-rhino5/06-febe-rhino-transform-orient-workflows/",
+    "scope": "Command sessions cho Move/Scale/Rotate/Array/Orient với pivot/ref/copy/preview kiểu Rhino.",
+    "exclude": "Phép toán ma trận chỉ gọi CAD Base; Matrix Toolbar ở 04.",
+    "manual_references": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          65,
+          83
+        ],
+        "pdf_pages_1based": [
+          73,
+          91
+        ]
+      },
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          235,
+          266
+        ],
+        "pdf_pages_1based": [
+          9,
+          40
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-11",
+      "OM9-L2-02-02"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "M03_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M03-UI",
+    "l3_count": 6,
+    "l3_catalog_path": "specs/03-ms03-curve-surface-solid-3dm/06-febe-rhino-transform-orient-workflows/l3-index.json",
+    "l3_deferred_count": 0,
+    "l3_m03_owner_count": 6,
+    "l4_count_planned_m03": 31
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-02-06-001",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino/L3-001 - Interactive Move Copy And Rotate/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-06-002",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino/L3-002 - Interactive Scale 1d 2d 3d/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-06-003",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino/L3-003 - Interactive Mirror And Array/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-06-004",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino/L3-004 - Orient By Two Three Reference Points/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-06-005",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino/L3-005 - Align And Setpoints/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-06-006",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino/L3-006 - Transform Cancel Preview And Undo/l3.json",
+      "target_implementation_milestone": "M03"
+    }
+  ],
+  "m03_l4_planned_count": 31,
+  "execution_state": "NOT_STARTED",
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+}

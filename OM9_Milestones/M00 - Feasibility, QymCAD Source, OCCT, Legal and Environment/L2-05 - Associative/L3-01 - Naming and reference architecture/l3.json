@@ -1,0 +1,67 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-05-01",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-05",
+  "title": "Naming and reference architecture audit",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-05-01",
+    "module_id": "OM9-M00-L2-05",
+    "gate_id": "G00-05",
+    "title": "Naming and reference architecture audit",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-05-01-01",
+        "title": "Đọc qymcad-kernel naming.rs và OCCT history semantics",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L3-01 - Naming and reference architecture/L4-01 - Đọc qymcad-kernel naming.rs và OCCT/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-05-01-02",
+        "title": "Đọc query-based refs và explicit rebind",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L3-01 - Naming and reference architecture/L4-02 - Đọc query-based refs và explicit rebind/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-05-01-03",
+        "title": "Lập bảng mapping QymCAD timeline với Matrix Builder history",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L3-01 - Naming and reference architecture/L4-03 - Lập bảng mapping QymCAD timeline với/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-05-01-04",
+        "title": "Chốt baseline test tách/gộp topology",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L3-01 - Naming and reference architecture/L4-04 - Chốt baseline test tách - gộp topology/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-05-01-01",
+    "OM9-M00-L4-05-01-02",
+    "OM9-M00-L4-05-01-03",
+    "OM9-M00-L4-05-01-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-05-01-01",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L3-01 - Naming and reference architecture/L4-01 - Đọc qymcad-kernel naming.rs và OCCT/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-05-01-02",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L3-01 - Naming and reference architecture/L4-02 - Đọc query-based refs và explicit rebind/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-05-01-03",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L3-01 - Naming and reference architecture/L4-03 - Lập bảng mapping QymCAD timeline với/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-05-01-04",
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L3-01 - Naming and reference architecture/L4-04 - Chốt baseline test tách - gộp topology/l4.json"
+    }
+  ]
+}

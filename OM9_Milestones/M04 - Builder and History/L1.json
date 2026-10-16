@@ -1,0 +1,71 @@
+{
+  "level": "L1",
+  "id": "OM9-M04",
+  "milestone": "M04",
+  "title": "Builder, History và Ring",
+  "planning_state": "L1_L4_SPECIFIED_NOT_IMPLEMENTED",
+  "planning_only": true,
+  "module_count": 7,
+  "l3_count": 51,
+  "l4_count": 340,
+  "modules": [
+    {
+      "id": "OM9-L2-01-04",
+      "file": "M04 - Builder and History/L2-01-04 - 01-be-associative-dependency-rebuild/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-11",
+      "file": "M04 - Builder and History/L2-03-11 - 02-febe-matrix-builder-ui-and-live-handles/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-12",
+      "file": "M04 - Builder and History/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-13",
+      "file": "M04 - Builder and History/L2-03-13 - 04-febe-matrix-history/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-02",
+      "file": "M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-03",
+      "file": "M04 - Builder and History/L2-04-03 - 06-febe-jewelry-ring-builder-family/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-19",
+      "file": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L2.json"
+    }
+  ],
+  "implementation_targets_by_milestone": {
+    "M04": 51
+  },
+  "execution_readiness": {
+    "target": "GPT-6 Luna one L4 per run",
+    "source_pin": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+    "mini_gate_order": [
+      "G04-A",
+      "G04-B",
+      "G04-C",
+      "G04-D",
+      "G04-E"
+    ],
+    "gate_owners": {
+      "G04-A": "Associative history graph",
+      "G04-B": "Ring rails and profiles",
+      "G04-C": "Builder UI and styles",
+      "G04-D": "Ring builders",
+      "G04-E": "History UI, weight, Top11 dispatch"
+    },
+    "m04_external_delegated_l3": [
+      "OM9-L3-03-08-005"
+    ],
+    "blocked_until": "M00–M03 actual runtime gates approved; specs themselves grant no PASS",
+    "notes": [
+      "M04 ring builder uses M05 gem placeholders only, full gem generation deferred",
+      "Resizer manual says non-history; L3 conflict must be reviewed before implementation"
+    ],
+    "scope": "Planning-only JSON; no binary, runtime receipts or changelog"
+  }
+}

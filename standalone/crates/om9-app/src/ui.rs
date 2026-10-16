@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 use crate::{
+    dock_layout::{self, DockLayout, DockSide, FloatRect, PanelId, Regions, SectionId},
     session::{Controller, InvocationOrigin, LINE, POINT},
+    status_surface::{StatusKind, StatusSurface},
     transcript::Transcript,
+    workbench_regions::{
+        CommandInputHost, RegionError, RegionPlan, RegionRect, WindowSize, compute_regions_for,
+        tile_views,
+    },
 };
 use eframe::egui::{
     self, Color32, Key, Modifiers, Rect, Sense, Stroke, TextBuffer, TextEdit, Vec2,
@@ -69,6 +75,16 @@ pub struct Feature {
     pub command: Option<String>,
     pub module: String,
 }
+/// Adapter for the `CommandInputHost` seam toward `OM9-L2-01-02`. The CMD frame
+/// (`MatrixApp::transcript` plus `command_ui`) is built into every frame, so it
+/// is always attached. This says nothing about command dispatch or the Undo
+/// journal, which that module does not provide yet.
+struct AttachedCmdFrame;
+impl CommandInputHost for AttachedCmdFrame {
+    fn command_input_ready(&self) -> bool {
+        true
+    }
+}
 pub struct MatrixApp {
     pub controller: Controller,
     pub transcript: Transcript,
@@ -98,7 +114,8 @@ pub struct MatrixApp {
     file_error: String,
     file_ime_composing: bool,
     file_f6_rects: BTreeMap<crate::file_lifecycle::FileKind, Rect>,
-    window_title: String,
+    /// Window title owned by this document's path/name and dirty marker.
+    pub window_title: String,
     current_ui_context: Option<egui::Context>,
     hover: Option<Point3>,
     pub audit: Option<UiAudit>,
@@ -112,11 +129,36 @@ pub struct MatrixApp {
     main_category: usize,
     toolbar_tab: usize,
     style_ready: bool,
-    collapsed: std::collections::BTreeSet<String>,
+    /// Live rectangles of the Matrix menu title bars, keyed by section key.
+    pub section_rects: BTreeMap<&'static str, Rect>,
+    section_drag: Option<SectionId>,
+    sidebar_scroll: f32,
     view_menu_capture: Option<(egui::Id, crate::viewport_menu::ViewMenuCapture)>,
     viewport_menu_owns_frame: bool,
     viewport_menu_pointer_guard: bool,
     viewport_title_arrows: BTreeMap<ViewId, Rect>,
+    /// Matrix dock layout owned by L2-01-01 (panels, sizes, visibility, floats).
+    pub dock: DockLayout,
+    dock_path: Option<PathBuf>,
+    dock_dirty: bool,
+    dock_window: [f32; 2],
+    /// Layout warnings that must stay visible to the user (unknown version,
+    /// removed panel id, panel recovered from outside the window).
+    pub dock_diagnostics: Vec<String>,
+    /// Always-visible status/error line (L3-007).
+    pub status: StatusSurface,
+    pub regions: Regions,
+    /// Last validated workbench region plan (L3-002). Kept when a later frame
+    /// cannot produce one, so the shell never falls back to an unchecked layout.
+    pub region_plan: Option<RegionPlan>,
+    /// Why the current frame has no fresh plan; `None` when the plan is current.
+    pub region_error: Option<RegionError>,
+    /// Status text this module raised, so only it clears it again.
+    region_status: Option<String>,
+    pub right_dock_rect: Option<Rect>,
+    pub builder_slot_rect: Option<Rect>,
+    pub status_rect: Option<Rect>,
+    pub dock_panel_rects: BTreeMap<&'static str, Rect>,
 }
 pub struct UiAudit {
     pub directory: PathBuf,
@@ -197,9 +239,27 @@ impl MatrixApp {
     pub fn new(document: Document) -> Result<Self> {
         Self::from_controller(Controller::new(document, Limits::default())?)
     }
+    /// Typed startup: validate the configuration, open the empty document and
+    /// load the owned layout. No window exists yet, so a failure here is a
+    /// document-stage failure the caller reports.
+    pub fn start(
+        config: &crate::startup::AppConfig,
+    ) -> std::result::Result<Self, crate::startup::StartupFailure> {
+        use crate::startup::{StartupFailure, StartupStage};
+        config.validate()?;
+        let mut app = Self::new(Document::new(&config.document_name))
+            .map_err(|error| StartupFailure::from_error(StartupStage::Document, &error))?;
+        if let Some(path) = &config.layout_path {
+            app.set_dock_layout_path(Some(path.clone()));
+            app.load_dock_layout();
+        }
+        Ok(app)
+    }
     fn from_controller(controller: Controller) -> Result<Self> {
         let features = serde_json::from_str(include_str!("../assets/features.json"))
             .map_err(|e| Error::Io(e.to_string()))?;
+        let dock = DockLayout::matrix_default();
+        let regions = dock.resolve([1600., 1000.]);
         let mut app = Self {
             controller,
             transcript: Transcript::new(),
@@ -243,11 +303,27 @@ impl MatrixApp {
             main_category: 0,
             toolbar_tab: 0,
             style_ready: false,
-            collapsed: std::collections::BTreeSet::new(),
+            section_rects: BTreeMap::new(),
+            section_drag: None,
+            sidebar_scroll: 0.,
             view_menu_capture: None,
             viewport_menu_owns_frame: false,
             viewport_menu_pointer_guard: false,
             viewport_title_arrows: BTreeMap::new(),
+            dock,
+            dock_path: None,
+            dock_dirty: false,
+            dock_window: [0., 0.],
+            dock_diagnostics: Vec::new(),
+            status: StatusSurface::new(),
+            regions,
+            region_plan: None,
+            region_error: None,
+            region_status: None,
+            right_dock_rect: None,
+            builder_slot_rect: None,
+            status_rect: None,
+            dock_panel_rects: BTreeMap::new(),
         };
         for diagnostic in app.controller.file_diagnostics() {
             app.transcript.append_history(diagnostic);
@@ -255,11 +331,292 @@ impl MatrixApp {
         Ok(app)
     }
     fn feedback(&mut self, result: Result<()>) {
-        if let Err(error) = result {
-            self.transcript.append_history(&format!("{error}"));
+        match result {
+            Ok(()) => {
+                self.status.complete_success();
+            }
+            Err(error) => {
+                let message = format!("{error}");
+                self.transcript.append_history(&message);
+                self.status.error(&message);
+            }
         }
         self.transcript.set_prompt(self.controller.prompt());
         self.focus_cmd = true;
+    }
+    /// Attach the application-scoped layout store. The real app uses
+    /// `DockLayout::default_store_path`; tests inject an owned directory.
+    pub fn set_dock_layout_path(&mut self, path: Option<PathBuf>) {
+        self.dock_path = path;
+    }
+    pub fn dock_layout_path(&self) -> Option<&std::path::Path> {
+        self.dock_path.as_deref()
+    }
+    pub fn dock_panel_rect(&self, key: &str) -> Option<Rect> {
+        self.dock_panel_rects.get(key).copied()
+    }
+    pub fn status_line(&self) -> String {
+        self.status.line()
+    }
+    /// One-line summary of the current menu placement, used by tests and by the
+    /// status bar.
+    pub fn dock_summary(&self) -> String {
+        format!(
+            "left {}px, command {}px, right {}px · {}",
+            self.regions.left_rail,
+            self.regions.command_line,
+            self.regions.right_dock,
+            self.menu_summary()
+        )
+    }
+    /// Total load of the persisted layout. A missing file is the Matrix
+    /// default; an unusable file is reported and does not fail startup.
+    pub fn load_dock_layout(&mut self) -> Vec<String> {
+        let Some(path) = self.dock_path.clone() else {
+            return Vec::new();
+        };
+        let (mut layout, diagnostics) = DockLayout::load(&path, &Limits::default());
+        let mut reported = diagnostics;
+        if let [width, height] = self.dock_window
+            && width > 0.
+            && height > 0.
+        {
+            reported.extend(layout.clamp_floats([width, height]));
+        }
+        self.dock = layout;
+        self.dock_dirty = false;
+        self.note_dock_diagnostics(&reported);
+        reported
+    }
+    /// Persist the layout when the process owns a store path and the layout
+    /// changed. A failed write stays a visible warning, never a document error.
+    pub fn save_dock_layout(&mut self) -> Result<()> {
+        if !self.dock_dirty {
+            return Ok(());
+        }
+        let Some(path) = self.dock_path.clone() else {
+            return Ok(());
+        };
+        match self.dock.save(&path) {
+            Ok(()) => {
+                self.dock_dirty = false;
+                Ok(())
+            }
+            Err(error) => {
+                let message = format!("layout not saved ({error})");
+                self.status.warning(&message);
+                Err(error)
+            }
+        }
+    }
+    /// Restore the Matrix baseline layout. Document, undo journal, pending
+    /// command draft and selection are untouched: only panel geometry resets.
+    pub fn reset_dock_layout(&mut self, ctx: Option<&egui::Context>) {
+        if let Some(ctx) = ctx {
+            // egui remembers panel/window rectangles in its own memory; a
+            // layout reset must drop exactly that geometry.
+            ctx.memory_mut(|memory| memory.reset_areas());
+        }
+        self.dock.reset_to_default();
+        self.dock_dirty = true;
+        self.status.info("Layout reset to the Matrix default");
+    }
+    pub fn toggle_right_dock(&mut self) {
+        let visible = self.dock.state(PanelId::RightDock).visible;
+        self.dock.set_visible(PanelId::RightDock, !visible);
+        self.dock_dirty = true;
+        self.status.info(if visible {
+            "Right menu column closed"
+        } else {
+            "Right menu column opened"
+        });
+    }
+    /// Reorder a menu section inside its own column (documented title-bar drag).
+    pub fn move_menu_section(&mut self, id: SectionId, delta: i32) -> bool {
+        match self.dock.move_section(id, delta) {
+            Ok((section, index)) => {
+                self.dock_dirty = true;
+                self.status.info(&format!(
+                    "{} moved to menu position {}",
+                    section.title(),
+                    index + 1
+                ));
+                true
+            }
+            Err(error) => {
+                self.status.warning(&format!("{error}"));
+                false
+            }
+        }
+    }
+    /// Dock a menu to the left column or to the far-right mirror column.
+    pub fn dock_menu_section(&mut self, id: SectionId, side: DockSide) -> bool {
+        match self.dock.dock_section(id, side) {
+            Ok(()) => {
+                self.dock_dirty = true;
+                self.status.info(&format!(
+                    "{} docked {}",
+                    id.title(),
+                    match side {
+                        DockSide::Right => "to the right menu column",
+                        _ => "in the left menu column",
+                    }
+                ));
+                true
+            }
+            Err(error) => {
+                self.status.warning(&format!("{error}"));
+                false
+            }
+        }
+    }
+    /// Float a menu over the model at an owned rectangle.
+    pub fn float_menu_section(&mut self, id: SectionId, rect: FloatRect) -> bool {
+        if !matches!(self.dock.section(id).dock, DockSide::Floating) {
+            self.dock.float_section(id, rect);
+            self.dock_dirty = true;
+            self.status
+                .info(&format!("{} floated over the model", id.title()));
+            true
+        } else {
+            false
+        }
+    }
+    /// View ▸ Matrix Menus ▸ Set as Default: keep the current configuration. The
+    /// documented Matrix commands are explicit, so live menu changes are session
+    /// state until the user keeps them.
+    pub fn set_menus_as_default(&mut self) {
+        self.dock_dirty = true;
+        if self.save_dock_layout().is_ok() {
+            self.status.info("Menu configuration set as default");
+        }
+    }
+    /// View ▸ Matrix Menus ▸ Reset Menus: back to the documented default mode in
+    /// this session, without overwriting the configuration the program opens with.
+    pub fn reset_menus(&mut self, ctx: Option<&egui::Context>) {
+        if let Some(ctx) = ctx {
+            // egui remembers panel/window rectangles in its own memory; a reset
+            // must drop exactly that geometry.
+            ctx.memory_mut(|memory| memory.reset_areas());
+        }
+        self.dock.reset_to_default();
+        self.dock_dirty = false;
+        self.status.info("Menus reset to the Matrix default");
+    }
+    /// View ▸ Matrix Menus ▸ Reload Menus: load the configuration the program
+    /// opens with, falling back to the factory default.
+    pub fn reload_menus(&mut self) {
+        if self.dock_path.is_none() {
+            self.dock.reset_to_default();
+            self.dock_dirty = false;
+            self.status.info("Menus reloaded from the factory default");
+            return;
+        }
+        let diagnostics = self.load_dock_layout();
+        self.dock_dirty = false;
+        let fallback = diagnostics
+            .iter()
+            .any(|line| line.contains("Matrix default") && line.contains("layout"));
+        self.status.info(if fallback {
+            "Menus reloaded from the factory default"
+        } else {
+            "Menus reloaded from the saved configuration"
+        });
+    }
+    /// True while the session layout differs from the kept configuration.
+    pub fn menus_have_unsaved_changes(&self) -> bool {
+        self.dock_dirty
+    }
+    pub fn section_rect(&self, key: &str) -> Option<Rect> {
+        self.section_rects.get(key).copied()
+    }
+    /// One-line summary of the current menu placement for tests and the status bar.
+    pub fn menu_summary(&self) -> String {
+        let names = |ids: Vec<SectionId>| -> String {
+            ids.into_iter()
+                .map(SectionId::title)
+                .collect::<Vec<_>>()
+                .join(", ")
+        };
+        format!(
+            "left [{}] · right [{}]",
+            names(self.dock.left_sections()),
+            names(self.dock.right_sections())
+        )
+    }
+    fn note_dock_diagnostics(&mut self, diagnostics: &[String]) {
+        for diagnostic in diagnostics {
+            self.transcript.append_history(diagnostic);
+        }
+        if let Some(last) = diagnostics.last() {
+            self.status.warning(last);
+        }
+        self.dock_diagnostics.extend(diagnostics.iter().cloned());
+    }
+    /// Validate the workbench regions for this frame (OM9-L3-01-01-002).
+    /// A usable plan replaces the previous one; a failure keeps the last good
+    /// plan, changes no layout or scene state and is put on the status line.
+    fn refresh_region_plan(&mut self, window: [f32; 2]) {
+        match compute_regions_for(
+            &self.dock,
+            WindowSize::from(window),
+            &self.controller.workspace,
+            &AttachedCmdFrame,
+        ) {
+            Ok(plan) => {
+                self.region_error = None;
+                self.region_plan = Some(plan);
+            }
+            Err(error) => self.region_error = Some(error),
+        }
+        self.announce_regions();
+    }
+    /// Show what the region check wants the user to know: an error while there
+    /// is no usable plan, or a notice for a defined fallback (right dock
+    /// yielded, left rail narrowed, command input kept). Only text raised here
+    /// is cleared here, and a notice never hides an unacknowledged failure.
+    fn announce_regions(&mut self) {
+        let desired = match (&self.region_error, &self.region_plan) {
+            (Some(error), _) => Some((StatusKind::Error, format!("Layout: {error}"))),
+            (None, Some(plan)) if !plan.notes.is_empty() => {
+                let notes: Vec<String> = plan.notes.iter().map(ToString::to_string).collect();
+                Some((StatusKind::Info, format!("Layout: {}", notes.join("; "))))
+            }
+            _ => None,
+        };
+        match desired {
+            Some((kind, message)) => {
+                if self.region_status.as_deref() == Some(message.as_str()) {
+                    return;
+                }
+                if kind != StatusKind::Error && self.status.kind().is_failure() {
+                    return;
+                }
+                // The CMD history keeps the notice even if a later status
+                // message (for example a floating-menu warning) replaces it.
+                self.transcript.append_history(&message);
+                self.status.report(kind, &message);
+                self.region_status = Some(message);
+            }
+            None => {
+                if let Some(previous) = self.region_status.take()
+                    && self.status.message() == previous
+                {
+                    self.status.acknowledge();
+                }
+            }
+        }
+    }
+    fn sync_dock_window(&mut self, window: [f32; 2]) {
+        if self.dock_window == window {
+            return;
+        }
+        self.dock_window = window;
+        let diagnostics = self.dock.clamp_floats(window);
+        if !diagnostics.is_empty() {
+            self.dock_dirty = true;
+        }
+        self.note_dock_diagnostics(&diagnostics);
     }
     fn invoke(&mut self, id: &str, origin: InvocationOrigin) {
         let result = self.controller.dispatch_effect(id, origin);
@@ -441,6 +798,18 @@ impl MatrixApp {
         }
         self.configure_style(&ctx);
         ui.set_style(ctx.style_of(egui::Theme::Light));
+        let viewport = ui.max_rect().size();
+        self.refresh_region_plan([viewport.x, viewport.y]);
+        // Floating menus are only pulled back inside a window the region check
+        // accepts; a window below the minimum must not rewrite stored layout.
+        if self.region_error.is_none() {
+            self.sync_dock_window([viewport.x, viewport.y]);
+        }
+        self.regions = self.dock.resolve([viewport.x, viewport.y]);
+        let regions = self.regions;
+        self.dock_panel_rects.clear();
+        self.section_rects.clear();
+        self.builder_slot_rect = None;
         egui::Panel::top("menu")
             .exact_size(21.)
             .frame(
@@ -455,9 +824,9 @@ impl MatrixApp {
                 self.menu_ui(ui);
             });
         egui::Panel::left("matrix-sidebar")
-            .default_size(300.)
-            .min_size(240.)
-            .max_size(420.)
+            .default_size(regions.left_rail)
+            .min_size(dock_layout::LEFT_RAIL_MIN)
+            .max_size(dock_layout::LEFT_RAIL_MAX)
             .resizable(true)
             .frame(
                 egui::Frame::new()
@@ -466,15 +835,16 @@ impl MatrixApp {
             )
             .show(ui, |ui| {
                 self.sidebar_rect = Some(ui.max_rect());
+                self.sync_panel_size(PanelId::LeftRail, ui.max_rect().width());
                 if self.viewport_menu_owns_frame {
                     ui.disable();
                 }
                 self.sidebar_ui(ui);
             });
         egui::Panel::top("command")
-            .default_size(90.)
-            .min_size(58.)
-            .max_size(400.)
+            .default_size(regions.command_line)
+            .min_size(dock_layout::COMMAND_MIN)
+            .max_size(dock_layout::COMMAND_MAX)
             .resizable(true)
             .frame(
                 egui::Frame::new()
@@ -483,6 +853,7 @@ impl MatrixApp {
             )
             .show(ui, |ui| {
                 ui.set_min_height(ui.available_height());
+                self.sync_panel_size(PanelId::CommandLine, ui.max_rect().height());
                 self.command_ui(ui);
             });
         egui::Panel::top("matrix-toolbars")
@@ -498,26 +869,70 @@ impl MatrixApp {
                 }
                 self.toolbars_ui(ui);
             });
+        // Far-right menu column (documented ~300-pixel mirror of the left one).
+        // It only appears when a menu is docked there and yields on a narrow
+        // window instead of overlapping the command line or the canvas.
+        if regions.right_dock_visible {
+            egui::Panel::right("matrix-right-dock")
+                .default_size(regions.right_dock)
+                .min_size(dock_layout::RIGHT_DOCK_MIN)
+                .max_size(dock_layout::RIGHT_DOCK_MAX)
+                .resizable(true)
+                .frame(
+                    egui::Frame::new()
+                        .fill(Color32::from_gray(70))
+                        .inner_margin(2),
+                )
+                .show(ui, |ui| {
+                    self.right_dock_rect = Some(ui.max_rect());
+                    self.sync_panel_size(PanelId::RightDock, ui.max_rect().width());
+                    if self.viewport_menu_owns_frame {
+                        ui.disable();
+                    }
+                    self.right_dock_ui(ui);
+                });
+        } else {
+            self.right_dock_rect = None;
+        }
+        // Global status surface (L3-007): always visible, never owns Escape.
+        egui::Panel::bottom("matrix-status")
+            .exact_size(dock_layout::STATUS_BAR_HEIGHT)
+            .frame(
+                egui::Frame::new()
+                    .fill(Color32::from_gray(96))
+                    .inner_margin(2),
+            )
+            .show(ui, |ui| {
+                self.status_rect = Some(ui.max_rect());
+                self.status_bar_ui(ui);
+            });
         egui::CentralPanel::default()
             .frame(egui::Frame::new().fill(Color32::BLACK).inner_margin(0))
             .show(ui, |ui| {
                 let rect = ui.available_rect_before_wrap();
                 let views = self.controller.workspace.visible_views();
                 self.view_rects.clear();
-                for (i, id) in views.iter().enumerate() {
-                    let view_rect = if views.len() == 1 {
-                        rect
-                    } else {
-                        let size = (rect.size() - Vec2::splat(2.)) / 2.;
-                        let col = (i % 2) as f32;
-                        let row = (i / 2) as f32;
-                        Rect::from_min_size(
-                            rect.min + Vec2::new(col * (size.x + 2.), row * (size.y + 2.)),
-                            size,
-                        )
-                    };
-                    self.view_rects.insert(*id, view_rect);
-                    self.viewport_ui(ui, *id, view_rect);
+                // The tiling lives in workbench_regions; the frame feeds it the
+                // rectangle egui actually left for the canvas.
+                let center = RegionRect::new(rect.min.x, rect.min.y, rect.width(), rect.height());
+                match tile_views(center, &views) {
+                    Ok(slots) => {
+                        for slot in slots {
+                            let view_rect = Rect::from_min_size(
+                                egui::pos2(slot.rect.x, slot.rect.y),
+                                Vec2::new(slot.rect.width, slot.rect.height),
+                            );
+                            self.view_rects.insert(slot.view, view_rect);
+                            self.viewport_ui(ui, slot.view, view_rect);
+                        }
+                    }
+                    Err(error) => {
+                        // Not drawn, and said so on the status line.
+                        if self.region_error.is_none() {
+                            self.region_error = Some(error);
+                        }
+                        self.announce_regions();
+                    }
                 }
                 ui.allocate_rect(rect, Sense::hover());
             });
@@ -528,27 +943,68 @@ impl MatrixApp {
         }
         self.file_f6_rects.clear();
         if self.f6_open {
+            let stored = self
+                .dock
+                .state(PanelId::CommandSearch)
+                .float
+                .unwrap_or_else(FloatRect::command_search_default);
             let mut open = self.f6_open;
-            egui::Window::new("F6").open(&mut open).show(&ctx, |ui| {
-                if self.viewport_menu_owns_frame {
-                    ui.disable();
-                }
-                ui.checkbox(&mut self.f6_pinned, "Pin");
-                if ui.button("Line").clicked() {
-                    self.invoke(LINE, InvocationOrigin::F6);
-                }
-                if ui.button("Point").clicked() {
-                    self.invoke(POINT, InvocationOrigin::F6);
-                }
-                for kind in crate::file_lifecycle::FileKind::ALL {
-                    let response = ui.button(kind.label());
-                    self.file_f6_rects.insert(kind, response.rect);
-                    if response.clicked() {
-                        self.invoke(kind.feature_id(), InvocationOrigin::F6);
+            let window = egui::Window::new("F6")
+                // A window named only by its title takes its identity from that
+                // title, so a translated or renamed title would move it (adapted
+                // from the pinned QymCAD window-identity guard).
+                .id(egui::Id::new("om9-command-search"))
+                .default_pos([stored.x, stored.y])
+                .default_size([stored.width, stored.height])
+                .open(&mut open)
+                .show(&ctx, |ui| {
+                    if self.viewport_menu_owns_frame {
+                        ui.disable();
                     }
+                    ui.checkbox(&mut self.f6_pinned, "Pin");
+                    if ui.button("Line").clicked() {
+                        self.invoke(LINE, InvocationOrigin::F6);
+                    }
+                    if ui.button("Point").clicked() {
+                        self.invoke(POINT, InvocationOrigin::F6);
+                    }
+                    for kind in crate::file_lifecycle::FileKind::ALL {
+                        let response = ui.button(kind.label());
+                        self.file_f6_rects.insert(kind, response.rect);
+                        if response.clicked() {
+                            self.invoke(kind.feature_id(), InvocationOrigin::F6);
+                        }
+                    }
+                });
+            if let Some(window) = window {
+                let rect = window.response.rect;
+                if (rect.min.x - stored.x).abs() > 0.5
+                    || (rect.min.y - stored.y).abs() > 0.5
+                    || (rect.width() - stored.width).abs() > 0.5
+                    || (rect.height() - stored.height).abs() > 0.5
+                {
+                    self.dock.set_float(
+                        PanelId::CommandSearch,
+                        Some(FloatRect {
+                            x: rect.min.x,
+                            y: rect.min.y,
+                            width: rect.width(),
+                            height: rect.height(),
+                        }),
+                    );
+                    self.dock_dirty = true;
                 }
-            });
+            }
             self.f6_open = self.f6_open && open;
+        }
+        // Menus dragged out over the model float as owned windows; their
+        // rectangle is part of the layout, so it survives the session.
+        self.float_menu_windows(&ctx);
+        if !ctx.input(|input| input.pointer.any_down()) {
+            if let Some(pointer) = ctx.input(|input| input.pointer.interact_pos()) {
+                self.settle_section_drag(pointer);
+            }
+            self.section_drag = None;
         }
         if let Some((id, _)) = &self.view_menu_capture
             && !egui::Popup::is_id_open(&ctx, *id)
@@ -863,6 +1319,54 @@ impl MatrixApp {
                 image::ColorType::Rgba8,
             );
             let mut receipt = serde_json::json!({"scope":"initial_standalone_ui_slice","adapter":self.adapter,"passes":self.passes,"objects":self.controller.document().entities.len(),"document":self.controller.document(),"undo":self.controller.coordinator().undo_len(),"checks":audit.checks,"screenshot":path,"screenshot_saved":result.is_ok(),"view_rects":self.view_rects.iter().map(|(id,r)|(id.title(),[r.min.x,r.min.y,r.width(),r.height()])).collect::<BTreeMap<_,_>>(),"cmd":self.transcript.text(),"limitations":["full Matrix9 UI acceptance pending","CAD native adapters pending","GPU geometry caching and performance acceptance pending","DPI/multi-monitor acceptance pending"]});
+            // Menu/docking evidence for OM9-L2-01-01: the documented left column
+            // order, menus docked to the right, the reserved Builder area and the
+            // always-visible status surface.
+            let left_sections: Vec<&str> = self
+                .dock
+                .left_sections()
+                .into_iter()
+                .map(SectionId::key)
+                .collect();
+            let right_sections: Vec<&str> = self
+                .dock
+                .right_sections()
+                .into_iter()
+                .map(SectionId::key)
+                .collect();
+            let floating_sections: Vec<&str> = self
+                .dock
+                .floating_sections()
+                .into_iter()
+                .map(SectionId::key)
+                .collect();
+            receipt["dock"] = serde_json::json!({
+                "left_sections": left_sections,
+                "right_sections": right_sections,
+                "floating_sections": floating_sections,
+                "right_dock_visible": self.regions.right_dock_visible,
+                "builder_slot_visible": self.builder_slot_rect.is_some()
+                    || self
+                        .dock
+                        .left_sections()
+                        .contains(&SectionId::BuilderSlot),
+                "left_rail_px": self.regions.left_rail,
+                "command_line_px": self.regions.command_line,
+                "status_bar_px": self.regions.status_bar,
+                "status_kind": self.status.kind().label(),
+                "status_message": self.status.message(),
+                "diagnostics": self.dock_diagnostics,
+            });
+            // Workbench docking regions (OM9-L3-01-01-002): the validated plan
+            // for the audited window, or the explicit reason there is none.
+            receipt["regions"] = serde_json::json!({
+                "window": self.dock_window,
+                "plan": self.region_plan,
+                "error": self.region_error.as_ref().map(ToString::to_string),
+                "sidebar_px": self.sidebar_rect.map(|r| [r.min.x, r.min.y, r.width(), r.height()]),
+                "right_dock_px": self.right_dock_rect.map(|r| [r.min.x, r.min.y, r.width(), r.height()]),
+                "command_input_px": self.cmd_rect.map(|r| [r.min.x, r.min.y, r.width(), r.height()]),
+            });
             if audit.viewport_menu {
                 receipt["scope"] = serde_json::json!("viewport_title_menu_slice");
                 receipt["viewport_replay"] = serde_json::json!(audit.viewport_replay);
@@ -1134,38 +1638,139 @@ impl eframe::App for MatrixApp {
     }
 }
 pub fn launch(document: Document, audit: Option<PathBuf>) -> Result<()> {
-    launch_app(MatrixApp::new(document)?, audit)
+    launch_classified(document, audit).map_err(|failure| Error::Io(failure.line()))
 }
 pub fn launch_file(path: &std::path::Path) -> Result<()> {
+    launch_file_classified(path).map_err(|failure| Error::Io(failure.line()))
+}
+/// Launch with an explicit failure stage so a start that cannot restore the
+/// document is never reported as a renderer fault and vice versa (L3-001).
+pub fn launch_classified(
+    document: Document,
+    audit: Option<PathBuf>,
+) -> std::result::Result<(), crate::startup::StartupFailure> {
+    use crate::startup::{AppConfig, StartupFailure, StartupStage};
+    let mut config = AppConfig {
+        document_name: document.name.clone(),
+        audit_dir: audit,
+        ..AppConfig::interactive("Untitled", None)
+    };
+    // Audit-only window size (L3-002 runtime evidence at a narrow width). An
+    // unusable value is a visible startup failure, never ignored.
+    if config.audit_dir.is_some()
+        && let Some(text) = std::env::var_os("OM9_UI_AUDIT_WINDOW")
+    {
+        config.window = text.to_str().and_then(parse_window_size).ok_or_else(|| {
+            StartupFailure::new(
+                StartupStage::Renderer,
+                "OM9_UI_AUDIT_WINDOW must look like 800x600",
+            )
+        })?;
+        config.maximized = false;
+    }
+    let app = MatrixApp::start(&config)?;
+    launch_with(app, &config)
+        .map_err(|error| StartupFailure::from_error(StartupStage::Renderer, &error))
+}
+/// Parse `WIDTHxHEIGHT` (logical pixels, finite and positive).
+fn parse_window_size(text: &str) -> Option<[f32; 2]> {
+    let (width, height) = text.split_once('x')?;
+    let size = [
+        width.trim().parse::<f32>().ok()?,
+        height.trim().parse::<f32>().ok()?,
+    ];
+    size.iter()
+        .all(|v| v.is_finite() && *v > 0.)
+        .then_some(size)
+}
+pub fn launch_file_classified(
+    path: &std::path::Path,
+) -> std::result::Result<(), crate::startup::StartupFailure> {
+    use crate::startup::{AppConfig, StartupFailure, StartupStage};
     // Explicit own-app audit retains the normal --ui path constructor and
     // native window. No synthetic startup document or input events are used.
     let audit = std::env::var_os("OM9_UI_AUDIT_STARTUP_DIRECTORY").map(PathBuf::from);
-    launch_app(MatrixApp::from_file(path)?, audit)
+    let mut config = AppConfig::interactive("Untitled", audit);
+    let app = MatrixApp::from_file(path)
+        .map_err(|error| StartupFailure::from_error(StartupStage::Document, &error))?;
+    config.document_name = app.controller.document().name.clone();
+    launch_with(app, &config)
+        .map_err(|error| StartupFailure::from_error(StartupStage::Renderer, &error))
 }
-fn launch_app(mut app: MatrixApp, audit: Option<PathBuf>) -> Result<()> {
-    if let Some(directory) = &audit {
+/// Owned startup diagnostic: the native dialog is shown only when the caller
+/// decides to, and never for audits or automation.
+pub fn report_startup_failure(failure: &crate::startup::StartupFailure) -> bool {
+    if !crate::startup::should_report_dialog(
+        std::env::var(crate::startup::StartupFailure::DIALOG_ENV)
+            .ok()
+            .as_deref(),
+    ) {
+        return false;
+    }
+    om9_native_owner::report_startup_failure("OpenMatrix9", &failure.line())
+}
+/// Run one window from a validated configuration: title, size, minimum size,
+/// audit directory and adapter explanation all come from the record.
+fn launch_with(mut app: MatrixApp, config: &crate::startup::AppConfig) -> Result<()> {
+    if let Some(directory) = &config.audit_dir {
         std::fs::create_dir_all(directory).map_err(|e| Error::Io(e.to_string()))?;
     }
-    app.audit = audit.map(UiAudit::new);
+    app.audit = config.audit_dir.clone().map(UiAudit::new);
+    if app.dock_layout_path().is_none()
+        && let Some(path) = &config.layout_path
+    {
+        app.set_dock_layout_path(Some(path.clone()));
+        app.load_dock_layout();
+    }
+    // Audit-only: show the optional right dock without touching the stored
+    // layout (nothing is saved unless the user runs Set as Default).
+    if app.audit.is_some() && std::env::var("OM9_UI_AUDIT_RIGHT_DOCK").is_ok_and(|v| v == "1") {
+        app.dock_menu_section(SectionId::Layers, DockSide::Right);
+    }
+    let title = config.window_title().to_owned();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1600., 1000.])
-            .with_maximized(app.audit.is_none())
-            .with_min_inner_size([720., 480.])
+            .with_inner_size(config.window)
+            .with_maximized(config.maximized && app.audit.is_none())
+            .with_min_inner_size(config.min_window)
+            .with_title(&title)
             .with_icon(egui::IconData::default()),
         renderer: eframe::Renderer::Wgpu,
         ..Default::default()
     };
     eframe::run_native(
-        "OpenMatrix9",
+        &title,
         options,
         Box::new(move |cc| {
             app.configure_style(&cc.egui_ctx);
-            if let Some(render) = &cc.wgpu_render_state {
-                app.adapter = format!("{:?}", render.adapter.get_info());
+            // L3-001: an unavailable hardware adapter is explained on the status
+            // surface instead of silently rendering with a fallback identity.
+            let reported = cc
+                .wgpu_render_state
+                .as_ref()
+                .map(|render| format!("{:?}", render.adapter.get_info()));
+            let (adapter, note) = crate::startup::adapter_note(reported.as_deref());
+            app.adapter = adapter;
+            if let Some(note) = note {
+                app.status.warning(&note);
             }
             Ok(Box::new(app))
         }),
     )
     .map_err(|e| Error::Io(e.to_string()))
+}
+#[cfg(test)]
+mod tests {
+    use super::parse_window_size;
+
+    #[test]
+    fn audit_window_size_parses_only_positive_finite_pairs() {
+        assert_eq!(parse_window_size("800x600"), Some([800., 600.]));
+        assert_eq!(parse_window_size(" 1600 x 1000 "), Some([1600., 1000.]));
+        for bad in [
+            "", "800", "800x", "x600", "0x600", "-5x600", "NaNx600", "infx600", "axb",
+        ] {
+            assert_eq!(parse_window_size(bad), None, "{bad:?}");
+        }
+    }
 }

@@ -1,0 +1,210 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-01-06-004",
+  "milestone": "M01",
+  "parent_l2_id": "OM9-L2-01-06",
+  "title": "Wireframe And Isocurve Pass",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-L3-01-06-004",
+    "capability_id": "cap.01-06.wireframe-and-isocurve-pass",
+    "stable_owner_key": "OM9-L2-01-06/wireframe-and-isocurve-pass",
+    "title": "Wireframe And Isocurve Pass",
+    "slug": "wireframe-and-isocurve-pass",
+    "module_id": "OM9-L2-01-06",
+    "tag": "febe",
+    "implementation_role": "interactive_feature",
+    "milestone_id": "M01",
+    "target_milestone": "M01",
+    "delivery": "mainline",
+    "origin_source_taxonomy": "01-cad-base",
+    "goal": "draw curves, edges and NURBS isocurves",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "GPU viewport wireframe/shaded, gem display, camera draw, overlays và mesh tessellation.",
+    "parent_exclusions": "Không bao gồm offline render/V-Ray studio.",
+    "depends_on_module_ids": [
+      "OM9-L2-01-01",
+      "OM9-L2-01-05"
+    ],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [
+      "viewport-render-and-overlay"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          63,
+          70
+        ],
+        "pdf_pages_1based": [
+          73,
+          80
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Wireframe And Isocurve Pass” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M01: run OpenMatrix9 UI; perform “Wireframe And Isocurve Pass”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M01-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "execution_stage": "E02",
+    "planning_risk": "HIGH",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT"
+  },
+  "execution_design": {
+    "l3_id": "OM9-L3-01-06-004",
+    "module_id": "OM9-L2-01-06",
+    "owner_key": "OM9-L2-01-06/wireframe-and-isocurve-pass",
+    "title": "Wireframe And Isocurve Pass",
+    "goal_from_canonical": "draw curves, edges and NURBS isocurves",
+    "execution_stage": "E02",
+    "tag": "febe",
+    "risk": "HIGH",
+    "manual_references_inherited": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          63,
+          70
+        ],
+        "pdf_pages_1based": [
+          73,
+          80
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "manual_reference_precision": "PARENT_L2_RANGE_NOT_EXACT_COMMAND_CONFIRM_BEFORE_IMPLEMENTING_UI",
+    "positive_oracle_proposed": "Wireframe edges and isocurves appear separately from shaded geometry",
+    "negative_oracle_proposed": "Display isocurve must not be selectable as BRep edge",
+    "canonical_api_contract_state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+    "source_evidence_class": "PINNED_GITHUB_CONTENT_READ_WITH_CANDIDATES",
+    "source_anchors": [
+      {
+        "path": "crates/qymcad/src/viewport_gpu.rs",
+        "purpose": "wgpu scene pass",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/viewport_gpu.rs",
+        "blob_sha": "3098ad046972390794f6c534a26e561287b02f46",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-render/src/lib.rs",
+        "purpose": "render/draw layer",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-render/src/lib.rs",
+        "blob_sha": "8ca9c5ef80155cbca7a90ae1c0cec52c33f61d28",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-ui-state/src/scene.rs",
+        "purpose": "scene state",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/scene.rs",
+        "blob_sha": null,
+        "evidence": "CANDIDATE_RECHECK_LOCAL"
+      },
+      {
+        "path": "crates/qymcad/src/gui/a_machine_with_no_graphics.rs",
+        "purpose": "GPU fallback checks",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/gui/a_machine_with_no_graphics.rs",
+        "blob_sha": "22fe0b5b2aea983ec2ea62153b27ba5df656fc5b",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      }
+    ],
+    "reuse_decision_provisional": "ADAPT",
+    "reuse_approval_condition": "Audit local checkout at pinned SHA, compile/tests, M00 human legal approval; do not infer ready from static GitHub read.",
+    "implementation_owner_policy": "One owning L2, UI modules dispatch only. No source code changes in vendor-research/ unless approved fork.",
+    "l4_task_ids": [
+      "OM9-L4-01-06-004-01",
+      "OM9-L4-01-06-004-02",
+      "OM9-L4-01-06-004-03",
+      "OM9-L4-01-06-004-04",
+      "OM9-L4-01-06-004-05"
+    ],
+    "objectives": [
+      "Define typed seam + explicitly testable oracle",
+      "Implement one capability at its canonical owner",
+      "Verify failure rollback, stable IDs/units/geometry as relevant",
+      "Preserve manual approval for FEBE"
+    ]
+  },
+  "task_ids": [
+    "OM9-L4-01-06-004-01",
+    "OM9-L4-01-06-004-02",
+    "OM9-L4-01-06-004-03",
+    "OM9-L4-01-06-004-04",
+    "OM9-L4-01-06-004-05"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-L4-01-06-004-01",
+      "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-004 - Wireframe And Isocurve Pass/L4-01 - Source Audit/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-06-004-02",
+      "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-004 - Wireframe And Isocurve Pass/L4-02 - API Contract and Test Design/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-06-004-03",
+      "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-004 - Wireframe And Isocurve Pass/L4-03 - Implementation/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-06-004-04",
+      "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-004 - Wireframe And Isocurve Pass/L4-04 - Integration/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-06-004-05",
+      "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-004 - Wireframe And Isocurve Pass/L4-05 - Acceptance Test/l4.json"
+    }
+  ]
+}

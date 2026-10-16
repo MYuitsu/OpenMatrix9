@@ -138,6 +138,48 @@ impl MatrixApp {
                                 ui.close();
                             }
                         }
+                        ui.separator();
+                        // Documented menu configuration commands.
+                        ui.menu_button("Matrix Menus", |ui| {
+                            if ui
+                                .button("Set as Default")
+                                .on_hover_text("Keep this menu configuration for the next start")
+                                .clicked()
+                            {
+                                self.set_menus_as_default();
+                                ui.close();
+                            }
+                            if ui
+                                .button("Reset Menus")
+                                .on_hover_text("Return to the documented Matrix default mode")
+                                .clicked()
+                            {
+                                let ctx = self.current_ui_context.clone();
+                                self.reset_menus(ctx.as_ref());
+                                ui.close();
+                            }
+                            if ui
+                                .button("Reload Menus")
+                                .on_hover_text("Load the configuration the program opens with")
+                                .clicked()
+                            {
+                                self.reload_menus();
+                                ui.close();
+                            }
+                        });
+                        let right_column = !self.dock.right_sections().is_empty();
+                        if ui
+                            .button(if right_column {
+                                "Close Right Menu Column"
+                            } else {
+                                "Open Right Menu Column"
+                            })
+                            .on_hover_text("Mirror column for menus docked to the right")
+                            .clicked()
+                        {
+                            self.toggle_right_dock();
+                            ui.close();
+                        }
                     }
                     "Help" => {
                         if ui.button("Command help").clicked() {
@@ -194,9 +236,15 @@ impl MatrixApp {
         // keyboard input to CMD instead of leaving focus on a view button.
         self.focus_cmd = true;
     }
-    fn section(&mut self, ui: &mut egui::Ui, title: &str) -> bool {
-        let (rect, response) =
-            ui.allocate_exact_size(Vec2::new(ui.available_width(), 14.), Sense::click());
+    /// Title bar of one Matrix menu section. Left-click rolls it up, dragging
+    /// reorders it inside its column, docks it to the right mirror column or
+    /// floats it over the model — the documented Matrix menu behavior.
+    fn section(&mut self, ui: &mut egui::Ui, id: SectionId) -> bool {
+        let state = self.dock.section(id);
+        let (rect, response) = ui.allocate_exact_size(
+            Vec2::new(ui.available_width(), 14.),
+            Sense::click_and_drag(),
+        );
         gradient(
             ui.painter(),
             rect,
@@ -206,25 +254,131 @@ impl MatrixApp {
         ui.painter().text(
             rect.left_center() + Vec2::new(2., 0.),
             Align2::LEFT_CENTER,
-            title,
+            id.bar_title(),
             FontId::proportional(11.),
             Color32::BLACK,
         );
         ui.painter().text(
             rect.right_center() - Vec2::new(6., 0.),
             Align2::CENTER_CENTER,
-            if self.collapsed.contains(title) {
-                "+"
-            } else {
-                "−"
-            },
+            if state.collapsed { "+" } else { "−" },
             FontId::proportional(12.),
             Color32::from_rgb(150, 55, 55),
         );
-        if response.clicked() && !self.collapsed.remove(title) {
-            self.collapsed.insert(title.into());
+        self.section_rects.insert(id.key(), rect);
+        if response.clicked() {
+            let next = self.dock.toggle_section(id);
+            self.dock_dirty = true;
+            self.status.info(&format!(
+                "{} {}",
+                id.title(),
+                if next.collapsed {
+                    "rolled up"
+                } else {
+                    "expanded"
+                }
+            ));
         }
-        !self.collapsed.contains(title)
+        if response.drag_started() {
+            self.section_drag = Some(id);
+        }
+        let collapsed = self.dock.section(id).collapsed;
+        if collapsed && id.keeps_controls_while_collapsed() {
+            self.section_bar_controls(ui, id);
+        }
+        !collapsed
+    }
+    /// Snaps and Layers keep important controls on their closed title bar.
+    fn section_bar_controls(&mut self, ui: &mut egui::Ui, id: SectionId) {
+        ui.horizontal_wrapped(|ui| match id {
+            SectionId::Snaps => {
+                for name in ["GridSnap", "Ortho", "Planar"] {
+                    self.icon(ui, name, false, name);
+                }
+            }
+            SectionId::Layers => {
+                if let Some(current) = self
+                    .controller
+                    .document()
+                    .current_layer
+                    .and_then(|layer| self.controller.document().layers.get(&layer))
+                {
+                    ui.label(RichText::new(current.name.clone()).size(10.));
+                }
+            }
+            _ => {}
+        });
+    }
+    /// Apply the in-progress menu drag against the live column rectangles.
+    pub(super) fn settle_section_drag(&mut self, pointer: egui::Pos2) {
+        let Some(id) = self.section_drag else {
+            return;
+        };
+        let sidebar = self.sidebar_rect;
+        let dock = self.right_dock_rect;
+        // Release inside the viewports floats the menu over the model.
+        if self.view_rects.values().any(|rect| rect.contains(pointer)) {
+            self.section_drag = None;
+            self.float_section_at(id, pointer);
+            return;
+        }
+        if dock.is_some_and(|rect| rect.contains(pointer)) {
+            self.section_drag = None;
+            self.dock_menu_section(id, DockSide::Right);
+            return;
+        }
+        let Some(sidebar) = sidebar else {
+            return;
+        };
+        if !sidebar.contains(pointer) {
+            return;
+        }
+        let hovered = self
+            .section_rects
+            .iter()
+            .filter(|(_, rect)| rect.contains(pointer))
+            .filter_map(|(key, _)| SectionId::from_key(key))
+            .find(|section| self.dock.section(*section).dock == DockSide::Left);
+        let Some(hovered) = hovered else {
+            return;
+        };
+        if hovered == id {
+            return;
+        }
+        let current = self.dock.left_sections();
+        if !current.contains(&id) {
+            self.dock_menu_section(id, DockSide::Left);
+            return;
+        }
+        let from = current
+            .iter()
+            .position(|section| *section == id)
+            .unwrap_or(0) as i32;
+        let to = current
+            .iter()
+            .position(|section| *section == hovered)
+            .unwrap_or(0) as i32;
+        if to != from {
+            let _ = self.move_menu_section(id, to - from);
+        }
+    }
+    /// Float a menu where the pointer released it, clamped by the layout model.
+    fn float_section_at(&mut self, id: SectionId, pointer: egui::Pos2) {
+        let size = Vec2::new(300., 240.);
+        let x = (pointer.x - size.x / 2.).max(0.);
+        let y = (pointer.y - 7.).max(0.);
+        self.dock.float_section(
+            id,
+            FloatRect {
+                x,
+                y,
+                width: size.x,
+                height: size.y,
+            },
+        );
+        self.dock_dirty = true;
+        self.status
+            .info(&format!("{} floated over the model", id.title()));
     }
     fn icon(&mut self, ui: &mut egui::Ui, name: &str, enabled: bool, help: &str) -> egui::Response {
         let (rect, response) = ui.allocate_exact_size(
@@ -285,245 +439,286 @@ impl MatrixApp {
         ui.visuals_mut().override_text_color = Some(Color32::WHITE);
         ui.visuals_mut().widgets.inactive.bg_fill = Color32::from_gray(105);
         ui.visuals_mut().widgets.inactive.weak_bg_fill = Color32::from_gray(105);
+        // The column order, visibility and roll-up state come from the typed
+        // layout, so the documented Matrix order survives a session.
+        let sections = self.dock.left_sections();
+        let scroll = std::mem::take(&mut self.sidebar_scroll);
         egui::ScrollArea::vertical()
+            .id_salt("matrix-sidebar-sections")
+            .vertical_scroll_offset(scroll)
             .auto_shrink([false, false])
             .show(ui, |ui| {
-                if self.section(ui, "ICON HISTORY") {
-                    ui.horizontal_wrapped(|ui| {
-                        let recent: Vec<_> = self.controller.recent().iter().cloned().collect();
-                        for id in recent {
-                            let name = crate::icons::icon_name(&id).unwrap_or("Unavailable");
-                            self.feature_icon(ui, &id, name);
-                        }
-                        if self
-                            .icon(
-                                ui,
-                                "Undo",
-                                self.controller.coordinator().undo_len() > 0
-                                    && !self.controller.is_running(),
-                                "Undo",
-                            )
-                            .clicked()
-                        {
-                            let r = self.controller.undo();
-                            self.feedback(r);
-                        }
-                        if self
-                            .icon(
-                                ui,
-                                "Redo",
-                                self.controller.coordinator().redo_len() > 0
-                                    && !self.controller.is_running(),
-                                "Redo",
-                            )
-                            .clicked()
-                        {
-                            let r = self.controller.redo();
-                            self.feedback(r);
-                        }
-                    });
+                for id in sections {
+                    if !self.dock.section(id).visible {
+                        continue;
+                    }
+                    if self.section(ui, id) {
+                        self.sidebar_section_ui(ui, id);
+                    }
                 }
-                if self.section(ui, "MAIN MENU") {
+            });
+        self.sidebar_scroll = ui.ctx().memory(|memory| {
+            memory
+                .data
+                .get_temp::<f32>(egui::Id::new("matrix-sidebar-sections-offset"))
+                .unwrap_or(0.)
+        });
+    }
+    /// Body of one Matrix menu section. Builders open in the reserved area below
+    /// Projects; the slot itself never owns a builder model.
+    fn sidebar_section_ui(&mut self, ui: &mut egui::Ui, id: SectionId) {
+        match id {
+            SectionId::IconHistory => {
+                ui.horizontal_wrapped(|ui| {
+                    let recent: Vec<_> = self.controller.recent().iter().cloned().collect();
+                    for id in recent {
+                        let name = crate::icons::icon_name(&id).unwrap_or("Unavailable");
+                        self.feature_icon(ui, &id, name);
+                    }
+                    if self
+                        .icon(
+                            ui,
+                            "Undo",
+                            self.controller.coordinator().undo_len() > 0
+                                && !self.controller.is_running(),
+                            "Undo",
+                        )
+                        .clicked()
+                    {
+                        let r = self.controller.undo();
+                        self.feedback(r);
+                    }
+                    if self
+                        .icon(
+                            ui,
+                            "Redo",
+                            self.controller.coordinator().redo_len() > 0
+                                && !self.controller.is_running(),
+                            "Redo",
+                        )
+                        .clicked()
+                    {
+                        let r = self.controller.redo();
+                        self.feedback(r);
+                    }
+                });
+            }
+            SectionId::MainMenu => {
+                ui.horizontal_wrapped(|ui| {
+                    for label in ["File", "View", "Utilities", "Measure", "Custom"] {
+                        ui.add_enabled(false, egui::Button::new(label).frame(false))
+                            .on_hover_text("Menu customization pending");
+                    }
+                });
+                for (row, categories) in CATEGORIES.chunks(6).enumerate() {
                     ui.horizontal_wrapped(|ui| {
-                        for label in ["File", "View", "Utilities", "Measure", "Custom"] {
-                            ui.add_enabled(false, egui::Button::new(label).frame(false))
-                                .on_hover_text("Menu customization pending");
-                        }
-                    });
-                    for (row, categories) in CATEGORIES.chunks(6).enumerate() {
-                        ui.horizontal_wrapped(|ui| {
-                            for (column, category) in categories.iter().enumerate() {
-                                let i = row * 6 + column;
-                                let colors = [
-                                    Color32::YELLOW,
-                                    Color32::from_rgb(30, 215, 214),
-                                    Color32::from_rgb(255, 110, 100),
-                                    Color32::from_rgb(230, 200, 110),
-                                    Color32::from_rgb(140, 175, 255),
-                                    Color32::from_rgb(225, 130, 235),
-                                ];
-                                let text = RichText::new(format!("•{category}"))
-                                    .color(colors[i % 6])
-                                    .size(10.);
-                                if ui.add(egui::Button::new(text).frame(false)).clicked() {
-                                    self.main_category = i;
-                                    self.focus_cmd = true;
-                                }
+                        for (column, category) in categories.iter().enumerate() {
+                            let i = row * 6 + column;
+                            let colors = [
+                                Color32::YELLOW,
+                                Color32::from_rgb(30, 215, 214),
+                                Color32::from_rgb(255, 110, 100),
+                                Color32::from_rgb(230, 200, 110),
+                                Color32::from_rgb(140, 175, 255),
+                                Color32::from_rgb(225, 130, 235),
+                            ];
+                            let text = RichText::new(format!("•{category}"))
+                                .color(colors[i % 6])
+                                .size(10.);
+                            if ui.add(egui::Button::new(text).frame(false)).clicked() {
+                                self.main_category = i;
+                                self.focus_cmd = true;
                             }
-                        });
-                    }
-                    let category = CATEGORIES[self.main_category];
-                    let palette = category_palette(category);
-                    ui.horizontal_wrapped(|ui| {
-                        for name in palette {
-                            self.feature_icon(ui, "", name);
-                        }
-                    });
-                    if palette.is_empty() {
-                        ui.label(format!("{category} tools unavailable"));
-                    }
-                }
-                if self.section(ui, "DISPLAY") {
-                    self.icon_row(
-                        ui,
-                        &[
-                            "Grid",
-                            "Wireframe",
-                            "Shaded",
-                            "Sphere",
-                            "Gem",
-                            "Render",
-                            "Layers",
-                            "Fit",
-                            "Rotate",
-                            "Properties",
-                            "Settings",
-                            "Project",
-                        ],
-                    );
-                    ui.columns(2, |columns| {
-                        columns[0].add_enabled(false, egui::Button::new("Coarse Mesh ▾"));
-                        columns[1].add_enabled(false, egui::Button::new("Wireframe ▾"));
-                    });
-                }
-                if self.section(ui, "SNAPS") {
-                    self.icon_row(
-                        ui,
-                        &[
-                            "SnapEnd",
-                            "SnapMid",
-                            "SnapPoint",
-                            "SnapCenter",
-                            "GridSnap",
-                            "Ortho",
-                            "Planar",
-                            "Settings",
-                        ],
-                    );
-                    ui.horizontal_wrapped(|ui| {
-                        for text in ["Grid", "Ortho", "Planar", "0.1", "0.25", "0.5", "1.0"] {
-                            ui.add_enabled(false, egui::Button::new(text));
                         }
                     });
                 }
-                if self.section(ui, "INFO & SETTINGS") {
-                    self.icon_row(
-                        ui,
-                        &[
-                            "Settings",
-                            "Properties",
-                            "Project",
-                            "Layers",
-                            "Save",
-                            "Open",
-                            "Builder",
-                            "Gem",
-                            "Fit",
-                            "Move",
-                            "Rotate",
-                            "Scale",
-                        ],
-                    );
-                    ui.horizontal_wrapped(|ui| {
-                        ui.label(format!("Units: {:?}", self.controller.document().page_unit));
-                        ui.separator();
-                        ui.label(format!(
-                            "Objects: {}",
-                            self.controller.document().entities.len()
-                        ));
-                    });
+                let category = CATEGORIES[self.main_category];
+                let palette = category_palette(category);
+                ui.horizontal_wrapped(|ui| {
+                    for name in palette {
+                        self.feature_icon(ui, "", name);
+                    }
+                });
+                if palette.is_empty() {
+                    ui.label(format!("{category} tools unavailable"));
                 }
-                if self.section(ui, "LAYERS") {
-                    self.layers_ui(ui);
-                }
-                if self.section(ui, "PROJECTS") {
-                    ui.horizontal_wrapped(|ui| {
-                        let (list, _) = ui.allocate_exact_size(Vec2::new(62., 76.), Sense::hover());
-                        ui.painter().rect_filled(list, 0, Color32::from_gray(74));
+            }
+            SectionId::Display => {
+                self.icon_row(
+                    ui,
+                    &[
+                        "Grid",
+                        "Wireframe",
+                        "Shaded",
+                        "Sphere",
+                        "Gem",
+                        "Render",
+                        "Layers",
+                        "Fit",
+                        "Rotate",
+                        "Properties",
+                        "Settings",
+                        "Project",
+                    ],
+                );
+                ui.columns(2, |columns| {
+                    columns[0].add_enabled(false, egui::Button::new("Coarse Mesh ▾"));
+                    columns[1].add_enabled(false, egui::Button::new("Wireframe ▾"));
+                });
+            }
+            SectionId::Snaps => {
+                self.icon_row(
+                    ui,
+                    &[
+                        "SnapEnd",
+                        "SnapMid",
+                        "SnapPoint",
+                        "SnapCenter",
+                        "GridSnap",
+                        "Ortho",
+                        "Planar",
+                        "Settings",
+                    ],
+                );
+                ui.horizontal_wrapped(|ui| {
+                    for text in ["Grid", "Ortho", "Planar", "0.1", "0.25", "0.5", "1.0"] {
+                        ui.add_enabled(false, egui::Button::new(text));
+                    }
+                });
+            }
+            SectionId::InfoSettings => {
+                self.icon_row(
+                    ui,
+                    &[
+                        "Settings",
+                        "Properties",
+                        "Project",
+                        "Layers",
+                        "Save",
+                        "Open",
+                        "Builder",
+                        "Gem",
+                        "Fit",
+                        "Move",
+                        "Rotate",
+                        "Scale",
+                    ],
+                );
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(format!("Units: {:?}", self.controller.document().page_unit));
+                    ui.separator();
+                    ui.label(format!(
+                        "Objects: {}",
+                        self.controller.document().entities.len()
+                    ));
+                });
+            }
+            SectionId::Layers => {
+                self.layers_ui(ui);
+            }
+            SectionId::Projects => {
+                self.projects_ui(ui);
+            }
+            SectionId::BuilderSlot => {
+                self.builder_slot_ui(ui);
+            }
+        }
+    }
+    /// PROJECTS: the Project Manager area of the left column.
+    fn projects_ui(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal_wrapped(|ui| {
+            let (list, _) = ui.allocate_exact_size(Vec2::new(62., 76.), Sense::hover());
+            ui.painter().rect_filled(list, 0, Color32::from_gray(74));
+            ui.painter().text(
+                list.min + Vec2::new(2., 3.),
+                Align2::LEFT_TOP,
+                "Default",
+                FontId::proportional(10.),
+                Color32::WHITE,
+            );
+            for (index, name) in ["Project", "Gem", "Emerald"].iter().enumerate() {
+                ui.allocate_ui_with_layout(
+                    Vec2::new(62., 79.),
+                    egui::Layout::top_down(egui::Align::Min),
+                    |ui| {
+                        let (rect, response) =
+                            ui.allocate_exact_size(Vec2::new(62., 60.), Sense::hover());
+                        gradient(
+                            ui.painter(),
+                            rect,
+                            Color32::from_rgb(20, 47, 160),
+                            Color32::from_rgb(5, 12, 45),
+                        );
+                        self.icons.paint(ui, rect.shrink(12.), name);
                         ui.painter().text(
-                            list.min + Vec2::new(2., 3.),
+                            rect.min + Vec2::new(2., 2.),
                             Align2::LEFT_TOP,
-                            "Default",
+                            (index + 1).to_string(),
                             FontId::proportional(10.),
                             Color32::WHITE,
                         );
-                        for (index, name) in ["Project", "Gem", "Emerald"].iter().enumerate() {
-                            ui.allocate_ui_with_layout(
-                                Vec2::new(62., 79.),
-                                egui::Layout::top_down(egui::Align::Min),
-                                |ui| {
-                                    let (rect, r) =
-                                        ui.allocate_exact_size(Vec2::new(62., 60.), Sense::hover());
-                                    gradient(
-                                        ui.painter(),
-                                        rect,
-                                        Color32::from_rgb(20, 47, 160),
-                                        Color32::from_rgb(5, 12, 45),
-                                    );
-                                    self.icons.paint(ui, rect.shrink(12.), name);
-                                    ui.painter().text(
-                                        rect.min + Vec2::new(2., 2.),
-                                        Align2::LEFT_TOP,
-                                        (index + 1).to_string(),
-                                        FontId::proportional(10.),
-                                        Color32::WHITE,
-                                    );
-                                    r.on_hover_text("Project preview unavailable");
-                                    ui.add_enabled(false, egui::Button::new("↑  ▣  ×"));
-                                },
-                            );
-                        }
-                    });
-                    ui.horizontal_wrapped(|ui| {
-                        for name in ["Master", "Creation", "Parts", "Render", "Output"] {
-                            let (rect, r) =
-                                ui.allocate_exact_size(Vec2::new(55., 49.), Sense::hover());
-                            ui.painter().rect_filled(rect, 0, Color32::from_gray(79));
-                            bevel(ui.painter(), rect);
-                            ui.painter().text(
-                                rect.min + Vec2::new(2., 3.),
-                                Align2::LEFT_TOP,
-                                name,
-                                FontId::proportional(10.),
-                                Color32::WHITE,
-                            );
-                            r.on_hover_text("Project operation unavailable");
-                        }
-                    });
-                }
-                if self.section(ui, "EMERALD BUILDER") {
-                    ui.horizontal_wrapped(|ui| {
-                        ui.vertical(|ui| {
-                            ui.label("Gem");
-                            let (rect, r) =
-                                ui.allocate_exact_size(Vec2::new(104., 76.), Sense::hover());
-                            ui.painter().rect_filled(rect, 0, Color32::from_gray(53));
-                            self.icons.paint(ui, rect.shrink(16.), "Emerald");
-                            r.on_hover_text("No active gem; builder operation unavailable");
-                        });
-                        ui.add_space(36.);
-                        ui.vertical(|ui| {
-                            for name in ["New Emerald", "Size ▾", "Show Diag.", "Reset"] {
-                                ui.add_enabled(false, egui::Button::new(name))
-                                    .on_hover_text("Emerald builder operation unavailable");
-                            }
-                        });
-                    });
-                    ui.horizontal_wrapped(|ui| {
-                        for name in ["Emerald", "Scale", "Move", "Rotate", "Gem"] {
-                            self.icon(ui, name, false, "Builder parameter");
-                        }
-                    });
-                    ui.horizontal_wrapped(|ui| {
-                        ui.add_enabled(
-                            false,
-                            egui::Slider::new(&mut 0.5f32, 0.0..=1.0).show_value(false),
-                        );
-                        ui.label("LENGTH");
-                        ui.add_enabled(false, egui::Button::new("0.5 mm"));
-                    });
+                        response.on_hover_text("Project preview unavailable");
+                        ui.add_enabled(false, egui::Button::new("↑  ▣  ×"));
+                    },
+                );
+            }
+        });
+        ui.horizontal_wrapped(|ui| {
+            for name in ["Master", "Creation", "Parts", "Render", "Output"] {
+                let (rect, response) = ui.allocate_exact_size(Vec2::new(55., 49.), Sense::hover());
+                ui.painter().rect_filled(rect, 0, Color32::from_gray(79));
+                bevel(ui.painter(), rect);
+                ui.painter().text(
+                    rect.min + Vec2::new(2., 3.),
+                    Align2::LEFT_TOP,
+                    name,
+                    FontId::proportional(10.),
+                    Color32::WHITE,
+                );
+                response.on_hover_text("Project operation unavailable");
+            }
+        });
+    }
+    /// BUILDERS: the reserved area in the space below the Project Manager. M04
+    /// owns the real builder; M01 keeps the slot visible and non-interactive.
+    fn builder_slot_ui(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal_wrapped(|ui| {
+            let response = ui
+                .add_enabled(false, egui::Button::new("Builder (reserved)"))
+                .on_hover_text(
+                    "Builders open in the space below the Project Manager; M04 implements them",
+                );
+            self.builder_slot_rect = Some(response.rect);
+        });
+        ui.horizontal_wrapped(|ui| {
+            ui.vertical(|ui| {
+                ui.label("Gem");
+                let (rect, response) = ui.allocate_exact_size(Vec2::new(104., 76.), Sense::hover());
+                ui.painter().rect_filled(rect, 0, Color32::from_gray(53));
+                self.icons.paint(ui, rect.shrink(16.), "Emerald");
+                response.on_hover_text("No active gem; builder operation unavailable");
+            });
+            ui.add_space(36.);
+            ui.vertical(|ui| {
+                for name in ["New Emerald", "Size ▾", "Show Diag.", "Reset"] {
+                    ui.add_enabled(false, egui::Button::new(name))
+                        .on_hover_text("Emerald builder operation unavailable");
                 }
             });
+        });
+        ui.horizontal_wrapped(|ui| {
+            for name in ["Emerald", "Scale", "Move", "Rotate", "Gem"] {
+                self.icon(ui, name, false, "Builder parameter");
+            }
+        });
+        ui.horizontal_wrapped(|ui| {
+            ui.add_enabled(
+                false,
+                egui::Slider::new(&mut 0.5f32, 0.0..=1.0).show_value(false),
+            );
+            ui.label("LENGTH");
+            ui.add_enabled(false, egui::Button::new("0.5 mm"));
+        });
     }
     pub(super) fn toolbars_ui(&mut self, ui: &mut egui::Ui) {
         self.file_toolbar_rects.clear();
@@ -644,6 +839,184 @@ impl MatrixApp {
                     }
                 });
             });
+    }
+    /// Mirror a user-resized dock panel into the typed layout so the size can be
+    /// persisted. Only a real change marks the layout dirty, so a clamped frame
+    /// cannot loop.
+    pub(super) fn sync_panel_size(&mut self, id: PanelId, size: f32) {
+        // While the region check has no usable plan (window below the minimum),
+        // the panels are squeezed by the window and must not rewrite the stored
+        // sizes: the layout stays exactly as it was.
+        if self.region_error.is_some() {
+            return;
+        }
+        let before = self.dock.state(id).size;
+        self.dock.set_size(id, size);
+        if (self.dock.state(id).size - before).abs() > 0.5 {
+            self.dock_dirty = true;
+        }
+    }
+    /// Far-right menu column: a ~300-pixel mirror of the left one holding the
+    /// menus the user docked there. Each menu keeps the same title bar behavior
+    /// (roll up, reorder, re-dock, float).
+    pub(super) fn right_dock_ui(&mut self, ui: &mut egui::Ui) {
+        ui.set_min_width(ui.available_width());
+        let sections = self.dock.right_sections();
+        if sections.is_empty() {
+            ui.label(
+                RichText::new("Drag a menu title bar here to dock it")
+                    .size(10.)
+                    .color(Color32::from_gray(190)),
+            );
+            return;
+        }
+        for (index, id) in sections.iter().enumerate() {
+            let state = self.dock.section(*id);
+            let mut move_by: Option<i32> = None;
+            let mut toggle = false;
+            let mut dock_left = false;
+            let mut float = false;
+            ui.horizontal(|ui| {
+                let arrow = if state.collapsed { "+" } else { "−" };
+                let response = ui
+                    .selectable_label(!state.collapsed, format!("{arrow} {}", id.bar_title()))
+                    .on_hover_text("Collapse or expand this menu");
+                self.section_rects.insert(id.key(), response.rect);
+                toggle = response.clicked();
+                let up = ui
+                    .add_enabled(index > 0, egui::Button::new("▲").small())
+                    .on_hover_text("Move this menu up");
+                if up.clicked() {
+                    move_by = Some(-1);
+                }
+                let down = ui
+                    .add_enabled(index + 1 < sections.len(), egui::Button::new("▼").small())
+                    .on_hover_text("Move this menu down");
+                if down.clicked() {
+                    move_by = Some(1);
+                }
+                dock_left = ui
+                    .small_button("◀")
+                    .on_hover_text("Dock this menu back in the left column")
+                    .clicked();
+                float = ui
+                    .small_button("⧉")
+                    .on_hover_text("Float this menu over the model")
+                    .clicked();
+            });
+            if toggle {
+                self.dock.toggle_section(*id);
+                self.dock_dirty = true;
+            }
+            if let Some(delta) = move_by {
+                self.move_menu_section(*id, delta);
+            }
+            if dock_left {
+                self.dock_menu_section(*id, DockSide::Left);
+                continue;
+            }
+            if float {
+                self.float_section_at(
+                    *id,
+                    ui.max_rect().center() + Vec2::new(-40. * index as f32, 40.),
+                );
+                continue;
+            }
+            if self.dock.section(*id).collapsed {
+                continue;
+            }
+            self.sidebar_section_ui(ui, *id);
+        }
+    }
+    /// Floating menus live in owned windows whose rectangle is layout state.
+    pub(super) fn float_menu_windows(&mut self, ctx: &egui::Context) {
+        for id in self.dock.floating_sections() {
+            let state = self.dock.section(id);
+            if !state.visible {
+                continue;
+            }
+            let stored = state
+                .float
+                .unwrap_or_else(FloatRect::command_search_default);
+            let mut open = true;
+            let mut dock_left = false;
+            let mut dock_right = false;
+            let window = egui::Window::new(id.title())
+                .id(egui::Id::new(("om9-float-menu", id.key())))
+                .default_pos([stored.x, stored.y])
+                .default_size([stored.width, stored.height])
+                .open(&mut open)
+                .show(ctx, |ui| {
+                    ui.horizontal(|ui| {
+                        dock_left = ui
+                            .small_button("◀ Dock left")
+                            .on_hover_text("Return this menu to the left column")
+                            .clicked();
+                        dock_right = ui
+                            .small_button("Dock right ▶")
+                            .on_hover_text("Dock this menu to the right mirror column")
+                            .clicked();
+                    });
+                    self.sidebar_section_ui(ui, id);
+                });
+            if let Some(window) = window {
+                let rect = window.response.rect;
+                if (rect.min.x - stored.x).abs() > 0.5
+                    || (rect.min.y - stored.y).abs() > 0.5
+                    || (rect.width() - stored.width).abs() > 0.5
+                    || (rect.height() - stored.height).abs() > 0.5
+                {
+                    self.dock.float_section(
+                        id,
+                        FloatRect {
+                            x: rect.min.x,
+                            y: rect.min.y,
+                            width: rect.width(),
+                            height: rect.height(),
+                        },
+                    );
+                    self.dock_dirty = true;
+                }
+            }
+            if dock_left {
+                self.dock_menu_section(id, DockSide::Left);
+            } else if dock_right {
+                self.dock_menu_section(id, DockSide::Right);
+            } else if !open {
+                // Closing a floating menu returns it to the documented home
+                // column instead of losing it.
+                self.dock_menu_section(id, DockSide::Left);
+            }
+        }
+    }
+    /// Always-visible status/error line. It shows the current state, keeps an
+    /// unacknowledged failure on screen and never consumes Escape.
+    pub(super) fn status_bar_ui(&mut self, ui: &mut egui::Ui) {
+        let (kind, message) = (self.status.kind(), self.status.message().to_owned());
+        let color = match kind {
+            StatusKind::Ready => Color32::from_rgb(206, 228, 206),
+            StatusKind::Info => Color32::WHITE,
+            StatusKind::Warning => Color32::from_rgb(255, 226, 150),
+            StatusKind::Error => Color32::from_rgb(255, 168, 158),
+        };
+        let summary = self.dock_summary();
+        ui.horizontal(|ui| {
+            ui.label(
+                RichText::new(format!("{}: {message}", kind.label()))
+                    .color(color)
+                    .size(11.),
+            );
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if kind.is_failure() && ui.small_button("Dismiss").clicked() {
+                    self.status.acknowledge();
+                }
+                ui.label(
+                    RichText::new(summary)
+                        .color(Color32::from_gray(205))
+                        .size(10.),
+                );
+            });
+        });
     }
 }
 fn category_palette(category: &str) -> &'static [&'static str] {

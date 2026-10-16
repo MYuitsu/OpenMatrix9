@@ -1,0 +1,165 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "oracle_schema": "om9.m01.oracle.v1.5",
+  "oracle_schema_note": "no local definition of om9.m01.oracle.v1.5 exists in this repository; the string is carried as a field only",
+  "l3": "OM9-L3-01-01-002",
+  "l4": "OM9-L4-01-01-002-02",
+  "case": "workbench-docking-regions-negative",
+  "source": "authored for the OM9 standalone shell; every case must be observable without a live reviewer. Numbers are hand-computed from the documented constants",
+  "status": "RUNTIME_DRIVEN_BY_TEST",
+  "negative_oracle": "Narrow window does not overlap/lose critical command input panel",
+  "rect_format": "[x, y, width, height] in window pixels, origin top-left",
+  "non_finite_tokens": "JSON cannot carry NaN/inf, so the strings \"NaN\", \"inf\" and \"-inf\" stand for those f32 values",
+  "constants": {
+    "command_min_height": 58,
+    "minimum_window_with_left_rail": [560, 286],
+    "minimum_window_without_left_rail": [320, 286],
+    "narrow_window_width": 900
+  },
+  "cases": [
+    {
+      "id": "narrow-800x600-with-right-dock-yields-and-keeps-command-input",
+      "kind": "negative",
+      "window": [800, 600],
+      "layout": { "dock_right": ["main-menu"] },
+      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+      "expect": {
+        "result": "ok",
+        "right_dock": null,
+        "notes": ["RightDockYielded"],
+        "left_rail": [0, 21, 300, 579],
+        "command_input": [300, 21, 500, 90],
+        "toolbar": [300, 111, 500, 67],
+        "status_bar": [300, 580, 500, 20],
+        "center": [300, 178, 500, 402],
+        "views": {
+          "LookingDown": [300, 178, 249, 200],
+          "Perspective": [551, 178, 249, 200],
+          "ThroughFinger": [300, 380, 249, 200],
+          "SideView": [551, 380, 249, 200]
+        },
+        "command_input_overlaps_nothing": true
+      }
+    },
+    {
+      "id": "zero-window",
+      "kind": "negative",
+      "window": [0, 0],
+      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+    },
+    {
+      "id": "negative-width",
+      "kind": "negative",
+      "window": [-10, 500],
+      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+    },
+    {
+      "id": "nan-width",
+      "kind": "negative",
+      "window": ["NaN", 500],
+      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+    },
+    {
+      "id": "infinite-height",
+      "kind": "negative",
+      "window": [800, "inf"],
+      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+    },
+    {
+      "id": "absurdly-large-window",
+      "kind": "negative",
+      "window": [1000000, 500],
+      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+    },
+    {
+      "id": "window-300x150-too-small",
+      "kind": "negative",
+      "window": [300, 150],
+      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [560, 286], "layout_unchanged": true }
+    },
+    {
+      "id": "one-pixel-below-minimum-width",
+      "kind": "negative",
+      "window": [559, 286],
+      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [560, 286], "layout_unchanged": true }
+    },
+    {
+      "id": "one-pixel-below-minimum-height",
+      "kind": "negative",
+      "window": [560, 285],
+      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [560, 286], "layout_unchanged": true }
+    },
+    {
+      "id": "left-rail-hidden-lowers-the-minimum-width",
+      "kind": "negative",
+      "window": [319, 286],
+      "layout": { "hide_panels": ["left-rail"] },
+      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [320, 286], "layout_unchanged": true }
+    },
+    {
+      "id": "left-rail-hidden-320x286-is-usable",
+      "kind": "negative",
+      "window": [320, 286],
+      "layout": { "hide_panels": ["left-rail"] },
+      "expect": { "result": "ok", "left_rail": null, "command_input": [0, 21, 320, 58], "center": [0, 146, 320, 120] }
+    },
+    {
+      "id": "hidden-right-dock-is-a-defined-state-not-an-error",
+      "kind": "negative",
+      "window": [1600, 1000],
+      "layout": {},
+      "expect": { "result": "ok", "right_dock": null, "notes": [] }
+    },
+    {
+      "id": "command-line-hidden-by-layout-is-kept",
+      "kind": "negative",
+      "window": [1280, 900],
+      "layout": { "hide_panels": ["command-line"] },
+      "expect": {
+        "result": "ok",
+        "notes": ["CommandInputKept"],
+        "command_input": [300, 21, 980, 90],
+        "layout_unchanged": true
+      }
+    },
+    {
+      "id": "command-input-host-not-ready",
+      "kind": "negative",
+      "window": [1280, 900],
+      "host": { "command_input_ready": false },
+      "expect": { "result": "error", "error": "CommandInputUnavailable", "layout_unchanged": true }
+    },
+    {
+      "id": "empty-view-set",
+      "kind": "negative",
+      "window": [1280, 900],
+      "views": [],
+      "expect": { "result": "error", "error": "ViewSetInvalid", "count": 0, "layout_unchanged": true }
+    },
+    {
+      "id": "five-views",
+      "kind": "negative",
+      "window": [1280, 900],
+      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView", "SideView"],
+      "expect": { "result": "error", "error": "ViewSetInvalid", "count": 5, "layout_unchanged": true }
+    },
+    {
+      "id": "duplicate-view",
+      "kind": "negative",
+      "window": [1280, 900],
+      "views": ["Perspective", "Perspective"],
+      "expect": { "result": "error", "error": "ViewSetInvalid", "count": 2, "layout_unchanged": true }
+    },
+    {
+      "id": "sweep-never-overlaps-or-hides-command-input",
+      "kind": "negative",
+      "sweep": { "width": { "from": 200, "to": 1600, "step": 20 }, "height": { "from": 100, "to": 1000, "step": 20 } },
+      "layouts": ["default", "right-dock-main-menu", "command-line-hidden"],
+      "expect": {
+        "every_ok_plan": "command_input.height >= 58, command_input inside the window, command_input overlaps no other region",
+        "every_other_size": "explicit WindowTooSmall error",
+        "silent_fallbacks": 0
+      }
+    }
+  ]
+}

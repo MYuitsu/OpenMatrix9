@@ -1,0 +1,175 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-04-19-005",
+  "milestone": "M04",
+  "parent_l2_id": "OM9-L2-04-19",
+  "title": "Metal Weight Error And Open B-Rep Policy",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "target_implementation_milestone": "M04",
+  "execution_stage": "E09",
+  "source_original_path": "specs/04-ms04-builder-history-ring/07-be-jewelry-metal-weight-calculations/005-be-metal-weight-error-and-open-brep-policy/l3.json",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-04-19-005",
+    "capability_id": "cap.04-19.metal-weight-error-and-open-brep-policy",
+    "stable_owner_key": "OM9-L2-04-19/metal-weight-error-and-open-brep-policy",
+    "title": "Metal Weight Error And Open B-Rep Policy",
+    "slug": "metal-weight-error-and-open-brep-policy",
+    "module_id": "OM9-L2-04-19",
+    "module_path": "specs/04-ms04-builder-history-ring/07-be-jewelry-metal-weight-calculations/",
+    "l3_path": "specs/04-ms04-builder-history-ring/07-be-jewelry-metal-weight-calculations/005-be-metal-weight-error-and-open-brep-policy/",
+    "tag": "be",
+    "implementation_role": "backend_framework",
+    "milestone_id": "M04",
+    "target_milestone": "M04",
+    "delivery": "mainline",
+    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "origin_source_taxonomy": "04-matrix8-book2",
+    "goal": "reject unsupported/open geometries and report uncertainty",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Tính thể tích, vật liệu, trọng lượng kim loại trang sức",
+    "parent_exclusions": "Không yêu cầu offline render hay báo giá vendor.",
+    "depends_on_module_ids": [
+      "OM9-L2-01-05",
+      "OM9-L2-04-03"
+    ],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          368,
+          369
+        ],
+        "pdf_pages_1based": [
+          142,
+          143
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Metal Weight Error And Open B-Rep Policy” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
+    ],
+    "acceptance_tests_manual": [],
+    "requires_manual_test": false,
+    "manual_test_gate": "AUTO_ONLY",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "execution_stage": "E09",
+    "planning_release": "CORE_MVP",
+    "planning_risk": "NORMAL",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
+    "execution_status": "L4_PLANNED_NOT_EXECUTED; M00-M03 gates require real approval"
+  },
+  "children_l4": [
+    {
+      "id": "OM9-L4-04-19-005-01",
+      "file": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-005 - Metal Weight Error And Open B-Rep Policy/L4-01 - Source Map/l4.json",
+      "title": "Source Map — Metal Weight Error And Open B-Rep Policy",
+      "role": "SOURCE_MAP",
+      "depends_on_l4_ids": []
+    },
+    {
+      "id": "OM9-L4-04-19-005-02",
+      "file": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-005 - Metal Weight Error And Open B-Rep Policy/L4-02 - API Contract And Fixtures/l4.json",
+      "title": "API Contract And Fixtures — Metal Weight Error And Open B-Rep Policy",
+      "role": "API_FIXTURE",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-19-005-01",
+        "OM9-L4-04-19-001-06"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-19-005-03",
+      "file": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-005 - Metal Weight Error And Open B-Rep Policy/L4-03 - Implementation/l4.json",
+      "title": "Implementation — Metal Weight Error And Open B-Rep Policy",
+      "role": "IMPLEMENT",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-19-005-02",
+        "OM9-L4-04-19-001-06"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-19-005-04",
+      "file": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-005 - Metal Weight Error And Open B-Rep Policy/L4-04 - Integration/l4.json",
+      "title": "Integration — Metal Weight Error And Open B-Rep Policy",
+      "role": "INTEGRATE",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-19-005-03",
+        "OM9-L4-04-19-001-06"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-19-005-05",
+      "file": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-005 - Metal Weight Error And Open B-Rep Policy/L4-05 - Regression Tests/l4.json",
+      "title": "Regression Tests — Metal Weight Error And Open B-Rep Policy",
+      "role": "REGRESSION",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-19-005-04",
+        "OM9-L4-04-19-001-06"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-19-005-07",
+      "file": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-005 - Metal Weight Error And Open B-Rep Policy/L4-07 - Adversarial And Recovery Tests/l4.json",
+      "title": "Adversarial And Recovery Tests — Metal Weight Error And Open B-Rep Policy",
+      "role": "ADVERSARIAL",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-19-005-05",
+        "OM9-L4-04-19-001-06"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-19-005-06",
+      "file": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-005 - Metal Weight Error And Open B-Rep Policy/L4-06 - Acceptance And Evidence/l4.json",
+      "title": "Acceptance And Evidence — Metal Weight Error And Open B-Rep Policy",
+      "role": "ACCEPT",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-19-005-07",
+        "OM9-L4-04-19-001-06"
+      ]
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "m04_execution_handoff": {
+    "schema": "om9.m04.luna.l3.v1",
+    "assigned_milestone": "M04",
+    "mini_gate": "G04-E",
+    "priority": "CRITICAL",
+    "l4_count": 7,
+    "l4_verified_count": 0,
+    "required_prior_l3_acceptance_ids": [
+      "OM9-L3-04-19-001"
+    ],
+    "positive_fixture": {
+      "input": "open shell and invalid BRep; metadata missing density",
+      "expected_positive": "typed errors, no false mass number; preserve geometry and previous valid calculation",
+      "negative_input": "NaN volume, zero-sized or self-overlapping solid"
+    },
+    "test_policy": "L4 source/design deliver documents; implement/integrate/regression/accept require actual code+test evidence",
+    "geometry_is_upstream_verified": false,
+    "requires_human_review": true,
+    "source_pin": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+    "special_manual_flags": []
+  }
+}

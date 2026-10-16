@@ -14,31 +14,31 @@
   "modules": [
     {
       "id": "OM9-M00-L2-01",
-      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD GitHub & source reuse/L2.json"
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD/L2.json"
     },
     {
       "id": "OM9-M00-L2-02",
-      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry/L2.json"
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT/L2.json"
     },
     {
       "id": "OM9-M00-L2-03",
-      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-03 - UI - Viewport - GPU technology/L2.json"
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-03 - UI/L2.json"
     },
     {
       "id": "OM9-M00-L2-04",
-      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L2.json"
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM/L2.json"
     },
     {
       "id": "OM9-M00-L2-05",
-      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative history & stable topology/L2.json"
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative/L2.json"
     },
     {
       "id": "OM9-M00-L2-06",
-      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License - redistribution compliance/L2.json"
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License/L2.json"
     },
     {
       "id": "OM9-M00-L2-07",
-      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L2.json"
+      "file": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible/L2.json"
     }
   ],
   "execution_scope": {

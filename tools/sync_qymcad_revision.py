@@ -23,11 +23,11 @@ APPLY = "--apply" in sys.argv
 PACKAGES = {
     "M03": ("OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange",
             "build/m03-incoming/OpenMatrix9/M03 - Curve, Surface, Solid and 3DM Exchange"),
-    "M04": ("OM9_Milestones/M04 - Builder, History and Ring",
-            "build/m04-incoming/OpenMatrix9/M04 - Builder, History and Ring"),
+    "M04": ("OM9_Milestones/M04 - Builder and History",
+            "build/m04-incoming/OpenMatrix9/M04 - Builder and History"),
     "M05": ("OM9_Milestones/M05 - Gems and Layout", "build/m05-incoming"),
     "M06": ("OM9_Milestones/M06 - Settings and Prongs", "build/m06-incoming"),
-    "M07": ("OM9_Milestones/M07 - Cutters and Manufacturing Validation",
+    "M07": ("OM9_Milestones/M07 - Cutters",
             "build/m07-incoming/OpenMatrix9/planning/M07"),
 }
 

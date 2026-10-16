@@ -7823,7 +7823,371 @@
         "This development source uses the matching custom native App SDK; FreeCAD core stays separate by user instruction. Stock FreeCAD and CI binaries are not certified by this local proof.",
         "Historical RED receipts remain historical; the repaired Rebuild preview and 3DM prepared-dictionary cases pass in native02."
       ]
-    }
+    },
+    {
+      "id": "m01-l2-01-01-shell-docking-implementation-2026-10-16",
+      "date": "2026-10-16",
+      "status": "standalone_implementation_verified_scoped",
+      "scope": "OM9-L2-01-01 (M01, 8 L3 / 33 L4) - Febe Application Shell Docking, standalone om9-app (L3-001..005, 007, 008; L3-006 ghi chu con lai)",
+      "why": "Nguoi dung chon 'module dau tien L2-01' cua M01 va yeu cau kiem tra code da co truoc khi lam. Audit cho thay shell/CMD/viewport/layers/files da co that, nen chi trien khai phan thieu. Sau do nguoi dung chi ra anh Matrix9 that va yeu cau doc Matrix.rui cho vi tri PROJECTS: ban dau dat Project Manager/Builder o dock phai la SAI, da viet lai theo tai lieu tham chieu chinh thuc cua module (Matrix8 book 1 tr.11-13): 7 muc sidebar theo thu tu, Builder ngay duoi Projects, cot phai ~300px chi la noi neo menu nguoi dung dock, va 3 lenh View > Matrix Menus.",
+      "audited_existing_code": {
+        "startup_and_window": "standalone/crates/om9-app/src/main.rs, src/ui.rs launch/launch_app, src/ui/startup_audit.rs",
+        "docking_regions": "src/ui.rs panel menu/sidebar/command/toolbars/central + 4 viewport; om9-scene/src/workspace.rs ViewId::ALL",
+        "collapse_and_float": "src/ui.rs collapsed set, ui/chrome.rs section toggle, F6 window + Pin",
+        "active_document": "src/ui/files.rs update_file_title (dirty marker), src/session/files.rs unsaved decision flow",
+        "status_surface": "src/ui.rs feedback -> transcript history; per-owner error strings only",
+        "missing_before": [
+          "dock phai tuy chon va luat cua so hep",
+          "reorder panel va cuu panel float ra ngoai man hinh",
+          "reset layout mac dinh Matrix",
+          "persist layout giua cac phien",
+          "be mat status/loi nonfatal luon hien thi",
+          "builder docking slot giu cho"
+        ]
+      },
+      "code_added": [
+        "standalone/crates/om9-app/src/dock_layout.rs (moi): PanelId cho vung + SectionId cho 8 muc menu tai lieu (IconHistory..BuilderSlot) voi visible/collapsed/dock/order/height/float; schema_version=2; mac dinh theo tai lieu (BuilderSlot ngay sau Projects); move_section/dock_section/float_section/normalize/clamp_floats/resolve(window)/from_json/load/save; schema 1 (co right-dock.project-manager) bi tu choi va reset ve mac dinh",
+        "standalone/crates/om9-app/src/status_surface.rs (moi): StatusKind + StatusSurface, gioi han 512 byte, tail 8 muc, loi chua xac nhan khong bi lenh thanh cong sau xoa",
+        "standalone/crates/om9-app/src/startup.rs (moi): StartupStage + StartupFailure (bound 512 byte, gap newline, to_json/write_receipt qua tep staging), adapter_note(), should_report_dialog()",
+        "standalone/crates/om9-native-owner/src/windows.rs + lib.rs: report_startup_failure(title, message) qua MessageBoxW trong unsafe co SAFETY comment, chan 512 ky tu; ban non-Windows tra false",
+        "standalone/crates/om9-app/src/ui/chrome.rs: section() title bar theo mo hinh (click = roll-up, keo = doi thu tu/dock phai/float), section_bar_controls() (Snaps/Layers giu controls tren thanh da roll-up), sidebar_ui() render dung thu tu mo hinh, sidebar_section_ui() tach than tung muc, projects_ui(), builder_slot_ui(), right_dock_ui() (cot phai + nut up/down/dock-left/float), float_menu_windows(), status_bar_ui(), menu View > Matrix Menus > Set as Default / Reset Menus / Reload Menus",
+        "standalone/crates/om9-app/src/ui.rs: sync_dock_window, sync_panel_size, settle_section_drag, float_section_at, move_menu_section, dock_menu_section, float_menu_section, set_menus_as_default, reset_menus, reload_menus, menus_have_unsaved_changes, menu_summary, section_rect; launch_classified/launch_file_classified; report_startup_failure; adapter_note noi vao wgpu render state",
+        "standalone/crates/om9-app/src/main.rs: run() tra StartupFailure, ghi stderr + receipt startup-failure.json, hop thoai native chi khi lenh that su mo cua so",
+        "standalone/crates/om9-app/src/lib.rs: dang ky dock_layout, status_surface, startup",
+        "standalone/crates/om9-app/tests/shell_docking.rs (moi): 10 test UI tren khung MatrixApp::show that",
+        "build/inspect_matrix_rui_*.py + build/matrix-rui-*.json: phan tich dan xuat Matrix.rui (khong chep noi dung thuong mai vao repo)"
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --lib dock_layout",
+          "result": "13 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-app --lib status_surface",
+          "result": "4 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-app --lib startup",
+          "result": "5 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-app --test shell_docking",
+          "result": "10 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-app",
+          "result": "36 lib + toan bo test tich hop pass, 0 regression"
+        },
+        {
+          "command": "cargo test -p om9-native-owner",
+          "result": "pass (18 lib / 8 process owner / 1 teardown / 8 verified file)"
+        },
+        {
+          "command": "cargo test --workspace",
+          "result": "pass, khong FAILED"
+        },
+        {
+          "command": "cargo fmt --check",
+          "result": "exit 0"
+        },
+        {
+          "command": "cargo clippy --workspace --all-targets -- -D warnings",
+          "result": "exit 0"
+        },
+        {
+          "command": "om9.exe --ui <missing>.om9 (OM9_STARTUP_DIALOG=0, OM9_UI_LAYOUT tro thu muc tam)",
+          "result": "exit 1; stderr 'OpenMatrix9 could not start (document): I/O: The system cannot find the file specified. (os error 2)'; receipt startup-failure.json schema om9.startup.failure.v1 / stage document"
+        }
+      ],
+      "runtime_evidence": "om9.exe --ui-audit: passes=21, objects=1, undo=1, screenshot_saved=true, checks 'CMD line accepted once', 'actual CMD Undo', 'actual CMD Redo', 'Esc canceled draft without publication'; 4 view_rects; receipt dock = left_sections [icon-history, main-menu, display, snaps, info-settings, layers, projects, builder-slot], right_sections [], floating_sections [], right_dock_visible=false, builder_slot_visible=true, status_bar_px=20, status_kind=Ready, diagnostics ['layout version 1 is not supported; restored the Matrix default'] (schema that), adapter = NVIDIA GeForce RTX (phan cung that); ui-layout.json KHONG duoc tu ghi (dung 3 lenh Matrix Menus); workspace.png 1600x1000 sha256 7f33d63c445c78075a832e358a722940d2b5fb12df611648c0e71c644644a492 (build/standalone-validation/ui-artifacts/2026-10-16-m01-l2-01-01-docking/); duong loi khoi dong: om9.exe --ui <missing>.om9 -> exit 1, stderr 'OpenMatrix9 could not start (document): I/O: ... os error 2', receipt startup-failure.json (schema om9.startup.failure.v1, stage document); receipt copies docs/validation/2026-10-16-m01-l2-01-01-docking/{ui-receipt.json,startup-failure.json}",
+      "reference_check": "Matrix.rui trong ban cai rieng chi dinh nghia UI Rhino (119 tool_bar / 20 tool_bar_group / 14 sidebar; sidebar_one -> group 'Main'); khong co muc PROJECTS. Vi tri Projects/Builder chot theo tai lieu tham chieu chinh thuc cua module: OM9_Milestones/M01.../L2-01-01.../reference/text/m8book1__p11-13__a-tour-of-the-interface.md (Icon History, Main Menu, Display, Snaps, Info & Settings, Layers, Projects; builder mo o vung duoi Project Manager; roll-up/drag reorder/float/dock phai ~300px; View > Matrix Menus > Set as Default / Reset Menus / Reload Menus).",
+      "geometric_or_runtime_evidence": "Test UI chay tren dung khung MatrixApp::show (khong mock): right dock tuy chon, cua so 800x600 tu bo dock phai va giu command line + canvas >= 320 px, persist/thu hoi layout, version la -> mac dinh, reset layout khong mat document/undo, builder slot bat kha tuong tac, status giu loi chua xac nhan.",
+      "milestone_status_promoted": false,
+      "implementation_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "L3-006 van la ung dung mot tai lieu; chua co chuyen doi tai lieu (phu thuoc hop dong OM9-L2-01-03).",
+        "Keo-tha menu da co mo hinh + tha de doi thu tu/dock/float nhung chua co preview truc tiep khi dang keo va chua ho tro keo sang man hinh khac; thanh title bar roll-up moi giu controls rut gon cho Snaps/Layers.",
+        "Hop thoai loi khoi dong native moi co test quyet dinh + build Windows; chua co anh chup thao tac nguoi that.",
+        "Chua co anh chup DPI/multi-monitor Windows cho module nay nen gate thu cong M01-UI van mo.",
+        "M00 chua ky: moi L3/L4 trong OM9_Milestones giu SPEC_ONLY_NOT_IMPLEMENTED; khong status nao duoc promote."
+      ],
+      "next_action": "Them preview keo-tha truc tiep (hoan thien L3-003), roi kiem thu thu cong Windows DPI/multi-monitor de dong gate M01-UI o pham vi module."
+    },
+    {
+      "id": "m01-l3-01-01-001-startup-completion-2026-10-16",
+      "date": "2026-10-16",
+      "status": "standalone_implementation_verified_scoped",
+      "scope": "OM9-L3-01-01-001 (Application Startup And Main Window) - 4 L4 tasks of module OM9-L2-01-01",
+      "why": "Nguoi dung yeu cau 'hoan chinh M01 - L2-01 L3-01': dong du bon L4 cua L3-001 theo dung artefact ma goi ke hoach yeu cau (source audit, hop dong + fixture, trien khai + log, acceptance + review).",
+      "source_audit": {
+        "checkout": "vendor-research/QymCAD",
+        "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+        "verified_clean": true,
+        "artefact": "implementation/design/M01/OM9-L3-01-01-001/source_crosswalk.json",
+        "planned_anchors_all_present": true,
+        "additional_anchors_found": [
+          "crates/qymcad/src/gui/startup.rs (launch/NativeOptions/ViewportBuilder/run_native/choose_the_adapter_ourselves)",
+          "crates/qymcad/src/window_identity_guard.rs (moi cua so phai co .id rieng)",
+          "crates/qymcad/src/app_identity.rs",
+          "crates/qymcad/src/safe_graphics.rs (chua co tuong duong trong OM9)",
+          "crates/qymcad/src/crash.rs (note_failed_start)",
+          "crates/qymcad/src/diagnostics.rs (note_gpu/note_adapters/note_start_failure)"
+        ],
+        "decision": "ADAPT",
+        "copied_upstream_code": false,
+        "license_note": "QymCAD AGPL-3.0-or-later; sao chep ma van can phe duyet G00-06"
+      },
+      "code_added": [
+        "standalone/crates/om9-app/src/startup.rs: AppConfig (app_title/document_name/window/min_window/maximized/audit_dir/layout_path/startup_dialog) + interactive()/window_title()/validate(); giu StartupFailure/StartupStage/adapter_note/should_report_dialog",
+        "standalone/crates/om9-app/src/ui.rs: MatrixApp::start(&AppConfig), launch_with(app, &config) dung title/size/min/maximized/audit/layout tu record; launch_classified/launch_file_classified chay tren record; F6 window co .id(\"om9-command-search\"); window_title tro thanh pub",
+        "standalone/crates/om9-app/src/window_identity_guard.rs (moi): guard kieu QymCAD quet src/** bat moi egui::Window::new thieu .id()",
+        "standalone/crates/om9-app/src/lib.rs: dang ky window_identity_guard",
+        "implementation/design/M01/OM9-L3-01-01-001/{api.md,source_crosswalk.json}",
+        "implementation/fixtures/M01/OM9-L3-01-01-001/{positive.json,negative.json}",
+        "standalone/crates/om9-app/tests/startup_contract.rs (moi): test doc fixture tu dia va lai app that",
+        "implementation/evidence/M01/OM9-L3-01-01-001/: diffstat, target-test log, regression log, startup-failure receipt + stderr, ui-review.json"
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --lib startup",
+          "result": "7 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-app --lib window_identity_guard",
+          "result": "2 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-app --test startup_contract",
+          "result": "3 passed; 0 failed (fixture-driven)"
+        },
+        {
+          "command": "cargo test --workspace",
+          "result": "88 nhom 'test result: ok', 0 FAILED, exit 0"
+        },
+        {
+          "command": "cargo fmt --check / cargo check --workspace --all-targets / cargo clippy --workspace --all-targets -- -D warnings",
+          "result": "exit 0 / exit 0 / exit 0"
+        },
+        {
+          "command": "om9.exe --ui-audit <dir>",
+          "result": "exit 0; passes=21; adapter NVIDIA GeForce RTX 3060 / Vulkan / driver 610.88; 4 view_rects; status Ready; workspace.png sha256 7f33d63c445c78075a832e358a722940d2b5fb12df611648c0e71c644644a492"
+        },
+        {
+          "command": "om9.exe --ui <missing>.om9 (OM9_STARTUP_DIALOG=0)",
+          "result": "exit 1; stderr 'OpenMatrix9 could not start (document): I/O: The system cannot find the file specified. (os error 2)'; receipt om9.startup.failure.v1 / stage document (sha256 38d7866183f2a3f98ccdad42cffc8ef5346d468b9fa4da49b215ab0dddb91384); document va layout khong doi"
+        }
+      ],
+      "runtime_evidence": "App that: mot cua so tieu de 'OpenMatrix9 - Untitled' (dirty marker khi sua), 4 viewport (Looking Down/Perspective/Side View/Through Finger), cot trai 8 muc dung tai lieu, status Ready, command line hien dien; adapter phan cung that duoc ghi vao receipt; adapter thieu (fixture) -> 'software-fallback' + chan doan 'GPU adapter unavailable'; loi khoi dong -> stderr + receipt + hop thoai native (tat bang OM9_STARTUP_DIALOG=0).",
+      "gate_state": {
+        "m01_ui": "OPEN",
+        "m00_signed": false,
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false,
+        "note": "reviewer.status = NOT_SIGNED trong ui-review.json; agent khong tu ky nghiem thu"
+      },
+      "not_yet_done": [
+        "Nguoi review Windows kiem bang mat (checklist 5 buoc, gom DPI 150% va hai man hinh).",
+        "Chua co buoc ha cap do hoa tu dong giua cac lan chay nhu safe_graphics cua upstream (ADD, ghi trong crosswalk).",
+        "L3-006 (chuyen doi tai lieu) va phan con lai cua L3-003 (preview khi keo menu) van mo trong module."
+      ],
+      "next_action": "Mo L3-006 (chuyen doi nhieu tai lieu) theo mo hinh hoan vi trang thai active/inactive, roi hoan thien preview keo menu cua L3-003.",
+      "artefacts": [
+        "docs/validation/2026-10-16-m01-l3-01-01-001-startup-completion.md",
+        "implementation/design/M01/OM9-L3-01-01-001/api.md",
+        "implementation/design/M01/OM9-L3-01-01-001/source_crosswalk.json",
+        "implementation/fixtures/M01/OM9-L3-01-01-001/positive.json",
+        "implementation/fixtures/M01/OM9-L3-01-01-001/negative.json",
+        "implementation/evidence/M01/OM9-L3-01-01-001/OM9-L4-01-01-001-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-01-01-001/OM9-L4-01-01-001-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-01-01-001/OM9-L4-01-01-001-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-01-01-001/OM9-L4-01-01-001-05.ui-review.json"
+      ]
+    },
+    {
+      "id": "m01-l3-01-01-002-workbench-docking-regions-2026-10-16",
+      "date": "2026-10-16",
+      "status": "standalone_implementation_verified_scoped",
+      "scope": "OM9-L3-01-01-002 (Workbench Docking Regions) - 4 L4 tasks (01 source audit, 02 contract+tests, 03 implementation, 05 acceptance) of module OM9-L2-01-01",
+      "why": "User asked: Thuc hien hoan chinh M01 - L2-01 L3-02. Implemented the pure region model, wired the egui frame to it, and produced the declared artefacts.",
+      "source_audit": {
+        "checkout": "vendor-research/QymCAD",
+        "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+        "verified_clean": true,
+        "artefact": "implementation/design/M01/OM9-L3-01-01-002/source_crosswalk.json",
+        "decision": "ADAPT (place-kind vocabulary and host-seam idea from qymcad-shell) + ADD (four-viewport tiling, narrow-window rule, command-input guarantee, typed errors)",
+        "copied_upstream_code": false,
+        "legal_reuse_status": "PENDING_HUMAN_M00_APPROVAL"
+      },
+      "code_added": [
+        "standalone/crates/om9-app/src/workbench_regions.rs (new): RegionPlan/RegionRect/RegionKind/ViewSlot/RegionNote/RegionError, compute_regions, compute_regions_for, tile_views, validate(), CommandInputHost + ViewportSceneHost seams",
+        "standalone/crates/om9-app/src/ui.rs: refresh_region_plan/announce_regions each frame, central panel tiles via tile_views, AttachedCmdFrame adapter, receipt block 'regions', audit-only OM9_UI_AUDIT_WINDOW and OM9_UI_AUDIT_RIGHT_DOCK",
+        "standalone/crates/om9-app/src/ui/chrome.rs: sync_panel_size is a no-op while the region check has an error",
+        "standalone/crates/om9-app/tests/workbench_regions.rs (new): fixture replay + 5 egui frame tests",
+        "implementation/design|fixtures|evidence/M01/OM9-L3-01-01-002/*"
+      ],
+      "validation_commands": [
+        {
+          "command": "RED: cargo test -p om9-app --lib workbench_regions / --test workbench_regions (skeleton)",
+          "result": "lib 3 passed 18 failed, integration 1 passed 6 failed, exit 101, assertion failures not build errors"
+        },
+        {
+          "command": "cargo test -p om9-app --lib workbench_regions",
+          "result": "21 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-app --test workbench_regions",
+          "result": "8 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-app",
+          "result": "all groups ok, exit 0 (lib 61 incl. 21 new + 1 audit-size parser test)"
+        },
+        {
+          "command": "cargo test --workspace / cargo check --workspace --all-targets / cargo build --workspace",
+          "result": "exit 0 / exit 0 / exit 0"
+        },
+        {
+          "command": "cargo clippy --workspace --all-targets -- -D warnings / cargo fmt --all -- --check",
+          "result": "exit 0 / exit 0"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "exit 1: 11721 pre-existing errors in ref/, manuals/, OM9_Milestones/, QymCAD/, vendor-research/, om9-window.png; 0 in L3-002 paths. NOT claimed as passed."
+        },
+        {
+          "command": "python tools/validate_m01_spec.py",
+          "result": "NOT RUN: tool absent (exit 2, file not found)"
+        },
+        {
+          "command": "om9.exe --ui-audit with OM9_UI_AUDIT_WINDOW=1600x1000 and 800x600, OM9_UI_AUDIT_RIGHT_DOCK=1",
+          "result": "exit 0 both; RTX 3060 Vulkan; 1600x1000: left rail + right dock + 4 views; 800x600: RightDockYielded/NarrowWindow note, no right dock, command input and 4 views kept; screenshots in build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/"
+        }
+      ],
+      "behaviour_changes_pending_consent": [
+        "A window below 560x286 (320x286 with no left rail) now yields an explicit 'Layout:' error on the status line and keeps the last good plan, instead of a silent clamp.",
+        "A command line marked hidden in the layout is still reserved (CommandInputKept notice).",
+        "While the region check has an error, sync_panel_size and floating-menu clamping do not rewrite the stored layout.",
+        "Notices (right dock yielded, left rail narrowed) go to the CMD history and, when no failure is on screen, the status line.",
+        "No skills/ file was edited; the user is asked whether to record these in the relevant skill."
+      ],
+      "gate_state": {
+        "m01_ui": "OPEN",
+        "m00_signed": false,
+        "legal_reuse": "PENDING_HUMAN_M00_APPROVAL",
+        "dependencies": "OM9-L2-01-02 and OM9-L2-01-03 SPEC_ONLY_NOT_IMPLEMENTED (BLOCKED_DEPENDENCY); seams tested against stubs",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false,
+        "note": "reviewer.status = NOT_SIGNED in ui-review.json"
+      },
+      "not_yet_done": [
+        "Human Windows verification of the 7-item checklist (incl. 150% DPI and second monitor).",
+        "Status bar text overlaps itself at 800x600 (pre-existing L3-007 behavior, seen in the capture).",
+        "Persistence L3-005, restore default L3-004, reorder/float L3-003, builder slot L3-008 untouched.",
+        "om9.m01.oracle.v1.5 has no local definition; OpenMatrix9_Codex_Spec_v2 is absent locally."
+      ],
+      "final_reconciliation": {
+  "public_source_audit_rerun": "python tools/public_source_audit.py -> exit 1, 11721 errors (same count as before); 0 errors outside ref/, manuals/, OM9_Milestones/, QymCAD/, vendor-research/, om9-window.png. Not passed; not fixed because AGENTS.md forbids touching private references.",
+  "plan_tree_planning_state": "unchanged: l3.json SPEC_ONLY_NOT_IMPLEMENTED, four l4.json NOT_STARTED. Repo vocabulary has no completed value and M00 gate is NOT_PASS, so no promotion is supported by evidence.",
+  "next_document": "implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-05.ui-review.json",
+  "date": "2026-10-16",
+  "review_verdict": "APPROVED (.agents/tasks/m01-l3-002-docking/review.json)",
+  "uncertainties": [
+    "M01-UI manual gate OPEN: 7-item checklist pending human verification (.agents/tasks/m01-l3-002-docking/verification.md; implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-05.ui-review.json).",
+    "Legal reuse PENDING_HUMAN_M00_APPROVAL.",
+    "OM9-L2-01-02 / OM9-L2-01-03 stubbed: AttachedCmdFrame::command_input_ready always true; CommandInputUnavailable reachable only in tests.",
+    "Four business-rule changes await user consent; no skill edited."
+  ]
+},
+  "next_action": "Human reviewer runs the M01-UI checklist; then continue with the next L3 of OM9-L2-01-01 (L3-003 live drag preview).",
+      "artefacts": [
+        "docs/validation/2026-10-16-m01-l3-002-workbench-docking-regions.md",
+        "implementation/design/M01/OM9-L3-01-01-002/api.md",
+        "implementation/design/M01/OM9-L3-01-01-002/source_crosswalk.json",
+        "implementation/fixtures/M01/OM9-L3-01-01-002/positive.json",
+        "implementation/fixtures/M01/OM9-L3-01-01-002/negative.json",
+        "implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-02.red.log",
+        "implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-05.ui-review.json",
+        ".agents/tasks/m01-l3-002-docking/verification.md"
+      ]
+    },
+  {
+    "id": "om9-milestones-path-shortening-maxpath-2026-10-16",
+    "date": "2026-10-16",
+    "status": "applied_verified_two_modules_blocked_by_windows_handle",
+    "scope": "OM9_Milestones path budget (Windows MAX_PATH) + dong bo tham chieu trong tools/ va ledger. Khong nang planning_state/gate nao.",
+    "why": "Nguoi dung bao loi 'Filename too long' cho OM9_Milestones/M00 .../L2-04 .../L3-03 .../L4-01 .../l4.json (242 ky tu) va yeu cau rut ngan cac duong dan qua dai nhung khong mat thong tin.",
+    "source_audit": {
+      "measured_before": {
+        "files": 11881,
+        "max_path": 249,
+        "files_ge_240": 214,
+        "files_ge_230": 889,
+        "files_ge_220": 1815,
+        "longest_workspace_path": "build/m03-incoming/OpenMatrix9/... = 256"
+      },
+      "measured_after": {
+        "files": 11883,
+        "max_path": 210,
+        "files_over_210": 0,
+        "json_parse_errors": 0,
+        "dangling_references_real": 0
+      },
+      "root_cause": "Ten thu muc dat theo title: module M01/M02 dai 73/76 ky tu, L2 toi 63, L3 toi 65, cong reference/text (14) va ten file toi 42. Duong dan chi 242 ky tu nen loi chi xay ra khi co tien to cong them (staging build/mNN-incoming +31, worktree agent +~50).",
+      "no_information_lost": "Tieu de day du cua moi cap van nam trong L1.json / L2.json / l3.json / l4.json; OM9_Milestones/PATH_RENAMES.{json,md} ghi lai anh xa ten cu -> ten moi."
+    },
+    "code_added": [
+      "implementation/tools/om9_shorten_milestone_paths.py",
+      "implementation/tools/test_om9_shorten_milestone_paths.py",
+      "OM9_Milestones/PATH_RENAMES.json",
+      "OM9_Milestones/PATH_RENAMES.md",
+      "implementation/design/om9-milestone-path-shortening.md"
+    ],
+    "validation_commands": [
+      "python implementation/tools/test_om9_shorten_milestone_paths.py -> PASS (doi ten long nhau, idempotent, tu hoan tac khi loi)",
+      "python implementation/tools/om9_shorten_milestone_paths.py --apply -> VERIFY: PASS (max 210, 0 file qua ngan sach, 0 JSON loi, 0 tham chieu treo that, ledger JSON hop le)",
+      "python tools/validate_implementation_samples.py -> exit 0, errors: []",
+      "python tools/validate_m09_l4.py -> exit 0, PASS 30 L4 / 177 cases"
+    ],
+    "behaviour_changes_pending_consent": [],
+    "gate_state": {
+      "promoted": "none",
+      "note": "Chi doi ten thu muc/duong dan va dong bo tham chieu; khong doi planning_state hay gate."
+    },
+    "not_yet_done": [
+      "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment chua doi duoc ten module (Windows giu handle) -> da bu bang cach cat 18 thu muc con.",
+      "M03 - Curve, Surface, Solid and 3DM Exchange chua doi duoc ten module (Windows giu handle) -> da bu bang cach cat cac thu muc con.",
+      "Sau khi giai phong handle: python implementation/tools/om9_shorten_milestone_paths.py --finish-module \"<ten cu>=<ten moi>\"",
+      "Chua git add/commit: cay dang o trang thai rename chua stage."
+    ],
+    "final_reconciliation": {
+      "modules_renamed": [
+        "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation -> M01 - CAD Shell, Viewport",
+        "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction -> M02 - Viewport, Gumball",
+        "M04 - Builder, History and Ring -> M04 - Builder and History",
+        "M07 - Cutters and Manufacturing Validation -> M07 - Cutters",
+        "M08 - Advanced Jewelry Modeling -> M08 - Jewelry Modeling",
+        "ZAFTER - Post-Release Extensions -> ZAFTER - Extensions"
+      ],
+      "modules_blocked": [
+        "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment",
+        "M03 - Curve, Surface, Solid and 3DM Exchange"
+      ],
+      "inner_dirs_renamed": 48,
+      "budget": 210,
+      "report": "implementation/design/om9-milestone-path-shortening.md"
+    },
+    "next_action": "Dong moi handle dang mo tren M00/M03 (khoi dong lai phien/editor), chay --finish-module cho hai module nay, roi git add -A OM9_Milestones tools va review diff rename.",
+    "artefacts": [
+      "OM9_Milestones/PATH_RENAMES.json",
+      "OM9_Milestones/PATH_RENAMES.md",
+      "implementation/design/om9-milestone-path-shortening.md",
+      "implementation/tools/om9_path_plan.json"
+    ]
+  }
   ],
   "merge_context": {
     "date": "2026-10-09",
@@ -8384,7 +8748,7 @@
         "73 l3.json: children_l4, l4_status=PLANNED_NOT_EXECUTED, planning_state=SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED, specification.l4_status/execution_status",
         "9 L2.json: l4_status, planned_l4_count_m08, definition.l3_l4_status (M03 L2-04-01: 44 L4)",
         "M08 L1.json: l4_count 221, l4_count_in_tree 177, l4_placed_by_milestone, l3_spec_tree_by_milestone, execution_readiness (gate E13, source_audit_status REMOTE_REVIEW_ONLY_NO_LOCAL_BUILD)",
-        "OM9_Milestones/M08 - Advanced Jewelry Modeling/reference/m08-l4/: 8 tài liệu gói (manifest JSON/CSV, packaging report, self review, release gate, Luna handoff, README)"
+        "OM9_Milestones/M08 - Jewelry Modeling/reference/m08-l4/: 8 tài liệu gói (manifest JSON/CSV, packaging report, self review, release gate, Luna handoff, README)"
       ],
       "implementation_samples": "221 L4 M08 được sinh khối implementation_samples + implementation_sample_guide bằng tools/apply_implementation_samples.py (thêm M08 vào MILESTONES, alias MENU_BINDING→INTEGRATE). Vai trò: CONTRACT_TEST 73, ACCEPTANCE 73, IMPLEMENT 51, REGRESSION_STRESS 24.",
       "tooling_changes": [

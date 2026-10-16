@@ -1,0 +1,123 @@
+{
+  "schema": "om9.m01.ui_review.v1",
+  "task_id": "OM9-L4-01-01-001-05",
+  "l3_id": "OM9-L3-01-01-001",
+  "l3_title": "Application Startup And Main Window",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "utc": "2026-10-16",
+  "positive_oracle": "Desktop main process starts one window with OpenMatrix9 title, empty doc, error route",
+  "negative_oracle": "No GPU/OCCT startup failure should show diagnostic, not silent exit",
+  "runtime": {
+    "window_count": 1,
+    "window_title": "OpenMatrix9 — Untitled",
+    "window_title_prefix_matches_product": true,
+    "graphics": {
+      "adapter": "NVIDIA GeForce RTX 3060",
+      "vendor_id": 4318,
+      "device_id": 9476,
+      "device_type": "DiscreteGpu",
+      "driver": "NVIDIA 610.88",
+      "backend": "Vulkan",
+      "fallback_used": false,
+      "fallback_diagnostic_when_absent": "GPU adapter unavailable: running the software fallback; 3D performance is not representative"
+    },
+    "document": {
+      "name": "Untitled",
+      "objects_after_replay": 1,
+      "undo_after_replay": 1,
+      "dirty_marker_in_title": true
+    },
+    "viewports": ["Looking Down", "Perspective", "Side View", "Through Finger"],
+    "left_menu_sections": [
+      "icon-history",
+      "main-menu",
+      "display",
+      "snaps",
+      "info-settings",
+      "layers",
+      "projects",
+      "builder-slot"
+    ],
+    "status_kind": "Ready",
+    "command_line_present": true,
+    "audit_checks": [
+      "CMD line accepted once",
+      "actual CMD Undo",
+      "actual CMD Redo",
+      "Esc canceled draft without publication"
+    ],
+    "audit_receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-001-startup/ui-receipt.json",
+    "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-001-startup/workspace.png",
+    "screenshot_sha256": "7f33d63c445c78075a832e358a722940d2b5fb12df611648c0e71c644644a492",
+    "exit_code": 0
+  },
+  "negative_runtime": {
+    "case": "start the UI with a document path that does not exist",
+    "command": "om9.exe --ui <missing>.om9  (OM9_STARTUP_DIALOG=0, OM9_UI_LAYOUT=<temp>)",
+    "exit_code": 1,
+    "stderr": "OM9: OpenMatrix9 could not start (document): I/O: The system cannot find the file specified. (os error 2)",
+    "receipt": "OM9-L4-01-01-001-05.startup-failure.receipt.json",
+    "receipt_sha256": "38d7866183f2a3f98ccdad42cffc8ef5346d468b9fa4da49b215ab0dddb91384",
+    "receipt_schema": "om9.startup.failure.v1",
+    "receipt_stage": "document",
+    "document_unchanged": true,
+    "layout_not_written": true,
+    "silent_exit": false
+  },
+  "checks_run": {
+    "focused": "cargo test -p om9-app --lib startup / window_identity_guard / --test startup_contract",
+    "fixtures": [
+      "implementation/fixtures/M01/OM9-L3-01-01-001/positive.json",
+      "implementation/fixtures/M01/OM9-L3-01-01-001/negative.json"
+    ],
+    "regression": "OM9-L4-01-01-001-05.regression.log (workspace tests, fmt, check, clippy)"
+  },
+  "manual_reviewer_checklist": [
+    {
+      "step": "Open OpenMatrix9 from the desktop launcher and watch the first frame",
+      "expected": "one window titled OpenMatrix9, four Matrix viewports, left menu column in the documented order, status line showing Ready",
+      "observed_by_agent": "audit receipt and screenshot above",
+      "reviewer_decision": null
+    },
+    {
+      "step": "Roll up and expand one menu title bar, then drag one above another",
+      "expected": "the menu keeps its state, the order changes, the document keeps its objects and undo",
+      "observed_by_agent": "covered by OM9-L2-01-01 L3-003 tests; not seen by a human reviewer",
+      "reviewer_decision": null
+    },
+    {
+      "step": "Run a command from the command line, Undo, Redo, then Esc during a preview",
+      "expected": "object appears, undo/redo restore the same IDs, Esc publishes nothing",
+      "observed_by_agent": "audit checks above",
+      "reviewer_decision": null
+    },
+    {
+      "step": "Trigger a failed start (open a document that does not exist from the launcher)",
+      "expected": "a visible diagnostic and a receipt, never a silent exit",
+      "observed_by_agent": "negative_runtime above with OM9_STARTUP_DIALOG=0",
+      "reviewer_decision": null
+    },
+    {
+      "step": "Repeat on a machine with the display scaled to 150% and with a second monitor",
+      "expected": "no lost or off-screen menu; the layout stays reachable",
+      "observed_by_agent": "not performed; DPI/multi-monitor acceptance remains open",
+      "reviewer_decision": null
+    }
+  ],
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "required": "a human reviewer on Windows, per the plan manual gate",
+    "reason": "the agent may not sign acceptance"
+  },
+  "gate": {
+    "m01_ui": "OPEN",
+    "m00": "NOT_SIGNED",
+    "note": "no OM9_Milestones status is promoted by this record"
+  },
+  "remaining": [
+    "human visual review of the startup frame and the failed-start dialog",
+    "DPI scaling and multi-monitor pass",
+    "automatic graphics step-down between runs (upstream safe_graphics has no OM9 equivalent yet)"
+  ]
+}

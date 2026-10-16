@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path("H:/OpenMatrix9")
 INCOMING = ROOT / "build/m07-incoming/OpenMatrix9/planning/M07"
-MS = ROOT / "OM9_Milestones/M07 - Cutters and Manufacturing Validation"
+MS = ROOT / "OM9_Milestones/M07 - Cutters"
 
 
 def tokens(text: str):

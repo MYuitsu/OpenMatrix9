@@ -1,0 +1,1113 @@
+task: OM9-L4-01-01-001-05 regression
+utc: 2026-10-16T02:36:18Z
+
+== cargo test --workspace ==
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.68s
+     Running unittests src\lib.rs (target\debug\deps\om9_app-3a2356c5e25e2c74.exe)
+
+running 39 tests
+test startup::tests::dialog_is_opt_out_for_automation_only ... ok
+test startup::tests::adapter_note_explains_the_software_fallback ... ok
+test startup::tests::detail_is_bounded_on_char_boundaries_and_newlines_are_folded ... ok
+test startup::tests::failure_line_names_the_stage_and_keeps_the_detail ... ok
+test status_surface::tests::failure_survives_a_later_success_and_clears_only_on_acknowledge ... ok
+test startup::tests::app_config_refuses_an_unusable_start_before_any_window_exists ... ok
+test status_surface::tests::messages_are_bounded_on_char_boundaries_and_newlines_are_folded ... ok
+test status_surface::tests::revision_changes_only_when_the_visible_state_changes ... ok
+test dock_layout::tests::reorder_moves_only_the_requested_menu_and_keeps_other_state ... ok
+test dock_layout::tests::narrow_window_yields_the_right_column_and_keeps_command_line ... ok
+test dock_layout::tests::builder_area_defaults_to_the_space_below_projects ... ok
+test dock_layout::tests::resolve_is_total_for_degenerate_and_nonfinite_windows ... ok
+test dock_layout::tests::clamp_floats_recovers_menus_dragged_outside_the_window ... ok
+test dock_layout::tests::default_left_column_matches_the_documented_matrix_order ... ok
+test status_surface::tests::tail_is_bounded_and_ordered_oldest_first ... ok
+test dock_layout::tests::unknown_panel_and_section_keys_are_reported_and_repaired ... ok
+test dock_layout::tests::dock_right_mirrors_the_left_column_and_float_needs_a_rectangle ... ok
+test dock_layout::tests::removed_section_is_restored_and_orders_stay_dense ... ok
+test dock_layout::tests::schema_one_and_unknown_versions_reset_to_the_documented_default ... ok
+test report::tests::report_admission_failure_writes_no_partial_success ... ok
+test dock_layout::tests::round_trip_persists_menu_identity_visibility_and_order ... ok
+test ui::file_success_audit::tests::restore_comparison_requires_renewal_and_rejects_other_content_changes ... ok
+test window_identity_guard::the_signal_catches_a_window_named_only_by_its_title ... ok
+test dock_layout::tests::save_reload_and_reset_menus_keep_document_scope_out ... ok
+test dock_layout::tests::load_reports_missing_corrupt_and_oversized_files_as_default ... ok
+test startup::tests::receipt_is_bounded_json_that_replaces_the_previous_failure ... ok
+test window_identity_guard::every_window_of_the_application_carries_an_identity ... ok
+test ui::file_success_audit::tests::missing_owned_overwrite_never_injects_an_accept_click ... ok
+test ui::chrome::chrome_tests::view_selection_requests_cmd_focus_without_erasing_numeric_input ... ok
+test ui::files::tests::minimized_logic_vetoes_dirty_close_and_retains_one_prompt_owner ... ok
+test ui::files::tests::minimized_logic_vetoes_stale_close_approval ... ok
+test icons::tests::feature_and_menu_aliases_share_cached_rasters_and_unknowns_are_neutral ... ok
+test icons::tests::every_embedded_authored_svg_renders_visible_pixels ... ok
+test ui::chrome::chrome_tests::sidebar_wrapping_and_toolbar_scrolling_keep_a_240px_allocation ... ok
+test ui::layer_dialog_audit::tests::startup_focus_wait_is_bounded_and_never_fabricates_os_focus ... ok
+test ui::layer_dialog_audit::tests::absent_rename_modal_never_receives_synthetic_text_in_cmd ... ok
+test ui::layer_dialog_audit::tests::ordinary_advanced_click_records_acceptance_without_reentrant_context_lock ... ok
+test ui::files::tests::real_adapter_error_keeps_file_owner_and_draft_and_requires_explicit_retry ... ok
+test ui::layer_dialog_audit::tests::long_advanced_gesture_is_reported_before_replay_can_edit_cmd ... ok
+
+test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+
+     Running unittests src\main.rs (target\debug\deps\om9-7ba02bdba66ce788.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\chrome_actions.rs (target\debug\deps\chrome_actions-8e431e89d9d4e80b.exe)
+
+running 5 tests
+test help_popup_contains_help_and_about_without_feature_catalog_actions ... ok
+test display_toolbar_tab_does_not_reuse_enabled_geometry_palette ... ok
+test view_tab_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test snaps_are_noninvoking_even_where_the_old_sidebar_displayed_point_and_line ... ok
+test view_menu_restores_cmd_focus_and_preserves_numeric_draft ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+
+     Running tests\cold_layers.rs (target\debug\deps\cold_layers-9a65f7756288b69a.exe)
+
+running 4 tests
+test independent_process_restores_unicode_preset_and_independent_hidden_flags ... ok
+test independent_owned_process_restores_layer_current_and_explicit_object_preferences ... ok
+test fresh_owned_process_restores_actual_dialog_commits_and_rejects_the_old_handle ... ok
+test actual_cli_explicitly_migrates_v3_then_fresh_process_reopens_v4_without_inferred_slot ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.02s
+
+     Running tests\cold_reopen.rs (target\debug\deps\cold_reopen-d47076d5a5501f5a.exe)
+
+running 9 tests
+test corrupt_archive_causes_real_process_failure_without_success_json ... ok
+test runtime_migration_overflow_rejects_before_replacing_original_schema1_file ... ok
+test schema4_cold_process_preserves_namespaces_current_edits_tombstones_and_original_unit_context ... ok
+test fresh_process_hydrates_embedded_resource_after_original_file_is_removed ... ok
+test audit_process_reports_loaded_document_and_waits_for_its_owner_to_release ... ok
+test persistent_report_hash_keeps_recipe_parameters_named_like_session_fields ... ok
+test actual_standalone_process_creates_and_cold_reopens_owned_om9_document ... ok
+test actual_process_requires_explicit_v1_upgrade_and_preserves_durable_identity ... ok
+test actual_schema2_upgrade_preserves_embedded_bytes_and_does_not_invent_native_sources ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running tests\command_sessions.rs (target\debug\deps\command_sessions-6a69eb265fb35f00.exe)
+
+running 6 tests
+test unavailable_command_and_unknown_options_cannot_publish_or_replace_active_session ... ok
+test both_sides_uses_start_as_midpoint_and_empty_enter_never_repeats_active_session ... ok
+test numeric_cmd_points_use_page_units_and_captured_cplane_exactly_once ... ok
+test cancel_and_invalid_second_point_preserve_world_and_executable_redo ... ok
+test menu_cmd_and_f6_dispatch_the_same_line_phases_and_atomic_commit ... ok
+test scene_is_derived_from_published_document_and_recent_icons_hold_nine_completed_commands ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\command_transcript.rs (target\debug\deps\command_transcript-73e3ef3019c58813.exe)
+
+running 3 tests
+test paste_only_changes_draft_and_submit_is_an_explicit_separate_action ... ok
+test one_surface_keeps_history_and_prompt_protected_with_unicode_char_indices ... ok
+test recall_down_restores_pending_draft_and_history_is_bounded_without_utf8_damage ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\file_lifecycle.rs (target\debug\deps\file_lifecycle-dfb9afe58f5da03b.exe)
+
+running 20 tests
+test file_and_layer_dialogs_cannot_overlap_owners ... ok
+test file_tokens_are_foreign_consumed_and_stale_after_undo_roundtrip ... ok
+test dirty_new_cancel_preserves_pending_line_and_discard_replaces_only_after_acceptance ... ok
+test old_overwrite_confirmation_cannot_authorize_reselected_destination ... ok
+test close_clean_or_discard_keeps_document_and_history_until_native_shutdown ... ok
+test close_cancel_save_failure_and_stale_consent_cannot_approve_shutdown ... ok
+test open_invalid_or_missing_candidate_keeps_document_scene_command_and_redo ... ok
+test missing_replay_module_is_diagnostic_and_not_a_clean_restore ... ok
+test rejected_picker_reply_is_consumed_even_if_the_path_later_becomes_valid ... ok
+test save_as_cancel_failure_and_unsupported_format_preserve_identity_and_target ... ok
+test save_as_existing_destination_requires_explicit_overwrite_and_cancel_preserves_bytes ... ok
+test failing_save_to_active_path_does_not_turn_into_a_save_as_picker ... ok
+test consumed_save_picker_reply_cannot_become_a_later_open_selection ... ok
+test new_save_failure_or_path_cancel_does_not_discard_old_document ... ok
+test save_clean_marker_tracks_undo_redo_and_different_same_revision_branch ... ok
+test same_file_open_renews_runtime_authority_and_invalidates_old_modal_tokens ... ok
+test first_save_and_subsequent_save_preserve_model_undo_and_redo ... ok
+test close_save_first_path_and_known_path_preserve_geometry_undo ... ok
+test save_keeps_hidden_locked_off_layers_and_explicit_preferences_in_complete_document ... ok
+test open_candidate_must_fit_alongside_old_world_scene_and_undo ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.69s
+
+     Running tests\file_lifecycle_cold.rs (target\debug\deps\file_lifecycle_cold-f22dee98e430033e.exe)
+
+running 1 test
+test controller_saved_documents_survive_new_open_and_independent_cold_inspection ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.89s
+
+     Running tests\file_widgets.rs (target\debug\deps\file_widgets-c4ba3f0bbb8ef465.exe)
+
+running 21 tests
+test ui_startup_from_file_keeps_active_path_and_missing_module_diagnostics ... ok
+test file_menu_and_cmd_dispatch_owned_intents_through_same_controller ... ok
+test clean_close_accepts_and_other_file_owner_defers_close ... ok
+test cmd_enter_opens_prompt_without_saving_and_ime_enter_cannot_affirm_it ... ok
+test window_close_discard_requests_shutdown_without_replacing_old_document ... ok
+test toolbar_new_opens_unsaved_prompt_and_escape_keeps_line_draft_and_redo ... ok
+test window_close_cancel_and_repeated_requests_keep_line_draft_and_same_prompt ... ok
+test window_close_first_save_picker_cancel_preserves_document_and_draft ... ok
+test cmd_composition_transfers_to_file_prompt_until_commit ... ok
+test ime_commit_enter_and_escape_wait_for_a_fresh_key_after_composition ... ok
+test shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save ... ok
+test close_save_failure_at_active_path_keeps_prompt_draft_and_path ... ok
+test owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner ... ok
+test held_opening_enter_cannot_accept_save_on_the_new_prompt ... ok
+test actual_save_control_routes_pending_new_without_a_second_geometry_undo ... ok
+test overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace ... ok
+test discard_new_resets_runtime_only_after_actual_button_and_blocks_canvas_input ... ok
+test failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo ... ok
+test real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once ... ok
+test old_discard_or_cancel_pointer_release_cannot_answer_a_new_prompt_owner ... ok
+test thirty_closed_file_prompts_reuse_area_state_and_keep_cmd_editor ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.18s
+
+     Running tests\layer_controller.rs (target\debug\deps\layer_controller-6989dc54320ec3d2.exe)
+
+running 9 tests
+test parser_uses_slot_identity_custom_label_none_and_closed_bounded_input ... ok
+test selection_filters_hidden_definition_members_and_counts_before_source_allocation ... ok
+test pending_line_preserves_start_both_sides_and_binds_current_at_acceptance ... ok
+test lazy_assign_keeps_current_and_is_one_undo_without_partial_creation_on_failure ... ok
+test group_mixed_toggle_keeps_hidden_and_explicit_selectable_preferences ... ok
+test quoted_numeric_none_and_zero_labels_resolve_owned_identity ... ok
+test layer_cmd_creates_only_its_group_and_does_not_assign_existing_objects ... ok
+test off_current_accepts_invisible_output_locked_current_refuses_without_losing_draft ... ok
+test nested_scene_metadata_and_new_point_refuse_aggregate_budget_without_mutation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests\layer_dialogs.rs (target\debug\deps\layer_dialogs-ec67e7527c867a11.exe)
+
+running 11 tests
+test open_cancel_does_not_materialize_lazy_layers_or_consume_redo ... ok
+test basic_lights_and_conflicting_dialog_requests_refuse_before_mutation ... ok
+test hidden_snapshot_count_is_admitted_before_allocation ... ok
+test empty_show_confirmation_needs_no_mutation_buffers_in_a_tight_budget ... ok
+test selective_show_changes_only_chosen_hidden_flag_and_keeps_canvas_selection_and_masks ... ok
+test old_and_foreign_tokens_cannot_mutate_a_new_dialog_or_a_reopened_document ... ok
+test rename_confirmation_materializes_one_group_without_changing_current_or_objects ... ok
+test invalid_names_leave_dialog_editable_and_document_unchanged ... ok
+test undo_roundtrip_does_not_revive_a_dialog_snapshot ... ok
+test empty_confirmation_and_existing_customization_noop_preserve_redo ... ok
+test color_confirmation_refreshes_by_layer_scene_and_preserves_alpha_identity_and_geometry ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\layer_widgets.rs (target\debug\deps\layer_widgets-f7c52eb292f75cca.exe)
+
+running 19 tests
+test default_rows_are_lazy_advanced_collapsed_and_fit_sidebar ... ok
+test command_acceptance_keeps_layer_hit_regions_at_the_rendered_locations ... ok
+test current_widget_rebinds_pending_line_without_erasing_numeric_draft ... ok
+test real_name_swatch_and_arrow_keep_current_separate_from_assignment_and_filter_selection ... ok
+test shift_right_advanced_name_opens_rename_modal_without_materializing_layers ... ok
+test release_of_old_dialog_ok_cannot_confirm_a_new_token ... ok
+test advanced_expand_collapse_and_group_bar_use_stable_nonsequential_label_order ... ok
+test rename_modal_escape_preserves_pending_line_and_numeric_draft ... ok
+test stale_modal_dismissal_and_old_ok_click_cannot_publish_pending_line ... ok
+test closing_rename_removes_its_editor_state_without_removing_cmd_state ... ok
+test modal_ime_commit_enter_does_not_publish_or_cancel_pending_command ... ok
+test actual_hide_show_and_lock_visibility_preserve_explicit_preferences ... ok
+test rename_modal_text_and_ok_publish_only_label_and_rebind_pending_line ... ok
+test hidden_modal_virtualizes_large_snapshot_and_keeps_every_owned_choice ... ok
+test invalid_rgb_text_cannot_silently_confirm_an_unchanged_color ... ok
+test color_modal_keyboard_edit_ok_and_cancel_do_not_change_current_or_membership ... ok
+test selective_show_checkbox_ids_distinguish_duplicate_labels_and_cancel_keeps_hidden ... ok
+test hidden_choice_long_and_multiline_labels_keep_fixed_clickable_rows ... ok
+test repeated_closed_dialogs_keep_modal_area_and_scroll_state_bounded ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.38s
+
+     Running tests\pinned_command.rs (target\debug\deps\pinned_command-7f41e417b594d9f5.exe)
+
+running 7 tests
+test pinned_row_pointer_edits_unicode_suffix_and_preserves_prompt ... ok
+test dragging_from_pinned_suffix_to_history_selects_and_copies_the_same_document ... ok
+test paste_that_retires_unicode_history_recomputes_layout_boundary_without_panicking ... ok
+test viewport_title_click_preserves_numeric_draft_and_enter_accepts_it ... ok
+test ime_confirmation_enter_cannot_execute_provisional_command_or_coordinate ... ok
+test live_command_is_pinned_and_unwrapped_while_history_scrolls_and_copies_as_one_document ... ok
+test dragging_scrolled_history_into_pinned_row_keeps_shared_selection ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.79s
+
+     Running tests\scene_allocation_peak.rs (target\debug\deps\scene_allocation_peak-6ad598dcb1801978.exe)
+
+running 1 test
+test moving_reallocation_cannot_exceed_admitted_nested_scene_or_cloud_peak ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.51s
+
+     Running tests\shell_docking.rs (target\debug\deps\shell_docking-f4394c0e6f922688.exe)
+
+running 10 tests
+test a_schema_one_layout_file_resets_with_a_diagnostic_instead_of_crashing ... ok
+test left_column_renders_the_documented_sections_with_builders_below_projects ... ok
+test builder_area_stays_reserved_and_non_interactive ... ok
+test the_left_rail_and_command_line_keep_their_documented_bounds ... ok
+test menus_dock_to_the_right_mirror_column_and_back ... ok
+test a_floated_menu_keeps_its_rectangle_and_docks_back ... ok
+test narrow_window_yields_the_right_column_and_keeps_command_line_and_canvas ... ok
+test reset_and_reload_menus_follow_the_documented_commands ... ok
+test invalid_command_stays_visible_in_the_status_surface_and_the_transcript ... ok
+test rolling_up_a_title_bar_keeps_its_state_and_persists ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s
+
+     Running tests\startup_contract.rs (target\debug\deps\startup_contract-942ddd82146fedd3.exe)
+
+running 3 tests
+test a_failed_start_leaves_the_document_and_the_layout_untouched ... ok
+test negative_fixture_reports_every_start_failure_instead_of_exiting_silently ... ok
+test positive_fixture_starts_one_window_with_the_openmatrix9_title_and_an_empty_document ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests\ui_events.rs (target\debug\deps\ui_events-b65fe4f74a6d79fa.exe)
+
+running 6 tests
+test reference_workspace_places_sidebar_left_and_through_finger_below_looking_down ... ok
+test construction_grid_colors_only_positive_axes_like_the_reference ... ok
+test printable_viewport_input_routes_to_cmd_when_no_other_editor_owns_focus ... ok
+test actual_editor_select_all_cut_paste_cannot_mutate_transcript_prefix_or_execute_paste ... ok
+test f6_remains_open_between_frames_and_unpinned_escape_restores_command_focus ... ok
+test rendered_cmd_events_build_line_undo_redo_and_cancel_without_direct_model_writes ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s
+
+     Running tests\viewport_title_menu.rs (target\debug\deps\viewport_title_menu-e10bceece8d9f9d4.exe)
+
+running 17 tests
+test layout_roundtrip_keeps_views_exact_but_does_not_revive_a_previous_capture ... ok
+test workspace_snapshot_restore_cannot_revive_a_used_menu ... ok
+test fresh_layout_clock_with_copied_view_states_cannot_reset_menu_authority ... ok
+test wireframe_changes_only_captured_view_and_no_op_preserves_revision ... ok
+test mismatched_view_key_cannot_redirect_menu_to_a_neighbor ... ok
+test wireframe_with_exhausted_revision_refuses_before_any_layout_or_camera_change ... ok
+test foreign_closed_and_replaced_view_capture_rejects_even_with_equal_visible_state ... ok
+test render_plugin_and_unimplemented_modes_refuse_without_changing_any_view_or_model ... ok
+test changed_document_or_target_view_invalidates_popup_without_resetting_prior_state ... ok
+test captured_maximize_preserves_model_redo_pending_point_and_all_camera_poses ... ok
+test replacing_target_view_dismisses_popup_before_command_input_resumes ... ok
+test keyboard_enter_activates_focused_menu_item_and_returns_to_command_draft ... ok
+test escape_closes_title_popup_and_preserves_numeric_draft_and_pending_command ... ok
+test outside_canvas_click_only_dismisses_popup_and_preserves_pending_point ... ok
+test long_title_menu_scrolls_to_last_reference_item_in_a_short_window ... ok
+test title_popup_has_reference_actions_instead_of_the_old_three_entry_stub ... ok
+test popup_keyboard_cannot_commit_command_after_tab_reaches_editor ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.41s
+
+     Running unittests src\lib.rs (target\debug\deps\om9_archive-f59e6ac9dde2556a.exe)
+
+running 1 test
+test restore::admission_tests::two_diagnostic_owners_are_reserved_before_restoration_grows_them ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\atomic_save.rs (target\debug\deps\atomic_save-1c6f3e1ecdb681be.exe)
+
+running 4 tests
+test canceled_and_invalid_save_preserve_good_destination_and_remove_staging ... ok
+test destination_permission_failure_preserves_existing_file_and_removes_staging ... ok
+test validation_copy_shares_point_budget_with_live_model_before_file_mutation ... ok
+test successful_same_volume_replacement_reopens_current_document ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\container_admission.rs (target\debug\deps\container_admission-d85310ea370737cb.exe)
+
+running 8 tests
+test overlapping_chunks_are_rejected_even_with_valid_payload_checksums ... ok
+test duplicate_json_identity_is_rejected_without_silent_last_record_wins ... ok
+test uuid_spelling_aliases_cannot_overwrite_a_different_master_during_typed_decode ... ok
+test offset_and_length_overflow_are_rejected_before_payload_allocation ... ok
+test checksum_truncation_version_and_trailing_payload_corruption_reject ... ok
+test aggregate_json_nodes_and_strings_are_preflighted_before_typed_decode ... ok
+test unknown_fields_and_missing_required_metadata_do_not_migrate_implicitly ... ok
+test typed_document_roundtrip_preserves_master_identity_basis_attributes_and_channels ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\definition_units.rs (target\debug\deps\definition_units-f0f04b8e0959ea11.exe)
+
+running 2 tests
+test definition_units_roundtrip_preserves_native_and_source_identity_in_schema4 ... ok
+test cold_archive_reopens_explicit_declared_and_unresolved_definition_units_without_external_source ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\layer_schema.rs (target\debug\deps\layer_schema-ec25ae9c1c27638c.exe)
+
+running 6 tests
+test legacy_migration_rejects_new_fields_even_when_false_or_null ... ok
+test schema4_roundtrip_keeps_preset_hidden_explicit_permissions_and_uuid ... ok
+test schema3_requires_explicit_migration_and_invents_no_slots_from_names ... ok
+test schema3_migration_cancel_overflow_and_budget_preserve_original_file ... ok
+test legacy_definition_attributes_refuse_hidden_but_cloud_hidden_is_preserved ... ok
+test schema4_corrupt_slots_labels_and_basic_palette_are_rejected_on_decode ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\resource_chunks.rs (target\debug\deps\resource_chunks-02b35466b6fac908.exe)
+
+running 8 tests
+test schema1_migration_cannot_synthesize_payload_or_accept_hidden_resource_chunks ... ok
+test missing_or_unreferenced_resource_chunks_reject_even_with_valid_container_checksums ... ok
+test legacy_schema1_requires_explicit_migration_with_empty_resources_and_unchanged_ids ... ok
+test mismatched_resource_identity_length_hash_and_duplicates_cannot_be_hydrated ... ok
+test schema4_resources_are_binary_chunks_and_hydrated_exactly_without_external_paths ... ok
+test ordinary_recipe_option_names_are_not_misinterpreted_as_uuid_table_paths ... ok
+test schema2_migration_preserves_binary_resources_without_inventing_source_provenance ... ok
+test aggregate_container_plus_document_and_payload_copy_is_admitted_before_hydration ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\restore_modules.rs (target\debug\deps\restore_modules-ec253e1eb0a90992.exe)
+
+running 6 tests
+test missing_replay_module_keeps_geometry_but_marks_recipe_and_result_unresolved_stale ... ok
+test solver_version_mismatch_never_acquires_clean_replay_from_similar_name ... ok
+test schema_one_legacy_owner_fields_migrate_without_promoting_stale_source_stamps ... ok
+test matching_registered_replay_key_rebinds_only_verified_current_session_stamps ... ok
+test two_independent_restores_of_the_same_bytes_have_distinct_owner_sessions ... ok
+test restoration_keeps_long_diagnostics_owned_at_the_source_parser_admission_boundary ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src\lib.rs (target\debug\deps\om9_core-2b6150d831d04071.exe)
+
+running 3 tests
+test retained::indexed_reconciliation_tests::aggregate_held_owners_refuse_reconciliation_scratch_before_changing_disposition ... ok
+test retained::indexed_reconciliation_tests::indexed_reconciliation_rejects_live_reparented_members_and_deleted_parent_aliases ... ok
+test retained::indexed_reconciliation_tests::indexed_reconciliation_keeps_original_member_baselines_and_marks_missing_members_deleted ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\atomic_transactions.rs (target\debug\deps\atomic_transactions-2b3888df7cc72be1.exe)
+
+running 16 tests
+test legacy_nil_session_is_format_data_until_explicit_runtime_restore ... ok
+test close_and_reopen_of_a_document_clone_cannot_restore_an_old_owner_stamp ... ok
+test revision_overflow_rejects_before_public_state_or_redo_changes ... ok
+test source_document_close_invalidates_job_without_resurrection ... ok
+test postacceptance_notification_failure_reports_committed_receipt ... ok
+test undo_of_new_insert_does_not_make_its_uuid_available_for_another_object ... ok
+test no_op_commit_never_erases_redo_or_creates_empty_group ... ok
+test intervening_commit_and_undo_do_not_resurrect_a_prepared_job ... ok
+test accepted_move_is_one_atomic_undo_and_redo ... ok
+test cancellation_after_prepare_keeps_every_record_and_redo ... ok
+test invalid_source_keeps_immediate_state_and_executable_prior_redo ... ok
+test cross_document_prepare_failure_never_transfers_first_participant ... ok
+test preacceptance_callback_cannot_mutate_or_veto_with_partial_state ... ok
+test panicking_callback_is_rejected_and_barrier_is_released ... ok
+test cross_document_move_undo_restores_both_document_owners ... ok
+test deleted_uuid_cannot_be_reallocated_to_resurrect_an_old_source_stamp ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\cancellation_links.rs (target\debug\deps\cancellation_links-b5c84e10e0eb302d.exe)
+
+running 3 tests
+test cancellation_union_deduplicates_shared_flags_and_bounds_distinct_owners ... ok
+test cancellation_union_is_transitive_and_own_cancel_remains_shared ... ok
+test cancellation_union_observes_both_original_owners ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\capability_gates.rs (target\debug\deps\capability_gates-99306f7beeaac60a.exe)
+
+running 4 tests
+test source_presence_never_enables_a_capability ... ok
+test commit_requires_actual_target_receipt_and_failed_or_legacy_receipt_is_insufficient ... ok
+test native_subset_needs_matching_native_abi_closure_and_runtime_receipts ... ok
+test matching_semantic_receipt_enables_only_declared_internal_rust_family ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\coordinator_authority.rs (target\debug\deps\coordinator_authority-85f640ccb2dd9d8d.exe)
+
+running 2 tests
+test prepared_transaction_cannot_publish_into_an_equal_coordinator_sharing_the_world ... ok
+test aborting_a_caller_cannot_revive_a_prepared_global_transaction ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\coordinator_held_startup.rs (target\debug\deps\coordinator_held_startup-2207bebabeca3ee0.exe)
+
+running 1 test
+test externally_held_startup_is_rejected_before_new_authority_allocation ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\curve_oracles.rs (target\debug\deps\curve_oracles-3837220c13efb24e.exe)
+
+running 9 tests
+test analytic_circle_d0_d1_d2_d3_use_native_radians_and_world_frame ... ok
+test circle_native_parameter_mapping_preserves_phase_and_scales_every_derivative ... ok
+test endpoints_are_one_sided_and_parameters_outside_domain_reject ... ok
+test interior_discontinuity_cannot_claim_unqualified_derivative ... ok
+test captured_curve_evaluator_retains_admission_limits_and_uses_polynomial_oracle ... ok
+test overflowing_native_parameter_span_never_produces_a_false_finite_line_value ... ok
+test mapped_circle_fraction_derivatives_do_not_overflow_canceling_native_scales ... ok
+test rational_quadratic_has_nonzero_third_derivative_from_quotient ... ok
+test reversed_fraction_derivatives_scale_each_order_without_translating_vectors ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\definition_units.rs (target\debug\deps\definition_units-25af12571e3a05d9.exe)
+
+running 8 tests
+test earlier_source_units_without_definition_context_remain_compatible ... ok
+test definition_resolution_requires_a_native_definition_in_its_source_namespace ... ok
+test definition_unit_map_rejects_uuid_aliases_and_duplicate_keys_before_the_value ... ok
+test definition_context_owned_name_capacity_is_admitted ... ok
+test unresolved_definition_units_are_retained_without_fabricating_a_resolution ... ok
+test explicit_definition_units_survive_owned_serialization_and_are_distinct_from_model_units ... ok
+test nonfinite_declared_resolution_and_unresolved_bound_definitions_reject ... ok
+test incomplete_conflicting_or_nonpositive_definition_resolutions_reject ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\embedded_resources.rs (target\debug\deps\embedded_resources-6be3e120d7dd12ec.exe)
+
+running 3 tests
+test resource_admission_counts_payload_copy_peak_and_rejects_bad_metadata ... ok
+test admitted_resource_owns_immutable_bytes_hash_and_typed_identity ... ok
+test descriptor_without_matching_payload_is_not_a_valid_live_document ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\held_preparation.rs (target\debug\deps\held_preparation-2285d2be7f87647f.exe)
+
+running 6 tests
+test prepared_receipt_reservation_checks_bound_cancellation ... ok
+test held_output_reservation_uses_the_same_counter_as_new_mutations ... ok
+test prepared_receipt_reservation_cannot_cross_coordinator_or_caller_lifecycle ... ok
+test external_input_is_reserved_before_preparing_a_candidate_and_undo ... ok
+test extending_prepared_receipt_reserves_full_candidate_and_failure_keeps_old_reservation ... ok
+test prepared_receipt_reservation_replaces_all_counters_instead_of_accumulating_old_metadata ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\history_replay.rs (target\debug\deps\history_replay-7a9f49db9ba1a9cb.exe)
+
+running 7 tests
+test mismatch_between_shape_snapshot_result_and_source_stamp_rejects_all_outputs ... ok
+test cycle_is_rejected_before_graph_or_shape_mutation ... ok
+test geometry_result_recipe_and_metadata_publish_in_one_undo_group ... ok
+test history_child_geometry_lock_does_not_block_reference_input_or_appearance ... ok
+test missing_parent_is_unresolved_without_rebinding_same_label ... ok
+test replay_preserves_child_identity_and_current_source_revision ... ok
+test source_change_marks_two_generations_dirty_and_old_results_stale ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\job_lifecycle.rs (target\debug\deps\job_lifecycle-c1b0736f0b1b50af.exe)
+
+running 5 tests
+test worker_budget_uses_floor_sixty_percent_without_four_worker_ceiling ... ok
+test canceled_and_duplicate_late_replies_never_become_ready ... ok
+test immutable_worker_input_survives_close_and_reply_is_discarded ... ok
+test commit_then_undo_still_invalidates_job_even_when_source_stamp_matches_again ... ok
+test active_savepoints_share_aggregate_budget_with_next_private_clone ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_state.rs (target\debug\deps\layer_state-952188f9805c9bca.exe)
+
+running 7 tests
+test hidden_masks_all_interaction_without_mutating_explicit_selectability ... ok
+test restored_custom_labels_cannot_collide_but_generic_import_names_can ... ok
+test preset_slot_is_durable_identity_not_label_and_duplicate_slots_refuse ... ok
+test basic_preset_palette_cannot_be_customized_on_creation_or_restore ... ok
+test two_proposed_advanced_renames_cannot_collide_in_one_batch ... ok
+test preset_updates_keep_slot_identity_and_reject_basic_customization_and_reserved_aliases ... ok
+test hiding_and_showing_do_not_restore_explicit_invisible_or_unselectable_state ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_transactions.rs (target\debug\deps\layer_transactions-663c5fca1ae6e9f2.exe)
+
+running 12 tests
+test layer_revision_overflow_and_new_layer_node_budget_preserve_immediate_world ... ok
+test one_batch_cannot_lock_a_target_then_assign_using_its_old_permission ... ok
+test cycle_locked_current_and_cancel_reject_before_any_publication ... ok
+test current_noop_at_full_history_budget_succeeds_and_keeps_prior_redo ... ok
+test foreign_coordinator_and_reopened_equal_counter_document_reject_layer_capture ... ok
+test lazy_create_and_current_are_one_undo_and_retired_uuid_cannot_be_reused ... ok
+test mixed_assignment_locked_source_refuses_whole_batch_and_preserves_redo ... ok
+test assign_changes_membership_and_color_atomically_without_changing_current_or_placement ... ok
+test current_only_preserves_existing_entities_and_noop_keeps_executable_redo ... ok
+test caller_savepoint_rollback_retires_created_layer_and_keeps_global_redo ... ok
+test oversized_assignment_capture_and_late_cancel_keep_world_and_old_redo ... ok
+test visibility_lock_and_unlock_preserve_explicit_object_preferences ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\lazy_layer_assignment.rs (target\debug\deps\lazy_layer_assignment-5f859c012a8ced58.exe)
+
+running 1 test
+test create_and_assign_new_preset_is_one_atomic_undo_in_either_request_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\model_admission.rs (target\debug\deps\model_admission-ed249cea8e094a1a.exe)
+
+running 13 tests
+test bounds_distinguish_unknown_empty_and_invalid_range ... ok
+test aggregate_budget_rejects_overflow_and_sum_of_admitted_items ... ok
+test finite_and_nurbs_admission_rejects_before_entity_creation ... ok
+test unit_conversion_changes_lengths_without_scaling_dimensionless_basis ... ok
+test permission_visibility_selection_edit_and_locked_reference_are_separate ... ok
+test point_map_cannot_be_admitted_below_its_fixed_entity_storage_floor ... ok
+test surface_grid_dimensions_are_checked_without_overflow ... ok
+test retained_unused_string_and_geometry_capacity_is_part_of_the_byte_budget ... ok
+test nested_instances_compose_world_placement_once_and_preserve_definition ... ok
+test mesh_and_cloud_have_distinct_master_types_and_ordered_channels ... ok
+test reused_label_never_resolves_a_deleted_object_stamp ... ok
+test coordinator_retention_includes_undo_label_capacity_and_both_document_snapshots ... ok
+test replacing_redo_branch_accounts_old_redo_and_new_undo_together_before_acceptance ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\resource_transactions.rs (target\debug\deps\resource_transactions-830f17eea2f67887.exe)
+
+running 12 tests
+test a_resource_cannot_be_owned_by_two_documents ... ok
+test initial_resource_id_cannot_be_replaced_or_reallocated_after_deletion ... ok
+test resource_and_object_identity_authority_are_tagged_independently ... ok
+test resources_and_geometry_publish_privately_as_one_undo_entry ... ok
+test resource_revisions_use_the_initial_batch_snapshot ... ok
+test cancellation_after_prepare_does_not_publish_or_retire_the_resource_id ... ok
+test rejected_acceptance_guard_preserves_resource_authority_and_prior_redo ... ok
+test caller_rejected_resource_batch_keeps_pending_state_and_prior_redo ... ok
+test caller_resource_identity_stays_retired_after_savepoint_rollback_and_abort ... ok
+test resource_id_stays_retired_after_undo_and_after_delete ... ok
+test resource_insert_rejects_aggregate_retention_before_a_candidate_is_returned ... ok
+test invalid_resource_batches_preserve_the_snapshot_and_executable_redo ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\retained_entity_baselines.rs (target\debug\deps\retained_entity_baselines-0cc7604d0b7b84da.exe)
+
+running 13 tests
+test entity_baseline_helper_rejects_wrong_kind_host_and_native_identity_alias ... ok
+test geometry_placement_attributes_and_label_edits_have_independent_hashes ... ok
+test legacy_bound_helper_never_invents_per_field_baselines ... ok
+test field_fingerprints_ignore_entity_identity_and_revision_counters ... ok
+test root_and_definition_member_helpers_capture_full_entity_and_independent_fields ... ok
+test retained_only_records_do_not_collapse_preserve_geometry_or_unknown_policy ... ok
+test legacy_policy_and_field_baselines_stay_unknown_after_cold_serde ... ok
+test unknown_policy_and_incomplete_baseline_packets_reject ... ok
+test field_baseline_is_invalid_on_retained_only_or_layer_records ... ok
+test unchanged_record_cannot_claim_forged_independent_baselines ... ok
+test field_baselines_remain_original_across_edit_and_delete_dispositions ... ok
+test policy_and_independent_baselines_survive_cold_serde_without_reinterpretation ... ok
+test spare_record_capacity_charges_inline_field_baselines_and_rejects_tight_limits ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\retained_imports.rs (target\debug\deps\retained_imports-34715c31a9743a69.exe)
+
+running 17 tests
+test aggregate_object_count_rejects_import_before_candidate_allocation ... ok
+test retained_only_native_record_has_no_fabricated_entity_and_referenced_resource_cannot_be_deleted ... ok
+test caller_rollback_preserves_retired_namespace_authority_and_prior_redo ... ok
+test retained_transfer_is_rejected_before_changing_either_document ... ok
+test deleted_member_aliases_cannot_claim_two_retired_owners_in_a_cold_document ... ok
+test unresolved_units_require_an_explicit_owned_resolution_before_import ... ok
+test source_and_namespace_id_reuse_after_import_undo_is_rejected_but_redo_restores_them ... ok
+test direct_cold_metadata_tampering_cannot_claim_unchanged_or_resurrect_deleted_source ... ok
+test invalid_import_has_no_partial_source_namespace_objects_or_undo ... ok
+test definition_member_binding_remains_local_to_its_shared_definition ... ok
+test two_imports_of_identical_source_use_separate_host_and_retained_namespaces ... ok
+test layers_assignment_refuses_retained_root_without_erasing_namespace_or_redo ... ok
+test import_requires_every_root_layer_definition_and_local_member_to_be_source_bound ... ok
+test edited_deleted_and_new_records_remain_distinct_and_undo_restores_original_binding ... ok
+test placement_attributes_and_prepared_replacement_all_update_the_retained_disposition ... ok
+test late_cancellation_stale_import_and_failed_acceptance_keep_prior_redo_and_unaccepted_ids ... ok
+test retained_validation_admits_record_scratch_with_all_owned_payload_and_document_storage ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\retained_peak_review.rs (target\debug\deps\retained_peak_review-06b89a8159ad76a9.exe)
+
+running 3 tests
+test held_reservations_cover_both_peer_orders_and_undo_snapshot_owners ... ok
+test mutation_input_remains_reserved_during_initial_coordinator_validation ... ok
+test validation_scratch_must_fit_alongside_other_retained_documents ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.42s
+
+     Running tests\source_binding.rs (target\debug\deps\source_binding-59fe0acabc41533d.exe)
+
+running 8 tests
+test owned_option_bytes_share_budget_with_source_snapshot ... ok
+test selected_point_peak_copy_is_part_of_aggregate_admission ... ok
+test capture_owns_immutable_provenance_and_revalidation_detects_context_change ... ok
+test ordered_subset_preserves_original_native_indices_including_hidden_points ... ok
+test whole_fit_points_is_not_replaced_by_a_prefix_or_subset ... ok
+test numeric_option_domain_and_dimension_are_explicit ... ok
+test unknown_role_option_wrong_kind_and_stale_generation_reject ... ok
+test duplicate_out_of_range_and_overlapping_subsets_are_rejected ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\startup_layers.rs (target\debug\deps\startup_layers-a381517dc9146bd8.exe)
+
+running 3 tests
+test current_none_preserves_default_curve_style_without_creating_a_group ... ok
+test new_document_has_no_current_layer_or_eager_groups ... ok
+test output_on_off_layer_is_admitted_invisible_and_locked_layer_rejects ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\transaction_scopes.rs (target\debug\deps\transaction_scopes-a61625e609fd6bf6.exe)
+
+running 8 tests
+test booked_scope_failed_prepare_keeps_booking_and_prior_redo ... ok
+test scope_owned_by_another_thread_cannot_be_finished ... ok
+test wrong_transaction_identity_cannot_borrow_caller_scope ... ok
+test cancellation_keeps_active_nested_scope_and_old_redo_immediately ... ok
+test nonrecording_empty_scope_keeps_prior_stacks_and_success_creates_no_undo ... ok
+test active_scope_merge_retains_first_write_baseline_and_one_undo ... ok
+test nested_savepoint_abort_restores_parent_pending_state ... ok
+test rolled_back_caller_identity_is_retired_and_global_prior_redo_remains_executable ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\om9_exchange-f2aa7ba8dd094dbf.exe)
+
+running 8 tests
+test import_graph::tests::depth_includes_an_already_visited_shared_subtree ... ok
+test import_graph::tests::shared_dependency_is_emitted_once_before_all_parents ... ok
+test import_graph::tests::rejects_disconnected_cycles_and_missing_dependencies ... ok
+test retained_cold::strict_metadata_tests::malformed_preserved_reference_entries_reject ... ok
+test retained_cold::strict_metadata_tests::bounds_tolerance_does_not_erase_small_or_translated_thin_hulls ... ok
+test inspection::tests::diagnostics_reserve_native_strings_and_om9_loss_messages_with_live_json ... ok
+test inspection::tests::inspection_rejects_duplicate_keys_unknown_status_and_echoed_untransformed_geometry ... ok
+test inspection::tests::circle_and_inverse_transpose_normals_use_source_placement_once ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\current_overlay.rs (target\debug\deps\current_overlay-5b015df427c9f059.exe)
+
+running 15 tests
+test original_cancel_and_equal_counter_wrong_coordinator_are_refused ... ok
+test object_ordinal_is_not_accepted_as_a_native_geometry_index ... ok
+test overlay_scratch_is_admitted_with_current_world_before_allocation ... ok
+test geometry_output_gets_fresh_native_ids_and_has_no_retained_only_output_identity ... ok
+test untouched_native_dependency_cannot_point_to_a_deleted_record ... ok
+test source_object_table_light_has_no_decoded_component_index_in_both_import_modes ... ok
+test output_map_keeps_primary_native_ids_deletes_b_and_allocates_distinct_new_c ... ok
+test native_frames_preserve_physical_nested_points_reflection_and_nonuniform_scale_once ... ok
+test edited_a_deleted_b_and_new_c_are_current_actions_with_retained_brep_and_undo ... ok
+test repeated_native_keys_remain_distinct_between_preserve_and_geometry_namespaces ... ok
+test missing_legacy_policy_and_missing_edited_field_baseline_reject_without_mutation ... ok
+test geometry_mode_regenerates_current_bindings_and_does_not_resurrect_retained_only_data ... ok
+test reverting_host_fields_retains_native_geometry_despite_advanced_revisions ... ok
+test multiple_preserve_imports_require_primary_and_remap_repeated_source_uuids ... ok
+test placement_attributes_and_label_change_only_their_explicit_native_patch_fields ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\current_overlay_review.rs (target\debug\deps\current_overlay_review-804859ae3c37864d.exe)
+
+running 8 tests
+test shared_definition_patches_member_list_once_and_does_not_publish_removed_member_as_addition ... ok
+test geometry_policy_regenerates_shared_current_members_and_omits_opaque_history_without_resurrection ... ok
+test rewriting_definition_member_list_does_not_hide_an_opaque_history_dependency_on_deleted_member ... ok
+test changed_leaf_invalidates_nested_retained_ancestors_and_unchanged_irefs_only ... ok
+test changing_iref_placement_refreshes_its_own_cached_bounds_with_clean_child_definition ... ok
+test switching_iref_child_refreshes_its_own_bounds_while_both_definitions_stay_clean ... ok
+test decoded_native_light_without_a_component_index_is_supported_or_omitted_by_policy ... ok
+test equal_extreme_model_and_definition_units_cancel_to_identity_without_intermediate_overflow ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\export_authority.rs (target\debug\deps\export_authority-47f6c7b6877ab308.exe)
+
+running 3 tests
+test equal_counters_and_shared_document_do_not_authorize_a_foreign_export_coordinator ... ok
+test a_caller_roundtrip_without_public_epoch_change_still_invalidates_export_capture ... ok
+test plain_export_cannot_bypass_an_active_caller_scope ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\import_capture.rs (target\debug\deps\import_capture-f18a9ab8fa153335.exe)
+
+running 12 tests
+test plain_capture_rejects_existing_scope_and_completed_caller_rollback ... ok
+test close_reopen_of_the_same_persistent_document_does_not_revive_capture ... ok
+test equal_coordinator_with_shared_target_arc_cannot_borrow_import_capture ... ok
+test import_prepare_reserves_external_receipt_memory_without_touching_target ... ok
+test scoped_capture_observes_savepoint_push_and_rollback_even_without_geometry_changes ... ok
+test original_caller_thread_is_required_for_scoped_capture ... ok
+test scoped_capture_reads_private_target_and_release_invalidates_its_lifecycle ... ok
+test undo_that_restores_the_exact_original_arc_cannot_revive_a_capture ... ok
+test caller_abort_after_preparation_rejects_a_late_global_import ... ok
+test acceptance_guard_can_revalidate_the_frozen_target_without_mutation_privilege ... ok
+test late_cancel_and_public_change_reject_prepared_import_without_partial_state ... ok
+test scoped_import_respects_caller_recording_and_publishes_only_at_finish ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_wire.rs (target\debug\deps\layer_wire-e3e4cc6110789353.exe)
+
+running 2 tests
+test definition_hidden_is_projected_without_leaking_new_fields_into_native_geometry_wire ... ok
+test geometry_wire_projects_hidden_to_visibility_and_keeps_om9_slots_out_of_native_abi ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\retained_cold_review.rs (target\debug\deps\retained_cold_review-0dbf2c34e8cfa582.exe)
+
+running 9 tests
+test cold_report_acceptance_and_refusal_obey_measured_remaining_allocation_peak ... ok
+test false_geometry_identity_indices_layer_or_envelope_never_prove_current_output ... ok
+test malformed_rich_metadata_and_unrequested_new_master_properties_reject ... ok
+test missing_duplicate_overlapping_or_falsified_raw_spans_reject ... ok
+test nested_native_instance_ids_members_and_independent_leaf_bounds_match_capture ... ok
+test nullable_relationship_uuid_aliases_are_rejected_before_acceptance ... ok
+test original_and_fresh_cancellation_remain_bound_to_cold_acceptance ... ok
+test strict_keys_required_nulls_digest_spelling_budget_and_cancel_reject ... ok
+test valid_cold_capture_geometry_and_actual_span_hashes_are_accepted ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.59s
+
+     Running tests\retained_native_import.rs (target\debug\deps\retained_native_import-9413041ef272a157.exe)
+
+running 8 tests
+test real_import_cold_om9_reopen_preserves_explicit_definition_context_without_source_file ... ignored, requires actual authored openNURBS source fixture and native projection binary
+test real_import_original_cancel_caller_scope_and_budget_failure_never_publish_partial_state ... ignored, requires actual authored openNURBS source fixture and native projection binary
+test real_preservation_and_explicit_geometry_mode_report_all_bound_field_losses ... ignored, requires actual authored openNURBS source fixture and native projection binary
+test real_source_import_keeps_native_geometry_shared_members_original_bytes_and_fresh_namespaces ... ignored, requires actual authored openNURBS source fixture and native projection binary
+test real_source_import_rejects_unknown_units_and_stale_canceled_targets_without_partial_state ... ignored, requires actual authored openNURBS source fixture and native projection binary
+test real_units_and_mixed_definition_contexts_preserve_the_same_world_coordinates ... ignored, requires actual authored openNURBS source fixture and native projection binary
+test real_unresolved_definition_closure_stays_retained_while_independent_roots_import ... ignored, requires actual authored openNURBS source fixture and native projection binary
+test real_unsupported_color_selectors_are_retained_or_reported_with_explicit_loss ... ignored, requires actual authored openNURBS source fixture and native projection binary
+
+test result: ok. 0 passed; 0 failed; 8 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\retained_native_inputs.rs (target\debug\deps\retained_native_inputs-842da55ddeccaba9.exe)
+
+running 4 tests
+test cancel_budget_stale_and_wrong_coordinator_reject_before_child_or_staging ... ignored, requires pinned authored native source and retained fixtures
+test real_model_page_and_definition_units_match_original_wire_contexts ... ignored, requires pinned authored native source and retained fixtures
+test real_sparse_indices_lights_and_copycount_zero_attachments_keep_original_owners ... ignored, requires pinned authored native source and retained fixtures
+test real_sparse_source_new_layer_definition_members_and_unassigned_output_have_separate_wire_slots ... ignored, requires pinned authored native source and retained fixtures
+
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\retained_native_write.rs (target\debug\deps\retained_native_write-79086b2a10381893.exe)
+
+running 4 tests
+test real_cold_publication_keeps_old_target_on_loss_permission_cancel_close_and_budget_refusals ... ignored, requires pinned native retained-current writer
+test real_current_edits_deletions_and_additions_cold_verify_native_frames_and_dirty_bounds ... ignored, requires pinned native writer and SDK authored source fixture
+test real_private_writer_hashes_actual_held_file_and_preserves_public_target ... ignored, requires pinned native retained-current writer
+test real_retained_sources_cold_verify_original_units_raw_tables_and_block_structure_without_external_source ... ignored, requires pinned native writer and SDK authored source fixture
+
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\retained_packet.rs (target\debug\deps\retained_packet-b4fee28cd9f72ef8.exe)
+
+running 2 tests
+test request_refuses_external_budget_and_stale_owner_before_serialized_growth ... ok
+test request_uses_native_references_for_layers_instances_and_definition_members ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests\retained_packet_review.rs (target\debug\deps\retained_packet_review-ff4bdca776ecdab7.exe)
+
+running 5 tests
+test aggregate_packet_peak_retains_all_prior_owners_and_bounds_refusal_allocations ... ok
+test implicit_current_layer_chooses_first_live_table_or_generated_unassigned ... ok
+test nested_member_and_layer_relations_use_output_uuids_with_explicit_current_layer ... ok
+test original_and_fresh_cancellation_at_packet_allocation_discard_private_encoded_output ... ok
+test packet_cap_refuses_a_large_cloud_without_allocating_the_output_buffer ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.16s
+
+     Running tests\retained_stage.rs (target\debug\deps\retained_stage-dcc485530adbf5ee.exe)
+
+running 2 tests
+test staged_request_holds_packet_against_write_delete_and_substituted_cancellation ... ok
+test refused_stage_budget_and_cancel_create_no_private_directory ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests\retained_stage_review.rs (target\debug\deps\retained_stage_review-24ecfe23ca0d1723.exe)
+
+running 5 tests
+test cancellation_after_request_materialization_closes_created_inputs_and_removes_private_directory ... ok
+test child_cancel_union_retains_all_three_owners_and_refuses_fifth_flag_before_growth ... ok
+test equal_counter_foreign_authority_and_closed_target_reject_without_changing_staged_bytes ... ok
+test request_sha_matches_guarded_bytes_and_handle_denies_rename_or_replacement ... ok
+test stage_packet_allocation_peak_is_bounded_with_all_prior_and_external_owners ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.90s
+
+     Running tests\source_preparation.rs (target\debug\deps\source_preparation-e19753d57268c325.exe)
+
+running 5 tests
+test sparse_wire_index_remains_distinct_from_reference_and_decoded_indices ... ok
+test original_unit_declaration_and_definition_context_cannot_be_forged ... ok
+test strict_schema_duplicate_keys_budget_and_cancellation_reject ... ok
+test changed_source_digest_record_hash_span_coverage_or_catalog_rejects ... ok
+test prepared_inputs_keep_original_cancel_owner_after_success_without_native_children ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests\source_preparation_review.rs (target\debug\deps\source_preparation_review-11c12577edae26f8.exe)
+
+running 4 tests
+test escaped_near_limit_name_has_admitted_parser_and_typed_allocation_peak ... ok
+test tiny_map_and_escaped_large_key_refuse_before_owned_key_and_set_growth ... ok
+test unresolved_original_units_require_an_explicit_owned_resolution_and_complete_null_fields ... ok
+test strict_userdata_discriminants_payload_oracle_and_copycount_zero ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\staged_export.rs (target\debug\deps\staged_export-3d96562dade71a65.exe)
+
+running 8 tests
+test all_owned_master_kinds_shared_nested_instances_and_current_edits_survive_cold_native_validation ... ignored, requires built openNURBS operation executable
+test cancel_after_validation_preserves_existing_file_and_releases_staging ... ignored, requires built openNURBS operation executable
+test close_and_staged_file_tampering_reject_before_destination_replacement ... ignored, requires built openNURBS operation executable
+test hidden_preset_native_projection_is_cold_verified_with_explicit_om9_losses ... ignored, requires built openNURBS operation executable
+test readonly_destination_after_validation_preserves_original_file ... ignored, requires built openNURBS operation executable
+test stale_after_commit_and_undo_cannot_publish_even_when_source_content_matches_again ... ignored, requires built openNURBS operation executable
+test unsupported_native_attribute_and_prelaunch_budget_failure_preserve_destination ... ignored, requires built openNURBS operation executable
+test verified_current_geometry_replaces_destination_and_preserves_document_and_undo ... ignored, requires built openNURBS operation executable
+
+test result: ok. 0 passed; 0 failed; 8 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\wire_capture.rs (target\debug\deps\wire_capture-45f19d0321000068.exe)
+
+running 3 tests
+test owned_current_snapshot_packet_keeps_geometry_placement_ids_units_and_unicode_attributes ... ok
+test intervening_commit_undo_and_close_make_export_capture_stale_without_resurrecting_source ... ok
+test delete_then_create_capture_contains_current_state_and_packet_budget_checks_before_growth ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\wire_output_review.rs (target\debug\deps\wire_output_review-2d59960a140a6302.exe)
+
+running 4 tests
+test additions_follow_host_layer_order_and_definition_members_have_no_native_indices ... ok
+test wire_map_peak_includes_retained_coordinator_prepared_inputs_stamps_and_external_owner ... ok
+test generated_native_layer_name_obeys_the_configured_name_limit ... ok
+test generated_layer_avoids_occupied_name_has_no_host_binding_and_keeps_original_cancel ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s
+
+     Running unittests src\lib.rs (target\debug\deps\om9_native_owner-e51d9ec6b633357b.exe)
+
+running 18 tests
+test dialog_probe::tests::accept_probe_refuses_missing_owner_without_spawning_a_worker ... ok
+test dialog_probe::tests::root_close_refuses_missing_and_foreign_handles ... ok
+test dialog_probe::tests::refuses_missing_or_foreign_root_without_starting_worker ... ok
+test file_dialog::tests::only_native_show_cancel_is_a_cancel_and_other_hresult_is_visible ... ok
+test windows::tests::accounting_query_that_finishes_after_deadline_cannot_return_success ... ok
+test file_dialog::tests::save_leaves_overwrite_to_owned_confirmation_and_requires_filesystem_path ... ok
+test windows::tests::unsuccessful_stop_cannot_publish_unreaped_process_as_success ... ok
+test windows::tests::controlled_open_empty_pipe_collection_is_bounded_by_the_same_deadline ... ok
+test windows::tests::delayed_accounting_requires_observed_zero_without_fixed_sleep ... ok
+test windows::tests::failed_stop_and_repeated_cleanup_cannot_refresh_the_absolute_deadline ... ok
+test windows::tests::exclusively_available_pipe_bytes_are_captured_without_waiting_for_writer_close ... ok
+test windows::tests::persistent_active_job_expires_at_the_remaining_teardown_budget ... ok
+test windows::tests::pipe_overflow_keeps_bounded_diagnostics_and_drains_after_writer_close ... ok
+test windows::tests::accounting_zero_observed_only_after_deadline_cannot_be_success ... ok
+test windows::tests::query_failure_during_drain_preserves_error_instead_of_accepting_last_sample ... ok
+test windows::tests::reader_not_ready_cannot_publish_zero_accounting_as_success ... ok
+test file_dialog::tests::audit_prefill_is_bounded_and_never_bypasses_the_native_owner ... ok
+test file_dialog::tests::real_com_apartment_conflict_is_error_and_does_not_uninitialize_the_owner ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\native_runner.rs (target\debug\deps\om9_native_runner-c7b5c29e4be3948e.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\process_fixture.rs (target\debug\deps\om9_process_fixture-20c0a00a57ecb67e.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\process_owner.rs (target\debug\deps\process_owner-3aac3f01291eb2fe.exe)
+
+running 8 tests
+test canceled_before_launch_never_allocates_a_native_process ... ok
+test wrong_binary_fingerprint_and_invalid_limits_reject_before_process_creation ... ok
+test native_error_cannot_publish_stdout_as_success_and_parent_retains_stderr_diagnostic ... ok
+test admitted_program_returns_owned_bounded_bytes_and_actual_job_peak_with_no_live_child ... ok
+test descendant_creation_is_denied_by_the_declared_single_process_job ... ok
+test output_and_stderr_overflow_reject_success_and_stop_the_native_writer ... ok
+test process_committed_memory_is_limited_before_native_entry_and_failure_is_not_success ... ok
+test running_cancel_and_deadline_kill_reap_and_join_output_readers_within_bound ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running tests\teardown.rs (target\debug\deps\teardown-34f7e9fb45ee2107.exe)
+
+running 1 test
+test concurrent_short_success_and_failure_jobs_reap_before_returning_bytes_or_error ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+     Running tests\verified_file.rs (target\debug\deps\verified_file-1a23d72d29842e3e.exe)
+
+running 8 tests
+test existing_writer_prevents_fingerprint_admission_and_missing_target_publishes ... ok
+test guard_drop_releases_write_delete_and_rename_denials_without_changing_bytes ... ok
+test invalid_size_nonregular_missing_and_early_cancel_never_admit_a_file ... ok
+test invalid_relative_or_quoted_windows_paths_are_rejected_without_touching_target ... ok
+test reparse_point_staged_file_and_target_are_rejected_when_symlinks_are_available ... ok
+test cancellation_during_streaming_hash_releases_the_held_file ... ok
+test readonly_or_directory_target_and_cancel_keep_the_good_destination ... ok
+test bounded_fingerprint_keeps_one_handle_and_denies_content_or_name_changes ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src\lib.rs (target\debug\deps\om9_scene-d25e4f94e391f78e.exe)
+
+running 1 test
+test workspace::tests::layout_overflow_rejects_before_active_maximized_or_view_state_changes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\affine_gesture.rs (target\debug\deps\affine_gesture-fe223119b3b871ca.exe)
+
+running 5 tests
+test preview_and_pick_proxy_use_the_same_gesture_matrix ... ok
+test warm_affine_updates_reuse_buffers_and_cancel_keeps_geometry_and_undo ... ok
+test stale_gesture_is_rejected_without_touching_public_redo ... ok
+test commit_updates_exact_placement_in_one_undo_and_redo ... ok
+test unchanged_gesture_accepts_no_document_write_or_undo_and_keeps_redo ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\camera_grid.rs (target\debug\deps\camera_grid-ac90d1b9fa1528c8.exe)
+
+running 5 tests
+test cplane_coordinate_resolution_is_independent_from_camera_navigation ... ok
+test invalid_camera_frame_clipping_and_viewport_ranges_reject ... ok
+test maximize_restore_preserves_each_view_and_original_titles ... ok
+test orthographic_projection_and_ray_share_world_frame_after_pan ... ok
+test finite_grid_is_world_geometry_for_display_only_with_exact_subdivision ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\instance_admission.rs (target\debug\deps\instance_admission-1fc980a54dd21d9f.exe)
+
+running 1 test
+test empty_shared_instances_charge_each_occurrence_before_descent ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests\layer_colors.rs (target\debug\deps\layer_colors-7865fa0e04c1983e.exe)
+
+running 2 tests
+test hidden_root_and_definition_member_mask_scene_display_pick_edit_and_reference ... ok
+test assigned_root_uses_layer_color_and_later_swatch_changes_without_geometry_edits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\metadata_cache.rs (target\debug\deps\metadata_cache-4f5e9cadcc31cffb.exe)
+
+running 2 tests
+test metadata_refresh_reuses_buffers_and_updates_instance_masks_color_and_stamps ... ok
+test cache_refresh_refuses_changed_geometry_owner_and_unreserved_metadata_clone ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\reference_workspace.rs (target\debug\deps\reference_workspace-208282be8f32417b.exe)
+
+running 1 test
+test through_finger_reference_projects_world_xz_and_side_reference_projects_world_yz ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\world_picking.rs (target\debug\deps\world_picking-2d1a1b1ccd3a621f.exe)
+
+running 7 tests
+test mesh_triangle_pick_maps_to_original_polygon_face ... ok
+test rendered_curve_picking_resolves_source_parameter_and_never_creates_mesh_master ... ok
+test nested_mirrored_instance_pick_keeps_root_member_path_and_single_world_transform ... ok
+test mapped_circle_sampling_uses_angular_span_and_keeps_native_parameters ... ok
+test hidden_locked_and_unselectable_stay_distinct_for_reference_picking ... ok
+test stale_camera_or_source_invalidates_held_pick_before_dispatch ... ok
+test mapped_circle_extreme_domains_preserve_native_samples_or_disclose_unrepresentable_bindings ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_app
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_archive
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_exchange
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_native_owner
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_scene
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+exit=0
+== cargo fmt --check ==
+
+exit=0
+== cargo check --workspace --all-targets ==
+    Checking om9-native-owner v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-native-owner)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-scene)
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-core)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-archive)
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-exchange)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.85s
+
+exit=0
+== cargo clippy --workspace --all-targets -- -D warnings ==
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
+
+exit=0

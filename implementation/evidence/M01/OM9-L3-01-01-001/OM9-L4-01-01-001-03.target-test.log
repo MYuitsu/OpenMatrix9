@@ -1,0 +1,46 @@
+task: OM9-L4-01-01-001-03 focused target tests
+utc: 2026-10-16T02:34:49Z
+
+== cargo test -p om9-app --lib startup ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running unittests src\lib.rs (target\debug\deps\om9_app-3a2356c5e25e2c74.exe)
+
+running 7 tests
+test startup::tests::dialog_is_opt_out_for_automation_only ... ok
+test startup::tests::adapter_note_explains_the_software_fallback ... ok
+test startup::tests::detail_is_bounded_on_char_boundaries_and_newlines_are_folded ... ok
+test startup::tests::app_config_refuses_an_unusable_start_before_any_window_exists ... ok
+test startup::tests::failure_line_names_the_stage_and_keeps_the_detail ... ok
+test startup::tests::receipt_is_bounded_json_that_replaces_the_previous_failure ... ok
+test ui::layer_dialog_audit::tests::startup_focus_wait_is_bounded_and_never_fabricates_os_focus ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 32 filtered out; finished in 0.30s
+
+
+exit=0
+== cargo test -p om9-app --lib window_identity_guard ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running unittests src\lib.rs (target\debug\deps\om9_app-3a2356c5e25e2c74.exe)
+
+running 2 tests
+test window_identity_guard::the_signal_catches_a_window_named_only_by_its_title ... ok
+test window_identity_guard::every_window_of_the_application_carries_an_identity ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 37 filtered out; finished in 0.01s
+
+
+exit=0
+== cargo test -p om9-app --test startup_contract ==
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.91s
+     Running tests\startup_contract.rs (target\debug\deps\startup_contract-942ddd82146fedd3.exe)
+
+running 3 tests
+test a_failed_start_leaves_the_document_and_the_layout_untouched ... ok
+test negative_fixture_reports_every_start_failure_instead_of_exiting_silently ... ok
+test positive_fixture_starts_one_window_with_the_openmatrix9_title_and_an_empty_document ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+
+exit=0

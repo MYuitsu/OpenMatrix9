@@ -1,0 +1,407 @@
+{
+ "schema": "om9.path_renames.v1",
+ "created_utc": "2026-10-16T03:52:29Z",
+ "reason": "Windows MAX_PATH: giu moi duong dan trong OM9_Milestones <= 210 ky tu",
+ "budget": 210,
+ "note": "Tieu de day du khong mat: van nam trong L1.json / L2.json / l3.json / l4.json tuong ung.",
+ "notes": [
+  "`M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment` chua doi duoc trong phien nay (thu muc bi giu handle); ten du kien: `M00 - Feasibility, Legal`. Hoan tat sau: `python implementation/tools/om9_shorten_milestone_paths.py --finish-module \"M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment=M00 - Feasibility, Legal\"`.",
+  "`M03 - Curve, Surface, Solid and 3DM Exchange` chua doi duoc trong phien nay (thu muc bi giu handle); ten du kien: `M03 - Geometry 3DM`. Hoan tat sau: `python implementation/tools/om9_shorten_milestone_paths.py --finish-module \"M03 - Curve, Surface, Solid and 3DM Exchange=M03 - Geometry 3DM\"`."
+ ],
+ "modules": [
+  {
+   "old": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment",
+   "new": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment",
+   "applied": false,
+   "planned_new": "M00 - Feasibility, Legal",
+   "blocked_reason": "thu muc bi giu handle"
+  },
+  {
+   "old": "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation",
+   "new": "M01 - CAD Shell, Viewport",
+   "applied": true,
+   "planned_new": "M01 - CAD Shell, Viewport",
+   "blocked_reason": null
+  },
+  {
+   "old": "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction",
+   "new": "M02 - Viewport, Gumball",
+   "applied": true,
+   "planned_new": "M02 - Viewport, Gumball",
+   "blocked_reason": null
+  },
+  {
+   "old": "M03 - Curve, Surface, Solid and 3DM Exchange",
+   "new": "M03 - Curve, Surface, Solid and 3DM Exchange",
+   "applied": false,
+   "planned_new": "M03 - Geometry 3DM",
+   "blocked_reason": "[WinError 5] Access is denied: 'H:\\\\OpenMatrix9\\\\OM9_Milestones\\\\M03 - Curve, Surface, Solid and 3DM Exchange' -> 'H:\\\\OpenMatrix9\\\\OM9_Milestones\\\\M03 - Geometry 3DM'"
+  },
+  {
+   "old": "M04 - Builder, History and Ring",
+   "new": "M04 - Builder and History",
+   "applied": true,
+   "planned_new": "M04 - Builder and History",
+   "blocked_reason": null
+  },
+  {
+   "old": "M07 - Cutters and Manufacturing Validation",
+   "new": "M07 - Cutters",
+   "applied": true,
+   "planned_new": "M07 - Cutters",
+   "blocked_reason": null
+  },
+  {
+   "old": "M08 - Advanced Jewelry Modeling",
+   "new": "M08 - Jewelry Modeling",
+   "applied": true,
+   "planned_new": "M08 - Jewelry Modeling",
+   "blocked_reason": null
+  },
+  {
+   "old": "ZAFTER - Post-Release Extensions",
+   "new": "ZAFTER - Extensions",
+   "applied": true,
+   "planned_new": "ZAFTER - Extensions",
+   "blocked_reason": null
+  }
+ ],
+ "dirs": [
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD GitHub & source reuse",
+   "new_name": "L2-01 - QymCAD",
+   "level": "L2",
+   "id": "OM9-M00-L2-01",
+   "full_title": "QymCAD GitHub & source reuse"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD GitHub & source reuse/L3-01 - Repository provenance & pinned checkout",
+   "new_name": "L3-01 - Repository provenance & pinned",
+   "level": "L3",
+   "id": "OM9-M00-L3-01-01",
+   "full_title": "Repository provenance & pinned checkout"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD GitHub & source reuse/L3-02 - Workspace map and dependency audit",
+   "new_name": "L3-02 - Workspace map",
+   "level": "L3",
+   "id": "OM9-M00-L3-01-02",
+   "full_title": "Workspace map and dependency audit"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-01 - QymCAD GitHub & source reuse/L3-03 - REUSE ADAPT ADD architecture decision",
+   "new_name": "L3-03 - REUSE ADAPT ADD architecture",
+   "level": "L3",
+   "id": "OM9-M00-L3-01-03",
+   "full_title": "REUSE ADAPT ADD architecture decision"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-02 - OCCT bridge & numerical geometry",
+   "new_name": "L2-02 - OCCT",
+   "level": "L2",
+   "id": "OM9-M00-L2-02",
+   "full_title": "OCCT bridge & numerical geometry"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-03 - UI - Viewport - GPU technology",
+   "new_name": "L2-03 - UI",
+   "level": "L2",
+   "id": "OM9-M00-L2-03",
+   "full_title": "UI/Viewport/GPU technology"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability",
+   "new_name": "L2-04 - 3DM",
+   "level": "L2",
+   "id": "OM9-M00-L2-04",
+   "full_title": "3DM / openNURBS interoperability"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-01 - 3DM capability gap and dependency candidate",
+   "new_name": "L3-01 - 3DM capability gap and dependency",
+   "level": "L3",
+   "id": "OM9-M00-L3-04-01",
+   "full_title": "3DM capability gap and dependency candidate"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-04 - 3DM - openNURBS interoperability/L3-03 - Import security and transparent limitations",
+   "new_name": "L3-03 - Import security and transparent",
+   "level": "L3",
+   "id": "OM9-M00-L3-04-03",
+   "full_title": "Import security and transparent limitations"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative history & stable topology",
+   "new_name": "L2-05 - Associative",
+   "level": "L2",
+   "id": "OM9-M00-L2-05",
+   "full_title": "Associative history & stable topology"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative history & stable topology/L3-01 - Naming and reference architecture audit",
+   "new_name": "L3-01 - Naming and reference architecture",
+   "level": "L3",
+   "id": "OM9-M00-L3-05-01",
+   "full_title": "Naming and reference architecture audit"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-05 - Associative history & stable topology/L3-02 - Regeneration and persistence stress proof",
+   "new_name": "L3-02 - Regeneration and persistence",
+   "level": "L3",
+   "id": "OM9-M00-L3-05-02",
+   "full_title": "Regeneration and persistence stress proof"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License - redistribution compliance",
+   "new_name": "L2-06 - License",
+   "level": "L2",
+   "id": "OM9-M00-L2-06",
+   "full_title": "License / redistribution compliance"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License - redistribution compliance/L3-01 - Software license and reuse strategy",
+   "new_name": "L3-01 - Software license and reuse",
+   "level": "L3",
+   "id": "OM9-M00-L3-06-01",
+   "full_title": "Software license and reuse strategy"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-06 - License - redistribution compliance/L3-02 - Assets, trademarks and release notices",
+   "new_name": "L3-02 - Assets, trademarks and release",
+   "level": "L3",
+   "id": "OM9-M00-L3-06-02",
+   "full_title": "Assets, trademarks and release notices"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline",
+   "new_name": "L2-07 - Reproducible",
+   "level": "L2",
+   "id": "OM9-M00-L2-07",
+   "full_title": "Reproducible build, CI and release baseline"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-01 - Windows 10 - 11 x64 baseline",
+   "new_name": "L3-01 - Windows 10 - 11 x64",
+   "level": "L3",
+   "id": "OM9-M00-L3-07-01",
+   "full_title": "Windows 10/11 x64 baseline"
+  },
+  {
+   "old_path": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment/L2-07 - Reproducible build, CI and release baseline/L3-03 - Continuous verification and gate handoff",
+   "new_name": "L3-03 - Continuous verification and gate",
+   "level": "L3",
+   "id": "OM9-M00-L3-07-03",
+   "full_title": "Continuous verification and gate handoff"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-09 - 01-be-occt-geometry-creation-ops",
+   "new_name": "L2-01-09 - 01-be-occt-geometry",
+   "level": "L2",
+   "id": "OM9-L2-01-09",
+   "full_title": "01-be-occt-geometry-creation-ops"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-002 - B-Rep Boolean Difference",
+   "new_name": "L3-002 - B-Rep Boolean",
+   "level": "L3",
+   "id": "OM9-L3-01-10-002",
+   "full_title": "B-Rep Boolean Difference"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-003 - B-Rep Boolean Intersection",
+   "new_name": "L3-003 - B-Rep Boolean",
+   "level": "L3",
+   "id": "OM9-L3-01-10-003",
+   "full_title": "B-Rep Boolean Intersection"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-004 - Curve And Face Split Intersections",
+   "new_name": "L3-004 - Curve And Face Split",
+   "level": "L3",
+   "id": "OM9-L3-01-10-004",
+   "full_title": "Curve And Face Split Intersections"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-006 - Fillet And Chamfer B-Rep Edges",
+   "new_name": "L3-006 - Fillet And Chamfer B-Rep",
+   "level": "L3",
+   "id": "OM9-L3-01-10-006",
+   "full_title": "Fillet And Chamfer B-Rep Edges"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-007 - Offset Face And Thicken Shell",
+   "new_name": "L3-007 - Offset Face And Thicken",
+   "level": "L3",
+   "id": "OM9-L3-01-10-007",
+   "full_title": "Offset Face And Thicken Shell"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-008 - Face Extract Unjoin And Rejoin",
+   "new_name": "L3-008 - Face Extract Unjoin",
+   "level": "L3",
+   "id": "OM9-L3-01-10-008",
+   "full_title": "Face Extract Unjoin And Rejoin"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-009 - Geometry Health And Naked Edge Query",
+   "new_name": "L3-009 - Geometry Health",
+   "level": "L3",
+   "id": "OM9-L3-01-10-009",
+   "full_title": "Geometry Health And Naked Edge Query"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-01-11 - 03-be-occt-transforms-and-pattern-ops",
+   "new_name": "L2-01-11 - 03-be-occt",
+   "level": "L2",
+   "id": "OM9-L2-01-11",
+   "full_title": "03-be-occt-transforms-and-pattern-ops"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04-febe-freeform-curve-modeling",
+   "new_name": "L2-02-04 - 04",
+   "level": "L2",
+   "id": "OM9-L2-02-04",
+   "full_title": "04-febe-freeform-curve-modeling"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-05 - 05-febe-freeform-surface-modeling",
+   "new_name": "L2-02-05 - 05",
+   "level": "L2",
+   "id": "OM9-L2-02-05",
+   "full_title": "05-febe-freeform-surface-modeling"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-06 - 06-febe-rhino-transform-orient-workflows",
+   "new_name": "L2-02-06 - 06-febe-rhino",
+   "level": "L2",
+   "id": "OM9-L2-02-06",
+   "full_title": "06-febe-rhino-transform-orient-workflows"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-08 - 07-febe-matrix-top11-and-shortcut-actions",
+   "new_name": "L2-03-08 - 07-febe-matrix-top11",
+   "level": "L2",
+   "id": "OM9-L2-03-08",
+   "full_title": "07-febe-matrix-top11-and-shortcut-actions"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-16 - 08-febe-matrix-curve-menu-workflows",
+   "new_name": "L2-03-16 - 08",
+   "level": "L2",
+   "id": "OM9-L2-03-16",
+   "full_title": "08-febe-matrix-curve-menu-workflows"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-17 - 09-febe-matrix-surface-menu-workflows",
+   "new_name": "L2-03-17 - 09-febe",
+   "level": "L2",
+   "id": "OM9-L2-03-17",
+   "full_title": "09-febe-matrix-surface-menu-workflows"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-18 - 10-febe-matrix-solid-menu-workflows",
+   "new_name": "L2-03-18 - 10-febe",
+   "level": "L2",
+   "id": "OM9-L2-03-18",
+   "full_title": "10-febe-matrix-solid-menu-workflows"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-19 - 11-febe-matrix-utilities-and-mesh-health",
+   "new_name": "L2-03-19 - 11-febe-matrix",
+   "level": "L2",
+   "id": "OM9-L2-03-19",
+   "full_title": "11-febe-matrix-utilities-and-mesh-health"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-20 - 12-febe-matrix-measure-and-model-statistics",
+   "new_name": "L2-03-20 - 12-febe-matrix",
+   "level": "L2",
+   "id": "OM9-L2-03-20",
+   "full_title": "12-febe-matrix-measure-and-model-statistics"
+  },
+  {
+   "old_path": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe-matrix-transform-toolbar-bridges",
+   "new_name": "L2-04-01 - 13-febe",
+   "level": "L2",
+   "id": "OM9-L2-04-01",
+   "full_title": "13-febe-matrix-transform-toolbar-bridges"
+  },
+  {
+   "old_path": "M04 - Builder, History and Ring/L2-03-13 - 04-febe-matrix-history-associative-updates",
+   "new_name": "L2-03-13 - 04-febe-matrix-history",
+   "level": "L2",
+   "id": "OM9-L2-03-13",
+   "full_title": "04-febe-matrix-history-associative-updates"
+  },
+  {
+   "old_path": "M05 - Gems and Layout/L2-04-11 - 03-febe-gem-halo-cluster-baguette-layouts",
+   "new_name": "L2-04-11 - 03-febe-gem-halo-cluster",
+   "level": "L2",
+   "id": "OM9-L2-04-11",
+   "full_title": "03-febe-gem-halo-cluster-baguette-layouts"
+  },
+  {
+   "old_path": "M06 - Settings and Prongs/L2-04-15 - 02-febe-prong-channel-metal-and-bead-settings",
+   "new_name": "L2-04-15 - 02-febe-prong-channel-metal-and-bead",
+   "level": "L2",
+   "id": "OM9-L2-04-15",
+   "full_title": "02-febe-prong-channel-metal-and-bead-settings"
+  },
+  {
+   "old_path": "M08 - Advanced Jewelry Modeling/L2-04-07 - 04-febe-jewelry-surface-object-placement-tools",
+   "new_name": "L2-04-07 - 04-febe-jewelry-surface-object-placement",
+   "level": "L2",
+   "id": "OM9-L2-04-07",
+   "full_title": "04-febe-jewelry-surface-object-placement-tools"
+  },
+  {
+   "old_path": "ZAFTER - Post-Release Extensions/L2-08-01 - 01-be-shared-offline-render-material-light-pipeline",
+   "new_name": "L2-08-01 - 01-be-shared-offline-render",
+   "level": "L2",
+   "id": "OM9-L2-08-01",
+   "full_title": "01-be-shared-offline-render-material-light-pipeline"
+  },
+  {
+   "old_path": "ZAFTER - Post-Release Extensions/L2-08-02 - 02-febe-jewelry-render-lookdev-and-light-rigs",
+   "new_name": "L2-08-02 - 02-febe-jewelry-render-lookdev-and-light",
+   "level": "L2",
+   "id": "OM9-L2-08-02",
+   "full_title": "02-febe-jewelry-render-lookdev-and-light-rigs"
+  },
+  {
+   "old_path": "ZAFTER - Post-Release Extensions/L2-08-04 - 04-febe-jewelry-batch-render-and-postprocessing",
+   "new_name": "L2-08-04 - 04-febe-jewelry-batch-render",
+   "level": "L2",
+   "id": "OM9-L2-08-04",
+   "full_title": "04-febe-jewelry-batch-render-and-postprocessing"
+  },
+  {
+   "old_path": "ZAFTER - Post-Release Extensions/L2-09-01 - 01-febe-tsplines-legacy-hud-command-compat",
+   "new_name": "L2-09-01 - 01-febe-tsplines-legacy-hud-command",
+   "level": "L2",
+   "id": "OM9-L2-09-01",
+   "full_title": "01-febe-tsplines-legacy-hud-command-compat"
+  },
+  {
+   "old_path": "ZAFTER - Post-Release Extensions/L2-09-02 - 02-febe-tsplines-legacy-primitive-builder-compat",
+   "new_name": "L2-09-02 - 02-febe-tsplines-legacy-primitive-builder",
+   "level": "L2",
+   "id": "OM9-L2-09-02",
+   "full_title": "02-febe-tsplines-legacy-primitive-builder-compat"
+  },
+  {
+   "old_path": "ZAFTER - Post-Release Extensions/L2-09-12 - 12-febe-clayoo-selection-set-operations",
+   "new_name": "L2-09-12 - 12-febe-clayoo-selection-set",
+   "level": "L2",
+   "id": "OM9-L2-09-12",
+   "full_title": "12-febe-clayoo-selection-set-operations"
+  },
+  {
+   "old_path": "ZAFTER - Post-Release Extensions/L2-10-03 - 03-febe-jewelry-print-supports-and-sprues",
+   "new_name": "L2-10-03 - 03-febe-jewelry-print-supports",
+   "level": "L2",
+   "id": "OM9-L2-10-03",
+   "full_title": "03-febe-jewelry-print-supports-and-sprues"
+  }
+ ]
+}

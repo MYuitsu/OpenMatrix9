@@ -20,6 +20,14 @@ pub mod file_dialog;
 mod verified_file;
 #[cfg(windows)]
 mod windows;
+#[cfg(windows)]
+pub use windows::report_startup_failure;
+/// Non-Windows builds have no owned window shell: the caller keeps the diagnostic
+/// receipt and stderr text instead of claiming a dialog was shown.
+#[cfg(not(windows))]
+pub fn report_startup_failure(_title: &str, _message: &str) -> bool {
+    false
+}
 pub use verified_file::VerifiedFile;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FailureKind {

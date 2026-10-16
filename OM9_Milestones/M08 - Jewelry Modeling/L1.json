@@ -1,0 +1,76 @@
+{
+  "level": "L1",
+  "id": "OM9-M08",
+  "milestone": "M08",
+  "title": "Advanced Jewelry Modeling",
+  "planning_state": "L1_L4_SPECIFIED_NOT_IMPLEMENTED",
+  "planning_only": true,
+  "module_count": 8,
+  "l3_count": 51,
+  "l4_count": 221,
+  "modules": [
+    {
+      "id": "OM9-L2-04-04",
+      "file": "M08 - Jewelry Modeling/L2-04-04 - 01-febe-smart-target-curve-blend-network/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-05",
+      "file": "M08 - Jewelry Modeling/L2-04-05 - 02-febe-matrix-smartflow-history-morph/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-06",
+      "file": "M08 - Jewelry Modeling/L2-04-06 - 03-febe-jewelry-ornament-builder-family/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-07",
+      "file": "M08 - Jewelry Modeling/L2-04-07 - 04-febe-jewelry-surface-object-placement/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-08",
+      "file": "M08 - Jewelry Modeling/L2-04-08 - 05-febe-matrix-advanced-deformation-ux/L2.json"
+    },
+    {
+      "id": "OM9-L2-05-01",
+      "file": "M08 - Jewelry Modeling/L2-05-01 - 06-febe-matrix9-smart-pattern-builder/L2.json"
+    },
+    {
+      "id": "OM9-L2-05-02",
+      "file": "M08 - Jewelry Modeling/L2-05-02 - 07-febe-matrix9-rope-builder/L2.json"
+    },
+    {
+      "id": "OM9-L2-05-03",
+      "file": "M08 - Jewelry Modeling/L2-05-03 - 08-febe-user-design-libraries/L2.json"
+    }
+  ],
+  "implementation_targets_by_milestone": {
+    "M08": 51
+  },
+  "l4_count_in_tree": 177,
+  "l4_executed_in_milestones": [
+    "M08",
+    "M03"
+  ],
+  "l3_spec_tree_by_milestone": {
+    "M03": 22,
+    "M08": 51
+  },
+  "l4_placed_by_milestone": {
+    "M03": 44,
+    "M08": 177
+  },
+  "cross_milestone_note": "E13 executes these L3 in M08 while each keeps its canonical owner milestone and L3 spec tree (no relocation).",
+  "execution_readiness": {
+    "target": "Planning-only L4 records; no binary, runtime receipts or changelog",
+    "blocked_until": [
+      "G00 PASS",
+      "prior stage gate before E13 PASS",
+      "source/OCCT/legal approved"
+    ],
+    "l4_planned": 221,
+    "l3_covered": 73,
+    "gate": "G-FULL requires G-MVP PASS and all E13 approved",
+    "stage": "E13",
+    "source_audit_status": "REMOTE_REVIEW_ONLY_NO_LOCAL_BUILD",
+    "qymcad_reviewed_revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d"
+  }
+}

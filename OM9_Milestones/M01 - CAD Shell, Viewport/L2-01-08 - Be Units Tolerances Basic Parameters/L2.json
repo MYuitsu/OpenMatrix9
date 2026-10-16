@@ -1,0 +1,81 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-08",
+  "milestone": "M01",
+  "title": "Be Units Tolerances Basic Parameters",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Millimeter, degrees, tolerances, numeric input và tham số builder đơn giản.",
+  "definition": {
+    "module_id": "OM9-L2-01-08",
+    "milestone_id": "M01",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "scope": "Millimeter, degrees, tolerances, numeric input và tham số builder đơn giản.",
+    "exclude": "Không cần solver phác thảo cơ khí hay formula dependency phức tạp.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ]
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          37,
+          43
+        ],
+        "pdf_pages_1based": [
+          45,
+          51
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [
+      "coordinate-and-units"
+    ],
+    "early_slices": [],
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 7
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-08-001",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-001 - Millimeter World Unit Model/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-08-002",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-002 - Angle Conversion And Degrees/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-08-003",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-003 - Document Absolute Relative Tolerances/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-08-004",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-004 - Typed Numeric Parameter Values/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-08-005",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-005 - Builder Parameter Range Validation/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-08-006",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-006 - Unit Safe Parameter Serialization/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-08-007",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-007 - Coordinate Numeric Input Primitives/l3.json"
+    }
+  ]
+}

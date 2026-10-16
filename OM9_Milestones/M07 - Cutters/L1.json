@@ -1,0 +1,42 @@
+{
+  "level": "L1",
+  "id": "OM9-M07",
+  "milestone": "M07",
+  "title": "Cutters và kiểm tra chế tạo",
+  "planning_state": "L1_L4_SPECIFIED_NOT_IMPLEMENTED",
+  "planning_only": true,
+  "module_count": 3,
+  "l3_count": 19,
+  "l4_count": 69,
+  "modules": [
+    {
+      "id": "OM9-L2-04-16",
+      "file": "M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-17",
+      "file": "M07 - Cutters/L2-04-17 - 02-febe-channel-microprong-brightcut-cutters/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-18",
+      "file": "M07 - Cutters/L2-04-18 - 03-febe-ring-finger-plane-quad-cutters/L2.json"
+    }
+  ],
+  "implementation_targets_by_milestone": {
+    "M07": 19
+  },
+  "execution_readiness": {
+    "target": "Planning-only L4 records; no binary, runtime receipts or changelog",
+    "blocked_until": [
+      "G00 PASS",
+      "prior stage gate before E12 PASS",
+      "source/OCCT/legal approved"
+    ],
+    "l4_planned": 69,
+    "l3_covered": 20,
+    "gate": "G-MVP after E12",
+    "stage": "E12",
+    "source_audit_status": "REMOTE_REVIEW_ONLY_NO_LOCAL_BUILD",
+    "qymcad_reviewed_revision": "746a17f127897e921a57118b6caad08968602bf5"
+  }
+}

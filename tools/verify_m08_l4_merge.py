@@ -20,7 +20,7 @@ ROOT = Path("H:/OpenMatrix9")
 MILESTONES = ROOT / "OM9_Milestones"
 STAGING = ROOT / "build/m08-incoming/OpenMatrix9"
 PACKAGE_MANIFEST = STAGING / "planning/M08/M08_L4_EXECUTION_MANIFEST.json"
-M08_DIR = "M08 - Advanced Jewelry Modeling"
+M08_DIR = "M08 - Jewelry Modeling"
 M03_DIR = "M03 - Curve, Surface, Solid and 3DM Exchange"
 REFERENCE_FILES = [
     "M08_L4_EXECUTION_MANIFEST.json", "M08_L4_EXECUTION_MANIFEST.csv",
