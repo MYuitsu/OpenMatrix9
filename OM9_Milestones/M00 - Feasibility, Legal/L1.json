@@ -1,0 +1,567 @@
+{
+  "level": "L1",
+  "id": "OM9-M00",
+  "milestone": "M00",
+  "title": "Feasibility, QymCAD source, OCCT, legal and environment",
+  "purpose": "Verify technical/legal feasibility and close architectural decisions. No CAD implementation here.",
+  "depends_on_milestones": [],
+  "planning_state": "NOT_STARTED",
+  "source_repo": "https://github.com/QymIs-Tech/QymCAD",
+  "pinned_source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "module_count": 7,
+  "l3_count": 19,
+  "l4_count": 73,
+  "modules": [
+    {
+      "id": "OM9-M00-L2-01",
+      "file": "M00 - Feasibility, Legal/L2-01 - QymCAD/L2.json"
+    },
+    {
+      "id": "OM9-M00-L2-02",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L2.json"
+    },
+    {
+      "id": "OM9-M00-L2-03",
+      "file": "M00 - Feasibility, Legal/L2-03 - UI/L2.json"
+    },
+    {
+      "id": "OM9-M00-L2-04",
+      "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L2.json"
+    },
+    {
+      "id": "OM9-M00-L2-05",
+      "file": "M00 - Feasibility, Legal/L2-05 - Associative/L2.json"
+    },
+    {
+      "id": "OM9-M00-L2-06",
+      "file": "M00 - Feasibility, Legal/L2-06 - License/L2.json"
+    },
+    {
+      "id": "OM9-M00-L2-07",
+      "file": "M00 - Feasibility, Legal/L2-07 - Reproducible/L2.json"
+    }
+  ],
+  "execution_scope": {
+    "this_is_only_planning": true,
+    "no_code_implemented": true,
+    "no_real_tests_executed": true,
+    "original_l2_l3_l4_ids_unchanged": true,
+    "not_included": [
+      "changelogs",
+      "lịch sử phiên bản",
+      "log thực thi",
+      "bằng chứng thực thi chưa có",
+      "công cụ kiểm thử thực thi",
+      "tệp báo cáo và manifest trùng lặp"
+    ],
+    "readme": "Giai đoạn lập kế hoạch: chỉ lưu JSON theo cấp L1/L2/L3/L4; tất cả L4 chưa triển khai. Các milestone khác ở L1–L3.",
+    "scope_other_milestones": "M03–M09 và AFTER được lưu riêng ở cấp L1–L3."
+  },
+  "technical_reference_material": {
+    "human_approval_policy": "# Human approval protocol (never auto-sign)\n\nFour L4 require a human decision: `01-03-03` architecture strategy, `06-01-04` product license, `06-02-04` legal gate, `07-03-04` release/E01 gate. AI may write the ADR but must set `BLOCKED_APPROVAL` until a reviewer actually reviews and signs.\n\nFor PASS, evidence review fields must have decision APPROVED, reviewer name, verified artifact/log reference, and a genuine JSON approval record with `task_id`, `decision`, `reviewer`, `approved_at_utc`, `evidence_sha256`. Structural validator cannot establish whether a person truly signed; independent review is still required.\n\nAGPL, OCCT exception, openNURBS custom license and Matrix documentation/assets require rights review; do not publish copied manuals, proprietary examples or branding.\n",
+    "small_model_execution_protocol": "# Small-model execution protocol — OpenMatrix9 M00 v0.13\n\nMục tiêu: cho agent năng lực suy luận hạn chế xử lý từng L4 theo tài liệu có oracle. **Không có lệnh nào trong file này được coi là đã chạy.**\n\n## Cố định nguồn\n- QymCAD: https://github.com/QymIs-Tech/QymCAD @ `746a17f127897e921a57118b6caad08968602bf5`.\n- openNURBS: https://github.com/mcneel/opennurbs @ `eb92af3ba1806b0a34a99aba0d3bda83e3d46083`.\n- QymCAD Rust/C++ bridge + OCCT, không phải nhân CAD thuần Rust. `Format::ALL` chưa có `.3dm` ở SHA ghim.\n- AGPL-3.0-or-later và giấy phép thành phần cần reviewer phê duyệt; không sao chép assets Matrix/Gemvision.\n\n## Quy trình chuẩn\n1. Chạy `python tools/validate_m00_v013.py` từ root; không sửa nhiệm vụ trước khi pass.\n2. Chạy `python tools/next_m00_task.py` và chọn đúng **một** RUNBOOK. Không tự làm các task khác kể cả tiện tay.\n3. Đọc toàn bộ `RUNBOOK.md`, `execution_contract.json` và `l4.json`. Kiểm SHA repo, dependencies, môi trường, fixture.\n4. Nếu thiếu dependency/source/toolchain/fixture hoặc human signoff: ghi BLOCKED và dừng, không suy đoán.\n5. Nếu được phép: làm microtask 1 rồi test, microtask 2 rồi test...; mỗi thay đổi code 1 đơn vị nhỏ, không sửa canonical L2/L3.\n6. Mỗi lệnh thật ghi command + exit code + stdout/stderr file. Lưu artifact path + SHA256, so expected/actual.\n7. Tạo `implementation/evidence/M00/G00-xx/OM9-M00-L4-xx-xx-xx.evidence.json`, kiểm `python tools/validate_m00_execution.py`.\n8. Khi đã lưu evidence, dừng phiên. Không tự động cấp PASS cho Gate và E01.\n\n## Status semantics\n- `NOT_RUN`: chưa làm; `BLOCKED_SOURCE`: không có đúng nguồn SHA; `BLOCKED_ENV`: thiếu Rust/OCCT/MSVC/GPU; `BLOCKED_FIXTURE`: thiếu dữ liệu kiểm thử.\n- `BLOCKED_DEPENDENCY`: prerequisite chưa PASS; `BLOCKED_APPROVAL`: phải có reviewer ký.\n- `FAIL`: chạy thật nhưng expected != actual. `NOT_TARGETED`: **chỉ** optional task có phê duyệt scope.\n- `PASS`: có evidence thật, expected/actual, artifact digest; với HUMAN task bắt buộc review signed record.\n\n## Câu hỏi/điều kiện dừng\n- Không xác định được path/symbol: chỉ hỏi người review hoặc BLOCKED_SOURCE, không tự đổi đầu bài.\n- Không có test oracle cho OCCT/3DM: BLOCKED_FIXTURE, không đánh dấu PASS chỉ vì compile.\n- Không có thiết bị GPU/Windows: BLOCKED_ENV; không dùng static code review thay test thật.\n- Không có quyền sử dụng manual/3DM sample: giữ private và BLOCKED_APPROVAL.\n- Mọi thay đổi `source_sha` tạo phiên audit mới, không tự nâng SHA.\n\n## Kiểm thử\n- `python tools/validate_m00_v013.py` xác minh kiến trúc và DAG.\n- `python tools/validate_m00_execution.py --self-test` xác minh từ chối evidence giả.\n- `python tools/validate_m00_execution.py --require-ready` chỉ PASS khi toàn bộ mandatory L4 thực sự có evidence và reviewer ký.\n\n## Helper tạo bằng chứng chuẩn (khuyến khích)\n\n- `python tools/m00_capture.py --task OM9-M00-L4-01-01-02 --cwd vendor-research/QymCAD --label head -- git rev-parse HEAD` lưu stdout/stderr/exit code thật. Chú ý repository phải tồn tại; lệnh chỉ minh họa, không có checkout mặc định.\n- `python tools/m00_init_evidence.py OM9-M00-L4-01-01-02` sinh bản nháp JSON `NOT_RUN`, **không được xem là PASS**. Không tự chạy code được gợi ý nếu máy thiếu OCCT.\n- Trường `expected` phải là oracle độc lập; `actual` đọc từ log/test thực, không copy từ `expected`.\n",
+    "qymcad_github_snapshot": "# QymCAD GitHub Source Snapshot — M00 G00-01\n\n**Kiểm tra remote vào 2026-10-15** qua GitHub API. Không chạy build QymCAD trong môi trường tạo đặc tả.\n\n- Repo: https://github.com/QymIs-Tech/QymCAD\n- Branch: `main`; commit pin: [`746a17f127897e921a57118b6caad08968602bf5`](https://github.com/QymIs-Tech/QymCAD/commit/746a17f127897e921a57118b6caad08968602bf5).\n- GitHub repository metadata: Rust, public, AGPL-3.0, with QymCAD README describing unstable development `.qcad` format.\n- Rust workspace: `Cargo.toml`; `qymcad-kernel` has C-ABI bridge and OCCT dynamic links; `qymcad-core` has feature timeline; `qymcad-io` project codec; `qymcad-render` egui painter; app uses `eframe` with `wgpu`, `glow` fallback.\n- `crates/qymcad-io/src/formats.rs` declares STEP, IGES, STL, OBJ, PLY, glTF, 3MF, AMF, DXF and SVG; no 3DM in `Format::ALL` at pinned revision; independent scan still required to exclude any other hidden converter.\n- `crates/qymcad-core/src/refs.rs` documents query-based references and refusing ambiguity rather than silent centroid guessing; `crates/qymcad-kernel/src/naming.rs` handles named topology across split/merge operations. **Source claim; needs runtime proof for OpenMatrix9.**\n- OCCT 7.8.1 appears in `THIRD-PARTY-NOTICES.md` and packaging instructions; pin OCCT binary/toolchain at runtime.\n- External .3dm candidate: https://github.com/mcneel/opennurbs — C++ reader/writer, **not** proof of working QymCAD integration. License/version/FFI decisions remain M00 tasks.\n\n## Remote-reviewed file references (same SHA)\n\n- [`AGENTS.md`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/AGENTS.md)\n- [`Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/Cargo.toml)\n- [`LICENSE`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/LICENSE)\n- [`THIRD-PARTY-NOTICES.md`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/THIRD-PARTY-NOTICES.md)\n- [`crates/qymcad-acceptance/src/lib.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/src/lib.rs)\n- [`crates/qymcad-core/src/feature.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/feature.rs)\n- [`crates/qymcad-core/src/refs.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/refs.rs)\n- [`crates/qymcad-io/Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/Cargo.toml)\n- [`crates/qymcad-io/src/formats.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/formats.rs)\n- [`crates/qymcad-io/src/project_file.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/project_file.rs)\n- [`crates/qymcad-kernel/Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/Cargo.toml)\n- [`crates/qymcad-kernel/build.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/build.rs)\n- [`crates/qymcad-kernel/src/lib.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/lib.rs)\n- [`crates/qymcad-kernel/src/naming.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/naming.rs)\n- [`crates/qymcad-kernel/src/shape.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/shape.rs)\n- [`crates/qymcad-render/Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-render/Cargo.toml)\n- [`crates/qymcad-render/src/lib.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-render/src/lib.rs)\n- [`crates/qymcad/Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/Cargo.toml)\n- [`packaging/README.md`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/packaging/README.md)\n- [`rust-toolchain.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/rust-toolchain.toml)\n\n## Quy tắc\n\n- `FILE_CONTENT_READ`: đã đọc nội dung text từ GitHub theo commit; **không có nghĩa compile/test/pass**.\n- `PATH_LISTED_OR_CANDIDATE_REVERIFY`: thấy qua listing hoặc cấu trúc, Codex phải kiểm tra bằng `git cat-file -e` sau checkout.\n- Một source path hay API nếu không còn tồn tại ở revision mà Codex chọn thì phải báo conflict; không tự sửa spec để báo PASS.\n",
+    "3dm_fixture_contract": {
+      "schema": "om9.m00.3dm_fixture_plan.v1",
+      "status": "FIXTURES_NOT_YET_CREATED",
+      "required_source": "Own generated files or redistribution-approved examples only",
+      "decoder": "mcneel/opennurbs @ eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+      "fixtures": [
+        {
+          "id": "3DM_CURVE_NURBS",
+          "geometry": "rational curve with degree/knots/weights",
+          "needs": "expected evaluator samples at t=0,0.25,0.5,0.75,1.0",
+          "verified": false
+        },
+        {
+          "id": "3DM_SURFACE_TRIM",
+          "geometry": "surface with internal hole + outer trim loop",
+          "needs": "face count, loop winding, 3D bbox/area, valid edge seam",
+          "verified": false
+        },
+        {
+          "id": "3DM_INSTANCE_NEST2",
+          "geometry": "block definition nested 2 levels with transform",
+          "needs": "explicit world matrices, unit conversion, expected instance count",
+          "verified": false
+        },
+        {
+          "id": "3DM_MM_INCH",
+          "geometry": "same box saved in inch and millimeter",
+          "needs": "expected dimensions [25.4,25.4,25.4] mm for 1in cube and 1x1x1 mm",
+          "verified": false
+        },
+        {
+          "id": "3DM_BAD_TRUNCATED",
+          "geometry": "valid file header truncated",
+          "needs": "typed corrupt error and rollback hash",
+          "verified": false
+        },
+        {
+          "id": "3DM_UNSUPPORTED_USERDATA",
+          "geometry": "custom metadata controlled sample",
+          "needs": "retained/ignored warning with object ID",
+          "verified": false
+        }
+      ],
+      "golden_verification": "Fixture golden computed from independent generator/analytical geometry, not from result of reader under test"
+    },
+    "geometry_analytic_fixtures": {
+      "schema": "om9.m00.geometry_golden.v1",
+      "units": "mm",
+      "status": "SPEC_ONLY_NO_RUNTIME",
+      "validation_policy": "Use independent analytic volume; tolerance chosen and approved per kernel build; do not label PASS without measured data",
+      "cases": [
+        {
+          "id": "BOX_10_20_30",
+          "type": "box",
+          "parameters": {
+            "width": 10,
+            "depth": 20,
+            "height": 30
+          },
+          "volume_mm3": 6000.0,
+          "bounds_local": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              10,
+              20,
+              30
+            ]
+          ],
+          "expected_solids": 1,
+          "expected_closed": true,
+          "suggested_tolerances": {
+            "abs_volume_mm3": 0.0001,
+            "abs_bbox_mm": 1e-05
+          }
+        },
+        {
+          "id": "CYLINDER_R10_H20",
+          "type": "cylinder",
+          "parameters": {
+            "radius": 10,
+            "height": 20
+          },
+          "volume_mm3": 6283.185307179587,
+          "bounds_local": [
+            [
+              -10,
+              -10,
+              0
+            ],
+            [
+              10,
+              10,
+              20
+            ]
+          ],
+          "expected_solids": 1,
+          "expected_closed": true,
+          "suggested_tolerances": {
+            "rel_volume": 1e-08,
+            "abs_bbox_mm": 1e-05
+          }
+        },
+        {
+          "id": "SPHERE_R10",
+          "type": "sphere",
+          "parameters": {
+            "radius": 10
+          },
+          "volume_mm3": 4188.790204786391,
+          "bounds_local": [
+            [
+              -10,
+              -10,
+              -10
+            ],
+            [
+              10,
+              10,
+              10
+            ]
+          ],
+          "expected_solids": 1,
+          "expected_closed": true,
+          "suggested_tolerances": {
+            "rel_volume": 1e-08,
+            "abs_bbox_mm": 1e-05
+          }
+        },
+        {
+          "id": "UNION_OVERLAPPING_CUBES",
+          "type": "boolean_union",
+          "parameters": {
+            "cube_A": [
+              0,
+              0,
+              0,
+              10,
+              10,
+              10
+            ],
+            "cube_B": [
+              5,
+              0,
+              0,
+              10,
+              10,
+              10
+            ]
+          },
+          "volume_mm3": 1500.0,
+          "bounds_local": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              15,
+              10,
+              10
+            ]
+          ],
+          "expected_solids": 1,
+          "expected_closed": true,
+          "suggested_tolerances": {
+            "abs_volume_mm3": 0.0001
+          }
+        },
+        {
+          "id": "DIFF_OVERLAPPING_CUBES",
+          "type": "boolean_difference",
+          "parameters": {
+            "cube_A": [
+              0,
+              0,
+              0,
+              10,
+              10,
+              10
+            ],
+            "cube_B": [
+              5,
+              0,
+              0,
+              10,
+              10,
+              10
+            ]
+          },
+          "volume_mm3": 500.0,
+          "bounds_local": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              5,
+              10,
+              10
+            ]
+          ],
+          "expected_solids": 1,
+          "expected_closed": true
+        },
+        {
+          "id": "INTERSECT_OVERLAPPING_CUBES",
+          "type": "boolean_intersection",
+          "parameters": {
+            "cube_A": [
+              0,
+              0,
+              0,
+              10,
+              10,
+              10
+            ],
+            "cube_B": [
+              5,
+              0,
+              0,
+              10,
+              10,
+              10
+            ]
+          },
+          "volume_mm3": 500.0,
+          "bounds_local": [
+            [
+              5,
+              0,
+              0
+            ],
+            [
+              10,
+              10,
+              10
+            ]
+          ],
+          "expected_solids": 1,
+          "expected_closed": true
+        },
+        {
+          "id": "INVALID_ZERO_RADIUS",
+          "type": "negative",
+          "parameters": {
+            "radius": 0.0
+          },
+          "expected": "Typed error; no mutation, process alive"
+        },
+        {
+          "id": "INVALID_FILLET_TOO_LARGE",
+          "type": "negative",
+          "parameters": {
+            "box": [
+              10,
+              10,
+              10
+            ],
+            "fillet_radius": 100
+          },
+          "expected": "Fail safely or typed refusal; do not assume exact code before run"
+        }
+      ]
+    },
+    "source_facts_pinned": {
+      "qymcad": {
+        "repository": "QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "status": "GITHUB_SOURCE_REVIEW_ONLY",
+        "source_anchors": {
+          "01": [
+            "Cargo.toml",
+            "README.md",
+            "AGENTS.md",
+            "CLAUDE.md",
+            "crates/qymcad-core/src/model.rs",
+            "crates/qymcad-core/src/feature.rs",
+            "crates/qymcad-core/src/refs.rs"
+          ],
+          "02": [
+            "crates/qymcad-kernel/build.rs",
+            "crates/qymcad-kernel/src/shape.rs",
+            "crates/qymcad-kernel/src/kernel.rs",
+            "crates/qymcad-kernel/src/workers.rs",
+            "crates/qymcad-kernel/src/naming.rs",
+            "crates/qymcad-kernel/tests/every_entry_catches_what_occt_throws.rs"
+          ],
+          "03": [
+            "crates/qymcad/Cargo.toml",
+            "crates/qymcad/src/viewport_gpu.rs",
+            "crates/qymcad-render/src/lib.rs",
+            "crates/qymcad-ui-state/src/navigation.rs",
+            "crates/qymcad-ui-state/src/selection.rs",
+            "crates/qymcad-ui-state/src/gizmos.rs"
+          ],
+          "04": [
+            "crates/qymcad-io/src/formats.rs",
+            "crates/qymcad-io/src/project_file.rs",
+            "crates/qymcad-kernel/src/shape/exchange.rs",
+            "crates/qymcad-core/src/model.rs"
+          ],
+          "05": [
+            "crates/qymcad-core/src/names.rs",
+            "crates/qymcad-core/src/refs.rs",
+            "crates/qymcad-core/tests/rebind_is_explicit.rs",
+            "crates/qymcad-kernel/src/naming.rs",
+            "crates/qymcad-core/tests/user_file_roundtrip.rs"
+          ],
+          "06": [
+            "LICENSE",
+            "THIRD-PARTY-NOTICES.md",
+            "crates/qymcad/src/packaging_licence.rs",
+            "packaging/README.md"
+          ],
+          "07": [
+            ".github/workflows/checks.yml",
+            ".github/workflows/release.yml",
+            "packaging/README.md",
+            "crates/qymcad/src/packaging_occt.rs",
+            "crates/qymcad/src/gui/a_machine_with_no_graphics.rs",
+            "tools/gate.py"
+          ]
+        },
+        "not_runtime_verified": [
+          "Windows packaging",
+          "OCCT compile",
+          "four-view demo",
+          "3dm-OCCT convert"
+        ]
+      },
+      "opennurbs": {
+        "repository": "mcneel/opennurbs",
+        "revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+        "read": "README.md/LICENSE/example_read/example_read.cpp",
+        "license_status": "CUSTOM_REVIEW_REQUIRED",
+        "must_verify": "Pin checkout and check license before redistribution"
+      },
+      "known_risks": [
+        "QymCAD io Format::ALL at pinned source has no 3dm entry",
+        "QymCAD .qcad format does not guarantee backwards compatibility",
+        "FFI is Rust+ C++ bridge against OCCT, not pure Rust kernel",
+        "Some documentation pins OCCT 7.8.1 while workflows reference 7.9.3: reconcile by platform/revision",
+        "QymCAD under AGPL-3.0-or-later: formal human licensing approval required"
+      ]
+    },
+    "execution_evidence_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "om9.m00.evidence.v013",
+      "title": "M00 L4 execution evidence",
+      "type": "object",
+      "required": [
+        "task_id",
+        "source_sha",
+        "status",
+        "actual_execution",
+        "commands",
+        "artifacts",
+        "expected",
+        "actual",
+        "review"
+      ],
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "pattern": "^OM9-M00-L4-\\d{2}-\\d{2}-\\d{2}$"
+        },
+        "source_sha": {
+          "const": "746a17f127897e921a57118b6caad08968602bf5"
+        },
+        "status": {
+          "enum": [
+            "NOT_RUN",
+            "PASS",
+            "FAIL",
+            "BLOCKED_SOURCE",
+            "BLOCKED_DEPENDENCY",
+            "BLOCKED_ENV",
+            "BLOCKED_FIXTURE",
+            "BLOCKED_APPROVAL",
+            "NOT_TARGETED"
+          ]
+        },
+        "actual_execution": {
+          "type": "boolean"
+        },
+        "timestamp_utc": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "os_arch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "toolchain": {
+          "type": "object"
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "command",
+              "exit_code",
+              "stdout_path",
+              "stderr_path"
+            ],
+            "properties": {
+              "command": {
+                "type": "string"
+              },
+              "exit_code": {
+                "type": "integer"
+              },
+              "stdout_path": {
+                "type": "string"
+              },
+              "stderr_path": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        },
+        "fixtures": {
+          "type": "array"
+        },
+        "expected": {
+          "type": "array"
+        },
+        "actual": {
+          "type": "array"
+        },
+        "review": {
+          "type": "object",
+          "required": [
+            "decision",
+            "reviewer",
+            "evidence_checked"
+          ],
+          "properties": {
+            "decision": {
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "REJECTED"
+              ]
+            },
+            "reviewer": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "evidence_checked": {
+              "type": "boolean"
+            },
+            "signed_record_path": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "scope_decision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "blockers": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

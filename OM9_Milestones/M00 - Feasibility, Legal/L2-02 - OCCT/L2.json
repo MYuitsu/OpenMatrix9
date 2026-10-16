@@ -1,0 +1,45 @@
+{
+  "level": "L2",
+  "id": "OM9-M00-L2-02",
+  "milestone": "M00",
+  "title": "OCCT bridge & numerical geometry",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+  "definition": {
+    "module_id": "OM9-M00-L2-02",
+    "title": "OCCT bridge & numerical geometry",
+    "gate_id": "G00-02",
+    "role": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+    "l3_items": [
+      {
+        "l3_id": "OM9-M00-L3-02-01",
+        "title": "Toolchain and C ABI bridge proof",
+        "l4_count": 4
+      },
+      {
+        "l3_id": "OM9-M00-L3-02-02",
+        "title": "Lifetime, threading and error safety",
+        "l4_count": 4
+      },
+      {
+        "l3_id": "OM9-M00-L3-02-03",
+        "title": "Geometry numeric invariants",
+        "l4_count": 4
+      }
+    ]
+  },
+  "children_l3": [
+    {
+      "id": "OM9-M00-L3-02-01",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-02-02",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-02 - Lifetime, threading and error safety/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-02-03",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/l3.json"
+    }
+  ]
+}

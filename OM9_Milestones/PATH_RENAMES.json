@@ -5,14 +5,13 @@
  "budget": 210,
  "note": "Tieu de day du khong mat: van nam trong L1.json / L2.json / l3.json / l4.json tuong ung.",
  "notes": [
-  "`M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment` chua doi duoc trong phien nay (thu muc bi giu handle); ten du kien: `M00 - Feasibility, Legal`. Hoan tat sau: `python implementation/tools/om9_shorten_milestone_paths.py --finish-module \"M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment=M00 - Feasibility, Legal\"`.",
   "`M03 - Curve, Surface, Solid and 3DM Exchange` chua doi duoc trong phien nay (thu muc bi giu handle); ten du kien: `M03 - Geometry 3DM`. Hoan tat sau: `python implementation/tools/om9_shorten_milestone_paths.py --finish-module \"M03 - Curve, Surface, Solid and 3DM Exchange=M03 - Geometry 3DM\"`."
  ],
  "modules": [
   {
    "old": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment",
-   "new": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment",
-   "applied": false,
+   "new": "M00 - Feasibility, Legal",
+   "applied": true,
    "planned_new": "M00 - Feasibility, Legal",
    "blocked_reason": "thu muc bi giu handle"
   },

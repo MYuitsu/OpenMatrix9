@@ -42,13 +42,13 @@ Confidence of mappings: low=80, high=999, medium=272. Placement: L3=991, L2=139,
 
 Columns: level, folder, text files, images, size, link to REFERENCE.md.
 
-### M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment
+### M00 - Feasibility, Legal
 
 | Level | Function folder | Text | Images | Size | Reference |
 |---|---|---|---|---|---|
-| L3 | L2-03 - UI / L3-02 - GPU renderer stability and performance | 1 | 22 | 1734 KB | [REFERENCE.md](M00%20-%20Feasibility%2C%20QymCAD%20Source%2C%20OCCT%2C%20Legal%20and%20Environment/L2-03%20-%20UI/L3-02%20-%20GPU%20renderer%20stability%20and%20performance/reference/REFERENCE.md) |
-| L3 | L2-03 - UI / L3-03 - Picking + transactional selection | 1 | 4 | 269 KB | [REFERENCE.md](M00%20-%20Feasibility%2C%20QymCAD%20Source%2C%20OCCT%2C%20Legal%20and%20Environment/L2-03%20-%20UI/L3-03%20-%20Picking%20%2B%20transactional%20selection/reference/REFERENCE.md) |
-| L3 | L2-04 - 3DM / L3-01 - 3DM capability gap and dependency | 1 | 1 | 54 KB | [REFERENCE.md](M00%20-%20Feasibility%2C%20QymCAD%20Source%2C%20OCCT%2C%20Legal%20and%20Environment/L2-04%20-%203DM/L3-01%20-%203DM%20capability%20gap%20and%20dependency/reference/REFERENCE.md) |
+| L3 | L2-03 - UI / L3-02 - GPU renderer stability and performance | 1 | 22 | 1734 KB | [REFERENCE.md](M00%20-%20Feasibility%2C%20Legal/L2-03%20-%20UI/L3-02%20-%20GPU%20renderer%20stability%20and%20performance/reference/REFERENCE.md) |
+| L3 | L2-03 - UI / L3-03 - Picking + transactional selection | 1 | 4 | 269 KB | [REFERENCE.md](M00%20-%20Feasibility%2C%20Legal/L2-03%20-%20UI/L3-03%20-%20Picking%20%2B%20transactional%20selection/reference/REFERENCE.md) |
+| L3 | L2-04 - 3DM / L3-01 - 3DM capability gap and dependency | 1 | 1 | 54 KB | [REFERENCE.md](M00%20-%20Feasibility%2C%20Legal/L2-04%20-%203DM/L3-01%20-%203DM%20capability%20gap%20and%20dependency/reference/REFERENCE.md) |
 
 ### M01 - CAD Shell, Viewport
 
@@ -883,27 +883,27 @@ No manual material was assigned to these functions (reason from mapping.json).
 
 | Level | Function folder | Reason |
 |---|---|---|
-| L2 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-01 - QymCAD | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-01 - QymCAD / L3-01 - Repository provenance & pinned | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-01 - QymCAD / L3-02 - Workspace map | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-01 - QymCAD / L3-03 - REUSE ADAPT ADD architecture | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L2 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-02 - OCCT | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-02 - OCCT / L3-01 - Toolchain and C ABI bridge proof | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-02 - OCCT / L3-02 - Lifetime, threading and error safety | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-02 - OCCT / L3-03 - Geometry numeric invariants | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-03 - UI / L3-01 - Source UI architecture and constraints | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-04 - 3DM / L3-02 - NURBS - trimmed BRep - units proof | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-04 - 3DM / L3-03 - Import security and transparent | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L2 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-05 - Associative | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-05 - Associative / L3-01 - Naming and reference architecture | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-05 - Associative / L3-02 - Regeneration and persistence | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L2 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-06 - License | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-06 - License / L3-01 - Software license and reuse | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-06 - License / L3-02 - Assets, trademarks and release | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L2 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-07 - Reproducible | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-07 - Reproducible / L3-01 - Windows 10 - 11 x64 | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-07 - Reproducible / L3-02 - Linux optional & packaged OCCT | M00 is a feasibility/spike gate; it has no manual-driven functionality |
-| L3 | M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment / L2-07 - Reproducible / L3-03 - Continuous verification and gate | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L2 | M00 - Feasibility, Legal / L2-01 - QymCAD | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-01 - QymCAD / L3-01 - Repository provenance & pinned | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-01 - QymCAD / L3-02 - Workspace map | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-01 - QymCAD / L3-03 - REUSE ADAPT ADD architecture | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L2 | M00 - Feasibility, Legal / L2-02 - OCCT | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-02 - OCCT / L3-01 - Toolchain and C ABI bridge proof | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-02 - OCCT / L3-02 - Lifetime, threading and error safety | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-02 - OCCT / L3-03 - Geometry numeric invariants | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-03 - UI / L3-01 - Source UI architecture and constraints | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-04 - 3DM / L3-02 - NURBS - trimmed BRep - units proof | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-04 - 3DM / L3-03 - Import security and transparent | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L2 | M00 - Feasibility, Legal / L2-05 - Associative | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-05 - Associative / L3-01 - Naming and reference architecture | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-05 - Associative / L3-02 - Regeneration and persistence | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L2 | M00 - Feasibility, Legal / L2-06 - License | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-06 - License / L3-01 - Software license and reuse | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-06 - License / L3-02 - Assets, trademarks and release | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L2 | M00 - Feasibility, Legal / L2-07 - Reproducible | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-07 - Reproducible / L3-01 - Windows 10 - 11 x64 | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-07 - Reproducible / L3-02 - Linux optional & packaged OCCT | M00 is a feasibility/spike gate; it has no manual-driven functionality |
+| L3 | M00 - Feasibility, Legal / L2-07 - Reproducible / L3-03 - Continuous verification and gate | M00 is a feasibility/spike gate; it has no manual-driven functionality |
 | L3 | M01 - CAD Shell, Viewport / L2-01-01 - Febe Application Shell Docking / L3-004 - Docking Layout Default Restore | No manual section genuinely covers this function |
 | L3 | M01 - CAD Shell, Viewport / L2-01-01 - Febe Application Shell Docking / L3-005 - Docking Layout Persistence | No manual section genuinely covers this function |
 | L3 | M01 - CAD Shell, Viewport / L2-01-01 - Febe Application Shell Docking / L3-006 - Active Document Window State | No manual section genuinely covers this function |

@@ -1,0 +1,67 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-05-02",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-05",
+  "title": "Regeneration and persistence stress proof",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-05-02",
+    "module_id": "OM9-M00-L2-05",
+    "gate_id": "G00-05",
+    "title": "Regeneration and persistence stress proof",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-05-02-01",
+        "title": "Test named reference qua feature rebuild",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/L4-01 - Test named reference qua feature rebuild/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-05-02-02",
+        "title": "Test conflict UI and command rollback",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/L4-02 - Test conflict UI and command rollback/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-05-02-03",
+        "title": "Kiểm thử persistence feature IDs và cache",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/L4-03 - Kiểm thử persistence feature IDs và/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-05-02-04",
+        "title": "Chốt hỗ trợ lịch sử MVP & fallback",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/L4-04 - Chốt hỗ trợ lịch sử MVP & fallback/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-05-02-01",
+    "OM9-M00-L4-05-02-02",
+    "OM9-M00-L4-05-02-03",
+    "OM9-M00-L4-05-02-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-05-02-01",
+      "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/L4-01 - Test named reference qua feature rebuild/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-05-02-02",
+      "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/L4-02 - Test conflict UI and command rollback/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-05-02-03",
+      "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/L4-03 - Kiểm thử persistence feature IDs và/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-05-02-04",
+      "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/L4-04 - Chốt hỗ trợ lịch sử MVP & fallback/l4.json"
+    }
+  ]
+}
