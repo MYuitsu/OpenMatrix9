@@ -1,0 +1,179 @@
+//! SECTIONS OF THE SETTINGS WINDOW — ONE SOURCE for the list on the left, for search and for reset.
+//!
+//! The window used to be one flat scroll where the sections were merely bold captions. That does not
+//! scale: there will be three times as many settings (autosave, interface scale, pick precision,
+//! recent files), and a flat list turns into a sheet that cannot be searched.
+//!
+//! WHY ONE TABLE AND NOT THREE LISTS. A section needs three things: what to show in it, what to
+//! search, and what to reset. Split those across three places and they drift silently: a new setting
+//! reaches the window but is not found by search, or is found but is not reset. So the row labels are
+//! declared here in [`SettingsSection::row_keys`], and a guard cross-checks them against the SOURCE of
+//! the window in both directions.
+//!
+//! The reset is spelled out field by field rather than "take the defaults wholesale": "reset the
+//! section" must touch EXACTLY that section, otherwise the button in "Sketch" would wipe the chosen
+//! language.
+use crate::Settings;
+
+/// A section of the settings window. The order of the variants is the order in the list on the left.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum SettingsSection {
+    General,
+    Appearance,
+    Viewport,
+    Sketch,
+    Part,
+    Assembly,
+    /// WHERE THE PANELS STAND. A section of its own because it belongs to no workbench: the shell owns
+    /// the places, and every workbench registers into the same ones.
+    Layout,
+}
+
+impl SettingsSection {
+    /// All the sections in display order.
+    pub fn all() -> &'static [Self] {
+        use SettingsSection::*;
+        &[General, Appearance, Viewport, Sketch, Part, Assembly, Layout]
+    }
+
+    /// The catalogue key holding the section name.
+    pub fn key(self) -> &'static str {
+        use SettingsSection::*;
+        match self {
+            General => "settings-sec-general",
+            Appearance => "settings-sec-appearance",
+            Viewport => "settings-sec-viewport",
+            Sketch => "settings-sec-sketch",
+            Part => "settings-sec-part",
+            Assembly => "settings-sec-assembly",
+            Layout => "settings-sec-layout",
+        }
+    }
+
+    /// THE ROW LABELS OF A SECTION — what search looks through. A guard cross-checks them against the window source.
+    pub fn row_keys(self) -> &'static [&'static str] {
+        use SettingsSection::*;
+        match self {
+            General => &[
+                "settings-language",
+                "settings-help-lang",
+                "settings-help-open",
+                "settings-open-last",
+                "settings-show-start",
+                "settings-import-ask",
+                "settings-autosave",
+                "settings-undo-cap",
+                "settings-kernel-threads",
+                "settings-updates",
+                "settings-recent-limit",
+                "settings-profile",
+            ],
+            Appearance => &["settings-scheme", "settings-ui-scale", "settings-icon-themes"],
+            Viewport => &[
+                "settings-engine",
+                "settings-projection",
+                "settings-shading",
+                "settings-viewcube",
+                "settings-mouse-nav",
+                "settings-zoom-at",
+                "settings-orbit-about",
+                "settings-pick-precision",
+                "settings-ghost-alpha",
+                "settings-fov",
+                "settings-msaa",
+                "settings-graphics-adapter",
+            ],
+            Sketch => &[
+                "settings-snap-on",
+                "settings-grid-step",
+                "settings-rot-step",
+                "settings-auto-constrain",
+                "settings-point-numbers",
+                "settings-dim-name",
+                "settings-dim-formula",
+                "settings-dim-font",
+                "settings-dim-text",
+            ],
+            Part => &["settings-default-extrude", "settings-default-offset"],
+            Assembly => &["settings-show-contours", "settings-show-joints", "settings-show-interference"],
+            Layout => &["settings-layout-place", "settings-layout-reset"],
+        }
+    }
+
+    /// Whether a row matches the search query. An empty query matches everything.
+    ///
+    /// THE WORDS ARE HANDED IN, NOT LOOKED UP. Searching happens over what a person SEES, so the text has
+    /// to be translated - but a record of the interface must not reach for the dictionary, or the state
+    /// would depend on the language shown. The caller passes the lookup it already has.
+    pub fn row_matches(key: &str, query: &str, tr: &dyn Fn(&str) -> String) -> bool {
+        let q = query.trim().to_lowercase();
+        q.is_empty() || tr(key).to_lowercase().contains(&q)
+    }
+
+    /// Whether the section holds any row matching the query; that decides whether to show it at all.
+    pub fn has_match(self, query: &str, tr: &dyn Fn(&str) -> String) -> bool {
+        self.row_keys().iter().any(|k| Self::row_matches(k, query, tr))
+    }
+
+    /// RESTORE THE FACTORY VALUES OF THIS SECTION ONLY. Nothing else is touched.
+    pub fn reset(self, s: &mut Settings) {
+        let d = Settings::default();
+        use SettingsSection::*;
+        match self {
+            General => {
+                s.language = d.language;
+                s.help_lang = d.help_lang;
+                s.help_external = d.help_external;
+                s.open_last = d.open_last;
+                s.show_start_screen = d.show_start_screen;
+                s.import_ask_always = d.import_ask_always;
+                s.import_units = d.import_units.clone();
+                s.autosave_secs = d.autosave_secs;
+                s.undo_cap = d.undo_cap;
+                s.recent_limit = d.recent_limit;
+                s.update_check = d.update_check;
+                // The time of the last check goes back with it: left behind, "once a week" would
+                // silently mean "not for another week" right after the setting was put back.
+                s.update_last_checked = d.update_last_checked;
+                // THE RECENT LIST ITSELF IS NOT TOUCHED BY A RESET: it is not a setting but a
+                // history of work. "Reset the section" means "restore the factory values", not
+                // "forget what I did"; the File menu has a separate item for the latter.
+            }
+            Appearance => {
+                s.scheme = d.scheme;
+                s.ui_scale = d.ui_scale;
+                s.active_icon_packs = d.active_icon_packs;
+                s.inactive_icon_packs = d.inactive_icon_packs;
+                s.icon_dev_watch = d.icon_dev_watch;
+                s.watched_icon_packs = d.watched_icon_packs;
+            }
+            Viewport => {
+                s.gpu_viewport = d.gpu_viewport;
+                s.projection = d.projection;
+                s.shading = d.shading;
+                s.viewcube_size = d.viewcube_size;
+                s.pick_precision = d.pick_precision;
+                s.mouse_nav = d.mouse_nav;
+                s.zoom_at = d.zoom_at;
+                s.orbit_about = d.orbit_about;
+                s.zoom_editing = d.zoom_editing;
+                s.ghost_alpha = d.ghost_alpha;
+                s.persp_fov_deg = d.persp_fov_deg;
+                s.msaa = d.msaa;
+            }
+            Sketch => {
+                s.snap = d.snap;
+                s.auto_constrain = d.auto_constrain;
+                s.show_point_numbers = d.show_point_numbers;
+                (s.dim_show_name, s.dim_show_formula, s.dim_font, s.dim_text) = (d.dim_show_name, d.dim_show_formula, d.dim_font, d.dim_text);
+            }
+            Part => s.defaults = d.defaults,
+            Assembly => {
+                s.show_contours = d.show_contours;
+                s.show_joints = d.show_joints;
+                s.show_interference = d.show_interference;
+            }
+            Layout => s.layout = d.layout,
+        }
+    }
+}

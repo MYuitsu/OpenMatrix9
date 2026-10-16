@@ -1,0 +1,140 @@
+{
+  "schema_version": "om9.m09.release_l4.v1",
+  "task_id": "OM9-M09-L4-GFULL-001",
+  "title": "Khóa G-MVP signed và E13 PASS",
+  "owner_milestone": "M09",
+  "owner_type": "RELEASE_GATE_ONLY",
+  "parent_gate_id": "G-FULL",
+  "canonical_ownership_policy": "READ_ONLY_TRACE_TO_EXISTING_L3; NO_L2_OR_L3_CREATED; NO_GEOMETRY_OWNER",
+  "task_kind": "GOVERNANCE",
+  "status": "PLANNED_NOT_EXECUTED",
+  "gate_status": "NOT_TESTED",
+  "release_decision": "UNDECIDED",
+  "source_revision": null,
+  "source_paths_verified_locally": [],
+  "toolchain_verified": false,
+  "estimated_effort": null,
+  "canonical_traceability": [
+    {
+      "l3_id": "OM9-L3-04-05-001",
+      "module_id": "OM9-L2-04-05",
+      "capability_id": "cap.04-05.smartflow-autobase-surface-generation",
+      "execution_stage": "E13",
+      "l3_path": "specs/08-ms08-advanced-jewelry-modeling/02-febe-matrix-smartflow-history-morph/001-febe-smartflow-autobase-surface-generation/l3.json"
+    },
+    {
+      "l3_id": "OM9-L3-05-01-001",
+      "module_id": "OM9-L2-05-01",
+      "capability_id": "cap.05-01.smartpattern-source-pattern-choice",
+      "execution_stage": "E13",
+      "l3_path": "specs/08-ms08-advanced-jewelry-modeling/06-febe-matrix9-smart-pattern-builder/001-febe-smartpattern-source-pattern-choice/l3.json"
+    }
+  ],
+  "depends_on_task_ids": [],
+  "external_gate_preconditions": [
+    "G_MVP_SIGNED_PASS",
+    "E13_PASS"
+  ],
+  "prerequisite_policy": "Evidence collection may be planned early; PASS requires every signed external gate and actual runtime tests; do not fabricate proof.",
+  "goal": "Khởi tạo FULL từ bản MVP đã được con người phê duyệt và chứng cứ E13 hoàn chỉnh.",
+  "inputs": [
+    "Actual checked-out Rust/OCCT source and runnable release artifact (not in planning ZIP)",
+    "Signed gate evidence, versioned fixtures, tolerance/performance budget from G00",
+    "Canonical L3s: OM9-L3-04-05-001, OM9-L3-05-01-001"
+  ],
+  "execution_steps": [
+    "Xác nhận G-MVP decision có chữ ký reviewer, source/build SHA, fixture checksums và status PASS.",
+    "Xác nhận E13 PASS độc lập, mọi 73 canonical L3 trong E13 có owner/evidence hoặc approved scope disposition.",
+    "Khóa baseline MVP để test hậu phát triển E13; không tự gắn advanced vào MVP trước gate."
+  ],
+  "negative_cases_and_blockers": [
+    "G-MVP thiếu chữ ký hoặc E13 chưa PASS: BLOCKED_GATE.",
+    "Baseline mất/hash khác mà không giải thích: BLOCKED_PROVENANCE."
+  ],
+  "acceptance": [
+    "All task-specific steps have reproducible actual vs expected evidence tied to source SHA, artifact hash, signed tolerance/fixture and environment.",
+    "Every negative case is run or explicitly BLOCKED with issue owner; no silent waivers.",
+    "Any issue requiring code changes is filed to the canonical owning module and re-tested, never implemented by M09.",
+    "PASS requires independent reviewer approval of this task evidence; agent cannot self-approve release gates."
+  ],
+  "test_plan": {
+    "automated": "Run relevant actual repo/CI tests identified after checkout, capture exact command/exit code; test descriptions above are required acceptance cases, not proof of existing test files.",
+    "manual": "Run exact UI, independent viewer or OS/GPU steps where listed; preserve tester identity and observed behavior.",
+    "reference_oracle": "Use signed G00 fixture/tolerance and approved OS/GPU/performance budgets; unavailable inputs => BLOCKED_REFERENCE."
+  },
+  "origin_manual_navigation": [],
+  "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-001/full-prerequisite-baseline.json",
+  "evidence_state": "NOT_CREATED",
+  "requires_evidence_fields": [
+    "task_id",
+    "source_sha",
+    "build_sha256",
+    "toolchain",
+    "occt_version",
+    "os_arch_gpu",
+    "fixtures_and_provenance",
+    "test_command_exit_codes",
+    "actual_vs_expected",
+    "defects",
+    "reviewer",
+    "review_timestamp",
+    "decision"
+  ],
+  "implementation_scope": "Release verification, independent evidence and signoff only. No release-owned CAD domain code, no rewriting Rust/OCCT/FFI from this task.",
+  "out_of_scope": [
+    "Create duplicate L2/L3 or change canonical capability IDs",
+    "Alter OCCT modeling algorithms or user features under M01–M08 ownership",
+    "Assume 3DM export, clayoo/subd/tsplines, emboss, render or CAM belong to release scope",
+    "Declare manufacturing suitability or legally clear license without independent review"
+  ],
+  "review_policy": "No production/runtime claim without actual logs. Signoff by designated human release authority only.",
+  "source_basis": [
+    "M09_RELEASE_GATES; E13; G-MVP signed report",
+    "planning/M09_RELEASE_GATES.md",
+    "planning/GATES_AND_EVIDENCE.md",
+    "planning/DEPENDENCY_AND_RELEASE_POLICY.md"
+  ],
+  "specific_pass_oracle": "Signed G-MVP GO evidence and frozen MVP baseline match an accepted E13 signed PASS revision; never run FULL on unsigned MVP.",
+  "test_cases": [
+    {
+      "case_id": "M09-TC-GFULL-001-01",
+      "case_kind": "ACCEPTANCE",
+      "action": "Xác nhận G-MVP decision có chữ ký reviewer, source/build SHA, fixture checksums và status PASS.",
+      "expected": "Signed G-MVP GO evidence and frozen MVP baseline match an accepted E13 signed PASS revision; never run FULL on unsigned MVP.",
+      "fixture_requirements": "Signed G00/G-MVP baseline if applicable; test fixture exact version/provenance required",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "case_id": "M09-TC-GFULL-001-02",
+      "case_kind": "ACCEPTANCE",
+      "action": "Xác nhận E13 PASS độc lập, mọi 73 canonical L3 trong E13 có owner/evidence hoặc approved scope disposition.",
+      "expected": "Signed G-MVP GO evidence and frozen MVP baseline match an accepted E13 signed PASS revision; never run FULL on unsigned MVP.",
+      "fixture_requirements": "Signed G00/G-MVP baseline if applicable; test fixture exact version/provenance required",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "case_id": "M09-TC-GFULL-001-03",
+      "case_kind": "ACCEPTANCE",
+      "action": "Khóa baseline MVP để test hậu phát triển E13; không tự gắn advanced vào MVP trước gate.",
+      "expected": "Signed G-MVP GO evidence and frozen MVP baseline match an accepted E13 signed PASS revision; never run FULL on unsigned MVP.",
+      "fixture_requirements": "Signed G00/G-MVP baseline if applicable; test fixture exact version/provenance required",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "case_id": "M09-TC-GFULL-001-N01",
+      "case_kind": "NEGATIVE",
+      "action": "G-MVP thiếu chữ ký hoặc E13 chưa PASS: BLOCKED_GATE.",
+      "expected": "Observe specified FAIL/BLOCKED state without side effects, no waiver unless expressly approved by reviewer",
+      "fixture_requirements": "Negative/invalid scenario must be reproducible and logged",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "case_id": "M09-TC-GFULL-001-N02",
+      "case_kind": "NEGATIVE",
+      "action": "Baseline mất/hash khác mà không giải thích: BLOCKED_PROVENANCE.",
+      "expected": "Observe specified FAIL/BLOCKED state without side effects, no waiver unless expressly approved by reviewer",
+      "fixture_requirements": "Negative/invalid scenario must be reproducible and logged",
+      "status": "NOT_EXECUTED"
+    }
+  ]
+}

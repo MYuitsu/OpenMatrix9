@@ -1,3 +1,17 @@
+# Tiếp tục OpenMatrix9 — specs v2
+
+Đọc AGENTS.md, OpenMatrix9_Codex_Spec_v2/README.md, RCORE-00, CODE_GUIDE, BACKEND_POLICY, MATRIX9_UI_CONTRACT và MIGRATION_LEDGER trước chọn kiến trúc; dùng workflow `route standalone-foundation`, rồi exact feature ID.
+
+Target: ứng dụng Rust OM9 độc lập; document/history/Undo/journal/UI/scene do OM9 sở hữu. QymCAD chỉ là code mẫu/routine, giao diện phải đúng mô tả Matrix9 hiện tại. openNURBS cho representation/3DM, OCCT chọn theo phép dựng/dependency closure; không toàn QymCAD hoặc FreeCAD runtime.
+
+V2 hiện là spec/portable planner đã kiểm tra, executable mới chưa được chứng minh. `docs/openmatrix9-progress.json`, `docs/core-requirements.json` và reports phải tách scope legacy/standalone. Local specs đủ cho semantics đã mô tả; unknown chỉ đọc đúng nguồn cần. Không dùng native passes/checklists cũ để enable target mới.
+
+Định tuyến: `rtk proxy python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 route standalone-foundation`; `feature <OM9-ID>` trả v2, không fallback v1. Build theo actual manifests/target, không invent tên app/crate. Legacy plugin maintenance dùng shared SDK/build/run policy của AGENTS; không reconfigure FreeCAD root cho v2.
+
+## Snapshot bàn giao FreeCAD lịch sử
+
+Toàn bộ phần dưới giữ nguyên fingerprint/claims/checkpoints của host cũ để chuyển adapter; đường dẫn binary/PID/profile/đếm test không là hướng dẫn build target v2 và phải kiểm lại nếu được yêu cầu bảo trì legacy.
+
 # Continue OpenMatrix9 on another machine
 
 Branch: `codex/matrix9-menu`. Work remains in progress; the complete objective is all 130 specifications in `01-core` before continuing Curve.

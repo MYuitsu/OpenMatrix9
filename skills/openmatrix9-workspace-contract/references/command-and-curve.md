@@ -1,12 +1,15 @@
 # Command and Curve input
 
+Target: specs v2, own OM9 scene/UI và Matrix9 như mô tả. Các số native tests/Qt-Coin/FreeCAD reports dưới đây là historical evidence, phải replay trên target mới. Runtime ownership theo [v2](../../openmatrix9-workflow/references/spec-v2-target.md), không link host cũ.
+
+
 ## Shared, copyable transcript
 
 Place Command above the viewports with Matrix-green background and black text. History, live prompt and input belong to one selectable/copyable plain-text transcript. Protect history and prompt from editing; only the draft suffix is editable. Ctrl+A/C can copy the transcript. Pasting and IME input remain on one unwrapped input line.
 
 Default height is **two history rows plus one live input row**, based on font metrics. Drag the lower dock separator to change history height; retain the user's resized height through workbench switches. The live prompt/input remains pinned at the bottom at every supported height, including minimum height and while scrolling old history. Draw a horizontal separator immediately above it. History scrolls independently without discarding or moving the draft.
 
-References: [default rows and options](../assets/matrix-command-options.png), [separator, pinned input and suggestions](../assets/matrix-command-completion.png).
+References: default rows and options (registry other_private_references key `matrix-command-options.png`; resolve docs/openmatrix9-reference-locations.json in checkout), separator, pinned input and suggestions (registry other_private_references key `matrix-command-completion.png`; resolve docs/openmatrix9-reference-locations.json in checkout).
 
 ## Idle command-name suggestions
 

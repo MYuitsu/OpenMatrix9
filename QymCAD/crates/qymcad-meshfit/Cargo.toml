@@ -1,0 +1,20 @@
+[package]
+name = "qymcad-meshfit"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Mesh recognition: clean a triangle mesh, split it into regions, fit planes, cylinders, cones, spheres and tori"
+
+[dependencies]
+qymcad-core.workspace = true
+nalgebra = "0.35" # the least-squares fits of planes, cylinders and spheres; the core already uses it
+
+[dev-dependencies]
+qymcad-io.workspace = true
+qymcad-kernel = { workspace = true, features = ["specimens"] } # the probes build the bodies the recognition finds
+
+[lints]
+workspace = true

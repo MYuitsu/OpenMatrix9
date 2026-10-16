@@ -1,0 +1,137 @@
+{
+  "level": "L1",
+  "id": "OM9-M09",
+  "milestone": "M09",
+  "title": "Cổng nghiệm thu và phát hành (không phát sinh L2 owner)",
+  "planning_state": "L1_RELEASE_GATE_L4_PLANNED_NOT_EXECUTED",
+  "planning_only": true,
+  "module_count": 0,
+  "l3_count": 0,
+  "l4_count": 30,
+  "modules": [],
+  "note": "Nguồn gốc chỉ quy định hai release gate G-MVP và G-FULL; không có L2/L3 với ID gốc. Không tự phát sinh L2/L3 mới. 30 L4 kiểm định nằm trong reference/m09-l4/ và chỉ đọc L3 canonical của M01-M08.",
+  "release_gate_contract_source": "planning/M09_RELEASE_GATES.md (original archive)",
+  "release_gate_contract": "# M09 — Hai release gates, không phát sinh L2 owner\n\n## G-MVP — core jewelry CAD\n\n**Prereqs:** G00, E01–E12 PASS; tất cả blocking severity đã đóng; geometry tests / cross-workflow tests PASS.\n\n- [ ] App native, 4 viewports, menu/snap/selection/docking, Save/Open.\n- [ ] Core Curve/Surface/Solid + geometry validity; undo/cancel/redo stable.\n- [ ] Import .3dm được kiểm chứng đúng phạm vi, unsupported data warning; không ngầm yêu cầu export .3dm.\n- [ ] Ring/Profile History; placement Gem/Pavé; Head/Bezel/Prong; Cutters.\n- [ ] STL export đúng mm/manifold khi fixture kỳ vọng; kiểm external viewer.\n- [ ] Release evidence: source/build SHA, tests, fixture provenance, OS/GPU, license, signoff và limitation công khai.\n\n## G-FULL — advanced jewelry CAD (không phải toàn bộ Matrix 9)\n\n**Prereqs:** G-MVP đã ký + E13 PASS.\n\n- [ ] SmartFlow and rigid placement, deformation, ornament builders.\n- [ ] Smart Pattern, Rope, user library and file roundtrip.\n- [ ] MVP regression unchanged; no silent API duplicates.\n- [ ] Advanced known gaps công khai: Clayoo/SubD/T-Splines/Emboss/Render/CAM nằm AFTER.\n\n**Không gọi hai gates này là đã PASS chỉ vì tài liệu hiện diện.** Trạng thái lúc tạo plan: NOT_TESTED.\n",
+  "planning_source_archive": "C:/Users/nguye/Downloads/OpenMatrix9_M09_L4_Patch.zip",
+  "planning_source_sha256": "ff962d452f8e081321b3ff25d9d9b382d71665fe9f911420c44968cd86094249",
+  "release_gate_plan": {
+    "path": "reference/m09-l4/M09_EXECUTION_MANIFEST.json",
+    "schema_version": "om9.m09.release_plan.v1",
+    "owner_type": "RELEASE_GATE_ONLY",
+    "release_gate_ids": [
+      "G-MVP",
+      "G-FULL"
+    ],
+    "gate_dependency_graph": {
+      "G-MVP": [
+        "G00",
+        "E01",
+        "E02",
+        "E03",
+        "E04",
+        "E05",
+        "E06",
+        "E07",
+        "E08",
+        "E09",
+        "E10",
+        "E11",
+        "E12"
+      ],
+      "G-FULL": [
+        "G-MVP",
+        "E13"
+      ]
+    },
+    "release_l4_count": 30,
+    "canonical_l2_added": 0,
+    "canonical_l3_added": 0,
+    "app_source_in_zip": false,
+    "source_revision": null,
+    "status": "PLANNED_NOT_EXECUTED",
+    "l4_by_gate": {
+      "G-MVP": {
+        "l4": 18,
+        "kinds": {
+          "GOVERNANCE": 3,
+          "COMPLIANCE": 1,
+          "BUILD_QA": 1,
+          "UI_QA": 1,
+          "GEOMETRY_QA": 1,
+          "TRANSACTION_QA": 1,
+          "PERSISTENCE_QA": 1,
+          "INTEROP_QA": 1,
+          "E2E_QA": 1,
+          "HISTORY_QA": 1,
+          "CUTTER_QA": 1,
+          "EXPORT_QA": 1,
+          "ROBUSTNESS_QA": 1,
+          "MANUAL_QA": 1,
+          "DISTRIBUTION": 1,
+          "SIGNOFF": 1
+        }
+      },
+      "G-FULL": {
+        "l4": 12,
+        "kinds": {
+          "GOVERNANCE": 2,
+          "GEOMETRY_QA": 2,
+          "HISTORY_QA": 1,
+          "E2E_QA": 2,
+          "PERSISTENCE_QA": 1,
+          "TRANSACTION_QA": 1,
+          "REGRESSION_QA": 1,
+          "DISTRIBUTION": 1,
+          "SIGNOFF": 1
+        }
+      }
+    },
+    "test_cases": 177,
+    "distinct_canonical_l3_refs": 59,
+    "documents": [
+      "reference/m09-l4/GPT6_LUNA_EXECUTION_PROMPT.md",
+      "reference/m09-l4/G_FULL_CHECKLIST.md",
+      "reference/m09-l4/G_MVP_CHECKLIST.md",
+      "reference/m09-l4/M09_RELEASE_GATES.md",
+      "reference/m09-l4/M09_REVIEW_REPORT.md",
+      "reference/m09-l4/PLANNING_README.md",
+      "reference/m09-l4/README.md",
+      "reference/m09-l4/g-full/01/TASK.md",
+      "reference/m09-l4/g-full/02/TASK.md",
+      "reference/m09-l4/g-full/03/TASK.md",
+      "reference/m09-l4/g-full/04/TASK.md",
+      "reference/m09-l4/g-full/05/TASK.md",
+      "reference/m09-l4/g-full/06/TASK.md",
+      "reference/m09-l4/g-full/07/TASK.md",
+      "reference/m09-l4/g-full/08/TASK.md",
+      "reference/m09-l4/g-full/09/TASK.md",
+      "reference/m09-l4/g-full/10/TASK.md",
+      "reference/m09-l4/g-full/11/TASK.md",
+      "reference/m09-l4/g-full/12/TASK.md",
+      "reference/m09-l4/g-mvp/01/TASK.md",
+      "reference/m09-l4/g-mvp/02/TASK.md",
+      "reference/m09-l4/g-mvp/03/TASK.md",
+      "reference/m09-l4/g-mvp/04/TASK.md",
+      "reference/m09-l4/g-mvp/05/TASK.md",
+      "reference/m09-l4/g-mvp/06/TASK.md",
+      "reference/m09-l4/g-mvp/07/TASK.md",
+      "reference/m09-l4/g-mvp/08/TASK.md",
+      "reference/m09-l4/g-mvp/09/TASK.md",
+      "reference/m09-l4/g-mvp/10/TASK.md",
+      "reference/m09-l4/g-mvp/11/TASK.md",
+      "reference/m09-l4/g-mvp/12/TASK.md",
+      "reference/m09-l4/g-mvp/13/TASK.md",
+      "reference/m09-l4/g-mvp/14/TASK.md",
+      "reference/m09-l4/g-mvp/15/TASK.md",
+      "reference/m09-l4/g-mvp/16/TASK.md",
+      "reference/m09-l4/g-mvp/17/TASK.md",
+      "reference/m09-l4/g-mvp/18/TASK.md"
+    ]
+  },
+  "gate_status": {
+    "G-MVP": "NOT_TESTED",
+    "G-FULL": "NOT_TESTED"
+  },
+  "release_decision": "UNDECIDED",
+  "evidence_state": "NOT_CREATED"
+}

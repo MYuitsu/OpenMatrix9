@@ -1,0 +1,403 @@
+{
+  "level": "L4",
+  "id": "OM9-M00-L4-06-01-03",
+  "milestone": "M00",
+  "parent_l3_id": "OM9-M00-L3-06-01",
+  "owner_l2_id": "OM9-M00-L2-06",
+  "title": "Audit Cargo dependency SPDX/SBOM",
+  "planning_state": "NOT_STARTED",
+  "task": {
+    "task_id": "OM9-M00-L4-06-01-03",
+    "parent_l3_id": "OM9-M00-L3-06-01",
+    "owner_module_id": "OM9-M00-L2-06",
+    "milestone_id": "M00",
+    "gate_id": "G00-06",
+    "execution_stage": "G00",
+    "title": "Audit Cargo dependency SPDX/SBOM",
+    "work_kind": "PROBE",
+    "mandatory_for_windows_mvp": true,
+    "purpose": "Kiểm kê licenses, provenance, nguồn cargo.lock và crates dùng",
+    "inputs": [
+      "QymCAD pinned HEAD SHA = 746a17f127897e921a57118b6caad08968602bf5",
+      "Relevant OpenMatrix9 v0.10 contracts and manifest",
+      "Source files and optional real build/test environment"
+    ],
+    "outputs": [
+      "implementation/evidence/M00/G00-06/dependency-sbom.csv"
+    ],
+    "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+    "github_sources": [
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "AGENTS.md",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/AGENTS.md",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "CLAUDE.md",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/CLAUDE.md",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "Cargo.lock",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/Cargo.lock",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "Cargo.toml",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/Cargo.toml",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "LICENSE",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/LICENSE",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "README.md",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/README.md",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "THIRD-PARTY-NOTICES.md",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/THIRD-PARTY-NOTICES.md",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "assets/fonts/LiberationSans-LICENSE.txt",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/assets/fonts/LiberationSans-LICENSE.txt",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad/Cargo.toml",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/Cargo.toml",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "rust-toolchain.toml",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/rust-toolchain.toml",
+        "remote_evidence": "FILE_CONTENT_READ"
+      }
+    ],
+    "reuse_decision": "PENDING_RUNTIME_SOURCE_AUDIT",
+    "steps": [
+      "cargo metadata --locked --format-version 1",
+      "cargo license/cargo deny nếu được",
+      "review transitive deps",
+      "ghi unknown license"
+    ],
+    "test_steps": [
+      "Validate produced evidence at implementation/evidence/M00/G00-06/dependency-sbom.csv",
+      "SBOM export có version+license+source/URL",
+      "unknown license must block until classified"
+    ],
+    "pass_criteria": [
+      "SBOM export có version+license+source/URL",
+      "unknown license must block until classified"
+    ],
+    "failure_cases": [
+      "No access to pinned QymCAD source or missing file: BLOCKED_SOURCE",
+      "Missing executable/log/fixture for a PROBE: BLOCKED_NOT_EXECUTED",
+      "License or data integrity conflict: FAIL_BLOCKER"
+    ],
+    "depends_on_task_ids": [
+      "OM9-M00-L4-06-01-02"
+    ],
+    "test_commands_suggested": "git rev-parse HEAD",
+    "evidence_record_required": [
+      "status",
+      "source_sha",
+      "tested_sha",
+      "timestamp_utc",
+      "os_arch",
+      "toolchain",
+      "exact_commands",
+      "exit_code",
+      "stdout_stderr_path",
+      "fixture_ids",
+      "expected",
+      "actual",
+      "blockers",
+      "reviewer"
+    ],
+    "review_policy": "Requires real execution evidence; REMOTE_VERIFIED_PATH is not a completed test.",
+    "estimated_scope": "PENDING_LOCAL_SOURCE_AUDIT",
+    "origin_manual_refs": []
+  },
+  "implementation_contract": {
+    "pinned_repo": "QymIs-Tech/QymCAD",
+    "kind": "PROBE",
+    "prerequisites": [
+      "OM9-M00-L4-06-01-02"
+    ],
+    "source_paths": [
+      "LICENSE",
+      "THIRD-PARTY-NOTICES.md",
+      "crates/qymcad/src/packaging_licence.rs",
+      "packaging/README.md"
+    ],
+    "procedure": [
+      "Chạy cargo metadata --locked và công cụ license/SBOM khi environment sẵn",
+      "Lưu danh sách name, version, source, SPDX expression, unknown license",
+      "Tạo report CSV/SBOM và tool versions; mark needs review"
+    ],
+    "fixture": "Cargo.lock dependency manifest",
+    "oracle": "Dependency list đủ, unknowns không tự đổi permissive",
+    "negative": "Missing dependency lockfile -> BLOCKED_ENV",
+    "commands_preview": [
+      "cd vendor-research/QymCAD",
+      "cargo metadata --locked --format-version 1 > ../../implementation/evidence/M00/cargo-metadata.json",
+      "# License approval: human reviewer only."
+    ],
+    "microtasks": [],
+    "approval_required": false
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "source_review": {
+    "status": "REMOTE_SOURCE_REVIEWED_NOT_RUNTIME_VERIFIED",
+    "reviewed_utc": "2026-10-15",
+    "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+    "finding": "Notices chỉ là nguồn tham khảo; chưa chạy cargo-license/cargo-deny tạo SBOM pinned.",
+    "provisional_technical_decision": "LICENSE_REVIEW",
+    "implementation_guidance": "Chạy cargo metadata/deny/license, tạo BOM.",
+    "verified_source_evidence": [
+      {
+        "source_id": "cargo",
+        "repository": "QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "Cargo.toml",
+        "blob_sha": null,
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/Cargo.toml",
+        "lines_reviewed": "1-75",
+        "verification": "GITHUB_CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "source_id": "notices",
+        "repository": "QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "THIRD-PARTY-NOTICES.md",
+        "blob_sha": "aa91fdb3f1d923c30cab92c0b1c5f695c076c856",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/THIRD-PARTY-NOTICES.md",
+        "lines_reviewed": "1-51",
+        "verification": "GITHUB_CONTENT_READ_AT_PINNED_SHA"
+      }
+    ],
+    "runtime_tests_performed": false,
+    "gate_pass": false,
+    "caveat": "GitHub source inspection only; no QymCAD clone, cargo build, OCCT runtime, GPU, 3DM import conversion or legal approval."
+  },
+  "small_model_workflow": {
+    "model_target": "SMALL_MODEL_SINGLE_TASK",
+    "task_complexity": "B_RUNTIME",
+    "execution_procedure": [
+      "Chạy cargo metadata --locked và công cụ license/SBOM khi environment sẵn",
+      "Lưu danh sách name, version, source, SPDX expression, unknown license",
+      "Tạo report CSV/SBOM và tool versions; mark needs review"
+    ],
+    "acceptance_oracle": "Dependency list đủ, unknowns không tự đổi permissive",
+    "stop_condition": "Missing dependency lockfile -> BLOCKED_ENV",
+    "fixture_requirement": "Cargo.lock dependency manifest",
+    "auto_approval_forbidden": false,
+    "local_source_verification_required": true,
+    "microsteps": [],
+    "known_upstream_source_paths": [
+      "LICENSE",
+      "THIRD-PARTY-NOTICES.md",
+      "crates/qymcad/src/packaging_licence.rs",
+      "packaging/README.md"
+    ],
+    "source_evidence_class": "MIXED_REMOTE_SOURCE_AND_CANDIDATE",
+    "risk_note": "Source inspection does not prove runtime PASS; verify local pinned checkout and exact commands."
+  },
+  "agent_runbook_markdown": "# OM9-M00-L4-06-01-03 — Audit Cargo dependency SPDX/SBOM\n\n**Phiên bản:** v0.13 | **Gate:** G00-06 | **Loại:** PROBE | **Mức:** B_RUNTIME | **Trạng thái ban đầu:** `NOT_RUN`.\n\n## 0. Tiền điều kiện (bắt buộc, không tự đoán)\n\n- Chỉ đọc và chạy đúng **một** L4 trong phiên; ID `OM9-M00-L4-06-01-03`.\n- Đã có evidence PASS thật của: `OM9-M00-L4-06-01-02`; nếu không thì `BLOCKED_DEPENDENCY`.\n- QymCAD checkout riêng tại SHA `746a17f127897e921a57118b6caad08968602bf5`; `git rev-parse HEAD` phải chính xác. Không sửa upstream checkout; PoC chỉ trong worktree hoặc nhánh OpenMatrix9.\n- OpenMatrix9 canonical 95 L2 / 772 L3 giữ nguyên. Không tạo PASS giả bằng cách chỉ đọc GitHub.\n- Môi trường Windows/OCCT/GPU/3DM **nếu cần** phải có bằng chứng thật; không có thì `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n\n## 1. Những file phải mở và xác minh\n\n- `LICENSE` — https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/LICENSE (kiểm tra path/symbol khi checkout; không coi URL là bằng chứng chạy)\n- `THIRD-PARTY-NOTICES.md` — https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/THIRD-PARTY-NOTICES.md (kiểm tra path/symbol khi checkout; không coi URL là bằng chứng chạy)\n- `crates/qymcad/src/packaging_licence.rs` — https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/packaging_licence.rs (kiểm tra path/symbol khi checkout; không coi URL là bằng chứng chạy)\n- `packaging/README.md` — https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/packaging/README.md (kiểm tra path/symbol khi checkout; không coi URL là bằng chứng chạy)\n\n- Nếu file không tồn tại hoặc API đã khác ở checkout: `BLOCKED_SOURCE`, ghi file và lỗi; **không tự đoán tên khác rồi tiếp tục**.\n- File kiểm thử gợi ý để tìm testcase đang có: `crates/qymcad/src/packaging_licence.rs`. Tên test phải đối chiếu `cargo test ... -- --list` trước khi chạy.\n\n## 2. Quy trình thực hiện từng bước\n\n1. **Đọc nguồn:** Chạy cargo metadata --locked và công cụ license/SBOM khi environment sẵn.\n2. **Thực hiện việc chính:** Lưu danh sách name, version, source, SPDX expression, unknown license.\n3. **Đối chiếu và xuất kết quả:** Tạo report CSV/SBOM và tool versions; mark needs review.\n4. **Xác minh đầu ra:** kiểm tra cấu trúc, ghi expected/actual và sha256 của file evidence; nguồn từ GitHub không thay thế runtime evidence.\n5. **Tự kiểm tra một lần:** áp dụng oracle bên dưới, chưa thỏa thì giữ FAIL/BLOCKED và ghi next_action, **không lặp vô hạn**.\n\n## 3. Các lệnh bắt đầu (không phải bằng chứng đã chạy)\n\n```shell\ncd vendor-research/QymCAD\ncargo metadata --locked --format-version 1 > ../../implementation/evidence/M00/cargo-metadata.json\n# License approval: human reviewer only.\n```\n\nTrên Windows dùng PowerShell tương đương; lệnh Linux/macOS chỉ là tham khảo. Chạy từ OpenMatrix9 root trừ khi có `cd`. Các lệnh `cargo` chỉ thực hiện sau khi đã chuẩn bị OCCT; nếu thiếu môi trường, ghi `BLOCKED_ENV` cùng thông báo thật.\n\n## 4. Fixture và oracle độc lập\n\n- **Fixture tối thiểu:** Cargo.lock dependency manifest.\n- **Kết quả đúng:** Dependency list đủ, unknowns không tự đổi permissive.\n- **Negative test / điều kiện dừng:** Missing dependency lockfile -> BLOCKED_ENV.\n- Với AUDIT: kiểm báo cáo chứa nguồn chứng minh cụ thể; không được thay source review bằng khẳng định runtime.\n- Với PROBE: ghi command, exit_code, stdout/stderr, toolchain, expected/actual, fixture SHA và thử lỗi; thiếu run thật thì không PASS.\n\n## 6. Đường dẫn đầu ra và định dạng evidence\n\n- **Artifact dự kiến:** `implementation/evidence/M00/G00-06/dependency-sbom.csv`.\n- **Evidence JSON:** `implementation/evidence/M00/G00-06/OM9-M00-L4-06-01-03.evidence.json`.\n- Ghi `status` một trong `PASS|FAIL|BLOCKED_SOURCE|BLOCKED_DEPENDENCY|BLOCKED_ENV|BLOCKED_FIXTURE|BLOCKED_APPROVAL|NOT_TARGETED|NOT_RUN`.\n- Không lưu evidence ngay trong đặc tả; để riêng `implementation/evidence` và dùng `python tools/validate_m00_execution.py`.\n- Trình kiểm `validate_m00_execution.py` chỉ xác nhận tính toàn vẹn evidence, **không chứng nhận chất lượng thuật toán**; người review phải kiểm trực tiếp logs/fixtures khi cần.\n\n## 7. Handoff cho tác vụ tiếp theo\n\nSau khi có bằng chứng, cập nhật ledger; báo 4 mục: `đã thực hiện`, `kết quả đo`, `blocker`, `next_task`. Khi gặp blocker, dừng; không tự động mở L4 kế tiếp.\n\n## 9. Ghi log không bịa số liệu\n\nChạy lệnh thực qua `python tools/m00_capture.py --task <TASK_ID> --cwd vendor-research/QymCAD --label <TEN_BUOC> -- <command>`, sau đó `m00_init_evidence.py <TASK_ID>` nếu chưa có evidence JSON. Thay placeholder bằng task này và đọc file log; không copy một exit code ví dụ.\n\n## Nguồn tham chiếu bắt buộc đối chiếu (Matrix9 / Rhino 5) — v0.16\n\n**Trạng thái bổ sung:** `requirements_only_not_runtime_evidence` — chỉ là yêu cầu đối chiếu, không phải nghiệm thu.\n\n**Trọng tâm đối chiếu:** Quyết định license phải tách rõ nguồn public (QymCAD/OCCT/Rhino5 guide) và nguồn private (Matrix9 export, Ghidra, manual) - bằng chứng: manifest hash hiện có.\n\n### Nguồn Matrix9 đã index phải mở (private reference, không copy)\n\n- `decompiled-ui/export-manifest.json` (reference export, `dnSpy export manifest`, `RESOURCE_MANIFEST_READ`) — assembly hash inventory used for the reference inventory\n  - Vai trò nguồn: export provenance. Records the six exported managed assemblies with size and SHA256 (MatrixControls, MatrixWPFControls, MatrixCommon, PIMData, MatrixTranslation, Matrix.rhp) and the dnSpy exit codes; generated sources were not rebuilt.\n  - Identifier đã index: `MatrixControls, MatrixWPFControls, MatrixCommon, PIMData, MatrixTranslation, Matrix.rhp`\n- `vb6-lite/source-manifest.json` (reference export, `VB Decompiler Lite manifest`, `RESOURCE_MANIFEST_READ`) — second hash inventory\n  - Vai trò nguồn: export provenance. Records Matrix90.exe and MatrixCmdBar.ocx sizes and SHA256 plus the limitation that form layouts/resources were recovered while native procedure bodies are primarily disassembly; the export was not compiled.\n  - Identifier đã index: `Matrix90.exe, MatrixCmdBar.ocx`\n- `decompiled-ui/native-inspection` (reference export, `PE resource extraction`, `RESOURCE_MANIFEST_READ`) — resource inventory\n  - Vai trò nguồn: native resource/trademark inventory. Per-binary resource manifests and extracted PE resources for Matrix90.exe, MatrixCmdBar.ocx and gvMatrixCore.rhp (BITMAP/ICON/STRING/DIALOG/CUSTOM entries plus form-module name hints) - the artifact inventory relevant to asset/trademark and UI-reference limits.\n  - Identifier đã index: `Matrix90, MatrixCmdBar, gvMatrixCore`\n- `Matrix90/MKey.cls` (Matrix90 (VB6 EXE), `MKey`, `IDENTIFIER_INDEXED`) — entitlement/licence path that must not be reproduced\n  - Vai trò nguồn: licence/entitlement gate. VB6 key class (113 KB) with SentinelKey/SentinelKeysLicense in the managed export - the entitlement path that OM9 must not reproduce.\n  - Identifier đã index: `MKey, SentinelKey, SentinelKeysLicense, CheckKeyValid`\n\n### Quy tắc sử dụng nguồn tham chiếu\n\n- Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.\n- Không copy mã, ảnh, resource hay nội dung manual vào repository.\n- Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.\n- Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.\n- Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.\n- Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native.\n\n### Điều các nguồn này KHÔNG chứng minh\n\n- Không chứng minh Matrix9 parity cho capability này.\n- Không xác nhận API Rust nào đã tồn tại trong QymCAD.\n- Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.\n- Không chứng minh default/option đã đúng cho bản Matrix9 đang cài.\n\n> Symbol/identifier ở trên là điểm tra cứu; phải kiểm lại tại checkout/manifest trước khi viết mã. PASS vẫn chỉ đến từ command receipt và oracle positive/negative đo được.\n\n## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "task_details_markdown": "# OM9-M00-L4-06-01-03 — Audit Cargo dependency SPDX/SBOM\n\n**M00 gate:** G00-06 | **L3 parent:** OM9-M00-L3-06-01 | **Loại:** PROBE | **Trạng thái:** `PLANNED_NOT_EXECUTED`.\n\n## Mục tiêu\n\nKiểm kê licenses, provenance, nguồn cargo.lock và crates dùng\n\n## QymCAD source audit (pin cụ thể)\n\nRepository: https://github.com/QymIs-Tech/QymCAD  \nCommit: `746a17f127897e921a57118b6caad08968602bf5`\n\n- [`AGENTS.md`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/AGENTS.md) — FILE_CONTENT_READ\n- [`CLAUDE.md`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/CLAUDE.md) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`Cargo.lock`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/Cargo.lock) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/Cargo.toml) — FILE_CONTENT_READ\n- [`LICENSE`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/LICENSE) — FILE_CONTENT_READ\n- [`README.md`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/README.md) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`THIRD-PARTY-NOTICES.md`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/THIRD-PARTY-NOTICES.md) — FILE_CONTENT_READ\n- [`assets/fonts/LiberationSans-LICENSE.txt`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/assets/fonts/LiberationSans-LICENSE.txt) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad/Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/Cargo.toml) — FILE_CONTENT_READ\n- [`rust-toolchain.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/rust-toolchain.toml) — FILE_CONTENT_READ\n\nKhông được gọi `source_paths_verified_locally=true` cho đến khi checkout đúng SHA và kiểm tra file thật; các link ở đây là điểm tra cứu, không đồng nghĩa đã build/test.\n\n## Codex thực hiện\n\n1. cargo metadata --locked --format-version 1\n2. cargo license/cargo deny nếu được\n3. review transitive deps\n4. ghi unknown license\n\n## Điều kiện PASS đo được\n\n- [ ] SBOM export có version+license+source/URL\n- [ ] unknown license must block until classified\n\n## Đầu ra bắt buộc\n\n- `implementation/evidence/M00/G00-06/dependency-sbom.csv`\n- Metadata: source_sha, os_arch, toolchain, exact_commands, exit_code, expected_vs_actual, tester/reviewer, UTC timestamp.\n- Nếu không có môi trường hoặc fixtures: ghi `BLOCKED`, không đánh dấu PASS.\n\n## Phụ thuộc\n\n`OM9-M00-L4-06-01-02`\n\n## Nguyên tắc\n\nChỉ tạo POC ở workspace OpenMatrix9 riêng; không ghi đè hoặc push lên repository QymCAD. Không đưa screenshot/manual/proprietary assets Matrix 9 vào mã nguồn công khai.\n\n## v0.12 — Kết quả đọc mã nguồn thực tế (GitHub, chưa chạy thử)\n\n**Kết luận:** Notices chỉ là nguồn tham khảo; chưa chạy cargo-license/cargo-deny tạo SBOM pinned.\n**Quyết định đề xuất:** `LICENSE_REVIEW` — chỉ có hiệu lực sau build/test và legal sign-off.\n\n**Nguồn đã đọc:**\n\n- [Cargo.toml](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/Cargo.toml) — 19 crates workspace, lints and package metadata.\n- [THIRD-PARTY-NOTICES.md](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/THIRD-PARTY-NOTICES.md) — upstream dependency notices and OCCT dynamic linking.\n\n**Bước thực thi còn lại:** Chạy cargo metadata/deny/license, tạo BOM.\n\n**Trạng thái:** SOURCE_REVIEWED_ONLY; không đánh dấu L4 PASS/G00 PASS.\n",
+  "execution_policy": {
+    "status": "NOT_RUN",
+    "evidence": "Not included: no implementation has been performed",
+    "prerequisites": "M00 must be signed off before M01; M01 before M02; per-task dependencies also apply",
+    "must_not_fake_pass": true,
+    "test_command_status": "SUGGESTED_NOT_EXECUTED",
+    "planned_output_paths_refer_to_future_implementation": true
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Quyết định license phải tách rõ nguồn public (QymCAD/OCCT/Rhino5 guide) và nguồn private (Matrix9 export, Ghidra, manual) - bằng chứng: manifest hash hiện có.",
+    "rhino5_core_chapters": [],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-export-manifest",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "reference export",
+        "path": "decompiled-ui/export-manifest.json",
+        "root": "ref/matrix",
+        "unit": "dnSpy export manifest",
+        "role_for_this_task": "assembly hash inventory used for the reference inventory",
+        "source_role": "export provenance",
+        "detail": "Records the six exported managed assemblies with size and SHA256 (MatrixControls, MatrixWPFControls, MatrixCommon, PIMData, MatrixTranslation, Matrix.rhp) and the dnSpy exit codes; generated sources were not rebuilt.",
+        "observed_identifiers": [
+          "MatrixControls",
+          "MatrixWPFControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix.rhp"
+        ],
+        "verification_state": "RESOURCE_MANIFEST_READ"
+      },
+      {
+        "anchor_id": "mx-vb6-manifest",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "reference export",
+        "path": "vb6-lite/source-manifest.json",
+        "root": "ref/matrix",
+        "unit": "VB Decompiler Lite manifest",
+        "role_for_this_task": "second hash inventory",
+        "source_role": "export provenance",
+        "detail": "Records Matrix90.exe and MatrixCmdBar.ocx sizes and SHA256 plus the limitation that form layouts/resources were recovered while native procedure bodies are primarily disassembly; the export was not compiled.",
+        "observed_identifiers": [
+          "Matrix90.exe",
+          "MatrixCmdBar.ocx"
+        ],
+        "verification_state": "RESOURCE_MANIFEST_READ"
+      },
+      {
+        "anchor_id": "mx-native-inspection",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "reference export",
+        "path": "decompiled-ui/native-inspection",
+        "root": "ref/matrix",
+        "unit": "PE resource extraction",
+        "role_for_this_task": "resource inventory",
+        "source_role": "native resource/trademark inventory",
+        "detail": "Per-binary resource manifests and extracted PE resources for Matrix90.exe, MatrixCmdBar.ocx and gvMatrixCore.rhp (BITMAP/ICON/STRING/DIALOG/CUSTOM entries plus form-module name hints) - the artifact inventory relevant to asset/trademark and UI-reference limits.",
+        "observed_identifiers": [
+          "Matrix90",
+          "MatrixCmdBar",
+          "gvMatrixCore"
+        ],
+        "verification_state": "RESOURCE_MANIFEST_READ"
+      },
+      {
+        "anchor_id": "mx-mkey",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix90 (VB6 EXE)",
+        "path": "Matrix90/MKey.cls",
+        "root": "ref/matrix/vb6-lite",
+        "unit": "MKey",
+        "role_for_this_task": "entitlement/licence path that must not be reproduced",
+        "source_role": "licence/entitlement gate",
+        "detail": "VB6 key class (113 KB) with SentinelKey/SentinelKeysLicense in the managed export - the entitlement path that OM9 must not reproduce.",
+        "observed_identifiers": [
+          "MKey",
+          "SentinelKey",
+          "SentinelKeysLicense",
+          "CheckKeyValid"
+        ],
+        "verification_state": "IDENTIFIER_INDEXED"
+      }
+    ],
+    "manual_reference_sheets": [],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "CONTRACT_TEST",
+    "role_label_on_record": "INFERRED_FROM_TITLE:CONTRACT_TEST",
+    "role_provenance": "inferred (title contains 'audit')",
+    "owner_boundary": "OM9-M00-L2-06",
+    "goal": "Kiểm kê licenses, provenance, nguồn cargo.lock và crates dùng",
+    "algorithm_on_record": "None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "the fixture is authored data; upstream code is read, never executed as proof",
+    "sketch": "// Audit Cargo dependency SPDX/SBOM\n// ROLE: CONTRACT_TEST - freeze the contract, then write a test that fails first.\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n// Owner: OM9-M00-L2-06\n//\n// 1. Freeze the typed signature and the error enum in the owner crate.\n// 2. Write the fixture harness for implementation/evidence/M00/G00-06/dependency-sbom.csv:\n//      input:  SBOM export có version+license+source/URL\n//      expect: SBOM export có version+license+source/URL\n//      negative input: No access to pinned QymCAD source or missing file: BLOCKED_SOURCE\n//      negative expect: unknown license must block until classified\n// 3. Run it: it must fail for the right reason (missing behaviour), not a compile accident.\n// 4. Only then hand the frozen type to the IMPLEMENT task of the same L3.\n\n#[test]\nfn om9_m00_l4_06_01_03_contract_is_red_first() {\n    // Arrange: build the fixture input from authored data, not from the implementation.\n    // Act: call the frozen entry point.\n    // Assert: expected == actual for the positive fixture, and a typed error for the negative one.\n    // Record the failing output as the RED receipt for this task.\n    unimplemented!()\n}"
+  }}

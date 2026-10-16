@@ -1,0 +1,125 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-04-08-005",
+  "milestone": "M08",
+  "parent_l2_id": "OM9-L2-04-08",
+  "title": "Cage Edit And Release Command",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "target_implementation_milestone": "M08",
+  "execution_stage": "E13",
+  "source_original_path": "specs/08-ms08-advanced-jewelry-modeling/05-febe-matrix-advanced-deformation-ux/005-febe-cage-edit-and-release-command/l3.json",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-04-08-005",
+    "capability_id": "cap.04-08.cage-edit-and-release-command",
+    "stable_owner_key": "OM9-L2-04-08/cage-edit-and-release-command",
+    "title": "Cage Edit And Release Command",
+    "slug": "cage-edit-and-release-command",
+    "module_id": "OM9-L2-04-08",
+    "module_path": "specs/08-ms08-advanced-jewelry-modeling/05-febe-matrix-advanced-deformation-ux/",
+    "l3_path": "specs/08-ms08-advanced-jewelry-modeling/05-febe-matrix-advanced-deformation-ux/005-febe-cage-edit-and-release-command/",
+    "tag": "febe",
+    "implementation_role": "interactive_feature",
+    "milestone_id": "M08",
+    "target_milestone": "M08",
+    "delivery": "mainline",
+    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "origin_source_taxonomy": "04-matrix8-book2",
+    "goal": "deform using 1D/2D/3D cage controls",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Bend/Twist/Taper/CageEdit/SoftMove dùng thiết kế đường nét trang sức",
+    "parent_exclusions": "Deform math dùng shared geometry operations theo từng L3.",
+    "depends_on_module_ids": [
+      "OM9-L2-02-05",
+      "OM9-L2-02-06"
+    ],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          240,
+          265
+        ],
+        "pdf_pages_1based": [
+          14,
+          39
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Cage Edit And Release Command” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M08: run OpenMatrix9 UI; perform “Cage Edit And Release Command”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M08-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "execution_stage": "E13",
+    "planning_release": "ADVANCED",
+    "planning_risk": "NORMAL",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
+    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+  },
+  "children_l4": [
+    {
+      "id": "OM9-L4-04-08-005-01",
+      "file": "M08 - Jewelry Modeling/L2-04-08 - 05-febe-matrix-advanced-deformation-ux/L3-005 - Cage Edit And Release Command/L4-01 - Source And Interface Contract/l4.json",
+      "title": "Source And Interface Contract — Cage Edit And Release Command",
+      "role": "CONTRACT_FIXTURE",
+      "depends_on_l4_ids": []
+    },
+    {
+      "id": "OM9-L4-04-08-005-02",
+      "file": "M08 - Jewelry Modeling/L2-04-08 - 05-febe-matrix-advanced-deformation-ux/L3-005 - Cage Edit And Release Command/L4-02 - Owner Operation Or Dispatch/l4.json",
+      "title": "Owner Operation Or Dispatch — Cage Edit And Release Command",
+      "role": "IMPLEMENT",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-08-005-01",
+        "OM9-L4-04-08-001-02"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-08-005-03",
+      "file": "M08 - Jewelry Modeling/L2-04-08 - 05-febe-matrix-advanced-deformation-ux/L3-005 - Cage Edit And Release Command/L4-03 - Transaction And UI Acceptance/l4.json",
+      "title": "Transaction And UI Acceptance — Cage Edit And Release Command",
+      "role": "ACCEPTANCE",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-08-005-02"
+      ]
+    },
+    {
+      "id": "OM9-L4-04-08-005-04",
+      "file": "M08 - Jewelry Modeling/L2-04-08 - 05-febe-matrix-advanced-deformation-ux/L3-005 - Cage Edit And Release Command/L4-04 - Adversarial History Regression/l4.json",
+      "title": "Adversarial History Regression — Cage Edit And Release Command",
+      "role": "ADVERSARIAL",
+      "depends_on_l4_ids": [
+        "OM9-L4-04-08-005-03"
+      ]
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED"
+}

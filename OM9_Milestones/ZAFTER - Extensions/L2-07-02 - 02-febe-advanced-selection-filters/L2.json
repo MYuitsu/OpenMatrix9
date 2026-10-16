@@ -1,0 +1,53 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-07-02",
+  "milestone": "AFTER",
+  "title": "02-febe-advanced-selection-filters",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Rhino detailed selection filters beyond jewelry Super Select.",
+  "source_original_path": "specs/90-after/02-rhino5-after/02-febe-advanced-selection-filters/module.json",
+  "definition": {
+    "module_id": "OM9-L2-07-02",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/02-rhino5-after/02-febe-advanced-selection-filters/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "07-rhino5-after",
+    "legacy_v07_path": "specs/07-rhino5-after/02-febe-advanced-selection-filters/",
+    "scope": "Rhino detailed selection filters beyond jewelry Super Select.",
+    "exclude": "Picking/selected objects essential remain core.",
+    "manual_references": [],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 4,
+    "l3_catalog_path": "specs/90-after/02-rhino5-after/02-febe-advanced-selection-filters/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-07-02-001",
+      "file": "AFTER - Post-Release Extensions/L2-07-02 - 02-febe-advanced-selection-filters/L3-001 - Selection Filter By Rhino Object Class/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-02-002",
+      "file": "AFTER - Post-Release Extensions/L2-07-02 - 02-febe-advanced-selection-filters/L3-002 - Selection Filter By Color Name Layer/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-02-003",
+      "file": "AFTER - Post-Release Extensions/L2-07-02 - 02-febe-advanced-selection-filters/L3-003 - Subobject Face Edge Select Filters/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-02-004",
+      "file": "AFTER - Post-Release Extensions/L2-07-02 - 02-febe-advanced-selection-filters/L3-004 - Save Filter Presets/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

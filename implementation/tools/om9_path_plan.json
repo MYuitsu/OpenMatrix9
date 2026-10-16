@@ -1,0 +1,17 @@
+{
+ "budget": 210,
+ "aliases": {
+  "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment",
+  "M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation": "M01 - CAD Shell, Viewport",
+  "M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction": "M02 - Viewport, Gumball",
+  "M03 - Curve, Surface, Solid and 3DM Exchange": "M03 - Geometry 3DM",
+  "M04 - Builder, History and Ring": "M04 - Builder and History",
+  "M05 - Gems and Layout": "M05 - Gems and Layout",
+  "M06 - Settings and Prongs": "M06 - Settings and Prongs",
+  "M07 - Cutters and Manufacturing Validation": "M07 - Cutters",
+  "M08 - Advanced Jewelry Modeling": "M08 - Jewelry Modeling",
+  "M09 - Acceptance and Release Gates": "M09 - Acceptance and Release Gates",
+  "ZAFTER - Post-Release Extensions": "ZAFTER - Extensions"
+ },
+ "renames": {}
+}

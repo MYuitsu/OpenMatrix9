@@ -1,0 +1,209 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-03-15-004",
+  "milestone": "M01",
+  "parent_l2_id": "OM9-L2-03-15",
+  "title": "Jobbag Slot Grid And Thumbnail",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-L3-03-15-004",
+    "capability_id": "cap.03-15.jobbag-slot-grid-and-thumbnail",
+    "stable_owner_key": "OM9-L2-03-15/jobbag-slot-grid-and-thumbnail",
+    "title": "Jobbag Slot Grid And Thumbnail",
+    "slug": "jobbag-slot-grid-and-thumbnail",
+    "module_id": "OM9-L2-03-15",
+    "tag": "febe",
+    "implementation_role": "ui_command_adapter",
+    "milestone_id": "M01",
+    "target_milestone": "M01",
+    "delivery": "mainline",
+    "origin_source_taxonomy": "03-matrix8-book1",
+    "goal": "per-project stage snapshots and visual thumbnails",
+    "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
+    "parent_scope": "File menu, native Open/Save, Import .3dm action, Job Bags/Project Manager",
+    "parent_exclusions": "Chỉ binding UI; .3dm reader là 01/13.",
+    "depends_on_module_ids": [
+      "OM9-L2-01-03",
+      "OM9-L2-01-12",
+      "OM9-L2-01-01"
+    ],
+    "reuses_or_dispatches_to_module_ids": [
+      "OM9-L2-01-12",
+      "OM9-L2-01-13"
+    ],
+    "downstream_consumers": [
+      "matrix-project-manager-jobbags",
+      "file-menu-import-action"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          48,
+          56
+        ],
+        "pdf_pages_1based": [
+          58,
+          66
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          79,
+          86
+        ],
+        "pdf_pages_1based": [
+          89,
+          96
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Jobbag Slot Grid And Thumbnail” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M01: run OpenMatrix9 UI; perform “Jobbag Slot Grid And Thumbnail”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M01-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "execution_stage": "E02",
+    "planning_risk": "NORMAL",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT"
+  },
+  "execution_design": {
+    "l3_id": "OM9-L3-03-15-004",
+    "module_id": "OM9-L2-03-15",
+    "owner_key": "OM9-L2-03-15/jobbag-slot-grid-and-thumbnail",
+    "title": "Jobbag Slot Grid And Thumbnail",
+    "goal_from_canonical": "per-project stage snapshots and visual thumbnails",
+    "execution_stage": "E02",
+    "tag": "febe",
+    "risk": "NORMAL",
+    "manual_references_inherited": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          48,
+          56
+        ],
+        "pdf_pages_1based": [
+          58,
+          66
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          79,
+          86
+        ],
+        "pdf_pages_1based": [
+          89,
+          96
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "manual_reference_precision": "PARENT_L2_RANGE_NOT_EXACT_COMMAND_CONFIRM_BEFORE_IMPLEMENTING_UI",
+    "positive_oracle_proposed": "Jobbag 3 slot thumbnails stay tied to snapshot revision and ID",
+    "negative_oracle_proposed": "Missing/deleted captured geometry must show unavailable slot, not wrong screenshot",
+    "canonical_api_contract_state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+    "source_evidence_class": "PINNED_GITHUB_CONTENT_READ_WITH_CANDIDATES",
+    "source_anchors": [
+      {
+        "path": "crates/qymcad-io/src/project_file.rs",
+        "purpose": "native save/reopen",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/project_file.rs",
+        "blob_sha": "caf559c0b338d08498146f92b53b8a366f4468e2",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad/src/gui.rs",
+        "purpose": "document UI",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad/src/gui.rs",
+        "blob_sha": "8f6ab517f24792f7feeda644163182754db493a3",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-core/src/model.rs",
+        "purpose": "project data",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/model.rs",
+        "blob_sha": "74d971c5f0211bf66f96ae673128189f334ffb20",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-io/src/formats.rs",
+        "purpose": "file chooser filter",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/formats.rs",
+        "blob_sha": "2949290555733255e1e02e0c10dc3d1b2c1ee783",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      }
+    ],
+    "reuse_decision_provisional": "ADD",
+    "reuse_approval_condition": "Audit local checkout at pinned SHA, compile/tests, M00 human legal approval; do not infer ready from static GitHub read.",
+    "implementation_owner_policy": "One owning L2, UI modules dispatch only. No source code changes in vendor-research/ unless approved fork.",
+    "l4_task_ids": [
+      "OM9-L4-03-15-004-01",
+      "OM9-L4-03-15-004-02",
+      "OM9-L4-03-15-004-03",
+      "OM9-L4-03-15-004-05"
+    ],
+    "objectives": [
+      "Define typed seam + explicitly testable oracle",
+      "Implement one capability at its canonical owner",
+      "Verify failure rollback, stable IDs/units/geometry as relevant",
+      "Preserve manual approval for FEBE"
+    ]
+  },
+  "task_ids": [
+    "OM9-L4-03-15-004-01",
+    "OM9-L4-03-15-004-02",
+    "OM9-L4-03-15-004-03",
+    "OM9-L4-03-15-004-05"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-L4-03-15-004-01",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-004 - Jobbag Slot Grid And Thumbnail/L4-01 - Source Audit/l4.json"
+    },
+    {
+      "id": "OM9-L4-03-15-004-02",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-004 - Jobbag Slot Grid And Thumbnail/L4-02 - API Contract and Test Design/l4.json"
+    },
+    {
+      "id": "OM9-L4-03-15-004-03",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-004 - Jobbag Slot Grid And Thumbnail/L4-03 - Implementation/l4.json"
+    },
+    {
+      "id": "OM9-L4-03-15-004-05",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-004 - Jobbag Slot Grid And Thumbnail/L4-05 - Acceptance Test/l4.json"
+    }
+  ]
+}

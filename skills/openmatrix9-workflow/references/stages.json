@@ -1,54 +1,195 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "active_spec_package": "OpenMatrix9_Codex_Spec_v2",
+  "target": "OM9Standalone",
+  "ui_contract": "matrix9_described_v1",
   "stages": {
     "inventory": {
       "skill": "openmatrix9-workflow",
-      "read_now": ["docs/openmatrix9-progress.json", "ref/matrix9/Matrix90_Codex_Guide_MD/00_PROJECT_FACTS.md", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/INDEX.md"],
-      "read_if": [{"when": "Auditing recovered VB6 resource references", "paths": ["ref/matrix9/vb6-lite/source-manifest.json", "ref/matrix9/vb6-lite/inspection-report.json"]}],
-      "exit_criteria": "Record actual input paths, source hashes, current code evidence and one next stage. Catalog status is not project progress."
+      "read_now": [
+        "docs/openmatrix9-progress.json",
+        "OpenMatrix9_Codex_Spec_v2/README.md",
+        "OpenMatrix9_Codex_Spec_v2/INDEX.md",
+        "OpenMatrix9_Codex_Spec_v2/MIGRATION_LEDGER.json"
+      ],
+      "read_if": [
+        {
+          "when": "Auditing original behavior not resolved by v2",
+          "paths": [
+            "docs/openmatrix9-reference-locations.json",
+            "Matrix90_Codex_Guide_MD/00_PROJECT_FACTS.md"
+          ]
+        }
+      ],
+      "exit_criteria": "Record active v2/target and legacy-vs-standalone evidence; select next authorized stage, never infer completion from catalog or file presence."
+    },
+    "standalone-foundation": {
+      "skill": "openmatrix9-feature-port",
+      "read_now": [
+        "OpenMatrix9_Codex_Spec_v2/AGENTS.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/00-qymcad-foundation-migration.md",
+        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
+        "OpenMatrix9_Codex_Spec_v2/CODE_GUIDE.md",
+        "OpenMatrix9_Codex_Spec_v2/BACKEND_POLICY.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/01-object-model-kernel.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/10-persistence-3dm-clipboard.md"
+      ],
+      "read_if": [
+        {
+          "when": "Selecting QymCAD source/routine",
+          "paths": [
+            "OpenMatrix9_Codex_Spec_v2/UPSTREAM_REUSE.md",
+            "OpenMatrix9_Codex_Spec_v2/UPSTREAM_SOURCE_AUDIT.json",
+            "OpenMatrix9_Codex_Spec_v2/LICENSING_AND_PROVENANCE.md"
+          ]
+        }
+      ],
+      "exit_criteria": "Own OM9 document/journal/geometry/UI boundaries specified and tested on actual target; missing executable/build/dependency closure remains unimplemented."
     },
     "ui-menu": {
       "skill": "openmatrix9-ui",
-      "read_now": ["docs/superpowers/specs/2026-10-03-matrix9-menu-design.md", "docs/superpowers/plans/2026-10-03-matrix9-menu.md", "Resources/menu/MainMenu.ini", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-iface-001-matrix-interface.md", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-main-001-main-menu.md", "rust/src/lib.rs", "rust/src/workbench.rs", "Gui/RustBridge.h", "Gui/Workbench.cpp"],
-      "read_if": [
-        {"when": "Extracting menu icon images or checking icon-to-command mapping", "paths": ["ref/Matrix.rui", "ref/matrix9/vb6-lite/Matrix90/frmMenuTools.frm", "ref/matrix9/vb6-lite/Matrix90/ctrTitleBar.123", "ref/matrix9/vb6-lite/Matrix90/ctrTitleBar.ctx"]},
-        {"when": "Implementing F6 or right-click menu", "paths": ["ref/ContextMenu.xml", "ref/RightClick.ini", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-f6-001-f6-context-menu.md"]}
+      "read_now": [
+        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-iface-001-matrix-interface.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-main-001-main-menu.md",
+        "Resources/menu/MainMenu.ini"
       ],
-      "exit_criteria": "Rust menu/state and ABI work through the Qt host; compare against the selected reference; record screenshots, lifecycle checks and disabled unsupported commands."
+      "read_if": [
+        {
+          "when": "Implementing F6/context",
+          "paths": [
+            "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-f6-001-f6-context-menu.md",
+            "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/UI_DETAILS.md",
+            "Resources/menu/ContextMenu.xml"
+          ]
+        },
+        {
+          "when": "Porting the existing legacy native menu adapter",
+          "paths": [
+            "Gui/Workbench.cpp",
+            "Gui/MatrixSidebar.cpp",
+            "rust/src/menu.rs"
+          ]
+        }
+      ],
+      "exit_criteria": "Actual standalone menu/panels match Matrix9-described-v1 UI; common dispatcher, focus/lifecycle and disabled branches have own runtime evidence; QymCAD code does not dictate style/workflow."
     },
     "ui-viewports": {
       "skill": "openmatrix9-ui",
-      "read_now": ["ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-viewport-001-four-viewports-c-plane-f4.md", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-iface-001-matrix-interface.md", "Gui/Workbench.cpp"],
-      "read_if": [{"when": "Recovering dimensions/control identity absent from screenshot and spec", "paths": ["ref/matrix9/vb6-lite/Matrix90/frmMaster.frm", "ref/matrix9/Matrix90_Codex_Guide_MD/03_PARSING_VB_OUTPUT.md"]}],
-      "exit_criteria": "Live FreeCAD views preserve camera, model selection and edit behavior; prove view arrangement with runtime evidence. A painted mockup is insufficient."
+      "read_now": [
+        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-viewport-001-four-viewports-c-plane-f4.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/03-coordinates-cplanes.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/12-display-render-resources.md"
+      ],
+      "read_if": [
+        {
+          "when": "Porting legacy camera/grid/overlay behavior",
+          "paths": [
+            "Gui/Workbench.cpp",
+            "skills/openmatrix9-workspace-contract/references/grid-and-viewports.md"
+          ]
+        }
+      ],
+      "exit_criteria": "Own four-view camera/CPlane/grid/pick/display interaction matches Matrix9 contract, real document edits/lifecycle are proven; no mock viewport or old FreeCAD screenshot closes target gate."
     },
     "native-mapping": {
       "skill": "openmatrix9-native-mapping",
-      "read_now": ["ref/matrix9/Matrix90_Codex_Guide_MD/01_SOURCE_OF_TRUTH.md", "ref/matrix9/Matrix90_Codex_Guide_MD/02_ADDRESS_MAPPING.md", "ref/matrix9/Matrix90_Codex_Guide_MD/05_MAPPING_WORKFLOW.md", "ref/matrix9/Matrix90_Codex_Guide_MD/07_CONFIDENCE_AND_VALIDATION.md"],
-      "read_if": [
-        {"when": "Understanding only the selected Ghidra function, callers and necessary callees; use bounded extraction", "paths": ["ref/matrix9/ghidra/Matrix90.exe.c", "ref/matrix9/Matrix90_Codex_Guide_MD/04_PARSING_GHIDRA_C.md"]},
-        {"when": "Address match times out, has no body or may be a thunk", "paths": ["ref/matrix9/Matrix90_Codex_Guide_MD/08_FAILURE_CASES.md", "ref/matrix9/Matrix90_Codex_Guide_MD/09_MATRIX90_EXAMPLES.md"]},
-        {"when": "User explicitly requests a recovered VB6 listing", "paths": ["ref/matrix9/Matrix90_Codex_Guide_MD/06_RECONSTRUCTION_RULES.md", "ref/matrix9/Matrix90_Codex_Guide_MD/13_TARGET_LAYOUT.md"]}
+      "read_now": [
+        "OpenMatrix9_Codex_Spec_v2/TERMINOLOGY.md",
+        "docs/openmatrix9-reference-locations.json",
+        "Matrix90_Codex_Guide_MD/01_SOURCE_OF_TRUTH.md",
+        "Matrix90_Codex_Guide_MD/02_ADDRESS_MAPPING.md",
+        "Matrix90_Codex_Guide_MD/05_MAPPING_WORKFLOW.md",
+        "Matrix90_Codex_Guide_MD/07_CONFIDENCE_AND_VALIDATION.md"
       ],
-      "exit_criteria": "Selected procedure has source/hash/VA, exact mapping status, separate behavioral confidence, bounded evidence and unresolved questions recorded for Rust implementation."
+      "read_if": [
+        {
+          "when": "Parser/missing-definition/thunk issues on a selected procedure",
+          "paths": [
+            "Matrix90_Codex_Guide_MD/03_PARSING_VB_OUTPUT.md",
+            "Matrix90_Codex_Guide_MD/04_PARSING_GHIDRA_C.md",
+            "Matrix90_Codex_Guide_MD/08_FAILURE_CASES.md"
+          ]
+        },
+        {
+          "when": "User explicitly asks for a recovered VB6 listing",
+          "paths": [
+            "Matrix90_Codex_Guide_MD/06_RECONSTRUCTION_RULES.md",
+            "Matrix90_Codex_Guide_MD/13_TARGET_LAYOUT.md"
+          ]
+        }
+      ],
+      "exit_criteria": "Exact procedure/VA/body bounded evidence and uncertainty serve selected v2 feature; imported recovery mission does not alter Rust target or authorize whole-export reading."
     },
     "feature-port": {
       "skill": "openmatrix9-feature-port",
-      "read_now": ["ref/matrix9/OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_RULES.md", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/SOURCES.md", "docs/openmatrix9-reference-locations.json", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/TERMINOLOGY.md"],
-      "read_if": [
-        {"when": "Feature is a builder or exposes history/styles; inspect only the applicable framework", "paths": ["ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-buildercore-001-builder-framework.md", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-history-001-history-workflow.md", "ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-style-001-styles-framework.md"]},
-        {"when": "Working on Clayoo/SubD, distinct from T-Splines", "paths": ["ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/14-subd/README.md"]}
+      "read_now": [
+        "OpenMatrix9_Codex_Spec_v2/AGENTS.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/00-qymcad-foundation-migration.md",
+        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
+        "OpenMatrix9_Codex_Spec_v2/IMPLEMENTATION_RULES.md",
+        "OpenMatrix9_Codex_Spec_v2/CODE_GUIDE.md",
+        "OpenMatrix9_Codex_Spec_v2/BACKEND_POLICY.md",
+        "OpenMatrix9_Codex_Spec_v2/TERMINOLOGY.md"
       ],
-      "exit_criteria": "Resolve exact ID with feature command, then read its returned spec and source manual page. Validate defaults, units, geometry and applicable preview/commit/cancel/history/undo/save behavior."
+      "read_if": [
+        {
+          "when": "Feature uses Builder/History/Styles",
+          "paths": [
+            "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-buildercore-001-builder-framework.md",
+            "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-history-001-history-workflow.md",
+            "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-style-001-styles-framework.md"
+          ]
+        },
+        {
+          "when": "Source evidence or third-party routine selection is unresolved",
+          "paths": [
+            "docs/openmatrix9-reference-locations.json",
+            "OpenMatrix9_Codex_Spec_v2/UPSTREAM_REUSE.md",
+            "OpenMatrix9_Codex_Spec_v2/LICENSING_AND_PROVENANCE.md"
+          ]
+        }
+      ],
+      "exit_criteria": "Exact ID/alias/options/defaults/unknowns and backend migration fulfilled on own target with relevant geometry/state/UI/Undo/.om9/3DM evidence; local normalized specs do not require PDF reread."
     },
     "build-validation": {
       "skill": "openmatrix9-build-validation",
-      "read_now": ["docs/superpowers/plans/2026-10-03-matrix9-menu.md", "CMakeLists.txt", "Gui/CMakeLists.txt", "rust/Cargo.toml", "InitGui.py", "Gui/RustBridge.h", "../../src/Mod/CMakeLists.txt"],
-      "read_if": [
-        {"when": "Checking the previously configured local build; inspect cache values, do not assume paths are valid", "paths": ["../../build/relWithDebInfo/CMakeCache.txt", "../../build/relWithDebInfo/build.ninja"]},
-        {"when": "Checking local CMake/Ninja runtime availability", "paths": ["../../.pixi/envs/default/Library/bin/cmake.exe", "../../.pixi/envs/default/Library/bin/ninja.exe"]}
+      "read_now": [
+        "OpenMatrix9_Codex_Spec_v2/AGENTS.md",
+        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/00-qymcad-foundation-migration.md",
+        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
+        "OpenMatrix9_Codex_Spec_v2/CODE_GUIDE.md",
+        "OpenMatrix9_Codex_Spec_v2/BACKEND_POLICY.md",
+        "skills/openmatrix9-build-validation/references/validation-playbook.md"
       ],
-      "exit_criteria": "Actual Rust checks, C++ compile/link, module load and UI/lifecycle checks succeed with recorded commands, logs, build path and screenshots. Build presence alone is insufficient."
+      "read_if": [
+        {
+          "when": "Verifying the request-planner examples only",
+          "paths": [
+            "OpenMatrix9_Codex_Spec_v2/examples/rust/Cargo.toml",
+            "OpenMatrix9_Codex_Spec_v2/examples/rust/README.md"
+          ]
+        },
+        {
+          "when": "Porting/testing a selected existing Rust component",
+          "paths": [
+            "rust/Cargo.toml",
+            "rust/src/lib.rs"
+          ]
+        },
+        {
+          "when": "Explicit legacy FreeCAD plugin maintenance/comparison",
+          "paths": [
+            "CMakeLists.txt",
+            "Gui/CMakeLists.txt",
+            "Gui/RustBridge.h",
+            "../../build/build-om9-plugin.ps1",
+            "../../build/run-om9-plugin.ps1"
+          ]
+        }
+      ],
+      "exit_criteria": "Actual selected manifests/build targets, native dependency closure/ABI and standalone lifecycle/UI/feature evidence recorded; old plugin/planner passes remain component or historical evidence."
     }
   }
 }

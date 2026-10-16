@@ -1,0 +1,125 @@
+# Apply Mesh UVN ￼
+
+- Source PDF: h:\OpenMatrix9\manuals\matrix8_book_1.pdf (Matrix 8 Instruction Manual Book 1)
+- Page range: 118-119
+- Section title: Apply Mesh UVN ￼
+- Section id: m8book1-121-apply-mesh-uvn
+- Kind: command
+- Note: boundary page(s) are shared with neighbouring sections (two-column layout); text/images on those pages may belong to the neighbour.
+- Images (../images/): m8book1_p118_img01.png, m8book1_p118_img02.png
+
+---
+<!-- section m8book1-121-apply-mesh-uvn | Apply Mesh UVN ￼ | m8book1 pages 118-119 -->
+
+<!-- page 118 -->
+
+## Mesh Reduce
+Note: With large meshes, use 2 or 3 percent
+reduction at a time for your mesh settings. Doing
+multiple times until the desired output is obtained.
+Undo Reduce Mesh by using the Undo button.
+‘ReduceMesh’
+Mesh Reduce is an easy way to reduce the
+polygon count (size) of mesh objects.
+Mesh Reducer in the Tools menu functions similar to
+Mesh Reduce but is not identical to this command
+.
+## Apply Mesh UVN
+Where is this Command:
+Access this command from Utilities>Mesh
+Reduce
+Steps:
+‘ApplyMeshUVN’
+Apply Mesh UVN transfers a mesh object up onto
+a surface, exactly fitting the length, width and
+curvature of that surface.
+Where is this Command:
+Access this command from Utilities>Apply
+Mesh UVN
+• Select Mesh
+Reduce from
+the Utilities
+menu
+• Select mesh
+objects
+• Set the new
+polygon count.
+Steps:
+### Menu Options:
+Or Planar Only: Restricts the reduction to
+planar polygons.
+• Select Apply Mesh UVN from the Utilities menu.
+• Select a mesh object to Apply.
+• Press Enter.
+• Select the target surface..
+• The mesh object now flows on the selected
+surface.
+Fast - Accurate: Fast trades speed for accuracy
+during conversion. Reduction is performed more
+randomly, involving fewer calculations, and is
+therefore faster. Accurate produces the fewest
+visible artifacts. This involves more calculations
+and is slower.
+Preview: Click to display a preview of the output.
+Do this after any setting change to see the
+updated preview.
+Example: Apply
+a brick pattern,
+from a bitmap
+file created into
+3Dgeometry in
+Matrix Art, with a
+UV curve (created
+from the rings
+target surface).
+Create the mesh
+and use it with
+Apply Mesh UVN.
+Note: Start with a surface that is not split or trimmed
+for the best results.
+Use Create UV Curves (Curves Menu) for a preview
+to see how the size of your mesh objects will fit
+on the surface. Or, use it in Matrix Art to apply a
+textured bitmap.
+Note: The resolution settings in Matrix Art or other
+program used to create the mesh will determine
+how many triangles (or other polygons) are used to
+make the mesh and how large or small they are. If
+the resolution is high, there will be smaller triangles
+used - and hence more of them - in order to try and
+capture the shape of that surface as accurately as
+possible. If the resolution is low, there will be fewer,
+larger triangles used, which means less information
+the computer has to work with and greater speed
+and ease while modeling - as well as less surface
+definition and accuracy in the resulting shape.
+
+<!-- page 119 -->
+
+If necessary, use Direction (on the target surface) to
+change the surface normals if your mesh objects flow
+inside out on the selected surface.
+The ability to flow mesh objects is now part of
+SmartFlow (Transform Menu). SmartFlow has this
+same ability plus more.
+## Extract Render Mesh
+‘ExtractRenderMesh’
+What you see when shading or rendering the
+object is actually meshes stored with the object
+and turned on when you hit Shade or Render. To
+get this mesh as a separate object you can model
+with on-screen, run the Extract Render Mesh
+utility.
+Where is this Command:
+Access this command from Utilities>Extract
+Render Mesh
+Steps:
+• Start the Extract Render Mesh command from the
+Utilities menu
+• Select a surface ,polysurface, mesh, extrusions or
+block instances. Press Enter.
+• A separate mesh option is created.
+Note: This mesh will be created with the current
+Mesh settings stored in Display (Coarse, Medium,
+Fine, or Superfine). So, set the desired Shade setting
+BEFORE you use this tool.

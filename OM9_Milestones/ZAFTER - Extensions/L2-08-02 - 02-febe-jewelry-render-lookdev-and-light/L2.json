@@ -1,0 +1,71 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-08-02",
+  "milestone": "AFTER",
+  "title": "02-febe-jewelry-render-lookdev-and-light-rigs",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Jewelry lighting/metal/gem lookdev.",
+  "source_original_path": "specs/90-after/03-render-after/02-febe-jewelry-render-lookdev-and-light-rigs/module.json",
+  "definition": {
+    "module_id": "OM9-L2-08-02",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/03-render-after/02-febe-jewelry-render-lookdev-and-light-rigs/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "08-render-after",
+    "legacy_v07_path": "specs/08-render-after/02-febe-jewelry-render-lookdev-and-light-rigs/",
+    "scope": "Jewelry lighting/metal/gem lookdev.",
+    "exclude": "Không thay thế shaded GPU viewport mainline.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          519,
+          566
+        ],
+        "pdf_pages_1based": [
+          293,
+          340
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/90-after/03-render-after/02-febe-jewelry-render-lookdev-and-light-rigs/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-08-02-001",
+      "file": "AFTER - Post-Release Extensions/L2-08-02 - 02-febe-jewelry-render-lookdev-and-light/L3-001 - Jewelry Metal Lookdev Material Picker/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-08-02-002",
+      "file": "AFTER - Post-Release Extensions/L2-08-02 - 02-febe-jewelry-render-lookdev-and-light/L3-002 - Gem Refraction And Caustic Lookdev/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-08-02-003",
+      "file": "AFTER - Post-Release Extensions/L2-08-02 - 02-febe-jewelry-render-lookdev-and-light/L3-003 - Studio Light Rig And Reflector Setup/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-08-02-004",
+      "file": "AFTER - Post-Release Extensions/L2-08-02 - 02-febe-jewelry-render-lookdev-and-light/L3-004 - Render Camera Backdrop And Props/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-08-02-005",
+      "file": "AFTER - Post-Release Extensions/L2-08-02 - 02-febe-jewelry-render-lookdev-and-light/L3-005 - Material Preview And Style Application/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

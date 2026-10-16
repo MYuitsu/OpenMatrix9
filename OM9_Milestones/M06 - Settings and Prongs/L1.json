@@ -1,0 +1,36 @@
+{
+  "level": "L1",
+  "id": "OM9-M06",
+  "milestone": "M06",
+  "title": "Settings và Prongs",
+  "planning_state": "L1_L4_SPECIFIED_NOT_IMPLEMENTED",
+  "planning_only": true,
+  "module_count": 2,
+  "l3_count": 19,
+  "l4_count": 76,
+  "modules": [
+    {
+      "id": "OM9-L2-04-14",
+      "file": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-15",
+      "file": "M06 - Settings and Prongs/L2-04-15 - 02-febe-prong-channel-metal-and-bead/L2.json"
+    }
+  ],
+  "implementation_targets_by_milestone": {
+    "M06": 19
+  },
+  "execution_readiness": {
+    "target": "Planning-only L4 records; no binary, runtime receipts or changelog",
+    "blocked_until": [
+      "G00_PASS",
+      "E01..E10_PASS",
+      "E10 gem contract frozen",
+      "source/OCCT/legal approved"
+    ],
+    "l4_planned": 76,
+    "l3_covered": 19,
+    "manual_basis": "Matrix 8 Book 2 PDF pp.242-271 (Chapter 28); see per-task origin refs"
+  }
+}

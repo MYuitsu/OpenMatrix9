@@ -1,0 +1,45 @@
+{
+  "level": "L2",
+  "id": "OM9-M00-L2-04",
+  "milestone": "M00",
+  "title": "3DM / openNURBS interoperability",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+  "definition": {
+    "module_id": "OM9-M00-L2-04",
+    "title": "3DM / openNURBS interoperability",
+    "gate_id": "G00-04",
+    "role": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+    "l3_items": [
+      {
+        "l3_id": "OM9-M00-L3-04-01",
+        "title": "3DM capability gap and dependency candidate",
+        "l4_count": 4
+      },
+      {
+        "l3_id": "OM9-M00-L3-04-02",
+        "title": "NURBS / trimmed BRep / units proof",
+        "l4_count": 5
+      },
+      {
+        "l3_id": "OM9-M00-L3-04-03",
+        "title": "Import security and transparent limitations",
+        "l4_count": 3
+      }
+    ]
+  },
+  "children_l3": [
+    {
+      "id": "OM9-M00-L3-04-01",
+      "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-04-02",
+      "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-02 - NURBS - trimmed BRep - units proof/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-04-03",
+      "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-03 - Import security and transparent/l3.json"
+    }
+  ]
+}

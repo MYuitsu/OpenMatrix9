@@ -1,0 +1,82 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-02-02",
+  "milestone": "M02",
+  "title": "Febe Cplanes And Coordinate Input",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "CPlane/World coordinates, gốc F4, nhập điểm chính xác, dựng hình theo view.",
+  "definition": {
+    "module_id": "OM9-L2-02-02",
+    "milestone_id": "M02",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "02-rhino5",
+    "scope": "CPlane/World coordinates, gốc F4, nhập điểm chính xác, dựng hình theo view.",
+    "exclude": "UI bố cục bốn view thuộc Matrix Book1.",
+    "manual_references": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          37,
+          43
+        ],
+        "pdf_pages_1based": [
+          45,
+          51
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-03",
+      "OM9-L2-01-08"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "manual_test_required": true,
+    "acceptance_gate": "M02-UI",
+    "l3_count": 7
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-02-02-001",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-001 - World And Construction Plane Coordinate Context/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-02-002",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-002 - CPlane Preset Worldtop Front Right/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-02-003",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-003 - CPlane Orientation And Origin Change/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-02-004",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-004 - Coordinate Text Point Entry/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-02-005",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-005 - Matrix F4 Origin Shortcut/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-02-006",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-006 - Ortho Planar Project Cursor Constrain/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-02-007",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-007 - Cross Viewport Coordinate Consistency/l3.json"
+    }
+  ]
+}

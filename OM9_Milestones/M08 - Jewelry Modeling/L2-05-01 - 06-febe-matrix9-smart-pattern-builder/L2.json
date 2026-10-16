@@ -1,0 +1,76 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-05-01",
+  "milestone": "M08",
+  "title": "06-febe-matrix9-smart-pattern-builder",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Smart Pattern trên surface: phân phối chi tiết trang sức, group/mesh, attraction và preview.",
+  "source_original_path": "specs/08-ms08-advanced-jewelry-modeling/06-febe-matrix9-smart-pattern-builder/module.json",
+  "definition": {
+    "module_id": "OM9-L2-05-01",
+    "milestone_id": "M08",
+    "module_path": "specs/08-ms08-advanced-jewelry-modeling/06-febe-matrix9-smart-pattern-builder/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "05-matrix9-addendum",
+    "legacy_v07_path": "specs/05-matrix9-addendum/01-febe-matrix9-smart-pattern-builder/",
+    "scope": "Smart Pattern trên surface: phân phối chi tiết trang sức, group/mesh, attraction và preview.",
+    "exclude": "Không xây lại Array/Orient geometry core.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          80,
+          81
+        ],
+        "pdf_pages_1based": [
+          86,
+          87
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-02-05",
+      "OM9-L2-03-11"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M08-UI",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/08-ms08-advanced-jewelry-modeling/06-febe-matrix9-smart-pattern-builder/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-05-01-001",
+      "file": "M08 - Jewelry Modeling/L2-05-01 - 06-febe-matrix9-smart-pattern-builder/L3-001 - Smartpattern Source Pattern Choice/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-05-01-002",
+      "file": "M08 - Jewelry Modeling/L2-05-01 - 06-febe-matrix9-smart-pattern-builder/L3-002 - Smartpattern UV Distribution/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-05-01-003",
+      "file": "M08 - Jewelry Modeling/L2-05-01 - 06-febe-matrix9-smart-pattern-builder/L3-003 - Smartpattern Group And Segment Controls/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-05-01-004",
+      "file": "M08 - Jewelry Modeling/L2-05-01 - 06-febe-matrix9-smart-pattern-builder/L3-004 - Smartpattern Attractor Region Controls/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-05-01-005",
+      "file": "M08 - Jewelry Modeling/L2-05-01 - 06-febe-matrix9-smart-pattern-builder/L3-005 - Smartpattern History And Viewport Preview/l3.json",
+      "target_implementation_milestone": "M08"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m08": 18
+}

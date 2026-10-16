@@ -1,0 +1,28 @@
+{
+  "scope": "post_checkpoint_documentation_validation",
+  "goal_complete": false,
+  "v2_screenshot_validator": {
+    "features_linked": 15,
+    "reference_links_checked": 41,
+    "catalog_features": 607,
+    "core_features": 130,
+    "capabilities": 148,
+    "acceptance_cases": 12,
+    "v1_unchanged": 665,
+    "v2_manifest": 678,
+    "images_copied": 0,
+    "runtime_completion_claim": false
+  },
+  "public_source_audit": {
+    "source_files": 4713,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "historical_validator_attempt": {
+    "tool": "tools/validate_rhino_foundation_specs.py",
+    "result": "not_applicable_failed_legacy_v1_path_missing",
+    "used_for_current_v2_acceptance": false
+  },
+  "measured_at": "2026-10-14T04:21:25+00:00"
+}

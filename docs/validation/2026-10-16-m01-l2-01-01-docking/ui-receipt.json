@@ -1,0 +1,160 @@
+{
+  "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+  "checks": [
+    "CMD line accepted once",
+    "actual CMD Undo",
+    "actual CMD Redo",
+    "Esc canceled draft without publication"
+  ],
+  "cmd": "layout version 1 is not supported; restored the Matrix default\nCommand: Line\nStart of line (BothSides=No): 0,0,0\nEnd of line (BothSides=No): 12,6,0\nCommand: Undo\nCommand: Redo\nCommand: Line\nStart of line (BothSides=No): 2,2,0\nCommand: ",
+  "dock": {
+    "builder_slot_visible": true,
+    "command_line_px": 83.0,
+    "diagnostics": [
+      "layout version 1 is not supported; restored the Matrix default"
+    ],
+    "floating_sections": [],
+    "left_rail_px": 295.0,
+    "left_sections": [
+      "icon-history",
+      "main-menu",
+      "display",
+      "snaps",
+      "info-settings",
+      "layers",
+      "projects",
+      "builder-slot"
+    ],
+    "right_dock_visible": false,
+    "right_sections": [],
+    "status_bar_px": 20.0,
+    "status_kind": "Ready",
+    "status_message": "Ready"
+  },
+  "document": {
+    "context_revision": 1,
+    "current_layer": null,
+    "definitions": {},
+    "entities": {
+      "602ca2ca-6ade-4531-9206-e367557a6c8a": {
+        "attributes": {
+          "color": [
+            0,
+            130,
+            85,
+            255
+          ],
+          "layer": null,
+          "locked": false,
+          "selectable": true,
+          "visible": true
+        },
+        "attributes_revision": 1,
+        "generation": 1,
+        "geometry": {
+          "Curve": {
+            "Line": {
+              "domain": [
+                0.0,
+                13.416407864998739
+              ],
+              "end": [
+                12.0,
+                6.0,
+                0.0
+              ],
+              "start": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "geometry_revision": 1,
+        "id": "602ca2ca-6ade-4531-9206-e367557a6c8a",
+        "label": "Line",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "epoch": 1,
+    "history": {
+      "recipes": {}
+    },
+    "id": "4e467f82-e19b-4bc5-adb2-cb9c96d0999e",
+    "layer_order": [],
+    "layers": {},
+    "name": "Untitled",
+    "owner_session": "b2c54444-70b4-46ca-a0fe-f8a7c18c3f12",
+    "page_unit": "Millimeter",
+    "results": {},
+    "revision": 2,
+    "session_generation": 1
+  },
+  "limitations": [
+    "full Matrix9 UI acceptance pending",
+    "CAD native adapters pending",
+    "GPU geometry caching and performance acceptance pending",
+    "DPI/multi-monitor acceptance pending"
+  ],
+  "objects": 1,
+  "passes": 21,
+  "scope": "initial_standalone_ui_slice",
+  "screenshot": {
+    "path": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l2-01-01-docking/workspace.png",
+    "sha256": "7f33d63c445c78075a832e358a722940d2b5fb12df611648c0e71c644644a492"
+  },
+  "screenshot_saved": true,
+  "undo": 1,
+  "view_rects": {
+    "Looking Down": [
+      300.0,
+      178.0,
+      649.0,
+      401.0
+    ],
+    "Perspective": [
+      951.0,
+      178.0,
+      649.0,
+      401.0
+    ],
+    "Side View": [
+      951.0,
+      581.0,
+      649.0,
+      401.0
+    ],
+    "Through Finger": [
+      300.0,
+      581.0,
+      649.0,
+      401.0
+    ]
+  }
+}

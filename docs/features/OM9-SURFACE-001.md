@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-SURFACE-001](../../OpenMatrix9_Codex_Spec_v2/specs/03-surface/om9-surface-001-sweep-1.md) · [OM9-SURFACE-002](../../OpenMatrix9_Codex_Spec_v2/specs/03-surface/om9-surface-002-sweep-1-history.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-SURFACE-001 — Sweep 1
 
 <!-- common-command-options-20261012:start -->

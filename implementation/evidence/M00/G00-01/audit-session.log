@@ -1,0 +1,169 @@
+### A1 qymcad rev-parse HEAD
+> git -C "$root\QymCAD" rev-parse HEAD
+c4ea3694e69bc5190917566a0dfb5b64ebbebd9c
+[exit=0]
+
+### A2 qymcad toplevel
+> git -C "$root\QymCAD" rev-parse --show-toplevel
+H:/OpenMatrix9
+[exit=0]
+
+### A3 qymcad has own .git
+> Test-Path "$root\QymCAD\.git"
+False
+[exit=0]
+
+### A4 qymcad tracked file count in OM9 index
+> (git -C $root ls-files QymCAD | Measure-Object).Count
+0
+[exit=0]
+
+### A5 vendor-research exists
+> Test-Path "$root\vendor-research"
+False
+[exit=0]
+
+### A6 implementation dir exists
+> Test-Path "$root\implementation"
+True
+[exit=0]
+
+### A7 M00 protocol tools present
+> foreach($n in @("validate_m00_v013.py","next_m00_task.py","validate_m00_execution.py")){ "{0} = {1}" -f $n,(Test-Path (Join-Path $root "tools\$n")) }
+validate_m00_v013.py = False
+next_m00_task.py = False
+validate_m00_execution.py = False
+[exit=0]
+
+### A8 qymcad crate dir count
+> (Get-ChildItem "$root\QymCAD\crates" -Directory).Count
+19
+[exit=0]
+
+### A9 license first line
+> Get-Content "$root\QymCAD\LICENSE" -TotalCount 1
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+[exit=0]
+
+### A10 toolchain
+> & "$env:USERPROFILE\.cargo\bin\rustc.exe" --version; & "$env:USERPROFILE\.cargo\bin\cargo.exe" --version; git --version
+rustc 1.98.1 (48a229cea 2026-09-01)
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+git version 2.55.0.windows.3
+[exit=0]
+
+### A11 OCCT present
+> foreach($p in @("C:\OpenCASCADE","C:\OCCT","H:\OpenCASCADE","H:\OpenMatrix9\build\occt")){ "{0} = {1}" -f $p,(Test-Path $p) }; "env OCCT_ROOT = $env:OCCT_ROOT"
+C:\OpenCASCADE = False
+C:\OCCT = False
+H:\OpenCASCADE = False
+H:\OpenMatrix9\build\occt = False
+env OCCT_ROOT =
+[exit=0]
+
+### A12 kernel build.rs OCCT linkage
+> Select-String -Path "$root\QymCAD\crates\qymcad-kernel\build.rs" -Pattern "occt|OCCT|TKBRep|link" | Select-Object -First 8 | ForEach-Object { "L{0}: {1}" -f $_.LineNumber,$_.Line.Trim() }
+L3: //! An installed OCCT is required, with its headers and libraries in place. Other systems and paths are handled
+L4: //! through the `OCCT_INCLUDE_DIR` and `OCCT_LIB_DIR` environment variables.
+L13: let inc = env::var("OCCT_INCLUDE_DIR").unwrap_or_else(|_| "/usr/include/opencascade".into());
+L14: let libdir = env::var("OCCT_LIB_DIR").unwrap_or_else(|_| "/usr/lib".into());
+L17: // same compiler that built OCCT. On Windows that is MSVC - the mainstream target for Rust there, and
+L28: // explicitly; where they are defined anyway the define is harmless. Without it the OCCT headers do not
+L32: .file("src/occt_bridge.cpp")
+L33: .file("src/occt_helical.cpp")
+[exit=0]
+
+### A13 QymCAD third party pins
+> Get-Content "$root\QymCAD\THIRD-PARTY-NOTICES.md" | Select-Object -First 25
+# Third-party notices
+
+QymCAD itself is distributed under [AGPL-3.0-or-later](LICENSE). It is built on other people's work,
+and this file says whose, on what terms, and where the sources are. It accompanies the binary
+packages (the Windows zip and the Linux AppImage) as well as the repository.
+
+## Open CASCADE Technology
+
+The geometric kernel — exact B-rep, the boolean operations, the fillets, STEP.
+
+- Version 7.8.1
+- Copyright (c) Open CASCADE SAS
+- Licence: **LGPL-2.1 with an additional exception** (the "Open CASCADE Exception"), quoted at
+  <https://dev.opencascade.org/resources/licensing>
+- Sources: <https://github.com/Open-Cascade-SAS/OCCT>
+
+QymCAD links OCCT **dynamically**: the `TK*` shared libraries lie next to the executable in the
+Windows package and inside the AppImage, and are not compiled into it. LGPL-2.1 §6 is thereby
+satisfied — the library can be replaced with another build of the same version without touching
+QymCAD.
+
+## Liberation Sans
+
+The bold face used for the ViewCube, the axes and the dimension labels.
+[exit=0]
+
+### B1 required M00 L2-01 outputs present
+> $names=@("source-provenance.json","source-checkout.log","upstream-agent-rules.md","source-file-inventory.csv","workspace-dependency-map.json","qymcad-api-boundaries.md","qymcad-feature-evidence.csv","upstream-drift-policy.md","reuse-adapt-add-l2.csv","matrix-gap-analysis.md","adr-qymcad-integration.md","e01-source-handoff.md"); foreach($n in $names){ $hits=Get-ChildItem $root -Recurse -Filter $n -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '\\implementation\\evidence\\' }; "{0,-32} {1}" -f $n, $(if($hits){"FOUND: "+($hits.FullName -join ';')}else{"MISSING"}) }
+source-provenance.json           MISSING
+source-checkout.log              MISSING
+upstream-agent-rules.md          MISSING
+source-file-inventory.csv        MISSING
+workspace-dependency-map.json    MISSING
+qymcad-api-boundaries.md         MISSING
+qymcad-feature-evidence.csv      MISSING
+upstream-drift-policy.md         MISSING
+reuse-adapt-add-l2.csv           MISSING
+matrix-gap-analysis.md           MISSING
+adr-qymcad-integration.md        MISSING
+e01-source-handoff.md            MISSING
+[exit=]
+
+### B2 established executed QymCAD pin (standalone provenance)
+> (Get-Content "$root\standalone\provenance.json" -Raw | ConvertFrom-Json).qymcad | ConvertTo-Json -Compress
+{"commit":"09a7f09ebeb87fab7c43e26774f7eb0eb88907dd","mode":"reference_only","copied_files":[],"runtime_dependency":false}
+[exit=]
+
+### B3 plan pin vs executed pin
+> "plan(L1.json)      = " + ((Get-Content "$root\OM9_Milestones\M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment\L1.json" -Raw | ConvertFrom-Json).pinned_source_revision); "executed(provenance)= " + ((Get-Content "$root\standalone\provenance.json" -Raw | ConvertFrom-Json).qymcad.commit); "plan doc reference = " + ((Select-String -Path "$root\docs\superpowers\plans\2026-10-13-standalone-foundation.md" -Pattern '09a7f09ebeb87fab7c43e26774f7eb0eb88907dd' | Select-Object -First 1).Line.Trim())
+plan(L1.json)      = c116f8f224ebffe0ada049c91c0d15df3634f00d
+executed(provenance)= 09a7f09ebeb87fab7c43e26774f7eb0eb88907dd
+plan doc reference = - QymCAD pin `09a7f09ebeb87fab7c43e26774f7eb0eb88907dd`; provenance required for any copied routine.
+[exit=]
+
+### B4 canonical milestone counts
+> $l2=(Get-ChildItem "$root\OM9_Milestones" -Recurse -Filter L2.json | Where-Object { $_.FullName -notmatch 'reference|incoming|planning' }); "L2 total = " + $l2.Count; "L2 M00..M08 = " + (($l2 | Where-Object { $_.FullName -notmatch 'ZAFTER' }).Count); "L3 total = " + (Get-ChildItem "$root\OM9_Milestones" -Recurse -Filter l3.json | Where-Object { $_.FullName -notmatch 'reference|incoming|planning' }).Count
+L2 total = 102
+L2 M00..M08 = 69
+L3 total = 777
+[exit=]
+
+### B5 capability->QymCAD mapping present?
+> $hits=Select-String -Path "$root\tools\matrix_ref_crosswalk.py" -Pattern "qymcad" -ErrorAction SilentlyContinue; "crosswalk qymcad hits = " + ($hits | Measure-Object).Count; $hits | ForEach-Object { "L{0}: {1}" -f $_.LineNumber,$_.Line.Trim() }
+crosswalk qymcad hits = 4
+L1152: mx={"mx-export-manifest": "provenance format to mirror for the QymCAD pin record",
+L1154: focus="Ghi provenance nguồn QymCAD theo cùng chuẩn manifest đã dùng cho Matrix9 (owner, revision, sha256, công cụ, giới hạn đã biết)."),
+L1215: focus="Kiến trúc naming/rebind lấy từ RCORE-09 + QymCAD kernel, không suy từ tên hàm Matrix."),
+L1226: focus="Quyết định license phải tách rõ nguồn public (QymCAD/OCCT/Rhino5 guide) và nguồn private (Matrix9 export, Ghidra, manual) - bằng chứng: manifest hash hiện có."),
+[exit=]
+
+### B6 QymCAD 3DM availability in local source
+> (Select-String -Path "$root\QymCAD\crates\qymcad-io\src\formats.rs" -Pattern "pub const ALL" | Select-Object -First 1).Line.Trim()
+pub const ALL: [Format; 10] = [Format::Step, Format::Iges, Format::Stl, Format::Obj, Format::Ply, Format::Gltf, Format::ThreeMf, Format::Amf, Format::Dxf, Format::Svg];
+[exit=]
+
+### B7 QymCAD agent-rule files present
+> foreach($n in @("AGENTS.md","CLAUDE.md","CONTRIBUTING.md","rust-toolchain.toml","Cargo.lock")){ "{0,-20} {1}" -f $n,(Test-Path (Join-Path "$root\QymCAD" $n)) }
+AGENTS.md            True
+CLAUDE.md            True
+CONTRIBUTING.md      True
+rust-toolchain.toml  True
+Cargo.lock           True
+[exit=]
+
+### B8 QymCAD real test surface (files)
+> foreach($c in @("qymcad-core","qymcad-kernel","qymcad-testkit","qymcad-io")){ $t=Get-ChildItem "$root\QymCAD\crates\$c\tests" -Filter *.rs -ErrorAction SilentlyContinue; "{0,-16} test_files={1}" -f $c,($t|Measure-Object).Count }
+qymcad-core      test_files=128
+qymcad-kernel    test_files=15
+qymcad-testkit   test_files=132
+qymcad-io        test_files=22
+[exit=]
+

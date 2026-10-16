@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-INFO-021](../../OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-info-021-gumball-alignment.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-INFO-021 — Gumball Alignment
 
 Current 2026-10-12: `implemented` / `validated_supported_slice`; approved OM9 scope complete. [Tests run locally](../validation/2026-10-12-local-tests-ci-build-only.md); the exact commit's [GitHub Action](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml) records build/package status only.

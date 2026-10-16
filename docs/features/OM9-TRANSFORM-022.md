@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-TRANSFORM-022](../../OpenMatrix9_Codex_Spec_v2/specs/05-transform/om9-transform-022-releasefromcage.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-TRANSFORM-022 — ReleaseFromCage
 
 <!-- rhino-core-cage-borrowed-admission-20261011:start -->

@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-INFO-016](../../OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-info-016-matrix-clear-object-history.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-INFO-016 — Matrix Clear Object History
 
 Source engineering contract: specs/01-core/om9-info-016-matrix-clear-object-history.md in Spec v1.

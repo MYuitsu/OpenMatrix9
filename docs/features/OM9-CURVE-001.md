@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-CURVE-001](../../OpenMatrix9_Codex_Spec_v2/specs/02-curve/om9-curve-001-polyline.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-CURVE-001 — Polyline
 
 Status: PARTIAL. Original public command: `Polyline`.

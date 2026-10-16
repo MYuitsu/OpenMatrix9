@@ -20,10 +20,13 @@ class ReferenceIndexTests(unittest.TestCase):
         self.assertTrue(result.stdout.strip(), "CLI must return a JSON result, including errors")
         return json.loads(result.stdout)
 
-    def test_exact_feature_resolves_source_page_and_existing_spec(self):
+    def test_exact_feature_resolves_standalone_v2_and_existing_guidance(self):
         data = self.call("feature", "OM9-GEM-001")
         self.assertEqual(data["feature"]["command"], "gvLoader")
-        self.assertEqual(data["feature"]["source_page_pdf"], 176)
+        self.assertEqual(data["feature"]["target_host"], "OM9Standalone")
+        self.assertEqual(data["feature"]["ui_contract"], "matrix9_described_v1")
+        self.assertIn("OpenMatrix9_Codex_Spec_v2", data["spec_file"])
+        self.assertTrue(all(x["exists"] for x in data["read_next"]))
         self.assertTrue(Path(data["spec_file"]).is_file())
 
     def test_search_keeps_subd_distinct_from_tsplines(self):
@@ -67,13 +70,24 @@ class ReferenceIndexTests(unittest.TestCase):
     def test_feature_path_cannot_escape_spec_package(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            spec = root / "ref/matrix9/OpenMatrix9_Codex_Spec_v1"
+            spec = root / "OpenMatrix9_Codex_Spec_v2"
             spec.mkdir(parents=True)
             (spec / "FEATURES.json").write_text(json.dumps([
                 {"id": "OM9-TEST-001", "spec_path": "../../outside.md"}
             ]), encoding="utf-8")
             data = self.call("feature", "OM9-TEST-001", root=root, expected=2)
             self.assertIn("outside", data["error"])
+
+    def test_v1_only_checkout_is_not_silently_used(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            legacy = root / "OpenMatrix9_Codex_Spec_v1"
+            legacy.mkdir()
+            (legacy / "FEATURES.json").write_text(json.dumps([
+                {"id": "OM9-GEM-001", "command": "legacy", "spec_path": "old.md"}
+            ]), encoding="utf-8")
+            data = self.call("feature", "OM9-GEM-001", root=root, expected=2)
+            self.assertIn("OpenMatrix9_Codex_Spec_v2", data["error"])
 
 
 if __name__ == "__main__":

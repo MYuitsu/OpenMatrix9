@@ -1,0 +1,318 @@
+//! Ratchet for source comments: counters that may only go down.
+//!
+//! The project is being opened to the public. Comments were written as a conversation with the
+//! customer — first person, quoted complaints, emotions — and they name third-party CAD products.
+//! Both are unacceptable in a public repository: the first is unreadable for an outsider, the second
+//! is a needless legal exposure.
+//!
+//! Rewriting 27 000 comment lines takes many sessions, so progress needs to be measurable and
+//! irreversible. Same mechanism as [`crate::i18n::ratchet`]: a ceiling that only moves down.
+//!
+//! Four counters, because the problems differ in urgency:
+//!
+//! * `PRODUCT_CEILING` — third-party product names. Small set, cleared first, must stay at zero.
+//! * `VOICE_CEILING` — first/second person and quoted complaints. Zero once a file is rewritten.
+//! * `CYRILLIC_CEILING` — comment lines still in Russian. Drops as translation proceeds.
+//! * `LITERAL_CEILING` — string literals still in Russian: assertion and panic messages. They are
+//!   read by whoever repairs the code, so they are as public as the comments around them.
+//!
+//! A counter that grows fails the build. A counter that shrinks also fails the build and asks for the
+//! ceiling to be lowered — otherwise slack accumulates silently and a whole file hides under it.
+#[cfg(test)]
+pub(crate) mod tests {
+    /// IS THIS THE TREE THE WORK HAPPENS IN, or a published copy of it.
+    ///
+    /// `tools/` never leaves: it holds the publishing script, the snapshot of released dependency
+    /// versions and the log of what was published. Several checks read from there, and in a published
+    /// tree they would panic on a missing file - which is the FIRST thing somebody who downloaded the
+    /// sources and ran `cargo test` would see. Measured on a fresh clone of the public repository: five
+    /// checks failed that way, four of them on `tools/`.
+    ///
+    /// These are ratchets over our own work, not statements about the program. In a copy of the tree
+    /// they have nothing to measure, and saying nothing is the honest answer.
+    fn in_the_working_tree() -> bool {
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tools").is_dir()
+    }
+
+    /// Third-party CAD products named in comments.
+    ///
+    /// The target is zero: naming a competitor buys nothing and risks a claim. It is not zero yet
+    /// because each mention is rewritten together with the block that holds it — a separate pass over
+    /// the same lines would mean editing them twice. Publication waits for this counter to reach zero.
+    const PRODUCT_CEILING: usize = 0;
+
+    /// Comment lines written as a conversation: first person, "the user said", quoted complaints.
+    const VOICE_CEILING: usize = 0;
+
+    /// Comment lines still in Russian. Target is zero — the public language of the code is English.
+    const CYRILLIC_CEILING: usize = 0;
+
+    /// String literals still in Russian: assertion messages, `expect` texts, panic texts.
+    ///
+    /// Interface strings are not counted here — those live in the localisation catalogue and are held
+    /// at zero by [`crate::i18n::ratchet`]. What is left is the text a developer reads when a check
+    /// fails, and it has to be readable by the same audience as the code.
+    ///
+    /// The remainder is DATA rather than messages, and that is why the target is this number and not
+    /// zero: the Russian words a lint looks for in the help text, driver names in another alphabet that
+    /// prove a formula accepts them, the character ranges `('а'..='я')` the guards themselves are built
+    /// from, search keys in other people's documents, language names and file names on disk.
+    const LITERAL_CEILING: usize = 86;
+
+    /// Files that carry comments: every source of the repository, tests included.
+    ///
+    /// NOT only Rust. The kernel bridge is C++ and the post-processors are scripts; their comments are
+    /// read by the same people and are just as public. While this counted `.rs` alone, a whole 4900-line
+    /// C++ file sat outside the count with a thousand Russian comment lines in it, and the counters
+    /// reported zero.
+    ///
+    /// Tests are counted too, unlike the localisation ratchet: their comments explain behaviour to a
+    /// reader and are just as public as the rest.
+    fn is_source(path: &std::path::Path) -> bool {
+        let ext = path.extension().and_then(|x| x.to_str()).unwrap_or("");
+        matches!(ext, "rs" | "cpp" | "cc" | "cxx" | "h" | "hpp" | "rhai") && path.file_name().is_none_or(|n| n != "comment_ratchet.rs")
+    }
+
+    /// The comment part of a source line: everything from the first `//` that is not inside a string
+    /// literal. `None` when the line carries no comment.
+    ///
+    /// A comment does not have to start the line. Counting only lines that begin with `//` missed every
+    /// trailing note — `let x = 1; // note` — and C++ is written that way throughout.
+    fn comment_of(line: &str) -> Option<&str> {
+        let b = line.as_bytes();
+        let (mut i, mut in_str) = (0usize, false);
+        while i < b.len() {
+            match b[i] {
+                b'\\' if in_str => i += 1,
+                b'"' => in_str = !in_str,
+                b'/' if !in_str && b.get(i + 1) == Some(&b'/') => return Some(&line[i..]),
+                _ => {}
+            }
+            i += 1;
+        }
+        None
+    }
+
+    /// Comment lines of a file: every line that carries a comment, the comment part alone.
+    fn comment_lines(text: &str) -> Vec<&str> {
+        text.lines().filter_map(comment_of).collect()
+    }
+
+    /// Russian string literals on a source line. The comment part is cut off first — what a comment
+    /// quotes is a comment, and it is counted by the other three.
+    fn russian_literals(line: &str) -> usize {
+        let line = match comment_of(line) {
+            Some(c) => &line[..line.len() - c.len()],
+            None => line,
+        };
+        let (mut n, mut rest) = (0, line);
+        while let Some(a) = rest.find('"') {
+            let after = &rest[a + 1..];
+            let Some(b) = after.find('"') else { break };
+            if has_cyrillic(&after[..b]) {
+                n += 1;
+            }
+            rest = &after[b + 1..];
+        }
+        // A LITERAL DOES NOT HAVE TO FIT ON ONE LINE. Counting only text between a pair of quotes on the
+        // same line missed every multi-line string: the setup sheet sat in one for the whole translation,
+        // eleven Russian captions of a document a person reads, and the counter said zero. Any Russian
+        // outside a comment counts, whether or not the quotes happen to close on this line.
+        if n == 0 && has_cyrillic(line) {
+            n = 1;
+        }
+        n
+    }
+
+    fn has_cyrillic(s: &str) -> bool {
+        s.chars().any(|c| ('а'..='я').contains(&c) || ('А'..='Я').contains(&c) || c == 'ё' || c == 'Ё')
+    }
+
+    /// Names of third-party CAD systems in any spelling seen in this tree.
+    fn names_product(s: &str) -> bool {
+        const NAMES: &[&str] = &["onshape", "fusion", "solidworks", "solid works", "компас", "kompas", "freecad", "inventor", "catia", "creo", "solidedge", "solid edge"];
+        let low = s.to_lowercase();
+        NAMES.iter().any(|n| low.contains(n))
+    }
+
+    /// Marks of a comment addressed to a person instead of describing the code.
+    ///
+    /// Whole words only: `я` matches the pronoun, not the middle of `имя`.
+    fn speaks_to_a_person(s: &str) -> bool {
+        const WORDS: &[&str] = &[
+            "юзер", "юзера", "юзеру", "я", "мне", "меня", "мной", "мой", "моя", "моё", "мои", "моего", "мы", "нам", "нас", "наш", "наша", "наше", "наши", "тебе", "тебя", "твой", "вчера", "сегодня",
+        ];
+        let low = s.to_lowercase();
+        let words: Vec<&str> = low.split(|c: char| !c.is_alphabetic()).collect();
+        if WORDS.iter().any(|w| words.contains(w)) {
+            return true;
+        }
+        // "пользователь сказал/прислал/поймал/показал/жаловался" — a report of a conversation
+        const REPORTED: &[&str] = &["сказал", "прислал", "поймал", "показал", "жалов", "пожалов", "просил", "требовал"];
+        low.contains("пользовател") && REPORTED.iter().any(|w| low.contains(w))
+    }
+
+    /// What the walk counted: comment lines naming a product, talking to a person, written in Russian; Russian
+    /// assertion texts; and, per file, its comment lines of the three kinds.
+    struct Counts {
+        product: usize,
+        voice: usize,
+        cyrillic: usize,
+        literals: usize,
+        per_file: Vec<FileCounts>,
+    }
+
+    struct FileCounts {
+        file: String,
+        product: usize,
+        voice: usize,
+        cyrillic: usize,
+    }
+
+    /// Walk the workspace and count all four.
+    fn count() -> Counts {
+        // THE WHOLE REPOSITORY, not just `crates`: the post-processor scripts live beside it and carry
+        // comments too. Build output and the git store are skipped — they are neither sources nor ours.
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).parent().and_then(|p| p.parent()).expect("repository root").to_path_buf();
+        let (mut prod, mut voice, mut cyr, mut lit) = (0, 0, 0, 0);
+        let mut per: Vec<FileCounts> = Vec::new();
+        let mut stack = vec![root.clone()];
+        while let Some(dir) = stack.pop() {
+            for e in std::fs::read_dir(&dir).expect("sources are readable").flatten() {
+                let p = e.path();
+                if p.is_dir() {
+                    let skip = p.file_name().and_then(|n| n.to_str()).is_some_and(|n| matches!(n, "target" | ".git"));
+                    if !skip {
+                        stack.push(p);
+                    }
+                    continue;
+                }
+                if !is_source(&p) {
+                    continue;
+                }
+                let text = std::fs::read_to_string(&p).expect("file is readable");
+                lit += text.lines().map(russian_literals).sum::<usize>();
+                let (mut fp, mut fv, mut fc) = (0, 0, 0);
+                for line in comment_lines(&text) {
+                    if names_product(line) {
+                        fp += 1;
+                    }
+                    if speaks_to_a_person(line) {
+                        fv += 1;
+                    }
+                    if has_cyrillic(line) {
+                        fc += 1;
+                    }
+                }
+                prod += fp;
+                voice += fv;
+                cyr += fc;
+                if fp + fv + fc > 0 {
+                    per.push(FileCounts { file: p.strip_prefix(&root).unwrap_or(&p).to_string_lossy().into_owned(), product: fp, voice: fv, cyrillic: fc });
+                }
+            }
+        }
+        per.sort_by_key(|f| std::cmp::Reverse(f.cyrillic));
+        Counts { product: prod, voice, cyrillic: cyr, literals: lit, per_file: per }
+    }
+
+    /// All four counters only ever go down.
+    #[test]
+    fn comments_only_ever_get_cleaner() {
+        if !in_the_working_tree() {
+            return; // a published copy of the tree: nothing here to measure
+        }
+        let Counts { product: prod, voice, cyrillic: cyr, literals: lit, per_file: per } = count();
+        let worst: Vec<String> = per.iter().take(10).map(|FileCounts { file: f, product: p, voice: v, cyrillic: c }| format!("  {c:5} cyrillic, {v:4} voice, {p:3} product  {f}")).collect();
+        let report = format!("worst files:\n{}", worst.join("\n"));
+
+        assert!(
+            prod == PRODUCT_CEILING,
+            "comments name third-party products: {prod} lines, ceiling {PRODUCT_CEILING}.\n\
+             Naming a competitor buys nothing and risks a claim — state the engineering rule instead.\n{report}"
+        );
+        assert!(voice == VOICE_CEILING, "comments talk to a person instead of describing the code: {voice} lines, ceiling {VOICE_CEILING}.\n{report}");
+        assert!(cyr == CYRILLIC_CEILING, "comments still in Russian: {cyr} lines, ceiling {CYRILLIC_CEILING}.\n{report}");
+        assert!(lit <= LITERAL_CEILING, "assertion and panic texts still in Russian: {lit} literals, ceiling {LITERAL_CEILING}");
+
+        // Slack is as bad as growth: under it a whole rewritten file hides, and the next regression
+        // lands unnoticed. This holds for the product counter most of all — publication waits on it
+        // reaching zero, so it is the one counter whose remaining distance has to stay exact.
+        assert_eq!(prod, PRODUCT_CEILING, "product ceiling is stale: {prod} lines left, set PRODUCT_CEILING to that");
+        assert_eq!(voice, VOICE_CEILING, "voice ceiling is stale: {voice} lines left, set VOICE_CEILING to that");
+        assert_eq!(cyr, CYRILLIC_CEILING, "cyrillic ceiling is stale: {cyr} lines left, set CYRILLIC_CEILING to that");
+        assert_eq!(lit, LITERAL_CEILING, "literal ceiling is stale: {lit} literals left, set LITERAL_CEILING to that");
+    }
+
+    /// DOES A LINE NAME A DOCUMENT OF WORK: a path into the archive, a capitalised document under `docs/`, or a
+    /// file name of the shape `SOME_PLAN.md`. The help (`docs/help/...`) and `README.md` are not documents of work.
+    fn names_a_plan(line: &str) -> bool {
+        // the path is put together here: written whole, it is a reference the publishing search refuses in this file
+        if line.contains(concat!("docs/", "archive")) {
+            return true;
+        }
+        line.match_indices(".md").any(|(i, _)| {
+            let path: String = line[..i].chars().rev().take_while(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '/' | '-')).collect::<Vec<_>>().into_iter().rev().collect();
+            let name = path.rsplit('/').next().unwrap_or("");
+            let shouted = name.contains('_') && name.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_');
+            let under_docs = path.starts_with("docs/") && name.chars().next().is_some_and(|c| c.is_ascii_uppercase());
+            shouted || under_docs
+        })
+    }
+
+    /// NO SOURCE NAMES A DOCUMENT OF WORK - in a comment, in a check's message, in the build files.
+    ///
+    /// A comment says what the code does and why, with the numbers measured. Where the work was planned is the
+    /// history of the work, and the documents of work are not published with the code, so a reader of the code
+    /// meets an address that leads nowhere. Measured when this was written: 27 such lines in 21 files.
+    #[test]
+    fn no_source_names_a_document_of_work() {
+        if !in_the_working_tree() {
+            return; // a published copy of the tree: nothing here to measure
+        }
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).parent().and_then(|p| p.parent()).expect("repository root").to_path_buf();
+        let mut found = Vec::new();
+        let mut stack = vec![root.clone()];
+        while let Some(dir) = stack.pop() {
+            for e in std::fs::read_dir(&dir).expect("sources are readable").flatten() {
+                let p = e.path();
+                let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                if p.is_dir() {
+                    // the documents themselves and the tooling that keeps them private are what may name them
+                    if !matches!(name, "target" | ".git" | "docs" | "tools") {
+                        stack.push(p);
+                    }
+                    continue;
+                }
+                let ext = p.extension().and_then(|x| x.to_str()).unwrap_or("");
+                let text_kind = is_source(&p) || matches!(ext, "toml" | "yml" | "yaml" | "sh" | "ps1");
+                if !text_kind || name == "comment_ratchet.rs" {
+                    continue;
+                }
+                let Ok(text) = std::fs::read_to_string(&p) else { continue };
+                for (n, line) in text.lines().enumerate() {
+                    if names_a_plan(line) {
+                        found.push(format!("  {}:{}: {}", p.strip_prefix(&root).unwrap_or(&p).display(), n + 1, line.trim()));
+                    }
+                }
+            }
+        }
+        assert!(found.is_empty(), "sources name documents of work - say what the code does and why instead:\n{}", found.join("\n"));
+    }
+
+    /// THE SIGNAL CATCHES THE SHAPES IT IS FOR, and lets the help and the readme pass.
+    #[test]
+    fn the_signal_catches_a_document_of_work() {
+        for line in [
+            "// see docs/PARALLEL_REBUILD_PLAN.md, step three",
+            concat!("/// written down in docs/", "archive/UI_SWEEP.md"),
+            "//! (C4 of `IMPORT_STRUCTURE_PLAN.md`)",
+            "# See docs/MSVC_MIGRATION.md.",
+        ] {
+            assert!(names_a_plan(line), "not caught: {line}");
+        }
+        for line in ["let page = \"docs/help/en/sketch/01-line.md\";", "// the build is described in README.md", "// a rebuild plan of 0 nodes"] {
+            assert!(!names_a_plan(line), "caught wrongly: {line}");
+        }
+    }
+}

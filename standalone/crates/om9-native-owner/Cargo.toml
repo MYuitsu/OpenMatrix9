@@ -1,0 +1,26 @@
+[package]
+name = "om9-native-owner"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+om9-core = { path = "../om9-core" }
+sha2.workspace = true
+serde_json.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "=0.62.2", default-features = false, features = ["Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell", "Win32_UI_Shell_Common"] }
+windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_Security", "Win32_Storage_FileSystem", "Win32_System_JobObjects", "Win32_System_Threading", "Win32_System_Pipes", "Win32_UI_WindowsAndMessaging", "Win32_UI_Input_KeyboardAndMouse"] }
+
+[dev-dependencies]
+uuid.workspace = true
+
+[[bin]]
+name = "om9-process-fixture"
+path = "src/bin/process_fixture.rs"
+
+[[bin]]
+name = "om9-native-runner"
+path = "src/bin/native_runner.rs"

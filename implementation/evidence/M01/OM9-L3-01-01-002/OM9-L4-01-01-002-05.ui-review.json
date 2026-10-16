@@ -1,0 +1,378 @@
+{
+  "schema": "om9.m01.ui_review.v1",
+  "task_id": "OM9-L4-01-01-002-05",
+  "l3_id": "OM9-L3-01-01-002",
+  "l3_title": "Workbench Docking Regions",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "oracle_schema": "om9.m01.oracle.v1.5 (no local definition; carried as a field only)",
+  "positive_oracle": "Show left rail, four viewport center region and optional right properties dock",
+  "negative_oracle": "Narrow window does not overlap/lose critical command input panel",
+  "runtime": {
+    "adapter": "NVIDIA GeForce RTX 3060, Vulkan (from the receipt)",
+    "command": "om9.exe --ui-audit <dir> with audit-only OM9_UI_AUDIT_WINDOW and OM9_UI_AUDIT_RIGHT_DOCK=1",
+    "build": "debug (target/debug/om9.exe)",
+    "normal": {
+      "window": "1600x1000",
+      "launch": "LAUNCHED",
+      "exit_code": 0,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/normal/workspace.png",
+      "screenshot_sha256": "f4b0f8ce048b1e9f849c999b9bce7328e6064c9899aea3da755734a59c05e066",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/normal/ui-receipt.json",
+      "receipt_sha256": "2f56bfefbec054a299c5d455e431b8d46e278024e715af4a5d4ba37cc497e973",
+      "view_rects": {
+        "Looking Down": [
+          300.0,
+          178.0,
+          499.0,
+          401.0
+        ],
+        "Perspective": [
+          801.0,
+          178.0,
+          499.0,
+          401.0
+        ],
+        "Side View": [
+          801.0,
+          581.0,
+          499.0,
+          401.0
+        ],
+        "Through Finger": [
+          300.0,
+          581.0,
+          499.0,
+          401.0
+        ]
+      },
+      "plan": {
+        "center": {
+          "height": 809.0,
+          "width": 1010.0,
+          "x": 295.0,
+          "y": 171.0
+        },
+        "command_input": {
+          "height": 83.0,
+          "width": 1305.0,
+          "x": 295.0,
+          "y": 21.0
+        },
+        "left_rail": {
+          "height": 979.0,
+          "width": 295.0,
+          "x": 0.0,
+          "y": 21.0
+        },
+        "menu_bar": {
+          "height": 21.0,
+          "width": 1600.0,
+          "x": 0.0,
+          "y": 0.0
+        },
+        "notes": [],
+        "right_dock": {
+          "height": 829.0,
+          "width": 295.0,
+          "x": 1305.0,
+          "y": 171.0
+        },
+        "status_bar": {
+          "height": 20.0,
+          "width": 1010.0,
+          "x": 295.0,
+          "y": 980.0
+        },
+        "toolbar": {
+          "height": 67.0,
+          "width": 1305.0,
+          "x": 295.0,
+          "y": 104.0
+        },
+        "views": [
+          {
+            "rect": {
+              "height": 403.5,
+              "width": 504.0,
+              "x": 295.0,
+              "y": 171.0
+            },
+            "view": "LookingDown"
+          },
+          {
+            "rect": {
+              "height": 403.5,
+              "width": 504.0,
+              "x": 801.0,
+              "y": 171.0
+            },
+            "view": "Perspective"
+          },
+          {
+            "rect": {
+              "height": 403.5,
+              "width": 504.0,
+              "x": 295.0,
+              "y": 576.5
+            },
+            "view": "ThroughFinger"
+          },
+          {
+            "rect": {
+              "height": 403.5,
+              "width": 504.0,
+              "x": 801.0,
+              "y": 576.5
+            },
+            "view": "SideView"
+          }
+        ],
+        "window": {
+          "height": 1000.0,
+          "width": 1600.0
+        }
+      },
+      "region_error": null,
+      "sidebar_px": [
+        2.0,
+        23.0,
+        295.0,
+        975.0
+      ],
+      "right_dock_px": [
+        1303.0,
+        180.0,
+        295.0,
+        818.0
+      ],
+      "command_input_px": [
+        303.0,
+        91.03125,
+        1294.0,
+        15.96875
+      ],
+      "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: Discret"
+    }
+  },
+  "negative_runtime": {
+    "narrow": {
+      "window": "800x600",
+      "launch": "LAUNCHED",
+      "exit_code": 0,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/narrow/workspace.png",
+      "screenshot_sha256": "5d357dce39182882aaecd92b87ca0f2487cb876129143b7fdb3d5636c32389b3",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/narrow/ui-receipt.json",
+      "receipt_sha256": "1907c9a8880b6978d3d6f33867f85699cea166a9e985457f7ead607a5abb548d",
+      "view_rects": {
+        "Looking Down": [
+          300.0,
+          178.0,
+          249.0,
+          201.0
+        ],
+        "Perspective": [
+          551.0,
+          178.0,
+          249.0,
+          201.0
+        ],
+        "Side View": [
+          551.0,
+          381.0,
+          249.0,
+          201.0
+        ],
+        "Through Finger": [
+          300.0,
+          381.0,
+          249.0,
+          201.0
+        ]
+      },
+      "plan": {
+        "center": {
+          "height": 409.0,
+          "width": 505.0,
+          "x": 295.0,
+          "y": 171.0
+        },
+        "command_input": {
+          "height": 83.0,
+          "width": 505.0,
+          "x": 295.0,
+          "y": 21.0
+        },
+        "left_rail": {
+          "height": 579.0,
+          "width": 295.0,
+          "x": 0.0,
+          "y": 21.0
+        },
+        "menu_bar": {
+          "height": 21.0,
+          "width": 800.0,
+          "x": 0.0,
+          "y": 0.0
+        },
+        "notes": [
+          {
+            "RightDockYielded": {
+              "reason": "NarrowWindow"
+            }
+          }
+        ],
+        "right_dock": null,
+        "status_bar": {
+          "height": 20.0,
+          "width": 505.0,
+          "x": 295.0,
+          "y": 580.0
+        },
+        "toolbar": {
+          "height": 67.0,
+          "width": 505.0,
+          "x": 295.0,
+          "y": 104.0
+        },
+        "views": [
+          {
+            "rect": {
+              "height": 203.5,
+              "width": 251.5,
+              "x": 295.0,
+              "y": 171.0
+            },
+            "view": "LookingDown"
+          },
+          {
+            "rect": {
+              "height": 203.5,
+              "width": 251.5,
+              "x": 548.5,
+              "y": 171.0
+            },
+            "view": "Perspective"
+          },
+          {
+            "rect": {
+              "height": 203.5,
+              "width": 251.5,
+              "x": 295.0,
+              "y": 376.5
+            },
+            "view": "ThroughFinger"
+          },
+          {
+            "rect": {
+              "height": 203.5,
+              "width": 251.5,
+              "x": 548.5,
+              "y": 376.5
+            },
+            "view": "SideView"
+          }
+        ],
+        "window": {
+          "height": 600.0,
+          "width": 800.0
+        }
+      },
+      "region_error": null,
+      "sidebar_px": [
+        2.0,
+        23.0,
+        295.0,
+        575.0
+      ],
+      "right_dock_px": null,
+      "command_input_px": [
+        303.0,
+        91.03125,
+        494.0,
+        15.96875
+      ],
+      "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: Discret"
+    },
+    "expectation": "right dock yielded with RightDockYielded/NarrowWindow note, left rail and command input kept, four viewports present",
+    "narrow_capture": "CAPTURED",
+    "observed_defect": "status bar text overlaps itself at 800x600 (pre-existing L3-007 behavior, not changed by this task)"
+  },
+  "not_captured": [
+    "150% display scaling",
+    "second monitor",
+    "window dragged live by a person",
+    "below-minimum window in the real window (OS min size 720x480 prevents it; covered by egui frame tests only)"
+  ],
+  "checks_run": [
+    "cargo test -p om9-app --lib workbench_regions: 21 passed",
+    "cargo test -p om9-app --test workbench_regions: 8 passed",
+    "cargo test -p om9-app: all passed",
+    "cargo test --workspace: exit 0",
+    "cargo check --workspace --all-targets: exit 0",
+    "cargo build --workspace: exit 0",
+    "cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "cargo fmt --all -- --check: exit 0",
+    "python tools/public_source_audit.py: exit 1, 11721 pre-existing errors in private/untracked trees, 0 in L3-002 paths (see regression.log)",
+    "python tools/validate_m01_spec.py: NOT RUN (tool absent)"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION (not passed)",
+    "items": [
+      {
+        "id": 1,
+        "step": "Launch OpenMatrix9 on Windows at a normal width; confirm the left rail, the four Matrix viewports and (after docking a menu to the right) the right dock are visible and do not overlap.",
+        "reviewer_decision": null
+      },
+      {
+        "id": 2,
+        "step": "Drag the window narrower than about 900 px; confirm the right dock yields, the command input stays visible and is not covered, and the left rail and viewports stay usable.",
+        "reviewer_decision": null
+      },
+      {
+        "id": 3,
+        "step": "Shrink toward the minimum window; confirm a visible message appears when the layout cannot be honored and nothing overlaps (no silent change).",
+        "reviewer_decision": null
+      },
+      {
+        "id": 4,
+        "step": "Hide the right dock and the command line from the menu; confirm the command line cannot be lost.",
+        "reviewer_decision": null
+      },
+      {
+        "id": 5,
+        "step": "Run one command, Undo, Redo, then save and reopen; confirm the regions and the document are unaffected.",
+        "reviewer_decision": null
+      },
+      {
+        "id": 6,
+        "step": "Repeat at 150% display scaling and with a second monitor (not performed by the agent).",
+        "reviewer_decision": null
+      },
+      {
+        "id": 7,
+        "step": "Look at the bottom status line at 800x600: the text overlaps itself in the agent capture; decide whether this is acceptable or a separate L3-007 defect.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "name": null,
+    "date": null,
+    "note": "The implementer does not sign acceptance."
+  },
+  "gate": {
+    "m01_ui": "OPEN",
+    "m00": "NOT_SIGNED",
+    "legal_reuse": "PENDING_HUMAN_M00_APPROVAL"
+  },
+  "remaining": [
+    "Human M01-UI manual verification on Windows (checklist above)",
+    "M00 gate G00-01 sign-off and legal reuse approval (G00-06)",
+    "OM9-L2-01-02 command dispatch/Undo and OM9-L2-01-03 document/scene are not implemented; the CommandInputHost seam adapter only reports the CMD frame as attached",
+    "DPI scaling and multi-monitor behavior",
+    "tools/validate_m01_spec.py and om9.m01.oracle.v1.5 definition are absent locally",
+    "public_source_audit.py fails on pre-existing private/untracked trees"
+  ]
+}

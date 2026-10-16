@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "validated_at": "2026-10-13T19:05:18+00:00",
+  "batch": "rcore00-rust-retained-inputs-sharing-red",
+  "status": "failed_measurement",
+  "goal_complete": false,
+  "rust_tests_passed": 1,
+  "rust_tests_failed": 2,
+  "authored_fixture_files_observed": 4,
+  "successful_owner_jobs_logged": 7,
+  "native_exit_failures": 2,
+  "failure": "DELETE-capable publication guard incompatible with CRT read sharing; source stage now uses read-only held File",
+  "proof_scope": "Regression failure only; no native output or merged-file acceptance",
+  "log": {
+    "path": "build/standalone-validation/retained-input-tests-red-sharing.log",
+    "sha256": "e24f925ea437fdcf4ff3d693a0f95824b6e4aa6345012ef2be2b84e6f0adbee6"
+  },
+  "source_hash_binding": "Initial validator stopped before writing captured source hash receipt; historical failure log only"
+}

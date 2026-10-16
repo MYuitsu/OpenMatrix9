@@ -1,0 +1,211 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-02-02-003",
+  "milestone": "M02",
+  "parent_l2_id": "OM9-L2-02-02",
+  "title": "CPlane Orientation And Origin Change",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-L3-02-02-003",
+    "capability_id": "cap.02-02.cplane-orientation-and-origin-change",
+    "stable_owner_key": "OM9-L2-02-02/cplane-orientation-and-origin-change",
+    "title": "CPlane Orientation And Origin Change",
+    "slug": "cplane-orientation-and-origin-change",
+    "module_id": "OM9-L2-02-02",
+    "tag": "febe",
+    "implementation_role": "interactive_feature",
+    "milestone_id": "M02",
+    "target_milestone": "M02",
+    "delivery": "mainline",
+    "origin_source_taxonomy": "02-rhino5",
+    "goal": "translate/rotate active construction plane",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "CPlane/World coordinates, gốc F4, nhập điểm chính xác, dựng hình theo view.",
+    "parent_exclusions": "UI bố cục bốn view thuộc Matrix Book1.",
+    "depends_on_module_ids": [
+      "OM9-L2-01-03",
+      "OM9-L2-01-08"
+    ],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [],
+    "origin_manual_refs": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          37,
+          43
+        ],
+        "pdf_pages_1based": [
+          45,
+          51
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “CPlane Orientation And Origin Change” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M02: run OpenMatrix9 UI; perform “CPlane Orientation And Origin Change”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M02-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "execution_stage": "E03",
+    "planning_risk": "NORMAL",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT"
+  },
+  "execution_design": {
+    "l3_id": "OM9-L3-02-02-003",
+    "title": "CPlane Orientation And Origin Change",
+    "owner_module_id": "OM9-L2-02-02",
+    "tag": "febe",
+    "risk": "HIGH",
+    "mini_gate_id": "G02-B",
+    "execution_stage": "E03",
+    "positive_case": "Đổi gốc CPlane sang (10,20,0) và quay 30° giữ world geometry không thay đổi",
+    "negative_case": "Đầu vào 3 điểm thẳng hàng hoặc frame singular trả typed error",
+    "algorithm_hint": "Tạo CPlane bằng transform orthonormalize, atomic assignment",
+    "manual_refs_inherited_not_precise": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          37,
+          43
+        ],
+        "pdf_pages_1based": [
+          45,
+          51
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_anchors": [
+      {
+        "path": "crates/qymcad-ui-state/src/navigation.rs",
+        "purpose": "view frames and projection",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/navigation.rs",
+        "blob_sha": "a15d60e48b62bf0ff6103a32e5169480363535b7",
+        "review_state": "CONTENT_READ"
+      },
+      {
+        "path": "crates/qymcad-core/src/feature.rs",
+        "purpose": "plane frame",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/feature.rs",
+        "blob_sha": null,
+        "review_state": "EXISTENCE_NEEDS_LOCAL_SYMBOL_VERIFICATION"
+      },
+      {
+        "path": "crates/qymcad-ui-state/src/scene.rs",
+        "purpose": "world/view transforms",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/scene.rs",
+        "blob_sha": "cf4eb2eb6855507befaaecd1cbfba101c10d0a01",
+        "review_state": "CONTENT_READ"
+      }
+    ],
+    "depends_on_l3_ids": [
+      "OM9-L3-02-02-001"
+    ],
+    "deferred_integration": null,
+    "l4_task_ids": [
+      "OM9-L4-02-02-003-01",
+      "OM9-L4-02-02-003-02",
+      "OM9-L4-02-02-003-03",
+      "OM9-L4-02-02-003-04",
+      "OM9-L4-02-02-003-06"
+    ],
+    "l4_count": 5,
+    "qymcad_symbol_candidate_hints_not_proven_feature_equivalence": "qymcad-core/src/feature.rs: BasePlane, SketchPlane; qymcad-ui-state/src/navigation.rs: ZoomAt/OrbitAbout"
+  },
+  "task_ids": [
+    "OM9-L4-02-02-003-01",
+    "OM9-L4-02-02-003-02",
+    "OM9-L4-02-02-003-03",
+    "OM9-L4-02-02-003-04",
+    "OM9-L4-02-02-003-06"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-L4-02-02-003-01",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-003 - CPlane Orientation And Origin Change/L4-01 - Source Audit/l4.json"
+    },
+    {
+      "id": "OM9-L4-02-02-003-02",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-003 - CPlane Orientation And Origin Change/L4-02 - API Contract and Test Design/l4.json"
+    },
+    {
+      "id": "OM9-L4-02-02-003-03",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-003 - CPlane Orientation And Origin Change/L4-03 - Implementation/l4.json"
+    },
+    {
+      "id": "OM9-L4-02-02-003-04",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-003 - CPlane Orientation And Origin Change/L4-04 - Integration/l4.json"
+    },
+    {
+      "id": "OM9-L4-02-02-003-06",
+      "file": "M02 - Viewport, Gumball/L2-02-02 - Febe Cplanes And Coordinate Input/L3-003 - CPlane Orientation And Origin Change/L4-06 - Acceptance Test/l4.json"
+    }
+  ],
+  "proposed_fixture": {
+    "fixture_id": "G02-B-02-02-003",
+    "l3_id": "OM9-L3-02-02-003",
+    "fixture_status": "REFERENCE_BLUEPRINT_NOT_RUNTIME",
+    "positive": {
+      "setup": "Đổi gốc CPlane sang (10,20,0) và quay 30° giữ world geometry không thay đổi",
+      "expected_kind": "geometry_or_state_contract",
+      "comparison": "exact_or_near_after_M01_tolerance_is_resolved"
+    },
+    "negative": {
+      "setup": "Đầu vào 3 điểm thẳng hàng hoặc frame singular trả typed error",
+      "expected_kind": "typed_error_or_unchanged_state"
+    },
+    "algorithm_and_coverage": "Tạo CPlane bằng transform orthonormalize, atomic assignment",
+    "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-06",
+  "milestone": "AFTER",
+  "title": "06-febe-clayoo-subd-primitive-generators",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Clayoo SubD primitives.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/06-febe-clayoo-subd-primitive-generators/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-06",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/06-febe-clayoo-subd-primitive-generators/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/06-febe-clayoo-subd-primitive-generators/",
+    "scope": "Clayoo SubD primitives.",
+    "exclude": "Toàn bộ hoãn; không chặn NURBS jewelry MVP.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          2,
+          50
+        ],
+        "pdf_pages_1based": [
+          8,
+          56
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/06-febe-clayoo-subd-primitive-generators/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-06-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-06 - 06-febe-clayoo-subd-primitive-generators/L3-001 - Clayoo Box And Plane Generators/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-06-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-06 - 06-febe-clayoo-subd-primitive-generators/L3-002 - Clayoo Sphere Quad And Polygonal/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-06-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-06 - 06-febe-clayoo-subd-primitive-generators/L3-003 - Clayoo Cylinder Cone Generators/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-06-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-06 - 06-febe-clayoo-subd-primitive-generators/L3-004 - Clayoo Shape Viewport Control Handles/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-06-005",
+      "file": "AFTER - Post-Release Extensions/L2-09-06 - 06-febe-clayoo-subd-primitive-generators/L3-005 - Clayoo Subdivision Level Preview/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "oracle_schema": "om9.m01.oracle.v1.5",
+  "oracle_schema_note": "no local definition of om9.m01.oracle.v1.5 exists in this repository; the string is carried as a field only",
+  "l3": "OM9-L3-01-01-002",
+  "l4": "OM9-L4-01-01-002-02",
+  "case": "workbench-docking-regions-positive",
+  "source": "authored for the OM9 standalone shell; every number below is hand-computed from the documented constants (left rail 300, right column 300, command line 90, menu bar 21, toolbar 67, status 20, view gap 2) and NOT copied from program output",
+  "status": "RUNTIME_DRIVEN_BY_TEST",
+  "positive_oracle": "Show left rail, four viewport center region and optional right properties dock",
+  "rect_format": "[x, y, width, height] in window pixels, origin top-left",
+  "view_order": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+  "cases": [
+    {
+      "id": "left-rail-four-views-right-dock-1600x1000",
+      "kind": "positive",
+      "window": [1600, 1000],
+      "layout": { "dock_right": ["main-menu"] },
+      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+      "expect": {
+        "menu_bar": [0, 0, 1600, 21],
+        "left_rail": [0, 21, 300, 979],
+        "right_dock": [1300, 178, 300, 822],
+        "command_input": [300, 21, 1300, 90],
+        "toolbar": [300, 111, 1300, 67],
+        "status_bar": [300, 980, 1000, 20],
+        "center": [300, 178, 1000, 802],
+        "views": {
+          "LookingDown": [300, 178, 499, 400],
+          "Perspective": [801, 178, 499, 400],
+          "ThroughFinger": [300, 580, 499, 400],
+          "SideView": [801, 580, 499, 400]
+        },
+        "notes": []
+      }
+    },
+    {
+      "id": "no-right-dock-1280x900",
+      "kind": "positive",
+      "window": [1280, 900],
+      "layout": {},
+      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+      "expect": {
+        "menu_bar": [0, 0, 1280, 21],
+        "left_rail": [0, 21, 300, 879],
+        "right_dock": null,
+        "command_input": [300, 21, 980, 90],
+        "toolbar": [300, 111, 980, 67],
+        "status_bar": [300, 880, 980, 20],
+        "center": [300, 178, 980, 702],
+        "views": {
+          "LookingDown": [300, 178, 489, 350],
+          "Perspective": [791, 178, 489, 350],
+          "ThroughFinger": [300, 530, 489, 350],
+          "SideView": [791, 530, 489, 350]
+        },
+        "notes": []
+      }
+    },
+    {
+      "id": "one-maximized-view-1280x900",
+      "kind": "positive",
+      "window": [1280, 900],
+      "layout": {},
+      "views": ["Perspective"],
+      "expect": {
+        "center": [300, 178, 980, 702],
+        "views": { "Perspective": [300, 178, 980, 702] },
+        "right_dock": null,
+        "notes": []
+      }
+    },
+    {
+      "id": "smallest-usable-window-560x286",
+      "kind": "positive",
+      "window": [560, 286],
+      "layout": {},
+      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+      "expect": {
+        "left_rail": [0, 21, 240, 265],
+        "right_dock": null,
+        "command_input": [240, 21, 320, 58],
+        "toolbar": [240, 79, 320, 67],
+        "status_bar": [240, 266, 320, 20],
+        "center": [240, 146, 320, 120],
+        "views": {
+          "LookingDown": [240, 146, 159, 59],
+          "Perspective": [401, 146, 159, 59],
+          "ThroughFinger": [240, 207, 159, 59],
+          "SideView": [401, 207, 159, 59]
+        },
+        "notes": ["LeftRailShrunk"]
+      }
+    }
+  ]
+}

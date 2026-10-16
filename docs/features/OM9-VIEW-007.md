@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-VIEW-006](../../OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-view-006-zoom-extents.md) · [OM9-VIEW-007](../../OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-view-007-zoom-selected.md) · [OM9-VIEWPORT-001](../../OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-viewport-001-four-viewports-c-plane-f4.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-VIEW-007 — Zoom Selected
 
 Source spec: `ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-view-007-zoom-selected.md`. Matrix8 Book1, printed92 / PDF102 was verified locally; the section ends on that same page before Zoom Window. PDF103 was checked to establish continuation boundaries. OM9-VIEW-006 Zoom Extents is also wholly described on PDF102.

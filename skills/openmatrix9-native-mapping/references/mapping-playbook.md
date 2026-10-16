@@ -1,6 +1,6 @@
 # Address-driven reading
 
-Paths are relative to the selected OpenMatrix9 checkout. Read original Guide files under `ref/matrix9/Matrix90_Codex_Guide_MD/` for details, only at the applicable stage.
+Paths are relative to the selected OpenMatrix9 checkout. Read original Guide files under `Matrix90_Codex_Guide_MD/` for details, only at the applicable stage.
 
 | Need | Document |
 |---|---|
@@ -23,8 +23,8 @@ Do not subtract ImageBase from these recovered VAs. Only if another tool explici
 Find the named procedure, then candidate Ghidra occurrences:
 
 ```powershell
-rg -n 'tmrProfileBrowser_Timer' ref/matrix9/vb6-lite/Matrix90/frmMaster.frm
-rg -n -m 8 'FUN_014de3a0' ref/matrix9/ghidra/Matrix90.exe.c
+rg -n 'tmrProfileBrowser_Timer' <registered-vb6-root>/frmMaster.frm
+rg -n -m 8 'FUN_014de3a0' <registered-ghidra-export>
 ```
 
 Inspect the declaration and body at the returned definition, not an arbitrary first hit. Extract a bounded section with line numbers; verify function boundaries including braces inside strings/comments. If using a script, require lexical awareness rather than a naive brace count. Follow a callee only to answer the current unresolved question.

@@ -1,0 +1,18 @@
+{
+  "template_only": true,
+  "do_not_treat_as_signed_decision": true,
+  "gate_id": null,
+  "status": "NOT_TESTED",
+  "decision": "UNDECIDED",
+  "human_reviewer": null,
+  "signed_at": null,
+  "signature_reference": null,
+  "source_sha": null,
+  "build_sha256": null,
+  "evidence_index": [],
+  "critical_blockers": [],
+  "approved_waivers_noncritical_only": [],
+  "published_scope_and_known_gaps": null,
+  "rollback_or_recovery_evidence": null,
+  "baseline_fixture_hashes": []
+}

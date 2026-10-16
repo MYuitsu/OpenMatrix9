@@ -1,12 +1,15 @@
 # OM9-FILE-012 — quy tắc 3DM đã được duyệt
 
+`OM9-FILE-012` là ID nội bộ legacy, không thuộc catalog607 và không có trang FILE-012 trong v2. Đọc RCORE-10 v2 và exact Import/Export IDs OM9-FILE-004/001; không yêu cầu router tìm một trang FILE-012 không tồn tại.
+
+
 Người dùng đồng ý ghi quy tắc này vào skill ngày 2026-10-06, sau khi đã triển khai và kiểm chứng. Đây là quyết định nghiệp vụ OpenMatrix9. Trước đây importer từ chối block; hành vi hiện tại bung block nhúng thành hình học CAD/mesh tương ứng.
 
 - Import block nhúng bằng cách giải định nghĩa và bung đệ quy các instance, kể cả block lồng nhau. Ghép transform theo thứ tự cha * con; áp dụng đúng vị trí, xoay, scale không đều và phản chiếu. Giữ hình học CAD, không tự chuyển CAD thành mesh để né lỗi chuyển đổi.
 - Hình học thuộc định nghĩa chỉ được nhập thông qua các instance đang sử dụng nó. Không nhập thêm bản gốc của định nghĩa vào cấp trên cùng và không làm mất các bản đặt khác nhau của cùng một block.
 - Giữ màu kế thừa từ block cha khi đối tượng dùng màu từ parent; kết hợp trạng thái hiển thị/khóa của cha và con. Xuất hình học đã bung; chưa giữ cấu trúc định nghĩa/tham chiếu block của Rhino. Phải nêu rõ giới hạn này khi người dùng cần chỉnh sửa block tiếp trong Rhino.
 - Định nghĩa hoặc thành viên bị thiếu, block ngoài không có hình học nhúng, vòng lặp định nghĩa và transform không hợp lệ phải báo lỗi trước khi sửa document. Không bỏ qua block lỗi rồi báo import thành công.
-- Nghiệm thu phải có import → export Rhino 5 → import lại trong FreeCAD, kiểm tra số đối tượng, metadata, topology hợp lệ, bounds hình học và độ lệch diện tích/thể tích. Kiểm tra thêm lưu, đóng và mở lại FCStd giữ đủ hình học CAD hợp lệ. Dùng các file 3DM người dùng cung cấp làm fixture bất biến; lưu output ở thư mục test/build riêng.
+- Nghiệm thu phải có import → export Rhino 5 → import lại trong OM9 standalone, kiểm tra số đối tượng, metadata, topology hợp lệ, bounds hình học và độ lệch diện tích/thể tích. Kiểm tra thêm lưu, đóng và mở lại .om9 giữ đủ hình học CAD hợp lệ. Dùng các file 3DM người dùng cung cấp làm fixture bất biến; lưu output ở thư mục test/build riêng.
 - Với NURBS phức tạp, dùng tích phân thích nghi cho diện tích/thể tích và bounds hình học thay vì chỉ dựa vào `Shape.Volume` hoặc bounds từ tessellation. Không nới ngưỡng nghiệm thu chỉ để làm test qua. Bằng chứng archive version 5/50 không thay thế việc kiểm tra trong ứng dụng Rhino 5.
 
 Trong checkout OpenMatrix9, đọc `docs/features/3dm-support-matrix.md` để xác định loại dữ liệu đã hỗ trợ và giới hạn còn lại; đọc `docs/validation/2026-10-06-3dm-blocks.md` để đối chiếu bằng chứng. Không suy từ hai fixture đạt test rằng mọi chức năng openNURBS đã được hỗ trợ. Các tài liệu này là đường dẫn tương đối với checkout, không phải thư mục skill đã cài.
@@ -21,3 +24,7 @@ Người dùng đồng ý lưu bổ sung này ngày 2026-10-09, sau kiểm chứ
 - CAD có display mesh vẫn được phân loại là CAD; không biến CAD thành mesh để copy hoặc để né xử lý hình học. Mesh thực và point cloud là các loại dữ liệu riêng. Xét khả dụng/phân loại bằng metadata, không đọc toàn bộ point arrays hoặc tessellation chỉ để bật lệnh. Khi thực sự Copy mesh/cloud, vẫn phải tuần tự hóa dữ liệu hình học cần thiết.
 
 Khi bảo trì hoặc kiểm tra, đọc `docs/validation/2026-10-09-modeling-phase-1-clipboard.md` và bộ bằng chứng tại `docs/validation/modeling-phase-1-clipboard/` trong checkout. Bằng chứng này chỉ nghiệm thu phần mở rộng Phase 1; không đóng Phase 2–5 hay chứng minh full openNURBS.
+
+## Scope v2
+
+Các kết quả Phase1/FreeCAD và flatten-only limits kể trên là historical baseline. V2 RCORE-10/OM9-FILE-012 quyết định read/edit/retain/export và block instance representation mới; không giới hạn target bằng old importer chỉ để tái dùng code. Replay current-state 3DM, cold .om9, clipboard và metadata semantics trên executable mới.

@@ -1,0 +1,226 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-01-07-007",
+  "milestone": "M02",
+  "parent_l2_id": "OM9-L2-01-07",
+  "title": "Generic Translation Rotation Scale Handles",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-L3-01-07-007",
+    "capability_id": "cap.01-07.generic-translation-rotation-scale-handles",
+    "stable_owner_key": "OM9-L2-01-07/generic-translation-rotation-scale-handles",
+    "title": "Generic Translation Rotation Scale Handles",
+    "slug": "generic-translation-rotation-scale-handles",
+    "module_id": "OM9-L2-01-07",
+    "tag": "febe",
+    "implementation_role": "interactive_feature",
+    "milestone_id": "M02",
+    "target_milestone": "M02",
+    "delivery": "mainline",
+    "origin_source_taxonomy": "01-cad-base",
+    "goal": "handle placement/drag feedback, not transforms implementation",
+    "owner_rule": "This L3 exclusively owns the described capability within its parent L2; any other menu/panel calls it through the parent service contract.",
+    "parent_scope": "Picking object/face/edge/vertex, selection set, gizmo hooks và hover hit-tests.",
+    "parent_exclusions": "Không tự tạo F6/Matrix Gumball UI hoặc Clayoo sub-object modes.",
+    "depends_on_module_ids": [
+      "OM9-L2-01-03",
+      "OM9-L2-01-06"
+    ],
+    "reuses_or_dispatches_to_module_ids": [],
+    "downstream_consumers": [
+      "picking-and-selection-engine"
+    ],
+    "origin_manual_refs": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          25,
+          30
+        ],
+        "pdf_pages_1based": [
+          33,
+          38
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_command": null,
+    "api_contract": {
+      "state": "PROPOSED_NOT_VERIFIED_IN_QYMCAD",
+      "input": "Typed command/document/geometry data and any selection or builder parameters required by this feature.",
+      "output": "Validated operation result and observable document changes; never silently claim success.",
+      "edge_cases": "Invalid/empty geometry, cancellation and tolerance/pathological input must be handled explicitly.",
+      "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
+    },
+    "acceptance_tests_auto": [
+      "Automated: valid input exercises “Generic Translation Rotation Scale Handles” without panic, leaked handle or stale scene reference.",
+      "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
+      "Automated: each operation changes only its documented state and supports undo/cancel where applicable."
+    ],
+    "acceptance_tests_manual": [
+      "Manual gate M02: run OpenMatrix9 UI; perform “Generic Translation Rotation Scale Handles”; observe preview/feedback and commit/cancel behavior.",
+      "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
+    ],
+    "requires_manual_test": true,
+    "manual_test_gate": "M02-UI",
+    "invariants": [
+      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No implementation may be assumed from QymCAD until source paths are checked.",
+      "Existing document IDs/layer flags/units/history remain consistent after operation.",
+      "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
+    ],
+    "qymcad_source_paths_verified": [],
+    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
+    "execution_stage": "E03",
+    "planning_risk": "NORMAL",
+    "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT"
+  },
+  "execution_design": {
+    "l3_id": "OM9-L3-01-07-007",
+    "title": "Generic Translation Rotation Scale Handles",
+    "owner_module_id": "OM9-L2-01-07",
+    "tag": "febe",
+    "risk": "CRITICAL",
+    "mini_gate_id": "G02-A",
+    "execution_stage": "E03",
+    "positive_case": "Gizmo Move/Rotate/Scale xuất hiện theo bounding box, trục đúng world axes",
+    "negative_case": "Object không hợp lệ/locked không tạo handle dùng được",
+    "algorithm_hint": "Tính gizmo frame từ selection; hoạt hình drag hiển thị preview, không mutate object tại bước này",
+    "manual_refs_inherited_not_precise": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          25,
+          30
+        ],
+        "pdf_pages_1based": [
+          33,
+          38
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "source_anchors": [
+      {
+        "path": "crates/qymcad-pick/src/lib.rs",
+        "purpose": "Pure picking entry points",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-pick/src/lib.rs",
+        "blob_sha": "45d0e13b3d0764d3042f2261189aac5e3b7fc688",
+        "review_state": "CONTENT_READ"
+      },
+      {
+        "path": "crates/qymcad-pick/src/body_hits.rs",
+        "purpose": "body bbox/edge hit",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-pick/src/body_hits.rs",
+        "blob_sha": "1e1c79df869909d157021396578a551c0d955a89",
+        "review_state": "CONTENT_READ"
+      },
+      {
+        "path": "crates/qymcad-ui-state/src/selection.rs",
+        "purpose": "selection state",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/selection.rs",
+        "blob_sha": "b34e6b62be915e4174f144fcbebf736a230a2330",
+        "review_state": "CONTENT_READ"
+      },
+      {
+        "path": "crates/qymcad-core/src/refs.rs",
+        "purpose": "persistent geometry refs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/refs.rs",
+        "blob_sha": "1de4b60ad153267ac98b46330b8880da1ce90485",
+        "review_state": "CONTENT_READ"
+      }
+    ],
+    "depends_on_l3_ids": [
+      "OM9-L3-01-07-002"
+    ],
+    "deferred_integration": null,
+    "l4_task_ids": [
+      "OM9-L4-01-07-007-01",
+      "OM9-L4-01-07-007-02",
+      "OM9-L4-01-07-007-03",
+      "OM9-L4-01-07-007-04",
+      "OM9-L4-01-07-007-05",
+      "OM9-L4-01-07-007-06"
+    ],
+    "l4_count": 6,
+    "qymcad_symbol_candidate_hints_not_proven_feature_equivalence": "qymcad-pick/src/body_hits.rs: body_bbox_hit, edge_at; qymcad-ui-state/src/selection.rs: Sel, SketchSelection"
+  },
+  "task_ids": [
+    "OM9-L4-01-07-007-01",
+    "OM9-L4-01-07-007-02",
+    "OM9-L4-01-07-007-03",
+    "OM9-L4-01-07-007-04",
+    "OM9-L4-01-07-007-05",
+    "OM9-L4-01-07-007-06"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-L4-01-07-007-01",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-007 - Generic Translation Rotation Scale Handles/L4-01 - Source Audit/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-07-007-02",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-007 - Generic Translation Rotation Scale Handles/L4-02 - API Contract and/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-07-007-03",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-007 - Generic Translation Rotation Scale Handles/L4-03 - Implementation/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-07-007-04",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-007 - Generic Translation Rotation Scale Handles/L4-04 - Integration/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-07-007-05",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-007 - Generic Translation Rotation Scale Handles/L4-05 - Regression and/l4.json"
+    },
+    {
+      "id": "OM9-L4-01-07-007-06",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-007 - Generic Translation Rotation Scale Handles/L4-06 - Acceptance Test/l4.json"
+    }
+  ],
+  "proposed_fixture": {
+    "fixture_id": "G02-A-01-07-007",
+    "l3_id": "OM9-L3-01-07-007",
+    "fixture_status": "REFERENCE_BLUEPRINT_NOT_RUNTIME",
+    "positive": {
+      "setup": "Gizmo Move/Rotate/Scale xuất hiện theo bounding box, trục đúng world axes",
+      "expected_kind": "geometry_or_state_contract",
+      "comparison": "exact_or_near_after_M01_tolerance_is_resolved"
+    },
+    "negative": {
+      "setup": "Object không hợp lệ/locked không tạo handle dùng được",
+      "expected_kind": "typed_error_or_unchanged_state"
+    },
+    "algorithm_and_coverage": "Tính gizmo frame từ selection; hoạt hình drag hiển thị preview, không mutate object tại bước này",
+    "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  }
+}

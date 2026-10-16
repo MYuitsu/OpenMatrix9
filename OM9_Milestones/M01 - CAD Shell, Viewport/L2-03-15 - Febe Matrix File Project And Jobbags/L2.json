@@ -1,0 +1,97 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-15",
+  "milestone": "M01",
+  "title": "Febe Matrix File Project And Jobbags",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "File menu, native Open/Save, Import .3dm action, Job Bags/Project Manager",
+  "definition": {
+    "module_id": "OM9-L2-03-15",
+    "milestone_id": "M01",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "scope": "File menu, native Open/Save, Import .3dm action, Job Bags/Project Manager",
+    "exclude": "Chỉ binding UI; .3dm reader là 01/13.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          48,
+          56
+        ],
+        "pdf_pages_1based": [
+          58,
+          66
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          79,
+          86
+        ],
+        "pdf_pages_1based": [
+          89,
+          96
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-03",
+      "OM9-L2-01-12",
+      "OM9-L2-01-01"
+    ],
+    "downstream_contracts": [
+      "matrix-project-manager-jobbags",
+      "file-menu-import-action"
+    ],
+    "early_slices": [
+      "M01: visible Projects panel, one Job Bag and Create/Save/Load minimal, File menu New/Open/Save.",
+      "M03: enable Import .3dm menu action using importer owner; M04: builder-aware Job Bag state if needed."
+    ],
+    "manual_test_required": true,
+    "acceptance_gate": "M01-UI",
+    "l3_count": 9
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-15-001",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-001 - Matrix File New Open Save Actions/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-15-002",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-002 - Matrix File Import Export Entrypoints/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-15-003",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-003 - Project Manager Project Row List/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-15-004",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-004 - Jobbag Slot Grid And Thumbnail/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-15-005",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-005 - Jobbag Capture Current Selection/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-15-006",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-006 - Jobbag Restore And Insert/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-15-007",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-007 - Master Jobbag Document Snapshot/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-15-008",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-008 - Project Notes And Basic Metadata/l3.json"
+    },
+    {
+      "id": "OM9-L3-03-15-009",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-009 - Project Manager Dock Interaction/l3.json"
+    }
+  ]
+}

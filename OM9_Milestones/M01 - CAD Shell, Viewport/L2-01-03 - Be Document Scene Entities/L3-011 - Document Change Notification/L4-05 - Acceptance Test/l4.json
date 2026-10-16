@@ -1,0 +1,334 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-01-03-011-05",
+  "milestone": "M01",
+  "parent_l3_id": "OM9-L3-01-03-011",
+  "owner_l2_id": "OM9-L2-01-03",
+  "title": "Hồi quy, thủ công và bàn giao — Document Change Notification",
+  "planning_state": "NOT_STARTED",
+  "task": {
+    "task_id": "OM9-L4-01-03-011-05",
+    "parent_l3_id": "OM9-L3-01-03-011",
+    "owner_module_id": "OM9-L2-01-03",
+    "title": "Hồi quy, thủ công và bàn giao — Document Change Notification",
+    "milestone_id": "M01",
+    "execution_stage": "E01",
+    "role": "ACCEPTANCE",
+    "l3_risk": "NORMAL",
+    "owner_tag": "be",
+    "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+    "m00_gate_required": true,
+    "manual_test_required": false,
+    "manual_refs_from_l3": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          22,
+          34
+        ],
+        "pdf_pages_1based": [
+          32,
+          44
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          44,
+          56
+        ],
+        "pdf_pages_1based": [
+          54,
+          66
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "manual_ref_precision": "PARENT_L2_RANGE_REFERENCE_NOT_COMMAND_EXACT",
+    "purpose": "observable scene/layer/object modification events",
+    "positive_case": "Them entity + doi layer phat mot ordered batch event voi revision tang",
+    "negative_case": "Observer khong duoc thay doi document trong callback lam reentrant mutation",
+    "steps": [
+      "Chạy test target được tạo ở L4-02 và full regression của owner; ghi command/stdout/stderr/exit code thật, đối chiếu PASS `Them entity + doi layer phat mot ordered batch event voi revision tang`.",
+      "Chạy negative case `Observer khong duoc thay doi document trong callback lam reentrant mutation` và kiểm tra rollback/không leak handle, không drop scene refs.",
+      "Đo kiểm headless geometry/API và so sánh JSON fixture/roundtrip với expected độc lập.",
+      "Chạy `cargo test --workspace` và `cargo check --workspace --all-targets` nếu dùng QymCAD fork; ghi kết quả thực hoặc BLOCKED_ENV. Khóa evidence với digest; bàn giao reviewer, không tự ký nghiệm thu."
+    ],
+    "microsteps": [],
+    "depends_on_task_ids": [
+      "OM9-L4-01-03-011-03"
+    ],
+    "source_paths": [
+      {
+        "path": "crates/qymcad-core/src/model.rs",
+        "purpose": "Project/Body/IDs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/model.rs",
+        "blob_sha": "74d971c5f0211bf66f96ae673128189f334ffb20",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-core/src/names.rs",
+        "purpose": "persistent named geometry",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/names.rs",
+        "blob_sha": "fb2708755711f49c11f6b431b84d9881a41ae08b",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-core/src/feature.rs",
+        "purpose": "timeline structure",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/feature.rs",
+        "blob_sha": null,
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      }
+    ],
+    "provisional_decision": "ADAPT",
+    "proposed_code_owner": "OM9-L2-01-03",
+    "test_oracle": "Them entity + doi layer phat mot ordered batch event voi revision tang",
+    "negative_oracle": "Observer khong duoc thay doi document trong callback lam reentrant mutation",
+    "outputs": [
+      "implementation/evidence/M01/OM9-L3-01-03-011/OM9-L4-01-03-011-05.regression.log"
+    ],
+    "stop_conditions": [
+      "M00 not PASS => BLOCKED_M00",
+      "Wrong upstream commit SHA => BLOCKED_SOURCE",
+      "Prerequisite task missing PASS => BLOCKED_DEPENDENCY",
+      "No independent fixture/test harness => BLOCKED_FIXTURE",
+      "Missing Rust/OCCT/GPU/Windows => BLOCKED_ENV",
+      "License/fork permission not approved => BLOCKED_APPROVAL"
+    ],
+    "approval_required": false,
+    "mini_gate_id": "G01-B"
+  },
+  "implementation_contract": {
+    "target_milestone": "M01",
+    "checkout_repo": "QymIs-Tech/QymCAD",
+    "required_source_paths": [
+      "crates/qymcad-core/src/model.rs",
+      "crates/qymcad-core/src/names.rs",
+      "crates/qymcad-core/src/feature.rs"
+    ],
+    "preconditions": {
+      "m00_pass": true,
+      "stage": "E01",
+      "dependencies_pass": true,
+      "owner_legal_approved": true
+    },
+    "positive_expected": "Them entity + doi layer phat mot ordered batch event voi revision tang",
+    "negative_expected": "Observer khong duoc thay doi document trong callback lam reentrant mutation",
+    "fixture_name": "OM9-L3-01-03-011",
+    "review": {
+      "human_required": false,
+      "reason": "Automated/test reviewer only"
+    },
+    "output_paths": [
+      "implementation/evidence/M01/OM9-L3-01-03-011/OM9-L4-01-03-011-05.regression.log"
+    ],
+    "test_commands_preview": [
+      "python tools/validate_m01_spec.py",
+      "cargo test --workspace",
+      "cargo check --workspace --all-targets"
+    ],
+    "note": "Commands are to be run in the actual implementation/fork workspace if available; spec workspace has no Rust application source. No command is evidence until captured.",
+    "required_oracle_schema": "om9.m01.oracle.v1.5",
+    "global_e01_barrier_required": false
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "agent_runbook_markdown": "# OM9-L4-01-03-011-05 — Hồi quy, thủ công và bàn giao — Document Change Notification\n\n**Trạng thái:** `NOT_RUN` · **Stage:** `E01` · **Role:** `ACCEPTANCE` · **L3:** `OM9-L3-01-03-011` · **Owner:** `OM9-L2-01-03` · **Manual gate:** `False`.\n\n## 0. Chặn thực thi trước tiên\n\n- Bắt buộc `python tools/validate_m00_execution.py --require-ready` **PASS thật** trước khi sửa mã M01. Nếu không: ghi `BLOCKED_M00` rồi dừng.\n- Repo QymCAD upstream chỉ để nghiên cứu tại `746a17f127897e921a57118b6caad08968602bf5`; chưa có quyền sao chép code nếu thiếu phê duyệt G00-06. Không tự `git checkout main`.\n- Mỗi phiên chỉ thực hiện **một** L4 `OM9-L4-01-03-011-05`. Đọc `M01 - CAD Shell, Viewport/L1.json` và parent `l3_execution.json`.\n- Với E02: chỉ được chạy nếu mini-gate hiện tại đã mở và toàn bộ dependency verified. Không dùng barrier E01 toàn cục. Spec này **không** kèm mã nguồn OpenMatrix9; không tự báo build PASS.\n\n## 1. Phụ thuộc\n\n- `OM9-L4-01-03-011-03`\n\n## 2. Nguồn mã ghim — bắt buộc mở trước\n\n- `crates/qymcad-core/src/model.rs` — Project/Body/IDs; **CONTENT_READ_AT_PINNED_SHA**\n- `crates/qymcad-core/src/names.rs` — persistent named geometry; **CONTENT_READ_AT_PINNED_SHA**\n- `crates/qymcad-core/src/feature.rs` — timeline structure; **CONTENT_READ_AT_PINNED_SHA**\n\nNếu có `CANDIDATE_RECHECK_LOCAL` thì phải kiểm file thực tồn tại và symbol/line trước khi áp dụng. Nếu QymCAD chưa hỗ trợ mục tiêu, ghi `ADD`, **không** tự gán `REUSE`.\n\n## 3. Hợp đồng đúng của nhiệm vụ\n\n- **Mục tiêu:** observable scene/layer/object modification events.\n- **PASS kỳ vọng (chưa chạy):** Them entity + doi layer phat mot ordered batch event voi revision tang.\n- **Negative bắt buộc:** Observer khong duoc thay doi document trong callback lam reentrant mutation.\n- **Ranh giới:** chỉ sửa owner `OM9-L2-01-03` và các adapter được phép; không nhân đôi backend trong menu/panel Matrix.\n- **Manual:** các trang trong canonical `l3.json` phần lớn là phạm vi L2, **chưa** chứng minh đúng từng lệnh Matrix 9.\n\n## 4. Các bước triển khai chính xác\n\n1. Chạy test target được tạo ở L4-02 và full regression của owner; ghi command/stdout/stderr/exit code thật, đối chiếu PASS `Them entity + doi layer phat mot ordered batch event voi revision tang`.\n2. Chạy negative case `Observer khong duoc thay doi document trong callback lam reentrant mutation` và kiểm tra rollback/không leak handle, không drop scene refs.\n3. Đo kiểm headless geometry/API và so sánh JSON fixture/roundtrip với expected độc lập.\n4. Chạy `cargo test --workspace` và `cargo check --workspace --all-targets` nếu dùng QymCAD fork; ghi kết quả thực hoặc BLOCKED_ENV. Khóa evidence với digest; bàn giao reviewer, không tự ký nghiệm thu.\n\n## 5. Lệnh có thể dùng (không mặc định đã chạy)\n\n```bash\npython tools/validate_m01_spec.py\npython tools/next_m01_task.py\npython tools/m01_init_evidence.py OM9-L4-01-03-011-05\n# Trong môi trường thực, chạy lệnh với capture (ví dụ):\npython tools/m01_capture.py --task OM9-L4-01-03-011-05 --cwd vendor-research/QymCAD --label sha -- git rev-parse HEAD\n```\n\nNếu thao tác thay đổi OpenMatrix9 Rust source thì capture phải chạy trong workspace implementation/fork thật. Lệnh `cargo test --workspace` và `cargo check --workspace --all-targets` chỉ thực thi ở workspace có Cargo.toml, không thử giả trong thư mục spec.\n\n## 6. Artifacts yêu cầu\n\n- `implementation/evidence/M01/OM9-L3-01-03-011/OM9-L4-01-03-011-05.regression.log`\n- Evidence: `implementation/evidence/M01/OM9-L3-01-03-011/OM9-L4-01-03-011-05.evidence.json` (bao gồm source SHA, thời gian UTC, OS, lệnh thật, exit code, stdout/stderr SHA256, expected, actual, digest của sản phẩm, reviewer).\n\n## 7. Nghiệm thu và dừng\n\n- Không thể hoàn thành chỉ với các đường dẫn GitHub; cần thử nghiệm và bằng chứng tại máy.\n- Nếu test sai kỳ vọng: `FAIL`; thiếu fixture `BLOCKED_FIXTURE`; thiếu môi trường `BLOCKED_ENV`.\n- **PASS chỉ khi test tự động/artefact đã được đối chiếu độc lập; không tự đoán kết quả.**\n- Sau khi viết evidence và chạy `python tools/validate_m01_execution.py`, **dừng phiên**. Không tự chuyển nhiệm vụ kế tiếp.\n\n**v0.15 mini-gate:** `G01-B`. Chỉ thực hiện khi các mini-gate trước VERIFIED_PASS; dùng `python tools/next_m01_task.py`. Không dựa trên raw status.\n\n## Nguồn tham chiếu bắt buộc đối chiếu (Matrix9 / Rhino 5) — v0.16\n\n**Trạng thái bổ sung:** `requirements_only_not_runtime_evidence` — chỉ là yêu cầu đối chiếu, không phải nghiệm thu.\n\n**Trọng tâm đối chiếu:** Notification phải observable và không churn; kiểm cả trường hợp no-op.\n\n### Chương Rhino 5 core phải đọc trước\n\n- `RCORE-04` — Command engine và vòng đời tương tác · Guide PDF 11-23 / in 3-15 · fixture đại diện `RCORE-04.T01, RCORE-04.T02, RCORE-04.T04, RCORE-04.T05, RCORE-04.T08`\n  - Help chính thức: [Undo / Redo](https://docs.mcneel.com/rhino/5/help/en-us/commands/undo.htm); [Aliases](https://docs.mcneel.com/rhino/5/help/en-us/options/aliases.htm); [Rhino scripting / command macros](https://docs.mcneel.com/rhino/5/help/en-us/information/rhinoscripting.htm)\n  - Capability: `RCORE-04.C01, RCORE-04.C02, RCORE-04.C03, RCORE-04.C04, RCORE-04.C05, RCORE-04.C06, RCORE-04.C07, RCORE-04.C08`\n- `RCORE-09` — Associative History và dependency identity · Guide PDF 98 / in 90 (chỉ ghi chú dimension) · fixture đại diện `RCORE-09.T01, RCORE-09.T03, RCORE-09.T04, RCORE-09.T05, RCORE-09.T08, RCORE-09.T11, RCORE-09.T12`\n  - Help chính thức: [History / HistoryUpdate / HistoryPurge](https://docs.mcneel.com/rhino/5/help/en-us/commands/history.htm); [Loft (history-enabled example)](https://docs.mcneel.com/rhino/5/help/en-us/commands/loft.htm)\n  - Capability: `RCORE-09.C01, RCORE-09.C02, RCORE-09.C03, RCORE-09.C04, RCORE-09.C05, RCORE-09.C06, RCORE-09.C07, RCORE-09.C08`\n\n### Nguồn Matrix9 đã index phải mở (private reference, không copy)\n\n- `Matrix/UserInterface/ObjectActionsEdit.cs` (Matrix (managed plugin), `ObjectActionsEdit`, `PATH_INDEXED_SYMBOL_CANDIDATE`) — object change notification precedent\n  - Vai trò nguồn: object property editor. Object property/action editor with its selection companion ObjectActionSelection.cs and ObjectSelectionWatcher.cs (managed observation of the Rhino selection).\n  - Identifier đã index: `ObjectActionsEdit, ObjectActionSelection, ObjectSelectionWatcher, ObjectActionsEditCommand, ObjectActionsViewCommand`\n\n### Quy tắc sử dụng nguồn tham chiếu\n\n- Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.\n- Không copy mã, ảnh, resource hay nội dung manual vào repository.\n- Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.\n- Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.\n- Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.\n- Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native.\n\n### Điều các nguồn này KHÔNG chứng minh\n\n- Không chứng minh Matrix9 parity cho capability này.\n- Không xác nhận API Rust nào đã tồn tại trong QymCAD.\n- Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.\n- Không chứng minh default/option đã đúng cho bản Matrix9 đang cài.\n\n> Symbol/identifier ở trên là điểm tra cứu; phải kiểm lại tại checkout/manifest trước khi viết mã. PASS vẫn chỉ đến từ command receipt và oracle positive/negative đo được.\n\n## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `ACCEPTANCE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "execution_policy": {
+    "status": "NOT_RUN",
+    "evidence": "Not included: no implementation has been performed",
+    "prerequisites": "M00 must be signed off before M01; M01 before M02; per-task dependencies also apply",
+    "must_not_fake_pass": true,
+    "test_command_status": "SUGGESTED_NOT_EXECUTED",
+    "planned_output_paths_refer_to_future_implementation": true
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Notification phải observable và không churn; kiểm cả trường hợp no-op.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-04",
+        "kind": "rhino5_core_chapter",
+        "title": "Command engine và vòng đời tương tác",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "11-23 / in 3-15",
+        "capability_ids": [
+          "RCORE-04.C01",
+          "RCORE-04.C02",
+          "RCORE-04.C03",
+          "RCORE-04.C04",
+          "RCORE-04.C05",
+          "RCORE-04.C06",
+          "RCORE-04.C07",
+          "RCORE-04.C08"
+        ],
+        "fixture_ids": [
+          "RCORE-04.T01",
+          "RCORE-04.T02",
+          "RCORE-04.T04",
+          "RCORE-04.T05",
+          "RCORE-04.T08"
+        ],
+        "official_help": [
+          {
+            "label": "Undo / Redo",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/undo.htm"
+          },
+          {
+            "label": "Aliases",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/options/aliases.htm"
+          },
+          {
+            "label": "Rhino scripting / command macros",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/information/rhinoscripting.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      },
+      {
+        "anchor_id": "RCORE-09",
+        "kind": "rhino5_core_chapter",
+        "title": "Associative History và dependency identity",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "98 / in 90 (chỉ ghi chú dimension)",
+        "capability_ids": [
+          "RCORE-09.C01",
+          "RCORE-09.C02",
+          "RCORE-09.C03",
+          "RCORE-09.C04",
+          "RCORE-09.C05",
+          "RCORE-09.C06",
+          "RCORE-09.C07",
+          "RCORE-09.C08"
+        ],
+        "fixture_ids": [
+          "RCORE-09.T01",
+          "RCORE-09.T03",
+          "RCORE-09.T04",
+          "RCORE-09.T05",
+          "RCORE-09.T08",
+          "RCORE-09.T11",
+          "RCORE-09.T12"
+        ],
+        "official_help": [
+          {
+            "label": "History / HistoryUpdate / HistoryPurge",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/history.htm"
+          },
+          {
+            "label": "Loft (history-enabled example)",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/loft.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-object-actions",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/UserInterface/ObjectActionsEdit.cs",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "ObjectActionsEdit",
+        "role_for_this_task": "object change notification precedent",
+        "source_role": "object property editor",
+        "detail": "Object property/action editor with its selection companion ObjectActionSelection.cs and ObjectSelectionWatcher.cs (managed observation of the Rhino selection).",
+        "observed_identifiers": [
+          "ObjectActionsEdit",
+          "ObjectActionSelection",
+          "ObjectSelectionWatcher",
+          "ObjectActionsEditCommand",
+          "ObjectActionsViewCommand"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      }
+    ],
+    "manual_reference_sheets": [],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "ACCEPTANCE",
+    "role_label_on_record": "ACCEPTANCE",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-01-03",
+    "goal": "observable scene/layer/object modification events",
+    "algorithm_on_record": "None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "oracles come from this record and the authored sheets, not from the sketch",
+    "sketch": "// Hồi quy, thủ công và bàn giao — Document Change Notification\n// ROLE: ACCEPTANCE - assert the emitted evidence; this task adds no behaviour.\n//\n// Fixture / oracle on record: implementation/evidence/M01/OM9-L3-01-03-011/OM9-L4-01-03-011-05.regression.log\n// Positive case: Them entity + doi layer phat mot ordered batch event voi revision tang\n//   expect: Them entity + doi layer phat mot ordered batch event voi revision tang\n// Negative case: Observer khong duoc thay doi document trong callback lam reentrant mutation\n//   expect: Observer khong duoc thay doi document trong callback lam reentrant mutation\n//\n// Assertion matrix to fill from the real run (no placeholder may remain):\n//   id | case      | input          | expected            | actual | verdict\n//   ---+-----------+----------------+---------------------+--------+--------\n//    1 | positive  | <fixture input>| <oracle>            | <meas> | PASS/FAIL\n//    2 | negative  | <bad input>    | <typed error>       | <meas> | PASS/FAIL\n//    3 | unchanged | after failure  | document identical  | <diff> | PASS/FAIL\n//\n// Rules:\n//   - every 'actual' must come from a command receipt with exit 0 and a captured log path\n//   - a missing log, an empty log or an unexecuted placeholder is FAIL, never PASS\n//   - geometry claims need a measured quantity plus its tolerance, not a screenshot"
+  }}

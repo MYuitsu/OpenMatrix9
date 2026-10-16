@@ -1,0 +1,327 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-03-14-007-01",
+  "milestone": "M01",
+  "parent_l3_id": "OM9-L3-03-14-007",
+  "owner_l2_id": "OM9-L2-03-14",
+  "title": "Xác minh mã nguồn, phạm vi và ownership — Object Property Editor Adapter",
+  "planning_state": "NOT_STARTED",
+  "task": {
+    "task_id": "OM9-L4-03-14-007-01",
+    "parent_l3_id": "OM9-L3-03-14-007",
+    "owner_module_id": "OM9-L2-03-14",
+    "title": "Xác minh mã nguồn, phạm vi và ownership — Object Property Editor Adapter",
+    "milestone_id": "M01",
+    "execution_stage": "E02",
+    "role": "SOURCE_AUDIT",
+    "l3_risk": "NORMAL",
+    "owner_tag": "febe",
+    "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+    "m00_gate_required": true,
+    "manual_test_required": false,
+    "manual_refs_from_l3": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          22,
+          37
+        ],
+        "pdf_pages_1based": [
+          32,
+          47
+        ],
+        "precision": "parent_l2_range"
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          44,
+          47
+        ],
+        "pdf_pages_1based": [
+          54,
+          57
+        ],
+        "precision": "parent_l2_range"
+      }
+    ],
+    "manual_ref_precision": "PARENT_L2_RANGE_REFERENCE_NOT_COMMAND_EXACT",
+    "purpose": "expose relevant document attributes without duplicating model",
+    "positive_case": "Edit color/name/property through document command once; undo restores previous value",
+    "negative_case": "Editing derived read-only BRep field must be disabled",
+    "steps": [
+      "Đọc canonical `M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/L3-007 - Object Property Editor Adapter/l3.json` và scope/exclusions của `OM9-L2-03-14`; sao chép ID, không đổi ID.",
+      "Checkout QymCAD `746a17f127897e921a57118b6caad08968602bf5`; git rev-parse HEAD phải bằng đúng SHA; đọc 2-4 anchors được liệt kê, dùng rg tìm symbol theo từ khóa `object-property-editor-adapter` và kiểm chứng tồn tại.",
+      "Lập bảng hiện trạng cho **Object Property Editor Adapter**: implemented API, missing behavior, license/reuse, source path+line; ghi đề xuất `ADAPT` hay đổi sang ADD khi không thấy.",
+      "Ghi ranh giới: expose relevant document attributes without duplicating model. Nếu chưa xác minh được API thì BLOCKED_SOURCE; không tự tạo fake implementation."
+    ],
+    "microsteps": [],
+    "depends_on_task_ids": [],
+    "source_paths": [
+      {
+        "path": "crates/qymcad-ui-state/src/selection.rs",
+        "purpose": "selection state",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/selection.rs",
+        "blob_sha": "b34e6b62be915e4174f144fcbebf736a230a2330",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-core/src/model.rs",
+        "purpose": "layer/object model",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/model.rs",
+        "blob_sha": "74d971c5f0211bf66f96ae673128189f334ffb20",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "path": "crates/qymcad-pick/src/lib.rs",
+        "purpose": "picking",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-pick/src/lib.rs",
+        "blob_sha": null,
+        "evidence": "CANDIDATE_RECHECK_LOCAL"
+      },
+      {
+        "path": "crates/qymcad-ui-state/src/gizmos.rs",
+        "purpose": "overlays",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-ui-state/src/gizmos.rs",
+        "blob_sha": "20ed68768e15e55734bd2079188b26d14462cf9f",
+        "evidence": "CONTENT_READ_AT_PINNED_SHA"
+      }
+    ],
+    "provisional_decision": "ADAPT",
+    "proposed_code_owner": "OM9-L2-03-14",
+    "test_oracle": "Local symbol+source path/line and reuse decision for Object Property Editor Adapter",
+    "negative_oracle": "Editing derived read-only BRep field must be disabled",
+    "outputs": [
+      "implementation/design/M01/OM9-L3-03-14-007/source_crosswalk.json"
+    ],
+    "stop_conditions": [
+      "M00 not PASS => BLOCKED_M00",
+      "Wrong upstream commit SHA => BLOCKED_SOURCE",
+      "Prerequisite task missing PASS => BLOCKED_DEPENDENCY",
+      "No independent fixture/test harness => BLOCKED_FIXTURE",
+      "Missing Rust/OCCT/GPU/Windows => BLOCKED_ENV",
+      "License/fork permission not approved => BLOCKED_APPROVAL"
+    ],
+    "approval_required": false,
+    "mini_gate_id": "G01-E"
+  },
+  "implementation_contract": {
+    "target_milestone": "M01",
+    "checkout_repo": "QymIs-Tech/QymCAD",
+    "required_source_paths": [
+      "crates/qymcad-ui-state/src/selection.rs",
+      "crates/qymcad-core/src/model.rs",
+      "crates/qymcad-pick/src/lib.rs",
+      "crates/qymcad-ui-state/src/gizmos.rs"
+    ],
+    "preconditions": {
+      "m00_pass": true,
+      "stage": "E02",
+      "dependencies_pass": true,
+      "owner_legal_approved": true
+    },
+    "positive_expected": "Local symbol+source path/line and reuse decision for Object Property Editor Adapter",
+    "negative_expected": "Editing derived read-only BRep field must be disabled",
+    "fixture_name": "OM9-L3-03-14-007",
+    "review": {
+      "human_required": false,
+      "reason": "Automated/test reviewer only"
+    },
+    "output_paths": [
+      "implementation/design/M01/OM9-L3-03-14-007/source_crosswalk.json"
+    ],
+    "test_commands_preview": [
+      "python tools/validate_m01_spec.py",
+      "git rev-parse HEAD",
+      "git status --porcelain"
+    ],
+    "note": "Commands are to be run in the actual implementation/fork workspace if available; spec workspace has no Rust application source. No command is evidence until captured.",
+    "required_oracle_schema": "om9.m01.oracle.v1.5",
+    "global_e01_barrier_required": false
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "agent_runbook_markdown": "# OM9-L4-03-14-007-01 — Xác minh mã nguồn, phạm vi và ownership — Object Property Editor Adapter\n\n**Trạng thái:** `NOT_RUN` · **Stage:** `E02` · **Role:** `SOURCE_AUDIT` · **L3:** `OM9-L3-03-14-007` · **Owner:** `OM9-L2-03-14` · **Manual gate:** `False`.\n\n## 0. Chặn thực thi trước tiên\n\n- Bắt buộc `python tools/validate_m00_execution.py --require-ready` **PASS thật** trước khi sửa mã M01. Nếu không: ghi `BLOCKED_M00` rồi dừng.\n- Repo QymCAD upstream chỉ để nghiên cứu tại `746a17f127897e921a57118b6caad08968602bf5`; chưa có quyền sao chép code nếu thiếu phê duyệt G00-06. Không tự `git checkout main`.\n- Mỗi phiên chỉ thực hiện **một** L4 `OM9-L4-03-14-007-01`. Đọc `M01 - CAD Shell, Viewport/L1.json` và parent `l3_execution.json`.\n- Với E02: chỉ được chạy nếu mini-gate hiện tại đã mở và toàn bộ dependency verified. Không dùng barrier E01 toàn cục. Spec này **không** kèm mã nguồn OpenMatrix9; không tự báo build PASS.\n\n## 1. Phụ thuộc\n\n- Không có L4 prerequisite trong M01; vẫn bắt buộc G00.\n\n## 2. Nguồn mã ghim — bắt buộc mở trước\n\n- `crates/qymcad-ui-state/src/selection.rs` — selection state; **CONTENT_READ_AT_PINNED_SHA**\n- `crates/qymcad-core/src/model.rs` — layer/object model; **CONTENT_READ_AT_PINNED_SHA**\n- `crates/qymcad-pick/src/lib.rs` — picking; **CANDIDATE_RECHECK_LOCAL**\n- `crates/qymcad-ui-state/src/gizmos.rs` — overlays; **CONTENT_READ_AT_PINNED_SHA**\n\nNếu có `CANDIDATE_RECHECK_LOCAL` thì phải kiểm file thực tồn tại và symbol/line trước khi áp dụng. Nếu QymCAD chưa hỗ trợ mục tiêu, ghi `ADD`, **không** tự gán `REUSE`.\n\n## 3. Hợp đồng đúng của nhiệm vụ\n\n- **Mục tiêu:** expose relevant document attributes without duplicating model.\n- **PASS kỳ vọng (chưa chạy):** Local symbol+source path/line and reuse decision for Object Property Editor Adapter.\n- **Negative bắt buộc:** Editing derived read-only BRep field must be disabled.\n- **Ranh giới:** chỉ sửa owner `OM9-L2-03-14` và các adapter được phép; không nhân đôi backend trong menu/panel Matrix.\n- **Manual:** các trang trong canonical `l3.json` phần lớn là phạm vi L2, **chưa** chứng minh đúng từng lệnh Matrix 9.\n\n## 4. Các bước triển khai chính xác\n\n1. Đọc canonical `M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/L3-007 - Object Property Editor Adapter/l3.json` và scope/exclusions của `OM9-L2-03-14`; sao chép ID, không đổi ID.\n2. Checkout QymCAD `746a17f127897e921a57118b6caad08968602bf5`; git rev-parse HEAD phải bằng đúng SHA; đọc 2-4 anchors được liệt kê, dùng rg tìm symbol theo từ khóa `object-property-editor-adapter` và kiểm chứng tồn tại.\n3. Lập bảng hiện trạng cho **Object Property Editor Adapter**: implemented API, missing behavior, license/reuse, source path+line; ghi đề xuất `ADAPT` hay đổi sang ADD khi không thấy.\n4. Ghi ranh giới: expose relevant document attributes without duplicating model. Nếu chưa xác minh được API thì BLOCKED_SOURCE; không tự tạo fake implementation.\n\n## 5. Lệnh có thể dùng (không mặc định đã chạy)\n\n```bash\npython tools/validate_m01_spec.py\npython tools/next_m01_task.py\npython tools/m01_init_evidence.py OM9-L4-03-14-007-01\n# Trong môi trường thực, chạy lệnh với capture (ví dụ):\npython tools/m01_capture.py --task OM9-L4-03-14-007-01 --cwd vendor-research/QymCAD --label sha -- git rev-parse HEAD\n```\n\nNếu thao tác thay đổi OpenMatrix9 Rust source thì capture phải chạy trong workspace implementation/fork thật. Lệnh `cargo test --workspace` và `cargo check --workspace --all-targets` chỉ thực thi ở workspace có Cargo.toml, không thử giả trong thư mục spec.\n\n## 6. Artifacts yêu cầu\n\n- `implementation/design/M01/OM9-L3-03-14-007/source_crosswalk.json`\n- Evidence: `implementation/evidence/M01/OM9-L3-03-14-007/OM9-L4-03-14-007-01.evidence.json` (bao gồm source SHA, thời gian UTC, OS, lệnh thật, exit code, stdout/stderr SHA256, expected, actual, digest của sản phẩm, reviewer).\n\n## 7. Nghiệm thu và dừng\n\n- Không thể hoàn thành chỉ với các đường dẫn GitHub; cần thử nghiệm và bằng chứng tại máy.\n- Nếu test sai kỳ vọng: `FAIL`; thiếu fixture `BLOCKED_FIXTURE`; thiếu môi trường `BLOCKED_ENV`.\n- **PASS chỉ khi test tự động/artefact đã được đối chiếu độc lập; không tự đoán kết quả.**\n- Sau khi viết evidence và chạy `python tools/validate_m01_execution.py`, **dừng phiên**. Không tự chuyển nhiệm vụ kế tiếp.\n\n**v0.15 mini-gate:** `G01-E`. Chỉ thực hiện khi các mini-gate trước VERIFIED_PASS; dùng `python tools/next_m01_task.py`. Không dựa trên raw status.\n\n## Nguồn tham chiếu bắt buộc đối chiếu (Matrix9 / Rhino 5) — v0.16\n\n**Trạng thái bổ sung:** `requirements_only_not_runtime_evidence` — chỉ là yêu cầu đối chiếu, không phải nghiệm thu.\n\n**Trọng tâm đối chiếu:** Editor chỉ phơi bày attribute của document owner, không giữ bản sao state.\n\n### Chương Rhino 5 core phải đọc trước\n\n- `RCORE-06` — Selection, layer, group, block và Worksession · Guide PDF 33-38 / in 25-30; 97-98 / in 89-90 · fixture đại diện `RCORE-06.T01, RCORE-06.T03, RCORE-06.T04, RCORE-06.T06, RCORE-06.T08, RCORE-06.T10`\n  - Help chính thức: [Selection commands / sub-object selection](https://docs.mcneel.com/rhino/5/help/en-us/commands/selection_commands.htm); [Layer](https://docs.mcneel.com/rhino/5/help/en-us/commands/layer.htm); [Block](https://docs.mcneel.com/rhino/5/help/en-us/commands/block.htm)\n  - Capability: `RCORE-06.C01, RCORE-06.C02, RCORE-06.C03, RCORE-06.C04, RCORE-06.C05, RCORE-06.C06, RCORE-06.C07, RCORE-06.C08, RCORE-06.C09, RCORE-06.C10`\n\n### Nguồn Matrix9 đã index phải mở (private reference, không copy)\n\n- `Matrix/UserInterface/ObjectActionsEdit.cs` (Matrix (managed plugin), `ObjectActionsEdit`, `PATH_INDEXED_SYMBOL_CANDIDATE`) — property editor surface\n  - Vai trò nguồn: object property editor. Object property/action editor with its selection companion ObjectActionSelection.cs and ObjectSelectionWatcher.cs (managed observation of the Rhino selection).\n  - Identifier đã index: `ObjectActionsEdit, ObjectActionSelection, ObjectSelectionWatcher, ObjectActionsEditCommand, ObjectActionsViewCommand`\n\n### Quy tắc sử dụng nguồn tham chiếu\n\n- Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.\n- Không copy mã, ảnh, resource hay nội dung manual vào repository.\n- Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.\n- Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.\n- Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.\n- Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native.\n\n### Điều các nguồn này KHÔNG chứng minh\n\n- Không chứng minh Matrix9 parity cho capability này.\n- Không xác nhận API Rust nào đã tồn tại trong QymCAD.\n- Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.\n- Không chứng minh default/option đã đúng cho bản Matrix9 đang cài.\n\n> Symbol/identifier ở trên là điểm tra cứu; phải kiểm lại tại checkout/manifest trước khi viết mã. PASS vẫn chỉ đến từ command receipt và oracle positive/negative đo được.\n\n## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `SOURCE_AUDIT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "execution_policy": {
+    "status": "NOT_RUN",
+    "evidence": "Not included: no implementation has been performed",
+    "prerequisites": "M00 must be signed off before M01; M01 before M02; per-task dependencies also apply",
+    "must_not_fake_pass": true,
+    "test_command_status": "SUGGESTED_NOT_EXECUTED",
+    "planned_output_paths_refer_to_future_implementation": true
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Editor chỉ phơi bày attribute của document owner, không giữ bản sao state.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-06",
+        "kind": "rhino5_core_chapter",
+        "title": "Selection, layer, group, block và Worksession",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "33-38 / in 25-30; 97-98 / in 89-90",
+        "capability_ids": [
+          "RCORE-06.C01",
+          "RCORE-06.C02",
+          "RCORE-06.C03",
+          "RCORE-06.C04",
+          "RCORE-06.C05",
+          "RCORE-06.C06",
+          "RCORE-06.C07",
+          "RCORE-06.C08",
+          "RCORE-06.C09",
+          "RCORE-06.C10"
+        ],
+        "fixture_ids": [
+          "RCORE-06.T01",
+          "RCORE-06.T03",
+          "RCORE-06.T04",
+          "RCORE-06.T06",
+          "RCORE-06.T08",
+          "RCORE-06.T10"
+        ],
+        "official_help": [
+          {
+            "label": "Selection commands / sub-object selection",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/selection_commands.htm"
+          },
+          {
+            "label": "Layer",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/layer.htm"
+          },
+          {
+            "label": "Block",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/block.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-object-actions",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/UserInterface/ObjectActionsEdit.cs",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "ObjectActionsEdit",
+        "role_for_this_task": "property editor surface",
+        "source_role": "object property editor",
+        "detail": "Object property/action editor with its selection companion ObjectActionSelection.cs and ObjectSelectionWatcher.cs (managed observation of the Rhino selection).",
+        "observed_identifiers": [
+          "ObjectActionsEdit",
+          "ObjectActionSelection",
+          "ObjectSelectionWatcher",
+          "ObjectActionsEditCommand",
+          "ObjectActionsViewCommand"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      }
+    ],
+    "manual_reference_sheets": [],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "SOURCE_AUDIT",
+    "role_label_on_record": "SOURCE_AUDIT",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-03-14",
+    "goal": "expose relevant document attributes without duplicating model",
+    "algorithm_on_record": "None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "read the pinned file and record symbol + line range; no runtime claim",
+    "sketch": "// Xác minh mã nguồn, phạm vi và ownership — Object Property Editor Adapter\n// ROLE: SOURCE_AUDIT - this task produces an inventory, not code.\n// source: crates/qymcad-ui-state/src/selection.rs — selection state\n// source: crates/qymcad-core/src/model.rs — layer/object model\n// source: crates/qymcad-pick/src/lib.rs — picking\n// source: crates/qymcad-ui-state/src/gizmos.rs — overlays\n//\n// Capability: expose relevant document attributes without duplicating model\n// Proposed contract on record: (none frozen yet)\n//\n// Inventory to fill from the pinned checkout (record file, symbol, line range, verdict):\n    // - None\n    // - --- bước thuật toán domain đã trích (phải đo lại hằng số trước khi dùng) ---\n    // - D1. Đọc mô tả đá: lấy dữ liệu đối tượng dưới khoá MATRIXICGEM, dựng sáu điểm min/max, biến đổi bằng xform instance, suy độ lớn X/Y/Z và làm tròn.\n    // - D2. Đọc profile nếu có: parse chuỗi điểm, biến đổi từng điểm, cần ít nhất 7 điểm cho các độ dài góc/đáy.\n    // - D3. Suy các đại lượng dẫn xuất: chuỗi mô tả theo họ hình dạng, độ dài góc từ trung điểm hai đoạn, pháp tuyến từ TableCenter trừ Culet, cờ gương từ dấu định thức.\n//\n// Decision skeleton to complete with real evidence:\n//   reuse_decision: REUSE | ADAPT | ADD | BLOCKED_SOURCE\n//   evidence: <path>:<line-range> at pinned SHA\n//   license: <reviewed scope from M00>\n//\n// Do not claim \"implemented\", \"works\" or a PASS from this file.",
+    "domain_algorithm_reference": {
+      "note_id": "algo.gem.block.data-model",
+      "stage": "Mô hình dữ liệu đá và khối lượng kim loại",
+      "why_for_this_task": "Bề mặt thuộc tính của đối tượng (cỡ, hình dạng, profile, pháp tuyến, cờ gương) là danh sách trường mà property editor phải đọc được.",
+      "om9_backend": "pure Rust cho model và tính khối lượng; openNURBS cho user data trên đối tượng",
+      "steps_cited": [1, 2, 4],
+      "algorithm_steps": [
+        "M1. Đọc mô tả đá: lấy dữ liệu đối tượng dưới khoá MATRIXICGEM, dựng sáu điểm min/max, biến đổi bằng xform instance, suy độ lớn X/Y/Z và làm tròn.",
+        "M2. Đọc profile nếu có: parse chuỗi điểm, biến đổi từng điểm, cần ít nhất 7 điểm cho các độ dài góc/đáy.",
+        "M4. Suy các đại lượng dẫn xuất: chuỗi mô tả theo họ hình dạng, độ dài góc từ trung điểm hai đoạn, pháp tuyến từ TableCenter trừ Culet, cờ gương từ dấu định thức."
+      ],
+      "source_file": "PIM/GemBlock.cs",
+      "source_methods": ["GemBlock", "Strs2Pts"],
+      "boundaries_carried": [
+        "KHÔNG có bảng tỉ trọng trong mã Matrix - OM9 phải tự chọn nguồn (ISO/tiêu chuẩn hợp kim) và ghi rõ nguồn.",
+        "Công thức trọng lượng carat cho hình dạng KHÔNG tròn chưa đọc (chỉ biết nó dùng hệ số F).",
+        "GemBlock không có hàm ghi, nên không có đặc tả round-trip để bắt chước ngoài khoá MATRIXICGEM và tên instance.",
+        "Việc loại khối instance khỏi phép tính khối lượng là hành vi của họ; OM9 phải quyết định có làm vậy không.",
+        "Chưa chứng minh gì về runtime."
+      ],
+      "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
+    }
+  }}

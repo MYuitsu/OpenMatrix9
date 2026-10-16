@@ -1,0 +1,5 @@
+{
+  "detail": "I/O: The system cannot find the file specified. (os error 2)",
+  "schema": "om9.startup.failure.v1",
+  "stage": "document"
+}

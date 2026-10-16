@@ -1,3 +1,5 @@
+> Current target: [specs v2 UI contract](../OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md). Keep these described shortcuts; the state/pass claims below are the dated legacy FreeCAD snapshot, not standalone acceptance.
+
 # Phím tắt Matrix9 trong OpenMatrix9
 
 Nguồn: các mô tả tại `ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core`. Bảng này ghi các phím mặc định được nêu rõ trong specs và trạng thái thực tế của bản thử ngày 2026-10-05.

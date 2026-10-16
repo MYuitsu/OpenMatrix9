@@ -1,0 +1,1615 @@
+{
+  "schema_version": "om9.m06.plan.v1",
+  "milestone_id": "M06",
+  "execution_stage": "E11",
+  "canonical_l3_count": 19,
+  "owner_l2_count": 2,
+  "l4_count": 76,
+  "status": "PLANNED_NOT_EXECUTED",
+  "preconditions": [
+    "G00_PASS",
+    "E01..E10_PASS",
+    "E10 gem contract frozen",
+    "source/OCCT/legal approved"
+  ],
+  "canonical_main_manifest": "planning/EXECUTION_MANIFEST.json",
+  "manual_basis": "Matrix 8 Book 2 PDF pp.242-271 (Chapter 28); see per-task origin refs",
+  "items": [
+    {
+      "task_id": "OM9-M06-L4-14-001-01",
+      "l3_id": "OM9-L3-04-14-001",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-basket",
+      "title": "Head Builder Basket — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-001/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-001/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        243,
+        244,
+        245
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-001-02",
+      "l3_id": "OM9-L3-04-14-001",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-basket",
+      "title": "Head Builder Basket — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-001/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-001/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-001-01",
+        "OM9-M06-L4-14-008-02",
+        "OM9-M06-L4-14-009-01"
+      ],
+      "manual_pages_pdf": [
+        243,
+        244,
+        245
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-001-03",
+      "l3_id": "OM9-L3-04-14-001",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-basket",
+      "title": "Head Builder Basket — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-001/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-001/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-001-02"
+      ],
+      "manual_pages_pdf": [
+        243,
+        244,
+        245
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-001-04",
+      "l3_id": "OM9-L3-04-14-001",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-basket",
+      "title": "Head Builder Basket — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-001/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-001/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-001-03"
+      ],
+      "manual_pages_pdf": [
+        243,
+        244,
+        245
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-002-01",
+      "l3_id": "OM9-L3-04-14-002",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-half-bezel-mode",
+      "title": "Head Builder Half Bezel Mode — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-002/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-002/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        243,
+        245,
+        247,
+        248
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-002-02",
+      "l3_id": "OM9-L3-04-14-002",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-half-bezel-mode",
+      "title": "Head Builder Half Bezel Mode — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-002/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-002/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-002-01",
+        "OM9-M06-L4-14-001-02"
+      ],
+      "manual_pages_pdf": [
+        243,
+        245,
+        247,
+        248
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-002-03",
+      "l3_id": "OM9-L3-04-14-002",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-half-bezel-mode",
+      "title": "Head Builder Half Bezel Mode — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-002/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-002/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-002-02",
+        "OM9-M06-L4-14-001-03"
+      ],
+      "manual_pages_pdf": [
+        243,
+        245,
+        247,
+        248
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-002-04",
+      "l3_id": "OM9-L3-04-14-002",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-half-bezel-mode",
+      "title": "Head Builder Half Bezel Mode — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-002/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-002/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-002-03"
+      ],
+      "manual_pages_pdf": [
+        243,
+        245,
+        247,
+        248
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-003-01",
+      "l3_id": "OM9-L3-04-14-003",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-prong-rail-level-edit",
+      "title": "Head Builder Prong Rail Level Edit — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-003/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-003/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        244,
+        245,
+        246,
+        247,
+        248
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-003-02",
+      "l3_id": "OM9-L3-04-14-003",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-prong-rail-level-edit",
+      "title": "Head Builder Prong Rail Level Edit — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-003/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-003/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-003-01",
+        "OM9-M06-L4-14-001-02"
+      ],
+      "manual_pages_pdf": [
+        244,
+        245,
+        246,
+        247,
+        248
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-003-03",
+      "l3_id": "OM9-L3-04-14-003",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-prong-rail-level-edit",
+      "title": "Head Builder Prong Rail Level Edit — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-003/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-003/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-003-02",
+        "OM9-M06-L4-14-001-03"
+      ],
+      "manual_pages_pdf": [
+        244,
+        245,
+        246,
+        247,
+        248
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-003-04",
+      "l3_id": "OM9-L3-04-14-003",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-builder-prong-rail-level-edit",
+      "title": "Head Builder Prong Rail Level Edit — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-003/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-003/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-003-03"
+      ],
+      "manual_pages_pdf": [
+        244,
+        245,
+        246,
+        247,
+        248
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-004-01",
+      "l3_id": "OM9-L3-04-14-004",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.bezel-builder-full",
+      "title": "Bezel Builder Full — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-004/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-004/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        249,
+        250,
+        251
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-004-02",
+      "l3_id": "OM9-L3-04-14-004",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.bezel-builder-full",
+      "title": "Bezel Builder Full — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-004/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-004/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-004-01",
+        "OM9-M06-L4-14-008-02",
+        "OM9-M06-L4-14-009-01"
+      ],
+      "manual_pages_pdf": [
+        249,
+        250,
+        251
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-004-03",
+      "l3_id": "OM9-L3-04-14-004",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.bezel-builder-full",
+      "title": "Bezel Builder Full — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-004/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-004/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-004-02"
+      ],
+      "manual_pages_pdf": [
+        249,
+        250,
+        251
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-004-04",
+      "l3_id": "OM9-L3-04-14-004",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.bezel-builder-full",
+      "title": "Bezel Builder Full — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-004/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-004/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-004-03"
+      ],
+      "manual_pages_pdf": [
+        249,
+        250,
+        251
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-005-01",
+      "l3_id": "OM9-L3-04-14-005",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.bezel-builder-under-bezel-and-gallery",
+      "title": "Bezel Builder Under Bezel And Gallery — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-005/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-005/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        249,
+        251,
+        252
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-005-02",
+      "l3_id": "OM9-L3-04-14-005",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.bezel-builder-under-bezel-and-gallery",
+      "title": "Bezel Builder Under Bezel And Gallery — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-005/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-005/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-005-01",
+        "OM9-M06-L4-14-004-02"
+      ],
+      "manual_pages_pdf": [
+        249,
+        251,
+        252
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-005-03",
+      "l3_id": "OM9-L3-04-14-005",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.bezel-builder-under-bezel-and-gallery",
+      "title": "Bezel Builder Under Bezel And Gallery — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-005/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-005/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-005-02",
+        "OM9-M06-L4-14-004-03"
+      ],
+      "manual_pages_pdf": [
+        249,
+        251,
+        252
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-005-04",
+      "l3_id": "OM9-L3-04-14-005",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.bezel-builder-under-bezel-and-gallery",
+      "title": "Bezel Builder Under Bezel And Gallery — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-005/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-005/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-005-03"
+      ],
+      "manual_pages_pdf": [
+        249,
+        251,
+        252
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-006-01",
+      "l3_id": "OM9-L3-04-14-006",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.scallop-bezel-builder",
+      "title": "Scallop Bezel Builder — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-006/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-006/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        255,
+        256,
+        257
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-006-02",
+      "l3_id": "OM9-L3-04-14-006",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.scallop-bezel-builder",
+      "title": "Scallop Bezel Builder — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-006/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-006/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-006-01",
+        "OM9-M06-L4-14-004-02"
+      ],
+      "manual_pages_pdf": [
+        255,
+        256,
+        257
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-006-03",
+      "l3_id": "OM9-L3-04-14-006",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.scallop-bezel-builder",
+      "title": "Scallop Bezel Builder — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-006/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-006/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-006-02",
+        "OM9-M06-L4-14-004-03"
+      ],
+      "manual_pages_pdf": [
+        255,
+        256,
+        257
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-006-04",
+      "l3_id": "OM9-L3-04-14-006",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.scallop-bezel-builder",
+      "title": "Scallop Bezel Builder — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-006/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-006/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-006-03"
+      ],
+      "manual_pages_pdf": [
+        255,
+        256,
+        257
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-007-01",
+      "l3_id": "OM9-L3-04-14-007",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-profile-browser",
+      "title": "Head Bezel Profile Browser — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-007/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-007/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        243,
+        249,
+        256
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-007-02",
+      "l3_id": "OM9-L3-04-14-007",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-profile-browser",
+      "title": "Head Bezel Profile Browser — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-007/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-007/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-007-01"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        256
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-007-03",
+      "l3_id": "OM9-L3-04-14-007",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-profile-browser",
+      "title": "Head Bezel Profile Browser — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-007/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-007/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-007-02"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        256
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-007-04",
+      "l3_id": "OM9-L3-04-14-007",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-profile-browser",
+      "title": "Head Bezel Profile Browser — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-007/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-007/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-007-03"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        256
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-008-01",
+      "l3_id": "OM9-L3-04-14-008",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-girdle-seat-attachment",
+      "title": "Head Bezel Girdle Seat Attachment — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-008/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-008/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        243,
+        249,
+        250
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-008-02",
+      "l3_id": "OM9-L3-04-14-008",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-girdle-seat-attachment",
+      "title": "Head Bezel Girdle Seat Attachment — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-008/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-008/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-008-01"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        250
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-008-03",
+      "l3_id": "OM9-L3-04-14-008",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-girdle-seat-attachment",
+      "title": "Head Bezel Girdle Seat Attachment — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-008/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-008/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-008-02"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        250
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-008-04",
+      "l3_id": "OM9-L3-04-14-008",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-girdle-seat-attachment",
+      "title": "Head Bezel Girdle Seat Attachment — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-008/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-008/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-008-03"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        250
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-009-01",
+      "l3_id": "OM9-L3-04-14-009",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-geometry-validity-and-update",
+      "title": "Head Bezel Geometry Validity And Update — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-009/01/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-009/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        243,
+        249,
+        251
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-009-02",
+      "l3_id": "OM9-L3-04-14-009",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-geometry-validity-and-update",
+      "title": "Head Bezel Geometry Validity And Update — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-009/02/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-009/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-009-01"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        251
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-009-03",
+      "l3_id": "OM9-L3-04-14-009",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-geometry-validity-and-update",
+      "title": "Head Bezel Geometry Validity And Update — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-009/03/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-009/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-009-02",
+        "OM9-M06-L4-14-001-02",
+        "OM9-M06-L4-14-004-02"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        251
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-14-009-04",
+      "l3_id": "OM9-L3-04-14-009",
+      "module_id": "OM9-L2-04-14",
+      "capability_id": "cap.04-14.head-bezel-geometry-validity-and-update",
+      "title": "Head Bezel Geometry Validity And Update — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/01-head-and-bezel/om9-l3-04-14-009/04/l4.json",
+      "task_path": "planning/M06/01-head-and-bezel/om9-l3-04-14-009/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-14-009-03"
+      ],
+      "manual_pages_pdf": [
+        243,
+        249,
+        251
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-001-01",
+      "l3_id": "OM9-L3-04-15-001",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-builder-gem-line",
+      "title": "Prong Builder Gem Line — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-001/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-001/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        257,
+        258,
+        259,
+        260
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-001-02",
+      "l3_id": "OM9-L3-04-15-001",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-builder-gem-line",
+      "title": "Prong Builder Gem Line — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-001/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-001/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-001-01",
+        "OM9-M06-L4-14-008-02",
+        "OM9-M06-L4-14-009-02"
+      ],
+      "manual_pages_pdf": [
+        257,
+        258,
+        259,
+        260
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-001-03",
+      "l3_id": "OM9-L3-04-15-001",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-builder-gem-line",
+      "title": "Prong Builder Gem Line — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-001/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-001/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-001-02"
+      ],
+      "manual_pages_pdf": [
+        257,
+        258,
+        259,
+        260
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-001-04",
+      "l3_id": "OM9-L3-04-15-001",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-builder-gem-line",
+      "title": "Prong Builder Gem Line — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-001/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-001/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-001-03"
+      ],
+      "manual_pages_pdf": [
+        257,
+        258,
+        259,
+        260
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-002-01",
+      "l3_id": "OM9-L3-04-15-002",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-editor-selected",
+      "title": "Prong Editor Selected — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-002/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-002/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        260,
+        261
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-002-02",
+      "l3_id": "OM9-L3-04-15-002",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-editor-selected",
+      "title": "Prong Editor Selected — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-002/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-002/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-002-01",
+        "OM9-M06-L4-15-001-02"
+      ],
+      "manual_pages_pdf": [
+        260,
+        261
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-002-03",
+      "l3_id": "OM9-L3-04-15-002",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-editor-selected",
+      "title": "Prong Editor Selected — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-002/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-002/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-002-02",
+        "OM9-M06-L4-15-001-03"
+      ],
+      "manual_pages_pdf": [
+        260,
+        261
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-002-04",
+      "l3_id": "OM9-L3-04-15-002",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-editor-selected",
+      "title": "Prong Editor Selected — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-002/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-002/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-002-03"
+      ],
+      "manual_pages_pdf": [
+        260,
+        261
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-003-01",
+      "l3_id": "OM9-L3-04-15-003",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-on-surface",
+      "title": "Prong On Surface — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-003/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-003/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        261,
+        262
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-003-02",
+      "l3_id": "OM9-L3-04-15-003",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-on-surface",
+      "title": "Prong On Surface — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-003/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-003/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-003-01",
+        "OM9-M06-L4-15-001-02"
+      ],
+      "manual_pages_pdf": [
+        261,
+        262
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-003-03",
+      "l3_id": "OM9-L3-04-15-003",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-on-surface",
+      "title": "Prong On Surface — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-003/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-003/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-003-02"
+      ],
+      "manual_pages_pdf": [
+        261,
+        262
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-003-04",
+      "l3_id": "OM9-L3-04-15-003",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.prong-on-surface",
+      "title": "Prong On Surface — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-003/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-003/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-003-03"
+      ],
+      "manual_pages_pdf": [
+        261,
+        262
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-004-01",
+      "l3_id": "OM9-L3-04-15-004",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.metal-piece-from-gems",
+      "title": "Metal Piece From Gems — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-004/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-004/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        264,
+        265,
+        266,
+        267,
+        268
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-004-02",
+      "l3_id": "OM9-L3-04-15-004",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.metal-piece-from-gems",
+      "title": "Metal Piece From Gems — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-004/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-004/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-004-01",
+        "OM9-M06-L4-15-005-02"
+      ],
+      "manual_pages_pdf": [
+        264,
+        265,
+        266,
+        267,
+        268
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-004-03",
+      "l3_id": "OM9-L3-04-15-004",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.metal-piece-from-gems",
+      "title": "Metal Piece From Gems — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-004/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-004/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-004-02"
+      ],
+      "manual_pages_pdf": [
+        264,
+        265,
+        266,
+        267,
+        268
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-004-04",
+      "l3_id": "OM9-L3-04-15-004",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.metal-piece-from-gems",
+      "title": "Metal Piece From Gems — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-004/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-004/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-004-03"
+      ],
+      "manual_pages_pdf": [
+        264,
+        265,
+        266,
+        267,
+        268
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-005-01",
+      "l3_id": "OM9-L3-04-15-005",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.channel-border-curve",
+      "title": "Channel Border Curve — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-005/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-005/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        270,
+        271
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-005-02",
+      "l3_id": "OM9-L3-04-15-005",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.channel-border-curve",
+      "title": "Channel Border Curve — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-005/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-005/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-005-01"
+      ],
+      "manual_pages_pdf": [
+        270,
+        271
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-005-03",
+      "l3_id": "OM9-L3-04-15-005",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.channel-border-curve",
+      "title": "Channel Border Curve — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-005/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-005/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-005-02"
+      ],
+      "manual_pages_pdf": [
+        270,
+        271
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-005-04",
+      "l3_id": "OM9-L3-04-15-005",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.channel-border-curve",
+      "title": "Channel Border Curve — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-005/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-005/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-005-03"
+      ],
+      "manual_pages_pdf": [
+        270,
+        271
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-006-01",
+      "l3_id": "OM9-L3-04-15-006",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.bead-on-curve-milgrain",
+      "title": "Bead On Curve Milgrain — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-006/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-006/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        268,
+        269,
+        270
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-006-02",
+      "l3_id": "OM9-L3-04-15-006",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.bead-on-curve-milgrain",
+      "title": "Bead On Curve Milgrain — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-006/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-006/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-006-01"
+      ],
+      "manual_pages_pdf": [
+        268,
+        269,
+        270
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-006-03",
+      "l3_id": "OM9-L3-04-15-006",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.bead-on-curve-milgrain",
+      "title": "Bead On Curve Milgrain — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-006/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-006/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-006-02"
+      ],
+      "manual_pages_pdf": [
+        268,
+        269,
+        270
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-006-04",
+      "l3_id": "OM9-L3-04-15-006",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.bead-on-curve-milgrain",
+      "title": "Bead On Curve Milgrain — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-006/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-006/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-006-03"
+      ],
+      "manual_pages_pdf": [
+        268,
+        269,
+        270
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-007-01",
+      "l3_id": "OM9-L3-04-15-007",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.bead-on-surface",
+      "title": "Bead On Surface — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-007/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-007/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        263,
+        264
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-007-02",
+      "l3_id": "OM9-L3-04-15-007",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.bead-on-surface",
+      "title": "Bead On Surface — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-007/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-007/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-007-01",
+        "OM9-M06-L4-15-006-02"
+      ],
+      "manual_pages_pdf": [
+        263,
+        264
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-007-03",
+      "l3_id": "OM9-L3-04-15-007",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.bead-on-surface",
+      "title": "Bead On Surface — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-007/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-007/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-007-02"
+      ],
+      "manual_pages_pdf": [
+        263,
+        264
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-007-04",
+      "l3_id": "OM9-L3-04-15-007",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.bead-on-surface",
+      "title": "Bead On Surface — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-007/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-007/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-007-03"
+      ],
+      "manual_pages_pdf": [
+        263,
+        264
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-008-01",
+      "l3_id": "OM9-L3-04-15-008",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.pull-object-to-rail-setting",
+      "title": "Pull Object To Rail Setting — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-008/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-008/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        255,
+        256
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-008-02",
+      "l3_id": "OM9-L3-04-15-008",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.pull-object-to-rail-setting",
+      "title": "Pull Object To Rail Setting — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-008/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-008/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-008-01",
+        "OM9-M06-L4-14-001-02"
+      ],
+      "manual_pages_pdf": [
+        255,
+        256
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-008-03",
+      "l3_id": "OM9-L3-04-15-008",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.pull-object-to-rail-setting",
+      "title": "Pull Object To Rail Setting — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-008/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-008/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-008-02"
+      ],
+      "manual_pages_pdf": [
+        255,
+        256
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-008-04",
+      "l3_id": "OM9-L3-04-15-008",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.pull-object-to-rail-setting",
+      "title": "Pull Object To Rail Setting — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-008/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-008/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-008-03"
+      ],
+      "manual_pages_pdf": [
+        255,
+        256
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-009-01",
+      "l3_id": "OM9-L3-04-15-009",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.setting-row-end-modes-and-prong-spacing",
+      "title": "Setting Row End Modes And Prong Spacing — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-009/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-009/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        257,
+        258,
+        259,
+        260
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-009-02",
+      "l3_id": "OM9-L3-04-15-009",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.setting-row-end-modes-and-prong-spacing",
+      "title": "Setting Row End Modes And Prong Spacing — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-009/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-009/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-009-01",
+        "OM9-M06-L4-15-001-02"
+      ],
+      "manual_pages_pdf": [
+        257,
+        258,
+        259,
+        260
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-009-03",
+      "l3_id": "OM9-L3-04-15-009",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.setting-row-end-modes-and-prong-spacing",
+      "title": "Setting Row End Modes And Prong Spacing — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-009/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-009/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-009-02",
+        "OM9-M06-L4-15-001-03"
+      ],
+      "manual_pages_pdf": [
+        257,
+        258,
+        259,
+        260
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-009-04",
+      "l3_id": "OM9-L3-04-15-009",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.setting-row-end-modes-and-prong-spacing",
+      "title": "Setting Row End Modes And Prong Spacing — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-009/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-009/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-009-03"
+      ],
+      "manual_pages_pdf": [
+        257,
+        258,
+        259,
+        260
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-010-01",
+      "l3_id": "OM9-L3-04-15-010",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.settings-associative-edit-and-mass",
+      "title": "Settings Associative Edit And Mass — Chốt dữ liệu/API và fixture",
+      "work_kind": "CONTRACT",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-010/01/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-010/01/TASK.md",
+      "depends_on_task_ids": [],
+      "manual_pages_pdf": [
+        242,
+        243,
+        264
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-010-02",
+      "l3_id": "OM9-L3-04-15-010",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.settings-associative-edit-and-mass",
+      "title": "Settings Associative Edit And Mass — Hiện thực lõi không giao diện",
+      "work_kind": "BE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-010/02/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-010/02/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-010-01",
+        "OM9-M06-L4-14-009-02",
+        "OM9-M06-L4-15-001-02",
+        "OM9-M06-L4-15-004-02"
+      ],
+      "manual_pages_pdf": [
+        242,
+        243,
+        264
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-010-03",
+      "l3_id": "OM9-L3-04-15-010",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.settings-associative-edit-and-mass",
+      "title": "Settings Associative Edit And Mass — Tích hợp lệnh, preview, giao diện",
+      "work_kind": "FEBE",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-010/03/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-010/03/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-010-02",
+        "OM9-M06-L4-14-009-03",
+        "OM9-M06-L4-15-001-03",
+        "OM9-M06-L4-15-004-03"
+      ],
+      "manual_pages_pdf": [
+        242,
+        243,
+        264
+      ],
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M06-L4-15-010-04",
+      "l3_id": "OM9-L3-04-15-010",
+      "module_id": "OM9-L2-04-15",
+      "capability_id": "cap.04-15.settings-associative-edit-and-mass",
+      "title": "Settings Associative Edit And Mass — Hồi quy, liên kết, nghiệm thu E11",
+      "work_kind": "QA",
+      "execution_stage": "E11",
+      "status": "PLANNED_NOT_EXECUTED",
+      "path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-010/04/l4.json",
+      "task_path": "planning/M06/02-prong-metal-and-bead/om9-l3-04-15-010/04/TASK.md",
+      "depends_on_task_ids": [
+        "OM9-M06-L4-15-010-03"
+      ],
+      "manual_pages_pdf": [
+        242,
+        243,
+        264
+      ],
+      "source_revision": null
+    }
+  ]
+}

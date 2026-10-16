@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "qymcad": {
+    "commit": "09a7f09ebeb87fab7c43e26774f7eb0eb88907dd",
+    "mode": "reference_only",
+    "copied_files": [],
+    "runtime_dependency": false,
+    "commit_role": "revision consulted by the 2026-10-13 standalone-foundation work; kept as history, not the M00 baseline",
+    "m00_baseline_pin": "746a17f127897e921a57118b6caad08968602bf5",
+    "m00_baseline_pin_note": "Re-pinned 2026-10-15 by the M00 L2-01 baseline decision: the vendored QymCAD tree is blob-identical to this commit, which sits on main. It replaces the former PR-head pin c116f8f2. Pinned read-only checkout: vendor-research/QymCAD. Evidence: implementation/evidence/M00/G00-01/source-provenance.json",
+    "m00_baseline_receipt": "docs/validation/2026-10-15-m00-l2-01-baseline-and-trap-register.md"
+  },
+  "portable_om9_reuse": [
+    {
+      "source_path": "rust/src/layers.rs",
+      "source_sha256": "7db2b8a6e978bfd527eee291d24e6b42dc6f74cc2af4ae00197e9a6ff7d4a753",
+      "target_path": "standalone/crates/om9-core/src/layers/preset.rs",
+      "mode": "port_host_free_rust_policy",
+      "license": "LGPL-2.1-or-later",
+      "scope": "Existing OM9 32-slot names/RGB defaults plus Lights33; no FFI wrapper or FreeCAD native owner copied. Durable typed preset identity and custom-label admission are authored standalone policy.",
+      "dependency_closure": [
+        "serde",
+        "om9-core owned layer model/transaction/budget/error"
+      ],
+      "owner": "safe Rust document owns UUID, stable preset slot, label/color/current and independent Hidden/explicit visibility/selectable; no native handle",
+      "thread": "immutable borrowed plan captured to document/coordinator session, atomic coordinator publication",
+      "errors": "typed invalid/permission/stale/cancel/budget/overflow errors; no ABI",
+      "fixtures": [
+        "om9-core::layer_state",
+        "om9-archive::layer_schema",
+        "om9-app::cold_layers",
+        "om9-exchange::layer_wire"
+      ],
+      "receipt": "docs/validation/2026-10-14-owned-layer-state.json",
+      "full_layers_acceptance": false
+    },
+    {
+      "source_path": "rust/src/support_snapshot.rs",
+      "source_sha256": "5452c56601ce2846df190cdf18c96117b2e0f4caba2b3586ca242d54981ee51f",
+      "target_path": "standalone/crates/om9-core/src/evaluation.rs",
+      "mode": "reuse_portable_rust",
+      "license": "LGPL-2.1-or-later",
+      "scope": "Taylor/de Boor homogeneous rational recurrence; expanded knots, bounded D0-D3 and standalone source policy",
+      "dependency_closure": [
+        "serde",
+        "om9-core owned geometry/budget/error"
+      ],
+      "owner": "safe Rust owned curve inputs and temporary buffers",
+      "thread": "immutable borrowed curve per evaluation; no native handles",
+      "errors": "typed finite/domain/budget/continuity errors; no ABI",
+      "fixtures": [
+        "curve_oracles::rational_quadratic_has_nonzero_third_derivative_from_quotient",
+        "curve_oracles::reversed_fraction_derivatives_scale_each_order_without_translating_vectors"
+      ]
+    }
+  ],
+  "native_adapters": [
+    {
+      "name": "authored_openNURBS_current_geometry_exchange",
+      "mode": "reuse_native_adapter",
+      "source_path": "standalone/native/native_exchange.cpp",
+      "upstream_url": "https://github.com/mcneel/opennurbs",
+      "upstream_commit": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+      "license_notice": "Resources/licenses/openNURBS.txt",
+      "dependency_closure": [
+        "opennurbsStatic",
+        "prefixed zlib",
+        "nlohmann/json 3.11.3",
+        "MSVC runtime",
+        "Windows system libraries",
+        "Windows bcrypt SHA-256 source-byte hashing"
+      ],
+      "json_header_sha256": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+      "json_license_notice": "Resources/licenses/nlohmann-json.txt",
+      "json_license_sha256": "86b998c792894ccb911a1cb7994f7a9652894e7a094c0b5e45be2f553f45cf14",
+      "abi": "schema-1 current-geometry write/inspect, schema-2 strict inventory, schema-3 hash-bound explicit-unit projection, schema-4 original-wire preparation and retained-current write/fresh cold inspection; owned UTF-8 files/stdout, no native pointer or allocator crosses boundary",
+      "owner": "Safe Rust owns durable current model, complete native identities/index contexts/table order/unit frames/field policies, bounded borrowed requests, immutable source/request/output handles, independent cold span/current represented-geometry checks and final atomic publication. Native operation process owns original SDK classes/attachments, strict same-held-FILE readers and selected SDK serialization/native-only conservative leaf hulls; it invents no host identity or output intent.",
+      "thread": "native operation is single-threaded, isolated from immutable Rust document snapshots",
+      "errors": "bounded operation/record diagnostics, caught C++ exceptions, native failure has no success payload; structural input and output admission",
+      "scope": "Selected version50 retained-current library export, original-wire preparation and native-to-Rust import. Raw unselected tables/unchanged records and bounded opaque surrounding chunks are retained by admitted codec policy; current edits/delete/new and dirty cache refresh have matching frozen native/Rust cold receipts. Explicit losses precede atomic publication; no app capability or general remap permission is enabled.",
+      "runtime_status": "validated_selected_retained_current_cold_publication_and_source_import_not_app_capability",
+      "fixture_receipts": [
+        "docs/validation/2026-10-13-standalone-native-conversion.json",
+        "docs/validation/2026-10-13-standalone-exchange.json",
+        "docs/validation/2026-10-13-standalone-native-source-inventory.json",
+        "docs/validation/2026-10-13-standalone-native-source-projection.json",
+        "docs/validation/2026-10-13-standalone-import.json",
+        "docs/validation/2026-10-14-standalone-retained-infrastructure.json",
+        "docs/validation/2026-10-14-standalone-retained-inputs.json",
+        "docs/validation/2026-10-14-standalone-retained-current.json",
+        "docs/validation/2026-10-14-native-retained-current-selected.json"
+      ],
+      "limitations": [
+        "Original serialized/reference/SDK destination contexts remain distinct; only a fresh output correspondence proof admits the completed wire file.",
+        "General opaque semantic/identity/length remapping, primary layer reordering and unsupported original settings edits refuse.",
+        "Conservative native-only leaf hull checks do not certify independent tight BRep bounds; unsupported hull/master conversions refuse.",
+        "Full native families, resource and clipboard matrices, complete global concurrent memory/performance gates and Rhino5 acceptance remain open.",
+        "Selected SDK dependencies are not certified memory-safe by a Rust process owner."
+      ],
+      "source_paths": [
+        "standalone/native/native_exchange.cpp",
+        "standalone/native/retained_merge.hpp"
+      ],
+      "source_sha256": {
+        "standalone/native/native_exchange.cpp": "c527dbb0f1644f0f8ab4fabea990ca2415f51b5bee7fdb36a3741e35a961c59b",
+        "standalone/native/retained_merge.hpp": "0cb564af07eee577ad89b9b409287b24f1593472811c492607638acdfa803d00"
+      },
+      "native_exception_reason": "Original openNURBS class readers, raw class/table serializers and actual native BRep/surface leaf access require the pinned SDK APIs. Portable policy/model/maps/frames/admission/current represented geometry/atomic export are safe Rust."
+    },
+    {
+      "name": "selected_windows_owned_file_dialog",
+      "mode": "historical_adapter_dependency_superseded",
+      "source_path": "standalone/crates/om9-app/src/native_picker.rs",
+      "upstream_url": "https://github.com/PolyMeilex/rfd",
+      "upstream_version": "0.17.2",
+      "cargo_checksum": "20dafead71c16a34e1ff357ddefc8afc11e7d51d6d2b9fbd07eaa48e3e540220",
+      "license": "MIT",
+      "license_notice": "Resources/licenses/rfd-0.17.2.txt",
+      "license_sha256": "65fc947f4bac882a2cd104ef73c246b1b037059df9f2b3a58b7f77f0b9e56071",
+      "dependency_closure": [
+        "rfd0.17.2 Windows synchronous common dialog; default features off",
+        "raw-window-handle0.6.2",
+        "windows-sys0.61.2 Win32 COM/Shell",
+        "log0.4; existing locked closure"
+      ],
+      "abi": "borrowed eframe Frame parent handle; owned optional PathBuf result; no document or transaction pointer",
+      "owner": "safe Rust OM9 File controller owns tokens, dirty state, delayed intent and atomic publication; third-party rfd owns native COM dialog lifetime",
+      "thread": "synchronous UI thread; no rfd asynchronous API used. Opt-in own-window WM_CLOSE probe is separately bounded and joined.",
+      "errors": "rfd maps native HRESULT failure to None just like Cancel; panic is reported. Native error/Cancel distinction remains a required continuation.",
+      "scope": "native .om9 single-file Open/Save chooser. Real Windows cancel/destroy lifecycle measured; successful OS selection/save/open and single overwrite UX remain unmeasured.",
+      "unsafe_boundary": "rfd invokes Win32 COM unsafe; safe caller does not certify native memory safety. Authored audit-only handle queries/message posting isolated in om9-native-owner/src/dialog_probe.rs; no desktop input or foreign-window control.",
+      "fixtures": [
+        "om9-app::file_widgets",
+        "om9-app::file_lifecycle",
+        "native File UI raw-event replay and3 owned real Windows picker cancellations"
+      ],
+      "receipt": "docs/validation/2026-10-14-owned-file-ui.json",
+      "full_file_acceptance": false,
+      "runtime_dependency": false,
+      "replaced_by": "authored_windows_common_file_dialog"
+    },
+    {
+      "name": "authored_windows_common_file_dialog",
+      "mode": "authored_selected_native_os_adapter",
+      "source_path": "standalone/crates/om9-native-owner/src/file_dialog.rs",
+      "upstream_url": "https://github.com/microsoft/windows-rs",
+      "bindings_version": "0.62.2",
+      "cargo_checksum": "527fadee13e0c05939a6a05d5bd6eec6cd2e3dbd648b9f8e447c6518133d8580",
+      "license_notice": "Resources/licenses/windows-0.62.2.txt",
+      "license": "MIT (selected dual-license option)",
+      "license_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+      "dependency_closure": [
+        "existing windows0.62.2 pinned generated bindings; default features off; Win32_Foundation/System_Com/UI_Shell/UI_Shell_Common",
+        "existing windows-core/result/strings/interface/future closure",
+        "windows-sys0.61.2 own-window PID/thread check and audit-only modal probe",
+        "raw-window-handle0.6.2 for borrowed eframe HWND"
+      ],
+      "abi": "verified same-PID/current-thread HWND input; borrowed bounded Windows paths, owned optional PathBuf output and typed stage/HRESULT error. No document/transaction/native shape pointer crosses.",
+      "owner": "safe OM9 controller owns token/intent/dirty state/publication. Thread-bound RAII balances successful COM initialization, interfaces and COM task-string allocations; no third-party backend code copied.",
+      "thread": "synchronous current UI STA; MTA conflict is an error, not silently canceled. All COM owners drop before CoUninitialize, including S_FALSE balancing.",
+      "errors": "only Show HRESULT_FROM_WIN32(ERROR_CANCELLED) is Cancel. Other setup/Show/result HRESULTs surface in bounded UI error for explicit retry. Parent/path admission fails before document mutation.",
+      "scope": "native .om9 single-file Open/Save; Save disables OS overwrite prompt for the fresh owned OM9 confirmation. Actual OS successful selection/save/open still requires evidence.",
+      "unsafe_boundary": "generated Win32 COM calls and task-allocated PWSTR conversion are isolated in om9-native-owner. Bounded UTF-16 conversion assumes documented native NUL-terminated allocation; no native memory-safety certificate.",
+      "fixtures": [
+        "file_dialog::tests (3 including actual MTA/STA error)",
+        "ui::files::tests (1 native owner error preserves draft/operation)",
+        "ui::layer_dialog_audit::tests (4 guarded replay/focus/timing cases)",
+        "native File8checks/3 WindowsCancel and Layers modal10checks"
+      ],
+      "receipt": "docs/validation/2026-10-14-owned-file-win32.json",
+      "full_file_acceptance": false
+    },
+    {
+      "name": "authored_owned_file_selection_and_startup_audit",
+      "mode": "authored_opt_in_own_app_measurement",
+      "source_paths": [
+        "standalone/crates/om9-native-owner/src/file_dialog.rs",
+        "standalone/crates/om9-native-owner/src/dialog_probe.rs",
+        "standalone/crates/om9-app/src/native_picker.rs",
+        "standalone/crates/om9-app/src/ui/file_success_audit.rs",
+        "standalone/crates/om9-app/src/ui/startup_audit.rs"
+      ],
+      "binding_scope": "existing windows0.62.2 COM/Shell and windows-sys0.61.2; Win32_UI_Input_KeyboardAndMouse selected solely for IsWindowEnabled query; no desktop input APIs used",
+      "selection_boundary": "explicit authored fixture filename prefill; own-PID/thread/root/modal/title and enabled IDOK child WM_COMMAND; synchronous native Show/GetResult returns owned optional PathBuf; captured controller token still decides publication/overwrite",
+      "startup_boundary": "explicit audit directory env on actual --ui path; same Controller::from_file and native rendering; no startup input/document substitution",
+      "native_contract": "Win32 handle validity and COM NUL-terminated memory contracts remain native unsafe; no native memory-safety certificate; hung native calls/full global budgets remain open",
+      "full_file_acceptance": false
+    }
+  ],
+  "ui_assets": [
+    {
+      "mode": "existing_authored_om9_svg",
+      "count": 58,
+      "renderer": {
+        "crate": "resvg",
+        "version": "0.45.1",
+        "default_features": false,
+        "license": "Apache-2.0 OR MIT",
+        "repository": "https://github.com/linebender/resvg"
+      },
+      "dependency_closure": "Pinned Cargo.lock; pure Rust resvg/usvg/tiny-skia subset, no system fonts or raster image decoder features",
+      "source_receipt": "docs/validation/2026-10-13-standalone-icons.json",
+      "runtime": "Compile-time SVG includes; one lazy 64px raster texture per authored icon, reused at menu size",
+      "limitation": "Identity rendering only; unavailable operations stay disabled; no commercial bitmap imported"
+    }
+  ],
+  "persistence": {
+    "schema_version": 4,
+    "owner": "safe Rust document owns ResourceIds and immutable Arc byte payloads; no native pointer stored",
+    "file_publication": "om9-native-owner safe VerifiedFile API; isolated Windows FFI holds and hashes the same handle used for atomic rename",
+    "scope": "Immutable bytes, source/namespace/baseline/tombstone ledger and original/resolved per-definition contexts; schema4 adds explicit preset identity/independent Hidden. Explicit schema1/2/3 migrations preserve old IDs/payloads and do not infer preset slots from names. Exact-subset native import has separate scoped evidence.",
+    "receipt": "docs/validation/2026-10-14-owned-layer-state.json",
+    "historical_resource_receipt": "docs/validation/2026-10-13-standalone-resources.json",
+    "limitations": [
+      "Full native source-family admission and general retained remapping remain pending; selected current-state structural export has separate cold/publication evidence.",
+      "full archive resource families and external relink pending",
+      "global reservations and exact immutable payload deduplication pending"
+    ]
+  }
+}

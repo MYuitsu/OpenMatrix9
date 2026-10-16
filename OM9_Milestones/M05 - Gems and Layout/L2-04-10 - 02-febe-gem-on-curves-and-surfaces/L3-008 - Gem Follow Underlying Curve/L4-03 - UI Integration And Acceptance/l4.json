@@ -1,0 +1,481 @@
+{
+  "schema_version": "om9.m05.l4.v1",
+  "task_id": "OM9-L4-10-008-03",
+  "parent_l3_id": "OM9-L3-04-10-008",
+  "capability_id": "cap.04-10.gem-follow-underlying-curve",
+  "owner_module_id": "OM9-L2-04-10",
+  "l3_path": "specs/05-ms05-gems-and-layout/02-febe-gem-on-curves-and-surfaces/008-febe-gem-follow-underlying-curve/",
+  "milestone_id": "M05",
+  "execution_stage": "E10",
+  "phase": "UI_INTEGRATION_AND_ACCEPTANCE",
+  "title": "Gem Follow Underlying Curve — Ui Integration And Acceptance",
+  "status": "PLANNED_BLOCKED_G00_E09",
+  "review_level": "PLAN_ONLY",
+  "source_revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "source_checkout_required": true,
+  "source_paths_verified_locally": [],
+  "reuse_decision": "PENDING_LOCAL_SOURCE_AUDIT",
+  "estimated_scope": null,
+  "source_code_implementation_verified": false,
+  "purpose": "update gems when underlying curve/surface changes",
+  "parent_goal": "update gems when underlying curve/surface changes",
+  "inputs": [
+    "existing placement link and edited source geometry version"
+  ],
+  "outputs": [
+    "implementation/evidence/M05/10-008/03/ui_test.json",
+    "implementation/evidence/M05/10-008/03/manual_signoff.md",
+    "implementation/evidence/M05/10-008/03/screenshots/"
+  ],
+  "proposed_contract": {
+    "status": "DESIGN_INTENT_NOT_EXISITING_API",
+    "input": "existing placement link and edited source geometry version",
+    "output": "recomputed transforms under a transactional update",
+    "error_type": "Result<T, DomainError> (illustrative Rust convention; must align with checked-out workspace)",
+    "caller_boundary": "GUI/command registry -> canonical feature service; no geometry in widgets",
+    "ownership": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
+    "serialization": "Versioned feature parameters, semantic IDs, units mm, references/provenance; select existing project format after local audit"
+  },
+  "preconditions": [
+    "G00-01..G00-07 PASS, documented license/legal approval",
+    "E01..E09 PASS with actual test evidence and compatible contracts",
+    "QymCAD HEAD == pinned SHA or explicit approved rebaseline",
+    "Relevant module source/contract audited locally; never infer paths from planning ZIP",
+    "Rust-first app + OCCT C++ bridge for OCCT operations; approved FFI boundary",
+    "Audit task contract and dependency domain outputs have passed"
+  ],
+  "error_cases": [
+    "deleted path or ambiguous topology becomes visible conflict; preserve unchanged GemIds",
+    "Cancel and invalid input must not mutate document",
+    "No silent geometry fallback or fake-positive preview",
+    "Dependency contract mismatch => BLOCKED_CONTRACT"
+  ],
+  "geometry_invariants": [
+    "Use document mm and document tolerance; never hard-code arbitrary tolerance as PASS threshold",
+    "Gem cut/size metadata and rigid instance transform remain coherent",
+    "No naked/invalid BRep when closed geometry is claimed; OCCT validity check if shape is generated",
+    "Preview must be ephemeral; Accept is atomic transaction; Undo/Redo reverts exactly",
+    "Stable EntityId/GemId/FeatureId/LayerId when mapping is unambiguous; otherwise explicit conflict",
+    "Source dependency and style provenance survive save/open without silent detach",
+    "No dependencies on specs/90-after and no duplicate M06 settings or M07 cutters"
+  ],
+  "api_contract_and_callers": [
+    "Owner: OM9-L2-04-10; capability cap.04-10.gem-follow-underlying-curve",
+    "Module dependency: OM9-L2-04-09",
+    "Module dependency: OM9-L2-02-04",
+    "Module dependency: OM9-L2-02-05",
+    "Module dependency: OM9-L2-01-04",
+    "Downstream/caller: gem-placement-curves-surfaces"
+  ],
+  "files_expected_to_touch": [
+    "TO_DISCOVER_AFTER_LOCAL_AUDIT: do not invent Rust crate paths",
+    "specs/05-ms05-gems-and-layout/02-febe-gem-on-curves-and-surfaces/008-febe-gem-follow-underlying-curve/l3.json",
+    "implementation/evidence/M05/10-008/contract.md",
+    "implementation/evidence/M05/10-008/03/"
+  ],
+  "depends_on_task_ids": [
+    "OM9-M05-L4-10-008-02",
+    "OM9-M05-L4-10-011-03"
+  ],
+  "depends_on_stage_gates": [
+    "G00",
+    "E09"
+  ],
+  "depends_on_parent_l3_ids": [
+    "OM9-L3-04-10-011"
+  ],
+  "work_instructions": [
+    "Expose command through real menu/F6/selection context; use existing command dispatch and semantic state, not dummy buttons",
+    "Implement preview/cancel/confirm with no phantom document objects; ensure control values use mm/deg and invalid controls are disabled",
+    "Run guided UI scenario: Move control points of linked source; observe gems follow; Undo/Redo",
+    "Check viewport response, Undo/Redo, save/open and source-edit history with screenshots/log",
+    "Mark READY_FOR_MANUAL_TEST only after runtime UI and BE tests; DONE only after human sign-off"
+  ],
+  "automated_tests": [
+    "UI command registration resolves to real service; disabled state for missing selection/dependency",
+    "Automated preview/cancel/accept integration test with scene object counts",
+    "Automated command state + undo/redo + file reopen smoke test",
+    "No direct OCCT computation from UI widgets"
+  ],
+  "manual_steps_and_expected": [
+    {
+      "step": "Launch clean-build Windows app; record SHA/OS/GPU/OCCT",
+      "expected": "App boot, valid document and four viewports; no fatal error"
+    },
+    {
+      "step": "Move control points of linked source; observe gems follow; Undo/Redo",
+      "expected": "recomputed transforms under a transactional update"
+    },
+    {
+      "step": "Change any relevant parameter; check preview then press Cancel",
+      "expected": "No changes to document, entity count, undo stack or saved file"
+    },
+    {
+      "step": "Repeat and Accept, Undo/Redo, Save/Open then re-evaluate history where applicable",
+      "expected": "Expected placements or attributes return consistently; IDs/references stable or explicit conflict"
+    },
+    {
+      "step": "Attempt invalid input / absent selection",
+      "expected": "Clear error/disabled control; no silent no-op or document corruption"
+    }
+  ],
+  "fixture_ids": [
+    "M05-10-008-VALID",
+    "M05-10-008-INVALID",
+    "M05-10-008-ROUNDTRIP",
+    "M05-10-008-UI"
+  ],
+  "fixtures_design_note": "Proposed fixture identifiers; user-independent procedural geometry only; register exact files, SHA, inputs, oracle and tolerances when source/toolchain available.",
+  "origin_manual_refs": [
+    {
+      "manual_id": "book2",
+      "filename": "matrix_8_manual_book2.pdf",
+      "printed_page": 459,
+      "pdf_page_1based": 233,
+      "precision": "section_heading"
+    },
+    {
+      "manual_id": "book2",
+      "filename": "matrix_8_manual_book2.pdf",
+      "printed_pages": [
+        403,
+        434
+      ],
+      "pdf_pages_1based": [
+        177,
+        208
+      ],
+      "precision": "parent_l2_range"
+    }
+  ],
+  "manual_interpretation_note": "Manual references inherited from canonical L3; if parent_l2_range only, do not present as command-level proof. Reinspect relevant PDF pages before asserting behavior.",
+  "downstream_exclusion": "Dùng arc-length / surface evaluator chung.",
+  "pass_criteria": [
+    "Live command/selection/preview/commit/undo/save-open behavior is correct",
+    "BE regression and UI smoke have actual logs",
+    "Screenshots, expected-versus-actual and human sign-off recorded",
+    "No placeholder actions; unresolved blockers prevent DONE"
+  ],
+  "evidence_record_required": [
+    "task_id",
+    "status",
+    "source_sha",
+    "tested_sha",
+    "timestamp_utc",
+    "os_arch",
+    "rust_toolchain",
+    "occt_version_and_build",
+    "commands",
+    "exit_codes",
+    "stdout_stderr_paths",
+    "fixture_sources_and_shas",
+    "expected",
+    "actual",
+    "geometry_diff",
+    "blockers",
+    "reviewer",
+    "signoff_utc_if_febe"
+  ],
+  "failure_cases": [
+    "BLOCKED_G00_E09",
+    "BLOCKED_SOURCE",
+    "BLOCKED_CONTRACT",
+    "BLOCKED_REFERENCE_OR_ORACLE",
+    "BLOCKED_TOOLCHAIN",
+    "FAIL_TEST",
+    "FAIL_GEOMETRY",
+    "FAIL_MANUAL",
+    "PASS_EVIDENCED"
+  ],
+  "review_policy": "Generated plan only; no build or runtime validation asserted. PASS requires exact evidence and human manual signoff for FEBE.",
+  "task_boundaries": {
+    "in_scope": "UI_INTEGRATION_AND_ACCEPTANCE",
+    "out_of_scope": [
+      "Implementing upstream stage gates",
+      "Cloning/copying proprietary Gemvision gemstone libraries, brand icons or manual content",
+      "Owning physical prongs (M06) or cutters/manufacturing (M07)",
+      "Whole-project refactor unrelated to this L3"
+    ]
+  },
+  "execution_controls": {
+    "max_scope": "Single L3 one-phase deliverable; split further if changed code touches >1 independent algorithm or multiple owners",
+    "abort_on_missing_prerequisites": true,
+    "forbid_fabricated_results": true,
+    "human_signoff_required": true
+  },
+  "id": "OM9-L4-10-008-03",
+  "level": "L4",
+  "task_role": "WIRE_UI",
+  "overlay_task_id": "OM9-M05-L4-10-008-03",
+  "overlay_phase": "UI_INTEGRATION_AND_ACCEPTANCE",
+  "owner_l2_id": "OM9-L2-04-10",
+  "depends_on_l4_ids": [
+    "OM9-L4-10-008-02",
+    "OM9-L4-10-011-03"
+  ],
+  "evidence_path": "implementation/evidence/M05/10-008/03",
+  "manual_signoff_required": true,
+  "reference_policy": "Planning-only record: no build, runtime or geometry evidence is claimed. Anchor supplements are added by tools/apply_matrix_ref_supplements.py.",
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Đá cập nhật khi curve/surface nền đổi: test ID và vị trí trước/sau, không chỉ đếm lại.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-09",
+        "kind": "rhino5_core_chapter",
+        "title": "Associative History và dependency identity",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "98 / in 90 (chỉ ghi chú dimension)",
+        "capability_ids": [
+          "RCORE-09.C01",
+          "RCORE-09.C02",
+          "RCORE-09.C03",
+          "RCORE-09.C04",
+          "RCORE-09.C05",
+          "RCORE-09.C06",
+          "RCORE-09.C07",
+          "RCORE-09.C08"
+        ],
+        "fixture_ids": [
+          "RCORE-09.T01",
+          "RCORE-09.T03",
+          "RCORE-09.T04",
+          "RCORE-09.T05",
+          "RCORE-09.T08",
+          "RCORE-09.T11",
+          "RCORE-09.T12"
+        ],
+        "official_help": [
+          {
+            "label": "History / HistoryUpdate / HistoryPurge",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/history.htm"
+          },
+          {
+            "label": "Loft (history-enabled example)",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/loft.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      },
+      {
+        "anchor_id": "RCORE-07",
+        "kind": "rhino5_core_chapter",
+        "title": "NURBS editing và modeling",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "53-67 / in 45-59; 69-71 / in 61-63; 73-91 / in 65-83",
+        "capability_ids": [
+          "RCORE-07.C01",
+          "RCORE-07.C02",
+          "RCORE-07.C03",
+          "RCORE-07.C04",
+          "RCORE-07.C05",
+          "RCORE-07.C06",
+          "RCORE-07.C07",
+          "RCORE-07.C08",
+          "RCORE-07.C09",
+          "RCORE-07.C10",
+          "RCORE-07.C11",
+          "RCORE-07.C12"
+        ],
+        "fixture_ids": [
+          "RCORE-07.T01",
+          "RCORE-07.T03",
+          "RCORE-07.T05",
+          "RCORE-07.T07",
+          "RCORE-07.T08",
+          "RCORE-07.T10"
+        ],
+        "official_help": [
+          {
+            "label": "PointsOn / PointsOff",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/pointson.htm"
+          },
+          {
+            "label": "Rebuild",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuild.htm"
+          },
+          {
+            "label": "FitCrv",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/fitcrv.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-gem-declared-builders",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix90 (VB6 EXE)",
+        "path": "Matrix90/frmICBuilderEternity.frm",
+        "root": "ref/matrix/vb6-lite",
+        "unit": "frmICBuilder* gem forms",
+        "role_for_this_task": "frmICBuilderGemFollow panel",
+        "source_role": "legacy gem builder panels",
+        "detail": "Declared legacy gem builder panels: Baguette, BeadOnSurface, Bezel, BrightCutChannel, Channel, CustomGem, Emerald, Eternity, GemControl, GemFollow, GemLoader, GemOnCrv, GemOnSurface, GemReporter, HaloBuilder, Pave, PaveAzure, PaveProng, ClusterBuilder, with modIC*/modPave* modules carrying the procedures.",
+        "observed_identifiers": [
+          "frmICBuilderBaguette",
+          "frmICBuilderEmerald",
+          "frmICBuilderCustomGem",
+          "frmICBuilderGemControl",
+          "frmICBuilderGemFollow",
+          "frmICBuilderGemLoader",
+          "frmICBuilderGemOnCrv",
+          "frmICBuilderGemOnSurface",
+          "frmICBuilderGemReporter",
+          "frmCHaloBuilder",
+          "frmICBuilderPave",
+          "frmICBuilderPaveAzure",
+          "frmICBuilderPaveProng",
+          "frmBuilderClusterBuilderOld"
+        ],
+        "verification_state": "IDENTIFIER_INDEXED"
+      }
+    ],
+    "manual_reference_sheets": [
+      {
+        "anchor_id": "mx-manual-gem-follow",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 2",
+        "pages": "233-234",
+        "section": "Gem Follow",
+        "topic": "gems follow a changed underlying curve/surface",
+        "sheet_id": "m8book2__p233-234__gem-follow",
+        "path": "OM9_Milestones/M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-008 - Gem Follow Underlying Curve/reference/text/m8book2__p233-234__gem-follow.md",
+        "role_for_this_task": "Gem Follow behaviour when the base changes",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      },
+      {
+        "anchor_id": "mx-manual-history",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 1",
+        "pages": "48-53",
+        "section": "History",
+        "topic": "Matrix History family: record, update, clear and reporting",
+        "sheet_id": "m8book1__p48-53__031-history",
+        "path": "OM9_Milestones/M04 - Builder and History/L2-01-04 - 01-be-associative-dependency-rebuild/reference/text/m8book1__p48-53__031-history.md",
+        "role_for_this_task": "associative update contract",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      }
+    ],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "INTEGRATE",
+    "role_label_on_record": "WIRE_UI",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-04-10",
+    "goal": "update gems when underlying curve/surface changes",
+    "algorithm_on_record": "Use document mm and document tolerance; never hard-code arbitrary tolerance as PASS threshold. Gem cut/size metadata and rigid instance transform remain coherent. No naked/invalid BRep when closed geometry is claimed; OCCT validity check if shape is generated. Preview must be ephemeral; Accept is atomic transaction; Undo/Redo reverts exactly. Stable EntityId/GemId/FeatureId/LayerId when mapping is unambiguous; otherwise explicit conflict. Source dependency and style provenance survive save/open without silent detach. No dependencies on specs/90-after and no duplicate M06 settings or M07 cutters. Proposed fixture identifiers; user-independent procedural geometry only; register exact files, SHA, inputs, oracle and tolerances when source/toolchain available. Manual references inherited from canonical L3; if parent_l2_range only, do not present as command-level proof. Reinspect relevant PDF pages before asserting behavior. Expose command through real menu/F6/selection context; use existing command dispatch and semantic state, not dummy buttons. Implement preview/cancel/confirm with no phantom document objects; ensure control values use mm/deg and invalid controls are disabled. Run guided UI scenario: Move control points of linked source; observe gems follow; Undo/Redo. Check viewport response, Undo/Redo, save/open and source-edit history with screenshots/log. Mark READY_FOR_MANUAL_TEST only after runtime UI and BE tests; DONE only after human sign-off",
+    "proposed_signature_on_record": "input: existing placement link and edited source geometry version; output: recomputed transforms under a transactional update; error_type: Result<T, DomainError> (illustrative Rust convention; must align with checked-out workspace)",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "compose owners; re-check each owner's contract at its own revision",
+    "sketch": "// Gem Follow Underlying Curve — Ui Integration And Acceptance\n// ROLE: INTEGRATE - wire owners together; do not reimplement their logic.\n//\n// Purpose: update gems when underlying curve/surface changes\n// Boundary: this task may only orchestrate; each step below must already be owned\n//           and tested by the module named in the record's external_owner_interfaces.\n//\n// Order: Use document mm and document tolerance; never hard-code arbitrary tolerance as PASS threshold. Gem cut/size metadata and rigid instance transform remain coherent. No naked/invalid BRep when closed geometry is claimed; OCCT validity check if shape is generated. Preview must be ephemeral; Accept is atomic transaction; Undo/Redo reverts exactly. Stable EntityId/GemId/FeatureId/LayerId when mapping is unambiguous; otherwise explicit conflict. Source dependency and style provenance survive save/open without silent detach. No dependencies on specs/90-after and no duplicate M06 settings or M07 cutters. Proposed fixture identifiers; user-independent procedural geometry only; register exact files, SHA, inputs, oracle and tolerances when source/toolchain available. Manual references inherited from canonical L3; if parent_l2_range only, do not present as command-level proof. Reinspect relevant PDF pages before asserting behavior. Expose command through real menu/F6/selection context; use existing command dispatch and semantic state, not dummy buttons. Implement preview/cancel/confirm with no phantom document objects; ensure control values use mm/deg and invalid controls are disabled. Run guided UI scenario: Move control points of linked source; observe gems follow; Undo/Redo. Check viewport response, Undo/Redo, save/open and source-edit history with screenshots/log. Mark READY_FOR_MANUAL_TEST only after runtime UI and BE tests; DONE only after human sign-off\n//\n// Integration checklist:\n//   1. resolve owners through the parent service contract, not through UI handles\n//   2. keep one transaction boundary: either the whole sequence commits or nothing does\n//   3. on any step error, roll back what this sequence already changed and report the failing step\n//   4. assert identity survives: same stable IDs before and after, no stale scene reference\n//\n// Contract under test: input: existing placement link and edited source geometry version; output: recomputed transforms under a transactional update; error_type: Result<T, DomainError> (illustrative Rust convention; must align with checked-out workspace)\n// Oracle: UI command registration resolves to real service; disabled state for missing selection/dependency\n// Negative oracle: deleted path or ambiguous topology becomes visible conflict; preserve unchanged GemIds",
+    "domain_algorithm_reference": {
+      "note_id": "algo.gem.on.curve.family",
+      "stage": "3. Đặt đá theo curve - cả bốn biến thể và khác biệt giữa chúng",
+      "why_for_this_task": "Đi theo curve bên dưới: điểm đến là điểm trên curve dịch theo trục y cục bộ của frame, và pháp tuyến được đo LẠI từ điểm đã dịch.",
+      "om9_backend": "pure Rust cho phân bố, nội suy và trật tự transform; openNURBS/OCCT cho frame, hộp bao và curve",
+      "steps_cited": [4, 5],
+      "algorithm_steps": [
+        "S3. Dựng offset đặt đá theo placement method (Culet/Girdle/Table) dưới dạng một phép dịch z trong hệ viên đá.",
+        "S4. Với mỗi viên: xác định chỉ số, nội suy tuyến tính đường kính và offset, dịch điểm theo trục y của frame, đo lại pháp tuyến nếu phương pháp yêu cầu, dựng frame 3 điểm."
+      ],
+      "source_file": "MatrixBuilder/GemOnCurveAdvanced/GemOnCurveAdvancedBuilder.cs",
+      "source_methods": [
+        "UpdateBuilder",
+        "CalcXform",
+        "AddToDocument",
+        "Initialize",
+        "GetValues",
+        "UpdateHandles",
+        "SetGemShape"
+      ],
+      "boundaries_carried": [
+        "Bốn biến thể KHÁC NHAU thật và KHÔNG được gộp: Advanced dùng start/end và chia lại khoảng dư; Count dùng số lượng và huỷ nếu không vừa; List theo thứ tự danh sách không chia đều; Multi thêm phân bố theo hàng và pattern.",
+        "Count và List dùng cặp nửa rộng NGƯỢC với Advanced ở chiều tiến - nếu OM9 dùng một công thức chung thì sẽ lệch chỗ chèn.",
+        "Advanced có HAI mẫu số khác nhau cho cùng một thao tác chia lại; phải đo lại trên document thật để biết cái nào áp khi nào.",
+        "Ý nghĩa nhãn của Direction (Start/End) là INFERRED từ mã, chưa xác minh trên UI.",
+        "Giá trị mặc định nạp từ user data đã lưu (last-used) CHƯA kiểm; các mặc định ghi ở trên là mặc định của nhà máy.",
+        "Chính sách huỷ khi update tương tác có để lại viên đã đặt - đọc thấy nhưng chưa xác minh hệ quả hiển thị.",
+        "Công thức trọng lượng đá chỉ đúng cho đá tròn; việc OM9 có phải tái tạo con số carat là quyết định sản phẩm.",
+        "Chưa chứng minh gì về runtime; mọi con số phải đo lại trước khi thành đặc tả."
+      ],
+      "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
+    }
+  },
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}

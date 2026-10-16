@@ -1,0 +1,269 @@
+{
+  "scope": "authored_native_dependency_probe_only",
+  "status": "validated_probe_not_integrated",
+  "binary_sha256": "e383669f8e622e23231fea205fbdab753ea8cec9db9e033d1213ee0780e756be",
+  "fixture_sha256": "7cfe868c230053eea2068c4e9f071df9349ad34f0a8bf54d70d11eaa9002307a",
+  "inventory": {
+    "archive_version": 50,
+    "objects": [
+      {
+        "name": "Point",
+        "type": "Point",
+        "point": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "name": "Line",
+        "type": "Line",
+        "start": [
+          0,
+          0,
+          0
+        ],
+        "end": [
+          12,
+          6,
+          0
+        ]
+      },
+      {
+        "name": "RationalArc",
+        "type": "NurbsCurve",
+        "degree": 2,
+        "rational": true,
+        "cv_count": 3,
+        "domain": [
+          2,
+          4
+        ],
+        "midpoint": [
+          7.0710678118654755,
+          7.0710678118654755,
+          0
+        ]
+      },
+      {
+        "name": "Mesh",
+        "type": "Mesh",
+        "faces": [
+          [
+            0,
+            1,
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "name": "Cloud",
+        "type": "Cloud",
+        "points": [
+          [
+            2,
+            3,
+            4
+          ],
+          [
+            5,
+            6,
+            7
+          ]
+        ],
+        "colors": [
+          [
+            255,
+            0,
+            0
+          ],
+          [
+            0,
+            255,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "pe_imports": [
+    "ADVAPI32.dll",
+    "DWrite.dll",
+    "GDI32.dll",
+    "KERNEL32.dll",
+    "MSVCP140.dll",
+    "RPCRT4.dll",
+    "SHELL32.dll",
+    "SHLWAPI.dll",
+    "USER32.dll",
+    "VCRUNTIME140.dll",
+    "VCRUNTIME140_1.dll",
+    "api-ms-win-crt-convert-l1-1-0.dll",
+    "api-ms-win-crt-environment-l1-1-0.dll",
+    "api-ms-win-crt-filesystem-l1-1-0.dll",
+    "api-ms-win-crt-heap-l1-1-0.dll",
+    "api-ms-win-crt-locale-l1-1-0.dll",
+    "api-ms-win-crt-math-l1-1-0.dll",
+    "api-ms-win-crt-runtime-l1-1-0.dll",
+    "api-ms-win-crt-stdio-l1-1-0.dll",
+    "api-ms-win-crt-string-l1-1-0.dll",
+    "api-ms-win-crt-time-l1-1-0.dll",
+    "api-ms-win-crt-utility-l1-1-0.dll",
+    "ole32.dll"
+  ],
+  "native_owner": {
+    "runner_sha256": "92639edd12a54f00f66783b61e0922dd36d31c3d3a26cb65d6a8ad166a0fb418",
+    "runs": [
+      {
+        "limits": {
+          "native_committed_bytes": 134217728,
+          "reservation_bytes": 167968768,
+          "stderr_bytes": 16384,
+          "stdout_bytes": 16777216
+        },
+        "stats": {
+          "active_processes": 0,
+          "elapsed_ms": 435,
+          "exited": true,
+          "peak_committed_bytes": 34553856,
+          "pid": 84220
+        },
+        "status": "native_owner_result",
+        "stderr": "",
+        "stdout": "{\"archive_version\":50,\"objects\":[{\"name\":\"Point\",\"type\":\"Point\",\"point\":[1,2,3]},{\"name\":\"Line\",\"type\":\"Line\",\"start\":[0,0,0],\"end\":[12,6,0]},{\"name\":\"RationalArc\",\"type\":\"NurbsCurve\",\"degree\":2,\"rational\":true,\"cv_count\":3,\"domain\":[2,4],\"midpoint\":[7.0710678118654755,7.0710678118654755,0]},{\"name\":\"Mesh\",\"type\":\"Mesh\",\"faces\":[[0,1,2,2]]},{\"name\":\"Cloud\",\"type\":\"Cloud\",\"points\":[[2,3,4],[5,6,7]],\"colors\":[[255,0,0],[0,255,0]]}]}\r\n"
+      },
+      {
+        "limits": {
+          "native_committed_bytes": 134217728,
+          "reservation_bytes": 167968768,
+          "stderr_bytes": 16384,
+          "stdout_bytes": 16777216
+        },
+        "stats": {
+          "active_processes": 0,
+          "elapsed_ms": 424,
+          "exited": true,
+          "peak_committed_bytes": 34185216,
+          "pid": 41808
+        },
+        "status": "native_owner_result",
+        "stderr": "",
+        "stdout": "{\"archive_version\":50,\"objects\":[{\"name\":\"Point\",\"type\":\"Point\",\"point\":[1,2,3]},{\"name\":\"Line\",\"type\":\"Line\",\"start\":[0,0,0],\"end\":[12,6,0]},{\"name\":\"RationalArc\",\"type\":\"NurbsCurve\",\"degree\":2,\"rational\":true,\"cv_count\":3,\"domain\":[2,4],\"midpoint\":[7.0710678118654755,7.0710678118654755,0]},{\"name\":\"Mesh\",\"type\":\"Mesh\",\"faces\":[[0,1,2,2]]},{\"name\":\"Cloud\",\"type\":\"Cloud\",\"points\":[[2,3,4],[5,6,7]],\"colors\":[[255,0,0],[0,255,0]]}]}\r\n"
+      },
+      {
+        "reason": "NativeExit(1)",
+        "stats": {
+          "active_processes": 0,
+          "elapsed_ms": 441,
+          "exited": true,
+          "peak_committed_bytes": 34263040,
+          "pid": 70552
+        },
+        "status": "native_owner_rejected",
+        "stderr": "OM9 openNURBS probe: native archive read\r\n"
+      }
+    ],
+    "policy": "suspended before job assignment, one process, explicit stdio-only inheritance, committed memory/output caps, cancellation/deadline, exclusive nonblocking pipe pumping and one teardown deadline for exit/EOF/observed job accounting",
+    "sources": [
+      {
+        "path": "standalone/crates/om9-native-owner/Cargo.toml",
+        "sha256": "8bf82882e5a6063f500a5a9d629c0a67c28aa8d4bd55f55b0102d66af8ee3eff"
+      },
+      {
+        "path": "standalone/crates/om9-native-owner/src/bin/native_runner.rs",
+        "sha256": "4c8892e951aa323a154507d180c1039d671658d541202e86cf807a71aea9b838"
+      },
+      {
+        "path": "standalone/crates/om9-native-owner/src/bin/process_fixture.rs",
+        "sha256": "b4b78ca9a73627d39cd43db4613361e48a3b4e48ebb809cb145a2d2071d8c9e9"
+      },
+      {
+        "path": "standalone/crates/om9-native-owner/src/lib.rs",
+        "sha256": "a6536e9e9ce77c99963cb941c7c9a7566b57bc145d0740283bb71e180edb7906"
+      },
+      {
+        "path": "standalone/crates/om9-native-owner/src/verified_file.rs",
+        "sha256": "80cfcda63211ca8897272e73babfd9097a3a43050a8f215952ca9f14a7923799"
+      },
+      {
+        "path": "standalone/crates/om9-native-owner/src/windows.rs",
+        "sha256": "d0b5be38d6418617e7c20fadad094a5d9703105344bf76192ed80f8dff9e16c9"
+      },
+      {
+        "path": "standalone/crates/om9-native-owner/tests/process_owner.rs",
+        "sha256": "605062d78f0a4e9d814b0b2553c5b2b69766f1b84fd24e6168a00cb00b00dba9"
+      },
+      {
+        "path": "standalone/crates/om9-native-owner/tests/teardown.rs",
+        "sha256": "ef61b002482f5ea4d619b176daf3ca90b99c5a71da0da853a1b00e62f59ef86a"
+      },
+      {
+        "path": "standalone/crates/om9-native-owner/tests/verified_file.rs",
+        "sha256": "d9dbcd2edcca3f4004addf36cd5de86ec512ecf3559378a69f6ebb55844e4f66"
+      }
+    ]
+  },
+  "source": {
+    "repository": "https://github.com/mcneel/opennurbs",
+    "commit": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "working_tree_clean": true,
+    "license_git_blob_sha256": "de437cd429817f50999710543b9d3e743b17b35b4c96842393b9d39f7bb9b3bd",
+    "license_worktree_sha256": "ca1a15f52b3eef950b4d0e0ffe90ef3e4ac0dedcefe32049ff22253cb32ba2a4",
+    "license_text_matches_existing_notice": true,
+    "key_files": [
+      {
+        "path": "CMakeLists.txt",
+        "sha256": "c9a61b8f7584f3574a27c78364ca0e13fde813bf4a23b9c17dd55b541ee62cad"
+      },
+      {
+        "path": "opennurbs_extensions.h",
+        "sha256": "d7a39cbf8b8900fb02df7634c0b3d12bd51ff27145b540296be0896641946b42"
+      },
+      {
+        "path": "opennurbs_pointcloud.h",
+        "sha256": "42e21a2b7c95e16a923d66c0c3998a05bd462945d4258ce1cb7cedaa05aae1e2"
+      }
+    ]
+  },
+  "build": {
+    "generator": "Visual Studio 17 2022",
+    "compiler": "MSVC 19.44.35208.0",
+    "compiler_path": "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+    "sdk": "10.0.22621.0",
+    "architecture": "x64",
+    "configuration": "Release",
+    "runtime": "MD dynamic MSVC CRT",
+    "targets": [
+      "om9-opennurbs-probe",
+      "opennurbsStatic",
+      "zlib"
+    ],
+    "libraries": [
+      "Shlwapi",
+      "Usp10",
+      "Windows/MSVC OS dependencies in actual PE imports"
+    ],
+    "cmake_cache_sha256": "30e2006d3d025e1812142c68cf1b927ffafddce1ed3588e25965b6f37c21b701",
+    "authored_sources": [
+      {
+        "path": "standalone/native/CMakeLists.txt",
+        "sha256": "a0ccf4caef12c0ae127ab80dcdbb9779e828a75d380db8409234737a509dda4e"
+      },
+      {
+        "path": "standalone/native/opennurbs_probe.cpp",
+        "sha256": "4c717186f0a5705634b2e5e5ec1d37901fe6090f0214fb908c4059754d5cd238"
+      },
+      {
+        "path": "tools/validate_standalone_opennurbs_probe.py",
+        "sha256": "8e6e00d5d2bcec194a822b2872170671c862939d6d8d8019d565f161813e6657"
+      }
+    ]
+  },
+  "limitations": [
+    "Not an OM9 import/export command or native memory-safety/global aggregate-budget gate",
+    "Retained/edited/deleted merge, blocks and full family/field matrix pending",
+    "No Rhino 5 open/edit/runtime acceptance",
+    "Cloud per-point hidden flags are runtime-only in openNURBS and not serialized natively"
+  ]
+}

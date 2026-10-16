@@ -1,0 +1,471 @@
+{
+  "level": "L4",
+  "id": "OM9-M00-L4-01-02-03",
+  "milestone": "M00",
+  "parent_l3_id": "OM9-M00-L3-01-02",
+  "owner_l2_id": "OM9-M00-L2-01",
+  "title": "Kiểm tra phạm vi chức năng bằng test thực có",
+  "planning_state": "NOT_STARTED",
+  "task": {
+    "task_id": "OM9-M00-L4-01-02-03",
+    "parent_l3_id": "OM9-M00-L3-01-02",
+    "owner_module_id": "OM9-M00-L2-01",
+    "milestone_id": "M00",
+    "gate_id": "G00-01",
+    "execution_stage": "G00",
+    "title": "Kiểm tra phạm vi chức năng bằng test thực có",
+    "work_kind": "AUDIT",
+    "mandatory_for_windows_mvp": true,
+    "purpose": "Không coi README features là chức năng đã thử; phân cấp feature evidence",
+    "inputs": [
+      "QymCAD pinned HEAD SHA = 746a17f127897e921a57118b6caad08968602bf5",
+      "Relevant OpenMatrix9 v0.10 contracts and manifest",
+      "Source files and optional real build/test environment"
+    ],
+    "outputs": [
+      "implementation/evidence/M00/G00-01/qymcad-feature-evidence.csv"
+    ],
+    "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+    "github_sources": [
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-acceptance/src/lib.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/src/lib.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-acceptance/src/matrix.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/src/matrix.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-acceptance/tests/acceptance",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/tests/acceptance",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-core/src/feature.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/feature.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-core/src/model.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/model.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-core/src/names.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/names.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-core/src/refs.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/refs.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-core/tests/rebind_is_explicit.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/tests/rebind_is_explicit.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-core/tests/user_file_roundtrip.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/tests/user_file_roundtrip.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-io/Cargo.toml",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/Cargo.toml",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-io/src/formats.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/formats.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-io/src/project_file.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/project_file.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-io/src/stl_export.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/stl_export.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-io/tests/project_file.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/tests/project_file.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/Cargo.toml",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/Cargo.toml",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/build.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/build.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/src/lib.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/lib.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/src/naming.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/naming.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/src/occt_bridge.cpp",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/occt_bridge.cpp",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/src/occt_common.hpp",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/occt_common.hpp",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/src/ops/primitives.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/ops/primitives.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/src/shape.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/shape.rs",
+        "remote_evidence": "FILE_CONTENT_READ"
+      },
+      {
+        "repository": "https://github.com/QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/tests/every_operation_goes_through_the_door.rs",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/tests/every_operation_goes_through_the_door.rs",
+        "remote_evidence": "PATH_LISTED_OR_CANDIDATE_REVERIFY"
+      }
+    ],
+    "reuse_decision": "PENDING_RUNTIME_SOURCE_AUDIT",
+    "steps": [
+      "Đối chiếu README với tests/ và acceptance",
+      "lấy một test cho mỗi capability",
+      "phân biệt unit, integration, GUI acceptance"
+    ],
+    "test_steps": [
+      "Validate produced evidence at implementation/evidence/M00/G00-01/qymcad-feature-evidence.csv",
+      "feature map có TEST_PRESENT/NOT_FOUND/UNVERIFIED, không tự nhận test PASS nếu chưa chạy"
+    ],
+    "pass_criteria": [
+      "feature map có TEST_PRESENT/NOT_FOUND/UNVERIFIED, không tự nhận test PASS nếu chưa chạy"
+    ],
+    "failure_cases": [
+      "No access to pinned QymCAD source or missing file: BLOCKED_SOURCE",
+      "Missing executable/log/fixture for a PROBE: BLOCKED_NOT_EXECUTED",
+      "License or data integrity conflict: FAIL_BLOCKER"
+    ],
+    "depends_on_task_ids": [
+      "OM9-M00-L4-01-02-02"
+    ],
+    "test_commands_suggested": "cargo test -p qymcad-acceptance --locked",
+    "evidence_record_required": [
+      "status",
+      "source_sha",
+      "tested_sha",
+      "timestamp_utc",
+      "os_arch",
+      "toolchain",
+      "exact_commands",
+      "exit_code",
+      "stdout_stderr_path",
+      "fixture_ids",
+      "expected",
+      "actual",
+      "blockers",
+      "reviewer"
+    ],
+    "review_policy": "Requires real execution evidence; REMOTE_VERIFIED_PATH is not a completed test.",
+    "estimated_scope": "PENDING_LOCAL_SOURCE_AUDIT",
+    "origin_manual_refs": []
+  },
+  "implementation_contract": {
+    "pinned_repo": "QymIs-Tech/QymCAD",
+    "kind": "AUDIT",
+    "prerequisites": [
+      "OM9-M00-L4-01-02-02"
+    ],
+    "source_paths": [
+      "crates/qymcad-acceptance/src/lib.rs",
+      "crates/qymcad-core/tests/user_file_roundtrip.rs"
+    ],
+    "procedure": [
+      "Liệt kê test thực có trong core, kernel, io và acceptance; giữ path và tên test",
+      "Dùng cargo test --workspace -- --list nếu có runtime; nếu không chỉ SOURCE_ONLY",
+      "Phân loại test kiểm tra logic, topology, UI, I/O; ghi những hành vi Matrix chưa được phủ"
+    ],
+    "fixture": "tests from core/kernel/io",
+    "oracle": "Mỗi dòng ghi test_path, test_name, actual_run, covered_behavior; không khai PASS nguồn-only",
+    "negative": "Tên test không tồn tại = BLOCKED_SOURCE",
+    "commands_preview": [
+      "git -C vendor-research/QymCAD rev-parse HEAD",
+      "git -C vendor-research/QymCAD status --porcelain",
+      "git -C vendor-research/QymCAD ls-files"
+    ],
+    "microtasks": [],
+    "approval_required": false
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "source_review": {
+    "status": "REMOTE_SOURCE_REVIEWED_NOT_RUNTIME_VERIFIED",
+    "reviewed_utc": "2026-10-15",
+    "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+    "finding": "Có kiểm thử acceptance Session, format enum, FFI guards và rebinding; đọc mã kiểm thử không bằng chạy PASS.",
+    "provisional_technical_decision": "REUSE_CANDIDATE",
+    "implementation_guidance": "Chạy cargo test --workspace và lưu log/exit-code theo runner.",
+    "verified_source_evidence": [
+      {
+        "source_id": "accept",
+        "repository": "QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-acceptance/src/lib.rs",
+        "blob_sha": null,
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/src/lib.rs",
+        "lines_reviewed": "1-100",
+        "verification": "GITHUB_CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "source_id": "ffi_test",
+        "repository": "QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-kernel/tests/every_entry_catches_what_occt_throws.rs",
+        "blob_sha": "1b51de315a3cc5a227ac6e7f8366b041346cae27",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/tests/every_entry_catches_what_occt_throws.rs",
+        "lines_reviewed": "1-160",
+        "verification": "GITHUB_CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "source_id": "rebind",
+        "repository": "QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-core/tests/rebind_is_explicit.rs",
+        "blob_sha": "e7ecd98c2982a8956dea323c4dfc5c2692679ffd",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/tests/rebind_is_explicit.rs",
+        "lines_reviewed": "1-83",
+        "verification": "GITHUB_CONTENT_READ_AT_PINNED_SHA"
+      },
+      {
+        "source_id": "fmt_test",
+        "repository": "QymIs-Tech/QymCAD",
+        "revision": "746a17f127897e921a57118b6caad08968602bf5",
+        "path": "crates/qymcad-io/tests/formats.rs",
+        "blob_sha": "a5b969d707337c1ff44b40d42c1dad7f81171101",
+        "url": "https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/tests/formats.rs",
+        "lines_reviewed": "1-81",
+        "verification": "GITHUB_CONTENT_READ_AT_PINNED_SHA"
+      }
+    ],
+    "runtime_tests_performed": false,
+    "gate_pass": false,
+    "caveat": "GitHub source inspection only; no QymCAD clone, cargo build, OCCT runtime, GPU, 3DM import conversion or legal approval."
+  },
+  "small_model_workflow": {
+    "model_target": "SMALL_MODEL_SINGLE_TASK",
+    "task_complexity": "B_GUIDED",
+    "execution_procedure": [
+      "Liệt kê test thực có trong core, kernel, io và acceptance; giữ path và tên test",
+      "Dùng cargo test --workspace -- --list nếu có runtime; nếu không chỉ SOURCE_ONLY",
+      "Phân loại test kiểm tra logic, topology, UI, I/O; ghi những hành vi Matrix chưa được phủ"
+    ],
+    "acceptance_oracle": "Mỗi dòng ghi test_path, test_name, actual_run, covered_behavior; không khai PASS nguồn-only",
+    "stop_condition": "Tên test không tồn tại = BLOCKED_SOURCE",
+    "fixture_requirement": "tests from core/kernel/io",
+    "auto_approval_forbidden": false,
+    "local_source_verification_required": true,
+    "microsteps": [],
+    "known_upstream_source_paths": [
+      "crates/qymcad-acceptance/src/lib.rs",
+      "crates/qymcad-core/tests/user_file_roundtrip.rs"
+    ],
+    "source_evidence_class": "GITHUB_FILE_READ_AND_PINNED",
+    "risk_note": "Source inspection does not prove runtime PASS; verify local pinned checkout and exact commands."
+  },
+  "agent_runbook_markdown": "# OM9-M00-L4-01-02-03 — Kiểm tra phạm vi chức năng bằng test thực có\n\n**Phiên bản:** v0.13 | **Gate:** G00-01 | **Loại:** AUDIT | **Mức:** B_GUIDED | **Trạng thái ban đầu:** `NOT_RUN`.\n\n## 0. Tiền điều kiện (bắt buộc, không tự đoán)\n\n- Chỉ đọc và chạy đúng **một** L4 trong phiên; ID `OM9-M00-L4-01-02-03`.\n- Đã có evidence PASS thật của: `OM9-M00-L4-01-02-02`; nếu không thì `BLOCKED_DEPENDENCY`.\n- QymCAD checkout riêng tại SHA `746a17f127897e921a57118b6caad08968602bf5`; `git rev-parse HEAD` phải chính xác. Không sửa upstream checkout; PoC chỉ trong worktree hoặc nhánh OpenMatrix9.\n- OpenMatrix9 canonical 95 L2 / 772 L3 giữ nguyên. Không tạo PASS giả bằng cách chỉ đọc GitHub.\n- Môi trường Windows/OCCT/GPU/3DM **nếu cần** phải có bằng chứng thật; không có thì `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n\n## 1. Những file phải mở và xác minh\n\n- `crates/qymcad-acceptance/src/lib.rs` — https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/src/lib.rs (kiểm tra path/symbol khi checkout; không coi URL là bằng chứng chạy)\n- `crates/qymcad-core/tests/user_file_roundtrip.rs` — https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/tests/user_file_roundtrip.rs (kiểm tra path/symbol khi checkout; không coi URL là bằng chứng chạy)\n\n- Nếu file không tồn tại hoặc API đã khác ở checkout: `BLOCKED_SOURCE`, ghi file và lỗi; **không tự đoán tên khác rồi tiếp tục**.\n- File kiểm thử gợi ý để tìm testcase đang có: `crates/qymcad-core/tests/user_file_roundtrip.rs`. Tên test phải đối chiếu `cargo test ... -- --list` trước khi chạy.\n\n## 2. Quy trình thực hiện từng bước\n\n1. **Đọc nguồn:** Liệt kê test thực có trong core, kernel, io và acceptance; giữ path và tên test.\n2. **Thực hiện việc chính:** Dùng cargo test --workspace -- --list nếu có runtime; nếu không chỉ SOURCE_ONLY.\n3. **Đối chiếu và xuất kết quả:** Phân loại test kiểm tra logic, topology, UI, I/O; ghi những hành vi Matrix chưa được phủ.\n4. **Xác minh đầu ra:** kiểm tra cấu trúc, ghi expected/actual và sha256 của file evidence; nguồn từ GitHub không thay thế runtime evidence.\n5. **Tự kiểm tra một lần:** áp dụng oracle bên dưới, chưa thỏa thì giữ FAIL/BLOCKED và ghi next_action, **không lặp vô hạn**.\n\n## 3. Các lệnh bắt đầu (không phải bằng chứng đã chạy)\n\n```shell\ngit -C vendor-research/QymCAD rev-parse HEAD\ngit -C vendor-research/QymCAD status --porcelain\ngit -C vendor-research/QymCAD ls-files\n```\n\nTrên Windows dùng PowerShell tương đương; lệnh Linux/macOS chỉ là tham khảo. Chạy từ OpenMatrix9 root trừ khi có `cd`. Các lệnh `cargo` chỉ thực hiện sau khi đã chuẩn bị OCCT; nếu thiếu môi trường, ghi `BLOCKED_ENV` cùng thông báo thật.\n\n## 4. Fixture và oracle độc lập\n\n- **Fixture tối thiểu:** tests from core/kernel/io.\n- **Kết quả đúng:** Mỗi dòng ghi test_path, test_name, actual_run, covered_behavior; không khai PASS nguồn-only.\n- **Negative test / điều kiện dừng:** Tên test không tồn tại = BLOCKED_SOURCE.\n- Với AUDIT: kiểm báo cáo chứa nguồn chứng minh cụ thể; không được thay source review bằng khẳng định runtime.\n- Với PROBE: ghi command, exit_code, stdout/stderr, toolchain, expected/actual, fixture SHA và thử lỗi; thiếu run thật thì không PASS.\n\n## 6. Đường dẫn đầu ra và định dạng evidence\n\n- **Artifact dự kiến:** `implementation/evidence/M00/G00-01/qymcad-feature-evidence.csv`.\n- **Evidence JSON:** `implementation/evidence/M00/G00-01/OM9-M00-L4-01-02-03.evidence.json`.\n- Ghi `status` một trong `PASS|FAIL|BLOCKED_SOURCE|BLOCKED_DEPENDENCY|BLOCKED_ENV|BLOCKED_FIXTURE|BLOCKED_APPROVAL|NOT_TARGETED|NOT_RUN`.\n- Không lưu evidence ngay trong đặc tả; để riêng `implementation/evidence` và dùng `python tools/validate_m00_execution.py`.\n- Trình kiểm `validate_m00_execution.py` chỉ xác nhận tính toàn vẹn evidence, **không chứng nhận chất lượng thuật toán**; người review phải kiểm trực tiếp logs/fixtures khi cần.\n\n## 7. Handoff cho tác vụ tiếp theo\n\nSau khi có bằng chứng, cập nhật ledger; báo 4 mục: `đã thực hiện`, `kết quả đo`, `blocker`, `next_task`. Khi gặp blocker, dừng; không tự động mở L4 kế tiếp.\n\n## 9. Ghi log không bịa số liệu\n\nChạy lệnh thực qua `python tools/m00_capture.py --task <TASK_ID> --cwd vendor-research/QymCAD --label <TEN_BUOC> -- <command>`, sau đó `m00_init_evidence.py <TASK_ID>` nếu chưa có evidence JSON. Thay placeholder bằng task này và đọc file log; không copy một exit code ví dụ.\n\n## Nguồn tham chiếu bắt buộc đối chiếu (Matrix9 / Rhino 5) — v0.16\n\n**Trạng thái bổ sung:** `requirements_only_not_runtime_evidence` — chỉ là yêu cầu đối chiếu, không phải nghiệm thu.\n\n**Trọng tâm đối chiếu:** Đối chiếu bản đồ workspace 19 crate với cách manifest Matrix9 liệt kê từng assembly và resource.\n\n### Nguồn Matrix9 đã index phải mở (private reference, không copy)\n\n- `decompiled-ui/export-manifest.json` (reference export, `dnSpy export manifest`, `RESOURCE_MANIFEST_READ`) — workspace/project inventory precedent\n  - Vai trò nguồn: export provenance. Records the six exported managed assemblies with size and SHA256 (MatrixControls, MatrixWPFControls, MatrixCommon, PIMData, MatrixTranslation, Matrix.rhp) and the dnSpy exit codes; generated sources were not rebuilt.\n  - Identifier đã index: `MatrixControls, MatrixWPFControls, MatrixCommon, PIMData, MatrixTranslation, Matrix.rhp`\n- `decompiled-ui/native-inspection` (reference export, `PE resource extraction`, `RESOURCE_MANIFEST_READ`) — per-binary resource inventory precedent\n  - Vai trò nguồn: native resource/trademark inventory. Per-binary resource manifests and extracted PE resources for Matrix90.exe, MatrixCmdBar.ocx and gvMatrixCore.rhp (BITMAP/ICON/STRING/DIALOG/CUSTOM entries plus form-module name hints) - the artifact inventory relevant to asset/trademark and UI-reference limits.\n  - Identifier đã index: `Matrix90, MatrixCmdBar, gvMatrixCore`\n\n### Quy tắc sử dụng nguồn tham chiếu\n\n- Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.\n- Không copy mã, ảnh, resource hay nội dung manual vào repository.\n- Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.\n- Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.\n- Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.\n- Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native.\n\n### Điều các nguồn này KHÔNG chứng minh\n\n- Không chứng minh Matrix9 parity cho capability này.\n- Không xác nhận API Rust nào đã tồn tại trong QymCAD.\n- Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.\n- Không chứng minh default/option đã đúng cho bản Matrix9 đang cài.\n\n> Symbol/identifier ở trên là điểm tra cứu; phải kiểm lại tại checkout/manifest trước khi viết mã. PASS vẫn chỉ đến từ command receipt và oracle positive/negative đo được.\n\n## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "task_details_markdown": "# OM9-M00-L4-01-02-03 — Kiểm tra phạm vi chức năng bằng test thực có\n\n**M00 gate:** G00-01 | **L3 parent:** OM9-M00-L3-01-02 | **Loại:** AUDIT | **Trạng thái:** `PLANNED_NOT_EXECUTED`.\n\n## Mục tiêu\n\nKhông coi README features là chức năng đã thử; phân cấp feature evidence\n\n## QymCAD source audit (pin cụ thể)\n\nRepository: https://github.com/QymIs-Tech/QymCAD  \nCommit: `746a17f127897e921a57118b6caad08968602bf5`\n\n- [`crates/qymcad-acceptance/src/lib.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/src/lib.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-acceptance/src/matrix.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/src/matrix.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-acceptance/tests/acceptance`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/tests/acceptance) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-core/src/feature.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/feature.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-core/src/model.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/model.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-core/src/names.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/names.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-core/src/refs.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/src/refs.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-core/tests/rebind_is_explicit.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/tests/rebind_is_explicit.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-core/tests/user_file_roundtrip.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/tests/user_file_roundtrip.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-io/Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/Cargo.toml) — FILE_CONTENT_READ\n- [`crates/qymcad-io/src/formats.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/formats.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-io/src/project_file.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/project_file.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-io/src/stl_export.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/src/stl_export.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-io/tests/project_file.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/tests/project_file.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-kernel/Cargo.toml`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/Cargo.toml) — FILE_CONTENT_READ\n- [`crates/qymcad-kernel/build.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/build.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-kernel/src/lib.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/lib.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-kernel/src/naming.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/naming.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-kernel/src/occt_bridge.cpp`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/occt_bridge.cpp) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-kernel/src/occt_common.hpp`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/occt_common.hpp) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-kernel/src/ops/primitives.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/ops/primitives.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n- [`crates/qymcad-kernel/src/shape.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/src/shape.rs) — FILE_CONTENT_READ\n- [`crates/qymcad-kernel/tests/every_operation_goes_through_the_door.rs`](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/tests/every_operation_goes_through_the_door.rs) — PATH_LISTED_OR_CANDIDATE_REVERIFY\n\nKhông được gọi `source_paths_verified_locally=true` cho đến khi checkout đúng SHA và kiểm tra file thật; các link ở đây là điểm tra cứu, không đồng nghĩa đã build/test.\n\n## Codex thực hiện\n\n1. Đối chiếu README với tests/ và acceptance\n2. lấy một test cho mỗi capability\n3. phân biệt unit, integration, GUI acceptance\n\n## Điều kiện PASS đo được\n\n- [ ] feature map có TEST_PRESENT/NOT_FOUND/UNVERIFIED, không tự nhận test PASS nếu chưa chạy\n\n## Đầu ra bắt buộc\n\n- `implementation/evidence/M00/G00-01/qymcad-feature-evidence.csv`\n- Metadata: source_sha, os_arch, toolchain, exact_commands, exit_code, expected_vs_actual, tester/reviewer, UTC timestamp.\n- Nếu không có môi trường hoặc fixtures: ghi `BLOCKED`, không đánh dấu PASS.\n\n## Phụ thuộc\n\n`OM9-M00-L4-01-02-02`\n\n## Nguyên tắc\n\nChỉ tạo POC ở workspace OpenMatrix9 riêng; không ghi đè hoặc push lên repository QymCAD. Không đưa screenshot/manual/proprietary assets Matrix 9 vào mã nguồn công khai.\n\n## v0.12 — Kết quả đọc mã nguồn thực tế (GitHub, chưa chạy thử)\n\n**Kết luận:** Có kiểm thử acceptance Session, format enum, FFI guards và rebinding; đọc mã kiểm thử không bằng chạy PASS.\n**Quyết định đề xuất:** `REUSE_CANDIDATE` — chỉ có hiệu lực sau build/test và legal sign-off.\n\n**Nguồn đã đọc:**\n\n- [crates/qymcad-acceptance/src/lib.rs](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-acceptance/src/lib.rs) — Session acceptance framework and private fixture skip.\n- [crates/qymcad-kernel/tests/every_entry_catches_what_occt_throws.rs](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-kernel/tests/every_entry_catches_what_occt_throws.rs) — static test requires OCCT exception catches within C++ bridge.\n- [crates/qymcad-core/tests/rebind_is_explicit.rs](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-core/tests/rebind_is_explicit.rs) — tests reject silently matching lost face.\n- [crates/qymcad-io/tests/formats.rs](https://github.com/QymIs-Tech/QymCAD/blob/746a17f127897e921a57118b6caad08968602bf5/crates/qymcad-io/tests/formats.rs) — format extension and unsupported extension tests.\n\n**Bước thực thi còn lại:** Chạy cargo test --workspace và lưu log/exit-code theo runner.\n\n**Trạng thái:** SOURCE_REVIEWED_ONLY; không đánh dấu L4 PASS/G00 PASS.\n",
+  "execution_policy": {
+    "status": "NOT_RUN",
+    "evidence": "Not included: no implementation has been performed",
+    "prerequisites": "M00 must be signed off before M01; M01 before M02; per-task dependencies also apply",
+    "must_not_fake_pass": true,
+    "test_command_status": "SUGGESTED_NOT_EXECUTED",
+    "planned_output_paths_refer_to_future_implementation": true
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Đối chiếu bản đồ workspace 19 crate với cách manifest Matrix9 liệt kê từng assembly và resource.",
+    "rhino5_core_chapters": [],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-export-manifest",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "reference export",
+        "path": "decompiled-ui/export-manifest.json",
+        "root": "ref/matrix",
+        "unit": "dnSpy export manifest",
+        "role_for_this_task": "workspace/project inventory precedent",
+        "source_role": "export provenance",
+        "detail": "Records the six exported managed assemblies with size and SHA256 (MatrixControls, MatrixWPFControls, MatrixCommon, PIMData, MatrixTranslation, Matrix.rhp) and the dnSpy exit codes; generated sources were not rebuilt.",
+        "observed_identifiers": [
+          "MatrixControls",
+          "MatrixWPFControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix.rhp"
+        ],
+        "verification_state": "RESOURCE_MANIFEST_READ"
+      },
+      {
+        "anchor_id": "mx-native-inspection",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "reference export",
+        "path": "decompiled-ui/native-inspection",
+        "root": "ref/matrix",
+        "unit": "PE resource extraction",
+        "role_for_this_task": "per-binary resource inventory precedent",
+        "source_role": "native resource/trademark inventory",
+        "detail": "Per-binary resource manifests and extracted PE resources for Matrix90.exe, MatrixCmdBar.ocx and gvMatrixCore.rhp (BITMAP/ICON/STRING/DIALOG/CUSTOM entries plus form-module name hints) - the artifact inventory relevant to asset/trademark and UI-reference limits.",
+        "observed_identifiers": [
+          "Matrix90",
+          "MatrixCmdBar",
+          "gvMatrixCore"
+        ],
+        "verification_state": "RESOURCE_MANIFEST_READ"
+      }
+    ],
+    "manual_reference_sheets": [],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "CONTRACT_TEST",
+    "role_label_on_record": "INFERRED_FROM_TITLE:CONTRACT_TEST",
+    "role_provenance": "inferred (title contains 'test')",
+    "owner_boundary": "OM9-M00-L2-01",
+    "goal": "Không coi README features là chức năng đã thử; phân cấp feature evidence",
+    "algorithm_on_record": "None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "the fixture is authored data; upstream code is read, never executed as proof",
+    "sketch": "// Kiểm tra phạm vi chức năng bằng test thực có\n// ROLE: CONTRACT_TEST - freeze the contract, then write a test that fails first.\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n// Owner: OM9-M00-L2-01\n//\n// 1. Freeze the typed signature and the error enum in the owner crate.\n// 2. Write the fixture harness for implementation/evidence/M00/G00-01/qymcad-feature-evidence.csv:\n//      input:  feature map có TEST_PRESENT/NOT_FOUND/UNVERIFIED, không tự nhận test PASS nếu chưa chạy\n//      expect: feature map có TEST_PRESENT/NOT_FOUND/UNVERIFIED, không tự nhận test PASS nếu chưa chạy\n//      negative input: No access to pinned QymCAD source or missing file: BLOCKED_SOURCE\n//      negative expect: typed error with unchanged state\n// 3. Run it: it must fail for the right reason (missing behaviour), not a compile accident.\n// 4. Only then hand the frozen type to the IMPLEMENT task of the same L3.\n\n#[test]\nfn om9_m00_l4_01_02_03_contract_is_red_first() {\n    // Arrange: build the fixture input from authored data, not from the implementation.\n    // Act: call the frozen entry point.\n    // Assert: expected == actual for the positive fixture, and a typed error for the negative one.\n    // Record the failing output as the RED receipt for this task.\n    unimplemented!()\n}"
+  }}

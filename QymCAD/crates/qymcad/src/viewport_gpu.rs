@@ -1,0 +1,1230 @@
+//! THE GPU PASS OF THE 3D VIEWPORT.
+//!
+//! It replaces the software rasterisation of bodies (`rasterize_3d`) with real GPU rendering through
+//! `wgpu` under eframe: the vertices of a body are uploaded into video memory and projected in the vertex
+//! shader, and visibility is decided by the hardware depth buffer (no CPU sorting or reprojection). It is
+//! built into egui as a paint callback UNDER the 2D overlays (dimensions, edges and gizmos stay on the
+//! `painter`).
+//!
+//! The scheme: in `prepare` the scene is drawn into an OFFSCREEN target (colour plus depth) through the
+//! egui encoder; in `paint` the offscreen texture is blitted into the rectangle of the viewport with
+//! alpha-over (a transparent background lets the floor grid show through from below). The offscreen
+//! target is needed because the main pass of egui has NO depth attachment — a z-buffer of our own cannot
+//! be hung on it. The matrices agree with `Screen::at` pixel for pixel (orthographic, world-up upwards).
+//!
+//! Colour: the offscreen target is in an sRGB format, the fragment gives out a LINEAR colour
+//! (srgb-to-linear), and the write encodes it back into the same sRGB bytes the CPU path lays down
+//! (`Color32`), so the colour matches frame for frame. The lights and the shading, and the hot and ghost
+//! branches, follow the same formula as the raster (`shade_tri`); the lights go with the camera and come in its
+//! uniform every frame.
+//! Back faces are culled in the fragment by the ray FROM THE EYE (in orthographic that is `fwd`, in
+//! perspective a direction of its own at every point), with the normal of the face carried in the
+//! vertices.
+
+use qymcad_ui_state::GpuVert;
+use eframe::egui_wgpu;
+use eframe::wgpu;
+use egui::PaintCallbackInfo;
+
+/// The offscreen target lives in GAMMA space (non-sRGB), like the main framebuffer of egui: the sRGB
+/// bytes of `Color32` are kept as they are, with no hardware conversion. The blit carries them one for one
+/// (or encodes them, if the target format is sRGB).
+const OFFSCREEN_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba8Unorm;
+const DEPTH_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
+/// Texels in one row of the look table: the texture width, 2048 being the smallest limit a device may have
+/// (the shader's `look_of` divides by the same number).
+const LOOK_ROW: u32 = 2048;
+/// Edge antialiasing (MSAA). The bodies are rendered into a multisample target (colour plus depth) and
+/// then resolved into a single-sample texture, which the blit samples. 4x is the universally supported
+/// level.
+/// THE NUMBER OF SAMPLES THIS RENDERER WAS BUILT WITH.
+///
+/// It is taken ONCE when the pipelines are created: they bake it into themselves. The setting lives in
+/// `Settings::msaa` and takes effect on a restart — the settings window says so.
+static MSAA_SAMPLES: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(4);
+
+#[cfg(test)]
+pub fn msaa_samples_for_test() -> u32 {
+    msaa_samples()
+}
+
+fn msaa_samples() -> u32 {
+    MSAA_SAMPLES.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+/// WHAT THIS DEVICE CAN REALLY DO (a bit mask over the positions 1/2/4/8/16). 0 means it has not been
+/// asked yet.
+static MSAA_SUPPORTED: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+/// The sample counts supported by BOTH formats of the pass (colour and depth).
+///
+/// Asking is essential: the specification guarantees only 1 and 4, and everything else depends on the
+/// luck of the hardware and the driver. 8x was once offered in the settings without asking — and the
+/// program CRASHED AT STARTUP, that is, the setting made it unlaunchable: getting back would have meant
+/// editing the config by hand.
+pub fn supported_msaa() -> Vec<u32> {
+    let mask = MSAA_SUPPORTED.load(std::sync::atomic::Ordering::Relaxed);
+    if mask == 0 {
+        return vec![1, 4]; // the device has not been asked yet, so only what the spec guarantees is promised
+    }
+    [1u32, 2, 4, 8, 16].into_iter().filter(|n| mask & (1 << n.trailing_zeros()) != 0).collect()
+}
+
+fn probe_supported(device: &wgpu::Device, target: wgpu::TextureFormat) {
+    let feats = device.features();
+    let ok = |fmt: wgpu::TextureFormat, n: u32| fmt.guaranteed_format_features(feats).flags.sample_count_supported(n);
+    let mut mask = 0u32;
+    for n in [1u32, 2, 4, 8, 16] {
+        // the pass draws into the offscreen target, into the depth and (after the blit) into the target
+        // format of the window — what suits is what ALL THREE can do: a pipeline is built against each
+        if ok(OFFSCREEN_FORMAT, n) && ok(DEPTH_FORMAT, n) && ok(target, n) {
+            mask |= 1 << n.trailing_zeros();
+        }
+    }
+    MSAA_SUPPORTED.store(mask.max(1), std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Remember the chosen number of samples BEFORE the renderer is created (called at startup).
+///
+/// An unsupported value does NOT bring the program down but is lowered to the nearest smaller one the
+/// device can do: somebody asked for a prettier picture, and a program that does not work is not what
+/// they should get for it.
+pub fn set_msaa(n: u32) {
+    let ok = supported_msaa();
+    let take = ok.iter().rev().find(|&&s| s <= n).copied().unwrap_or(1);
+    MSAA_SAMPLES.store(take, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// The camera uniform (orthographic). `right`/`up`/`fwd` are an orthonormal basis; the projection
+/// repeats `Screen::at`.
+#[repr(C)]
+#[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct CamRaw {
+    right: [f32; 4],
+    up: [f32; 4],
+    fwd: [f32; 4],
+    target: [f32; 4],
+    /// [scale (points), half_w (points), half_h (points), depth_half (world)].
+    params: [f32; 4],
+    /// [inv_d_eye (1/d_eye for perspective, 0 for orthographic), z_near, 0, 0] - the depth is reversed and has no far
+    /// plane (`ProjParams`); the formula is the same as `depth_ndc`.
+    persp: [f32; 4],
+    /// THE LIGHTS AND THE SHADING, moved here from the vertices.
+    ///
+    /// `key` and `fill` are where the two lights come from, each with what it gives a face turned straight to it in
+    /// `w` (`SceneLights`); `shade` is [floor, ghost_alpha 0..1, 0, 0], and `ghost` is the colour a ghost is led
+    /// towards. All of it used to be applied on the processor and baked into every vertex - which is why a change of
+    /// highlight rewrote the whole scene.
+    key: [f32; 4],
+    fill: [f32; 4],
+    shade: [f32; 4],
+    ghost: [f32; 4],
+    /// THE FLOOR (`qymcad_ui_state::floor_pixel`): [finest step (mm), pixels per point, the spacing in points a level of
+    /// the grid is gone at, and whole at], the widths [line, axis, Z axis, the number of levels], and the colours,
+    /// premultiplied. All of it from the one description the raster takes too.
+    floor: [f32; 4],
+    floor_lines: [f32; 4],
+    /// [FLOOR_GRAZING, FLOOR_WHOLE_TO, FLOOR_Z_REACH, 0], and [the point the floor fades round (x, y), its reach, 0].
+    floor_more: [f32; 4],
+    floor_round: [f32; 4],
+    grid_minor: [f32; 4],
+    grid_major: [f32; 4],
+    axis_x: [f32; 4],
+    axis_y: [f32; 4],
+    axis_z: [f32; 4],
+}
+
+/// WHAT THE SHADING NEEDS, gathered from the scheme and the settings: the lights, the floor the shading
+/// cannot go below, how solid a ghost is, and the colour a ghost is led towards.
+#[derive(Clone, Copy)]
+pub struct ShadeRaw {
+    pub lights: qymcad_ui_state::SceneLights,
+    pub floor: f32,
+    pub ghost_alpha: f32,
+    pub ghost_target: [f32; 3],
+}
+
+impl CamRaw {
+    /// Build from the basis of the camera (`Cam3::basis`), the scale and the rectangle of the viewport
+    /// (in points), and the depth of the frame (`proj_params`), so the CPU and the GPU agree.
+    pub fn new(basis: &([f64; 3], [f64; 3], [f64; 3]), scale: f32, target: [f64; 3], size: egui::Vec2, proj: &qymcad_ui_state::ProjParams, look: ShadeRaw) -> Self {
+        let (r, u, f) = basis;
+        let cv = |v: &[f64; 3]| [v[0] as f32, v[1] as f32, v[2] as f32, 0.0];
+        let (half_w, half_h) = (size.x * 0.5, size.y * 0.5);
+        Self {
+            right: cv(r),
+            up: cv(u),
+            fwd: cv(f),
+            target: [target[0] as f32, target[1] as f32, target[2] as f32, 0.0],
+            params: [scale.max(1e-4), half_w, half_h, proj.depth_half as f32],
+            persp: [proj.inv_d_eye as f32, proj.z_near as f32, 0.0, 0.0],
+            key: light_raw(look.lights.key, look.lights.key_share),
+            fill: light_raw(look.lights.fill, look.lights.fill_share),
+            shade: [look.floor, look.ghost_alpha, 0.0, 0.0],
+            ghost: [look.ghost_target[0], look.ghost_target[1], look.ghost_target[2], 0.0],
+            floor: [0.0; 4],
+            floor_lines: [0.0; 4],
+            floor_more: [0.0; 4],
+            floor_round: [0.0; 4],
+            grid_minor: [0.0; 4],
+            grid_major: [0.0; 4],
+            axis_x: [0.0; 4],
+            axis_y: [0.0; 4],
+            axis_z: [0.0; 4],
+        }
+    }
+
+    /// The floor of the frame, drawn at `ppp` pixels a point. Without it the floor is not drawn: its colours stay
+    /// transparent.
+    pub fn with_floor(mut self, look: &qymcad_ui_state::FloorLook, ppp: f32) -> Self {
+        use qymcad_ui_state::{FLOOR_AXIS, FLOOR_AXIS_Z, FLOOR_FADE_GONE, FLOOR_FADE_WHOLE, FLOOR_GRAZING, FLOOR_LEVELS, FLOOR_LINE, FLOOR_WHOLE_TO, FLOOR_Z_REACH};
+        let paint = |c: egui::Color32| c.to_array().map(|v| v as f32 / 255.0);
+        self.floor = [look.step as f32, ppp, FLOOR_FADE_GONE as f32, FLOOR_FADE_WHOLE as f32];
+        self.floor_lines = [FLOOR_LINE as f32, FLOOR_AXIS as f32, FLOOR_AXIS_Z as f32, FLOOR_LEVELS as f32];
+        self.floor_more = [FLOOR_GRAZING as f32, FLOOR_WHOLE_TO as f32, FLOOR_Z_REACH as f32, 0.0];
+        self.floor_round = [look.centre[0] as f32, look.centre[1] as f32, look.reach as f32, 0.0];
+        (self.grid_minor, self.grid_major) = (paint(look.minor), paint(look.major));
+        (self.axis_x, self.axis_y, self.axis_z) = (paint(look.axis_x), paint(look.axis_y), paint(look.axis_z));
+        self
+    }
+}
+
+/// A light as the shader takes it: where it comes from, and what it gives a face turned to it.
+fn light_raw(from: [f64; 3], share: f64) -> [f32; 4] {
+    [from[0] as f32, from[1] as f32, from[2] as f32, share as f32]
+}
+
+pub(crate) const SHADER: &str = r#"
+struct Cam {
+    right: vec4<f32>,
+    up: vec4<f32>,
+    fwd: vec4<f32>,
+    tgt: vec4<f32>,
+    params: vec4<f32>, // scale, half_w, half_h, depth_half
+    persp: vec4<f32>,  // inv_d_eye (0 for orthographic), z_near, _, _
+    key: vec4<f32>,    // where the key light comes from; w: what it gives a face turned to it
+    fill: vec4<f32>,   // the same for the fill
+    shade: vec4<f32>,  // floor, ghost_alpha, _, _
+    ghost: vec4<f32>,  // the colour a ghost is led towards
+    floor: vec4<f32>,  // finest step, pixels per point, the spacing in points a level is gone at, and whole at
+    floor_lines: vec4<f32>, // the widths of a line, an axis, the Z axis, in points; the number of levels
+    floor_more: vec4<f32>,  // the sine of level the grid fades out at, the share of the reach it stays whole to, the Z axis's share of the reach, _
+    floor_round: vec4<f32>, // the point of the floor it fades out round (x, y), how far it reaches, _
+    grid_minor: vec4<f32>,
+    grid_major: vec4<f32>,
+    axis_x: vec4<f32>,
+    axis_y: vec4<f32>,
+    axis_z: vec4<f32>,
+};
+@group(0) @binding(0) var<uniform> cam: Cam;
+
+// WHAT A BODY LOOKS LIKE: its own colour (already brightened) and the flags of its look - bit 1 selected,
+// bit 2 a ghost, bit 4 the cap of a section (`BodyLook`). One row per body, rewritten every frame; the
+// vertices know only which row is theirs.
+struct Look {
+    tint: u32,
+    state: u32,
+};
+// A TEXTURE, NOT A STORAGE BUFFER: a device reached through OpenGL has no storage buffers in the fragment stage
+// (limit 0), and the program died at start there with exit code 101. A row of `LOOK_ROW` texels, two numbers each.
+@group(1) @binding(0) var looks: texture_2d<u32>;
+fn look_of(body: u32) -> Look {
+    let t = textureLoad(looks, vec2<i32>(i32(body % 2048u), i32(body / 2048u)), 0);
+    return Look(t.x, t.y);
+}
+
+struct VsOut {
+    @builtin(position) pos: vec4<f32>,
+    // THE ROW OF THE LOOK TABLE travels flat: it is the same for the whole triangle, and interpolating an
+    // index would be meaningless.
+    @location(1) @interpolate(flat) body: u32,
+    // THE VERTEX NORMAL TRAVELS INTERPOLATED, and that is the whole of smooth shading: unpacked in the vertex
+    // stage and blended across the triangle, so a curved surface reads as curved. Carried flat - which is how
+    // it was first written - every triangle took one vertex's normal and the smooth mode drew facets. Reported
+    // on an imported engine: pipes and fan blades visibly polygonal, while the software raster (which
+    // interpolates its colours) drew the same bodies smooth.
+    @location(3) nrm: vec3<f32>,
+    // THE WORLD POINT — for culling back faces BY THE RAY FROM THE EYE. In perspective the direction of
+    // view is its own at every point of the frame, and a shared `fwd` will not do for it (see
+    // `fs_mesh`).
+    @location(2) wpos: vec3<f32>,
+};
+
+// 0-1 linear out of 0-1 sRGB gamma (needed only if the target framebuffer is sRGB-aware)
+fn s2l(c: vec3<f32>) -> vec3<f32> {
+    let lower = c / 12.92;
+    let higher = pow((c + 0.055) / 1.055, vec3<f32>(2.4));
+    return select(higher, lower, c <= vec3<f32>(0.04045));
+}
+
+// THE NORMAL OUT OF FOUR BYTES, the octahedral form `geom::pack_direction` writes: 16 bits a coordinate, from 1 up
+fn octa(p: u32) -> vec3<f32> {
+    let e = vec2<f32>(f32(p & 0xffffu) - 1.0, f32(p >> 16u) - 1.0) / 65534.0 * 2.0 - 1.0;
+    let z = 1.0 - abs(e.x) - abs(e.y);
+    var xy = e;
+    if (z < 0.0) {
+        xy = vec2<f32>((1.0 - abs(e.y)) * select(-1.0, 1.0, e.x >= 0.0), (1.0 - abs(e.x)) * select(-1.0, 1.0, e.y >= 0.0));
+    }
+    return normalize(vec3<f32>(xy, z));
+}
+
+@vertex
+fn vs_mesh(@location(0) pos: vec3<f32>, @location(1) body: u32, @location(2) nrm_packed: u32) -> VsOut {
+    var out: VsOut;
+    let rel = pos - cam.tgt.xyz;
+    let sx = dot(rel, cam.right.xyz);
+    let sy = dot(rel, cam.up.xyz);
+    let depth = dot(rel, cam.fwd.xyz);
+    let scale = cam.params.x;
+    let inv_d = cam.persp.x;                 // 1/d_eye (0 for orthographic)
+    if (inv_d > 0.0) {
+        // PERSPECTIVE: the real clip-w is the eye distance, the hardware divides by it and the depth
+        // comes out perspective-correct (otherwise large triangles pierce each other when the depth is
+        // interpolated across the screen).
+        let d_eye = 1.0 / inv_d;
+        let zc = depth + d_eye;              // the distance along the view from the eye (>0 in front of it)
+        // REVERSED AND WITHOUT A FAR PLANE: ndc_z = clip_z / w = z_near / zc, 1 at the near plane and 0 at infinity
+        // (`depth_ndc`). The buffer is a float, and a float keeps its relative precision down to 0.
+        // ndc.xy = clip.xy/w: clip.xy = sx*scale/half*d_eye, /zc -> sx*scale/half*(d_eye/zc)
+        out.pos = vec4<f32>(sx * scale / cam.params.y * d_eye, sy * scale / cam.params.z * d_eye, cam.persp.y, zc);
+    } else {
+        // ORTHOGRAPHIC: w=1, the depth is linear in the world over the range that holds the scene, reversed - nearer
+        // is larger
+        let ndc_x = sx * scale / cam.params.y;
+        let ndc_y = sy * scale / cam.params.z;     // world-up becomes ndc +y (upwards), as in the raster
+        let ndc_z = 0.5 - depth / (2.0 * cam.params.w);
+        out.pos = vec4<f32>(ndc_x, ndc_y, ndc_z, 1.0);
+    }
+    out.wpos = pos;
+    out.body = body;
+    // zero means flat shading: then the fragment takes the face normal from the derivatives
+    out.nrm = select(vec3<f32>(0.0, 0.0, 0.0), octa(nrm_packed), nrm_packed != 0u);
+    return out;
+}
+
+@fragment
+fn fs_mesh(in: VsOut, @builtin(front_facing) front: bool) -> @location(0) vec4<f32> {
+    // THE SIDE TURNED AWAY FROM THE EYE IS NOT DRAWN, and which side that is comes from `front_facing` - the
+    // winding of this triangle as it came out ON SCREEN.
+    //
+    // Asked that way the question is answered per triangle and per point, which is what perspective needs: the
+    // ray of sight is its own at every point of the frame, and the wider the field of view the further it
+    // diverges from the camera axis at the edges. Culling by a shared direction lost visible faces (slits in a
+    // body) and kept invisible ones (a ring broken into ribbons) - two reported screenshots.
+    //
+    // The derivatives cannot answer it: `cross(dpdx, dpdy)` is built from the screen basis and comes out
+    // pointing along the line of sight for EVERY triangle, whichever way it is wound. Taking its sign from
+    // `front_facing` and then testing it against the ray discarded exactly the faces that should have stayed -
+    // reported as extruded text losing its walls, while the software raster drew the same document correctly.
+    if (!front) { discard; }
+    // THE FLAT NORMAL COMES FROM THE DERIVATIVES of the world position across the triangle - the same normal
+    // that used to be carried in every vertex, 12 bytes lighter per vertex. Its sign is turned to the eye here: each
+    // light lights only the side turned to it, so the side matters.
+    var n = normalize(cross(dpdx(in.wpos), dpdy(in.wpos)));
+    var sight = cam.fwd.xyz;
+    if (cam.persp.x > 0.0) {
+        sight = in.wpos - (cam.tgt.xyz - cam.fwd.xyz / cam.persp.x);
+    }
+    if (dot(n, sight) > 0.0) {
+        n = -n;
+    }
+
+    // SMOOTH SHADING BRINGS ITS OWN NORMAL: a vertex normal packed into four bytes. Flat shading leaves it
+    // zero and the face normal above is used - which is exactly what flat shading means. A vertex normal pointing
+    // into the body (a sheet wound the other way) is turned to the eye with its face.
+    var shading_n = n;
+    if (dot(in.nrm, in.nrm) > 0.25) {
+        shading_n = normalize(in.nrm);
+        if (dot(shading_n, n) < 0.0) {
+            shading_n = -shading_n;
+        }
+    }
+
+    let look = look_of(in.body);
+    let tint = vec3<f32>(f32(look.tint & 0xffu), f32((look.tint >> 8u) & 0xffu), f32((look.tint >> 16u) & 0xffu));
+    // THE SHADING, moved here from the processor: it can only darken, never brighten past the body's own
+    // colour, and never below the floor the scheme sets. The two lights as `SceneLights::on` takes them.
+    let floor = cam.shade.x;
+    let diff = cam.key.w * max(dot(shading_n, cam.key.xyz), 0.0) + cam.fill.w * max(dot(shading_n, cam.fill.xyz), 0.0);
+    let lit = floor + clamp(diff, 0.0, 1.0) * (1.0 - floor);
+
+    if ((look.state & 4u) != 0u) {
+        // the cap of a section: a fill, not a surface of the part - it is not shaded
+        return vec4<f32>(tint / 255.0, 1.0);
+    }
+    if ((look.state & 1u) != 0u) {
+        // A SELECTED BODY: lifted towards white with a slight cool tint - and OPAQUE even when it is a ghost.
+        // The selection replaces the colour whole, exactly as it does in the raster; what stays with the
+        // ghost is its PASS, chosen outside the shader by the same bit.
+        let v = tint * lit;
+        let cool = vec3<f32>(0.0, 8.0, 22.0);
+        return vec4<f32>(min(v + (vec3<f32>(255.0) - v) * 0.4 + cool, vec3<f32>(255.0)) / 255.0, 1.0);
+    }
+    if ((look.state & 2u) != 0u) {
+        // a ghost: a quarter of its own colour and three quarters of the colour the scheme leads it towards
+        return vec4<f32>(tint * lit * 0.25 / 255.0 + cam.ghost.xyz * 0.75, cam.shade.y);
+    }
+    return vec4<f32>(tint * lit / 255.0, 1.0);
+}
+
+
+// ---- THE FLOOR: the plane Z = 0 under a grid, and the world axes, to the horizon (`qymcad_ui_state::floor_pixel`,
+// the same arithmetic the raster runs) ----
+struct FloorOut {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) ndc: vec2<f32>,
+};
+
+@vertex
+fn vs_floor(@builtin(vertex_index) vi: u32) -> FloorOut {
+    var out: FloorOut;
+    let x = f32((vi << 1u) & 2u) * 2.0 - 1.0;
+    let y = f32(vi & 2u) * 2.0 - 1.0;
+    out.pos = vec4<f32>(x, y, 0.0, 1.0);
+    out.ndc = vec2<f32>(x, y);
+    return out;
+}
+
+struct Ray {
+    o: vec3<f32>,
+    d: vec3<f32>,
+};
+
+// The ray of sight through a point of the frame (`ViewRays::through`).
+fn ray_at(ndc: vec2<f32>) -> Ray {
+    let s = vec2<f32>(ndc.x * cam.params.y, ndc.y * cam.params.z) / cam.params.x;
+    let side = cam.right.xyz * s.x + cam.up.xyz * s.y;
+    let inv_d = cam.persp.x;
+    if (inv_d > 0.0) {
+        return Ray(cam.tgt.xyz - cam.fwd.xyz / inv_d, cam.fwd.xyz + side * inv_d);
+    }
+    return Ray(cam.tgt.xyz + side, cam.fwd.xyz);
+}
+
+fn covers(off: f32, width: f32) -> f32 {
+    return clamp(width * 0.5 + 0.5 - off, 0.0, 1.0);
+}
+
+fn over(top: vec4<f32>, under: vec4<f32>) -> vec4<f32> {
+    return top + under * (1.0 - top.a);
+}
+
+// How much of the floor is left at `r` mm from the point it fades round, for a fade gone at `out` times its reach
+// (`FloorLook::left_at`).
+fn left_at(r: f32, out: f32) -> f32 {
+    let reach = cam.floor_round.z * out;
+    return 1.0 - smoothstep(cam.floor_more.y * reach, reach, r);
+}
+
+// THE FLOOR LIES BEHIND EVERY BODY: the pass draws at the far end of the depth and passes only where no body was drawn.
+@fragment
+fn fs_floor(in: FloorOut) -> @location(0) vec4<f32> {
+    let ray = ray_at(in.ndc);
+    let persp = cam.persp.x > 0.0;
+    let level_ray = abs(ray.d.z) < 1e-12;
+    let t = -ray.o.z / select(ray.d.z, 1.0, level_ray);
+    let p = ray.o.xy + ray.d.xy * t;
+    // the size of a pixel on the plane, taken before any branch: the derivatives need every pixel of the quad
+    let fw = max(fwidth(p), vec2<f32>(1e-12));
+    let ppp = cam.floor.y;
+    var colour = vec4<f32>(0.0);
+    if (!level_ray && (!persp || t > cam.persp.y)) {
+        let level = abs(normalize(ray.d).z);
+        let r = length(p - cam.floor_round.xy);
+        let grazing = smoothstep(0.0, cam.floor_more.x, level);
+        var grid = vec4<f32>(0.0);
+        var spacing = cam.floor.x;
+        for (var k = 0; k < i32(cam.floor_lines.w); k = k + 1) {
+            let off = abs(p - round(p / spacing) * spacing) / fw;
+            let seen = smoothstep(vec2<f32>(cam.floor.z), vec2<f32>(cam.floor.w), spacing / (fw * ppp));
+            let w = cam.floor_lines.x * ppp;
+            let cov = max(covers(off.x, w) * seen.x, covers(off.y, w) * seen.y);
+            let c = select(cam.grid_major, cam.grid_minor, k == 0) * (cov * grazing * left_at(r, 1.0));
+            if (c.a > grid.a) {
+                grid = c;
+            }
+            spacing = spacing * 5.0;
+        }
+        let near_level = smoothstep(0.0, 0.01, level) * left_at(r, 2.0);
+        let ax = cam.axis_x * (covers(abs(p.y) / fw.y, cam.floor_lines.y * ppp) * near_level);
+        let ay = cam.axis_y * (covers(abs(p.x) / fw.x, cam.floor_lines.y * ppp) * near_level);
+        colour = over(ay, over(ax, grid));
+    }
+    // THE Z AXIS: where the ray passes closest to the line standing up from the origin, fading with its height
+    let aa = dot(ray.d, ray.d);
+    let b = ray.d.z;
+    let den = aa - b * b;
+    if (den > 1e-12 * aa) {
+        let dd = dot(ray.d, ray.o);
+        let e = ray.o.z;
+        let sc = (b * e - dd) / den;
+        let tc = (aa * e - b * dd) / den;
+        if (tc >= 0.0 && (!persp || sc > cam.persp.y)) {
+            let gap = length(ray.o + ray.d * sc - vec3<f32>(0.0, 0.0, tc));
+            var per_point = 1.0 / cam.params.x;
+            if (persp) {
+                per_point = sc * cam.persp.x / cam.params.x;
+            }
+            let az = covers(gap / per_point * ppp, cam.floor_lines.z * ppp) * left_at(tc, cam.floor_more.z);
+            if (az > 0.0) {
+                colour = over(cam.axis_z * az, colour);
+            }
+        }
+    }
+    if (colour.a < 0.5 / 255.0) {
+        discard;
+    }
+    return colour;
+}
+
+// ---- the blit of the offscreen target into the rectangle of the viewport (a fullscreen triangle) ----
+struct BlitOut {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) uv: vec2<f32>,
+};
+
+@vertex
+fn vs_blit(@builtin(vertex_index) vi: u32) -> BlitOut {
+    var out: BlitOut;
+    let x = f32((vi << 1u) & 2u) * 2.0 - 1.0; // -1, 3, -1
+    let y = f32(vi & 2u) * 2.0 - 1.0;         // -1, -1, 3
+    out.pos = vec4<f32>(x, y, 0.0, 1.0);
+    out.uv = vec2<f32>((x + 1.0) * 0.5, (1.0 - y) * 0.5); // ndc +y (up) becomes uv.y 0 (the top row)
+    return out;
+}
+
+@group(0) @binding(0) var src_tex: texture_2d<f32>;
+@group(0) @binding(1) var src_smp: sampler;
+
+// A gamma target framebuffer (non-sRGB, the ordinary eframe case): the sRGB bytes are carried one for one.
+@fragment
+fn fs_blit_gamma(in: BlitOut) -> @location(0) vec4<f32> {
+    return textureSample(src_tex, src_smp, in.uv);
+}
+
+// An sRGB-aware target framebuffer: the hardware write encodes, so a linear colour is what to give out.
+@fragment
+fn fs_blit_srgb(in: BlitOut) -> @location(0) vec4<f32> {
+    let c = textureSample(src_tex, src_smp, in.uv);
+    return vec4<f32>(s2l(c.rgb), c.a);
+}
+"#;
+
+/// The persistent GPU resources of the viewport. They live in `Renderer::callback_resources` of the egui
+/// render state.
+pub struct GpuRenderer {
+    mesh_pipeline: wgpu::RenderPipeline,
+    mesh_pipeline_ghost: wgpu::RenderPipeline,
+    /// The depth of the ghosts alone, drawn before their colour (see `mesh_pipeline_ghost_depth` where it is made).
+    mesh_pipeline_ghost_depth: wgpu::RenderPipeline,
+    /// The floor, after the solid bodies and before the ghosts (see `floor_pipeline` where it is made).
+    floor_pipeline: wgpu::RenderPipeline,
+    blit_pipeline: wgpu::RenderPipeline,
+    cam_buf: wgpu::Buffer,
+    cam_bind: wgpu::BindGroup,
+    blit_layout: wgpu::BindGroupLayout,
+    look_layout: wgpu::BindGroupLayout,
+    sampler: wgpu::Sampler,
+    // the resources for the current size of the viewport (recreated on a resize)
+    /// THE SAMPLES A PIXEL IS DRAWN WITH, fixed when the renderer is made: the pipelines are built for it, and the
+    /// targets must agree with them. The setting takes effect on a restart, so it is read once, here.
+    samples: u32,
+    msaa_view: Option<wgpu::TextureView>,  // the multisample render target, resolved into color_view
+    color_tex: Option<wgpu::Texture>,      // the same texture, kept so a check can copy the drawn picture out
+    color_view: Option<wgpu::TextureView>, // the single-sample resolve target, sampled by the blit
+    depth_view: Option<wgpu::TextureView>, // the multisample depth
+    blit_bind: Option<wgpu::BindGroup>,
+    size: [u32; 2],
+    // THE BUFFERS OF THE SCENE, in pieces (re-uploaded only when scene_key changes): a vertex buffer and an
+    // index buffer for each piece.
+    //
+    // Reported behaviour on the heaviest reference file, a V8 engine in STEP: the program died with
+    // "Buffer size 739358112 is greater than the maximum buffer size (268435456)". A device has a limit on
+    // ONE buffer - 256 MB is the ordinary one - and the engine holds 23 million vertices. So the scene is cut
+    // into pieces and drawn one piece after another; the blocks are laid into the pieces by
+    // `gui::scene_chunks::pack_blocks`, and a block never lies across a seam - an indexed draw reads from one
+    // buffer only.
+    bufs: Vec<(wgpu::Buffer, wgpu::Buffer)>,
+    /// Where each block lies and whose it is: the pass is chosen from the look of that body, so a body
+    /// becoming a ghost changes no buffer at all.
+    spans: Vec<Span>,
+    /// The look table on the card, rewritten every frame - two numbers per body.
+    look_buf: Option<wgpu::Texture>,
+    look_bind: Option<wgpu::BindGroup>,
+    look_len: usize,
+    vcount: u32,
+    scene_key: u64,
+}
+
+/// ONE BLOCK AS THE DRAW SEES IT: which piece it lies in, which of that piece's indices are its own, where
+/// its vertices begin (the `base_vertex` of the draw), and whose body it is.
+struct Span {
+    chunk: usize,
+    idx: std::ops::Range<u32>,
+    base_vertex: i32,
+    body: u32,
+}
+
+impl GpuRenderer {
+    fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat, samples: u32) -> Self {
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor { label: Some("qym_viewport_shader"), source: wgpu::ShaderSource::Wgsl(SHADER.into()) });
+
+        // --- the camera uniform ---
+        let cam_buf = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("qymcad_uniform"),
+            size: std::mem::size_of::<CamRaw>() as u64,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        let cam_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("qymcad_layout"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
+                ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: None },
+                count: None,
+            }],
+        });
+        let cam_bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("qymcad_bind"),
+            layout: &cam_layout,
+            entries: &[wgpu::BindGroupEntry { binding: 0, resource: cam_buf.as_entire_binding() }],
+        });
+
+        // THE LOOK TABLE: an integer texture, one texel per body. It is the whole of what a change of highlight
+        // costs now - a few kilobytes rewritten, against the scene re-uploaded. A texture rather than a storage
+        // buffer so it reads on every backend, OpenGL included (see `look_of` in the shader).
+        let look_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("qym_look_layout"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture { sample_type: wgpu::TextureSampleType::Uint, view_dimension: wgpu::TextureViewDimension::D2, multisampled: false },
+                count: None,
+            }],
+        });
+        // --- the mesh pipeline ---
+        let mesh_pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some("qym_mesh_pl"), bind_group_layouts: &[Some(&cam_layout), Some(&look_layout)], immediate_size: 0 });
+        let vbl = wgpu::VertexBufferLayout {
+            array_stride: std::mem::size_of::<GpuVert>() as u64,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &[
+                wgpu::VertexAttribute { format: wgpu::VertexFormat::Float32x3, offset: 0, shader_location: 0 },
+                wgpu::VertexAttribute { format: wgpu::VertexFormat::Uint32, offset: 12, shader_location: 1 },
+                wgpu::VertexAttribute { format: wgpu::VertexFormat::Uint32, offset: 16, shader_location: 2 },
+            ],
+        };
+        let mesh_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("qym_mesh_pipeline"),
+            layout: Some(&mesh_pl),
+            vertex: wgpu::VertexState { module: &shader, entry_point: Some("vs_mesh"), compilation_options: Default::default(), buffers: std::slice::from_ref(&vbl) },
+            primitive: wgpu::PrimitiveState { topology: wgpu::PrimitiveTopology::TriangleList, cull_mode: None, ..Default::default() },
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: DEPTH_FORMAT,
+                depth_write_enabled: Some(true),
+                depth_compare: Some(wgpu::CompareFunction::Greater),
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default(),
+            }),
+            multisample: wgpu::MultisampleState { count: samples, ..Default::default() },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: Some("fs_mesh"),
+                compilation_options: Default::default(),
+                targets: &[Some(wgpu::ColorTargetState { format: OFFSCREEN_FORMAT, blend: Some(wgpu::BlendState::REPLACE), write_mask: wgpu::ColorWrites::ALL })],
+            }),
+            multiview_mask: None,
+            cache: None,
+        });
+
+        // --- the depth of translucent bodies (ghosts) ---
+        // A GHOST IS SEEN AS ITS NEAREST SURFACE, one pane of glass: this pass writes the depth of the ghosts and no
+        // colour, and the colour pass after it blends only what lies at that depth. Blended face over face, the walls
+        // of a hole through a ghost and the faces behind them heaped up darker than the rest - a mess of layers.
+        let mesh_pipeline_ghost_depth = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("qym_mesh_pipeline_ghost_depth"),
+            layout: Some(&mesh_pl),
+            vertex: wgpu::VertexState { module: &shader, entry_point: Some("vs_mesh"), compilation_options: Default::default(), buffers: std::slice::from_ref(&vbl) },
+            primitive: wgpu::PrimitiveState { topology: wgpu::PrimitiveTopology::TriangleList, cull_mode: None, ..Default::default() },
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: DEPTH_FORMAT,
+                depth_write_enabled: Some(true),
+                depth_compare: Some(wgpu::CompareFunction::Greater),
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default(),
+            }),
+            multisample: wgpu::MultisampleState { count: samples, ..Default::default() },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: Some("fs_mesh"),
+                compilation_options: Default::default(),
+                targets: &[Some(wgpu::ColorTargetState { format: OFFSCREEN_FORMAT, blend: None, write_mask: wgpu::ColorWrites::empty() })],
+            }),
+            multiview_mask: None,
+            cache: None,
+        });
+
+        // --- the pipeline of translucent bodies (ghosts) ---
+        // The colour of the ghosts comes AFTER their depth: alpha-blended on top of the opaque bodies, at the depth the
+        // pass before wrote (GreaterEqual: the depth is reversed), so each pixel takes the nearest face of a ghost once. The colour is already
+        // premultiplied (`Color32`), hence PREMULTIPLIED_ALPHA_BLENDING.
+        let mesh_pipeline_ghost = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("qym_mesh_pipeline_ghost"),
+            layout: Some(&mesh_pl),
+            vertex: wgpu::VertexState { module: &shader, entry_point: Some("vs_mesh"), compilation_options: Default::default(), buffers: std::slice::from_ref(&vbl) },
+            primitive: wgpu::PrimitiveState { topology: wgpu::PrimitiveTopology::TriangleList, cull_mode: None, ..Default::default() },
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: DEPTH_FORMAT,
+                depth_write_enabled: Some(false),
+                depth_compare: Some(wgpu::CompareFunction::GreaterEqual),
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default(),
+            }),
+            multisample: wgpu::MultisampleState { count: samples, ..Default::default() },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: Some("fs_mesh"),
+                compilation_options: Default::default(),
+                targets: &[Some(wgpu::ColorTargetState { format: OFFSCREEN_FORMAT, blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING), write_mask: wgpu::ColorWrites::ALL })],
+            }),
+            multiview_mask: None,
+            cache: None,
+        });
+
+        // --- the floor ---
+        // A FULL-FRAME PASS AT THE FAR END OF THE DEPTH: every pixel casts its ray onto the plane (`fs_floor`), and the
+        // test against the solid bodies passes only where none was drawn - the floor lies behind every body, from above
+        // and from below. It writes no depth, so a ghost drawn after it shows the floor behind through itself.
+        let floor_pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some("qym_floor_pl"), bind_group_layouts: &[Some(&cam_layout)], immediate_size: 0 });
+        let floor_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("qym_floor_pipeline"),
+            layout: Some(&floor_pl),
+            vertex: wgpu::VertexState { module: &shader, entry_point: Some("vs_floor"), compilation_options: Default::default(), buffers: &[] },
+            primitive: wgpu::PrimitiveState::default(),
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: DEPTH_FORMAT,
+                depth_write_enabled: Some(false),
+                depth_compare: Some(wgpu::CompareFunction::GreaterEqual),
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default(),
+            }),
+            multisample: wgpu::MultisampleState { count: samples, ..Default::default() },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: Some("fs_floor"),
+                compilation_options: Default::default(),
+                targets: &[Some(wgpu::ColorTargetState { format: OFFSCREEN_FORMAT, blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING), write_mask: wgpu::ColorWrites::ALL })],
+            }),
+            multiview_mask: None,
+            cache: None,
+        });
+
+        // --- the blit pipeline ---
+        let blit_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("qym_blit_layout"),
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture { sample_type: wgpu::TextureSampleType::Float { filterable: true }, view_dimension: wgpu::TextureViewDimension::D2, multisampled: false },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering), count: None },
+            ],
+        });
+        let blit_pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some("qym_blit_pl"), bind_group_layouts: &[Some(&blit_layout)], immediate_size: 0 });
+        let blit_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("qym_blit_pipeline"),
+            layout: Some(&blit_pl),
+            vertex: wgpu::VertexState { module: &shader, entry_point: Some("vs_blit"), compilation_options: Default::default(), buffers: &[] },
+            primitive: wgpu::PrimitiveState::default(),
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                // a gamma framebuffer (ordinary eframe) means a one-for-one carry; an sRGB-aware one
+                // means giving out linear for the hardware to encode
+                entry_point: Some(if target_format.is_srgb() { "fs_blit_srgb" } else { "fs_blit_gamma" }),
+                compilation_options: Default::default(),
+                targets: &[Some(wgpu::ColorTargetState { format: target_format, blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING), write_mask: wgpu::ColorWrites::ALL })],
+            }),
+            multiview_mask: None,
+            cache: None,
+        });
+
+        let sampler =
+            device.create_sampler(&wgpu::SamplerDescriptor { label: Some("qym_blit_sampler"), mag_filter: wgpu::FilterMode::Linear, min_filter: wgpu::FilterMode::Linear, ..Default::default() });
+
+        Self {
+            mesh_pipeline,
+            mesh_pipeline_ghost,
+            mesh_pipeline_ghost_depth,
+            floor_pipeline,
+            blit_pipeline,
+            cam_buf,
+            cam_bind,
+            blit_layout,
+            look_layout,
+            sampler,
+            msaa_view: None,
+            color_tex: None,
+            color_view: None,
+            depth_view: None,
+            blit_bind: None,
+            size: [0, 0],
+            bufs: Vec::new(),
+            spans: Vec::new(),
+            look_buf: None,
+            look_bind: None,
+            look_len: 0,
+            vcount: 0,
+            scene_key: u64::MAX,
+            samples,
+        }
+    }
+
+    /// Recreate the offscreen colour and depth for a new size (in pixels), plus the bind group of the
+    /// blit.
+    fn ensure_size(&mut self, device: &wgpu::Device, size: [u32; 2]) {
+        if size == self.size && self.color_view.is_some() {
+            return;
+        }
+        let extent = wgpu::Extent3d { width: size[0].max(1), height: size[1].max(1), depth_or_array_layers: 1 };
+        // the single-sample colour the blit carries: the resolve target, or the target itself with one sample
+        let color = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("qym_offscreen_color"),
+            size: extent,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: OFFSCREEN_FORMAT,
+            // COPY_SRC IS THERE SO THE PICTURE CAN BE TAKEN OFF THE CARD. Everything below the blit - the
+            // culling, the shading, the look table, the indices - is invisible to a check that only looks at
+            // the numbers, and a mistake in it does not crash: it draws the body wrong. Reported behaviour:
+            // "the faces fell apart" on a document the software rasteriser drew correctly.
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+        let depth = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("qym_offscreen_depth"),
+            size: extent,
+            mip_level_count: 1,
+            sample_count: self.samples,
+            dimension: wgpu::TextureDimension::D2,
+            format: DEPTH_FORMAT,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+        // A MULTISAMPLE TARGET ONLY WHEN THERE IS SOMETHING TO RESOLVE. With antialiasing off (one sample) the
+        // pass draws straight into the colour: a target of one sample resolved into another is a validation error
+        // of wgpu, and it closed the window on start (issue #2).
+        let msaa_view = (self.samples > 1).then(|| {
+            device
+                .create_texture(&wgpu::TextureDescriptor {
+                    label: Some("qym_offscreen_msaa"),
+                    size: extent,
+                    mip_level_count: 1,
+                    sample_count: self.samples,
+                    dimension: wgpu::TextureDimension::D2,
+                    format: OFFSCREEN_FORMAT,
+                    usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                    view_formats: &[],
+                })
+                .create_view(&wgpu::TextureViewDescriptor::default())
+        });
+        let color_view = color.create_view(&wgpu::TextureViewDescriptor::default());
+        let depth_view = depth.create_view(&wgpu::TextureViewDescriptor::default());
+        let blit_bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("qym_blit_bind"),
+            layout: &self.blit_layout,
+            entries: &[
+                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&color_view) },
+                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&self.sampler) },
+            ],
+        });
+        self.msaa_view = msaa_view;
+        self.color_tex = Some(color);
+        self.color_view = Some(color_view);
+        self.depth_view = Some(depth_view);
+        self.blit_bind = Some(blit_bind);
+        self.size = size;
+    }
+}
+
+/// The per-frame paint callback: it carries the camera, the size of the viewport and (when the scene has
+/// changed) new vertices.
+pub struct MeshPaint {
+    cam: CamRaw,
+    size_px: [u32; 2],
+    /// `Some` only when the scene has changed (otherwise the uploaded buffer is reused).
+    /// The scene in pieces, in drawing order: one per body, plus the caps of a section. `None` means the
+    /// geometry has not changed and only the look below has.
+    verts: Option<Vec<qymcad_ui_state::ScenePiece>>,
+    /// What every body looks like at this moment - rewritten every frame, two numbers per body.
+    looks: Vec<qymcad_ui_state::BodyLook>,
+    scene_key: u64,
+}
+
+impl MeshPaint {
+    pub fn new(cam: CamRaw, size_px: [u32; 2], verts: Option<Vec<qymcad_ui_state::ScenePiece>>, looks: Vec<qymcad_ui_state::BodyLook>, scene_key: u64) -> Self {
+        Self { cam, size_px, verts, looks, scene_key }
+    }
+}
+
+impl egui_wgpu::CallbackTrait for MeshPaint {
+    fn prepare(
+        &self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        _screen: &egui_wgpu::ScreenDescriptor,
+        encoder: &mut wgpu::CommandEncoder,
+        resources: &mut egui_wgpu::CallbackResources,
+    ) -> Vec<wgpu::CommandBuffer> {
+        let Some(gpu) = resources.get_mut::<GpuRenderer>() else { return Vec::new() };
+        queue.write_buffer(&gpu.cam_buf, 0, bytemuck::bytes_of(&self.cam));
+        gpu.ensure_size(device, self.size_px);
+
+        // re-upload the vertices only when the scene has changed
+        if let Some(verts) = &self.verts {
+            if self.scene_key != gpu.scene_key || gpu.bufs.is_empty() {
+                // THE LIMIT IS ASKED OF THE DEVICE, not assumed: it differs between cards and drivers, and a
+                // number written here would be right on one machine and fatal on another.
+                let (vsize, isize_) = (std::mem::size_of::<GpuVert>() as u64, 4u64);
+                let room = crate::gui::scene_chunks::room_in_a_chunk(device.limits().max_buffer_size, vsize, isize_);
+                let sizes: Vec<(u32, u32)> = verts.iter().map(|p| (p.verts.len() as u32, p.idx.len() as u32)).collect();
+                let placed = crate::gui::scene_chunks::pack_blocks(&sizes, room);
+                // how much each piece holds in the end: the last block laid into it says so
+                let mut totals: Vec<(u32, u32)> = Vec::new();
+                for (p, (v, i)) in placed.iter().zip(&sizes) {
+                    let c = p.chunk as usize;
+                    if totals.len() <= c {
+                        totals.resize(c + 1, (0, 0));
+                    }
+                    totals[c] = (p.first_vertex + v, p.first_index + i);
+                }
+                gpu.bufs.clear();
+                for (v, i) in &totals {
+                    let vbuf = device.create_buffer(&wgpu::BufferDescriptor {
+                        label: Some("qym_scene_vbuf"),
+                        size: (*v as u64 * vsize).max(4),
+                        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                        mapped_at_creation: false,
+                    });
+                    let ibuf = device.create_buffer(&wgpu::BufferDescriptor {
+                        label: Some("qym_scene_ibuf"),
+                        size: (*i as u64 * isize_).max(4),
+                        usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST,
+                        mapped_at_creation: false,
+                    });
+                    gpu.bufs.push((vbuf, ibuf));
+                }
+                // EVERY BLOCK GOES STRAIGHT FROM THE SCENE into the piece that holds it, whole: its vertices
+                // at one offset, its indices at another. The indices stay LOCAL to the block - where its
+                // vertices begin is told to the draw as `base_vertex`.
+                gpu.spans.clear();
+                for (part, at) in verts.iter().zip(&placed) {
+                    let Some((vbuf, ibuf)) = gpu.bufs.get(at.chunk as usize) else { continue };
+                    queue.write_buffer(vbuf, at.first_vertex as u64 * vsize, bytemuck::cast_slice(&part.verts));
+                    queue.write_buffer(ibuf, at.first_index as u64 * isize_, bytemuck::cast_slice(&part.idx));
+                    gpu.spans.push(Span { chunk: at.chunk as usize, idx: at.first_index..at.first_index + part.idx.len() as u32, base_vertex: at.first_vertex as i32, body: part.body });
+                }
+                gpu.vcount = verts.iter().map(|p| p.idx.len() as u32).sum();
+                gpu.scene_key = self.scene_key;
+            }
+        }
+
+        // THE LOOK TABLE, EVERY FRAME. It is two numbers per body: rewriting it costs kilobytes, while the
+        // geometry above is touched only when a shape or a position changed.
+        if !self.looks.is_empty() {
+            // rows of LOOK_ROW texels; the last row is padded, the texture being written whole
+            let rows = self.looks.len().div_ceil(LOOK_ROW as usize) as u32;
+            let mut table = self.looks.clone();
+            table.resize(rows as usize * LOOK_ROW as usize, qymcad_ui_state::BodyLook::default());
+            let bytes: &[u8] = bytemuck::cast_slice(&table);
+            if gpu.look_len < table.len() || gpu.look_buf.is_none() {
+                let tex = device.create_texture(&wgpu::TextureDescriptor {
+                    label: Some("qym_look_buf"),
+                    size: wgpu::Extent3d { width: LOOK_ROW, height: rows, depth_or_array_layers: 1 },
+                    mip_level_count: 1,
+                    sample_count: 1,
+                    dimension: wgpu::TextureDimension::D2,
+                    format: wgpu::TextureFormat::Rg32Uint,
+                    usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+                    view_formats: &[],
+                });
+                let view = tex.create_view(&wgpu::TextureViewDescriptor::default());
+                gpu.look_bind = Some(device.create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: Some("qym_look_bind"),
+                    layout: &gpu.look_layout,
+                    entries: &[wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&view) }],
+                }));
+                gpu.look_buf = Some(tex);
+                gpu.look_len = table.len();
+            }
+            if let Some(tex) = gpu.look_buf.as_ref() {
+                queue.write_texture(
+                    wgpu::TexelCopyTextureInfo { texture: tex, mip_level: 0, origin: wgpu::Origin3d::ZERO, aspect: wgpu::TextureAspect::All },
+                    bytes,
+                    wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(LOOK_ROW * 8), rows_per_image: Some(rows) },
+                    wgpu::Extent3d { width: LOOK_ROW, height: rows, depth_or_array_layers: 1 },
+                );
+            }
+        }
+
+        // the offscreen pass: clear to transparent, draw the bodies with a depth buffer - into the multisample
+        // target resolved into the colour, or with one sample straight into the colour
+        let (Some(cv), Some(dv)) = (gpu.color_view.as_ref(), gpu.depth_view.as_ref()) else { return Vec::new() };
+        let (view, resolve_target, store) = match gpu.msaa_view.as_ref() {
+            // the multisample texture is needed only for the resolve, so it is not stored (Discard); the resolve
+            // happens all the same
+            Some(mv) => (mv, Some(cv), wgpu::StoreOp::Discard),
+            None => (cv, None, wgpu::StoreOp::Store),
+        };
+        let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("qym_offscreen_pass"),
+            multiview_mask: None,
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view,
+                resolve_target,
+                depth_slice: None,
+                ops: wgpu::Operations { load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT), store },
+            })],
+            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                view: dv,
+                depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Clear(0.0), store: wgpu::StoreOp::Store }),
+                stencil_ops: None,
+            }),
+            timestamp_writes: None,
+            occlusion_query_set: None,
+        });
+        // WHICH PASS A BODY BELONGS TO IS READ FROM THE LOOK, not from where its vertices lie. A body turning into a ghost
+        // changes a row of the table and nothing else; before, its vertices had to move into the other half of the
+        // buffer, which meant rebuilding and re-uploading.
+        //
+        // The order of the passes is kept across the whole scene: every solid body first, so the depth buffer is set,
+        // then the floor tested against them, and the ghosts after - otherwise a ghost drawn early hides a solid body
+        // drawn later. THE PASS IS CHOSEN BY THE GHOST BIT ALONE, with no regard to the selection: picking a neighbour's
+        // body paints it as selected and leaves it in the blended pass, as in the raster.
+        let ghostly = |body: u32| self.looks.get(body as usize).is_some_and(|l| l.state & qymcad_ui_state::LOOK_GHOST != 0);
+        let scene = (gpu.vcount > 0 && !gpu.bufs.is_empty()).then_some(gpu.look_bind.as_ref()).flatten();
+        let bodies = |pass: &mut wgpu::RenderPass<'_>, ghost_pass: bool, pipeline: &wgpu::RenderPipeline| {
+            let Some(look_bind) = scene else { return };
+            pass.set_pipeline(pipeline);
+            pass.set_bind_group(0, &gpu.cam_bind, &[]);
+            pass.set_bind_group(1, look_bind, &[]);
+            for span in gpu.spans.iter().filter(|span| ghostly(span.body) == ghost_pass) {
+                let Some((vbuf, ibuf)) = gpu.bufs.get(span.chunk) else { continue };
+                pass.set_vertex_buffer(0, vbuf.slice(..));
+                pass.set_index_buffer(ibuf.slice(..), wgpu::IndexFormat::Uint32);
+                pass.draw_indexed(span.idx.clone(), span.base_vertex, 0..1);
+            }
+        };
+        bodies(&mut pass, false, &gpu.mesh_pipeline);
+        pass.set_pipeline(&gpu.floor_pipeline);
+        pass.set_bind_group(0, &gpu.cam_bind, &[]);
+        pass.draw(0..3, 0..1);
+        bodies(&mut pass, true, &gpu.mesh_pipeline_ghost_depth);
+        bodies(&mut pass, true, &gpu.mesh_pipeline_ghost);
+        drop(pass);
+        Vec::new()
+    }
+
+    fn paint(&self, info: PaintCallbackInfo, render_pass: &mut wgpu::RenderPass<'static>, resources: &egui_wgpu::CallbackResources) {
+        let Some(gpu) = resources.get::<GpuRenderer>() else { return };
+        let Some(bind) = gpu.blit_bind.as_ref() else { return };
+        let vp = info.viewport_in_pixels();
+        if vp.width_px <= 0 || vp.height_px <= 0 {
+            return;
+        }
+        render_pass.set_viewport(vp.left_px as f32, vp.top_px as f32, vp.width_px as f32, vp.height_px as f32, 0.0, 1.0);
+        render_pass.set_pipeline(&gpu.blit_pipeline);
+        render_pass.set_bind_group(0, bind, &[]);
+        render_pass.draw(0..3, 0..1);
+    }
+}
+
+/// THE SIDE OF THE PICTURE A SELF-TEST DRAWS, in pixels: small, so a test on the processor costs little.
+const TEST_SIDE: u32 = 64;
+
+/// DOES THIS DEVICE DRAW: the viewport's own pipeline draws a square into its offscreen target with `samples` per
+/// pixel, the picture is read back, and its middle must be covered. Any error of wgpu on the way is a "no".
+///
+/// Reported behaviour: on some cards the window opened and the bodies were not there - an RX 580 under DX12 drew a
+/// transparent picture when it drew with several samples (wgpu #3838). Nothing fails when that happens; the only
+/// way to know is to draw and look. The square is drawn in both windings, so one of them faces the eye whatever the
+/// pipeline takes for the front.
+pub fn draws(device: &wgpu::Device, queue: &wgpu::Queue, samples: u32) -> bool {
+    let feats = device.features();
+    let ok = |fmt: wgpu::TextureFormat| fmt.guaranteed_format_features(feats).flags.sample_count_supported(samples);
+    if samples > 1 && !(ok(OFFSCREEN_FORMAT) && ok(DEPTH_FORMAT)) {
+        return false;
+    }
+    let scopes = [wgpu::ErrorFilter::Validation, wgpu::ErrorFilter::OutOfMemory, wgpu::ErrorFilter::Internal].map(|f| device.push_error_scope(f));
+    let covered = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| draw_the_square(device, queue, samples))).unwrap_or(0);
+    let clean = scopes.into_iter().rev().all(|scope| pollster::block_on(scope.pop()).is_none());
+    // the square covers 80 % of the side, so the middle quarter of the picture lies wholly inside it
+    clean && covered >= (TEST_SIDE / 2) * (TEST_SIDE / 2)
+}
+
+/// The square drawn and read back: how many pixels of the middle quarter it covers.
+fn draw_the_square(device: &wgpu::Device, queue: &wgpu::Queue, samples: u32) -> u32 {
+    let mut resources = egui_wgpu::CallbackResources::default();
+    resources.insert(GpuRenderer::new(device, OFFSCREEN_FORMAT, samples));
+    let side = TEST_SIDE as f32;
+    let basis = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]);
+    let shade = ShadeRaw { lights: qymcad_ui_state::scene_lights(&basis), floor: 0.5, ghost_alpha: 0.5, ghost_target: [0.5; 3] };
+    let proj = qymcad_ui_state::ProjParams { inv_d_eye: 0.0, z_near: 0.0, depth_half: 10.0 };
+    let cam = CamRaw::new(&basis, side / 2.0 * 0.8, [0.0; 3], egui::vec2(side, side), &proj, shade);
+    let corner = |x: f32, y: f32| GpuVert { pos: [x, y, 0.0], body: 0, nrm: 0 };
+    let verts = vec![corner(-1.0, -1.0), corner(1.0, -1.0), corner(1.0, 1.0), corner(-1.0, 1.0)];
+    let idx = vec![0, 1, 2, 0, 2, 3, 0, 2, 1, 0, 3, 2];
+    let piece = qymcad_ui_state::ScenePiece { verts: std::sync::Arc::new(verts), idx: std::sync::Arc::new(idx), body: 0, rows: 1 };
+    let looks = vec![qymcad_ui_state::BodyLook { tint: 0x00C0_C0C0, state: 0 }];
+    let paint = MeshPaint::new(cam, [TEST_SIDE; 2], Some(vec![piece]), looks, 1);
+    let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("qym_self_test") });
+    let screen = egui_wgpu::ScreenDescriptor { size_in_pixels: [TEST_SIDE; 2], pixels_per_point: 1.0 };
+    use egui_wgpu::CallbackTrait;
+    let extra = paint.prepare(device, queue, &screen, &mut encoder, &mut resources);
+    let Some(tex) = resources.get::<GpuRenderer>().and_then(|g| g.color_tex.clone()) else { return 0 };
+    let row = (TEST_SIDE * 4).div_ceil(256) * 256;
+    let buf = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("qym_self_test_read"),
+        size: (row * TEST_SIDE) as u64,
+        usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+        mapped_at_creation: false,
+    });
+    encoder.copy_texture_to_buffer(
+        wgpu::TexelCopyTextureInfo { texture: &tex, mip_level: 0, origin: wgpu::Origin3d::ZERO, aspect: wgpu::TextureAspect::All },
+        wgpu::TexelCopyBufferInfo { buffer: &buf, layout: wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(row), rows_per_image: Some(TEST_SIDE) } },
+        wgpu::Extent3d { width: TEST_SIDE, height: TEST_SIDE, depth_or_array_layers: 1 },
+    );
+    queue.submit(extra.into_iter().chain(std::iter::once(encoder.finish())));
+    let slice = buf.slice(..);
+    let (tx, rx) = std::sync::mpsc::channel();
+    slice.map_async(wgpu::MapMode::Read, move |r| {
+        let _ = tx.send(r);
+    });
+    if device.poll(wgpu::PollType::wait_indefinitely()).is_err() || !matches!(rx.recv(), Ok(Ok(()))) {
+        return 0;
+    }
+    let data = slice.get_mapped_range();
+    let quarter = TEST_SIDE / 4..TEST_SIDE * 3 / 4;
+    let covered = quarter.clone().flat_map(|y| quarter.clone().map(move |x| (y * row + x * 4 + 3) as usize)).filter(|&o| data[o] > 128).count() as u32;
+    drop(data);
+    buf.unmap();
+    covered
+}
+
+/// THE SAME RESOURCES, INTO A BARE BAG - for a check that renders without a window.
+///
+/// `install` below needs the render state of eframe, which exists only when a window is open. A check has a
+/// device and nothing else, and it must run the SAME pipeline: a copy of the setup here would prove that the
+/// copy works.
+#[cfg(test)]
+pub(crate) fn install_for_test(device: &wgpu::Device, resources: &mut egui_wgpu::CallbackResources, samples: u32) {
+    resources.insert(GpuRenderer::new(device, OFFSCREEN_FORMAT, samples));
+}
+
+/// The texture the bodies were drawn into, for copying the picture out of a check.
+#[cfg(test)]
+pub(crate) fn color_texture_for_test(resources: &egui_wgpu::CallbackResources) -> Option<wgpu::Texture> {
+    resources.get::<GpuRenderer>().and_then(|g| g.color_tex.clone())
+}
+
+/// Install the GPU resources of the viewport into the egui render state (called from `launch` if the wgpu
+/// backend is active). Returns `false` if there is no render state (the glow fallback) — and then the CPU
+/// raster does the work.
+pub fn install(render_state: &egui_wgpu::RenderState) -> bool {
+    // ASK THE DEVICE BEFORE BUILDING THE PIPELINES and lower the request to what it can do: an
+    // unsupported number of samples is a panic from wgpu right at startup, not "a slightly worse
+    // picture".
+    probe_supported(&render_state.device, render_state.target_format);
+    set_msaa(MSAA_SAMPLES.load(std::sync::atomic::Ordering::Relaxed));
+    let renderer = GpuRenderer::new(&render_state.device, render_state.target_format, msaa_samples());
+    render_state.renderer.write().callback_resources.insert(renderer);
+    crate::crash::journal(&format!("the viewport is built with {} samples a pixel", msaa_samples()));
+    true
+}
+
+#[cfg(test)]
+mod tests {
+    //! The GPU viewport had not a single test, although THE CAMERA in it is pure arithmetic that can be
+    //! checked without a window and without a GPU. And it is the camera that must agree with the CPU path
+    //! (`proj_params`), otherwise the picture and the picks drift apart.
+    use super::CamRaw;
+
+    /// An orthographic frame whose range is `depth_half` either way.
+    fn ortho(depth_half: f64) -> qymcad_ui_state::ProjParams {
+        qymcad_ui_state::ProjParams { inv_d_eye: 0.0, z_near: 0.0, depth_half }
+    }
+
+    /// The camera basis for looking along -Z: right=+X, up=+Y, fwd=-Z.
+    fn basis() -> ([f64; 3], [f64; 3], [f64; 3]) {
+        ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, -1.0])
+    }
+
+    /// Shading plays no part in what these checks measure - the projection does.
+    fn plain() -> super::ShadeRaw {
+        super::ShadeRaw { lights: qymcad_ui_state::scene_lights(&basis()), floor: 0.35, ghost_alpha: 0.5, ghost_target: [0.1, 0.1, 0.12] }
+    }
+
+    /// THE SELF-TEST SEES A DEVICE THAT DRAWS: on this machine's device the square is drawn, with one sample and
+    /// with four. Where there is no device it says so and stands aside.
+    #[test]
+    fn the_self_test_sees_a_device_that_draws() {
+        use eframe::wgpu;
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle());
+        let Ok(adapter) = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default())) else {
+            eprintln!("PASSED OVER: no graphics device to test");
+            return;
+        };
+        let Ok((device, queue)) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor::default())) else {
+            eprintln!("PASSED OVER: the graphics device would not open");
+            return;
+        };
+        let began = std::time::Instant::now();
+        assert!(super::draws(&device, &queue, 1), "the device of this machine draws, and the self-test says it does not (one sample)");
+        assert!(super::draws(&device, &queue, 4), "the device of this machine draws, and the self-test says it does not (four samples)");
+        eprintln!("the self-test on {}: {:?} for both", adapter.get_info().name, began.elapsed());
+    }
+
+    #[test]
+    fn camera_carries_basis_scale_and_viewport() {
+        let c = CamRaw::new(&basis(), 2.0, [10.0, 20.0, 30.0], egui::vec2(800.0, 600.0), &ortho(1000.0), plain());
+        assert_eq!(c.right[..3], [1.0, 0.0, 0.0], "the right unit vector is as it was passed");
+        assert_eq!(c.up[..3], [0.0, 1.0, 0.0]);
+        assert_eq!(c.fwd[..3], [0.0, 0.0, -1.0]);
+        assert_eq!(c.target[..3], [10.0, 20.0, 30.0], "the target is as it was passed");
+        assert_eq!(c.params[0], 2.0, "the scale");
+        assert_eq!((c.params[1], c.params[2]), (400.0, 300.0), "the half-sizes of the viewport in points");
+        assert_eq!(c.persp[0], 0.0, "0 means an orthographic projection");
+    }
+
+    /// The orthographic range reaches the shader as the frame measured it (`proj_params`, which holds the whole scene).
+    #[test]
+    fn the_ortho_depth_range_reaches_the_shader() {
+        let c = CamRaw::new(&basis(), 10.0, [0.0; 3], egui::vec2(800.0, 600.0), &ortho(52_500.0), plain());
+        assert_eq!(c.params[3], 52_500.0);
+    }
+
+    /// A degenerate scale (zero or negative) must not give an infinity or a NaN in the uniform —
+    /// otherwise the frame is drawn as rubbish rather than as the scene.
+    #[test]
+    fn degenerate_scale_stays_finite() {
+        for scale in [0.0, -1.0, f32::MIN_POSITIVE] {
+            let c = CamRaw::new(&basis(), scale, [0.0; 3], egui::vec2(800.0, 600.0), &ortho(1000.0), plain());
+            assert!(c.params.iter().all(|v| v.is_finite()), "scale {scale}: the parameters are finite, and what came back is {:?}", c.params);
+            assert!(c.params[3] > 0.0, "the depth of the clip is positive at scale {scale}");
+        }
+    }
+
+    /// Perspective: 1/d_eye and the near plane reach the shader as they are (the CPU and the GPU compute by one
+    /// formula - let them diverge and the picks stop matching the picture).
+    #[test]
+    fn perspective_params_pass_through() {
+        let proj = qymcad_ui_state::ProjParams { inv_d_eye: 1.0 / 500.0, z_near: 0.5, depth_half: 1000.0 };
+        let c = CamRaw::new(&basis(), 1.0, [0.0; 3], egui::vec2(1024.0, 768.0), &proj, plain());
+        assert!((c.persp[0] - 0.002).abs() < 1e-9, "1/d_eye");
+        assert_eq!(c.persp[1], 0.5, "the near plane is as it was passed");
+    }
+}

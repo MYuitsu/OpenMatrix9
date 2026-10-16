@@ -1,0 +1,267 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-01",
+  "milestone": "M03",
+  "title": "13-febe-matrix-transform-toolbar-bridges",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Matrix Transform menu binds to Rhino/OCCT transforms",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/13-febe-matrix-transform-toolbar-bridges/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-01",
+    "milestone_id": "M03",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/13-febe-matrix-transform-toolbar-bridges/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/01-febe-matrix-transform-toolbar-bridges/",
+    "scope": "Matrix Transform menu binds to Rhino/OCCT transforms",
+    "exclude": "Không toán học transform trùng.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          235,
+          266
+        ],
+        "pdf_pages_1based": [
+          9,
+          40
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-02-06",
+      "OM9-L2-03-07"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M03-UI",
+    "l3_count": 42,
+    "l3_catalog_path": "specs/03-ms03-curve-surface-solid-3dm/13-febe-matrix-transform-toolbar-bridges/l3-index.json",
+    "l3_deferred_count": 22,
+    "l3_m03_owner_count": 20,
+    "l4_count_planned_m03": 62
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-01-001",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-001 - Transform · Scale 3D - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-002",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-002 - Transform · Scale2D - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-003",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-003 - Transform · Scale1D - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-004",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-004 - Transform · Scale Non-Uniform - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-005",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-005 - Transform · Orient 2 Points - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-006",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-006 - Transform · Orient 3 Points - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-007",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-007 - Transform · Rotate3D - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-008",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-008 - Transform · Bend - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-009",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-009 - Transform · Array Polar - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-010",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-010 - Transform · Project To C-Plane - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-011",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-011 - Transform · Smart Flow - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-012",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-012 - Transform · Smart Flow Rigid - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-013",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-013 - Transform · Smart Flow Break - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-014",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-014 - Transform · Smart Flow Pull Down Curves - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-015",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-015 - Transform · Orient on Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-016",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-016 - Transform · Orient Perpendicular to Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-017",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-017 - Transform · Orient on Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-018",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-018 - Transform · Symmetry - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-019",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-019 - Transform · Solid Points ON - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-020",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-020 - Transform · Cage Edit - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-021",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-021 - Transform · ReleaseFromCage - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-022",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-022 - Transform · Array Along Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-023",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-023 - Transform · Array Linear - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-024",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-024 - Transform · Array Along Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-025",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-025 - Transform · Array Curve on Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-026",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-026 - Transform · Array - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-027",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-027 - Transform · Flow Along Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-028",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-028 - Transform · Flow Along Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-029",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-029 - Transform · Splop - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-030",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-030 - Transform · Set Points - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-031",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-031 - Transform · Scale By Plane - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-032",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-032 - Transform · Stretch - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-033",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-033 - Transform · Taper - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-034",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-034 - Transform · Shear - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-035",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-035 - Transform · Twist - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-036",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-036 - Transform · Maelstrom - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-037",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-037 - Transform · Make Down Facing - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-038",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-038 - Transform · Remap to C-Plane - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-04-01-039",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-039 - Transform · MoveUVN - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-040",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-040 - Transform · Soft Move - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-041",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-041 - Transform · Create Cage - menu binding/l3.json",
+      "target_implementation_milestone": "M08"
+    },
+    {
+      "id": "OM9-L3-04-01-042",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-04-01 - 13-febe/L3-042 - Transform menu action availability/l3.json",
+      "target_implementation_milestone": "M03"
+    }
+  ],
+  "m03_l4_planned_count": 62,
+  "execution_state": "NOT_STARTED",
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m08": 44
+}

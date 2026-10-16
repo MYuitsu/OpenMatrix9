@@ -1,0 +1,130 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-02-04",
+  "milestone": "M03",
+  "title": "04-febe-freeform-curve-modeling",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Line/Polyline/InterpCurve/Circle/Arc/Offset/Fillet/Blend/Rebuild/Match và point edit, G0/G1/G2 theo scope Curve cần cho Matrix.",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/04-febe-freeform-curve-modeling/module.json",
+  "definition": {
+    "module_id": "OM9-L2-02-04",
+    "milestone_id": "M03",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/04-febe-freeform-curve-modeling/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "02-rhino5",
+    "legacy_v07_path": "specs/02-rhino5/04-febe-freeform-curve-modeling/",
+    "scope": "Line/Polyline/InterpCurve/Circle/Arc/Offset/Fillet/Blend/Rebuild/Match và point edit, G0/G1/G2 theo scope Curve cần cho Matrix.",
+    "exclude": "OCCT xử lý hình học, 03 chỉ đưa icon/menu.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          120,
+          165
+        ],
+        "pdf_pages_1based": [
+          130,
+          175
+        ]
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          17,
+          18
+        ],
+        "pdf_pages_1based": [
+          25,
+          26
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-09",
+      "OM9-L2-01-07",
+      "OM9-L2-02-02"
+    ],
+    "downstream_contracts": [
+      "rhino-freeform-curves"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "M03_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M03-UI",
+    "l3_count": 12,
+    "l3_catalog_path": "specs/03-ms03-curve-surface-solid-3dm/04-febe-freeform-curve-modeling/l3-index.json",
+    "l3_deferred_count": 0,
+    "l3_m03_owner_count": 12,
+    "l4_count_planned_m03": 63
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-02-04-001",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-001 - Line Polyline Point Creation/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-002",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-002 - Circle Arc Ellipse Polygon Creation/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-003",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-003 - Interpolated And Controlpoint NURBS Curve/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-004",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-004 - Curve Edit Points And Grips/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-005",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-005 - Join Explode Close And Split Curves/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-006",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-006 - Offset Fillet Chamfer Curves/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-007",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-007 - Blend Arcblend And Match Curve Continuity/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-008",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-008 - Rebuild Refit And Knot Operations/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-009",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-009 - Project Pullback And Curve Intersections/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-010",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-010 - Duplicate Edge Border Isocurve/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-011",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-011 - Curve Seams Directions And Divisions/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-02-04-012",
+      "file": "M03 - Curve, Surface, Solid and 3DM Exchange/L2-02-04 - 04/L3-012 - Sketch On Surface Mesh And Two Views/l3.json",
+      "target_implementation_milestone": "M03"
+    }
+  ],
+  "m03_l4_planned_count": 63,
+  "execution_state": "NOT_STARTED",
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+}

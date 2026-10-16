@@ -1,0 +1,896 @@
+{
+  "level": "L1",
+  "id": "OM9-M01",
+  "milestone": "M01",
+  "title": "CAD shell, OCCT bridge, document, undo, GPU and viewport foundation",
+  "purpose": "Build core CAD vertical slice and all application foundations.",
+  "depends_on_milestones": [
+    "M00"
+  ],
+  "planning_state": "NOT_STARTED",
+  "source_repo": "https://github.com/QymIs-Tech/QymCAD",
+  "pinned_source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "module_count": 13,
+  "l3_count": 117,
+  "l4_count": 516,
+  "modules": [
+    {
+      "id": "OM9-L2-01-01",
+      "file": "M01 - CAD Shell, Viewport/L2-01-01 - Febe Application Shell Docking/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-02",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-03",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-05",
+      "file": "M01 - CAD Shell, Viewport/L2-01-05 - Be Occt Brep Kernel Bridge/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-06",
+      "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-08",
+      "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-12",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L2.json"
+    },
+    {
+      "id": "OM9-L2-02-01",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-01",
+      "file": "M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-07",
+      "file": "M01 - CAD Shell, Viewport/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-10",
+      "file": "M01 - CAD Shell, Viewport/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-14",
+      "file": "M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-15",
+      "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L2.json"
+    }
+  ],
+  "execution_scope": {
+    "this_is_only_planning": true,
+    "no_code_implemented": true,
+    "no_real_tests_executed": true,
+    "original_l2_l3_l4_ids_unchanged": true,
+    "not_included": [
+      "changelogs",
+      "lịch sử phiên bản",
+      "log thực thi",
+      "bằng chứng thực thi chưa có",
+      "công cụ kiểm thử thực thi",
+      "tệp báo cáo và manifest trùng lặp"
+    ],
+    "readme": "Giai đoạn lập kế hoạch: chỉ lưu JSON theo cấp L1/L2/L3/L4; tất cả L4 chưa triển khai. Các milestone khác ở L1–L3.",
+    "scope_other_milestones": "M03–M09 và AFTER được lưu riêng ở cấp L1–L3."
+  },
+  "technical_reference_material": {
+    "m01_module_api_boundaries": "# M01 — 13 đường ranh giới kiến trúc API (proposed, not compiled)\n\nĐây là các **loại dữ liệu/API đề xuất** để Codex thảo luận với owner trong M01 L4-02. Không khẳng định QymCAD cung cấp các chữ ký này. Tên `om9::*` là placeholder cho architecture, chỉ được đóng băng sau G00 source+license review.\n\n| L2 owner | Public contract yêu cầu | Không được làm | Downstream |\n|---|---|---|---|\n| `OM9-L2-01-08` | `LengthMm`, `AngleDeg`, `TolerancePolicy`, `WorldPoint`, `LocalPoint` | Truyền `f64` vô nhãn unit giữa modules | Geometry, Builders, UI input |\n| `OM9-L2-01-03` | `Document`, `EntityId`, `FeatureId`, `LayerId`, `GeometryHandle`, `Snapshot`, `DocChange` | Dùng array index làm persistent ID | Commands, GPU, Project, Gems |\n| `OM9-L2-01-05` | `GeometryService`, `BrepHandle`, `ShapeValidity`, `Tessellation`, `KernelError` | FFI pointer trong UI; copy C++ exceptions qua boundary | Geometry operations, scene, renderer |\n| `OM9-L2-01-02` | `CommandId`, `Descriptor`, `Context`, `Transaction`, `UndoJournal` | Menu/commandline tạo engine riêng | Menu, F6, interactive modeling |\n| `OM9-L2-02-01` | `CurveSemantic`, `SurfaceTrim`, `ShapeKind`, `InstanceSemantic` | Mesh tự gán là NURBS / isocurve tự thành edge | Rhino commands, builders, 3DM |\n| `OM9-L2-01-12` | `ProjectCodec`, `Version`, `SaveAtomic`, `LoadValidated`, `PersistentBrep` | Clone QymCAD `.qcad` không policy version | Project Manager, reload, Job Bags |\n| `OM9-L2-01-01` | `AppShell`, `DockLayout`, `ActiveDocumentView`, `StatusBus` | Dock panel tự giữ document geometry | 4 views, menu, layers, projects |\n| `OM9-L2-01-06` | `RenderBackend`, `SceneBuffer`, `DrawRevision`, `SelectionOverlay` | Lưu GPU mesh như hình học chuẩn | 4 views, hover, selection |\n| `OM9-L2-03-01` | `ViewportId`, `CameraPreset`, `ViewportLayout4`, `CPlane` | Camera/cplane ghi đè document shape | Four-view editing |\n| `OM9-L2-03-07` | `MatrixMenuPanel`, `CommandListAdapter`, `IconHistory` | Handler tự sửa kernel/scene | UX command dispatch |\n| `OM9-L2-03-10` | `CommandLineAdapter`, `PromptText`, `CommandLog` | Parser riêng không thống nhất với descriptor | Interactive command usage |\n| `OM9-L2-03-14` | `LayerPaletteAdapter`, `ObjectInfoAdapter`, `SuperselectPredicate` | Lưu trùng layer database trong UI | Jewelry workflows |\n| `OM9-L2-03-15` | `ProjectManagerAdapter`, `JobBagSlot`, `JobBagSnapshot`, `Notes` | Serializer thứ hai hoặc phục hồi không transaction | jewelry project workflows |\n\n## Invariants quan trọng để mô hình nhỏ không phá\n\n- Mọi event UI -> command -> model; geometry kernel chỉ qua GeometryService; renderer chỉ đọc snapshot/draw buffer.\n- `Document` giữ canonical geometry/IDs; GPU chỉ giữ resources sinh lại được.\n- Undo, Job Bag restore, Save/Open dùng cùng transaction/snapshot contracts, không tự thay ownership.\n- Color, lock, visibility của layer phải được document persist và tác động tới hit-testing.\n- Chỉ số C++ BRep face/edge **không** là stable topology reference; dùng structure/name semantics, explicit refusal on ambiguity.\n- M00 G00-06 yêu cầu quyết định AGPL/openNURBS/OCCT trước khi tái sử dụng upstream.\n",
+    "m01_vertical_slice": "**v0.15:** G01-C là phép trình diễn khả thi *sớm* sau G01-A/B; `G01-E` mới là điều kiện hoàn thành toàn M01. Mọi kết quả dưới đây chưa có runtime.\n\n# M01 end-to-end vertical slice — release evidence only, not code\n\nMục đích: trước khi mở M02, phải có một luồng hoạt động thực tế (không thay bằng ảnh UI mock):\n\n1. Khởi chạy OpenMatrix9 trên Windows 10/11; xác nhận main shell mở có Command Line + Sidebar + **4 camera**, mỗi pane có tên và active highlight (`01-01`, `01-06`, `03-01`).\n2. Với QymCAD fork/prototype được cấp phép, tạo **BRep Box 10×20×30 mm** bằng kernel OCCT. Đây là mẫu hình học kiểm toán M00: bbox `[(0,0,0),(10,20,30)]`, volume **6000 mm³**, closed solid count=1; không được dùng visual mesh làm nguồn chính (`01-05`, `02-01`).\n3. Thêm entity Box vào `Metals`, có persistent EntityId/LayerId; chọn box trong một pane, màu selection xuất hiện đúng và pane khác đồng bộ đối tượng nhưng không đổi camera (`01-03`, `01-06`, `03-14`).\n4. Dùng command chính thức di chuyển hoặc đổi thuộc tính theo **một transaction**; Undo rồi Redo khôi phục ổn định IDs, layer, box; Escape khi preview không tạo undo entry (`01-02`, `03-10`).\n5. **G01-C:** Tạo project và thử Save/Open cơ bản; kiểm tra ID và BRep. **G01-E final:** thêm Job Bag slot từ selection, snapshot/instance semantics (`03-15`).\n6. Save `.om9` (đuôi đề xuất, chốt ở API contract thực), đóng app, mở lại; xác nhận volume, IDs, color, locked/visible, Job Bag, camera/layout persistence theo policy (`01-12`, `01-01`, `03-01`, `03-15`).\n7. Thử invalid: NaN in dimension, invalid layer, missing BRep, corrupted ZIP, fake GPU device loss. Từng lỗi có thông điệp, không mất document; khi fail yêu cầu log rollback.\n8. Xuất STL và import 3DM chưa nằm trong điều kiện nghiệm thu đầy đủ của M01, dù menu có thể hiển thị entry disabled. STL được lên lịch ở M07/E12; 3DM import ở milestone riêng theo execution manifest.\n\n## Bằng chứng phải lưu\n\n- executable build ID, OS/toolchain, source SHA, license decision G00;\n- video/screenshot có 4 view và popup/selection states;\n- golden box `mass properties` (không dùng bbox đơn thuần để suy ra volume);\n- logs của `cargo test`, `cargo check`, M01 targeted tests, frontend smoke tests;\n- save-project artifact + reloaded scene fingerprint;\n- negative test logs, GPU fallback report;\n- chữ ký reviewer cho 55 frontend acceptance L4 và M01 gate sign-off.\n\n**Các con số volume/tolerance trong tài liệu là oracle giải tích dự kiến, không phải số đo đã chạy.**\n",
+    "protocol": "# OpenMatrix9 v0.15 — M01 small-model protocol\n\n## Mục đích và trạng thái\n\nM01 = 13 L2 + 116 L3 **có target_milestone=M01** được triển khai trong E01 (42 L3) / E02 (74 L3). Có 117 L3 **nằm vật lý** trong `specs/01-ms01-workbench-shell`, nhưng `OM9-L3-01-12-008` (STL Tessellation Export Codec) có `target_milestone=M07`, `execution_stage=E12`; tuyệt đối không thi công như M01.\n\nv0.15 **giữ nguyên canonical `specs/**/l3.json`** để tương thích validator cũ, và tạo execution overlay riêng trong `planning/M01`. Vì vậy `l4_status=NOT_CREATED` bên canonical là thuộc baseline cũ; **quyết định thực thi v0.15 xem `planning/M01/**/l3_execution.json` và `M01_EXECUTION_MANIFEST.json`**. Không hiểu hai bên là hai chức năng trùng nhau.\n\nCác hợp đồng, fixture và expected là **đề xuất**, không phải kết quả runtime. Chưa có M00 G00 nào PASS; mã nguồn OpenMatrix9 hoàn chỉnh chưa được đưa trong gói này.\n\n## Nguyên tắc dừng bắt buộc\n\n1. Trước bất kỳ sửa code: `python tools/validate_m00_execution.py --require-ready`. Kết quả khác 0 → `BLOCKED_M00`, dừng. Reviewer giấy phép G00-06 phải phê duyệt, không tự suy diễn từ GitHub.\n2. Chạy `python tools/validate_m01_spec.py`, sau đó `python tools/next_m01_task.py`. **Không** chạy `--preview` để coi như cho phép sửa mã. `--preview` chỉ cho việc lên lịch.\n3. Chọn đúng một L4 từ kết quả, đọc `RUNBOOK.md`, `execution_contract.json`, `l4.json`, `l3_execution.json`, canonical L3, L2 `module.json`, `MATRIX9_FIRST_CONTRACTS.md`.\n4. Checkout *đúng* upstream `QymIs-Tech/QymCAD@746a17f127897e921a57118b6caad08968602bf5` ở thư mục nghiên cứu. Không sửa upstream trừ khi fork và G00-06 đồng ý. Upstream path content-read **không chứng minh** có chức năng Matrix tương ứng.\n5. Đảm bảo tất cả `depends_on_task_ids` đã `PASS` với evidence hợp lệ. Mỗi L4 thuộc **mini-gate** trong `M01_MINIGATES.json`; các gate trước cần VERIFIED_PASS, không còn E01-wide barrier.\n6. Làm từng step đúng thứ tự, ghi log lệnh thật qua `m01_capture.py`. Cố định input, fixture và expected độc lập trước khi code; chạy test RED → GREEN. `cargo test` chỉ là test chung, không thay thế golden fixture.\n7. Tạo artifacts tại chính xác `outputs` đã kê, hash SHA-256 và evidence JSON. Gọi `python tools/validate_m01_execution.py`. Với FEBE L4 cuối, cần screenshot/video và reviewer thủ công trên Windows (không cho AI tự ký).\n8. Dừng ngay sau một L4, báo `task_id`, file chạm, chính xác lệnh chạy, kết quả, đường dẫn log, lỗi, next pending. Không tự chuyển L4 kế tiếp.\n\n## Cách xử lý nghịch lý upstream\n\n- QymCAD có Rust+OCCT C++ FFI, không phải 100% nhân Rust. Không sao chép raw OCCT pointer vào tài liệu hoặc UI.\n- QymCAD `.qcad` tự ghi rõ chưa có bảo đảm backward compatibility; OpenMatrix9 định nghĩa định dạng/version riêng và chính sách migration riêng trước implementation.\n- M01 chưa cung cấp `.3dm` importer đầy đủ hoặc STL exporter M07. Menu phải disable entry chưa được triển khai.\n- Đọc Matrix 8 Book 1 + Rhino 5 từ refs gốc trong canonical L3. Phần lớn refs là `parent_l2_range`, **không phải xác thực vị trí từng câu lệnh**.\n- UI Book 1 được thiết kế theo Matrix 8; yêu cầu fidelity Matrix 9 vẫn có thể cần screenshot/reference bổ sung hoặc ký chấp nhận mức tương đồng.\n\n## Stage E01 / E02 exit\n\n**E01 legacy label**: 42 L3 × 174 L4; model, typed IDs/units/commands, error+undo, kernel BRep bridge. Label kế thừa phục vụ thống kê; không phải barrier mới. Runtime OCCT phải được đo trong G01-B/C.\n\n**E02 legacy label**: 74 L3 × 342 L4; NURBS semantics, native save/project, app shell, four viewports, GPU, Matrix panels, commandline, layers, Job Bags. PASS chỉ khi toàn bộ 516 L4 VERIFIED_PASS, regression E01 vẫn xanh, 55 L4 FEBE cuối có reviewer ký và M01 vertical slice hoàn chỉnh.\n\n## Evidence & trạng thái\n\n- Source code inspected: `CONTENT_READ_AT_PINNED_SHA` hoặc `CANDIDATE_RECHECK_LOCAL`, không có trạng thái `VERIFIED_IMPLEMENTED` trước local source audit.\n- `NOT_RUN`, `PASS`, `FAIL`, `BLOCKED_M00`, `BLOCKED_SOURCE`, `BLOCKED_DEPENDENCY`, `BLOCKED_ENV`, `BLOCKED_FIXTURE`, `BLOCKED_APPROVAL`.\n- `PASS` yêu cầu: nguồn SHA, `actual_execution=true`, thời gian UTC, OS/toolchain, commands, stdout/stderr SHA256, artifact SHA256, fixture IDs, expected/actual, reviewer (nếu manual).\n- Evidence JSON bắt đầu ở `NOT_RUN`; `m01_init_evidence.py` **không** đồng nghĩa nghiệm thu.\n\n## Lệnh QA\n\n```bash\npython tools/validate_l3.py\npython tools/validate_v010_plan.py\npython tools/validate_m00_v013.py\npython tools/validate_m01_spec.py\npython tools/validate_m01_execution.py --self-test\npython tools/validate_m01_execution.py\npython tools/next_m01_task.py --preview    # xem, không cấp phép làm\npython tools/next_m01_task.py              # BLOCKED_M00 nếu G00 chưa PASS\n```\n\n## Bổ sung bắt buộc v0.15\n\n- Đọc `M01_PROOF_PROTOCOL_V015.md` và `M01_MINIGATES.md` trước khi giao một L4.\n- Không bỏ qua nhiệm vụ theo raw `status`: engine chung `tools/m01_proof.py` kiểm tra receipt, oracle, digest và review.\n- Mỗi L3 ưu tiên có `HARDENED_SPEC.md`. Chỉ được xem chữ ký Rust là bản **đề xuất**.\n- G01-C chỉ là MVP vertical slice, chưa bao gồm nghiệm thu Job Bags, Rhino NURBS đầy đủ hoặc tất cả panel Matrix; các phần này nằm ở G01-E.\n- `tools/m01_fixture_check.py` là phép kiểm tra tính hợp lệ của fixture tham chiếu, tuyệt đối không là chứng cứ OCCT/Windows runtime.\n",
+    "m01_proof_protocol": "# OpenMatrix9 v0.15 — Evidence protocol (M01)\n\n**Important: proofs are NOT build artifacts.** Current repo ZIP is a specification package only; OpenMatrix9 Rust implementation has not been compiled or run. Source audits are not implementation acceptance. All M01 coding remains blocked by M00 mandatory approvals.\n\n## 1. The one source of truth\n\nBoth `validate_m01_execution.py` and `next_m01_task.py` import `tools/m01_proof.py` and recompute `VERIFIED_PASS` from the evidence, linked capture receipts, oracle and SHA-256. A raw JSON `\"status\": \"PASS\"` does not authorize anything.\n\nSelect next task:\n\n```bash\npython tools/validate_m00_execution.py --require-ready\npython tools/validate_m01_spec.py\npython tools/next_m01_task.py\n```\n\n`--preview` is **planning only**. `BLOCKED_M00` must stop all source changes to M01.\n\n## 2. Capturing commands\n\n```bash\npython tools/m01_capture.py --task OM9-L4-01-08-001-01 --cwd vendor-research/QymCAD --label source-head -- git rev-parse HEAD\n# source-head.command.json, .stdout.log and .stderr.log are produced together\n```\n\nEach `--label` can be used only once to preserve immutable logs. The tool returns the *same* nonzero status as a failing test; a failed command is evidence of failure, not PASS. Use a new label after fixing and rerunning. Check `stdout_sha256`, `stderr_sha256` and receipt ID. A standalone `python -V`, `git status` or `validate_m01_spec.py` is **not** an implementation test.\n\n## 3. Evidence schema for PASS\n\n`implementation/evidence/M01/<L3>/<L4>.evidence.json` needs the original fields (ID, parent, pinned source_sha, UTC, environment, fixture IDs, expected and actual) plus:\n\n```json\n{\n  \"status\": \"PASS\",\n  \"actual_execution\": true,\n  \"toolchain\": {\"rustc\": \"record actual rustc --version\"},\n  \"commands\": [\n    {\"command_log_path\": \"implementation/evidence/M01/<L3>/commands/<L4>-focused.command.json\", \"purpose\": \"focused_test\"}\n  ],\n  \"oracle_report\": {\n    \"path\": \"implementation/evidence/M01/<L3>/oracle.json\",\n    \"sha256\": \"64_hex_chars_measured_from_this_file\"\n  },\n  \"artifacts\": [\n    {\"path\": \"implementation/evidence/M01/<L3>/runtime-report.txt\", \"sha256\": \"64_hex_chars_measured_from_this_file\"}\n  ]\n}\n```\n\n**This is a schema fragment, not a PASS template. Do not copy it verbatim.** Required command purpose: SOURCE_AUDIT=`source_revision` (`git rev-parse HEAD` with SHA pinned); CONTRACT_TEST=`fixture_validation`; IMPLEMENT, INTEGRATE and ACCEPTANCE=`focused_test`. `expected_red` with `why_failure_expected` can document a failing *red* test but never counts as a successful test. Other mandatory logs must be `exit_code=0` and error-free. A `focused_test` must invoke a test/probe/harness rather than merely print a version string.\n\n## 4. Oracle report generated from runtime observations\n\nSchema: `om9.m01.oracle.v1.5`. Report must have `task_id`, `command_log_path` equal to one captured receipt, and `cases` containing at least one `positive` and one `negative`. Each case has a distinct `case_id`, `comparison` (`exact`, `near`, `error_code`, `sha256`), `expected`, `actual`, `passed=true`; `near` requires a finite `abs_tolerance`. Validator **recalculates comparisons**, rejects mismatched expected/actual, FAIL strings, missing/altered output files or nonzero final test exit.\n\nThe report must come from **the target harness** (not a script that copies the proposed fixture into observed). Tests for invalid input are expected to return a *typed error inside a successful test process*, rather than using a failing test process as evidence of correctness. `tools/m01_fixture_check.py` validates the reference fixture design only; its success does NOT prove CAD functionality.\n\nFor high priority L3, see `HARDENED_SPEC.md` and `planning/M01/fixtures/`. The fixture JSON values are **predictions and analytical reference only**. The implementation agent must write tests, generate real observations, and capture logs.\n\n## 5. Human review\n\nWhen `human_review=true`, also attach screenshot/video artifacts with media_type and request a **separately controlled** approval record at `implementation/approvals/M01/<task-id>.approval.json`, with `task_id`, `decision=APPROVED`, reviewer name, `approved_at_utc`, and `evidence_sha256` computed using `m01_proof.evidence_digest(ev)` (excludes the review section). Evidence references that approval file in `review.signed_record_path`. Review must be genuinely from a person; a local JSON file alone cannot authenticate identity. Until approved, mark `BLOCKED_APPROVAL`.\n\n## 6. Required check-in order\n\n```bash\npython tools/test_m01_hardening.py\npython tools/validate_m01_execution.py --self-test\npython tools/m01_fixture_check.py             # reference-only\npython tools/validate_m01_execution.py         # checks any available evidence\npython tools/m01_mini_gate.py\npython tools/next_m01_task.py\n```\n\n`validate_m01_execution.py --require-ready` also requires actual M00 approval. No claims of passing OCCT/GUI without runtime. Remaining failure surfaces: forged local commands/test reports cannot be prevented cryptographically by a spec-only repository; require independent CI, protected artifacts, and human review before release.\n",
+    "m01_minigates": {
+      "schema_version": "om9.m01.minigates.v1.5",
+      "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+      "gates": [
+        {
+          "gate_id": "G01-A",
+          "title": "Typed units, tolerances, foundational EntityId",
+          "task_ids": [
+            "OM9-L4-01-08-001-01",
+            "OM9-L4-01-08-001-02",
+            "OM9-L4-01-08-001-03",
+            "OM9-L4-01-08-001-05",
+            "OM9-L4-01-08-002-01",
+            "OM9-L4-01-08-002-02",
+            "OM9-L4-01-08-002-03",
+            "OM9-L4-01-08-002-05",
+            "OM9-L4-01-08-003-01",
+            "OM9-L4-01-08-003-02",
+            "OM9-L4-01-08-003-03",
+            "OM9-L4-01-08-003-05",
+            "OM9-L4-01-08-004-01",
+            "OM9-L4-01-08-004-02",
+            "OM9-L4-01-08-004-03",
+            "OM9-L4-01-08-004-05",
+            "OM9-L4-01-08-005-01",
+            "OM9-L4-01-08-005-02",
+            "OM9-L4-01-08-005-03",
+            "OM9-L4-01-08-005-05",
+            "OM9-L4-01-08-006-01",
+            "OM9-L4-01-08-006-02",
+            "OM9-L4-01-08-006-03",
+            "OM9-L4-01-08-006-05",
+            "OM9-L4-01-08-007-01",
+            "OM9-L4-01-08-007-02",
+            "OM9-L4-01-08-007-03",
+            "OM9-L4-01-08-007-05",
+            "OM9-L4-01-03-001-01",
+            "OM9-L4-01-03-001-02",
+            "OM9-L4-01-03-001-03",
+            "OM9-L4-01-03-001-05"
+          ],
+          "task_count": 32,
+          "m00_required": true,
+          "completion": "Every task VERIFIED_PASS; M00 remains an independent approval gate"
+        },
+        {
+          "gate_id": "G01-B",
+          "title": "Document snapshot/transactions, OCCT exact BRep and Undo/Redo",
+          "task_ids": [
+            "OM9-L4-01-03-002-01",
+            "OM9-L4-01-03-002-02",
+            "OM9-L4-01-03-002-03",
+            "OM9-L4-01-03-002-05",
+            "OM9-L4-01-03-003-01",
+            "OM9-L4-01-03-003-02",
+            "OM9-L4-01-03-003-03",
+            "OM9-L4-01-03-003-05",
+            "OM9-L4-01-03-004-01",
+            "OM9-L4-01-03-004-02",
+            "OM9-L4-01-03-004-03",
+            "OM9-L4-01-03-004-05",
+            "OM9-L4-01-03-005-01",
+            "OM9-L4-01-03-005-02",
+            "OM9-L4-01-03-005-03",
+            "OM9-L4-01-03-005-05",
+            "OM9-L4-01-03-006-01",
+            "OM9-L4-01-03-006-02",
+            "OM9-L4-01-03-006-03",
+            "OM9-L4-01-03-006-05",
+            "OM9-L4-01-03-007-01",
+            "OM9-L4-01-03-007-02",
+            "OM9-L4-01-03-007-03",
+            "OM9-L4-01-03-007-05",
+            "OM9-L4-01-03-008-01",
+            "OM9-L4-01-03-008-02",
+            "OM9-L4-01-03-008-03",
+            "OM9-L4-01-03-008-04",
+            "OM9-L4-01-03-008-05",
+            "OM9-L4-01-03-009-01",
+            "OM9-L4-01-03-009-02",
+            "OM9-L4-01-03-009-03",
+            "OM9-L4-01-03-009-05",
+            "OM9-L4-01-03-010-01",
+            "OM9-L4-01-03-010-02",
+            "OM9-L4-01-03-010-03",
+            "OM9-L4-01-03-010-05",
+            "OM9-L4-01-03-011-01",
+            "OM9-L4-01-03-011-02",
+            "OM9-L4-01-03-011-03",
+            "OM9-L4-01-03-011-05",
+            "OM9-L4-01-03-012-01",
+            "OM9-L4-01-03-012-02",
+            "OM9-L4-01-03-012-03",
+            "OM9-L4-01-03-012-05",
+            "OM9-L4-01-05-001-01",
+            "OM9-L4-01-05-001-02",
+            "OM9-L4-01-05-001-03",
+            "OM9-L4-01-05-001-04",
+            "OM9-L4-01-05-001-05",
+            "OM9-L4-01-05-002-01",
+            "OM9-L4-01-05-002-02",
+            "OM9-L4-01-05-002-03",
+            "OM9-L4-01-05-002-05",
+            "OM9-L4-01-02-001-01",
+            "OM9-L4-01-02-001-02",
+            "OM9-L4-01-02-001-03",
+            "OM9-L4-01-02-001-05",
+            "OM9-L4-01-02-002-01",
+            "OM9-L4-01-02-002-02",
+            "OM9-L4-01-02-002-03",
+            "OM9-L4-01-02-002-05",
+            "OM9-L4-01-02-003-01",
+            "OM9-L4-01-02-003-02",
+            "OM9-L4-01-02-003-03",
+            "OM9-L4-01-02-003-05",
+            "OM9-L4-01-02-004-01",
+            "OM9-L4-01-02-004-02",
+            "OM9-L4-01-02-004-03",
+            "OM9-L4-01-02-004-05",
+            "OM9-L4-01-02-005-01",
+            "OM9-L4-01-02-005-02",
+            "OM9-L4-01-02-005-03",
+            "OM9-L4-01-02-005-05",
+            "OM9-L4-01-02-006-01",
+            "OM9-L4-01-02-006-02",
+            "OM9-L4-01-02-006-03",
+            "OM9-L4-01-02-006-05",
+            "OM9-L4-01-02-007-01",
+            "OM9-L4-01-02-007-02",
+            "OM9-L4-01-02-007-03",
+            "OM9-L4-01-02-007-04",
+            "OM9-L4-01-02-007-05",
+            "OM9-L4-01-02-008-01",
+            "OM9-L4-01-02-008-02",
+            "OM9-L4-01-02-008-03",
+            "OM9-L4-01-02-008-05"
+          ],
+          "task_count": 87,
+          "m00_required": true,
+          "completion": "Every task VERIFIED_PASS; M00 remains an independent approval gate"
+        },
+        {
+          "gate_id": "G01-C",
+          "title": "First executable vertical slice: shell+GPU+four panes+native reload",
+          "task_ids": [
+            "OM9-L4-01-05-003-01",
+            "OM9-L4-01-05-003-02",
+            "OM9-L4-01-05-003-03",
+            "OM9-L4-01-05-003-05",
+            "OM9-L4-01-05-004-01",
+            "OM9-L4-01-05-004-02",
+            "OM9-L4-01-05-004-03",
+            "OM9-L4-01-05-004-04",
+            "OM9-L4-01-05-004-05",
+            "OM9-L4-01-05-005-01",
+            "OM9-L4-01-05-005-02",
+            "OM9-L4-01-05-005-03",
+            "OM9-L4-01-05-005-04",
+            "OM9-L4-01-05-005-05",
+            "OM9-L4-01-05-006-01",
+            "OM9-L4-01-05-006-02",
+            "OM9-L4-01-05-006-03",
+            "OM9-L4-01-05-006-05",
+            "OM9-L4-01-05-007-01",
+            "OM9-L4-01-05-007-02",
+            "OM9-L4-01-05-007-03",
+            "OM9-L4-01-05-007-05",
+            "OM9-L4-01-05-008-01",
+            "OM9-L4-01-05-008-02",
+            "OM9-L4-01-05-008-03",
+            "OM9-L4-01-05-008-04",
+            "OM9-L4-01-05-008-05",
+            "OM9-L4-01-12-001-01",
+            "OM9-L4-01-12-001-02",
+            "OM9-L4-01-12-001-03",
+            "OM9-L4-01-12-001-04",
+            "OM9-L4-01-12-001-05",
+            "OM9-L4-01-12-002-01",
+            "OM9-L4-01-12-002-02",
+            "OM9-L4-01-12-002-03",
+            "OM9-L4-01-12-002-04",
+            "OM9-L4-01-12-002-05",
+            "OM9-L4-01-12-003-01",
+            "OM9-L4-01-12-003-02",
+            "OM9-L4-01-12-003-03",
+            "OM9-L4-01-12-003-04",
+            "OM9-L4-01-12-003-05",
+            "OM9-L4-01-12-004-01",
+            "OM9-L4-01-12-004-02",
+            "OM9-L4-01-12-004-03",
+            "OM9-L4-01-12-004-04",
+            "OM9-L4-01-12-004-05",
+            "OM9-L4-01-12-005-01",
+            "OM9-L4-01-12-005-02",
+            "OM9-L4-01-12-005-03",
+            "OM9-L4-01-12-005-04",
+            "OM9-L4-01-12-005-05",
+            "OM9-L4-01-12-006-01",
+            "OM9-L4-01-12-006-02",
+            "OM9-L4-01-12-006-03",
+            "OM9-L4-01-12-006-04",
+            "OM9-L4-01-12-006-05",
+            "OM9-L4-01-12-007-01",
+            "OM9-L4-01-12-007-02",
+            "OM9-L4-01-12-007-03",
+            "OM9-L4-01-12-007-04",
+            "OM9-L4-01-12-007-05",
+            "OM9-L4-01-01-001-01",
+            "OM9-L4-01-01-001-02",
+            "OM9-L4-01-01-001-03",
+            "OM9-L4-01-01-001-05",
+            "OM9-L4-01-01-002-01",
+            "OM9-L4-01-01-002-02",
+            "OM9-L4-01-01-002-03",
+            "OM9-L4-01-01-002-05",
+            "OM9-L4-01-06-001-01",
+            "OM9-L4-01-06-001-02",
+            "OM9-L4-01-06-001-03",
+            "OM9-L4-01-06-001-04",
+            "OM9-L4-01-06-001-05",
+            "OM9-L4-03-01-001-01",
+            "OM9-L4-03-01-001-02",
+            "OM9-L4-03-01-001-03",
+            "OM9-L4-03-01-001-04",
+            "OM9-L4-03-01-001-05",
+            "OM9-L4-03-15-001-01",
+            "OM9-L4-03-15-001-02",
+            "OM9-L4-03-15-001-03",
+            "OM9-L4-03-15-001-05"
+          ],
+          "task_count": 84,
+          "m00_required": true,
+          "completion": "Every task VERIFIED_PASS; M00 remains an independent approval gate"
+        },
+        {
+          "gate_id": "G01-D",
+          "title": "Complete remaining E01 kernel/command/document capabilities",
+          "task_ids": [
+            "OM9-L4-01-03-013-01",
+            "OM9-L4-01-03-013-02",
+            "OM9-L4-01-03-013-03",
+            "OM9-L4-01-03-013-05",
+            "OM9-L4-01-05-009-01",
+            "OM9-L4-01-05-009-02",
+            "OM9-L4-01-05-009-03",
+            "OM9-L4-01-05-009-05",
+            "OM9-L4-01-05-010-01",
+            "OM9-L4-01-05-010-02",
+            "OM9-L4-01-05-010-03",
+            "OM9-L4-01-05-010-05",
+            "OM9-L4-01-05-011-01",
+            "OM9-L4-01-05-011-02",
+            "OM9-L4-01-05-011-03",
+            "OM9-L4-01-05-011-05",
+            "OM9-L4-01-02-009-01",
+            "OM9-L4-01-02-009-02",
+            "OM9-L4-01-02-009-03",
+            "OM9-L4-01-02-009-05",
+            "OM9-L4-01-02-010-01",
+            "OM9-L4-01-02-010-02",
+            "OM9-L4-01-02-010-03",
+            "OM9-L4-01-02-010-05",
+            "OM9-L4-01-02-011-01",
+            "OM9-L4-01-02-011-02",
+            "OM9-L4-01-02-011-03",
+            "OM9-L4-01-02-011-05"
+          ],
+          "task_count": 28,
+          "m00_required": true,
+          "completion": "Every task VERIFIED_PASS; M00 remains an independent approval gate"
+        },
+        {
+          "gate_id": "G01-E",
+          "title": "Complete E02 UI, NURBS, menus, panels and regression",
+          "task_ids": [
+            "OM9-L4-02-01-001-01",
+            "OM9-L4-02-01-001-02",
+            "OM9-L4-02-01-001-03",
+            "OM9-L4-02-01-001-04",
+            "OM9-L4-02-01-001-05",
+            "OM9-L4-02-01-002-01",
+            "OM9-L4-02-01-002-02",
+            "OM9-L4-02-01-002-03",
+            "OM9-L4-02-01-002-04",
+            "OM9-L4-02-01-002-05",
+            "OM9-L4-02-01-003-01",
+            "OM9-L4-02-01-003-02",
+            "OM9-L4-02-01-003-03",
+            "OM9-L4-02-01-003-04",
+            "OM9-L4-02-01-003-05",
+            "OM9-L4-02-01-004-01",
+            "OM9-L4-02-01-004-02",
+            "OM9-L4-02-01-004-03",
+            "OM9-L4-02-01-004-04",
+            "OM9-L4-02-01-004-05",
+            "OM9-L4-02-01-005-01",
+            "OM9-L4-02-01-005-02",
+            "OM9-L4-02-01-005-03",
+            "OM9-L4-02-01-005-04",
+            "OM9-L4-02-01-005-05",
+            "OM9-L4-02-01-006-01",
+            "OM9-L4-02-01-006-02",
+            "OM9-L4-02-01-006-03",
+            "OM9-L4-02-01-006-04",
+            "OM9-L4-02-01-006-05",
+            "OM9-L4-02-01-007-01",
+            "OM9-L4-02-01-007-02",
+            "OM9-L4-02-01-007-03",
+            "OM9-L4-02-01-007-04",
+            "OM9-L4-02-01-007-05",
+            "OM9-L4-02-01-008-01",
+            "OM9-L4-02-01-008-02",
+            "OM9-L4-02-01-008-03",
+            "OM9-L4-02-01-008-04",
+            "OM9-L4-02-01-008-05",
+            "OM9-L4-02-01-009-01",
+            "OM9-L4-02-01-009-02",
+            "OM9-L4-02-01-009-03",
+            "OM9-L4-02-01-009-04",
+            "OM9-L4-02-01-009-05",
+            "OM9-L4-02-01-010-01",
+            "OM9-L4-02-01-010-02",
+            "OM9-L4-02-01-010-03",
+            "OM9-L4-02-01-010-04",
+            "OM9-L4-02-01-010-05",
+            "OM9-L4-01-12-009-01",
+            "OM9-L4-01-12-009-02",
+            "OM9-L4-01-12-009-03",
+            "OM9-L4-01-12-009-04",
+            "OM9-L4-01-12-009-05",
+            "OM9-L4-01-12-010-01",
+            "OM9-L4-01-12-010-02",
+            "OM9-L4-01-12-010-03",
+            "OM9-L4-01-12-010-04",
+            "OM9-L4-01-12-010-05",
+            "OM9-L4-01-01-003-01",
+            "OM9-L4-01-01-003-02",
+            "OM9-L4-01-01-003-03",
+            "OM9-L4-01-01-003-05",
+            "OM9-L4-01-01-004-01",
+            "OM9-L4-01-01-004-02",
+            "OM9-L4-01-01-004-03",
+            "OM9-L4-01-01-004-05",
+            "OM9-L4-01-01-005-01",
+            "OM9-L4-01-01-005-02",
+            "OM9-L4-01-01-005-03",
+            "OM9-L4-01-01-005-05",
+            "OM9-L4-01-01-006-01",
+            "OM9-L4-01-01-006-02",
+            "OM9-L4-01-01-006-03",
+            "OM9-L4-01-01-006-05",
+            "OM9-L4-01-01-007-01",
+            "OM9-L4-01-01-007-02",
+            "OM9-L4-01-01-007-03",
+            "OM9-L4-01-01-007-04",
+            "OM9-L4-01-01-007-05",
+            "OM9-L4-01-01-008-01",
+            "OM9-L4-01-01-008-02",
+            "OM9-L4-01-01-008-03",
+            "OM9-L4-01-01-008-04",
+            "OM9-L4-01-01-008-05",
+            "OM9-L4-01-06-002-01",
+            "OM9-L4-01-06-002-02",
+            "OM9-L4-01-06-002-03",
+            "OM9-L4-01-06-002-04",
+            "OM9-L4-01-06-002-05",
+            "OM9-L4-01-06-003-01",
+            "OM9-L4-01-06-003-02",
+            "OM9-L4-01-06-003-03",
+            "OM9-L4-01-06-003-04",
+            "OM9-L4-01-06-003-05",
+            "OM9-L4-01-06-004-01",
+            "OM9-L4-01-06-004-02",
+            "OM9-L4-01-06-004-03",
+            "OM9-L4-01-06-004-04",
+            "OM9-L4-01-06-004-05",
+            "OM9-L4-01-06-005-01",
+            "OM9-L4-01-06-005-02",
+            "OM9-L4-01-06-005-03",
+            "OM9-L4-01-06-005-04",
+            "OM9-L4-01-06-005-05",
+            "OM9-L4-01-06-006-01",
+            "OM9-L4-01-06-006-02",
+            "OM9-L4-01-06-006-03",
+            "OM9-L4-01-06-006-04",
+            "OM9-L4-01-06-006-05",
+            "OM9-L4-01-06-007-01",
+            "OM9-L4-01-06-007-02",
+            "OM9-L4-01-06-007-03",
+            "OM9-L4-01-06-007-04",
+            "OM9-L4-01-06-007-05",
+            "OM9-L4-01-06-008-01",
+            "OM9-L4-01-06-008-02",
+            "OM9-L4-01-06-008-03",
+            "OM9-L4-01-06-008-04",
+            "OM9-L4-01-06-008-05",
+            "OM9-L4-01-06-009-01",
+            "OM9-L4-01-06-009-02",
+            "OM9-L4-01-06-009-03",
+            "OM9-L4-01-06-009-04",
+            "OM9-L4-01-06-009-05",
+            "OM9-L4-03-01-002-01",
+            "OM9-L4-03-01-002-02",
+            "OM9-L4-03-01-002-03",
+            "OM9-L4-03-01-002-05",
+            "OM9-L4-03-01-003-01",
+            "OM9-L4-03-01-003-02",
+            "OM9-L4-03-01-003-03",
+            "OM9-L4-03-01-003-05",
+            "OM9-L4-03-01-004-01",
+            "OM9-L4-03-01-004-02",
+            "OM9-L4-03-01-004-03",
+            "OM9-L4-03-01-004-05",
+            "OM9-L4-03-01-005-01",
+            "OM9-L4-03-01-005-02",
+            "OM9-L4-03-01-005-03",
+            "OM9-L4-03-01-005-05",
+            "OM9-L4-03-01-006-01",
+            "OM9-L4-03-01-006-02",
+            "OM9-L4-03-01-006-03",
+            "OM9-L4-03-01-006-05",
+            "OM9-L4-03-01-007-01",
+            "OM9-L4-03-01-007-02",
+            "OM9-L4-03-01-007-03",
+            "OM9-L4-03-01-007-05",
+            "OM9-L4-03-07-001-01",
+            "OM9-L4-03-07-001-02",
+            "OM9-L4-03-07-001-03",
+            "OM9-L4-03-07-001-04",
+            "OM9-L4-03-07-001-05",
+            "OM9-L4-03-07-002-01",
+            "OM9-L4-03-07-002-02",
+            "OM9-L4-03-07-002-03",
+            "OM9-L4-03-07-002-04",
+            "OM9-L4-03-07-002-05",
+            "OM9-L4-03-07-003-01",
+            "OM9-L4-03-07-003-02",
+            "OM9-L4-03-07-003-03",
+            "OM9-L4-03-07-003-04",
+            "OM9-L4-03-07-003-05",
+            "OM9-L4-03-07-004-01",
+            "OM9-L4-03-07-004-02",
+            "OM9-L4-03-07-004-03",
+            "OM9-L4-03-07-004-04",
+            "OM9-L4-03-07-004-05",
+            "OM9-L4-03-07-005-01",
+            "OM9-L4-03-07-005-02",
+            "OM9-L4-03-07-005-03",
+            "OM9-L4-03-07-005-04",
+            "OM9-L4-03-07-005-05",
+            "OM9-L4-03-07-006-01",
+            "OM9-L4-03-07-006-02",
+            "OM9-L4-03-07-006-03",
+            "OM9-L4-03-07-006-04",
+            "OM9-L4-03-07-006-05",
+            "OM9-L4-03-07-007-01",
+            "OM9-L4-03-07-007-02",
+            "OM9-L4-03-07-007-03",
+            "OM9-L4-03-07-007-04",
+            "OM9-L4-03-07-007-05",
+            "OM9-L4-03-07-008-01",
+            "OM9-L4-03-07-008-02",
+            "OM9-L4-03-07-008-03",
+            "OM9-L4-03-07-008-04",
+            "OM9-L4-03-07-008-05",
+            "OM9-L4-03-10-001-01",
+            "OM9-L4-03-10-001-02",
+            "OM9-L4-03-10-001-03",
+            "OM9-L4-03-10-001-04",
+            "OM9-L4-03-10-001-05",
+            "OM9-L4-03-10-002-01",
+            "OM9-L4-03-10-002-02",
+            "OM9-L4-03-10-002-03",
+            "OM9-L4-03-10-002-04",
+            "OM9-L4-03-10-002-05",
+            "OM9-L4-03-10-003-01",
+            "OM9-L4-03-10-003-02",
+            "OM9-L4-03-10-003-03",
+            "OM9-L4-03-10-003-04",
+            "OM9-L4-03-10-003-05",
+            "OM9-L4-03-10-004-01",
+            "OM9-L4-03-10-004-02",
+            "OM9-L4-03-10-004-03",
+            "OM9-L4-03-10-004-04",
+            "OM9-L4-03-10-004-05",
+            "OM9-L4-03-10-005-01",
+            "OM9-L4-03-10-005-02",
+            "OM9-L4-03-10-005-03",
+            "OM9-L4-03-10-005-04",
+            "OM9-L4-03-10-005-05",
+            "OM9-L4-03-10-006-01",
+            "OM9-L4-03-10-006-02",
+            "OM9-L4-03-10-006-03",
+            "OM9-L4-03-10-006-04",
+            "OM9-L4-03-10-006-05",
+            "OM9-L4-03-14-001-01",
+            "OM9-L4-03-14-001-02",
+            "OM9-L4-03-14-001-03",
+            "OM9-L4-03-14-001-05",
+            "OM9-L4-03-14-002-01",
+            "OM9-L4-03-14-002-02",
+            "OM9-L4-03-14-002-03",
+            "OM9-L4-03-14-002-05",
+            "OM9-L4-03-14-003-01",
+            "OM9-L4-03-14-003-02",
+            "OM9-L4-03-14-003-03",
+            "OM9-L4-03-14-003-05",
+            "OM9-L4-03-14-004-01",
+            "OM9-L4-03-14-004-02",
+            "OM9-L4-03-14-004-03",
+            "OM9-L4-03-14-004-05",
+            "OM9-L4-03-14-005-01",
+            "OM9-L4-03-14-005-02",
+            "OM9-L4-03-14-005-03",
+            "OM9-L4-03-14-005-05",
+            "OM9-L4-03-14-006-01",
+            "OM9-L4-03-14-006-02",
+            "OM9-L4-03-14-006-03",
+            "OM9-L4-03-14-006-05",
+            "OM9-L4-03-14-007-01",
+            "OM9-L4-03-14-007-02",
+            "OM9-L4-03-14-007-03",
+            "OM9-L4-03-14-007-05",
+            "OM9-L4-03-14-008-01",
+            "OM9-L4-03-14-008-02",
+            "OM9-L4-03-14-008-03",
+            "OM9-L4-03-14-008-05",
+            "OM9-L4-03-15-002-01",
+            "OM9-L4-03-15-002-02",
+            "OM9-L4-03-15-002-03",
+            "OM9-L4-03-15-002-04",
+            "OM9-L4-03-15-002-05",
+            "OM9-L4-03-15-003-01",
+            "OM9-L4-03-15-003-02",
+            "OM9-L4-03-15-003-03",
+            "OM9-L4-03-15-003-05",
+            "OM9-L4-03-15-004-01",
+            "OM9-L4-03-15-004-02",
+            "OM9-L4-03-15-004-03",
+            "OM9-L4-03-15-004-05",
+            "OM9-L4-03-15-005-01",
+            "OM9-L4-03-15-005-02",
+            "OM9-L4-03-15-005-03",
+            "OM9-L4-03-15-005-05",
+            "OM9-L4-03-15-006-01",
+            "OM9-L4-03-15-006-02",
+            "OM9-L4-03-15-006-03",
+            "OM9-L4-03-15-006-05",
+            "OM9-L4-03-15-007-01",
+            "OM9-L4-03-15-007-02",
+            "OM9-L4-03-15-007-03",
+            "OM9-L4-03-15-007-05",
+            "OM9-L4-03-15-008-01",
+            "OM9-L4-03-15-008-02",
+            "OM9-L4-03-15-008-03",
+            "OM9-L4-03-15-008-05",
+            "OM9-L4-03-15-009-01",
+            "OM9-L4-03-15-009-02",
+            "OM9-L4-03-15-009-03",
+            "OM9-L4-03-15-009-05"
+          ],
+          "task_count": 285,
+          "m00_required": true,
+          "completion": "Every task VERIFIED_PASS; M00 remains an independent approval gate"
+        }
+      ],
+      "total_l4": 516,
+      "original_ids_preserved": true
+    },
+    "analytical_fixtures_reference_only": [
+      {
+        "label": "00-units.json",
+        "data": {
+          "schema_version": "om9.m01.fixture.v1.5",
+          "status": "REFERENCE_ONLY_NOT_RUNTIME",
+          "source": "analytical/test design; values marked proposed until observed",
+          "cases": [
+            {
+              "id": "units-2p5-mm",
+              "kind": "positive",
+              "expected": {
+                "length_mm": 2.5,
+                "scale": 1.0
+              },
+              "abs_tolerance": 0
+            },
+            {
+              "id": "units-nan-rejection",
+              "kind": "negative",
+              "expected": {
+                "error_code": "OM9_INVALID_NONFINITE"
+              },
+              "abs_tolerance": 0
+            }
+          ]
+        }
+      },
+      {
+        "label": "01-box-occt.json",
+        "data": {
+          "schema_version": "om9.m01.fixture.v1.5",
+          "status": "REFERENCE_ONLY_NOT_RUNTIME",
+          "source": "analytical/test design; values marked proposed until observed",
+          "cases": [
+            {
+              "id": "box-10x20x30-mm",
+              "kind": "positive",
+              "expected": {
+                "dimensions_mm": [
+                  10,
+                  20,
+                  30
+                ],
+                "bbox_min_mm": [
+                  0,
+                  0,
+                  0
+                ],
+                "bbox_max_mm": [
+                  10,
+                  20,
+                  30
+                ],
+                "volume_mm3": 6000,
+                "closed_solids": 1
+              },
+              "abs_tolerance": 0
+            },
+            {
+              "id": "box-zero-side-rejection",
+              "kind": "negative",
+              "expected": {
+                "error_code": "OM9_INVALID_DIMENSION"
+              },
+              "abs_tolerance": 0
+            }
+          ]
+        }
+      },
+      {
+        "label": "02-command-undo.json",
+        "data": {
+          "schema_version": "om9.m01.fixture.v1.5",
+          "status": "REFERENCE_ONLY_NOT_RUNTIME",
+          "source": "analytical/test design; values marked proposed until observed",
+          "cases": [
+            {
+              "id": "undo-create-redo-stable-id",
+              "kind": "positive",
+              "expected": {
+                "after_create": [
+                  "E1"
+                ],
+                "after_undo": [],
+                "after_redo": [
+                  "E1"
+                ],
+                "journal_delta": 1
+              },
+              "abs_tolerance": 0
+            },
+            {
+              "id": "undo-invalid-ref-rejection",
+              "kind": "negative",
+              "expected": {
+                "error_code": "OM9_STALE_REFERENCE",
+                "journal_delta": 0
+              },
+              "abs_tolerance": 0
+            }
+          ]
+        }
+      },
+      {
+        "label": "03-four-views.json",
+        "data": {
+          "schema_version": "om9.m01.fixture.v1.5",
+          "status": "REFERENCE_ONLY_NOT_RUNTIME",
+          "source": "analytical/test design; values marked proposed until observed",
+          "cases": [
+            {
+              "id": "four-labelled-panes",
+              "kind": "positive",
+              "expected": {
+                "pane_count": 4,
+                "names": [
+                  "Looking Down",
+                  "Perspective",
+                  "Side",
+                  "Through Finger"
+                ],
+                "independent_cameras": true,
+                "shared_selection_id": "E1"
+              },
+              "abs_tolerance": 0
+            },
+            {
+              "id": "four-views-zero-dimension-rejection",
+              "kind": "negative",
+              "expected": {
+                "error_code": "OM9_INVALID_VIEWPORT_SIZE"
+              },
+              "abs_tolerance": 0
+            }
+          ]
+        }
+      },
+      {
+        "label": "04-native-codec.json",
+        "data": {
+          "schema_version": "om9.m01.fixture.v1.5",
+          "status": "REFERENCE_ONLY_NOT_RUNTIME",
+          "source": "analytical/test design; values marked proposed until observed",
+          "cases": [
+            {
+              "id": "save-reload-stable-state",
+              "kind": "positive",
+              "expected": {
+                "entity_id": "E1",
+                "layer_id": "Metals",
+                "volume_mm3": 6000,
+                "brep_is_authoritative": true
+              },
+              "abs_tolerance": 0
+            },
+            {
+              "id": "invalid-container-rejection",
+              "kind": "negative",
+              "expected": {
+                "error_code": "OM9_INVALID_PROJECT_ARCHIVE",
+                "current_document_unchanged": true
+              },
+              "abs_tolerance": 0
+            }
+          ]
+        }
+      },
+      {
+        "label": "05-block-instance.json",
+        "data": {
+          "schema_version": "om9.m01.fixture.v1.5",
+          "status": "REFERENCE_ONLY_NOT_RUNTIME",
+          "source": "analytical/test design; values marked proposed until observed",
+          "cases": [
+            {
+              "id": "shared-block-definition",
+              "kind": "positive",
+              "expected": {
+                "definitions": 1,
+                "instances": 2,
+                "clone_brep_count": 0
+              },
+              "abs_tolerance": 0
+            },
+            {
+              "id": "block-cycle-rejection",
+              "kind": "negative",
+              "expected": {
+                "error_code": "OM9_BLOCK_CYCLE",
+                "document_unchanged": true
+              },
+              "abs_tolerance": 0
+            }
+          ]
+        }
+      },
+      {
+        "label": "06-gpu-loss.json",
+        "data": {
+          "schema_version": "om9.m01.fixture.v1.5",
+          "status": "REFERENCE_ONLY_NOT_RUNTIME",
+          "source": "analytical/test design; values marked proposed until observed",
+          "cases": [
+            {
+              "id": "device-loss-fallback",
+              "kind": "positive",
+              "expected": {
+                "document_unchanged": true,
+                "ui_responsive": true,
+                "event": "DEVICE_LOST"
+              },
+              "abs_tolerance": 0
+            },
+            {
+              "id": "device-loss-no-renderer",
+              "kind": "negative",
+              "expected": {
+                "error_code": "OM9_RENDERER_UNAVAILABLE",
+                "document_unchanged": true
+              },
+              "abs_tolerance": 0
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "out_of_scope_l3": [
+    {
+      "id": "OM9-L3-01-12-008",
+      "target_milestone": "M07",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/l3.json",
+      "reason": "Giao triển khai ở M07/E12, giữ L3 trong M01 theo module sở hữu, không tạo L4 M01."
+    }
+  ]
+}

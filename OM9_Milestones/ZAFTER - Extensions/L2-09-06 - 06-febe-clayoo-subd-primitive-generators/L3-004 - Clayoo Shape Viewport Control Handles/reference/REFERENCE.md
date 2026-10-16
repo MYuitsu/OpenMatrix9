@@ -1,0 +1,13 @@
+# Reference: L3-004 - Clayoo Shape Viewport Control Handles
+
+| Source | Pages | Section | Kind | Confidence | Text | Images | Location |
+|---|---|---|---|---|---|---|---|
+| m9addendum | 31-32 | Clayoo Box | command | medium | [m9addendum__p31-32__clayoo-box.md](text/m9addendum__p31-32__clayoo-box.md) | 16 in [images/](images/) | copied here |
+| m9addendum | 32-33 | Clayoo Sphere | command | medium | [m9addendum__p32-33__clayoo-sphere.md](text/m9addendum__p32-33__clayoo-sphere.md) | 15 in [images/](images/) | copied here |
+| m9addendum | 33-35 | Clayoo Cylinder | command | medium | [m9addendum__p33-35__clayoo-cylinder.md](text/m9addendum__p33-35__clayoo-cylinder.md) | 22 in [images/](images/) | copied here |
+| m9addendum | 35-37 | Clayoo Cone | command | medium | [m9addendum__p35-37__clayoo-cone.md](text/m9addendum__p35-37__clayoo-cone.md) | 32 in [images/](images/) | copied here |
+| m9addendum | 37-38 | Clayoo Plane | command | medium | [m9addendum__p37-38__clayoo-plane.md](text/m9addendum__p37-38__clayoo-plane.md) | 16 in [images/](images/) | copied here |
+
+## Usage
+
+These excerpts are Matrix 8 / Matrix 9 / Rhino 5 manual sections split into plain text (`text/`) and extracted figures (`images/`) and mapped to this function (L3-004 - Clayoo Shape Viewport Control Handles). When implementing or testing this function, read the high-confidence rows first for the exact behaviour, dialog options and command names, then the medium and low rows for background. Page ranges are TOC-based, so a boundary page may also contain text or figures of the neighbouring section. Rows marked as linked point at the single copy kept in the parent L2 folder. Private reference material: do not publish or stage it in the public repository (see AGENTS.md and docs/private-reference-policy.md).

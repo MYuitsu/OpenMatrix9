@@ -1,0 +1,5 @@
+# Commits that change only the layout of the source. `git blame` and GitHub skip them, so a line shows who wrote
+# it rather than who formatted it. Locally: git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# style: the tree laid out by rustfmt
+23fb75d78834f0b662ac0fb7c78e64d040f44133
