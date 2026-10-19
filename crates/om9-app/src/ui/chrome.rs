@@ -10,13 +10,19 @@ const PANEL_ALT: Color32 = Color32::from_rgb(27, 39, 53);
 const PANEL_EDGE: Color32 = Color32::from_rgb(53, 70, 88);
 const PANEL_INK: Color32 = Color32::from_rgb(221, 231, 242);
 const ACCENT: Color32 = Color32::from_rgb(45, 212, 191);
-const CATEGORY_COLORS: [Color32; 6] = [
-    Color32::from_rgb(56, 189, 248),
-    Color32::from_rgb(251, 191, 36),
-    Color32::from_rgb(251, 113, 133),
-    Color32::from_rgb(167, 139, 250),
-    Color32::from_rgb(52, 211, 153),
-    Color32::from_rgb(244, 114, 182),
+const CATEGORY_COLORS: [Color32; 12] = [
+    Color32::from_rgb(212, 176, 0),  // Curve: gold, Matrix reference
+    Color32::from_rgb(46, 158, 107), // Surface: teal-green
+    Color32::from_rgb(123, 63, 160), // Solid: purple
+    Color32::from_rgb(214, 69, 69),  // Transform: red
+    Color32::from_rgb(76, 175, 80),  // SubD/TSpline: green
+    Color32::from_rgb(198, 198, 58), // Art: yellow-green
+    Color32::from_rgb(214, 69, 69),  // Builder: red
+    Color32::from_rgb(91, 75, 154),  // Tools: indigo
+    Color32::from_rgb(47, 128, 237), // Gems: blue
+    Color32::from_rgb(193, 58, 166), // Setting: magenta
+    Color32::from_rgb(242, 140, 40), // Cutters: orange
+    Color32::from_rgb(42, 167, 160), // Render: teal
 ];
 const CATEGORIES: [&str; 12] = [
     "Curve",
@@ -519,38 +525,40 @@ impl MatrixApp {
                             .on_hover_text("Menu customization pending");
                     }
                 });
+                self.main_category_rects.clear();
                 for (row, categories) in CATEGORIES.chunks(6).enumerate() {
                     ui.horizontal_wrapped(|ui| {
                         for (column, category) in categories.iter().enumerate() {
                             let i = row * 6 + column;
-                            let accent = CATEGORY_COLORS[i % CATEGORY_COLORS.len()];
+                            let accent = CATEGORY_COLORS[i];
                             let selected = self.main_category == i;
-                            let text = RichText::new(*category)
-                                .color(if selected {
-                                    Color32::from_rgb(15, 23, 42)
-                                } else {
-                                    accent
-                                })
+                            let label = format!("   {category}");
+                            let text = RichText::new(label)
+                                .color(if selected { Color32::WHITE } else { PANEL_INK })
                                 .size(9.5);
                             let button = egui::Button::new(text)
                                 .fill(if selected {
-                                    accent
+                                    PANEL_ALT
                                 } else {
-                                    Color32::from_rgba_unmultiplied(
-                                        accent.r(),
-                                        accent.g(),
-                                        accent.b(),
-                                        34,
-                                    )
+                                    Color32::TRANSPARENT
                                 })
                                 .corner_radius(4)
-                                .stroke(Stroke::new(1., accent.gamma_multiply(0.65)))
+                                .stroke(if selected {
+                                    Stroke::new(1., accent)
+                                } else {
+                                    Stroke::NONE
+                                })
                                 .min_size(Vec2::new(0., 18.));
-                            if ui
+                            let response = ui
                                 .add(button)
-                                .on_hover_text(format!("{category} command category"))
-                                .clicked()
-                            {
+                                .on_hover_text(format!("{category} command category"));
+                            ui.painter().circle_filled(
+                                egui::pos2(response.rect.left() + 7., response.rect.center().y),
+                                2.4,
+                                accent,
+                            );
+                            self.main_category_rects.insert(i, response.rect);
+                            if response.clicked() {
                                 self.main_category = i;
                                 self.focus_cmd = true;
                             }

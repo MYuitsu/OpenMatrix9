@@ -16,13 +16,13 @@
       "#141D28 panel",
       "#1B2735 card",
       "#2DD4BF accent",
-      "six category accents"
+      "twelve reference category accents"
     ],
     "preserved_positions": "left rail 300 outer, documented section order, 6 category chips per row",
     "modernized": [
       "rounded icon tiles",
       "flat section cards with accent rails",
-      "tinted category chips",
+      "reference-colour bullet categories with white labels",
       "soft toolbar gradient"
     ]
   },
@@ -190,9 +190,9 @@
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "b7f5ed9d79e3c4eb70c1af02dac740a595684fc642a8fac0f553cc0d2a45435b",
+    "screenshot_sha256": "071a0519fd830679a823603bae11b0e7f73adb08e153a6394ddadb3200faaa3f",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "f8a81c1f9ebae82a59e90309bf8da045f805d787bb74a02ff2013d9a4ffba748",
+    "receipt_sha256": "ca0c32756c73615e87a15929e98325fb18ab96dabe7e927e08d1194b4187b043",
     "passes": 21,
     "view_rects": {
       "Looking Down": [

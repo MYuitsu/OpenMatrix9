@@ -188,11 +188,8 @@ fn help_popup_contains_help_and_about_without_feature_catalog_actions() {
 
 #[test]
 fn main_menu_category_tabs_switch_palette_without_document_mutation() {
-    let (mut app, context, output) = startup();
-    let gems = text_positions(&output, "Gems")
-        .into_iter()
-        .next()
-        .expect("Gems category");
+    let (mut app, context, _) = startup();
+    let gems = app.main_category_rect(8).expect("Gems category").center();
     click(&mut app, &context, gems);
     assert_eq!(app.main_menu_category(), 8);
     assert!(!app.controller.is_running());

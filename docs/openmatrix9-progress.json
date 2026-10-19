@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19",
+  "updated_at": "2026-10-20",
   "implementation_target": "Standalone Rust OM9 owns model/session/UI/scene; selected native adapters only. Older FreeCAD entries are historical scoped evidence.",
   "active_item": "desktop-gpu-only-renderer-2026-10-19",
   "items": [
@@ -12974,7 +12974,7 @@
       "evidence": "implementation/evidence/M02/OM9-L2-03-03-AUDIT.md",
       "remaining": "M02-UI human review pending; L3-006 uses command-line typed input rather than an inline field on the handle"
     },
-{
+    {
       "id": "m01-l2-01-12-native-project-codec-2026-10-19",
       "date": "2026-10-19",
       "status": "all_9_active_l3_verified_with_automated_evidence_l3_008_deferred_to_m07",
@@ -13024,7 +13024,7 @@
       ],
       "remaining": "M07 STL document export command and tessellation remain; external reviewer sign-off not recorded. Global M00 execution gate is NOT READY (pre-existing missing M00 records); no QymCAD code or new upstream source was imported. OCCT runtime DLLs must be beside the debug binary or on PATH for om9-app process tests (they were copied into L:\\om9-target\\debug for this run)."
     },
-{
+    {
       "id": "m01-l2-02-01-rhino-nurbs-semantics-2026-10-19",
       "date": "2026-10-19",
       "status": "all_10_l3_verified_with_automated_evidence_gold_standard_semantics",
@@ -13070,7 +13070,7 @@
       ],
       "remaining": "External reviewer sign-off not recorded. Portable solid classification refuses open/coincident topology but geometric face-face self-intersection requires OCCT. Extrusion conversion supports closed planar polyline profiles only. Global M00 gate NOT READY (pre-existing); no QymCAD code imported."
     },
-{
+    {
       "id": "three-dm-rust-port-2026-10-19",
       "date": "2026-10-19",
       "status": "ported_from_phase2_rust_with_automated_evidence",
@@ -13098,7 +13098,7 @@
       ],
       "remaining": "Full .3dm geometry export and full native NURBS/BRep import still require the native openNURBS writer/reader and OCCT mapping (THREEDM-READINESS S3); FreeCAD workbench remains legacy and was not rebuilt."
     },
-{
+    {
       "id": "three-dm-native-host-2026-10-19",
       "date": "2026-10-19",
       "status": "native_reader_writer_full_scope_e2e_verified_brep_retained",
@@ -13140,63 +13140,96 @@
       "native_sha256": "6c96316f4403a12f2f43afc4619e0e27d770356ad0b094803aa479d7c0f215f5",
       "remaining": "BRep is retained/opaque and cannot be topology-edited; that requires a separate ON_Brep <-> OCCT bridge. BRep display needs a cached Rhino render mesh. Rational NURBS poles can differ by one ULP. The layout needs a signed installer. Material/linetype/dimstyle tables are intentionally excluded; layer table is retained. UI picker/menu needs human review."
     },
-{
-  "id": "m01-l2-03-01-viewport-layout-2026-10-19",
-  "date": "2026-10-19",
-  "status": "automated_target_validated_manual_ui_pending",
-  "milestone": "M01",
-  "area": "OM9-L2-03-01 Jewelry Viewport Layout And Cplanes",
-  "scope": "Four Matrix viewports, camera presets, active view/title tabs, F4 world datum overlay, mm grid/axes, maximize/restore and maximized tab switching.",
-  "changes": [
-    "Added F4 display-only world (0,0,0)/ring-centre overlay with no document or Undo mutation.",
-    "Verified existing four-view cameras, active view/title state, per-cplane grid axes and maximize/restore through new and existing acceptance tests.",
-    "Added viewport_layout tests and recorded L2/L3 runtime_implementation evidence."
-  ],
-  "tests": {
-    "viewport_layout": "3 passed",
-    "chrome_actions": "7 passed",
-    "viewport_title_menu": "17 passed",
-    "four_view_placement": "1 passed",
-    "workbench_regions": "18 passed",
-    "startup_window": "8 passed"
-  },
-  "evidence": [
-    "implementation/design/M01/OM9-L2-03-01/README.md",
-    "implementation/evidence/M01/2026-10-19-l2-03-01-viewport-layout-checks.json",
-    "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L2.json"
-  ],
-  "remaining": "Manual M01-UI visual review at supported window size/DPI is pending. F4 overlay is not a pickable document object."
-},
-{
-  "id": "m01-l2-03-07-menu-docking-2026-10-20",
-  "date": "2026-10-20",
-  "status": "automated_target_validated_manual_ui_pending",
-  "milestone": "M01",
-  "area": "OM9-L2-03-07 Matrix Main Menu Iconhistory And Docking",
-  "scope": "Modern Matrix menu colors/cards while preserving left-stack positions, category chips, SVG icon grid/tooltips, recent history, docking/collapse/float/reset and disabled-action visibility.",
-  "changes": [
-    "Modernized sidebar/main-menu palette: slate rails, rounded icon tiles, accent section rails, tinted category chips and soft toolbar gradient.",
-    "Added optional Feature.right_click metadata and an inert secondary-click slot that never repeats the primary action.",
-    "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence."
-  ],
-  "tests": {
-    "chrome_actions": "9 passed",
-    "left_stack_layers": "8 passed",
-    "shell_docking": "10 passed",
-    "panel_ops": "33 passed",
-    "dock_layout_default": "7 passed",
-    "dock_layout_persistence": "6 passed",
-    "command_sessions": "6 passed",
-    "command_options_and_repeat": "6 passed",
-    "startup_contract": "3 passed"
-  },
-  "evidence": [
-    "implementation/design/M01/OM9-L2-03-07/README.md",
-    "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",
-    "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L2.json"
-  ],
-  "remaining": "Manual M01-UI visual review pending. No feature registers a right-click alternative yet; the slot is implemented and inert by default."
-}
+    {
+      "id": "m01-l2-03-01-viewport-layout-2026-10-19",
+      "date": "2026-10-19",
+      "status": "automated_target_validated_manual_ui_pending",
+      "milestone": "M01",
+      "area": "OM9-L2-03-01 Jewelry Viewport Layout And Cplanes",
+      "scope": "Four Matrix viewports, camera presets, active view/title tabs, F4 world datum overlay, mm grid/axes, maximize/restore and maximized tab switching.",
+      "changes": [
+        "Added F4 display-only world (0,0,0)/ring-centre overlay with no document or Undo mutation.",
+        "Verified existing four-view cameras, active view/title state, per-cplane grid axes and maximize/restore through new and existing acceptance tests.",
+        "Added viewport_layout tests and recorded L2/L3 runtime_implementation evidence."
+      ],
+      "tests": {
+        "viewport_layout": "3 passed",
+        "chrome_actions": "7 passed",
+        "viewport_title_menu": "17 passed",
+        "four_view_placement": "1 passed",
+        "workbench_regions": "18 passed",
+        "startup_window": "8 passed"
+      },
+      "evidence": [
+        "implementation/design/M01/OM9-L2-03-01/README.md",
+        "implementation/evidence/M01/2026-10-19-l2-03-01-viewport-layout-checks.json",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L2.json"
+      ],
+      "remaining": "Manual M01-UI visual review at supported window size/DPI is pending. F4 overlay is not a pickable document object."
+    },
+    {
+      "id": "m01-l2-03-07-menu-docking-2026-10-20",
+      "date": "2026-10-20",
+      "status": "automated_target_validated_manual_ui_pending",
+      "milestone": "M01",
+      "area": "OM9-L2-03-07 Matrix Main Menu Iconhistory And Docking",
+      "scope": "Modern Matrix menu colors/cards while preserving left-stack positions, category chips, SVG icon grid/tooltips, recent history, docking/collapse/float/reset and disabled-action visibility.",
+      "changes": [
+        "Modernized sidebar/main-menu palette: slate rails, rounded icon tiles, accent section rails, tinted category chips and soft toolbar gradient.",
+        "Added optional Feature.right_click metadata and an inert secondary-click slot that never repeats the primary action.",
+        "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence."
+      ],
+      "tests": {
+        "chrome_actions": "9 passed",
+        "left_stack_layers": "8 passed",
+        "shell_docking": "10 passed",
+        "panel_ops": "33 passed",
+        "dock_layout_default": "7 passed",
+        "dock_layout_persistence": "6 passed",
+        "command_sessions": "6 passed",
+        "command_options_and_repeat": "6 passed",
+        "startup_contract": "3 passed"
+      },
+      "evidence": [
+        "implementation/design/M01/OM9-L2-03-07/README.md",
+        "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L2.json"
+      ],
+      "remaining": "Manual M01-UI visual review pending. No feature registers a right-click alternative yet; the slot is implemented and inert by default."
+    },
+    {
+      "id": "m01-l2-03-10-commandline-audit-2026-10-20",
+      "date": "2026-10-20",
+      "status": "all_six_l3_of_l2_03_10_pass_with_two_partial_notes",
+      "l3_status": {
+        "OM9-L3-03-10-001": "PASS (aliases Ln/Pt, canonical id echo, unknown alias no node)",
+        "OM9-L3-03-10-002": "PASS (prompt/phase exact, document change cancels safely)",
+        "OM9-L3-03-10-003": "PASS (clickable tokens, typed path identical, double click cannot commit, underlined letter)",
+        "OM9-L3-03-10-004": "PASS behaviour, PARTIAL message localisation",
+        "OM9-L3-03-10-005": "PASS behaviour (ordered history, 64 KiB/256 retention, path redaction), PARTIAL policy surface",
+        "OM9-L3-03-10-006": "PASS (Esc abort, Enter/Space repeat allowlisted, Space while editing never repeats)"
+      },
+      "changes": [
+        "resolve_alias + active_feature + both_sides/set_both_sides + underlined letter B",
+        "canonical feature id echoed in the transcript",
+        "clickable BothSides/Length tokens with identical parser path",
+        "Space repeat when idle only",
+        "transcript path redaction for file dialog messages"
+      ],
+      "tests": {
+        "command_transcript": 5,
+        "command_sessions": 5,
+        "command_state_machine": 4,
+        "command_options_and_repeat": 6,
+        "command_events_surface": 6,
+        "command_context": 3,
+        "command_feedback_adapter": 5,
+        "command_tokens": 1,
+        "command_shortcuts": 3,
+        "transcript_redaction": 3
+      },
+      "evidence": "implementation/evidence/M01/OM9-L2-03-10-AUDIT.md"
+    }
   ],
   "merge_context": {
     "date": "2026-10-09",

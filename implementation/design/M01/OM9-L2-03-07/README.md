@@ -16,9 +16,11 @@ The visual language is modernized without changing hit targets or layout geometr
   remains the same click/drag target.
 - Command icons are rounded tiles with a subtle outline, dark resting fill, lighter hover and muted
   disabled state instead of raised bevel buttons.
-- Main Menu category chips use a modern six-color palette; the selected category is a filled chip,
-  unselected categories are translucent tinted chips. The documented 6-per-row arrangement and all
-  twelve category names/order are unchanged.
+- Main Menu categories follow the Matrix reference colours as a coloured bullet plus a white label
+  (gold Curve, teal Surface, purple Solid, red Transform, green SubD/TSpline, yellow-green Art, red
+  Builder, indigo Tools, blue Gems, magenta Setting, orange Cutters, teal Render). The selected
+  category gets a subtle dark card and matching accent border; the 6-per-row arrangement and all
+  twelve names/order are unchanged.
 - Toolbar row uses a soft light gradient and keeps the existing 67-point allocation.
 - Icon tooltips keep the command name and append an optional registered right-click command. If no
   alternative is registered, the secondary click is inert and never replays the primary command.
@@ -43,7 +45,7 @@ The visual language is modernized without changing hit targets or layout geometr
 - `command_sessions` — **6**, `command_options_and_repeat` — **6**: recent command history.
 - `startup_contract` — **3**: failed start leaves layout untouched.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
-  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `b7f5ed9d…`). The screenshot shows the modern
+  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `071a0519…`). The screenshot shows the modern
   slate rail, colored category chips, rounded icon tiles and the unchanged four-viewport placement.
   This is automated evidence, not human sign-off.
 

@@ -173,6 +173,8 @@ pub struct MatrixApp {
     focus_cmd: bool,
     cmd_rect: Option<Rect>,
     cmd_history_rect: Option<Rect>,
+    /// Screen rectangles of the clickable command option tokens, for tests and hit reports.
+    cmd_token_rects: std::collections::BTreeMap<String, Rect>,
     cmd_horizontal_offset: f32,
     cmd_ime_composing: bool,
     pub view_rects: BTreeMap<ViewId, Rect>,
@@ -228,6 +230,7 @@ pub struct MatrixApp {
     pub toolbar_rect: Option<Rect>,
     icons: crate::icons::Icons,
     main_category: usize,
+    main_category_rects: BTreeMap<usize, Rect>,
     toolbar_tab: usize,
     style_ready: bool,
     /// Live rectangles of the Matrix menu title bars, keyed by section key.
@@ -481,6 +484,7 @@ impl MatrixApp {
             focus_cmd: true,
             cmd_rect: None,
             cmd_history_rect: None,
+            cmd_token_rects: std::collections::BTreeMap::new(),
             cmd_horizontal_offset: 0.,
             cmd_ime_composing: false,
             view_rects: BTreeMap::new(),
@@ -527,6 +531,7 @@ impl MatrixApp {
             toolbar_rect: None,
             icons: crate::icons::Icons::new(),
             main_category: 0,
+            main_category_rects: BTreeMap::new(),
             toolbar_tab: 0,
             style_ready: false,
             section_rects: BTreeMap::new(),
@@ -879,11 +884,22 @@ impl MatrixApp {
     }
     fn submit_draft(&mut self) {
         let draft = self.transcript.draft().to_owned();
+        // The underlined letter of the Length option starts its typed assignment, exactly as p22 describes.
+        if self.controller.is_running() && draft.eq_ignore_ascii_case("l") {
+            self.transcript.set_draft("Length=");
+            self.focus_cmd = true;
+            return;
+        }
         let prompt = self.controller.prompt();
         self.transcript.append_history(&format!("{prompt}{draft}"));
         let result = self.controller.submit_effect(&draft);
         if result.is_ok() {
             self.transcript.record_command(&draft);
+            // Echo the canonical feature id next to the typed alias (OM9-L3-03-10-001): the reader sees what
+            // the command actually became, not only the words they typed.
+            if let Some(feature) = self.controller.active_feature() {
+                self.transcript.append_history(&format!("[{feature}]"));
+            }
             self.transcript.set_draft("");
         }
         match result {
@@ -907,6 +923,10 @@ impl MatrixApp {
     }
     pub fn command_input_rect(&self) -> Option<Rect> {
         self.cmd_rect
+    }
+    /// The screen rectangle of one clickable option token, when the running command declares it.
+    pub fn command_option_token_rect(&self, name: &str) -> Option<Rect> {
+        self.cmd_token_rects.get(name).copied()
     }
     pub fn command_history_rect(&self) -> Option<Rect> {
         self.cmd_history_rect
@@ -1219,6 +1239,10 @@ impl MatrixApp {
 
     pub fn main_menu_category(&self) -> usize {
         self.main_category
+    }
+
+    pub fn main_category_rect(&self, index: usize) -> Option<Rect> {
+        self.main_category_rects.get(&index).copied()
     }
 
     pub fn show(&mut self, ui: &mut egui::Ui) {
