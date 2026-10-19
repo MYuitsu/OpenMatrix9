@@ -191,5 +191,24 @@
       "id": "OM9-L4-03-01-003-05",
       "file": "M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L3-003 - Active Viewport Indicator/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Active view selection via title/tab/menu and active title state; command focus/draft preserved.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-01/README.md",
+      "implementation/evidence/M01/2026-10-19-l2-03-01-viewport-layout-checks.json",
+      "crates/om9-app/tests/viewport_layout.rs",
+      "crates/om9-app/tests/chrome_actions.rs",
+      "crates/om9-app/tests/viewport_title_menu.rs",
+      "crates/om9-scene/src/workspace.rs",
+      "crates/om9-app/src/ui.rs"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M01-UI visual review pending."
+    ]
+  }
 }

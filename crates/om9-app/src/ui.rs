@@ -195,6 +195,8 @@ pub struct MatrixApp {
     file_f6_rects: BTreeMap<crate::file_lifecycle::FileKind, Rect>,
     /// Window title owned by this document's path/name and dirty marker.
     pub window_title: String,
+    /// F4 jewelry datum overlay (world 0,0,0 origin and ring centre).
+    world_datum_visible: bool,
     current_ui_context: Option<egui::Context>,
     hover: Option<Point3>,
     /// Rubber-band selection: where the drag started, in screen points.
@@ -499,6 +501,7 @@ impl MatrixApp {
             file_ime_composing: false,
             file_f6_rects: BTreeMap::new(),
             window_title: String::new(),
+            world_datum_visible: true,
             current_ui_context: None,
             hover: None,
             band_start: None,
@@ -1206,8 +1209,17 @@ impl MatrixApp {
     pub fn layer_dialog_control_rect(&self, control: LayerDialogControl) -> Option<Rect> {
         self.layer_dialog_rects.get(&control).copied()
     }
+    pub fn world_datum_visible(&self) -> bool {
+        self.world_datum_visible
+    }
+
     pub fn show(&mut self, ui: &mut egui::Ui) {
         self.passes += 1;
+        if !self.viewport_menu_owns_frame
+            && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::F4))
+        {
+            self.world_datum_visible = !self.world_datum_visible;
+        }
         self.gpu_drawn_views.clear();
         let stale_gesture = self.gumball_basis.as_ref().is_some_and(|basis| {
             basis.epoch != self.controller.coordinator().epoch()
@@ -1875,6 +1887,9 @@ impl MatrixApp {
         }
         self.viewport_title_popup(ui, id, &arrow_response);
         paint_axis_triad(&painter, &view.camera, viewport, rect);
+        if self.world_datum_visible {
+            paint_world_datum(&painter, &view.camera, viewport, rect);
+        }
         paint_view_marker(&painter, rect, id);
         if !self.viewport_menu_owns_frame
             && response.hovered()
@@ -3044,6 +3059,35 @@ impl MatrixApp {
         }
     }
 }
+/// F4 jewelry datum: world (0,0,0) and the ring centre, drawn as a small
+/// crosshair plus ring. It is display-only and never moves any datum coordinate.
+fn paint_world_datum(painter: &egui::Painter, camera: &Camera, viewport: Viewport, rect: Rect) {
+    let Ok(Some(origin)) = camera.project([0.; 3], viewport) else {
+        return;
+    };
+    let center = egui::pos2(origin.screen[0] as f32, origin.screen[1] as f32);
+    if !rect.contains(center) {
+        return;
+    }
+    let color = Color32::from_rgb(255, 170, 40);
+    let ring: Vec<_> = (0..24)
+        .map(|i| {
+            let a = i as f32 * std::f32::consts::TAU / 24.;
+            center + Vec2::new(6. * a.cos(), 6. * a.sin())
+        })
+        .collect();
+    painter.add(egui::Shape::closed_line(ring, Stroke::new(1.2, color)));
+    painter.line_segment(
+        [center - Vec2::new(11., 0.), center + Vec2::new(11., 0.)],
+        Stroke::new(1., color),
+    );
+    painter.line_segment(
+        [center - Vec2::new(0., 11.), center + Vec2::new(0., 11.)],
+        Stroke::new(1., color),
+    );
+    painter.circle_filled(center, 1.6, color);
+}
+
 fn paint_axis_triad(painter: &egui::Painter, camera: &Camera, viewport: Viewport, rect: Rect) {
     let anchor = egui::pos2(rect.left() + 30., rect.bottom() - 28.);
     let Ok(Some(origin)) = camera.project([0.; 3], viewport) else {

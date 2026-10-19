@@ -194,5 +194,24 @@
       "file": "M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L3-002 - Jewelry Viewport Camera Presets/L4-05 - Acceptance Test/l4.json"
     }
   ],
-  "hardening_notes": "# OM9-L3-03-01-002 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-03-01`.\n- Luồng/đối tượng: jewellery four-camera presets.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-ui-state/src/navigation.rs`.\n- API Rust dự kiến: `CameraPreset::for_view(ViewKind) -> Camera`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** LookingDown, Perspective, Side, ThroughFinger are distinct.\n- **Negative:** invalid view kind handled without camera corruption.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n"
+  "hardening_notes": "# OM9-L3-03-01-002 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-03-01`.\n- Luồng/đối tượng: jewellery four-camera presets.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-ui-state/src/navigation.rs`.\n- API Rust dự kiến: `CameraPreset::for_view(ViewKind) -> Camera`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** LookingDown, Perspective, Side, ThroughFinger are distinct.\n- **Negative:** invalid view kind handled without camera corruption.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n",
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Orthographic Looking Down/Side/Through Finger and perspective camera defaults with matching cplanes.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-01/README.md",
+      "implementation/evidence/M01/2026-10-19-l2-03-01-viewport-layout-checks.json",
+      "crates/om9-app/tests/viewport_layout.rs",
+      "crates/om9-app/tests/chrome_actions.rs",
+      "crates/om9-app/tests/viewport_title_menu.rs",
+      "crates/om9-scene/src/workspace.rs",
+      "crates/om9-app/src/ui.rs"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M01-UI visual review pending."
+    ]
+  }
 }

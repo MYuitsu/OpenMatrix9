@@ -191,5 +191,24 @@
       "id": "OM9-L4-03-01-006-05",
       "file": "M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L3-006 - Maximize And Restore Viewport Layout/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Double-click title and view-menu maximize/restore use the typed workspace layout; cameras/model unchanged.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-01/README.md",
+      "implementation/evidence/M01/2026-10-19-l2-03-01-viewport-layout-checks.json",
+      "crates/om9-app/tests/viewport_layout.rs",
+      "crates/om9-app/tests/chrome_actions.rs",
+      "crates/om9-app/tests/viewport_title_menu.rs",
+      "crates/om9-scene/src/workspace.rs",
+      "crates/om9-app/src/ui.rs"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M01-UI visual review pending."
+    ]
+  }
 }

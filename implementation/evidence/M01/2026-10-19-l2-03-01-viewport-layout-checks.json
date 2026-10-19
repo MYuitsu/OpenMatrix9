@@ -1,0 +1,148 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "m01-l2-03-01-viewport-layout-2026-10-19",
+  "date": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "milestone": "OM9-L2-03-01",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "implementation": {
+    "workspace": "crates/om9-scene/src/workspace.rs",
+    "camera": "crates/om9-scene/src/camera.rs",
+    "grid": "crates/om9-scene/src/grid.rs",
+    "viewport_ui": "crates/om9-app/src/ui.rs",
+    "chrome": "crates/om9-app/src/ui/chrome.rs",
+    "design": "implementation/design/M01/OM9-L2-03-01/README.md"
+  },
+  "checks": [
+    {
+      "name": "viewport-layout",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "viewport_layout",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 3,
+      "covers": [
+        "four camera presets and cplanes",
+        "per-cplane millimeter grid axes",
+        "maximize/restore visible view set"
+      ]
+    },
+    {
+      "name": "chrome-actions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "chrome_actions",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 7,
+      "covers": [
+        "F4 datum toggle/paint",
+        "view tabs/menu active view",
+        "numeric draft preservation",
+        "tab switch while maximized"
+      ]
+    },
+    {
+      "name": "viewport-title-menu",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "viewport_title_menu",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 17,
+      "covers": [
+        "title dropdown",
+        "captured maximize/restore",
+        "no model mutation"
+      ]
+    },
+    {
+      "name": "four-view-placement",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ui_events",
+        "reference_workspace_places_sidebar_left_and_through_finger_below_looking_down",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 1,
+      "covers": [
+        "Looking Down/Through Finger left column; Perspective/Side View right column"
+      ]
+    },
+    {
+      "name": "workbench-regions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "workbench_regions",
+        "--test",
+        "workbench_regions_sizes",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 18
+    },
+    {
+      "name": "startup-window",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "startup_contract",
+        "--test",
+        "window_minimum",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 8
+    }
+  ],
+  "runtime": {
+    "f4": "display-only world origin/ring centre overlay; toggled without document or Undo mutation",
+    "maximize": "double-click title and view menu use Workspace::toggle_maximize",
+    "active_view": "view title/tab click sets workspace.active and preserves numeric command draft"
+  },
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual visual review of the real window at the supported size and DPI is still required.",
+    "F4 overlay is not a pickable document object."
+  ],
+  "logs": {
+    "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-01-20261019/acceptance.log",
+    "acceptance_sha256": "0bdbad22f9bb439552a8f0cf7ec3fe5aa14ea162ed90fb7a0034a948009080cc",
+    "four_view": "build/standalone-validation/ui-artifacts/m01-l2-03-01-20261019/four-view.log",
+    "four_view_sha256": "358d72f28cbddb801646e863092a2e915d8c720c27b192f7b68b22f0be9f1195"
+  }
+}

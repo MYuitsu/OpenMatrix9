@@ -13139,7 +13139,34 @@
       ],
       "native_sha256": "6c96316f4403a12f2f43afc4619e0e27d770356ad0b094803aa479d7c0f215f5",
       "remaining": "BRep is retained/opaque and cannot be topology-edited; that requires a separate ON_Brep <-> OCCT bridge. BRep display needs a cached Rhino render mesh. Rational NURBS poles can differ by one ULP. The layout needs a signed installer. Material/linetype/dimstyle tables are intentionally excluded; layer table is retained. UI picker/menu needs human review."
-    }
+    },
+{
+  "id": "m01-l2-03-01-viewport-layout-2026-10-19",
+  "date": "2026-10-19",
+  "status": "automated_target_validated_manual_ui_pending",
+  "milestone": "M01",
+  "area": "OM9-L2-03-01 Jewelry Viewport Layout And Cplanes",
+  "scope": "Four Matrix viewports, camera presets, active view/title tabs, F4 world datum overlay, mm grid/axes, maximize/restore and maximized tab switching.",
+  "changes": [
+    "Added F4 display-only world (0,0,0)/ring-centre overlay with no document or Undo mutation.",
+    "Verified existing four-view cameras, active view/title state, per-cplane grid axes and maximize/restore through new and existing acceptance tests.",
+    "Added viewport_layout tests and recorded L2/L3 runtime_implementation evidence."
+  ],
+  "tests": {
+    "viewport_layout": "3 passed",
+    "chrome_actions": "7 passed",
+    "viewport_title_menu": "17 passed",
+    "four_view_placement": "1 passed",
+    "workbench_regions": "18 passed",
+    "startup_window": "8 passed"
+  },
+  "evidence": [
+    "implementation/design/M01/OM9-L2-03-01/README.md",
+    "implementation/evidence/M01/2026-10-19-l2-03-01-viewport-layout-checks.json",
+    "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L2.json"
+  ],
+  "remaining": "Manual M01-UI visual review at supported window size/DPI is pending. F4 overlay is not a pickable document object."
+}
   ],
   "merge_context": {
     "date": "2026-10-09",

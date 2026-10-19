@@ -81,5 +81,26 @@
       "id": "OM9-L3-03-01-007",
       "file": "M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L3-007 - Viewport Tab Switch When Maximized/l3.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Four fixed Matrix viewports with camera presets, active-view title/tabs, F4 world datum overlay, millimeter cplane grid/axes, maximize/restore and tab switching.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-01/README.md",
+      "implementation/evidence/M01/2026-10-19-l2-03-01-viewport-layout-checks.json",
+      "crates/om9-app/tests/viewport_layout.rs",
+      "crates/om9-app/tests/chrome_actions.rs",
+      "crates/om9-app/tests/viewport_title_menu.rs",
+      "crates/om9-scene/src/workspace.rs",
+      "crates/om9-app/src/ui.rs"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual visual review at supported window size/DPI is pending."
+    ]
+  },
+  "execution_state": "RUNTIME_IMPLEMENTED",
+  "readiness_state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
 }

@@ -66,6 +66,21 @@ fn text_positions(output: &egui::FullOutput, label: &str) -> Vec<Pos2> {
         })
         .collect()
 }
+fn datum_strokes(output: &egui::FullOutput) -> usize {
+    let color = egui::Color32::from_rgb(255, 170, 40);
+    output
+        .shapes
+        .iter()
+        .filter(|clipped| match &clipped.shape {
+            egui::Shape::LineSegment { stroke, .. } => stroke.color == color,
+            egui::Shape::Path(path) => {
+                matches!(path.stroke.color, eframe::epaint::ColorMode::Solid(c) if c == color)
+            }
+            _ => false,
+        })
+        .count()
+}
+
 fn startup() -> (MatrixApp, egui::Context, egui::FullOutput) {
     let mut app = MatrixApp::new(Document::new("chrome pointer fixtures")).unwrap();
     let context = egui::Context::default();
@@ -143,6 +158,26 @@ fn help_popup_contains_help_and_about_without_feature_catalog_actions() {
 }
 
 #[test]
+fn f4_toggles_world_datum_without_mutating_document() {
+    let (mut app, context, output) = startup();
+    assert!(app.world_datum_visible());
+    assert!(datum_strokes(&output) > 0, "F4 datum must paint");
+    let before = app.controller.coordinator().snapshot();
+    let hidden = frame(&mut app, &context, vec![key(Key::F4)]);
+    assert!(!app.world_datum_visible());
+    assert_eq!(datum_strokes(&hidden), 0);
+    let shown = frame(&mut app, &context, vec![key(Key::F4)]);
+    assert!(app.world_datum_visible());
+    assert!(datum_strokes(&shown) > 0);
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+    assert!(app.view_rects.contains_key(&ViewId::LookingDown));
+    assert!(app.view_rects.contains_key(&ViewId::Perspective));
+    assert!(app.view_rects.contains_key(&ViewId::SideView));
+    assert!(app.view_rects.contains_key(&ViewId::ThroughFinger));
+}
+
+#[test]
 fn view_tab_restores_cmd_focus_and_preserves_numeric_draft() {
     let (mut app, context, _) = startup();
     begin_numeric_draft(&mut app, &context);
@@ -155,6 +190,27 @@ fn view_tab_restores_cmd_focus_and_preserves_numeric_draft() {
     click(&mut app, &context, point);
     assert_eq!(app.controller.workspace.active, ViewId::SideView);
     finish_numeric_draft(&mut app, &context);
+}
+
+#[test]
+fn view_tab_switches_active_and_maximized_view() {
+    let (mut app, context, _) = startup();
+    app.controller.workspace.maximized = Some(ViewId::LookingDown);
+    app.controller.workspace.active = ViewId::LookingDown;
+    let output = frame(&mut app, &context, vec![]);
+    let toolbar = app.toolbar_rect.unwrap();
+    let point = text_positions(&output, ViewId::SideView.title())
+        .into_iter()
+        .find(|p| toolbar.contains(*p))
+        .unwrap();
+    click(&mut app, &context, point);
+    assert_eq!(app.controller.workspace.active, ViewId::SideView);
+    assert_eq!(app.controller.workspace.maximized, Some(ViewId::SideView));
+    assert_eq!(
+        app.controller.workspace.visible_views(),
+        vec![ViewId::SideView]
+    );
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
 }
 
 #[test]
