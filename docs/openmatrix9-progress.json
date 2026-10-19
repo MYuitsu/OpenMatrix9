@@ -13166,6 +13166,36 @@
     "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L2.json"
   ],
   "remaining": "Manual M01-UI visual review at supported window size/DPI is pending. F4 overlay is not a pickable document object."
+},
+{
+  "id": "m01-l2-03-07-menu-docking-2026-10-20",
+  "date": "2026-10-20",
+  "status": "automated_target_validated_manual_ui_pending",
+  "milestone": "M01",
+  "area": "OM9-L2-03-07 Matrix Main Menu Iconhistory And Docking",
+  "scope": "Modern Matrix menu colors/cards while preserving left-stack positions, category chips, SVG icon grid/tooltips, recent history, docking/collapse/float/reset and disabled-action visibility.",
+  "changes": [
+    "Modernized sidebar/main-menu palette: slate rails, rounded icon tiles, accent section rails, tinted category chips and soft toolbar gradient.",
+    "Added optional Feature.right_click metadata and an inert secondary-click slot that never repeats the primary action.",
+    "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence."
+  ],
+  "tests": {
+    "chrome_actions": "9 passed",
+    "left_stack_layers": "8 passed",
+    "shell_docking": "10 passed",
+    "panel_ops": "33 passed",
+    "dock_layout_default": "7 passed",
+    "dock_layout_persistence": "6 passed",
+    "command_sessions": "6 passed",
+    "command_options_and_repeat": "6 passed",
+    "startup_contract": "3 passed"
+  },
+  "evidence": [
+    "implementation/design/M01/OM9-L2-03-07/README.md",
+    "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",
+    "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L2.json"
+  ],
+  "remaining": "Manual M01-UI visual review pending. No feature registers a right-click alternative yet; the slot is implemented and inert by default."
 }
   ],
   "merge_context": {

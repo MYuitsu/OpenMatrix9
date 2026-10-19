@@ -77,6 +77,10 @@ pub struct Feature {
     pub name: String,
     pub command: Option<String>,
     pub module: String,
+    /// Optional command bound to the icon's secondary click. Missing means the
+    /// slot is inert; it must never repeat the primary action.
+    #[serde(default)]
+    pub right_click: Option<String>,
 }
 /// Adapter for the `CommandInputHost` seam toward `OM9-L2-01-02`. The CMD frame
 /// (`MatrixApp::transcript` plus `command_ui`) is built into every frame, so it
@@ -1213,6 +1217,10 @@ impl MatrixApp {
         self.world_datum_visible
     }
 
+    pub fn main_menu_category(&self) -> usize {
+        self.main_category
+    }
+
     pub fn show(&mut self, ui: &mut egui::Ui) {
         self.passes += 1;
         if !self.viewport_menu_owns_frame
@@ -1446,8 +1454,8 @@ impl MatrixApp {
             .exact_size(21.)
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_rgb(232, 232, 230))
-                    .inner_margin(2),
+                    .fill(Color32::from_rgb(248, 250, 252))
+                    .inner_margin(3),
             )
             .show(ui, |ui| {
                 if self.viewport_menu_owns_frame {
@@ -1462,7 +1470,7 @@ impl MatrixApp {
             .resizable(true)
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_gray(82))
+                    .fill(Color32::from_rgb(20, 29, 40))
                     .inner_margin(2),
             )
             .show(ui, |ui| {
@@ -1503,8 +1511,8 @@ impl MatrixApp {
             .exact_size(67.)
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_rgb(203, 214, 213))
-                    .inner_margin(1),
+                    .fill(Color32::from_rgb(231, 238, 245))
+                    .inner_margin(2),
             )
             .show(ui, |ui| {
                 if self.viewport_menu_owns_frame {
@@ -1523,8 +1531,8 @@ impl MatrixApp {
                 .resizable(true)
                 .frame(
                     egui::Frame::new()
-                        .fill(Color32::from_gray(70))
-                        .inner_margin(2),
+                        .fill(Color32::from_rgb(27, 39, 53))
+                        .inner_margin(3),
                 )
                 .show(ui, |ui| {
                     self.right_dock_rect = Some(ui.max_rect());
@@ -1551,7 +1559,7 @@ impl MatrixApp {
             .exact_size(dock_layout::STATUS_BAR_HEIGHT)
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_gray(96))
+                    .fill(Color32::from_rgb(17, 24, 39))
                     .inner_margin(2),
             )
             .show(ui, |ui| {

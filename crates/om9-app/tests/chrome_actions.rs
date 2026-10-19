@@ -53,6 +53,35 @@ fn click(app: &mut MatrixApp, context: &egui::Context, at: Pos2) -> egui::FullOu
         ],
     )
 }
+fn secondary_click(app: &mut MatrixApp, context: &egui::Context, at: Pos2) -> egui::FullOutput {
+    frame(
+        app,
+        context,
+        vec![
+            Event::PointerMoved(at),
+            Event::PointerButton {
+                pos: at,
+                button: egui::PointerButton::Secondary,
+                pressed: true,
+                modifiers: Modifiers::NONE,
+            },
+        ],
+    );
+    frame(
+        app,
+        context,
+        vec![
+            Event::PointerMoved(at),
+            Event::PointerButton {
+                pos: at,
+                button: egui::PointerButton::Secondary,
+                pressed: false,
+                modifiers: Modifiers::NONE,
+            },
+        ],
+    )
+}
+
 fn text_positions(output: &egui::FullOutput, label: &str) -> Vec<Pos2> {
     output
         .shapes
@@ -155,6 +184,32 @@ fn help_popup_contains_help_and_about_without_feature_catalog_actions() {
     assert!(text_positions(&opened, "Matrix Interface").is_empty());
     assert!(text_positions(&opened, "Line").is_empty());
     assert!(!app.controller.is_running());
+}
+
+#[test]
+fn main_menu_category_tabs_switch_palette_without_document_mutation() {
+    let (mut app, context, output) = startup();
+    let gems = text_positions(&output, "Gems")
+        .into_iter()
+        .next()
+        .expect("Gems category");
+    click(&mut app, &context, gems);
+    assert_eq!(app.main_menu_category(), 8);
+    assert!(!app.controller.is_running());
+    assert!(app.controller.document().entities.is_empty());
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn unregistered_right_click_slot_never_executes_a_previous_action() {
+    let (mut app, context, _) = startup();
+    let icon = *app.rail_icon_rects.first().expect("sidebar icon");
+    let before = app.controller.coordinator().snapshot();
+    secondary_click(&mut app, &context, icon.center());
+    assert!(!app.controller.is_running());
+    assert!(app.controller.document().entities.is_empty());
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
 }
 
 #[test]

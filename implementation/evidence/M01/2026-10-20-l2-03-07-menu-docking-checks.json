@@ -1,0 +1,224 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "m01-l2-03-07-menu-docking-2026-10-20",
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "milestone": "OM9-L2-03-07",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "implementation": {
+    "chrome": "crates/om9-app/src/ui/chrome.rs",
+    "shell": "crates/om9-app/src/ui.rs",
+    "dock_layout": "crates/om9-app/src/dock_layout.rs",
+    "design": "implementation/design/M01/OM9-L2-03-07/README.md"
+  },
+  "design": {
+    "palette": [
+      "#141D28 panel",
+      "#1B2735 card",
+      "#2DD4BF accent",
+      "six category accents"
+    ],
+    "preserved_positions": "left rail 300 outer, documented section order, 6 category chips per row",
+    "modernized": [
+      "rounded icon tiles",
+      "flat section cards with accent rails",
+      "tinted category chips",
+      "soft toolbar gradient"
+    ]
+  },
+  "checks": [
+    {
+      "name": "chrome-actions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "chrome_actions",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 9
+    },
+    {
+      "name": "left-stack-layers",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "left_stack_layers",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 8
+    },
+    {
+      "name": "shell-docking",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "shell_docking",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 10
+    },
+    {
+      "name": "panel-ops",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "panel_ops",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 33
+    },
+    {
+      "name": "dock-default",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "dock_layout_default",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 7
+    },
+    {
+      "name": "dock-persistence",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "dock_layout_persistence",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 6
+    },
+    {
+      "name": "command-sessions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "command_sessions",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 6
+    },
+    {
+      "name": "command-options-repeat",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "command_options_and_repeat",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 6
+    },
+    {
+      "name": "startup",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "startup_contract",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 3
+    },
+    {
+      "name": "app-lib",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--lib",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 101
+    }
+  ],
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual visual review of the real Windows window is still required.",
+    "No feature registers a right-click alternative yet; the slot is inert by default."
+  ],
+  "logs": {
+    "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
+    "acceptance_sha256": "33adf35194b027e03f82535133ac31813b36be218c503774f3554178a6c981c0",
+    "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
+    "app_lib_sha256": "edfb4fd8cd662876c3a5b139e73f582e09ba871bee0f868255e62275d6d06b8c"
+  },
+  "ui_audit": {
+    "screenshot": "build/ui-audit-l2-03-07/workspace.png",
+    "screenshot_sha256": "b7f5ed9d79e3c4eb70c1af02dac740a595684fc642a8fac0f553cc0d2a45435b",
+    "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
+    "receipt_sha256": "f8a81c1f9ebae82a59e90309bf8da045f805d787bb74a02ff2013d9a4ffba748",
+    "passes": 21,
+    "view_rects": {
+      "Looking Down": [
+        240,
+        159,
+        519,
+        359.5
+      ],
+      "Side View": [
+        761,
+        520.5,
+        519,
+        359.5
+      ],
+      "Perspective": [
+        761,
+        159,
+        519,
+        359.5
+      ],
+      "Through Finger": [
+        240,
+        520.5,
+        519,
+        359.5
+      ]
+    }
+  }
+}

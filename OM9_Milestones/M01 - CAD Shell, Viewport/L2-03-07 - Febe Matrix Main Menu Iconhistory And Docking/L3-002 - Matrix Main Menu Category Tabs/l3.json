@@ -176,5 +176,25 @@
       "id": "OM9-L4-03-07-002-05",
       "file": "M01 - CAD Shell, Viewport/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L3-002 - Matrix Main Menu Category Tabs/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-20",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Twelve Main Menu category chips with modern accent colors and selection state; File/View/Utilities/Measure/Custom placeholders.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-07/README.md",
+      "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",
+      "crates/om9-app/src/ui/chrome.rs",
+      "crates/om9-app/src/ui.rs",
+      "crates/om9-app/tests/chrome_actions.rs",
+      "crates/om9-app/tests/left_stack_layers.rs",
+      "crates/om9-app/tests/panel_ops.rs",
+      "crates/om9-app/tests/shell_docking.rs"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M01-UI visual review pending."
+    ]
+  }
 }

@@ -5,6 +5,19 @@ use super::*;
 use egui::{Align2, FontId, RichText};
 
 const GREEN: Color32 = Color32::from_rgb(130, 180, 140);
+const PANEL_BG: Color32 = Color32::from_rgb(20, 29, 40);
+const PANEL_ALT: Color32 = Color32::from_rgb(27, 39, 53);
+const PANEL_EDGE: Color32 = Color32::from_rgb(53, 70, 88);
+const PANEL_INK: Color32 = Color32::from_rgb(221, 231, 242);
+const ACCENT: Color32 = Color32::from_rgb(45, 212, 191);
+const CATEGORY_COLORS: [Color32; 6] = [
+    Color32::from_rgb(56, 189, 248),
+    Color32::from_rgb(251, 191, 36),
+    Color32::from_rgb(251, 113, 133),
+    Color32::from_rgb(167, 139, 250),
+    Color32::from_rgb(52, 211, 153),
+    Color32::from_rgb(244, 114, 182),
+];
 const CATEGORIES: [&str; 12] = [
     "Curve",
     "Surface",
@@ -65,11 +78,15 @@ impl MatrixApp {
         style
             .text_styles
             .insert(egui::TextStyle::Monospace, FontId::monospace(12.));
-        style.visuals.widgets.inactive.corner_radius = 0.into();
-        style.visuals.widgets.hovered.corner_radius = 0.into();
-        style.visuals.widgets.active.corner_radius = 0.into();
-        style.visuals.selection.bg_fill = GREEN;
-        style.visuals.selection.stroke = Stroke::new(1., Color32::BLACK);
+        style.visuals.widgets.inactive.corner_radius = 4.into();
+        style.visuals.widgets.hovered.corner_radius = 4.into();
+        style.visuals.widgets.active.corner_radius = 4.into();
+        style.visuals.widgets.inactive.weak_bg_fill = Color32::from_rgb(238, 243, 248);
+        style.visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(220, 235, 250);
+        style.visuals.widgets.active.weak_bg_fill = Color32::from_rgb(199, 232, 227);
+        style.visuals.selection.bg_fill = ACCENT;
+        style.visuals.selection.stroke = Stroke::new(1., Color32::from_rgb(15, 23, 42));
+        style.visuals.window_corner_radius = 8.into();
         ctx.set_theme(egui::ThemePreference::Light);
         ctx.set_style_of(egui::Theme::Light, style);
     }
@@ -258,18 +275,19 @@ impl MatrixApp {
             Vec2::new(ui.available_width(), 14.),
             Sense::click_and_drag(),
         );
-        gradient(
-            ui.painter(),
-            rect,
-            Color32::from_rgb(199, 199, 186),
-            Color32::from_rgb(151, 151, 141),
+        let accent = section_accent(id);
+        ui.painter().rect_filled(rect, 4, PANEL_ALT);
+        ui.painter().rect_filled(
+            Rect::from_min_size(rect.left_top(), Vec2::new(3., rect.height())),
+            2,
+            accent,
         );
         ui.painter().text(
-            rect.left_center() + Vec2::new(2., 0.),
+            rect.left_center() + Vec2::new(8., 0.),
             Align2::LEFT_CENTER,
             id.bar_title(),
-            FontId::proportional(11.),
-            Color32::BLACK,
+            FontId::proportional(10.5),
+            PANEL_INK,
         );
         // The reserved BUILDER area carries no close box (design review NIT 7):
         // it cannot be rolled up, so a +/− would promise something it refuses.
@@ -280,7 +298,7 @@ impl MatrixApp {
                 Align2::CENTER_CENTER,
                 if state.collapsed { "+" } else { "−" },
                 FontId::proportional(12.),
-                Color32::from_rgb(150, 55, 55),
+                accent,
             );
         }
         self.section_rects.insert(id.key(), rect);
@@ -321,6 +339,16 @@ impl MatrixApp {
         });
     }
     fn icon(&mut self, ui: &mut egui::Ui, name: &str, enabled: bool, help: &str) -> egui::Response {
+        self.icon_slot(ui, name, enabled, help, None)
+    }
+    fn icon_slot(
+        &mut self,
+        ui: &mut egui::Ui,
+        name: &str,
+        enabled: bool,
+        help: &str,
+        right_click: Option<&str>,
+    ) -> egui::Response {
         // Menu columns draw at the width-driven edge; every other caller (the
         // toolbars) keeps the base 22 because `column_icon_edge` is reset after
         // each column.
@@ -332,41 +360,67 @@ impl MatrixApp {
                 Sense::hover()
             },
         );
-        let fill = if response.hovered() {
-            Color32::from_rgb(122, 152, 184)
+        let fill = if !enabled {
+            PANEL_BG
+        } else if response.hovered() {
+            PANEL_EDGE
         } else {
-            Color32::from_gray(95)
+            PANEL_ALT
         };
-        ui.painter().rect_filled(rect, 0, fill);
-        bevel(ui.painter(), rect);
-        self.icons.paint(ui, rect.shrink(2.), name);
+        ui.painter().rect_filled(rect, 4, fill);
+        ui.painter().rect_stroke(
+            rect.shrink(0.5),
+            4,
+            Stroke::new(
+                1.,
+                if enabled {
+                    PANEL_EDGE
+                } else {
+                    Color32::from_rgb(38, 52, 68)
+                },
+            ),
+            egui::StrokeKind::Inside,
+        );
+        self.icons.paint(ui, rect.shrink(3.), name);
         match self.icon_column {
             IconColumn::Left => self.rail_icon_rects.push(rect),
             IconColumn::Right => self.right_dock_icon_rects.push(rect),
             IconColumn::None => {}
         }
-        response.on_hover_text(if enabled {
+        let mut tooltip = if enabled {
             help.to_owned()
         } else {
             format!("{help} — operation unavailable")
-        })
+        };
+        if enabled && let Some(command) = right_click {
+            tooltip.push_str(&format!("\nRight-click: {command}"));
+        }
+        let response = response.on_hover_text(tooltip);
+        if enabled
+            && let Some(command) = right_click
+            && response.secondary_clicked()
+        {
+            self.invoke(command, InvocationOrigin::Menu);
+        }
+        response
     }
     fn feature_icon(&mut self, ui: &mut egui::Ui, id: &str, name: &str) {
-        let actual = self
+        let feature = self
             .features
             .iter()
             .find(|f| crate::icons::icon_name(&f.id) == Some(name))
-            .map(|f| f.id.clone());
-        let actual = if id == LINE || id == POINT {
-            Some(id.to_owned())
-        } else {
-            actual
-        };
+            .cloned();
+        let actual = feature
+            .as_ref()
+            .map(|f| f.id.clone())
+            .or_else(|| (id == LINE || id == POINT).then(|| id.to_owned()));
         if let Some(actual) = actual {
-            if self
-                .icon(ui, name, Controller::availability(&actual).is_ok(), &actual)
-                .clicked()
-            {
+            let enabled = Controller::availability(&actual).is_ok();
+            let right = feature
+                .as_ref()
+                .and_then(|f| f.right_click.as_deref())
+                .filter(|command| Controller::availability(command).is_ok());
+            if self.icon_slot(ui, name, enabled, &actual, right).clicked() {
                 self.invoke(&actual, InvocationOrigin::Menu);
             }
         } else {
@@ -384,9 +438,13 @@ impl MatrixApp {
         });
     }
     pub(super) fn sidebar_ui(&mut self, ui: &mut egui::Ui) {
-        ui.visuals_mut().override_text_color = Some(Color32::WHITE);
-        ui.visuals_mut().widgets.inactive.bg_fill = Color32::from_gray(105);
-        ui.visuals_mut().widgets.inactive.weak_bg_fill = Color32::from_gray(105);
+        ui.visuals_mut().override_text_color = Some(PANEL_INK);
+        ui.visuals_mut().widgets.inactive.bg_fill = PANEL_ALT;
+        ui.visuals_mut().widgets.inactive.weak_bg_fill = PANEL_ALT;
+        ui.visuals_mut().widgets.hovered.bg_fill = PANEL_EDGE;
+        ui.visuals_mut().widgets.hovered.weak_bg_fill = PANEL_EDGE;
+        ui.visuals_mut().widgets.active.bg_fill = ACCENT;
+        ui.visuals_mut().widgets.active.weak_bg_fill = ACCENT;
         // The column order, visibility and roll-up state come from the typed
         // layout, so the documented Matrix order survives a session.
         let sections = self.dock.left_sections();
@@ -465,18 +523,34 @@ impl MatrixApp {
                     ui.horizontal_wrapped(|ui| {
                         for (column, category) in categories.iter().enumerate() {
                             let i = row * 6 + column;
-                            let colors = [
-                                Color32::YELLOW,
-                                Color32::from_rgb(30, 215, 214),
-                                Color32::from_rgb(255, 110, 100),
-                                Color32::from_rgb(230, 200, 110),
-                                Color32::from_rgb(140, 175, 255),
-                                Color32::from_rgb(225, 130, 235),
-                            ];
-                            let text = RichText::new(format!("•{category}"))
-                                .color(colors[i % 6])
-                                .size(10.);
-                            if ui.add(egui::Button::new(text).frame(false)).clicked() {
+                            let accent = CATEGORY_COLORS[i % CATEGORY_COLORS.len()];
+                            let selected = self.main_category == i;
+                            let text = RichText::new(*category)
+                                .color(if selected {
+                                    Color32::from_rgb(15, 23, 42)
+                                } else {
+                                    accent
+                                })
+                                .size(9.5);
+                            let button = egui::Button::new(text)
+                                .fill(if selected {
+                                    accent
+                                } else {
+                                    Color32::from_rgba_unmultiplied(
+                                        accent.r(),
+                                        accent.g(),
+                                        accent.b(),
+                                        34,
+                                    )
+                                })
+                                .corner_radius(4)
+                                .stroke(Stroke::new(1., accent.gamma_multiply(0.65)))
+                                .min_size(Vec2::new(0., 18.));
+                            if ui
+                                .add(button)
+                                .on_hover_text(format!("{category} command category"))
+                                .clicked()
+                            {
                                 self.main_category = i;
                                 self.focus_cmd = true;
                             }
@@ -700,8 +774,8 @@ impl MatrixApp {
         gradient(
             ui.painter(),
             row,
-            Color32::from_rgb(154, 185, 158),
-            Color32::from_rgb(215, 225, 217),
+            Color32::from_rgb(226, 232, 240),
+            Color32::from_rgb(248, 250, 252),
         );
         let tab = TABS[self.toolbar_tab];
         egui::ScrollArea::horizontal()
@@ -1137,6 +1211,19 @@ fn feature_category(f: &Feature) -> &str {
         "Tools"
     }
 }
+fn section_accent(id: SectionId) -> Color32 {
+    match id {
+        SectionId::IconHistory => CATEGORY_COLORS[0],
+        SectionId::MainMenu => CATEGORY_COLORS[1],
+        SectionId::Display => CATEGORY_COLORS[4],
+        SectionId::Snaps => CATEGORY_COLORS[2],
+        SectionId::InfoSettings => CATEGORY_COLORS[3],
+        SectionId::Layers => CATEGORY_COLORS[5],
+        SectionId::Projects => CATEGORY_COLORS[0],
+        SectionId::BuilderSlot => CATEGORY_COLORS[3],
+    }
+}
+
 fn gradient(p: &egui::Painter, rect: Rect, top: Color32, bottom: Color32) {
     for i in 0..12 {
         let t = i as f32 / 11.;
