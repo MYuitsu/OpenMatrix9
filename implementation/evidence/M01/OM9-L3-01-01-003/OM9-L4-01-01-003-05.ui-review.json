@@ -1,0 +1,316 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-01-003-05",
+  "l3_id": "OM9-L3-01-01-003",
+  "title": "Reorder Collapse And Float Panels",
+  "oracle": {
+    "positive": "Move, collapse, float permitted dock panel; restore without losing state",
+    "negative": "Dragging panel outside screen can be recovered/reset"
+  },
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "SIGNED",
+    "role": "project owner (human reviewer) running the app on Windows",
+    "date_utc": "2026-10-16",
+    "statement": "test roi okie nha",
+    "scope": "1) M1 roll-up: click PROJECTS twice; 2) M2 drag-reorder with the 3 px insertion line; 3) M3 float into a viewport and close it; 4) M4 dock to the right column and back, including the window narrower than 1200 points; 5) M5 a floating menu pulled back inside when the window shrinks; 6) M6 a drop past the screen edge and Escape cancelling without losing the command draft",
+    "signature_note": "recorded from the owner's in-session confirmation; the implementer did not sign. Screenshots of the same six paths: OM9-L4-01-01-003-05.real-window-panels.json"
+  },
+  "checks_run": [
+    "cargo test -p om9-app --test panel_ops: 33 passed (every machine-checkable model/drop case of both fixtures, plus the 2000-op sweep N33)",
+    "cargo test -p om9-app --lib: 83 passed; cargo test --workspace: every group ok",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: tools/validate_m01_l3_002_ui_matrix.py --mode all -> 14/14 PASS (all_passed=true) after the placement-index fix",
+    "fixture coverage: 13/13 positive + 34/34 negative have a machine-checkable home (OM9-L4-01-01-003-05.fixture-coverage.json)",
+    "cargo test -p om9-app --test panel_ops: 33 passed (N34 now bans eight tokens and requires every UI layout call to be on the documented allowlist)",
+    "python tools/validate_m01_l3_003_panels.py --self-test: comparators and expectations consistent",
+    "real windows: python tools/validate_m01_l3_003_panels.py -> 7/7 PASS (reorder, float, dock-right, escape, roll-up, float-drop, readback-recover)",
+    "cargo test -p om9-app --test panel_door: 12 passed on real egui frames (adds the closed-bar-controls case P2 and the BUILDERS click N21, plus the stale-cursor regression)",
+    "cargo test -p om9-app --test panel_ops: 33 passed (N34 now bans eight tokens and requires every UI layout call to be on the documented allowlist)"
+  ],
+  "artefacts": [
+    "OM9-L4-01-01-003-02.green.log",
+    "OM9-L4-01-01-003-02.red.log",
+    "OM9-L4-01-01-003-03.diffstat.txt",
+    "OM9-L4-01-01-003-03.target-test.log",
+    "OM9-L4-01-01-003-05.design-review-response.md",
+    "OM9-L4-01-01-003-05.fixture-coverage.json",
+    "OM9-L4-01-01-003-05.real-window-panels.json",
+    "OM9-L4-01-01-003-05.regression.log",
+    "OM9-L4-01-01-003-05.single-door.json"
+  ],
+  "implementation_summary": [
+    "panel_ops.rs: pure typed layer (WorkArea [8,29,1584,943] at 1600x1000, PanelOp x7, PanelOutcome, PanelNote Recovered/OutsideMainWindow, PanelOpError x12, apply_panel_op clone-apply-invariant-commit, DropZones/DropTarget/DropIndicator, resolve_drop, drop_indicator, drop_op)",
+    "SectionState.home: a menu remembers the column position it left (serde default, old layouts still load)",
+    "ui/panel_audit.rs: the single door MatrixApp::apply_panel_op, the drag/preview state, the exact design messages, the cancel rules (Escape, pointer lost, reset/reload, hidden while dragging), resync_floats",
+    "ui.rs / ui/chrome.rs: every placement (title click, drag, right-column buttons, float window buttons, close box, readback, API wrappers) goes through the door; the old 28 px right_drop_zone mechanism is gone; the right strip is the rightmost 48 px of the views' union as recorded in the fixture",
+    "Fixture coverage: 47/47 cases are driven from the fixture files at run time; the drop index rule of design §5 is shared by the resolver and the operation, so what the preview shows is what the release applies (P3/P4/P9).",
+    "A panel message never replaces an unacknowledged failure: it reaches the command history only (N30)."
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PASSED BY HUMAN REVIEW (2026-10-16)",
+    "scope_note": "Machine proof for these items is geometric and headless. Only the owner can confirm the live feel (indicator visibility, cursor, drag tracking, recovery on a shrinking window).",
+    "items": [
+      {
+        "id": "M1",
+        "step": "Click the PROJECTS title bar twice (and SNAPS, LAYERS).",
+        "machine_proven": "ToggleCollapsed returns the exact previous state; the documented order is unchanged; P1/P2 pass.",
+        "human_must_verify": "The menu really rolls up to its title bar, the glyph flips, the status line reads 'Projects rolled up' / 'Projects expanded', and the second click restores the body, its scroll and its height.",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": "M2",
+        "step": "Drag the PROJECTS title bar above DISPLAY, release; then drag it to the bottom of the column.",
+        "machine_proven": "Drop index rule, Move saturation, AlreadyThere/no-op reporting, invariant 'each menu exactly once, dense order'.",
+        "human_must_verify": "The 3 px red insertion line follows the pointer, the release reorders the column, and the status line reads 'Projects moved to menu position 3'.",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": "M3",
+        "step": "Drag MAIN MENU into the middle of a viewport, release; then move the floating window and press its X.",
+        "machine_proven": "Float keeps a home, the drop preview rect equals the applied rect, the readback is not reported as recovery, closing restores home and left order.",
+        "human_must_verify": "The float preview frame appears while dragging, the window floats over the model without jumping, and X returns the menu to its old slot with the same roll-up state.",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": "M4",
+        "step": "With the right column hidden, drag a menu into the 48 px strip at the right edge; then press ◀ in the right column. Repeat in a window narrower than 1200 points.",
+        "machine_proven": "Strip = rightmost 48 px of the views; Place{Right} from the strip; Dock restores home with restored_home=true; under 1200 points there is no strip and the drop floats instead.",
+        "human_must_verify": "The right column appears exactly where the strip was offered, the menu is not lost, and below 1200 points nothing docks right (the menu floats).",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": "M5",
+        "step": "Float a menu to the bottom-right corner, then shrink the window until it must move.",
+        "machine_proven": "SetFloatRect clamps into the work area and reports Recovered; resync_floats pulls a stored rectangle back inside; a window below the plan floor changes nothing.",
+        "human_must_verify": "The floating menu is pulled inside and stays usable, the warning names it, and no menu disappears or jumps outside the screen.",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": "M6",
+        "step": "Drag a menu past the right edge of the screen and release; then drag again and press Esc while a command draft is open.",
+        "machine_proven": "FloatOutside adds the OutsideMainWindow note plus recovery; a lost pointer cancels; Escape cancels and does not fall through to the command controller.",
+        "human_must_verify": "The menu lands inside the window with the warning 'cannot float outside the main window', and Esc cancels the drag while the typed draft stays in the command box.",
+        "reviewer_decision": "PASS"
+      }
+    ],
+    "reviewer_statement": "test roi okie nha"
+  },
+  "design_review": {
+    "verdict": "CHANGES_REQUESTED",
+    "note": "The design review asks for changes (6 MEDIUM, 8 NIT). Four are answered in code and evidence (MEDIUM 4, MEDIUM 5, NIT 7, NIT 9) and three more by the recorded evidence (NIT 11, NIT 13, NIT 14); the rest are design-document or other-item edits. See OM9-L4-01-01-003-05.design-review-response.md.",
+    "findings": [
+      {
+        "severity": "MEDIUM",
+        "id": 1,
+        "title": "Baseline already stale; L3-002 measurements now exist and settle Layers visibility that the design still calls unmeasured (and §9 contradicts)",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "MEDIUM",
+        "id": 2,
+        "title": "Steering/screenshot 'two-line Command box' (~30 px capture, ~42 pt) not reconciled with the 3-row rule (C ≈ 56)",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "MEDIUM",
+        "id": 3,
+        "title": "§12 and the re-grep miss L3-003's own C-dependent fixtures, stale env/receipt keys and the in-crate drop-zone tests",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "MEDIUM",
+        "id": 4,
+        "title": "Source-scan test has no defined banned token set or allowlist; existing legitimate dock mutations would fail it or make it vacuous",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "MEDIUM",
+        "id": 5,
+        "title": "New CMD-history appends from panel ops re-open the proven stale-cursor keystroke drop (Transcript::append_history vs protected_chars)",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "MEDIUM",
+        "id": 6,
+        "title": "Command outer/inner sync made conditional though the code fixes drift at 6 pt; row metric has no epsilon and is a proxy",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "NIT",
+        "id": 7,
+        "title": "Builders close box shows a roll-up/move refusal text",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "NIT",
+        "id": 8,
+        "title": "DocSnapshot.workspace type is a placeholder",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "NIT",
+        "id": 9,
+        "title": "Narrow band (full window height) and drop zone (views only) cover different y-ranges without saying so",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "NIT",
+        "id": 10,
+        "title": "A1 records the 300 value but not the DPI-only scaling rule as the assumption",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "NIT",
+        "id": 11,
+        "title": "Visible differences from the capture (A7-A9, A11) should be listed in the final report",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "NIT",
+        "id": 12,
+        "title": "A saved CommandLine.size 90 keeps about four history rows",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "NIT",
+        "id": 13,
+        "title": "PNG paths may not match the FEAT-003 validator output layout (default/ subfolder)",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      },
+      {
+        "severity": "NIT",
+        "id": 14,
+        "title": "'Test host display is 1440x900' stated as a constant",
+        "status": "OPEN - design review verdict is CHANGES_REQUESTED; needs a decision before acceptance"
+      }
+    ],
+    "status": {
+      "answered_in_code_and_evidence": [
+        "MEDIUM 4",
+        "MEDIUM 5",
+        "NIT 7",
+        "NIT 9"
+      ],
+      "answered_by_recorded_evidence": [
+        "NIT 11",
+        "NIT 13",
+        "NIT 14"
+      ],
+      "design_document_or_other_item": [
+        "MEDIUM 1",
+        "MEDIUM 2",
+        "MEDIUM 6",
+        "NIT 8",
+        "NIT 10",
+        "NIT 12"
+      ],
+      "partly_answered": [
+        "MEDIUM 3"
+      ],
+      "decision_aid": "OM9-L4-01-01-003-05.design-review-response.md"
+    }
+  },
+  "gate": {
+    "m01_ui": "L3-003 scope ACCEPTED BY HUMAN REVIEW on 2026-10-16; whole-module M01-UI still OPEN",
+    "m01_ui_l3_003_scope": "SIGNED_BY_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  },
+  "open_before_signature": [
+    "CLOSED 2026-10-16: the owner ran the six manual items and confirmed them.",
+    "Still open and NOT part of this signature: the L3-003 design review is CHANGES_REQUESTED (6 MEDIUM, 8 NIT). Four are answered in code (MEDIUM 4, MEDIUM 5, NIT 7, NIT 9), three by recorded evidence (NIT 11, NIT 13, NIT 14), one partly (MEDIUM 3); the rest are design-document or other-item edits. See OM9-L4-01-01-003-05.design-review-response.md."
+  ],
+  "real_window_evidence": {
+    "tool": "tools/validate_m01_l3_003_panels.py",
+    "scenario_env": "OM9_UI_AUDIT_PANELS=reorder|float|dock-right|escape",
+    "summary": "OM9-L4-01-01-003-05.real-window-panels.json",
+    "what_it_proves": [
+      "the preview a pressed drag shows is the operation the release applies (reorder: Place{left,2} + a 3 px line at the DISPLAY bar top; dock-right: Place{right,0} + the 48 px strip at x=1552)",
+      "a real drop into a viewport floats the menu and keeps its home (float-drop: floating=[display], home={left,2}, left order loses display)",
+      "the roll-up round trip in a real window: 'Projects rolled up' then 'Projects expanded' with the documented order unchanged",
+      "a rectangle the real window reports is read back and repaired with the warning 'Display was moved back inside the window' (readback-recover)",
+      "Escape cancels a real drag: layout unchanged, status Info 'Display drag cancelled (Esc)'",
+      "the work area the application used is [8, 29, 1584, 943] at 1600x1000, as the fixture records",
+      "no menu drag touched document entities or the undo journal"
+    ],
+    "limitations": [
+      "the X of the floating window is not scripted (a 16 px target): closing it is p7 plus the owner's item M3",
+      "the window keeps its audit size, so the repair comes from the rectangle the real window reports; the shrinking-window case is the owner's item M5"
+    ],
+    "screenshots": [
+      {
+        "scenario": "reorder",
+        "path": "screenshots/reorder.png",
+        "sha256": "5069cb5cf0831898942a542eff2660bcc2ad5c58388c768b70c5d945596a9d28",
+        "passed": true
+      },
+      {
+        "scenario": "float",
+        "path": "screenshots/float.png",
+        "sha256": "78e3813659ca925bac6225adf0dea34d5528453167b6f98dab5a7c54a6ccbfa9",
+        "passed": true
+      },
+      {
+        "scenario": "dock-right",
+        "path": "screenshots/dock-right.png",
+        "sha256": "0f841d39873cda1f2586a962b28c3c87ed9c548af4bb2602e4f55e3992c3222e",
+        "passed": true
+      },
+      {
+        "scenario": "escape",
+        "path": "screenshots/escape.png",
+        "sha256": "9c682edbd88f88acb778adcbfed897077e1a44ff6c90c52ade9cf1a6dc75eca7",
+        "passed": true
+      },
+      {
+        "scenario": "roll-up",
+        "path": "screenshots/roll-up.png",
+        "sha256": "51f4f344b420f39679979b2191975b8fb90bb24599d7be0603bbaad4a883e9a6",
+        "passed": true
+      },
+      {
+        "scenario": "float-drop",
+        "path": "screenshots/float-drop.png",
+        "sha256": "9ffb6264efb0e0aa1999d4a32017678cf58bf3497c72d45b6ebc9f085ec541dc",
+        "passed": true
+      },
+      {
+        "scenario": "readback-recover",
+        "path": "screenshots/readback-recover.png",
+        "sha256": "4e07c4ea76ae92451733c183917118b02dec28b1547ce91b5951d4b47ec7c427",
+        "passed": true
+      }
+    ],
+    "receipt_sha256": [
+      {
+        "scenario": "reorder",
+        "sha256": "593c39c07f1042fd70a45caf875c14c0db3793f43ce6af979890aea155411fc2"
+      },
+      {
+        "scenario": "float",
+        "sha256": "17f12dbd56a6721507d8d00bd11e05a8cd9bd08d3b1ce7838a07cd33eab33e98"
+      },
+      {
+        "scenario": "dock-right",
+        "sha256": "ecb5c80c75c9e68b3a24103492724eb00b28afeba40e04a9c39105c9d6845383"
+      },
+      {
+        "scenario": "escape",
+        "sha256": "f2a4801df5a48ebb20969b90ee8064f20cab0c31b69f4e2f09ed1e99d4b93690"
+      },
+      {
+        "scenario": "roll-up",
+        "sha256": "cd7e84d4518771045294e52698e5a3c253a2a1fa65058433e50dda41d0351b11"
+      },
+      {
+        "scenario": "float-drop",
+        "sha256": "956de43ec933f1e9b2a183232fd715cab9deb6e20f6807e01832dc6adb8d8201"
+      },
+      {
+        "scenario": "readback-recover",
+        "sha256": "bfdaf27ad9b0f32de510330ec28ebd4a9b8b8ae26f6c72f34ffa83f1acb1d86d"
+      }
+    ]
+  }
+}

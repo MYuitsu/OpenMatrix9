@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-006-01",
+  "l3_id": "OM9-L3-01-03-006",
+  "l3_title": "Layer Selection Visibility Rules",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "hide/lock rules as input to selection and display",
+  "positive_oracle": "Layer ẩn thì không vẽ/không pick; layer khoá vẫn vẽ nhưng không sửa.",
+  "negative_oracle": "Mọi ghi vào đối tượng thuộc layer khoá bị từ chối, tài liệu không đổi.",
+  "reuse_decision": "REUSE",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "symbols": [
+        "Permissions",
+        "Document::layer_permissions",
+        "Document::permissions",
+        "Document::permissions_for_entity"
+      ],
+      "decision": "REUSE"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/model.rs (Document::layer_permissions, permissions_for_entity)",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_006 -> 2 passed"
+  ],
+  "notes": "REUSE the existing permission chain; prove it with the locked/hidden cases"
+}

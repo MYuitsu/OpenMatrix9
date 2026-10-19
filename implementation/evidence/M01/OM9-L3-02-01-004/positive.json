@@ -1,0 +1,71 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-004",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "plane",
+      "call": "classify_surface(plane)",
+      "expect": {
+        "domain": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "periodic": [
+          false,
+          false
+        ],
+        "seam": [
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "id": "closed-cylinder",
+      "call": "classify_surface(cylinder)",
+      "expect": {
+        "periodic": [
+          false,
+          false
+        ],
+        "seam": [
+          0.0,
+          null
+        ]
+      }
+    },
+    {
+      "id": "periodic-u",
+      "call": "unclamped U knots + periodic [true,false]",
+      "expect": {
+        "periodic": [
+          true,
+          false
+        ],
+        "seam": [
+          0.25,
+          null
+        ],
+        "domain": [
+          [
+            0.25,
+            1.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    }
+  ]
+}

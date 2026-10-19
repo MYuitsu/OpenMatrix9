@@ -1,0 +1,45 @@
+# OM9-L2-01-03 focused verification
+# utc: 2026-10-17T01:04:56Z
+
+# command: cargo test -p om9-core --test document_graph l3_008
+# exit: 0
+
+warning: variable does not need to be mutable
+   --> crates\om9-core\tests\document_graph.rs:868:10
+    |
+868 |     let (mut c, d, a, _b) = grouped_coordinator();
+    |          ----^
+    |          |
+    |          help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-core` (test "document_graph") generated 1 warning (run `cargo fix --test "document_graph" -p om9-core` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\document_graph.rs (L:\om9-target\debug\deps\document_graph-b1a683feb2892502.exe)
+
+running 5 tests
+test l3_008_nested_cycles_are_refused_by_document_validation ... ok
+test l3_008_a_self_referencing_definition_is_refused_without_a_partial_write ... ok
+test l3_008_a_definition_insert_is_admitted_on_a_layerless_document ... ok
+test l3_008_one_undo_removes_the_definition_and_all_of_its_occurrences ... ok
+test l3_008_two_instances_share_one_definition_without_cloning_topology ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 25 filtered out; finished in 0.00s
+
+
+# command: cargo test -p om9-scene --test shared_instances
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\shared_instances.rs (L:\om9-target\debug\deps\shared_instances-a4f8678796eae070.exe)
+
+running 4 tests
+test shared_definition_captures_both_occurrences_without_duplicating_members_as_roots ... ok
+test one_definition_insert_and_one_undo_remove_definition_both_occurrences_and_their_objects ... ok
+test each_occurrence_picks_its_own_root_and_reports_the_definition_member_path ... ok
+test occurrence_placements_are_independent_and_member_transform_equals_the_placement ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+

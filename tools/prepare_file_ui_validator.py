@@ -15,7 +15,7 @@ replacements={
     'Task1 File lifecycle service is wired to controller APIs only; File menu/CMD/picker UI is not enabled or accepted.':'Common native OM9 menu/CMD/F6/toolbar and owned prompts connected; native path selection/overwrite success is not measured.',
     'Cold fixtures validate controller Save/New/Open/SaveAs and archive state; interactive native picker/save/open, complete view/material persistence and .3dm remain pending.':'Actual widgets and three real Windows picker cancellations are distinct from scripted path delivery. Real OS selection/save/reopen, duplicate overwrite prompt UX, native backend error diagnostics, complete view/material persistence and .3dm remain pending.',
     '"native_checks": [10, 13, 6]':'"native_checks": [8, 10, 13, 6]',
-    'ROOT / "standalone/native/CMakeLists.txt", ROOT / "rust/src/layers.rs"':'ROOT / "standalone/native/CMakeLists.txt", ROOT / "rust/src/layers.rs", ROOT / "Resources/licenses/rfd-0.17.2.txt"',
+    'ROOT / "native/CMakeLists.txt", ROOT / "rust/src/layers.rs"':'ROOT / "native/CMakeLists.txt", ROOT / "rust/src/layers.rs", ROOT / "Resources/licenses/rfd-0.17.2.txt"',
 }
 for old,new in replacements.items():
     assert old in s,old

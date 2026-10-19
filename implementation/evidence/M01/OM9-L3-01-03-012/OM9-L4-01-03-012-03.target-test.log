@@ -1,0 +1,32 @@
+# OM9-L2-01-03 focused verification
+# utc: 2026-10-17T01:04:56Z
+
+# command: cargo test -p om9-archive --test document_snapshot
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\document_snapshot.rs (L:\om9-target\debug\deps\document_snapshot-92fc3b1643300685.exe)
+
+running 4 tests
+test an_unknown_snapshot_version_is_refused_without_migration ... ok
+test restoring_another_documents_snapshot_is_refused_atomically ... ok
+test snapshot_restore_reproduces_ids_and_geometry_bits ... ok
+test a_tampered_snapshot_is_refused ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+# command: cargo test -p om9-app --test document_contract l3_012
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+     Running tests\document_contract.rs (L:\om9-target\debug\deps\document_contract-b700f62a9f572b35.exe)
+
+running 3 tests
+test l3_012_another_documents_snapshot_is_refused_without_changing_the_controller ... ok
+test l3_012_a_restore_inside_a_running_command_is_busy ... ok
+test l3_012_snapshot_restore_rebuilds_the_document_and_resets_undo ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+

@@ -189,5 +189,21 @@
       "id": "OM9-L4-01-03-006-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-006 - Layer Selection Visibility Rules/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Imported layer visibility/locked flags remain effective.",
+    "evidence": [
+      "implementation/design/M01/THREE-DM-HOST-ADAPTER.md",
+      "implementation/evidence/M01/2026-10-19-three-dm-native-host-checks.json",
+      "crates/om9-app/tests/three_dm_curve_roundtrip.rs",
+      "crates/om9-app/tests/three_dm_brep_roundtrip.rs",
+      "crates/om9-app/tests/three_dm_native_roundtrip.rs",
+      "native/native_exchange.cpp"
+    ],
+    "human_approval": null,
+    "remaining": []
+  }
 }

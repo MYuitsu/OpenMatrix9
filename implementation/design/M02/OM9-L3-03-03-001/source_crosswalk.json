@@ -1,0 +1,142 @@
+{
+  "schema": "om9.l4.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-03-001-01",
+  "l3_id": "OM9-L3-03-03-001",
+  "owner_l2_id": "OM9-L2-03-03",
+  "role": "SOURCE_AUDIT",
+  "purpose": "add/remove selection with Matrix shortcuts",
+  "pinned_qymcad_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "local_qymcad_revision": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "revision_state": "REFERENCE_ONLY",
+  "revision_note": "The pinned QymCAD revision is not checked out; because QymCAD is the third-tier reference this does not block the L4. The inventory below is from the local checkout and is used only as Rust guidance.",
+  "source_anchors": [
+    {
+      "path": "crates/qymcad-ui-state/src/selection.rs",
+      "symbol": "pub enum Sel",
+      "line": 6,
+      "local_evidence": "Sel variants Mesh(usize), Face(mesh, face), Contour, Sketch, Plane, DatumPoint, DatumAxis, Feature, Component, Mate",
+      "decision": "ADAPT",
+      "om9_counterpart": "BTreeSet<ObjectId> selection + Subelement keys (crates/om9-app/src/session/layers.rs, crates/om9-scene/src/scene.rs)"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/gizmos.rs",
+      "symbol": "fn op_target_body",
+      "line": 12,
+      "local_evidence": "maps a Sel to the body id a gumball/gizmo operation targets",
+      "decision": "ADAPT",
+      "om9_counterpart": "Controller::gumball_targets (crates/om9-app/src/session/gumball.rs)"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/gizmos.rs",
+      "symbol": "fn body_giz_readout",
+      "line": 151,
+      "local_evidence": "formats the gizmo readout text for the selected body",
+      "decision": "ADAPT",
+      "om9_counterpart": "gumball status text in crates/om9-app/src/ui.rs"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "symbol": "modifier handling",
+      "line": 1432,
+      "local_evidence": "egui modifiers are read for keyboard shortcuts (command+S, shift combos), not for a click-to-select mapping at this site",
+      "decision": "ADD",
+      "om9_counterpart": "crates/om9-app/src/ui.rs click branch (ctrl_or_command + select_root/add_objects/toggle_selection)"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "symbol": "Sel::None clearing",
+      "line": 738,
+      "local_evidence": "selection is cleared by assigning Sel::None at several command boundaries",
+      "decision": "ADAPT",
+      "om9_counterpart": "Controller::clear_selection / select_root(None)"
+    }
+  ],
+  "om9_implementation": {
+    "plain_click": "crates/om9-app/src/ui.rs:1889 select_root(picked, shift) with shift=false -> replace",
+    "shift_click": "crates/om9-app/src/ui.rs:1889 select_root(picked, true) -> ADD ONLY (crates/om9-app/src/session/layers.rs:399)",
+    "ctrl_click": "crates/om9-app/src/ui.rs:1888 toggle_selection for (Some(id), true) (crates/om9-app/src/session/layers.rs:303)",
+    "ctrl_shift_click": "crates/om9-app/src/ui.rs:1839 subobject pick (face/edge/vertex)",
+    "empty_click": "select_root(None, false) clears the selection",
+    "locked_or_hidden": "select_root/select_objects/toggle_selection require object.selectable, which permissions derive as visible && selectable && !locked (crates/om9-core/src/model.rs:540)"
+  },
+  "oracle": {
+    "positive": "Shift click them, Ctrl click toggle selection, plain click replace theo mapping đã chốt",
+    "positive_status": "PASS",
+    "positive_evidence": "crates/om9-app/tests/acceptance_viewport_selection.rs::shift_click_adds_and_keeps_an_already_selected_object + crates/om9-app/tests/acceptance_selection_set.rs",
+    "negative": "Click đối tượng locked không tạo ID vào selection",
+    "negative_status": "PASS",
+    "negative_evidence": "crates/om9-app/tests/acceptance_selection_set.rs::a_locked_or_hidden_object_is_refused_and_not_stored"
+  },
+  "files_sha256": {
+    "crates\\om9-app\\src\\session\\layers.rs": "587b2fbced725dca491bd7f9b7d17e93572f0d70b32c072e1c933dd1b36801eb",
+    "crates\\om9-app\\src\\ui.rs": "b1ca38087afa59816e33d60132352d3ae9901c27a3ef85a892c362831ef0023f"
+  },
+  "generated": "2026-10-19T09:23:34+07:00",
+  "status": "PASS_ORACLE_MEASURED",
+  "status_reason": "Documentation oracle (Rhino 5 p33-35, highest authority) is implemented and measured: Shift adds, Ctrl toggles, plain click replaces, locked/hidden never enter the selection. Matrix9 decompiled references confirm the replace-or-add facade. QymCAD is reference-only.",
+  "authority_order": [
+    "matrix9_rhino5_documentation",
+    "matrix9_decompiled_reference",
+    "qymcad_rust_reference"
+  ],
+  "authority_note": "User direction 2026-10-19: Matrix9/Rhino5 documentation is the highest authority, then the decompiled Matrix9 reference, and QymCAD is only a Rust reference to consult and change when it does not fit. The QymCAD pin is therefore NOT a completion gate for this L4.",
+  "documentation_oracle": [
+    {
+      "source": "ref/rhino5 (Rhino 5 User Guide) p33-34, text rhino5__p33-34__selecting-objects.md",
+      "rule": "Click selects one object; \"Hold the Shift key while clicking the objects\" adds; \"Hold the Ctrl key and click the objects again\" removes; \"Click away from the objects or press the Esc key\" cancels.",
+      "om9_behaviour": "ui.rs click branch: plain -> select_root(replace), Shift -> select_root(add), Ctrl -> toggle_selection, empty -> clear, Esc -> clear_selection",
+      "status": "PASS"
+    },
+    {
+      "source": "ref/rhino5 p34-35, text rhino5__p34-35__select-objects-with.md",
+      "rule": "Window (left to right) takes only objects completely enclosed; crossing (right to left) also takes objects the window crosses; Shift adds and Ctrl removes with window/crossing.",
+      "om9_behaviour": "ui.rs objects_in_band(window) + add_objects/remove_objects; clipped objects are excluded from window",
+      "status": "PASS"
+    }
+  ],
+  "matrix9_reference": [
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "SelectObject(strObject, bolUnselectall)",
+      "line": 1690,
+      "reading": "one object plus an explicit unselect-all flag, i.e. replace-or-add semantics"
+    },
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "SelectObjects(arrObjects, bolUnselectall)",
+      "line": 1873,
+      "reading": "same flag for a set (window/crossing result)"
+    },
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "SelectedObjects(arg_C)",
+      "line": 1351,
+      "reading": "the facade returns the current selection for commands"
+    },
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "UnSelectObject(arrObjects) / UnSelectObjects(arrObjects)",
+      "line": 2212,
+      "reading": "explicit removal path used by Ctrl-style remove"
+    },
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "UnselectAllObjects()",
+      "line": 1210,
+      "reading": "clearing path used by click-away/Esc"
+    },
+    {
+      "path": "ref/matrix/decompiled-ui/Matrix/SmartTargets/MSR/MSRMouseCallBack.cs",
+      "symbol": "Control.ModifierKeys == Keys.Control",
+      "line": 48,
+      "reading": "Matrix9 reads Ctrl during SmartTargets picking to change selection behaviour; confirms modifier-driven picking in the product"
+    },
+    {
+      "path": "ref/matrix/decompiled-ui/Matrix/SmartTargets/MSR/MSRCommand.cs",
+      "symbol": "Control.ModifierKeys == Keys.Control",
+      "line": 88,
+      "reading": "same Ctrl check on the command side"
+    }
+  ],
+  "qymcad_reference_state": "REFERENCE_ONLY_NOT_A_GATE"
+}

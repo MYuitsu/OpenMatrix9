@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-005",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "trim-record",
+      "call": "TrimmedSurface(plane, outer 4 pts, inner 3 pts)",
+      "expect": {
+        "is_trimmed": true,
+        "underlying.domain": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "entity-kind",
+      "call": "entity with Geometry::Surface + om9.trim.surface",
+      "expect": {
+        "kind": "TrimmedSurface"
+      }
+    },
+    {
+      "id": "save-open",
+      "call": "Archive::save/open",
+      "expect": {
+        "trim record equal": true,
+        "kind": "TrimmedSurface"
+      }
+    }
+  ]
+}

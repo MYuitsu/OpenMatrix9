@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-006",
+  "l4": "OM9-L4-01-02-006-02",
+  "case": "atomic-command-transactions-negative",
+  "negative_oracle": "Mid-operation failure rolls back every change and preserves undo journal",
+  "cases": [
+    {
+      "id": "U1-a-refused-command-writes-nothing",
+      "action": "zero-length line",
+      "expect": {
+        "entities_unchanged": true,
+        "undo_unchanged": true,
+        "phase": "AwaitEnd"
+      }
+    },
+    {
+      "id": "U2-a-second-command-while-one-runs-writes-nothing",
+      "action": "dispatch POINT during LINE",
+      "expect": {
+        "error": "Busy",
+        "entities_unchanged": true,
+        "undo_unchanged": true
+      }
+    },
+    {
+      "id": "U3-a-cancelled-command-writes-nothing",
+      "action": "Escape after the first point",
+      "expect": {
+        "entities_unchanged": true,
+        "undo_unchanged": true,
+        "phase": "Idle"
+      }
+    },
+    {
+      "id": "U4-a-stale-session-writes-nothing",
+      "action": "switch the active view after the first point, then click",
+      "expect": {
+        "refused": true,
+        "entities_unchanged": true,
+        "undo_unchanged": true
+      }
+    }
+  ]
+}

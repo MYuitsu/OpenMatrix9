@@ -1,9 +1,11 @@
 # OM9_Milestones — ánh xạ tên thư mục sau khi rút ngắn đường dẫn
 
-- Tạo: 2026-10-16T03:52:29Z | ngân sách: mọi đường dẫn ≤ **210** ký tự.
+- Tạo: 2026-10-16T05:16:01Z | ngân sách: mọi đường dẫn ≤ **210** ký tự.
 - Lý do: giới hạn MAX_PATH 260 của Windows khi cây bị sao chép vào tiền tố dài hơn (staging `build/...`, worktree agent, thư mục tạm).
 - **Không mất thông tin:** tiêu đề đầy đủ của mỗi cấp vẫn nằm trong `L1.json`, `L2.json`, `l3.json`, `l4.json` tương ứng; bảng dưới chỉ là ánh xạ tên thư mục.
-- `M03 - Curve, Surface, Solid and 3DM Exchange` chua doi duoc trong phien nay (thu muc bi giu handle); ten du kien: `M03 - Geometry 3DM`. Hoan tat sau: `python implementation/tools/om9_shorten_milestone_paths.py --finish-module "M03 - Curve, Surface, Solid and 3DM Exchange=M03 - Geometry 3DM"`.
+- Ten module con lai da doi ben ngoai tool; dung `python implementation/tools/om9_shorten_milestone_paths.py --finalize` de dong bo lai.
+- Ten module con lai da doi ben ngoai tool; dung `python implementation/tools/om9_shorten_milestone_paths.py --finalize` de dong bo lai.
+- Ten module con lai da doi ben ngoai tool; dung `python implementation/tools/om9_shorten_milestone_paths.py --finalize` de dong bo lai.
 
 ## Thư mục module
 
@@ -12,7 +14,7 @@
 | `M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment` | `M00 - Feasibility, Legal` | đã đổi |
 | `M01 - CAD Shell, OCCT Bridge, Document, Undo, GPU and Viewport Foundation` | `M01 - CAD Shell, Viewport` | đã đổi |
 | `M02 - Viewport Picking, Snapping, Navigation, Gumball and Matrix Interaction` | `M02 - Viewport, Gumball` | đã đổi |
-| `M03 - Curve, Surface, Solid and 3DM Exchange` | `M03 - Curve, Surface, Solid and 3DM Exchange` | giữ nguyên |
+| `M03 - Curve, Surface, Solid and 3DM Exchange` | `M03 - Geometry 3DM` | đã đổi |
 | `M04 - Builder, History and Ring` | `M04 - Builder and History` | đã đổi |
 | `M07 - Cutters and Manufacturing Validation` | `M07 - Cutters` | đã đổi |
 | `M08 - Advanced Jewelry Modeling` | `M08 - Jewelry Modeling` | đã đổi |

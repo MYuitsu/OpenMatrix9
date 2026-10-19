@@ -1,0 +1,36 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-02-02",
+  "cases": [
+    {
+      "id": "M00-FX-02-02-POS-01",
+      "call": "handle_refcount",
+      "expected": {
+        "before": 1,
+        "while_copied": 2,
+        "after_nullify": 1
+      }
+    },
+    {
+      "id": "M00-FX-02-02-POS-02",
+      "call": "create_destroy",
+      "input": {
+        "cycles": 10000
+      },
+      "expected": {
+        "growth_mb_max": 8.0
+      }
+    },
+    {
+      "id": "M00-FX-02-02-POS-03",
+      "call": "serialized_box_volume",
+      "input": {
+        "threads": 4,
+        "calls_each": 250
+      },
+      "expected": {
+        "failures": 0
+      }
+    }
+  ]
+}

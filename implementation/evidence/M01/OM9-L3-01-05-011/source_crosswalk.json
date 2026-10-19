@@ -1,0 +1,35 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-05-011",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-05-011-01",
+      "capability": "Reference shape fixture evaluation",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-011/",
+      "test": "the_reference_fixtures_match_their_analytic_values"
+    },
+    {
+      "l4": "OM9-L4-01-05-011-02",
+      "capability": "Reference shape fixture evaluation",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-011/",
+      "test": "the_reference_fixtures_match_their_analytic_values"
+    },
+    {
+      "l4": "OM9-L4-01-05-011-03",
+      "capability": "Reference shape fixture evaluation",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-011/",
+      "test": "the_reference_fixtures_match_their_analytic_values"
+    },
+    {
+      "l4": "OM9-L4-01-05-011-05",
+      "capability": "Reference shape fixture evaluation",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-011/",
+      "test": "the_reference_fixtures_match_their_analytic_values"
+    }
+  ],
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  }
+}

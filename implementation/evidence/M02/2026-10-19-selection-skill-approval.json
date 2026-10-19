@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-19T01:20:00.606427+00:00",
+  "scope": "approved BRep selection rule saved to openmatrix9-ui",
+  "approval": {
+    "source": "direct user reply to proposed skill text",
+    "answer": "Có, lưu quy tắc này vào skill",
+    "authorizes": "Persist the proposed selection rule; does not sign off M02-UI acceptance"
+  },
+  "rule": "Pick BRep retains root, complete member path, UUID face/edge/vertex and SourceStamp/publication; never treats tessellation diagonals as BRep edges; new publication and Undo cannot revive old picks.",
+  "files": [
+    "H:\\OpenMatrix9\\skills\\openmatrix9-ui\\SKILL.md",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-ui\\SKILL.md"
+  ],
+  "sha256": "2fec9d63d9394877b89fe10ccd801594e31bbd8d69af2360f218193e71fb1448",
+  "validation": {
+    "source_and_installed_bytes_equal": true,
+    "relative_links_valid": 6,
+    "implementation_evidence_exists": true,
+    "quick_validate_source": "pass",
+    "quick_validate_installed": "pass",
+    "diff_check": "pass",
+    "public_source_audit_exit_code": 1,
+    "public_source_audit_existing_findings": 11735,
+    "public_source_audit_log": "build/m02-selection-skill-approval/public-source-audit.log",
+    "public_source_audit_log_sha256": "22b049eb061f79f70f12b0bdf02a6975a1135e0281922b034703e6596c0f3b6b"
+  },
+  "runtime_code_changed": false,
+  "human_ui_approval": null
+}

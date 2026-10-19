@@ -1,0 +1,26 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-012",
+  "l4": "OM9-L4-01-03-012-02",
+  "title": "Document Snapshot And Restore",
+  "case": "om9-l3-01-03-012-positive",
+  "runtime_tests": "om9-app/tests/document_contract.rs::l3_012_snapshot_restore_rebuilds_the_document_and_resets_undo|l3_012_another_documents_snapshot_is_refused_without_changing_the_controller|l3_012_a_restore_inside_a_running_command_is_busy; om9-archive/tests/document_snapshot.rs",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "id": "snapshot-restore",
+      "expect": {
+        "undo_len": 0,
+        "line_domain_end_bits": "12f64.hypot(6.).to_bits()",
+        "ids_as_captured": true,
+        "B_absent": true
+      },
+      "steps": [
+        "Point A, Line L, layer Metals",
+        "capture_snapshot",
+        "add Point B",
+        "restore_snapshot"
+      ]
+    }
+  ]
+}

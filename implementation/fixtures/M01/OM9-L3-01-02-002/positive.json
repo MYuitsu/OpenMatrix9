@@ -1,0 +1,61 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-002",
+  "l4": "OM9-L4-01-02-002-02",
+  "case": "typed-command-descriptor-positive",
+  "positive_oracle": "Descriptor declares typed inputs/options/output and is serializable/deterministic",
+  "operation": {
+    "id": "line",
+    "feature": "OM9-FEAT-001",
+    "aliases": ["Line"],
+    "prompt": "Start of line (BothSides=No): ",
+    "input_types": ["Point", "Point"],
+    "requires_input": true,
+    "output": ["Curve"],
+    "options": ["BothSides", "Length"],
+    "preconditions": { "needs_document": true, "needs_selection": false, "needs_active_view": true },
+    "backend": "rust",
+    "prepare": true,
+    "preview": true,
+    "commit": true
+  },
+  "cases": [
+    {
+      "id": "D1-the-descriptor-declares-its-signature",
+      "expect": {
+        "input_types": ["Point", "Point"],
+        "output": ["Curve"],
+        "prompt": "Start of line (BothSides=No): ",
+        "options": ["BothSides", "Length"],
+        "requires_input": true
+      }
+    },
+    {
+      "id": "D2-a-declared-option-resolves-ignoring-case",
+      "lookup": ["bothsides", "LENGTH", "  Length  "],
+      "expect": { "declared": ["BothSides", "Length", "Length"] }
+    },
+    {
+      "id": "D3-the-descriptor-round-trips-through-json",
+      "expect": { "equal_after_round_trip": true }
+    },
+    {
+      "id": "D4-the-descriptor-is-deterministic",
+      "expect": { "equal_across_10_serializations": true }
+    },
+    {
+      "id": "D5-an-option-less-command-is-still-a-descriptor",
+      "second": {
+        "id": "fit",
+        "feature": "OM9-FEAT-900",
+        "prompt": "Select the view to fit: ",
+        "input_types": [],
+        "requires_input": false,
+        "output": [],
+        "options": [],
+        "backend": "rust"
+      },
+      "expect": { "registers": true, "options_empty": true }
+    }
+  ]
+}

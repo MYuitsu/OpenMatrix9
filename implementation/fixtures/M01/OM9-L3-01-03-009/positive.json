@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-009",
+  "l4": "OM9-L4-01-03-009-02",
+  "title": "Jewelry Semantic Extension Record",
+  "case": "om9-l3-01-03-009-positive",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_009_extension_slots_keep_object_identity_and_bump_attributes_only|l3_009_an_unknown_slot_survives_a_json_round_trip|l3_009_a_malformed_extension_payload_is_refused|l3_009_a_bare_slot_name_is_not_a_slot|l3_009_a_locked_source_refuses_the_extension_write|l3_009_clearing_a_slot_removes_it_and_reports_it_as_unknown_when_replaced",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "id": "gem-slot",
+      "expect": {
+        "generation_unchanged": true,
+        "payload_verbatim": true,
+        "object_id_unchanged": true,
+        "attributes_revision_delta": 1
+      },
+      "steps": [
+        "Point A",
+        "Mutation::Extension slot om9.gem Extension::new(1, payload)"
+      ]
+    }
+  ]
+}

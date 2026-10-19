@@ -41,5 +41,7 @@
       "id": "OM9-M00-L3-04-03",
       "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-03 - Import security and transparent/l3.json"
     }
-  ]
+  ],
+  "gate_id": "G00-04",
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
 }

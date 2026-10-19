@@ -1,4 +1,4 @@
 interface:
   display_name: "OpenMatrix9 · VB6 và Ghidra"
   short_description: "Đối chiếu từng hàm native để hiểu hành vi gốc Matrix9"
-  default_prompt: "Dùng $openmatrix9-native-mapping để giải unknown của exact feature specs v2 qua procedure/VA đã chọn, phục vụ Rust OM9 độc lập."
+  default_prompt: "Dùng $openmatrix9-native-mapping để giải unknown của exact feature milestone specs qua procedure/VA đã chọn, phục vụ Rust OM9 độc lập."

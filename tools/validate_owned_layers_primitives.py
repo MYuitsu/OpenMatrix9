@@ -32,7 +32,7 @@ def main():
     scratch=ROOT/"build/standalone-validation"
     scratch.mkdir(parents=True,exist_ok=True)
     for n,args in enumerate(commands):
-        command=["rtk","proxy","cargo","test","--locked","--manifest-path","standalone/Cargo.toml",*args,"--","--nocapture"]
+        command=["rtk","proxy","cargo","test","--locked","--manifest-path","Cargo.toml",*args,"--","--nocapture"]
         result=subprocess.run(command,cwd=ROOT,capture_output=True,timeout=180)
         output=result.stdout.decode("utf-8",errors="strict")+result.stderr.decode("utf-8",errors="replace")
         log=scratch/f"owned-layer-primitives-{n}.log"

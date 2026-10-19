@@ -1,0 +1,134 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+warning: unused variable: `document`
+  --> crates\om9-app\tests\panel_ops.rs:67:15
+   |
+67 | fn float_rect(document: &Value, case: &Value, key: &str) -> FloatRect {
+   |               ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_document`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-app` (test "panel_ops") generated 1 warning (run `cargo fix --test "panel_ops" -p om9-app` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.88s
+     Running tests\panel_ops.rs (target\debug\deps\panel_ops-7f1da5a3b1d8bc7e.exe)
+
+running 20 tests
+test fixture_directory_is_the_expected_one ... ok
+test p2_collapsing_snaps_and_layers_keeps_the_documented_order ... ok
+test n24_floating_an_already_floating_menu_is_refused ... FAILED
+test n26_only_a_column_side_is_a_dock_target ... ok
+test n27_an_unknown_section_key_reports_the_key_back ... FAILED
+test p1_collapse_then_expand_restores_the_exact_state ... ok
+test p6_dock_right_then_left_restores_home_and_roll_up ... FAILED
+test n23_a_floating_menu_is_not_reordered ... FAILED
+test p8_a_user_moved_floating_window_is_readback_not_recovery ... FAILED
+test p5_move_is_one_operation_for_the_api_and_the_button ... FAILED
+test p7_float_records_home_and_close_returns_to_it ... FAILED
+test n15_a_window_below_the_floor_is_refused_without_rewriting_the_layout ... FAILED
+test n25_a_no_op_is_reported_and_never_silent ... FAILED
+test n21_n22_the_reserved_builders_area_refuses_every_operation ... FAILED
+test n28_a_hidden_section_cannot_be_moved_or_floated ... ok
+test n16_an_invalid_window_has_no_work_area ... FAILED
+test p12_docking_back_without_home_lands_below_info_and_settings ... FAILED
+test every_error_leaves_the_serialized_layout_identical ... ok
+test n14_a_window_shrink_recovers_the_floating_menu ... FAILED
+test n12_n13_a_non_finite_readback_is_refused_and_changes_nothing ... FAILED
+
+failures:
+
+---- n24_floating_an_already_floating_menu_is_refused stdout ----
+
+thread 'n24_floating_an_already_floating_menu_is_refused' (37032) panicked at crates\om9-app\tests\panel_ops.rs:578:6:
+float: LayoutBlocked
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- n27_an_unknown_section_key_reports_the_key_back stdout ----
+
+thread 'n27_an_unknown_section_key_reports_the_key_back' (59280) panicked at crates\om9-app\tests\panel_ops.rs:647:5:
+assertion `left == right` failed
+  left: "unknown menu section 'left-dock.legacy'"
+ right: "menu section 'left-dock.legacy' is not recognized"
+
+---- p6_dock_right_then_left_restores_home_and_roll_up stdout ----
+
+thread 'p6_dock_right_then_left_restores_home_and_roll_up' (43220) panicked at crates\om9-app\tests\panel_ops.rs:225:6:
+dock right: LayoutBlocked
+
+---- n23_a_floating_menu_is_not_reordered stdout ----
+
+thread 'n23_a_floating_menu_is_not_reordered' (33388) panicked at crates\om9-app\tests\panel_ops.rs:548:6:
+float: LayoutBlocked
+
+---- p8_a_user_moved_floating_window_is_readback_not_recovery stdout ----
+
+thread 'p8_a_user_moved_floating_window_is_readback_not_recovery' (38032) panicked at crates\om9-app\tests\panel_ops.rs:339:6:
+float: LayoutBlocked
+
+---- p5_move_is_one_operation_for_the_api_and_the_button stdout ----
+
+thread 'p5_move_is_one_operation_for_the_api_and_the_button' (26668) panicked at crates\om9-app\tests\panel_ops.rs:176:6:
+move up: NotDocked { section: Projects }
+
+---- p7_float_records_home_and_close_returns_to_it stdout ----
+
+thread 'p7_float_records_home_and_close_returns_to_it' (43592) panicked at crates\om9-app\tests\panel_ops.rs:283:6:
+float: LayoutBlocked
+
+---- n15_a_window_below_the_floor_is_refused_without_rewriting_the_layout stdout ----
+
+thread 'n15_a_window_below_the_floor_is_refused_without_rewriting_the_layout' (8368) panicked at crates\om9-app\tests\panel_ops.rs:475:5:
+assertion `left == right` failed
+  left: Array [Number(1200), Number(600), Number(300), Number(240)]
+ right: Array [Number(1200.0), Number(600.0), Number(300.0), Number(240.0)]
+
+---- n25_a_no_op_is_reported_and_never_silent stdout ----
+
+thread 'n25_a_no_op_is_reported_and_never_silent' (4024) panicked at crates\om9-app\tests\panel_ops.rs:617:9:
+NotDocked { section: IconHistory }
+
+---- n21_n22_the_reserved_builders_area_refuses_every_operation stdout ----
+
+thread 'n21_n22_the_reserved_builders_area_refuses_every_operation' (28180) panicked at crates\om9-app\tests\panel_ops.rs:524:5:
+assertion `left == right` failed
+  left: 4
+ right: 3
+
+---- n16_an_invalid_window_has_no_work_area stdout ----
+
+thread 'n16_an_invalid_window_has_no_work_area' (17112) panicked at crates\om9-app\tests\panel_ops.rs:493:9:
+window [150.0, 150.0] has no work area
+
+---- p12_docking_back_without_home_lands_below_info_and_settings stdout ----
+
+thread 'p12_docking_back_without_home_lands_below_info_and_settings' (48584) panicked at crates\om9-app\tests\panel_ops.rs:375:6:
+float layers: LayoutBlocked
+
+---- n14_a_window_shrink_recovers_the_floating_menu stdout ----
+
+thread 'n14_a_window_shrink_recovers_the_floating_menu' (28380) panicked at crates\om9-app\tests\panel_ops.rs:451:6:
+float: LayoutBlocked
+
+---- n12_n13_a_non_finite_readback_is_refused_and_changes_nothing stdout ----
+
+thread 'n12_n13_a_non_finite_readback_is_refused_and_changes_nothing' (49356) panicked at crates\om9-app\tests\panel_ops.rs:414:6:
+float: LayoutBlocked
+
+
+failures:
+    n12_n13_a_non_finite_readback_is_refused_and_changes_nothing
+    n14_a_window_shrink_recovers_the_floating_menu
+    n15_a_window_below_the_floor_is_refused_without_rewriting_the_layout
+    n16_an_invalid_window_has_no_work_area
+    n21_n22_the_reserved_builders_area_refuses_every_operation
+    n23_a_floating_menu_is_not_reordered
+    n24_floating_an_already_floating_menu_is_refused
+    n25_a_no_op_is_reported_and_never_silent
+    n27_an_unknown_section_key_reports_the_key_back
+    p12_docking_back_without_home_lands_below_info_and_settings
+    p5_move_is_one_operation_for_the_api_and_the_button
+    p6_dock_right_then_left_restores_home_and_roll_up
+    p7_float_records_home_and_close_returns_to_it
+    p8_a_user_moved_floating_window_is_readback_not_recovery
+
+test result: FAILED. 6 passed; 14 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-app --test panel_ops`

@@ -1,0 +1,25 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.67s
+     Running tests\command_availability.rs (target\debug\deps\command_availability-af0ef476aa1032b9.exe)
+
+running 4 tests
+test a7_admit_accepts_an_option_typed_in_another_case ... ok
+test a1_to_a6_availability_follows_the_session_state ... ok
+test b1_to_b7_a_command_that_cannot_run_is_never_offered ... ok
+test fixture_design_pair_is_present ... FAILED
+
+failures:
+
+---- fixture_design_pair_is_present stdout ----
+
+thread 'fixture_design_pair_is_present' (57368) panicked at crates\om9-core\tests\command_availability.rs:272:5:
+H:\OpenMatrix9\standalone\crates\om9-core\../../../implementation/design/M01/OM9-L3-01-02-011/api.md
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    fixture_design_pair_is_present
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-core --test command_availability`

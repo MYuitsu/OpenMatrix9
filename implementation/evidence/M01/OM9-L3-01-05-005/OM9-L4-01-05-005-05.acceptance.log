@@ -1,0 +1,4 @@
+# OM9-L4-01-05-005-05 — nghiệm thu Face/wire/edge topology access
+# utc: 2026-10-18
+# oracle: box 8/12/6/6; sphere one face and one wire; cylinder three faces and three wires; all valid
+# result: all crate tests pass (see the kernel-test log beside this file)

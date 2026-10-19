@@ -32,5 +32,7 @@
       "id": "OM9-M00-L3-05-02",
       "file": "M00 - Feasibility, Legal/L2-05 - Associative/L3-02 - Regeneration and persistence/l3.json"
     }
-  ]
+  ],
+  "gate_id": "G00-05",
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
 }

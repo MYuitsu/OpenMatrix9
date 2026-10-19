@@ -1,0 +1,82 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-01-005-05",
+  "l3_id": "OM9-L3-01-01-005",
+  "title": "Docking Layout Persistence",
+  "oracle": {
+    "positive": "Persist dock positions and reopen same named panel IDs",
+    "negative": "Removed/unrecognized panel ID ignored with warning not crash"
+  },
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) running the app on Windows",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-app --test dock_layout_persistence -> 4 passed; 2 failed (the store wrote nothing because a model-side change never marked the session dirty; and five repairs in normalize had no diagnostic)",
+    "GREEN: cargo test -p om9-app --test dock_layout_persistence -> 6 passed; 0 failed (S1..S4 positive, M1..M13 negative)",
+    "cargo test -p om9-app --lib: 83 passed; cargo test --workspace: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: L3-002 size matrix 14/14 PASS; L3-003 panel scenarios 7/7 PASS (normalize runs on every load, so both harnesses re-ran)"
+  ],
+  "code_change": [
+    "dock_layout.rs::normalize now reports every repair it makes: a panel size outside its bounds, a menu height outside its bounds, a floating rectangle that is not finite, a floating rectangle below the minimum, and menu orders that were not dense. Its own contract is 'Diagnostics are user-visible warnings, never silent data loss', and the L3 negative oracle asks for an ignored id to be reported with a warning.",
+    "dense_section_orders now returns whether it changed anything, so the renumbering is reported instead of silent.",
+    "No behaviour change to what is stored or restored: the same keys, the same values, the same schema."
+  ],
+  "artefacts": [
+    "OM9-L4-01-01-005-02.red.log",
+    "OM9-L4-01-01-005-02.green.log",
+    "OM9-L4-01-01-005-03.diffstat.txt",
+    "OM9-L4-01-01-005-03.target-test.log",
+    "OM9-L4-01-01-005-05.regression.log"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The unit tests write and read real files; only the owner can confirm the session behaviour of the shipped application.",
+    "items": [
+      {
+        "id": "P1",
+        "step": "Arrange the menus (dock one right, roll one up, reorder, float one, hide one, resize the rail), run View ▸ Matrix Menus ▸ Set as Default, close the app, start it again.",
+        "machine_proven": "S1/S2/S3: the written file reopens byte for byte, with the same named ids, orders, roll-up states, floating rectangle, height, rail width and right column.",
+        "human_must_verify": "The window opens exactly as you left it: same order, same sizes, the floating menu back in the same place, the hidden menu still hidden.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "P2",
+        "step": "Arrange the menus, change them again without running Set as Default, then Reload Menus. Repeat with Set as Default in between.",
+        "machine_proven": "the store is the only writer; reload without a kept file is the documented baseline (S4).",
+        "human_must_verify": "Reload brings back the kept configuration; changes you did not keep are discarded; the status line says which of the two happened.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "P3",
+        "step": "Put a layout file that names a panel the program no longer has (for example key right-dock.project-manager) at the layout path and start the app.",
+        "machine_proven": "M1/M2: an unknown panel or menu id is removed with the warning \"... is not recognized; removed\", and the rest of the file still loads.",
+        "human_must_verify": "The app starts, the finished arrangement is kept for every name it still knows, and the status/history names the id it dropped.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "P4",
+        "step": "Put a layout file with an absurd value in it (rail width 5000, a zero-sized floating rectangle, two menus with the same order) at the layout path and start the app.",
+        "machine_proven": "M4/M5/M8: each repair is clamped or renumbered and reported with a warning; nothing is silently changed.",
+        "human_must_verify": "The app starts with a usable arrangement and the status/history lists what it repaired.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "P5",
+        "step": "Make the layout file unreadable (garbage bytes, or delete it) and start the app.",
+        "machine_proven": "M10/M11/M12: unreadable, empty and oversized files are refused; a missing file is a clean baseline with no warning (S4).",
+        "human_must_verify": "The app always starts: garbage is reported and ignored, a missing file is silent, and no menu is lost.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_ui_l3_005_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

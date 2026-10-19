@@ -4,7 +4,7 @@
   "milestone": "M00",
   "parent_l3_id": "OM9-M00-L3-06-02",
   "owner_l2_id": "OM9-M00-L2-06",
-  "title": "Ký gate legal readiness",
+  "title": "Ký gate legal readiness (human approval required)",
   "planning_state": "NOT_STARTED",
   "task": {
     "task_id": "OM9-M00-L4-06-02-04",
@@ -345,4 +345,5 @@
     "must_not_be_reported_as_implemented": true,
     "reference_note": "the fixture is authored data; upstream code is read, never executed as proof",
     "sketch": "// Ký gate legal readiness\n// ROLE: CONTRACT_TEST - freeze the contract, then write a test that fails first.\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n// Owner: OM9-M00-L2-06\n//\n// 1. Freeze the typed signature and the error enum in the owner crate.\n// 2. Write the fixture harness for implementation/evidence/M00/G00-06/license-gate-decision.json:\n//      input:  Gate G00-06 PASS only with human legal approval and no unclassified critical artifact\n//      expect: Gate G00-06 PASS only with human legal approval and no unclassified critical artifact\n//      negative input: No access to pinned QymCAD source or missing file: BLOCKED_SOURCE\n//      negative expect: typed error with unchanged state\n// 3. Run it: it must fail for the right reason (missing behaviour), not a compile accident.\n// 4. Only then hand the frozen type to the IMPLEMENT task of the same L3.\n\n#[test]\nfn om9_m00_l4_06_02_04_contract_is_red_first() {\n    // Arrange: build the fixture input from authored data, not from the implementation.\n    // Act: call the frozen entry point.\n    // Assert: expected == actual for the positive fixture, and a typed error for the negative one.\n    // Record the failing output as the RED receipt for this task.\n    unimplemented!()\n}"
-  }}
+  }
+}

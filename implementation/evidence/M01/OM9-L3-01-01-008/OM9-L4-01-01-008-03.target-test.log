@@ -1,0 +1,32 @@
+task: OM9-L4-01-01-008-03 (implementation) Builder Panel Docking Slot
+utc: 2026-10-16T13:39:55Z
+cwd: H:\OpenMatrix9\standalone
+
+== RED: cargo test -p om9-app --test builder_slot (truoc khi sua) ==
+xem OM9-L4-01-01-008-02.red.log: 7 passed; 2 failed. Loi san pham: mot tai lieu layout co the dat builder-slot sang phai/float/an/dat order 0, tuc la pha duoc su du tru sau khi mo lai (B6/Y4). Loi thu hai la trong chinh test scan (cua so 3 dong) - da sua test.
+== GREEN: cargo test -p om9-app --test builder_slot ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s
+     Running tests\builder_slot.rs (target\debug\deps\builder_slot-2b1af694614623fc.exe)
+
+running 9 tests
+test b1_the_slot_is_reserved_directly_below_projects ... ok
+test fixture_design_pair_is_present ... ok
+test b6_to_y4_a_layout_file_cannot_break_the_reservation ... ok
+test b5_the_placeholder_is_noninteractive ... ok
+test b2_every_placement_is_refused_and_changes_nothing ... ok
+test y2_y3_y5_the_slot_is_a_placeholder_and_never_a_menu ... ok
+test b3_the_slot_owns_no_model ... ok
+test b4_the_bar_carries_no_close_box_and_starts_no_drag ... ok
+test y1_a_click_on_the_bar_is_refused ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+
+
+exit=0
+== cargo test -p om9-app --lib ==
+
+test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s
+
+
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 0

@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-05-001-01",
+  "l3_id": "OM9-L3-01-05-001",
+  "l3_title": "OCCT FFI Safe Handle Lifecycle",
+  "owner_module_id": "OM9-L2-01-05",
+  "milestone": "M01",
+  "goal": "a kernel object handle is safe: stale handles never resolve, drops are not silent",
+  "positive_oracle": "HandleStore cấp phát slot + generation; get/remove O(1); slot được tái dùng với generation mới.",
+  "negative_oracle": "Handle cũ sau khi xoá là stale (không alias object mới); xoá hai lần trả StaleHandle; store không rò slot.",
+  "legacy_source": [
+    "rust/src/geometry_contract.rs",
+    "rust/src/topology_snapshot.rs",
+    "rust/src/ffi.rs"
+  ],
+  "reuse_decision": "ADAPT",
+  "decision_note": "Không đụng tới UNSAFE: handle là chỉ số thế hệ trong Rust; lớp native sẽ chỉ nhận slot khi OCCT được duyệt.",
+  "method": "Read the legacy OCCT adapter shells and the target crates. The portable adapter half (records, validation, handle lifetime, error contract, policy) is re-implemented in safe Rust; the native kernel boundary is not ported and is refused by name.",
+  "verified_utc": "2026-10-17",
+  "om9_owner": "crates/om9-core/src/brep_kernel.rs (HandleStore)",
+  "runtime_tests": [
+    "cargo test -p om9-core --test brep_kernel"
+  ]
+}

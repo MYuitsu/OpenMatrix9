@@ -1,0 +1,20 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-07-03",
+  "cases": [
+    {
+      "id": "M00-FX-07-03-POS-01",
+      "check": "digests",
+      "expected": {
+        "verified": true
+      }
+    },
+    {
+      "id": "M00-FX-07-03-POS-02",
+      "check": "audit_tree",
+      "expected": {
+        "findings": 0
+      }
+    }
+  ]
+}

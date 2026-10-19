@@ -1,0 +1,33 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.68s
+     Running tests\command_availability.rs (target\debug\deps\command_availability-af0ef476aa1032b9.exe)
+
+running 4 tests
+test a7_to_a8_admit_reads_the_context_and_the_option_names_it_was_given ... FAILED
+test fixture_design_pair_is_present ... FAILED
+test a1_to_a6_availability_follows_the_session_state ... ok
+test b1_to_b7_a_command_that_cannot_run_is_never_offered ... ok
+
+failures:
+
+---- a7_to_a8_admit_reads_the_context_and_the_option_names_it_was_given stdout ----
+
+thread 'a7_to_a8_admit_reads_the_context_and_the_option_names_it_was_given' (42064) panicked at crates\om9-core\tests\command_availability.rs:173:9:
+assertion `left == right` failed: A7-admit-uses-the-session-context-that-was-given: options ["BothSides"] in context ContextState { has_document: true, selection: 2, has_active_view: true }
+  left: false
+ right: true
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- fixture_design_pair_is_present stdout ----
+
+thread 'fixture_design_pair_is_present' (53056) panicked at crates\om9-core\tests\command_availability.rs:268:5:
+H:\OpenMatrix9\standalone\crates\om9-core\../../../implementation/design/M01/OM9-L3-01-02-011/api.md
+
+
+failures:
+    a7_to_a8_admit_reads_the_context_and_the_option_names_it_was_given
+    fixture_design_pair_is_present
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-core --test command_availability`

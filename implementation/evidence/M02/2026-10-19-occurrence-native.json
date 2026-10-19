@@ -1,0 +1,938 @@
+{
+  "module": "OM9-L2-01-07",
+  "date": "2026-10-19",
+  "passed": true,
+  "full_l2_complete": false,
+  "occurrence_runs": 3,
+  "standard_regression_runs": 1,
+  "runs": [
+    {
+      "artifact": "build/standalone-validation/ui-artifacts/m02-occurrences-20261019-gpu-100/m02-report.json",
+      "artifact_sha256": "68ef23561ef31e49a6e2b58509190bd9802078a5de6e7f232a669d4499e8c954",
+      "scenario": "occurrences",
+      "zoom": 1.0,
+      "gpu_requested": true,
+      "exit_code": 0,
+      "binary_sha256": "61d04b858d5535d95a9a46c69adf7aa2bfe033c8b9a8d91acc7127245e036ea6",
+      "source_fingerprint": "989684a4ddbcf6c9d0a5bc6ef8f057757cde74057c3cb44b42bfb49d52c23129",
+      "checks": [
+        {
+          "actual": {
+            "path": [
+              "ceca669f-5ecb-4882-a7a0-2afbbb9eb781",
+              "9308f289-d6b6-4b77-b071-727fa45f31d2"
+            ],
+            "probes": [
+              {
+                "expected_green": true,
+                "screen": [
+                  536.6951293945312,
+                  407.2682800292969
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1190.7496337890625,
+                  345.3795471191406
+                ],
+                "view": "Perspective"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  536.6951293945312,
+                  770.243896484375
+                ],
+                "view": "Through Finger"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1246.231689453125,
+                  770.243896484375
+                ],
+                "view": "Side View"
+              },
+              {
+                "expected_green": false,
+                "screen": [
+                  536.6951293945312,
+                  348.7317199707031
+                ],
+                "view": "unselected sibling"
+              }
+            ],
+            "root": "990cc9f6-e7f1-4683-8a5b-1f73af190713"
+          },
+          "name": "Ctrl+Shift stores the exact nested member path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "ceca669f-5ecb-4882-a7a0-2afbbb9eb781",
+                "9308f289-d6b6-4b77-b071-727fa45f31d2"
+              ],
+              [
+                "780600ae-a6ce-47a8-8904-9becca505fb0",
+                "9308f289-d6b6-4b77-b071-727fa45f31d2"
+              ]
+            ],
+            "undo": 0
+          },
+          "name": "shared leaf face selected twice under two paths",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "780600ae-a6ce-47a8-8904-9becca505fb0",
+                "9308f289-d6b6-4b77-b071-727fa45f31d2"
+              ]
+            ]
+          },
+          "name": "toggling the left path preserves the right path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "objects": 0,
+            "subobjects": 0,
+            "undo": 0
+          },
+          "name": "Escape clears occurrence selection without document history",
+          "pass": true
+        }
+      ],
+      "visual_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            537,
+            407
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1191,
+            345
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Through Finger",
+          "pixel": [
+            537,
+            770
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Side View",
+          "pixel": [
+            1246,
+            770
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "unselected sibling",
+          "pixel": [
+            537,
+            349
+          ],
+          "expected_green": false,
+          "observed_green": false
+        }
+      ],
+      "gpu_scene_views": [
+        "Looking Down",
+        "Perspective",
+        "Side View",
+        "Through Finger"
+      ],
+      "preview_screenshots": {
+        "m02-occurrence.png": "8a9cfefcd5ee8281c78e5372e303abe213eeee420a74da1723df96d7ae663155"
+      },
+      "screenshot_sha256": "30e4819ae58f608ed59d16ac710b44005fb67d686ccbd6ca8235d272f8932b3f"
+    },
+    {
+      "artifact": "build/standalone-validation/ui-artifacts/m02-occurrences-20261019-gpu-150/m02-report.json",
+      "artifact_sha256": "d4202d67bffc02355ae86fc9d8f6f53509a5c261d5254cd83924e57a735a20f4",
+      "scenario": "occurrences",
+      "zoom": 1.5,
+      "gpu_requested": true,
+      "exit_code": 0,
+      "binary_sha256": "61d04b858d5535d95a9a46c69adf7aa2bfe033c8b9a8d91acc7127245e036ea6",
+      "source_fingerprint": "989684a4ddbcf6c9d0a5bc6ef8f057757cde74057c3cb44b42bfb49d52c23129",
+      "checks": [
+        {
+          "actual": {
+            "path": [
+              "82161b0e-52b1-4fed-9373-9023781ec744",
+              "b68fe6cf-61c5-44e8-942e-cf4f99edaf85"
+            ],
+            "probes": [
+              {
+                "expected_green": true,
+                "screen": [
+                  508.9275817871094,
+                  349.95123291015625
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1062.0308837890625,
+                  303.53466796875
+                ],
+                "view": "Perspective"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  508.9275817871094,
+                  622.6829223632812
+                ],
+                "view": "Through Finger"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1103.642578125,
+                  622.6829223632812
+                ],
+                "view": "Side View"
+              },
+              {
+                "expected_green": false,
+                "screen": [
+                  508.9275817871094,
+                  306.04876708984375
+                ],
+                "view": "unselected sibling"
+              }
+            ],
+            "root": "d57fb1be-8ef8-4872-9306-20f253c3293a"
+          },
+          "name": "Ctrl+Shift stores the exact nested member path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "82161b0e-52b1-4fed-9373-9023781ec744",
+                "b68fe6cf-61c5-44e8-942e-cf4f99edaf85"
+              ],
+              [
+                "bf7833ed-906c-4ea1-928e-af537533a77e",
+                "b68fe6cf-61c5-44e8-942e-cf4f99edaf85"
+              ]
+            ],
+            "undo": 0
+          },
+          "name": "shared leaf face selected twice under two paths",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "bf7833ed-906c-4ea1-928e-af537533a77e",
+                "b68fe6cf-61c5-44e8-942e-cf4f99edaf85"
+              ]
+            ]
+          },
+          "name": "toggling the left path preserves the right path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "objects": 0,
+            "subobjects": 0,
+            "undo": 0
+          },
+          "name": "Escape clears occurrence selection without document history",
+          "pass": true
+        }
+      ],
+      "visual_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            763,
+            525
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1593,
+            455
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Through Finger",
+          "pixel": [
+            763,
+            934
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Side View",
+          "pixel": [
+            1655,
+            934
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "unselected sibling",
+          "pixel": [
+            763,
+            459
+          ],
+          "expected_green": false,
+          "observed_green": false
+        }
+      ],
+      "gpu_scene_views": [
+        "Looking Down",
+        "Perspective",
+        "Side View",
+        "Through Finger"
+      ],
+      "preview_screenshots": {
+        "m02-occurrence.png": "3809abd84db6fb87c4f451a2b8f0cbc9a2005972f4a58e3e9a33ef820a73bcdb"
+      },
+      "screenshot_sha256": "24821bd12b6c0df061396bf63ce22ea5f8d2ea1b2c11d94979deab7724c73c0a"
+    },
+    {
+      "artifact": "build/standalone-validation/ui-artifacts/m02-occurrences-20261019-cpu-100/m02-report.json",
+      "artifact_sha256": "150e5175825aed7ef830e687d6cb6db542a9a7b3fdb9cc77522f664eabb01389",
+      "scenario": "occurrences",
+      "zoom": 1.0,
+      "gpu_requested": false,
+      "exit_code": 0,
+      "binary_sha256": "e12aa412765009a16f01d53974e60dd9e07097fad0d18cd9c82fe842294e73bb",
+      "source_fingerprint": "989684a4ddbcf6c9d0a5bc6ef8f057757cde74057c3cb44b42bfb49d52c23129",
+      "checks": [
+        {
+          "actual": {
+            "path": [
+              "951bc5d2-cd24-4469-ba4a-15239217e220",
+              "0ccc6aa5-ebb2-4342-8419-c407b120d380"
+            ],
+            "probes": [
+              {
+                "expected_green": true,
+                "screen": [
+                  536.6951293945312,
+                  407.2682800292969
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1190.7496337890625,
+                  345.3795471191406
+                ],
+                "view": "Perspective"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  536.6951293945312,
+                  770.243896484375
+                ],
+                "view": "Through Finger"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1246.231689453125,
+                  770.243896484375
+                ],
+                "view": "Side View"
+              },
+              {
+                "expected_green": false,
+                "screen": [
+                  536.6951293945312,
+                  348.7317199707031
+                ],
+                "view": "unselected sibling"
+              }
+            ],
+            "root": "3652bca7-02eb-4a9b-9d50-96fc3c959b4d"
+          },
+          "name": "Ctrl+Shift stores the exact nested member path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "951bc5d2-cd24-4469-ba4a-15239217e220",
+                "0ccc6aa5-ebb2-4342-8419-c407b120d380"
+              ],
+              [
+                "7d883f39-fcd5-4eeb-ac1e-495275170532",
+                "0ccc6aa5-ebb2-4342-8419-c407b120d380"
+              ]
+            ],
+            "undo": 0
+          },
+          "name": "shared leaf face selected twice under two paths",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "7d883f39-fcd5-4eeb-ac1e-495275170532",
+                "0ccc6aa5-ebb2-4342-8419-c407b120d380"
+              ]
+            ]
+          },
+          "name": "toggling the left path preserves the right path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "objects": 0,
+            "subobjects": 0,
+            "undo": 0
+          },
+          "name": "Escape clears occurrence selection without document history",
+          "pass": true
+        }
+      ],
+      "visual_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            537,
+            407
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1191,
+            345
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Through Finger",
+          "pixel": [
+            537,
+            770
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Side View",
+          "pixel": [
+            1246,
+            770
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "unselected sibling",
+          "pixel": [
+            537,
+            349
+          ],
+          "expected_green": false,
+          "observed_green": false
+        }
+      ],
+      "gpu_scene_views": [],
+      "preview_screenshots": {
+        "m02-occurrence.png": "70148a23ead9b2cf8dfbae1516d6e67c7c9ea69eac183215ee6570c26745fee7"
+      },
+      "screenshot_sha256": "f052d1468218bb2281dd592ce349b4e64aa8b879afd7024815d0887a52d82119"
+    },
+    {
+      "artifact": "build/standalone-validation/ui-artifacts/m02-occurrences-20261019-regression/m02-report.json",
+      "artifact_sha256": "386317744d3b95bd3058286220bf212106ce7eb1f76915bebf913f2ff00cc55e",
+      "scenario": "selection",
+      "zoom": 1.0,
+      "gpu_requested": true,
+      "exit_code": 0,
+      "binary_sha256": "61d04b858d5535d95a9a46c69adf7aa2bfe033c8b9a8d91acc7127245e036ea6",
+      "source_fingerprint": "989684a4ddbcf6c9d0a5bc6ef8f057757cde74057c3cb44b42bfb49d52c23129",
+      "checks": [
+        {
+          "actual": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "name": "click selects the curve and exposes a pivot",
+          "pass": true
+        },
+        {
+          "actual": {
+            "curve_samples": [
+              {
+                "screen": [
+                  702.5487804878048,
+                  360.4390243902439
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "screen": [
+                  1352.5588376307699,
+                  406.146697145643
+                ],
+                "view": "Perspective"
+              }
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "views": 4
+          },
+          "name": "first drag sample previews +5 mm without document or history writes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "release commits +5 mm as exactly one Undo entry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Undo restores original geometry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Redo restores +5 mm",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.9999996609157988,
+              0.0,
+              0.0,
+              5.000003051757814
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "scale square doubles X about current pivot",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "rotation arc makes 90 degree Z turn",
+          "pass": true
+        },
+        {
+          "actual": {
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "Escape discards preview and retains old Redo",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "old Redo remains usable after cancelled drag",
+          "pass": true
+        },
+        {
+          "actual": [
+            "fabad819-5d2c-46ce-b08c-d666e7fd4511"
+          ],
+          "name": "GPU and painter paths select the polygon mesh",
+          "pass": true
+        },
+        {
+          "actual": {
+            "mesh_probe": [
+              565.9634146341464,
+              285.3170731707317
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                2.0000012207031252
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "mesh preview uses selected mesh indices after selection changes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              2.0000012207031252
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "mesh release commits one additional transaction",
+          "pass": true
+        }
+      ],
+      "visual_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            703,
+            360
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1353,
+            406
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Looking Down mesh",
+          "pixel": [
+            566,
+            285
+          ],
+          "selected_color_visible": true
+        }
+      ],
+      "gpu_scene_views": [
+        "Looking Down",
+        "Perspective",
+        "Side View",
+        "Through Finger"
+      ],
+      "preview_screenshots": {
+        "m02-mesh.png": "2dccf7290278c337a6cdea6cd6820853da3431255ffe90f47b3d6c85f113639e",
+        "m02-move.png": "029e35d327bd68f8558a8577f5559868296c771d1bbab3c01762764a73a058fc",
+        "m02-rotate.png": "1e1839e2aa67d2de9a39644ce84cdb458fceb99ea91f50d093be22714a187cbf",
+        "m02-scale.png": "898e4665e86b79e4b310ba5613295461767c0739bf398db94efaf458a5176abb"
+      },
+      "screenshot_sha256": "1f432a5e55da2a38bea9a53753c283dbb9d43928e92b9ba2b0d7a73de0caf22b"
+    }
+  ],
+  "synthetic_input": true,
+  "human_approval": null,
+  "remaining": [
+    "Missing v2 ownership/backend policy",
+    "Native BRep representation/topology",
+    "M02-UI external review"
+  ]
+}

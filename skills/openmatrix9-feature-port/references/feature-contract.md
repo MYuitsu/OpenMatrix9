@@ -1,6 +1,6 @@
 # Normalize the selected feature
 
-Use the exact ID from `OpenMatrix9_Codex_Spec_v2/FEATURES.json` in the selected checkout. Read IMPLEMENTATION_RULES, CODE_GUIDE, MATRIX9_UI_CONTRACT and the feature migration/backend requirements; source/provenance guidance is UPSTREAM_REUSE and SOURCE_READ_AUDIT, not a nonexistent SOURCES.md.
+Use the exact L1/L2/L3/L4 ID from `OM9_Milestones`. Resolve it with the workflow router, read its parent owner and exact milestone contract, then implementation/runtime evidence. Source/provenance guidance comes from root AGENTS, the selected source anchors and `docs/private-reference-policy.md`; proposed APIs in imported documents are not implemented APIs.
 
 Record the following in `docs/features/<ID>.md`, derived separately from the original package:
 

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-02-01-009",
+  "title": "Mesh Vs NURBS Object Type Rules",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "Mesh and exact box keep different kinds; no implicit mesh-to-NURBS conversion.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-core/src/geometry.rs:455-499",
+      "what": "GeometryKind/Geometry"
+    },
+    {
+      "path_line": "crates/om9-core/src/rhino_semantics.rs:936-959",
+      "what": "is_exact_geometry + require_exact_nurbs"
+    }
+  ],
+  "reuse_decision": "ADD authored refusal; no conversion exists by design.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-02-01/crosswalk.json"
+}

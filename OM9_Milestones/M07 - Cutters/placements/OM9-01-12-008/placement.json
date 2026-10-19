@@ -1,0 +1,11 @@
+{
+  "schema": "om9.placement.v1",
+  "l3_id": "OM9-L3-01-12-008",
+  "owner_milestone": "M01",
+  "owner_l2_id": "OM9-L2-01-12",
+  "target_milestone": "M07",
+  "owner_record": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/l3.json",
+  "note": "Delegated L3: M01 owns the specification, M07 hosts the E12 execution queue.",
+  "moved_from": "M07 - Cutters/L2-01-12 - Be Native Project Codec Stl Export/",
+  "reason": "a delegated L3 keeps the owner's ids; the execution queue is placed here"
+}

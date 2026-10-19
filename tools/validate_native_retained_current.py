@@ -24,7 +24,7 @@ def build_fixture():
 project(OM9RetainedCurrentFixture LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-add_executable(om9-retained-current-fixture "{ROOT.as_posix()}/standalone/native/retained_current_fixture.cpp")
+add_executable(om9-retained-current-fixture "{ROOT.as_posix()}/native/retained_current_fixture.cpp")
 target_include_directories(om9-retained-current-fixture PRIVATE "{ROOT.as_posix()}/build/standalone-deps/opennurbs" "{ROOT.as_posix()}/build/standalone-deps/nlohmann-json-3.11.3")
 target_compile_definitions(om9-retained-current-fixture PRIVATE ON_CMAKE_BUILD NOMINMAX)
 target_compile_options(om9-retained-current-fixture PRIVATE /W4 /WX /utf-8 /EHsc)
@@ -117,7 +117,7 @@ def cache_scale_packet(translated=False):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--binary", type=Path, default=ROOT / "build/standalone-native/Release/om9-exchange-native.exe")
-    p.add_argument("--runner", type=Path, default=ROOT / "standalone/target/release/om9-native-runner.exe")
+    p.add_argument("--runner", type=Path, default=ROOT / "target/release/om9-native-runner.exe")
     p.add_argument("--receipt", type=Path, default=ROOT / "build/standalone-native/native-retained-current-validation.json")
     p.add_argument("--fixture", type=Path, default=ROOT / "build/native-source-fixture/Release/om9-source-fixture.exe")
     p.add_argument("--retained-fixture", type=Path, default=ROOT / "build/native-retained-source-fixture/Release/om9-retained-source-fixture.exe")
@@ -205,7 +205,7 @@ def main():
             "batch": "retained-cache-scale-v1", "total_runs": len(runs),
             "expected_rejections": 2, "successful_writer_output_files": 2,
             "authored_valid_stale_cache_output_files": 2, "semantic_scenarios": 4,
-            "binary_sha256": digest(args.binary), "header_sha256": digest(ROOT / "standalone/native/retained_merge.hpp"),
+            "binary_sha256": digest(args.binary), "header_sha256": digest(ROOT / "native/retained_merge.hpp"),
             "evidence": cache_scale_evidence, "owned_runs": runs}, indent=2), encoding="utf-8")
         if args.cache_tolerance_only:
             print("PASS native tiny amplified and thin translated cache regressions:8 owned jobs,2 rejections")
@@ -484,9 +484,9 @@ def main():
         "sdk_authored_source_files": 8, "successful_writer_output_files": 23,
         "authored_valid_stale_cache_output_files": 7, "semantic_scenarios": 57,
         "count_definition": "Distinct source/output paths and semantic cases; setup, deterministic repeats and independent oracle calls are not extra semantic scenarios",
-        "binary_sha256": digest(args.binary), "source_sha256": digest(ROOT / "standalone/native/native_exchange.cpp"),
-        "header_sha256": digest(ROOT / "standalone/native/retained_merge.hpp"),
-        "fixture_source_sha256": digest(ROOT / "standalone/native/retained_current_fixture.cpp"),
+        "binary_sha256": digest(args.binary), "source_sha256": digest(ROOT / "native/native_exchange.cpp"),
+        "header_sha256": digest(ROOT / "native/retained_merge.hpp"),
+        "fixture_source_sha256": digest(ROOT / "native/retained_current_fixture.cpp"),
         "fixture_binary_sha256": digest(args.cache_fixture), "validator_sha256": digest(Path(__file__)),
         "runner_sha256": digest(args.runner), "dependencies": {str(p.relative_to(ROOT)): digest(p) for p in dependencies},
         "scope": "Selected strict current serializers, primary raw bytes, typed secondary regeneration, cache leaf hull; no Rhino interoperability or arbitrary opaque semantic certification", "runs": runs}, indent=2), encoding="utf-8")

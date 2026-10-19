@@ -5,7 +5,7 @@ description: Use when implementing, reviewing or resuming the OpenMatrix9 Layers
 
 # OpenMatrix9 Layers business contract
 
-Đọc [đích specs v2 và hợp đồng UI Matrix9](../openmatrix9-workflow/references/spec-v2-target.md) trước lựa chọn kiến trúc, spec hoặc runtime. Package đích `OpenMatrix9_Codex_Spec_v2`; QymCAD chỉ cho code mẫu/routine, giao diện giữ Matrix9 như mô tả hiện tại.
+Đọc [đích milestone và giao diện Matrix9](../openmatrix9-workflow/references/milestones-target.md) trước lựa chọn kiến trúc, spec hoặc runtime. Nguồn nền tảng `OM9_Milestones/M01 - CAD Shell, Viewport`; QymCAD chỉ cho code mẫu/routine, giao diện giữ Matrix9 như mô tả hiện tại.
 
 Áp dụng cho **OM9-LAYER-001**. Người dùng đồng ý lưu thành skill mới ngày 2026-10-11: “có lưu trong skill mới”. Các quy tắc dưới đây là hợp đồng OM9 đã kiểm chứng; không chứng nhận toàn bộ Matrix/Rhino.
 
@@ -40,7 +40,7 @@ CMD nhận `Layer=1..33`, tên chuẩn/tên tùy biến, `Layer=Lights`, `Layer=
 
 Safe Rust sở hữu slot/default/parser/action/name/visibility/permission policy; OM9 document/permissions/journal quản lý properties, groups, selection, transactions và labels; C++ chỉ bridge geometry native cần thiết. Python dùng test/tool. Đối chiếu quy tắc Rust của dự án trước khi thêm FFI.
 
-Tìm checkout OM9 hiện hành, đọc spec `OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-layer-001-layer-management.md` và report `docs/validation/2026-10-11-layer-panel-implementation.md`. Mốc đã kiểm chứng: Rust11/11, native204/204; đây là evidence lịch sử, không thay kiểm tra source/runtime mới. Native fixtures: `layer_panel_smoke`, `layer_outputs_smoke`, `layer_visibility_permission_smoke`, `layer_modal_lifecycle_smoke`, `circle_layers_smoke`, `core_mouse_smoke` trong `tests/*.FCMacro`.
+Tìm checkout OM9 hiện hành, đọc spec `OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/L2.json` và report `docs/validation/2026-10-11-layer-panel-implementation.md`. Mốc đã kiểm chứng: Rust11/11, native204/204; đây là evidence lịch sử, không thay kiểm tra source/runtime mới. Native fixtures: `layer_panel_smoke`, `layer_outputs_smoke`, `layer_visibility_permission_smoke`, `layer_modal_lifecycle_smoke`, `circle_layers_smoke`, `core_mouse_smoke` trong `tests/*.FCMacro`.
 
 Target v2 dùng executable OM9 và selective backend theo build-validation; chưa có target thì ghi chưa triển khai. Plugin build/run scripts và .FCMacro chỉ cho bảo trì/đối chiếu legacy FreeCAD, không đóng gate v2. Đồng bộ spec/catalog/README/live ledger theo evidence thực tế.
 

@@ -1,0 +1,32 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-M00-L3-06-01",
+  "reviewer": {
+    "name": "chủ dự án (OpenMatrix9)",
+    "role": "project owner",
+    "status": "SIGNED",
+    "signature": "signed in the working session: 'ký hết và tiếp tục chuyển đến phần code'"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T00:30:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "license and reuse strategy (4/4): QymCAD AGPL stays reference-only, OCCT LGPL + exception with dynamic linking and the modified TKG3d published, 345-package SPDX audit with no GPL/AGPL, product licence decided as LGPL-2.1-or-later",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-06-01/OM9-M00-L4-06-01-02.note.md",
+      "sha256": "444f3510931a8592520b61bcef4334bcb1e9fc7f3532674daddac441f6dd001f",
+      "bytes": 247
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-06-01/OM9-M00-L4-06-01-03.note.md",
+      "sha256": "ec2490d0d52739cafb5910923a2233d0e583f71aa2da0e32dec544fa020ed986",
+      "bytes": 245
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-06-01/source_crosswalk.json",
+      "sha256": "9cbcba62827ba8c89e18491c823fbb0a3ad1dc3d80be1bbde8ca2c79b8d826d2",
+      "bytes": 497
+    }
+  ],
+  "note": "recorded by the assistant from the owner instruction; the assistant did not self-approve"
+}

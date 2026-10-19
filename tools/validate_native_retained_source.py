@@ -29,7 +29,7 @@ def build_retained_fixture():
 project(OM9RetainedSourceFixture LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-add_executable(om9-retained-source-fixture "{ROOT.as_posix()}/standalone/native/retained_source_fixture.cpp")
+add_executable(om9-retained-source-fixture "{ROOT.as_posix()}/native/retained_source_fixture.cpp")
 target_include_directories(om9-retained-source-fixture PRIVATE "{ROOT.as_posix()}/build/standalone-deps/opennurbs" "{ROOT.as_posix()}/build/standalone-deps/nlohmann-json-3.11.3")
 target_compile_definitions(om9-retained-source-fixture PRIVATE ON_CMAKE_BUILD NOMINMAX)
 target_compile_options(om9-retained-source-fixture PRIVATE /W4 /WX /utf-8 /EHsc)
@@ -124,7 +124,7 @@ def main():
     parser.add_argument("--binary", type=Path, default=ROOT/"build/standalone-native/Release/om9-exchange-native.exe")
     parser.add_argument("--fixture-binary", type=Path, default=ROOT/"build/native-source-fixture/Release/om9-source-fixture.exe")
     parser.add_argument("--retained-fixture-binary", type=Path, default=ROOT/"build/native-retained-source-fixture/Release/om9-retained-source-fixture.exe")
-    parser.add_argument("--runner", type=Path, default=ROOT/"standalone/target/release/om9-native-runner.exe")
+    parser.add_argument("--runner", type=Path, default=ROOT/"target/release/om9-native-runner.exe")
     parser.add_argument("--receipt", type=Path, default=ROOT/"build/standalone-native/native-retained-source-preparation-validation.json")
     args = parser.parse_args()
     actual_pin = subprocess.check_output(["rtk", "proxy", "git", "-C", str(ROOT/"build/standalone-deps/opennurbs"), "rev-parse", "HEAD"], text=True).strip()
@@ -243,9 +243,9 @@ def main():
     receipt = {"schema_version":1, "scope":"actual_native_retained_source_preparation", "goal_complete":False,
                "opennurbs_commit":PIN, "binary_sha256":digest(args.binary), "fixture_binary_sha256":digest(args.fixture_binary),
                "retained_fixture_binary_sha256":digest(args.retained_fixture_binary), "runner_sha256":digest(args.runner),
-               "source_sha256":digest(ROOT/"standalone/native/native_exchange.cpp"),
-               "header_sha256":digest(ROOT/"standalone/native/retained_merge.hpp"),
-               "retained_fixture_source_sha256":digest(ROOT/"standalone/native/retained_source_fixture.cpp"),
+               "source_sha256":digest(ROOT/"native/native_exchange.cpp"),
+               "header_sha256":digest(ROOT/"native/retained_merge.hpp"),
+               "retained_fixture_source_sha256":digest(ROOT/"native/retained_source_fixture.cpp"),
                "dependencies":[{"path":str(path.relative_to(ROOT)), "sha256":digest(path)} for path in dependencies],
                "owner_limits":next(r["limits"] for r in runs if r["status"] == "native_owner_result"),
                "producer_limits":{"archive_bytes":64*1024*1024, "aggregate_records":4096, "aggregate_points":65536,

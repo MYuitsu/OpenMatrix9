@@ -23,7 +23,7 @@ def main():
     baseline=json.loads((PACKAGE/'SOURCE_READ_AUDIT.json').read_text(encoding='utf-8'))
     for row in baseline['files']:
         path=ROOT/'OpenMatrix9_Codex_Spec_v1'/row['path'];assert path.stat().st_size==row['bytes'] and digest(path)==row['sha256']
-    lock=tomllib.loads((ROOT/'standalone/Cargo.lock').read_text());assert not any(row['name']=='rfd' for row in lock['package'])
+    lock=tomllib.loads((ROOT/'Cargo.lock').read_text());assert not any(row['name']=='rfd' for row in lock['package'])
     binding=next(row for row in lock['package'] if row['name']=='windows');assert binding['version']=='0.62.2'
     passed,focused=r['workspace_passed'],r['focused_tests']
     meta={'scope':'selected_win32_file_adapter_and_owned_replay_guards','receipt':'../'+RECEIPT,'report':'../'+REPORT,
@@ -132,10 +132,10 @@ measurement batches remain unknown.
     note=MARKER+f'\n\n[Current scoped evidence](../../../{REPORT}): {passed} workspace/{focused} focused subsets; selected authored Win32 adapter exposes HRESULT errors and disables OS overwrite prompt for the existing owned confirmation.4 audit+3 native+1 UI-error checks;8 native File checks/3 real Windows cancels;10+13+6 regressions/7 cold children. Readiness guards prevent missing-modal events from editing CMD; original missed-click cause remains unknown. OS selection/save/open/overwrite/native startup, full budgets/close/async/persistence/.3dm and all full feature/RCORE/Matrix9 gates remain required.'
     for path in [*(PACKAGE/name for name in specs),PACKAGE/'specs/00-rhino-core/00-qymcad-foundation-migration.md',PACKAGE/'specs/00-rhino-core/MATRIX9_SCREENSHOT_DETAILS_2026-10-14.md',PACKAGE/'specs/00-rhino-core/UI_DETAILS.md']:append(path,note)
     for path in [PACKAGE/'IMPLEMENTATION_STATUS.md',PACKAGE/'README.md']:append(path,note.replace('../../../'+REPORT,'../'+REPORT))
-    append(ROOT/'README.en.md',note.replace('../../../'+REPORT,REPORT));append(ROOT/'standalone/README.md',note.replace('../../../'+REPORT,'../'+REPORT))
+    append(ROOT/'README.en.md',note.replace('../../../'+REPORT,REPORT));append(ROOT/'docs/standalone-foundation.md',note.replace('../../../'+REPORT,'../'+REPORT))
     append(ROOT/'README.md',MARKER+f'\n\nĐã thêm [adapter chọn tệp Win32]({REPORT}): {passed} test workspace; HRESULT lỗi được báo rõ, Cancel tách riêng và overwrite do token OM9 xác nhận. Replay Layers chờ focus thật và dừng khi dialog chưa mở;3 dialog Windows hủy/đóng sạch. Chọn/lưu/mở thành công bằng OS, startup từ tệp, budgets, close/async, persistence đầy đủ và `.3dm` vẫn tiếp tục; toàn goal chưa hoàn tất.')
     path=ROOT/'docs/openmatrix9-progress.json';d=json.loads(path.read_text(encoding='utf-8'));d['updated_at']=dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds');item=next(row for row in d['items'] if row.get('key')=='rcore00-standalone-foundation')
-    for output in [RECEIPT,REPORT,'standalone/crates/om9-native-owner/src/file_dialog.rs']:
+    for output in [RECEIPT,REPORT,'crates/om9-native-owner/src/file_dialog.rs']:
         if output not in item['outputs']:item['outputs'].append(output)
     prefix='Selected Win32 File adapter/replay;';item['evidence']=[row for row in item['evidence'] if not row.startswith(prefix)];item['evidence'].append(prefix+f' {passed} workspace/{focused} focused subset;8 new units;8 native File/3 real cancels;10+13+6 regressions/7 cold children. Typed HRESULT errors, owned overwrite policy and replay readiness/focus measured;0 fresh geometry SDK jobs;full gates open.')
     item['next_action']='Complete actual native successful File selection/save/open/owned overwrite and --ui path startup using owned fixture/dialog evidence; add dirty close and full UI/native/worker budget/cancellation ownership. Continue versioned view/material/annotation persistence and supported .3dm interoperability, full130core/RCORE/Matrix9 requirements. Preserve historical missed-click uncertainty; inspect new raw timing/focus/hit-test evidence if replay fails again.';write(path,d)

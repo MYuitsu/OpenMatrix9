@@ -84,7 +84,7 @@ def close(actual, expected):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path, default=ROOT / "build/standalone-native/Release/om9-exchange-native.exe")
-    parser.add_argument("--runner", type=Path, default=ROOT / "standalone/target/release/om9-native-runner.exe")
+    parser.add_argument("--runner", type=Path, default=ROOT / "target/release/om9-native-runner.exe")
     parser.add_argument("--receipt", type=Path, default=ROOT / "build/standalone-native/native-conversion-validation.json")
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
@@ -306,7 +306,7 @@ def main():
                    "pe_imports": imports,
                    "runner_sha256": digest(runner),
                    "authored_sources": [{"path": file.relative_to(ROOT).as_posix(), "sha256": digest(file)}
-                                        for file in [ROOT / "standalone/native/native_exchange.cpp", ROOT / "standalone/native/retained_merge.hpp", ROOT / "standalone/native/CMakeLists.txt", Path(__file__).resolve()]],
+                                        for file in [ROOT / "native/native_exchange.cpp", ROOT / "native/retained_merge.hpp", ROOT / "native/CMakeLists.txt", Path(__file__).resolve()]],
                    "dependencies": {"opennurbs_commit": commit, "opennurbs_worktree_clean": True,
                                     "opennurbs_license_sha256": digest(dependency / "LICENSE"),
                                     "json_version": "3.11.3", "json_header_sha256": digest(json_dependency / "json.hpp"),

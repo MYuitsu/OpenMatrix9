@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-004-01",
+  "l3_id": "OM9-L3-01-02-004",
+  "l3_title": "Interactive Command State Machine",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "multi-step selection/point requests with Enter and Escape",
+  "positive_oracle": "Two-click point command progresses Start->AwaitPoint->AwaitPoint->Commit, Escape aborts",
+  "negative_oracle": "Extra click/out-of-order Enter cannot commit partial geometry",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:338 then.take(&mut self.params.boolean, &mut self.status)",
+        "gui.rs:347 BarAsk::WidthPick => self.start_width_pick()",
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "QymCAD runs a multi-step command as a bar state machine (BarAsk variants) driven from the single doorway: the idea OM9 keeps. What is missing is an explicit, inspectable PHASE: QymCAD's step lives inside the bar type, so nothing can state 'this command is waiting for its end point' to the rest of the program, and nothing compares the phase with the prompt.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs (CmdPhase, Controller::phase, prompt, accept_world_point, cancel)"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:59 pub struct Place { key, … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No command lifecycle at all.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:87 pub fn cmd_val(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Parameter values, not the interaction phase.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session.rs::accept_world_point — finite check, then start/end point, then one transaction per completed command",
+    "session.rs::cancel() — Escape drops the session",
+    "session.rs::prompt() — the question, chosen from start.is_some() and both_sides",
+    "session.rs::dispatch_geometry — refuses to start a second command while one runs (Busy)"
+  ],
+  "gap_found_by_this_task": [
+    "There was no phase: the step could only be inferred from start.is_some(), so nothing could assert the sequence the plan names (Start -> AwaitPoint -> AwaitPoint -> Commit) and nothing compared the prompt with the state.",
+    "The prompt disagreed with the state after the context was lost: is_running() reported false while prompt() still asked for 'End of line …' (fixture N5). It now returns 'Command: ' whenever the session is not running.",
+    "Pinned, and unchanged because they already held: Enter while a point is awaited is refused (Invalid 'point required'), an extra click after the commit is refused (Missing 'active command'), a zero-length line is refused and leaves the command open, a second command while one runs is Busy, and Escape aborts at any phase with no entity and no undo entry.",
+    "CORRECTION (same day): the view rule was too strong at first. The pre-existing tests/chrome_actions.rs cases (a view-tab switch must keep a running command and its numeric draft) showed that switching the ACTIVE view is not losing the context. validate_context now refuses when the document identity changes, when the view the run started in is gone, or when the revision/epoch moved; a view-tab switch keeps the run with the view and plane it captured. Fixtures and tests were corrected with it."
+  ],
+  "reuse_decision": "ADAPT the bar state machine of gui.rs behind one doorway; ADD the explicit CmdPhase and make the prompt follow it.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-004/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-004/negative.json",
+    "standalone/crates/om9-app/tests/command_state_machine.rs"
+  ]
+}

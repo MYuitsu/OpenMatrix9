@@ -63,5 +63,46 @@
       "id": "OM9-M00-L4-02-02-04",
       "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-02 - Lifetime, threading and error safety/L4-04 - Kiểm tra thread serialization và UI handoff/l4.json"
     }
+  ],
+  "kernel_pin": {
+    "version": "8.0.1",
+    "tag": "V8_0_1",
+    "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
+    "pin_file": "native/occt/pin.json"
+  },
+  "execution_evidence": {
+    "l4_done": [
+      "OM9-M00-L4-02-02-01",
+      "OM9-M00-L4-02-02-02",
+      "OM9-M00-L4-02-02-03",
+      "OM9-M00-L4-02-02-04"
+    ],
+    "l4_open": [],
+    "harness": "native/occt-rust-proof (src/bin/lifetime.rs + tests/lifetime.rs)",
+    "evidence_root": "implementation/evidence/M00/OM9-M00-L3-02-02",
+    "design": "implementation/design/M00/OM9-M00-L3-02-02/api.md",
+    "fixtures": "implementation/fixtures/M00/OM9-M00-L3-02-02/{positive,negative}.json",
+    "measured": {
+      "raii": "refcount 1 -> 2 on copy -> 1 after Nullify",
+      "invalid_inputs": "9/9 rejected with a message (7 by the bridge guard, 2 by OCCT: BRep_Builder::Infinite parameter, Standard_DomainError)",
+      "create_destroy": "10 000 cycles in 0.73 s; working set 10.81 MB -> 11.22 MB (growth 0.398 MiB)",
+      "threads": "1000 serialized calls from 4 threads, 0 wrong results; 100 independent calls also succeeded (observation only)"
+    },
+    "sign_off": {
+      "status": "SIGNED",
+      "reviewer": "chủ dự án (project owner)",
+      "signed_at_utc": "2026-10-17T16:40:00Z",
+      "record": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L3-02-02.ui-review.json",
+      "manual_test_gate": "AUTO_ONLY"
+    },
+    "next": "gate G00-02 closed; next is G00-03 (UI/Viewport/GPU feasibility)"
+  },
+  "version_history": [
+    {
+      "date": "2026-10-17",
+      "change": "OCCT 8.0.1 pinned; 7.8.1 (FreeCAD bundle) and 7.9.3 (workflow CI) references are historical",
+      "reason": "official release ships headers, import libraries, DLLs and CMake config; C++17 baseline; 8.0.1 carries the modelling/meshing/healing fixes the gate needs",
+      "pin": "native/occt/pin.json"
+    }
   ]
 }

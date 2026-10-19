@@ -1,0 +1,17 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-04-02",
+  "cases": [
+    {
+      "id": "M00-FX-04-02-NEG-01",
+      "check": "corrupt_archive",
+      "input": {
+        "bytes": 512
+      },
+      "expected": {
+        "exit_code": 1,
+        "crash": false
+      }
+    }
+  ]
+}

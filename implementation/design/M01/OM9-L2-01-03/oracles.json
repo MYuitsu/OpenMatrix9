@@ -1,0 +1,125 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "oracle_schema": "om9.m01.oracle.v1.5",
+  "oracle_schema_note": "no local definition of om9.m01.oracle.v1.5 exists in this repository; the string is carried as a field only",
+  "l2": "OM9-L2-01-03",
+  "source": "authored from the l3.json oracles; placements and counts are hand-derived, NOT copied from program output",
+  "status": "RUNTIME_DRIVEN_BY_TEST",
+  "implementation_status_note": "2026-10-17: every oracle in this file is now carried by a named runtime test; the frozen per-L3 case lists are in implementation/fixtures/M01/OM9-L3-01-03-00N/{positive,negative}.json. The exact error strings recorded here (for example Unsupported(\"document variant\"), Invalid(\"allocated group UUID\"), Invalid(\"duplicate group member\"), Stale(\"selection epoch\")) are asserted by those tests, except where a case is marked NEEDS_USER_M00_DECISION (BRep / OCCT), which stays unsupported.",
+  "l3": {
+    "OM9-L3-01-03-001": {
+      "status": "DONE_WITH_EVIDENCE",
+      "positive": [ { "id": "unique-ids-survive-save", "evidence": "om9-archive/tests/container_admission.rs:66; om9-app/tests/cold_reopen.rs:132", "expect": { "ids_unique": true, "ids_equal_after_reopen": true } } ],
+      "negative": [ { "id": "no-reuse", "evidence": "om9-core/tests/atomic_transactions.rs:51, :98; model_admission.rs:172", "expect": { "deleted_id_insert": "Invalid(\"allocated object UUID\")", "world_unchanged": true } } ]
+    },
+    "OM9-L3-01-03-002": {
+      "positive": [ { "id": "kinds-roundtrip", "kinds": ["Point", "Curve", "Surface", "Mesh", "Cloud", "Instance"], "call": "Archive::encode/decode", "expect": { "kind_preserved_each": true } } ],
+      "negative": [
+        { "id": "unknown-kind", "call": "decode archive metadata where one geometry is {\"Brep\": {}}", "expect": { "error": "Unsupported(\"document variant\")", "not": "Invalid" } },
+        { "id": "brep", "status": "NEEDS_USER_M00_DECISION (OCCT) + BLOCKED_DEPENDENCY OM9-L2-01-05", "expect": "not implemented in this loop" }
+      ]
+    },
+    "OM9-L3-01-03-003": {
+      "positive": [ { "id": "separate-queries", "entity": "Point 'P' color [10,20,30,255] visible", "expect": { "label": "P", "attributes.color": [10, 20, 30, 255], "attributes.visible": true, "geometry_kind": "Point" } } ],
+      "negative": [
+        { "id": "dangling-instance-validate", "document": "root Entity Geometry::Instance(random DefinitionId)", "call": "Document::validate", "expect": { "error": "Missing(\"instance definition\")" } },
+        { "id": "dangling-instance-encode", "call": "Archive::encode", "expect": { "error": "Missing(\"instance definition\")" } },
+        { "id": "dangling-instance-insert", "call": "coordinator.prepare(Insert Instance(random))", "expect": { "error": true, "snapshot_unchanged": true } }
+      ]
+    },
+    "OM9-L3-01-03-004": {
+      "positive": [ { "id": "metals", "steps": ["LayerAction::Create Layer 'Metals' color [200,180,40,255] visible, locked", "Update name 'Metals 925'"], "expect": { "layer_id_unchanged": true, "visible": true, "locked": true, "undo_len": 2 } } ],
+      "negative": [
+        { "id": "duplicate-id", "evidence": "layer_transactions.rs:32 retired UUID; container_admission.rs:124 duplicate JSON key", "expect": "refused" },
+        { "id": "missing-parent", "call": "Create Layer with parent = Some(random LayerId)", "expect": { "error": "Missing(\"layer\")", "snapshot_unchanged": true } },
+        { "id": "self-parent", "evidence": "layer_transactions.rs:186", "expect": "Invalid(\"layer cycle\")" }
+      ]
+    },
+    "OM9-L3-01-03-005": {
+      "positive": [ { "id": "metals-to-gems", "steps": ["Point A on 'Metals'", "Assign A to 'Gems'"], "expect": { "object_id_unchanged": true, "layer": "Gems", "undo_len_delta": 1 } } ],
+      "negative": [
+        { "id": "unknown-target", "call": "LayerAction::Assign { layer: random LayerId }", "expect": { "error": true, "snapshot_unchanged": true } },
+        { "id": "locked-target", "evidence": "layer_transactions.rs:228", "expect": "refused" },
+        { "id": "dangling-membership", "document": "entity.attributes.layer = id removed from layers/layer_order", "call": "Document::validate and Archive::decode", "expect": { "error": "Missing(\"entity layer\")" } }
+      ]
+    },
+    "OM9-L3-01-03-006": {
+      "status": "DONE_WITH_EVIDENCE",
+      "positive": [ { "id": "hide-and-lock", "evidence": "om9-scene/tests/layer_colors.rs:57; world_picking.rs:208", "expect": { "hidden_not_drawn_not_picked": true, "locked_drawn_not_editable": true } } ],
+      "negative": [ { "id": "locked-no-mutation", "evidence": "om9-core/tests/layer_transactions.rs:289, :186; model_admission.rs:197", "expect": { "refused": true, "redo_preserved": true } } ]
+    },
+    "OM9-L3-01-03-007": {
+      "positive": [ { "id": "group-ungroup", "steps": ["Points A, B", "GroupCreate {A,B} 'G'", "GroupDelete G"], "expect": { "after_group": { "groups_of_A": ["G"], "undo_len_delta": 1 }, "after_ungroup": { "groups": 0, "A_B_ids_and_geometry_unchanged": true } } } ],
+      "negative": [
+        { "id": "unknown-member", "call": "GroupCreate with random ObjectId", "expect": { "error": true, "snapshot_unchanged": true } },
+        { "id": "deleted-member", "steps": ["Point A deleted", "GroupCreate {A}"], "expect": { "error": true } },
+        { "id": "duplicate-member", "call": "Group::new(\"G\", [A, A])", "expect": { "error": "Invalid(\"duplicate group member\")" } },
+        { "id": "empty", "call": "Group::new(\"G\", [])", "expect": { "error": true } },
+        { "id": "delete-prunes", "steps": ["group {A,B}", "Delete A"], "expect": { "group_members": ["B"] } },
+        { "id": "delete-last-removes-group", "steps": ["group {A}", "Delete A"], "expect": { "groups": 0 } },
+        { "id": "group-id-not-reused", "steps": ["GroupCreate G", "Undo", "GroupCreate with G.id"], "expect": { "error": "Invalid(\"allocated group UUID\")" } }
+      ]
+    },
+    "OM9-L3-01-03-008": {
+      "positive": [ { "id": "two-instances", "steps": ["DefinitionInsert D {Point [1,0,0]}", "Insert I1 = Instance(D) translation [10,0,0]", "Insert I2 = Instance(D) translation [0,20,0]"], "expect": { "definitions": 1, "definition_members": 1, "member_transform(I1,[m])*[1,0,0]": [11, 0, 0], "member_transform(I2,[m])*[1,0,0]": [1, 20, 0], "scene_objects": 2 } } ],
+      "negative": [
+        { "id": "self-cycle", "call": "DefinitionInsert D whose member is Instance(D.id)", "expect": { "error": "Invalid(\"definition cycle\")", "snapshot_unchanged": true } },
+        { "id": "nested-cycle-decode", "document": "D1 -> Instance(D2), D2 -> Instance(D1)", "call": "Document::validate", "expect": { "error": "Invalid(\"definition cycle\")" } },
+        { "id": "missing-definition", "call": "document.instance(random DefinitionId, identity, None)", "expect": { "error": "Missing(\"definition\")" } }
+      ]
+    },
+    "OM9-L3-01-03-009": {
+      "positive": [ { "id": "gem-slot", "steps": ["Point A", "Extension { slot: \"om9.gem\", extension: Some(Extension::new(1, \"{\\\"stone\\\":\\\"round\\\",\\\"size_mm\\\":2.5}\")) }"], "expect": { "object_id_unchanged": true, "generation_unchanged": true, "attributes_revision_delta": 1, "payload_verbatim": true } } ],
+      "negative": [
+        { "id": "unknown-slot-preserved", "steps": ["set slot \"vendor.futurething\"", "serde round-trip of Entity"], "expect": { "slot_present": true, "unknown_extension_slots": ["vendor.futurething"] } },
+        { "id": "payload-not-object", "call": "Extension::new(1, \"[1,2]\")", "expect": { "error": true } },
+        { "id": "payload-malformed", "call": "Extension::new(1, \"{\")", "expect": { "error": true } },
+        { "id": "version-zero", "call": "Extension::new(0, \"{}\")", "expect": { "error": true } },
+        { "id": "bad-slot-name", "call": "Mutation::Extension { slot: \"Gem\" }", "expect": { "error": true, "snapshot_unchanged": true } },
+        { "id": "locked-entity", "call": "Mutation::Extension on an entity on a locked layer", "expect": { "error": "Permission(\"source edit\")" } }
+      ]
+    },
+    "OM9-L3-01-03-010": {
+      "positive": [ { "id": "stable-id-selection", "steps": ["Point A", "select_root(Some(A))", "workspace maximize/restore (redraw)"], "expect": { "selection_state.objects": ["A"] } } ],
+      "negative": [
+        { "id": "undo-prunes", "steps": ["Point A", "select A", "undo()"], "expect": { "selected": [] } },
+        { "id": "stale-after-reload", "steps": ["capture selection_state", "New (clean) or Open"], "expect": { "validate_selection": "Stale(\"selection document\")" } },
+        { "id": "stale-after-publication", "steps": ["capture selection_state", "Point B committed"], "expect": { "validate_selection": "Stale(\"selection epoch\")" } }
+      ]
+    },
+    "OM9-L3-01-03-011": {
+      "positive": [
+        { "id": "one-ordered-batch", "call": "one coordinator commit: LayerAction::Create+current, then Mutation::Insert", "expect": { "changes": ["CurrentLayer", "LayerOrder", "LayerAdded(L)", "EntityAdded(E)"], "revision_delta": 1 } },
+        { "id": "controller-line", "steps": ["Line 0,0,0 3,4,0"], "expect": { "batches": 1, "cause": "Commit", "changes": ["EntityAdded"] } },
+        { "id": "undo-batch", "steps": ["Line", "undo()"], "expect": { "last.cause": "Undo", "last.changes": ["EntityRemoved"], "sequence_increasing": true } }
+      ],
+      "negative": [
+        { "id": "panicking-observer", "steps": ["observer panics", "Line"], "expect": { "entities": 1, "undo_len": 1, "observer_removed": true, "diagnostics": 1 } },
+        { "id": "no-op", "steps": ["set_current_layer(None) when already None"], "expect": { "new_batches": 0 } },
+        { "id": "reentrancy", "note": "DocumentObserver receives &ChangeBatch only; it has no Controller/coordinator handle (compile-time guarantee) - asserted by the API shape, no runtime mutation possible" }
+      ]
+    },
+    "OM9-L3-01-03-012": {
+      "positive": [ { "id": "snapshot-restore", "steps": ["Point A, Line L (0,0,0 -> 12,6,0), layer 'Metals'", "capture_snapshot", "rename layer, add Point B", "restore_snapshot"], "expect": { "ids": "A, L and the layer id as captured", "layer_name": "Metals", "B_absent": true, "revision": "captured revision", "line_domain_end_bits": "12f64.hypot(6.).to_bits()", "undo_len": 0 } } ],
+      "negative": [
+        { "id": "other-document", "call": "restore_snapshot(snapshot of another Document)", "expect": { "error": "Invalid(\"snapshot document\")", "controller_unchanged": true } },
+        { "id": "truncated", "call": "DocumentSnapshot::from_parts(id, rev, bytes[..len-1]).restore(id)", "expect": { "error": "Invalid", "controller_unchanged": true } },
+        { "id": "wrong-version", "call": "bytes with version field 5", "expect": { "error": "Unsupported(\"OM9 schema version; no implicit migration\")" } },
+        { "id": "busy", "call": "restore_snapshot while Line is running", "expect": { "error": "Busy" } }
+      ]
+    },
+    "OM9-L3-01-03-013": {
+      "positive": [ { "id": "imported-provenance", "fixture": "om9-core/tests/retained_imports.rs bundle helpers", "expect": { "source_sha256": "bundle.source.sha256", "native.id": "record key UUID", "native.native_index": "record index", "source_name": "resource name", "disposition": "Unchanged" } },
+                    { "id": "summary", "expect": { "records": "namespace.records.len()", "retained_only": "records with host None" } } ],
+      "negative": [
+        { "id": "native-entity", "call": "provenance(id of an Entity inserted by Mutation::Insert)", "expect": null },
+        { "id": "unknown-namespace", "call": "import_summary(random)", "expect": { "error": "Missing(\"import namespace\")" } },
+        { "id": "unbound-import", "evidence": "om9-core/tests/retained_imports.rs:853", "expect": "import refused without source binding" }
+      ]
+    },
+    "seam-OM9-L3-01-01-002": {
+      "positive": [ { "id": "scene-host", "call": "ViewportSceneHost::visible_views(&controller) vs &controller.workspace", "expect": { "equal_4_views": true, "equal_maximized": true } } ],
+      "negative": [ { "id": "scene-state-unavailable", "setup": "controller.scene = None (unit test)", "call": "document_scene_state()", "expect": { "scene_epoch": null } } ]
+    }
+  }
+}

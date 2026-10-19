@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-12-009",
+  "title": "Export Mesh Units And Winding",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "STL policy: explicit millimetre scale in the header, winding/normal agreement, watertight strict refusal.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-exchange/src/lib.rs:17",
+      "what": "pub mod stl"
+    },
+    {
+      "path_line": "crates/om9-exchange/src/stl.rs:84-97",
+      "what": "StlOptions scale/flip_winding/strict"
+    },
+    {
+      "path_line": "crates/om9-exchange/src/stl.rs:123-137",
+      "what": "open_edges"
+    },
+    {
+      "path_line": "crates/om9-exchange/src/stl.rs:141-210",
+      "what": "write_binary_stl scale, winding, normals, header"
+    }
+  ],
+  "reuse_decision": "ADD authored STL policy; the document export command remains M07.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-01-12/crosswalk.json"
+}

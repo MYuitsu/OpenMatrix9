@@ -1,6 +1,6 @@
 # Rust trước và ownership OM9 v2
 
-Đọc [đích specs v2](spec-v2-target.md). Safe Rust sở hữu nghiệp vụ, document/model/IDs/generations, command/session/options, History/Undo/journal, UI state/scene/index/cache và workers. Giữ nguyên hợp đồng Matrix9 UI/feature; ưu tiên Rust không cho phép thay semantics hoặc scope nghiệm thu.
+Đọc [đích milestone](milestones-target.md). Safe Rust sở hữu nghiệp vụ, document/model/IDs/generations, command/session/options, History/Undo/journal, UI state/scene/index/cache và workers. Giữ nguyên hợp đồng Matrix9 UI/feature; ưu tiên Rust không cho phép thay semantics hoặc scope nghiệm thu.
 
 - Giữ/thử port Rust logic hiện có nếu host-free; native property/transaction/FCStd/Qt-Coin adapter của FreeCAD phải chuyển sang own OM9. Không mặc định dùng FreeCAD/Project/Shell của QymCAD.
 - C++ chỉ bridge OCCT/openNURBS hoặc API native thực sự cần. Rust own math/data/UI/state khi phù hợp; operation adapter không sở hữu document, quyết định publish hay session. Ghi constraint, owner, ABI/error/lifetime/concurrency và closure cần thiết cho mỗi ngoại lệ.

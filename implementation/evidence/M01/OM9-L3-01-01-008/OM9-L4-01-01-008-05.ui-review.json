@@ -1,0 +1,82 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-01-008-05",
+  "l3_id": "OM9-L3-01-01-008",
+  "title": "Builder Panel Docking Slot",
+  "oracle": {
+    "positive": "Reserve Builder docking slot below Projects without creating a second Builder model",
+    "negative": "Absent Builder implementation shows noninteractive placeholder"
+  },
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) running the app on Windows",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-app --test builder_slot -> 7 passed; 2 failed. The one product defect: a stored layout document could float, hide, collapse or move the reserved BUILDERS area, breaking the reservation after a reopen. (The second failure was a weakness in the test's own source scan and was fixed in the test.)",
+    "GREEN: cargo test -p om9-app --test builder_slot -> 9 passed; 0 failed (B1..B6, Y1..Y5)",
+    "cargo test -p om9-app --lib: 83 passed; cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real window: om9.exe --ui-audit leaves the reserved area last in the left column with builder_slot_visible=true (OM9-L4-01-01-008-04.integration.log, screenshot builders-in-a-real-window.png); L3-002 size matrix 14/14 PASS; L3-003 panel scenarios 7/7 PASS"
+  ],
+  "code_change": [
+    "dock_layout.rs::normalize now repairs a stored document that tries to move (dock right), float, hide, collapse or place the reserved BUILDERS area above the Project Manager: it is put back in the left column below Projects with the diagnostic 'Builders is reserved for builder tools; the area was restored below the Project Manager'. The check runs on the document's own values, before the density pass renumbers a column for its current membership, so a session that docks menus right does not trip it."
+  ],
+  "artefacts": [
+    "OM9-L4-01-01-008-02.red.log",
+    "OM9-L4-01-01-008-02.green.log",
+    "OM9-L4-01-01-008-03.diffstat.txt",
+    "OM9-L4-01-01-008-03.target-test.log",
+    "OM9-L4-01-01-008-04.integration.log",
+    "OM9-L4-01-01-008-05.regression.log",
+    "builders-in-a-real-window.png"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The reservation and the refusal are machine-proven; how the placeholder reads on screen is the owner's call.",
+    "items": [
+      {
+        "id": "V1",
+        "step": "Look at the left column: the BUILDERS area is below PROJECTS.",
+        "machine_proven": "B1: the reserved slot is in the left column at the documented last position, visible, never floating; the real-window receipt shows it last.",
+        "human_must_verify": "The reserved area really sits under the Project Manager and stays there after resizing.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "V2",
+        "step": "Click the BUILDERS bar and try to drag it.",
+        "machine_proven": "Y1/B4: the click is refused with the documented message, the bar has no +/− box and no drag starts.",
+        "human_must_verify": "Nothing moves, the message explains that Builders are reserved, and the cursor gives no hint that it could be dragged.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "V3",
+        "step": "Try the placeholder's controls (New Emerald, Size, Show Diag., Reset, the slider, the icons).",
+        "machine_proven": "B5/Y2: every widget in builder_slot_ui is disabled or hover-only (source scan), and the gem box senses hover only.",
+        "human_must_verify": "None of them reacts, no popup opens, and the hover text says the operation is unavailable.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "V4",
+        "step": "Draw geometry, then look at the BUILDERS area and the document.",
+        "machine_proven": "B3/Y3: the placeholder is drawn from the layout only (no Document/Controller/builder type in its body); the slot creates no entities and no undo entries.",
+        "human_must_verify": "There is no second Builder model: the object count, the layer list and Undo show only your drawing.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "V5",
+        "step": "Edit a saved layout file so builder-slot is floating, hidden or above Projects, then start the app.",
+        "machine_proven": "B6/Y4: the reservation is repaired back to the documented slot with a diagnostic naming 'Builders is reserved'.",
+        "human_must_verify": "The app starts with the reserved area back below Projects and the status/history names the repair.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_ui_l3_008_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

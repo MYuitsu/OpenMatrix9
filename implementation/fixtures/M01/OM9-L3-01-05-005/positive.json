@@ -1,0 +1,11 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-005",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-005-POS",
+      "test": "face_wire_edge_topology_is_exact",
+      "expected": "box 8/12/6/6; sphere one face and one wire; cylinder three faces and three wires; all valid"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-M00-L3-02-01",
+  "reviewer": {
+    "name": "chủ dự án (OpenMatrix9)",
+    "role": "project owner",
+    "status": "SIGNED",
+    "signature": "signed in the working session on 2026-10-17; instruction: 'tôi ký và chuyển sang tiếp theo'"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-17T16:40:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "OCCT 8.0.1 pinned and proven from Rust: version 8.0.1, box volume 400 within 1e-13, drilled volume matches 400 - pi*r^2*h, invalid input arrives as a typed failure. The reference 7.x bridge does not compile against 8.0 and that finding is recorded rather than hidden.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-01.qymcad-buildrs-audit.md",
+      "sha256": "21d950edd846c0fab5f3be7603ef362e7553e8b779420dee595037f731edc8d6",
+      "bytes": 1461
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-02.compile-reference-bridge.log",
+      "sha256": "760bdcf18c31e2bad3d8ce1f9df6e03d3feff4b69f6af77b81e5df6577b2c5ad",
+      "bytes": 11142
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-03.occt-probe.json",
+      "sha256": "ca94b63eacde32ab3c6a74f39e3c2e6d3d2c2a6c7c8277a068baa39482bf187d",
+      "bytes": 644
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-03.occt-probe.log",
+      "sha256": "b140101f94657a929fda5ade72b84b33a056f70a63a8fd191e528011b5a8e305",
+      "bytes": 1300
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-04.rust-calls-occt.log",
+      "sha256": "367018af60ad93afb6cba711658b85ee6b7415856d126a083fff93a610f879f5",
+      "bytes": 1909
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-01/source_crosswalk.json",
+      "sha256": "dfdb74089cc7c8a198d10403b66301fe085521613d16a9ea1880c23685af902d",
+      "bytes": 3986
+    }
+  ],
+  "note": "The reviewer signed in the session; the assistant recorded the record and did not self-approve. No manual test is required: every acceptance value above is an automated measurement."
+}

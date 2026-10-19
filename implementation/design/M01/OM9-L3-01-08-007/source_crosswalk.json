@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-08-007-01",
+  "l3_id": "OM9-L3-01-08-007",
+  "l3_title": "Coordinate Numeric Input Primitives",
+  "owner_module_id": "OM9-L2-01-08",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "local and world numeric point representations",
+  "positive_oracle": "CPlane là frame có kiểu: local (1,2,3) trên plane dịch ([10,20,30]) thành world (13,21,32); to_local là nghịch đảo.",
+  "negative_oracle": "Local point không có frame là Missing; ngữ pháp x,y[,z] và nhãn lỗi giữ nguyên.",
+  "legacy_source": [
+    "rust/src/coordinates.rs",
+    "rust/src/coordinate_input.rs",
+    "rust/src/cplanes.rs"
+  ],
+  "reuse_decision": "PORT",
+  "decision_note": "Legacy coordinate input is portable logic; OM9 ports the grammar and the error labels unchanged and makes the frame an explicit typed parameter instead of an implicit context.",
+  "method": "Read the legacy `rust/` module named above and the target crate; the portable behaviour is re-implemented in safe Rust (AGENTS.md rust-first) without the legacy C ABI. No legacy code is copied verbatim.",
+  "verified_utc": "2026-10-17",
+  "om9_owner": "crates/om9-core/src/coords.rs, crates/om9-scene/src/camera.rs, crates/om9-app/src/session.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test coordinates",
+    "cargo test -p om9-scene --test coordinate_frame"
+  ]
+}

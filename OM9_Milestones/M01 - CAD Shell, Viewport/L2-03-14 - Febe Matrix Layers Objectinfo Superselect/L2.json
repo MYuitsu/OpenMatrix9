@@ -87,5 +87,6 @@
       "id": "OM9-L3-03-14-008",
       "file": "M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/L3-008 - Layer State Persistence Visual Check/l3.json"
     }
-  ]
+  ],
+  "gap_note": "Layer clipboard/exchange has no L3 owner in this tree while the portable kernel exists (implementation/design/M01/W5-LAYER-CLIPBOARD.md, 10 tests). This L2 is the nearest owner; authoring the owning L3 (and its L4 queue) needs an explicit plan decision."
 }

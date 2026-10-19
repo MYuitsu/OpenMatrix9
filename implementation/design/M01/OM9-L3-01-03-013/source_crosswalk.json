@@ -1,0 +1,36 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-013-01",
+  "l3_id": "OM9-L3-01-03-013",
+  "l3_title": "Import Source Provenance Metadata",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "map source .3dm names, IDs and reported omissions",
+  "positive_oracle": "Object nhập báo source name/sha256/native id/index/family/disposition; summary đếm đúng.",
+  "negative_oracle": "Object tạo native không có provenance; thiếu một mắt bằng chứng thì None; namespace lạ là Missing.",
+  "reuse_decision": "ADD",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/provenance.rs",
+      "symbols": [
+        "Provenance",
+        "ImportSummary",
+        "Document::provenance",
+        "Document::has_source_proof",
+        "Document::import_summary",
+        "Document::namespace_summary",
+        "accumulate"
+      ],
+      "decision": "ADD"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/provenance.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test provenance -> 5 passed (includes the 2000-object x 1000-record scale guard)"
+  ],
+  "notes": "ADD a read-only provenance query over the already-retained import metadata (no 3DM decision)"
+}

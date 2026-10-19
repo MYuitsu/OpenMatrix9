@@ -286,7 +286,7 @@
         "section": "Cutting Plane",
         "topic": "cutting plane entry",
         "sheet_id": "m8book1__p217-217__cutting-plane",
-        "path": "OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange/L2-03-17 - 09-febe/L3-036 - Surface · Cutting Plane - menu binding/reference/text/m8book1__p217-217__cutting-plane.md",
+        "path": "OM9_Milestones/M03 - Geometry 3DM/L2-03-17 - 09-febe/L3-036 - Surface · Cutting Plane - menu binding/reference/text/m8book1__p217-217__cutting-plane.md",
         "role_for_this_task": "Cutting Plane entry",
         "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
         "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."

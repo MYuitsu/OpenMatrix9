@@ -21,7 +21,7 @@ from validate_standalone_foundation import ROOT, pe_imports, sha256
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--binary", type=Path, default=ROOT / "standalone/target/release/om9.exe")
+    parser.add_argument("--binary", type=Path, default=ROOT / "target/release/om9.exe")
     parser.add_argument("--output", type=Path, default=ROOT / "docs/validation/2026-10-13-standalone-ui")
     parser.add_argument("--viewport-menu", action="store_true")
     parser.add_argument("--layers", action="store_true")

@@ -1,0 +1,714 @@
+{
+  "schema": "om9.m01.l4_matrix.v1",
+  "l2_id": "OM9-L2-01-12",
+  "milestone": "M01",
+  "audited_utc": "2026-10-19",
+  "active_l3_count": 9,
+  "deferred_l3": "OM9-L3-01-12-008 (target M07, execution_stage E12, no L4 records)",
+  "l4_count": 45,
+  "status_counts": {
+    "VERIFIED_WITH_EVIDENCE": 45
+  },
+  "entries": [
+    {
+      "id": "OM9-L4-01-12-001-01",
+      "l3_id": "OM9-L3-01-12-001",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Native Project Container Format",
+      "purpose": "versioned save container and manifest",
+      "positive_case": "container contains schema, document ID, layers and BRep blobs",
+      "negative_case": "unknown schema version blocked with explicit error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/container.rs:14-15 MAGIC/VERSION",
+        "crates/om9-archive/src/container.rs:44-120 encode",
+        "crates/om9-archive/src/container.rs:156-328 decode",
+        "Decision ADD authored OM9 container; qcad project_file.rs read as reference only"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-001-02",
+      "l3_id": "OM9-L3-01-12-001",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Native Project Container Format",
+      "purpose": "versioned save container and manifest",
+      "positive_case": "container contains schema, document ID, layers and BRep blobs",
+      "negative_case": "unknown schema version blocked with explicit error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:317 container manifest/B-Rep payload",
+        "crates/om9-archive/tests/container_admission.rs:66 typed roundtrip",
+        "crates/om9-archive/tests/container_admission.rs:74 version/checksum/truncation refusal"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-001-03",
+      "l3_id": "OM9-L3-01-12-001",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Native Project Container Format",
+      "purpose": "versioned save container and manifest",
+      "positive_case": "container contains schema, document ID, layers and BRep blobs",
+      "negative_case": "unknown schema version blocked with explicit error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/container.rs:44 encode",
+        "crates/om9-archive/src/container.rs:156 decode"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-001-04",
+      "l3_id": "OM9-L3-01-12-001",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Native Project Container Format",
+      "purpose": "versioned save container and manifest",
+      "positive_case": "container contains schema, document ID, layers and BRep blobs",
+      "negative_case": "unknown schema version blocked with explicit error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-app/src/session/files.rs:375 Archive::save caller",
+        "crates/om9-app/tests/cold_reopen.rs:34 real process save/reopen"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-001-05",
+      "l3_id": "OM9-L3-01-12-001",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Native Project Container Format",
+      "purpose": "versioned save container and manifest",
+      "positive_case": "container contains schema, document ID, layers and BRep blobs",
+      "negative_case": "unknown schema version blocked with explicit error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-archive (52 passed)",
+        "cargo test --workspace --no-fail-fast -j 2"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-002-01",
+      "l3_id": "OM9-L3-01-12-002",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Scene And Layer State Encoding",
+      "purpose": "serialize entity/layer/visibility/locked state",
+      "positive_case": "Save/open entity/layer/visibility/lock state with deterministic stable IDs",
+      "negative_case": "Missing layer reference/mismatched entity count refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/model.rs:13-24 Attributes",
+        "crates/om9-core/src/model.rs:289-300 Layer",
+        "crates/om9-core/src/model.rs:330-385 Document tables",
+        "Decision REUSE_IN_PLACE model; EXTEND container"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-002-02",
+      "l3_id": "OM9-L3-01-12-002",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Scene And Layer State Encoding",
+      "purpose": "serialize entity/layer/visibility/locked state",
+      "positive_case": "Save/open entity/layer/visibility/lock state with deterministic stable IDs",
+      "negative_case": "Missing layer reference/mismatched entity count refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/layer_schema.rs:24 preset/hidden/permissions roundtrip",
+        "crates/om9-archive/tests/project_codec_acceptance.rs:358 layer/visibility/lock + missing layer refusal"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-002-03",
+      "l3_id": "OM9-L3-01-12-002",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Scene And Layer State Encoding",
+      "purpose": "serialize entity/layer/visibility/locked state",
+      "positive_case": "Save/open entity/layer/visibility/lock state with deterministic stable IDs",
+      "negative_case": "Missing layer reference/mismatched entity count refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/model.rs:709-714 entity layer exists",
+        "crates/om9-core/src/model.rs:1132-1142 layer order/current",
+        "crates/om9-core/src/model.rs:505-546 permissions"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-002-04",
+      "l3_id": "OM9-L3-01-12-002",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Scene And Layer State Encoding",
+      "purpose": "serialize entity/layer/visibility/locked state",
+      "positive_case": "Save/open entity/layer/visibility/lock state with deterministic stable IDs",
+      "negative_case": "Missing layer reference/mismatched entity count refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-app/tests/cold_layers.rs:15 independent process layer restore",
+        "crates/om9-app/tests/file_lifecycle.rs:531 save hidden/locked/off layers"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-002-05",
+      "l3_id": "OM9-L3-01-12-002",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Scene And Layer State Encoding",
+      "purpose": "serialize entity/layer/visibility/locked state",
+      "positive_case": "Save/open entity/layer/visibility/lock state with deterministic stable IDs",
+      "negative_case": "Missing layer reference/mismatched entity count refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-archive (52 passed)",
+        "cargo test -p om9-app --features gpu-sphere --test cold_layers (4 passed)"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-003-01",
+      "l3_id": "OM9-L3-01-12-003",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — B-Rep Mesh And Instance Encoding",
+      "purpose": "serializable BRep, mesh and gem instance records",
+      "positive_case": "serialized BRep survives close/open without mesh substitution",
+      "negative_case": "missing BRep blob makes load fail without dropping existing scene",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/geometry.rs:490-499 Geometry Brep/Mesh/Instance",
+        "crates/om9-core/src/brep.rs:14-39 Brep+BrepDisplay",
+        "crates/om9-core/src/model.rs:632-650 instance creation",
+        "Decision ADD authored rust-owned snapshot; OCCT only via om9-kernel"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-003-02",
+      "l3_id": "OM9-L3-01-12-003",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — B-Rep Mesh And Instance Encoding",
+      "purpose": "serializable BRep, mesh and gem instance records",
+      "positive_case": "serialized BRep survives close/open without mesh substitution",
+      "negative_case": "missing BRep blob makes load fail without dropping existing scene",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:398 B-Rep roundtrip + missing/tampered source",
+        "crates/om9-app/tests/brep_selection.rs:103 real OCCT box cold archive volume 6000"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-003-03",
+      "l3_id": "OM9-L3-01-12-003",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — B-Rep Mesh And Instance Encoding",
+      "purpose": "serializable BRep, mesh and gem instance records",
+      "positive_case": "serialized BRep survives close/open without mesh substitution",
+      "negative_case": "missing BRep blob makes load fail without dropping existing scene",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/brep.rs:43-55 from_native binding",
+        "crates/om9-core/src/brep.rs:59-128 validate topology",
+        "crates/om9-core/src/geometry.rs:570-604 mesh channels"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-003-04",
+      "l3_id": "OM9-L3-01-12-003",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — B-Rep Mesh And Instance Encoding",
+      "purpose": "serializable BRep, mesh and gem instance records",
+      "positive_case": "serialized BRep survives close/open without mesh substitution",
+      "negative_case": "missing BRep blob makes load fail without dropping existing scene",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-app/tests/brep_selection.rs:103 fresh process --inspect + volume 6000",
+        "crates/om9-core/tests/document_graph.rs:613 shared definition instances"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-003-05",
+      "l3_id": "OM9-L3-01-12-003",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — B-Rep Mesh And Instance Encoding",
+      "purpose": "serializable BRep, mesh and gem instance records",
+      "positive_case": "serialized BRep survives close/open without mesh substitution",
+      "negative_case": "missing BRep blob makes load fail without dropping existing scene",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-archive (52 passed)",
+        "cargo test -p om9-app --features gpu-sphere --test brep_selection (5 passed)"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-004-01",
+      "l3_id": "OM9-L3-01-12-004",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Builder History Stub Persistence",
+      "purpose": "reserve and preserve feature association schema",
+      "positive_case": "Save feature/history placeholder schema then reopen without recompute support",
+      "negative_case": "Unknown feature schema preserved as opaque or blocked with explicit diagnostic",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/model.rs:199-245 Feature/FeatureKind",
+        "crates/om9-core/src/history.rs:110-149 Recipe",
+        "crates/om9-archive/src/restore.rs:147-198 runtime unresolved diagnostics",
+        "Decision EXTEND existing Feature/Recipe"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-004-02",
+      "l3_id": "OM9-L3-01-12-004",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Builder History Stub Persistence",
+      "purpose": "reserve and preserve feature association schema",
+      "positive_case": "Save feature/history placeholder schema then reopen without recompute support",
+      "negative_case": "Unknown feature schema preserved as opaque or blocked with explicit diagnostic",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:435 placeholder reopen + unknown feature kind refused",
+        "crates/om9-archive/tests/document_identity_round_trip.rs:99 feature/group IDs"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-004-03",
+      "l3_id": "OM9-L3-01-12-004",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Builder History Stub Persistence",
+      "purpose": "reserve and preserve feature association schema",
+      "positive_case": "Save feature/history placeholder schema then reopen without recompute support",
+      "negative_case": "Unknown feature schema preserved as opaque or blocked with explicit diagnostic",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/history.rs:350-364 history validation/order",
+        "crates/om9-core/src/model.rs:1099-1118 feature validation",
+        "crates/om9-archive/src/restore.rs:171-191 unregistered module -> Unresolved"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-004-04",
+      "l3_id": "OM9-L3-01-12-004",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Builder History Stub Persistence",
+      "purpose": "reserve and preserve feature association schema",
+      "positive_case": "Save feature/history placeholder schema then reopen without recompute support",
+      "negative_case": "Unknown feature schema preserved as opaque or blocked with explicit diagnostic",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-app/tests/file_lifecycle.rs:481 missing replay module is diagnostic",
+        "crates/om9-app/tests/cold_reopen.rs:259 persistent recipe parameters"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-004-05",
+      "l3_id": "OM9-L3-01-12-004",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Builder History Stub Persistence",
+      "purpose": "reserve and preserve feature association schema",
+      "positive_case": "Save feature/history placeholder schema then reopen without recompute support",
+      "negative_case": "Unknown feature schema preserved as opaque or blocked with explicit diagnostic",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-archive (52 passed)",
+        "cargo test -p om9-app --features gpu-sphere --test cold_reopen (9 passed)"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-005-01",
+      "l3_id": "OM9-L3-01-12-005",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Atomic Save And Write Failure Recovery",
+      "purpose": "write temp file, validate and commit atomically",
+      "positive_case": "write temporary→sync→atomic replacement; reopen good project",
+      "negative_case": "injected disk failure preserves last valid target unchanged",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/atomic_file.rs:26-57 bounded read",
+        "crates/om9-archive/src/atomic_file.rs:58-141 save",
+        "crates/om9-native-owner/src/verified_file.rs:13-52 VerifiedFile",
+        "Decision ADD authored atomic save; reuse VerifiedFile on Windows"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-005-02",
+      "l3_id": "OM9-L3-01-12-005",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Atomic Save And Write Failure Recovery",
+      "purpose": "write temp file, validate and commit atomically",
+      "positive_case": "write temporary→sync→atomic replacement; reopen good project",
+      "negative_case": "injected disk failure preserves last valid target unchanged",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/atomic_save.rs:24 replacement reopens",
+        "crates/om9-archive/tests/atomic_save.rs:35 cancel/invalid preserves target",
+        "crates/om9-archive/tests/atomic_save.rs:56 permission failure preserves target"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-005-03",
+      "l3_id": "OM9-L3-01-12-005",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Atomic Save And Write Failure Recovery",
+      "purpose": "write temp file, validate and commit atomically",
+      "positive_case": "write temporary→sync→atomic replacement; reopen good project",
+      "negative_case": "injected disk failure preserves last valid target unchanged",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/atomic_file.rs:60-75 encode/verify before file creation",
+        "crates/om9-archive/src/atomic_file.rs:91-110 staging + fsync + reread",
+        "crates/om9-archive/src/atomic_file.rs:112-137 publish"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-005-04",
+      "l3_id": "OM9-L3-01-12-005",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Atomic Save And Write Failure Recovery",
+      "purpose": "write temp file, validate and commit atomically",
+      "positive_case": "write temporary→sync→atomic replacement; reopen good project",
+      "negative_case": "injected disk failure preserves last valid target unchanged",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-app/src/session/files.rs:375 save caller",
+        "crates/om9-app/tests/file_lifecycle.rs:197/644 save failure paths"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-005-05",
+      "l3_id": "OM9-L3-01-12-005",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Atomic Save And Write Failure Recovery",
+      "purpose": "write temp file, validate and commit atomically",
+      "positive_case": "write temporary→sync→atomic replacement; reopen good project",
+      "negative_case": "injected disk failure preserves last valid target unchanged",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-archive --test atomic_save (4 passed)",
+        "cargo test -p om9-app --features gpu-sphere --test file_lifecycle (20 passed)"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-006-01",
+      "l3_id": "OM9-L3-01-12-006",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Project Load Validation And Compatibility",
+      "purpose": "verify format/version before scene mutation",
+      "positive_case": "valid project restores ID/layer/face metadata",
+      "negative_case": "zip truncation/path traversal/unsupported schema refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/container.rs:168-326 validation pipeline",
+        "crates/om9-archive/src/json_admission.rs duplicate/depth/allocation preflight",
+        "Decision ADD authored admission; no ZIP/decompression surface"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-006-02",
+      "l3_id": "OM9-L3-01-12-006",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Project Load Validation And Compatibility",
+      "purpose": "verify format/version before scene mutation",
+      "positive_case": "valid project restores ID/layer/face metadata",
+      "negative_case": "zip truncation/path traversal/unsupported schema refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:472 damaged container refused",
+        "crates/om9-archive/tests/container_admission.rs:74-191 corruption/overflow/duplicate/JSON admission",
+        "crates/om9-archive/tests/resource_chunks.rs:70 orphan/missing chunks refused"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-006-03",
+      "l3_id": "OM9-L3-01-12-006",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Project Load Validation And Compatibility",
+      "purpose": "verify format/version before scene mutation",
+      "positive_case": "valid project restores ID/layer/face metadata",
+      "negative_case": "zip truncation/path traversal/unsupported schema refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/container.rs:180-240 table bounds/overlap/trailing",
+        "crates/om9-archive/src/container.rs:241-296 IDs/flags/checksums/typed decode",
+        "crates/om9-archive/src/container.rs:310-326 resource hydration/final validation"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-006-04",
+      "l3_id": "OM9-L3-01-12-006",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Project Load Validation And Compatibility",
+      "purpose": "verify format/version before scene mutation",
+      "positive_case": "valid project restores ID/layer/face metadata",
+      "negative_case": "zip truncation/path traversal/unsupported schema refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-app/tests/file_lifecycle.rs:320 invalid open keeps current document",
+        "crates/om9-app/tests/cold_reopen.rs:132 explicit v1 migration"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-006-05",
+      "l3_id": "OM9-L3-01-12-006",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Project Load Validation And Compatibility",
+      "purpose": "verify format/version before scene mutation",
+      "positive_case": "valid project restores ID/layer/face metadata",
+      "negative_case": "zip truncation/path traversal/unsupported schema refused",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-archive (52 passed)",
+        "cargo test -p om9-app --features gpu-sphere --test file_lifecycle (20 passed)"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-007-01",
+      "l3_id": "OM9-L3-01-12-007",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Document Reload And Restoration",
+      "purpose": "reconstruct typed identities and relationships",
+      "positive_case": "reopen matches stable IDs and mass properties",
+      "negative_case": "failed read keeps currently opened document untouched",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/lib.rs:174-207 save/open/restore/open_restored",
+        "crates/om9-archive/src/restore.rs:13-198 ReplayKey/restore",
+        "crates/om9-core/src/model.rs:463-504 renew_session",
+        "Decision REUSE Archive::open; ADD restoration diagnostics"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-007-02",
+      "l3_id": "OM9-L3-01-12-007",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Document Reload And Restoration",
+      "purpose": "reconstruct typed identities and relationships",
+      "positive_case": "reopen matches stable IDs and mass properties",
+      "negative_case": "failed read keeps currently opened document untouched",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/restore_modules.rs:75-198 six restoration tests",
+        "crates/om9-archive/tests/document_snapshot.rs:48-146 snapshot identity/tamper/version"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-007-03",
+      "l3_id": "OM9-L3-01-12-007",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Document Reload And Restoration",
+      "purpose": "reconstruct typed identities and relationships",
+      "positive_case": "reopen matches stable IDs and mass properties",
+      "negative_case": "failed read keeps currently opened document untouched",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/restore.rs:62-123 admitted restoration peak",
+        "crates/om9-archive/src/restore.rs:147-198 restore engine"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-007-04",
+      "l3_id": "OM9-L3-01-12-007",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Document Reload And Restoration",
+      "purpose": "reconstruct typed identities and relationships",
+      "positive_case": "reopen matches stable IDs and mass properties",
+      "negative_case": "failed read keeps currently opened document untouched",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-app/tests/cold_reopen.rs:34 fresh process reopen",
+        "crates/om9-app/tests/cold_layers.rs:15 fresh process layers",
+        "crates/om9-app/tests/file_lifecycle.rs:425 open budget failure keeps old world"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-007-05",
+      "l3_id": "OM9-L3-01-12-007",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Document Reload And Restoration",
+      "purpose": "reconstruct typed identities and relationships",
+      "positive_case": "reopen matches stable IDs and mass properties",
+      "negative_case": "failed read keeps currently opened document untouched",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-archive (52 passed)",
+        "cargo test -p om9-app --features gpu-sphere --test cold_reopen --test cold_layers (13 passed)"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-009-01",
+      "l3_id": "OM9-L3-01-12-009",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Export Mesh Units And Winding",
+      "purpose": "normals and millimeter units policy for STL",
+      "positive_case": "Export mesh policy encodes millimeter/winding metadata and test square triangle normals",
+      "negative_case": "Inverted normals, nonfinite vertex coordinates refused; real STL export remains M07",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-exchange/src/stl.rs:84-97 StlOptions scale/winding/strict",
+        "crates/om9-exchange/src/lib.rs:17 pub mod stl",
+        "Decision ADD authored policy; M07 owns the export command"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-009-02",
+      "l3_id": "OM9-L3-01-12-009",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Export Mesh Units And Winding",
+      "purpose": "normals and millimeter units policy for STL",
+      "positive_case": "Export mesh policy encodes millimeter/winding metadata and test square triangle normals",
+      "negative_case": "Inverted normals, nonfinite vertex coordinates refused; real STL export remains M07",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-exchange/src/stl.rs:258-352 seven unit tests",
+        "crates/om9-exchange/tests/stl_export_policy.rs:62/93/128 scale/watertight/refusal"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-009-03",
+      "l3_id": "OM9-L3-01-12-009",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Export Mesh Units And Winding",
+      "purpose": "normals and millimeter units policy for STL",
+      "positive_case": "Export mesh policy encodes millimeter/winding metadata and test square triangle normals",
+      "negative_case": "Inverted normals, nonfinite vertex coordinates refused; real STL export remains M07",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-exchange/src/stl.rs:123-137 open_edges",
+        "crates/om9-exchange/src/stl.rs:141-210 write_binary_stl scale/winding/normals/header"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-009-04",
+      "l3_id": "OM9-L3-01-12-009",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Export Mesh Units And Winding",
+      "purpose": "normals and millimeter units policy for STL",
+      "positive_case": "Export mesh policy encodes millimeter/winding metadata and test square triangle normals",
+      "negative_case": "Inverted normals, nonfinite vertex coordinates refused; real STL export remains M07",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-exchange/tests/stl_export_policy.rs:62 public API header states scale",
+        "crates/om9-exchange/tests/stl_export_policy.rs:128 strict refusal before output exists"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-009-05",
+      "l3_id": "OM9-L3-01-12-009",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Export Mesh Units And Winding",
+      "purpose": "normals and millimeter units policy for STL",
+      "positive_case": "Export mesh policy encodes millimeter/winding metadata and test square triangle normals",
+      "negative_case": "Inverted normals, nonfinite vertex coordinates refused; real STL export remains M07",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-exchange (97 passed)",
+        "cargo clippy -p om9-archive -p om9-exchange --all-targets -D warnings"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-010-01",
+      "l3_id": "OM9-L3-01-12-010",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Project Roundtrip Regression Fixtures",
+      "purpose": "save/load equality of layers, IDs and instances",
+      "positive_case": "save/open Box yields volume=6000 mm³ and matching IDs",
+      "negative_case": "corrupted bundle rejected; original remains usable",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/container.rs + atomic_file.rs + restore.rs entire codec",
+        "crates/om9-app/tests/file_lifecycle.rs open/save lifecycle",
+        "Decision REUSE codec; fixture authored for this acceptance"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-010-02",
+      "l3_id": "OM9-L3-01-12-010",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Project Roundtrip Regression Fixtures",
+      "purpose": "save/load equality of layers, IDs and instances",
+      "positive_case": "save/open Box yields volume=6000 mm³ and matching IDs",
+      "negative_case": "corrupted bundle rejected; original remains usable",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:511 full fixture save/open/damage/duplicate",
+        "crates/om9-app/tests/brep_selection.rs:103 real OCCT box volume 6000"
+      ],
+      "red_receipt": "RETROFIT: the contract is pinned by the named regression test; the original RED run predates this audit record and is not retained."
+    },
+    {
+      "id": "OM9-L4-01-12-010-03",
+      "l3_id": "OM9-L3-01-12-010",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Project Roundtrip Regression Fixtures",
+      "purpose": "save/load equality of layers, IDs and instances",
+      "positive_case": "save/open Box yields volume=6000 mm³ and matching IDs",
+      "negative_case": "corrupted bundle rejected; original remains usable",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/src/container.rs:44-120 encode",
+        "crates/om9-archive/src/atomic_file.rs:58-141 save"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-010-04",
+      "l3_id": "OM9-L3-01-12-010",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Project Roundtrip Regression Fixtures",
+      "purpose": "save/load equality of layers, IDs and instances",
+      "positive_case": "save/open Box yields volume=6000 mm³ and matching IDs",
+      "negative_case": "corrupted bundle rejected; original remains usable",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-app/tests/cold_layers.rs:15",
+        "crates/om9-app/tests/cold_reopen.rs:432",
+        "crates/om9-archive/tests/document_identity_round_trip.rs:99"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-01-12-010-05",
+      "l3_id": "OM9-L3-01-12-010",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Project Roundtrip Regression Fixtures",
+      "purpose": "save/load equality of layers, IDs and instances",
+      "positive_case": "save/open Box yields volume=6000 mm³ and matching IDs",
+      "negative_case": "corrupted bundle rejected; original remains usable",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "cargo test -p om9-archive (52 passed)",
+        "cargo test --workspace --no-fail-fast -j 2"
+      ],
+      "red_receipt": null
+    }
+  ]
+}

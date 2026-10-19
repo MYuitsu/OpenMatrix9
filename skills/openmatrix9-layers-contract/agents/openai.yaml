@@ -1,4 +1,4 @@
 interface:
   display_name: "OpenMatrix9 Layers Contract"
   short_description: "Approved layer gestures, visibility and ownership rules"
-  default_prompt: "Use $openmatrix9-layers-contract to implement the approved Layers gestures in standalone OM9 using specs v2 and the Matrix9 UI contract."
+  default_prompt: "Use $openmatrix9-layers-contract to implement the approved Layers gestures in standalone OM9 using milestone contracts and the Matrix9 UI contract."

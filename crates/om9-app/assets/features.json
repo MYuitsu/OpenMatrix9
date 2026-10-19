@@ -1,0 +1,3650 @@
+[
+  {
+    "id": "OM9-IFACE-001",
+    "name": "Matrix Interface",
+    "command": null,
+    "module": "A Tour of the Interface"
+  },
+  {
+    "id": "OM9-MAIN-001",
+    "name": "Main Menu",
+    "command": null,
+    "module": "The Main Menu"
+  },
+  {
+    "id": "OM9-F6-001",
+    "name": "F6 Context Menu",
+    "command": "F6",
+    "module": "The F6 Menu"
+  },
+  {
+    "id": "OM9-VIEWPORT-001",
+    "name": "Four Viewports / C-Plane / F4",
+    "command": null,
+    "module": "Modeling in the Viewports"
+  },
+  {
+    "id": "OM9-BUILDERCORE-001",
+    "name": "Builder Framework",
+    "command": null,
+    "module": "Builders vs. Commands"
+  },
+  {
+    "id": "OM9-STYLE-001",
+    "name": "Styles Framework",
+    "command": null,
+    "module": "Styles"
+  },
+  {
+    "id": "OM9-INFO-001",
+    "name": "Object Properties",
+    "command": "Properties",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-002",
+    "name": "Rhino Options",
+    "command": "Options",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-003",
+    "name": "All Object Info",
+    "command": null,
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-004",
+    "name": "Command History",
+    "command": null,
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-005",
+    "name": "Object Info",
+    "command": "DisplayProperties",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-006",
+    "name": "Project Notes",
+    "command": null,
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-007",
+    "name": "Super Select",
+    "command": null,
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-008",
+    "name": "Viewport Tabs Toggle",
+    "command": "ViewportTabs",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-009",
+    "name": "Box Edit Menu",
+    "command": "BoxEdit",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-010",
+    "name": "Display Menu",
+    "command": null,
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-011",
+    "name": "Library Menu",
+    "command": "Libraries",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-012",
+    "name": "Selection Filter Menu",
+    "command": "SelectionFilter",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-013",
+    "name": "SmartTrack",
+    "command": "SmartTrack",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-014",
+    "name": "Design Report",
+    "command": "gvDesignReport",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-015",
+    "name": "Rhino History",
+    "command": "History",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-016",
+    "name": "Matrix Clear Object History",
+    "command": null,
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-017",
+    "name": "Matrix History Record",
+    "command": null,
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-018",
+    "name": "Matrix History Update",
+    "command": null,
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-019",
+    "name": "Smart Target MSR",
+    "command": "gvSmartMSR",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-020",
+    "name": "Gumball",
+    "command": "Gumball",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-021",
+    "name": "Gumball Alignment",
+    "command": "GumballAlignment",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-INFO-022",
+    "name": "Relocate Gumball",
+    "command": "RelocateGumball",
+    "module": "Info & Settings"
+  },
+  {
+    "id": "OM9-HISTORY-001",
+    "name": "History Workflow",
+    "command": null,
+    "module": "History"
+  },
+  {
+    "id": "OM9-LAYER-001",
+    "name": "Layer Management",
+    "command": null,
+    "module": "Layers"
+  },
+  {
+    "id": "OM9-PROJECT-001",
+    "name": "Project Manager Workflow",
+    "command": null,
+    "module": "Project Manager"
+  },
+  {
+    "id": "OM9-PROJECTDB-001",
+    "name": "Project Manager Database",
+    "command": null,
+    "module": "Project Manager Database"
+  },
+  {
+    "id": "OM9-SNAP-001",
+    "name": "Center Snap",
+    "command": "Osnap C",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-002",
+    "name": "End Snap",
+    "command": "Osnap E",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-003",
+    "name": "Mid Snap",
+    "command": "Osnap M",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-004",
+    "name": "Quad Snap",
+    "command": "Osnap Q",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-005",
+    "name": "Intersection Snap",
+    "command": "Osnap I",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-006",
+    "name": "Near Snap",
+    "command": "Osnap N",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-007",
+    "name": "Point Snap",
+    "command": "Osnap P",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-008",
+    "name": "Tangent Snap",
+    "command": "Osnap T",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-009",
+    "name": "Between",
+    "command": null,
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-010",
+    "name": "Perpendicular Snap",
+    "command": "Osnap R",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-011",
+    "name": "Polysurface Snap",
+    "command": null,
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-012",
+    "name": "Surface Snap",
+    "command": null,
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-013",
+    "name": "Grid Snap",
+    "command": null,
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-014",
+    "name": "Ortho",
+    "command": "Ortho",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-015",
+    "name": "Planar",
+    "command": "Planar",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-SNAP-016",
+    "name": "Project",
+    "command": "ProjectOsnap",
+    "module": "Snaps"
+  },
+  {
+    "id": "OM9-DISPLAY-001",
+    "name": "Preview Shade",
+    "command": null,
+    "module": "Display"
+  },
+  {
+    "id": "OM9-DISPLAY-002",
+    "name": "Shade Selected",
+    "command": null,
+    "module": "Display"
+  },
+  {
+    "id": "OM9-DISPLAY-003",
+    "name": "Show Cutters",
+    "command": null,
+    "module": "Display"
+  },
+  {
+    "id": "OM9-DISPLAY-004",
+    "name": "Show Grid",
+    "command": null,
+    "module": "Display"
+  },
+  {
+    "id": "OM9-DISPLAY-005",
+    "name": "Gem View",
+    "command": null,
+    "module": "Display"
+  },
+  {
+    "id": "OM9-DISPLAY-006",
+    "name": "Render Mesh",
+    "command": null,
+    "module": "Display"
+  },
+  {
+    "id": "OM9-DISPLAY-007",
+    "name": "Surface View",
+    "command": null,
+    "module": "Display"
+  },
+  {
+    "id": "OM9-DISPLAY-008",
+    "name": "Shade Mode",
+    "command": null,
+    "module": "Display"
+  },
+  {
+    "id": "OM9-TOP11-001",
+    "name": "Control Points On",
+    "command": "PointsOn",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-002",
+    "name": "Duplicate",
+    "command": "Copy",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-003",
+    "name": "Edit Points On",
+    "command": "EditPtOn",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-004",
+    "name": "Mirror",
+    "command": "Mirror",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-005",
+    "name": "Explode",
+    "command": "Explode",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-006",
+    "name": "Move",
+    "command": "Move",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-007",
+    "name": "Rotate",
+    "command": "Rotate",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-008",
+    "name": "Join",
+    "command": "Join",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-009",
+    "name": "Split",
+    "command": "Split",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-010",
+    "name": "Trim",
+    "command": "Trim",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-TOP11-011",
+    "name": "Ring Rail",
+    "command": "gvRingRail",
+    "module": "Top 11 Buttons"
+  },
+  {
+    "id": "OM9-FILE-001",
+    "name": "Export Selected",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-002",
+    "name": "New",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-003",
+    "name": "Open",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-004",
+    "name": "Import",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-005",
+    "name": "Save",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-006",
+    "name": "Save As",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-007",
+    "name": "Save Small",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-008",
+    "name": "Notes",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-009",
+    "name": "Print",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-010",
+    "name": "Save Small As",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-FILE-011",
+    "name": "Stuller Studio CAM Services",
+    "command": null,
+    "module": "File"
+  },
+  {
+    "id": "OM9-VIEW-001",
+    "name": "Picture Frame",
+    "command": "PictureFrame",
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-002",
+    "name": "Restore Viewports",
+    "command": null,
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-003",
+    "name": "Synchronize Viewports",
+    "command": "SynchronizeViews",
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-004",
+    "name": "Zoom Dynamic",
+    "command": "Zoom_Dynamic",
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-005",
+    "name": "Viewport to File",
+    "command": "ViewCaptureToFile",
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-006",
+    "name": "Zoom Extents",
+    "command": "Zoom_Extents",
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-007",
+    "name": "Zoom Selected",
+    "command": "Zoom_Selected",
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-008",
+    "name": "Zoom Window",
+    "command": "Zoom_Window",
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-009",
+    "name": "Set Crosshairs",
+    "command": "Crosshairs",
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-010",
+    "name": "System 6 HD View",
+    "command": null,
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-011",
+    "name": "Zoom 1:1",
+    "command": null,
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-012",
+    "name": "Center Viewport",
+    "command": null,
+    "module": "View"
+  },
+  {
+    "id": "OM9-VIEW-013",
+    "name": "Zoom 1:1 Calibrate",
+    "command": null,
+    "module": "View"
+  },
+  {
+    "id": "OM9-UTIL-001",
+    "name": "Direction",
+    "command": "Dir",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-002",
+    "name": "Check",
+    "command": "Check",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-003",
+    "name": "Select Bad Objects",
+    "command": "SelBadObjects",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-004",
+    "name": "Show Edges",
+    "command": "ShowEdges",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-005",
+    "name": "Merge Edge",
+    "command": "MergeEdge",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-006",
+    "name": "Split Edge",
+    "command": "SplitEdge",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-007",
+    "name": "Join 2 Naked Edges",
+    "command": "Join Edges",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-008",
+    "name": "Make 2D Drawing",
+    "command": "Make2D",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-009",
+    "name": "Unjoin Edge",
+    "command": "UnjoinEdge",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-010",
+    "name": "Bounding Box",
+    "command": "BoundingBox",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-011",
+    "name": "Center Object",
+    "command": "gvCenterObjects",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-012",
+    "name": "Group",
+    "command": "Group",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-013",
+    "name": "Extract Bad Surface",
+    "command": "ExtractBadSrf",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-014",
+    "name": "Show Z Buffer",
+    "command": "ShowZBuffer",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-015",
+    "name": "UnGroup",
+    "command": "UnGroup",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-016",
+    "name": "Align Mesh Vertices",
+    "command": "AlignMeshVertices",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-017",
+    "name": "Fill Hole",
+    "command": "FillMeshHole",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-018",
+    "name": "Fill Holes",
+    "command": "FillMeshHoles",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-019",
+    "name": "Mesh from NURBS Object",
+    "command": null,
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-020",
+    "name": "Apply Mesh UVN",
+    "command": "ApplyMeshUVN",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-021",
+    "name": "Mesh Reduce",
+    "command": "ReduceMesh",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-UTIL-022",
+    "name": "Extract Render Mesh",
+    "command": "ExtractRenderMesh",
+    "module": "Utilities"
+  },
+  {
+    "id": "OM9-MEASURE-001",
+    "name": "Angle",
+    "command": "Angle",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-002",
+    "name": "Distance",
+    "command": "Distance",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-003",
+    "name": "Length",
+    "command": "Length",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-004",
+    "name": "Horizontal Dimension",
+    "command": "Dim",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-005",
+    "name": "Radius",
+    "command": "Radius",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-006",
+    "name": "Vertical Dimension",
+    "command": "Dim",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-007",
+    "name": "Angle Dimension",
+    "command": "DimAngle",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-008",
+    "name": "Rotated Dimension",
+    "command": "DimRotated",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-009",
+    "name": "Aligned Dimension",
+    "command": "DimAligned",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-010",
+    "name": "Diameter Dimension",
+    "command": "DimDiameter",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-011",
+    "name": "Radial Dimension",
+    "command": "DimRadius",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-012",
+    "name": "Leader",
+    "command": "Leader",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-013",
+    "name": "Text Block",
+    "command": "Text",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-014",
+    "name": "Edit Dimension",
+    "command": null,
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-015",
+    "name": "Edit Text",
+    "command": "gvEditText",
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-016",
+    "name": "Dimension Options",
+    "command": null,
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-MEASURE-017",
+    "name": "Recenter Dimension Text",
+    "command": null,
+    "module": "Measure"
+  },
+  {
+    "id": "OM9-CURVE-001",
+    "name": "PolyLine",
+    "command": "Polyline",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-002",
+    "name": "Line",
+    "command": "Line",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-003",
+    "name": "Interp Curve",
+    "command": "InterpCrv",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-004",
+    "name": "Rectangle",
+    "command": "Rectangle",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-005",
+    "name": "Circle",
+    "command": "Circle",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-006",
+    "name": "Ellipse",
+    "command": "Ellipse",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-007",
+    "name": "Arc",
+    "command": "Arc",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-008",
+    "name": "Arc Direction",
+    "command": "Arc_StartPoint",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-009",
+    "name": "Rebuild",
+    "command": "Rebuild",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-010",
+    "name": "Refit to Tolerance",
+    "command": "FitCrv",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-011",
+    "name": "Quick Curve Blend",
+    "command": "Blend",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-012",
+    "name": "Adjustable Curve Blend",
+    "command": "BlendCrv",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-013",
+    "name": "Curve from 2 Views",
+    "command": "Crv2View",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-014",
+    "name": "Curve 2 Views with History",
+    "command": null,
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-015",
+    "name": "Pullback",
+    "command": "Pull",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-016",
+    "name": "Project",
+    "command": "Project",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-017",
+    "name": "Intersection",
+    "command": "Intersect",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-018",
+    "name": "Offset Curve",
+    "command": "Offset",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-019",
+    "name": "Extract Isocurve",
+    "command": "ExtractIsocurve",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-020",
+    "name": "Offset Curve on Surface",
+    "command": "OffsetCrvOnSrf",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-021",
+    "name": "Fillet Curves",
+    "command": "Fillet",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-022",
+    "name": "Chamfer Curves",
+    "command": "Chamfer",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-023",
+    "name": "Fillet Corners",
+    "command": "FilletCorners",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-024",
+    "name": "Apply UV Curves",
+    "command": "ApplyCrv",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-025",
+    "name": "Create UV Curves",
+    "command": "CreateUVCrv",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-026",
+    "name": "Through Points",
+    "command": "CurveThroughPt",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-027",
+    "name": "Extend Curve",
+    "command": "Extend",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-028",
+    "name": "Polygon",
+    "command": "Polygon",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-029",
+    "name": "Spiral",
+    "command": "Spiral",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-030",
+    "name": "Helix",
+    "command": "Helix",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-031",
+    "name": "Adjust Closed Curve Seam",
+    "command": "CrvSeam",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-032",
+    "name": "Mark Curve End",
+    "command": "CrvEnd",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-033",
+    "name": "Mark Curve Start",
+    "command": "CrvStart",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-034",
+    "name": "Point",
+    "command": "Point",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-035",
+    "name": "Continue Interpolated Curve",
+    "command": "ContinueinterpCrv",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-036",
+    "name": "Divide Curve",
+    "command": "Divide",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-037",
+    "name": "Curve Boolean",
+    "command": "CurveBoolean",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-038",
+    "name": "Tween Curves",
+    "command": "TweenCurves",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-039",
+    "name": "Duplicate Border",
+    "command": "DupBorder",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-040",
+    "name": "Duplicate Edge",
+    "command": "DupEdge",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-041",
+    "name": "Continue Control Point Curve",
+    "command": "ContinueCurve",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-042",
+    "name": "Curve",
+    "command": "Curve",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-043",
+    "name": "Cross Section Profiles",
+    "command": "CSec",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-044",
+    "name": "Extract Angle Isocurve",
+    "command": "gvExtractIsocurve",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-045",
+    "name": "Sketch",
+    "command": "Sketch",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-046",
+    "name": "Sketch on Surface",
+    "command": "Sketch O",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-047",
+    "name": "Interp Curve on Surface",
+    "command": "InterpCrvOnSrf",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-048",
+    "name": "Polyline on Surface",
+    "command": "gvPolylineOnSurface",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-049",
+    "name": "Sketch on Mesh",
+    "command": "Sketch N",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-050",
+    "name": "Curve to Lines",
+    "command": "Convert",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-051",
+    "name": "Section",
+    "command": "Section",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-052",
+    "name": "Match",
+    "command": "Match",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-053",
+    "name": "Silhouette",
+    "command": null,
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-054",
+    "name": "Extract Wire Frame",
+    "command": "ExtractWire",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-055",
+    "name": "Soft Edit",
+    "command": null,
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-056",
+    "name": "Arc Blend",
+    "command": "ArcBlend",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-057",
+    "name": "Offset Normal to Surface",
+    "command": "Offset Normal",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-CURVE-058",
+    "name": "Intersect Two Sets",
+    "command": "IntersectTwoSets",
+    "module": "Curve Tools"
+  },
+  {
+    "id": "OM9-SURFACE-001",
+    "name": "Sweep 1",
+    "command": "Sweep1",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-002",
+    "name": "Sweep 1 History",
+    "command": "gvSweepHistory",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-003",
+    "name": "Sweep 2",
+    "command": "Sweep2",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-004",
+    "name": "Sweep 2 History",
+    "command": "gvSweep2History",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-005",
+    "name": "Profile Sweep",
+    "command": "gvProfileSweep",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-006",
+    "name": "Rebuild",
+    "command": "Rebuild",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-007",
+    "name": "Blend Surface",
+    "command": "BlendSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-008",
+    "name": "Variable Blend Surfaces",
+    "command": "VariableBlendSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-009",
+    "name": "Loft",
+    "command": "Loft",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-010",
+    "name": "Curve Network",
+    "command": null,
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-011",
+    "name": "Patch",
+    "command": "Patch",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-012",
+    "name": "Shrink Trimmed Surface",
+    "command": "ShrinkTrimmedSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-013",
+    "name": "Planar Curves",
+    "command": "PlanarSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-014",
+    "name": "Edge Curves",
+    "command": "EdgeSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-015",
+    "name": "Plane from Corners",
+    "command": "Plane",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-016",
+    "name": "Surface Extrude All",
+    "command": null,
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-017",
+    "name": "Untrim",
+    "command": "Untrim",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-018",
+    "name": "Revolve",
+    "command": "Revolve",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-019",
+    "name": "Rail Revolve",
+    "command": "RailRevolve",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-020",
+    "name": "Fillet Surfaces",
+    "command": "FilletSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-021",
+    "name": "Sweep 4",
+    "command": "gvFourProfileSweep",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-022",
+    "name": "Variable Fillet Surfaces",
+    "command": "VariableFilletSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-023",
+    "name": "Chamfer Surfaces",
+    "command": "ChamferSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-024",
+    "name": "Variable Chamfer Surfaces",
+    "command": "VariableChamferSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-025",
+    "name": "Offset Surface",
+    "command": "OffsetSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-026",
+    "name": "Variable Offset Surface",
+    "command": "VariableOffsetSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-027",
+    "name": "Tween Surfaces",
+    "command": "TweenSurfaces",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-028",
+    "name": "Match Surfaces",
+    "command": "MatchSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-029",
+    "name": "Merge Surfaces",
+    "command": "MergeSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-030",
+    "name": "Drape",
+    "command": "Drape",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-031",
+    "name": "Heightfield from Image",
+    "command": "Heightfield",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-032",
+    "name": "Sweep Multi",
+    "command": "gvfourSweep",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-033",
+    "name": "Extend Surface",
+    "command": "ExtendSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-034",
+    "name": "Split at Isocurve",
+    "command": null,
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-035",
+    "name": "Extrude Normal to Surface",
+    "command": "Fin",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-036",
+    "name": "Unroll Surface",
+    "command": "UnrollSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-037",
+    "name": "Soft Edit",
+    "command": "SoftEditSrf",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-038",
+    "name": "Adjust Closed Surface Seam",
+    "command": "SrfSeam",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-039",
+    "name": "Cutting Plane",
+    "command": "CutPlane",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-040",
+    "name": "Set Surface Tangent",
+    "command": "SetSurfaceTangent",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SOLID-001",
+    "name": "Boolean Difference",
+    "command": "BooleanDifference",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-002",
+    "name": "Boolean Intersection",
+    "command": "BooleanIntersection",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-003",
+    "name": "Boolean Union",
+    "command": "BooleanUnion",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-004",
+    "name": "Boolean Two Objects",
+    "command": "Boolean2Objects",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-005",
+    "name": "Cap Planar",
+    "command": "Cap",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-006",
+    "name": "Extract Surface",
+    "command": "ExtractSrf",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-007",
+    "name": "Fillet Edge",
+    "command": "FilletEdge",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-008",
+    "name": "Text",
+    "command": "TextObject",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-009",
+    "name": "Extrude Curve Straight",
+    "command": "ExtrudeCrv",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-010",
+    "name": "Solid Extrude All",
+    "command": "ExtrudeCrv",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-011",
+    "name": "Pipe",
+    "command": "Pipe",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-012",
+    "name": "Box",
+    "command": "Box",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-013",
+    "name": "Ellipsoid",
+    "command": "Ellipsoid",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-014",
+    "name": "Sphere",
+    "command": "Sphere",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-015",
+    "name": "Torus",
+    "command": "Torus",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-016",
+    "name": "Cylinder",
+    "command": "Cylinder",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-017",
+    "name": "Tube",
+    "command": "Tube",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-018",
+    "name": "Pyramid",
+    "command": "Pyramid",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-019",
+    "name": "Cone",
+    "command": "Cone",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-020",
+    "name": "Truncated Cone",
+    "command": "TCone",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-021",
+    "name": "Boss",
+    "command": "Boss",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-022",
+    "name": "Rib",
+    "command": "Rib",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-023",
+    "name": "Make Hole",
+    "command": "MakeHole",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-024",
+    "name": "Slab",
+    "command": "Slab",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-025",
+    "name": "Array Hole",
+    "command": "ArrayHole",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-026",
+    "name": "Array Hole Polar",
+    "command": "ArrayHolePolar",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-027",
+    "name": "Move Hole",
+    "command": "MoveHole",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-028",
+    "name": "Move Face",
+    "command": null,
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-SOLID-029",
+    "name": "Shell",
+    "command": "Shell",
+    "module": "Solid Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-001",
+    "name": "Scale 3D",
+    "command": "Scale",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-002",
+    "name": "Scale2D",
+    "command": "Scale2D",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-003",
+    "name": "Scale Non-Uniform",
+    "command": "ScaleNU",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-004",
+    "name": "Scale1D",
+    "command": "Scale1D",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-005",
+    "name": "Orient 2 Points",
+    "command": "Orient",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-006",
+    "name": "Orient 3 Points",
+    "command": "Orient3Pt",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-007",
+    "name": "Bend",
+    "command": "Bend",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-008",
+    "name": "Rotate3D",
+    "command": "Rotate3D",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-009",
+    "name": "Array Polar",
+    "command": "Array Polar",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-010",
+    "name": "Project To C-Plane",
+    "command": "ProjectToCplane",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-011",
+    "name": "Smart Flow",
+    "command": "gvSmartFlow",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-012",
+    "name": "Smart Flow Rigid",
+    "command": "GvSmartFlowRigid",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-013",
+    "name": "Orient on Surface",
+    "command": "OrientOnSrf",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-014",
+    "name": "Smart Flow Break",
+    "command": "gvSmartFlowBreak",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-015",
+    "name": "Smart Flow Pull Down Curves",
+    "command": "gvSmartFlowPullDownCurves",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-016",
+    "name": "Orient Perpendicular to Curve",
+    "command": "OrientOnCrv",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-017",
+    "name": "Orient on Curve",
+    "command": "OrientOnCrv",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-018",
+    "name": "Symmetry",
+    "command": "Symmetry",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-019",
+    "name": "Solid Points ON",
+    "command": "SolidPtOn",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-020",
+    "name": "Cage Edit",
+    "command": "CageEdit",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-021",
+    "name": "Array Along Curve",
+    "command": "ArrayCrv",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-022",
+    "name": "ReleaseFromCage",
+    "command": "ReleaseFromCage",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-023",
+    "name": "Array Along Surface",
+    "command": "ArraySrf",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-024",
+    "name": "Array Linear",
+    "command": "ArrayLinear",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-025",
+    "name": "Array",
+    "command": "Array",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-026",
+    "name": "Array Curve on Surface",
+    "command": "ArrayCrvOnSrf",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-027",
+    "name": "Flow Along Curve",
+    "command": "Flow",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-028",
+    "name": "Flow Along Surface",
+    "command": null,
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-029",
+    "name": "Splop",
+    "command": "Splop",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-030",
+    "name": "Set Points",
+    "command": "SetPt",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-031",
+    "name": "Scale By Plane",
+    "command": "ScaleByPlane",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-032",
+    "name": "Stretch",
+    "command": "Stretch",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-033",
+    "name": "Taper",
+    "command": "Taper",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-034",
+    "name": "Shear",
+    "command": "Shear",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-035",
+    "name": "Maelstrom",
+    "command": "Maelstrom",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-036",
+    "name": "Twist",
+    "command": "Twist",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-037",
+    "name": "Make Down Facing",
+    "command": "gvMakeDownFacing",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-038",
+    "name": "Remap to C-Plane",
+    "command": "RemapCPlane",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-039",
+    "name": "MoveUVN",
+    "command": "MoveUVN",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-040",
+    "name": "Soft Move",
+    "command": "SoftMove",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TRANSFORM-041",
+    "name": "Create Cage",
+    "command": "Cage",
+    "module": "Transform Tools"
+  },
+  {
+    "id": "OM9-TSPLINE-001",
+    "name": "T-Splines HUD",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-002",
+    "name": "Convert to T-Splines",
+    "command": "tsConvert",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-003",
+    "name": "T-Splines to Rhino Surface",
+    "command": "tsConvertToRhinosurf",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-004",
+    "name": "Loop Select",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-005",
+    "name": "Ring Select",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-006",
+    "name": "Symmetry",
+    "command": "tsSymmetry",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-007",
+    "name": "Symmetry Off",
+    "command": "tsSymmetryOff",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-008",
+    "name": "X and Y Symmetry",
+    "command": "gvtsMirrorXY",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-009",
+    "name": "Box/Smooth Toggle",
+    "command": "tsSmoothToggle",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-010",
+    "name": "X Symmetry",
+    "command": "gvtsMirrorX",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-011",
+    "name": "Y Symmetry",
+    "command": "gvtsMirrorY",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-012",
+    "name": "Compatibility Mode",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-013",
+    "name": "Drag Modes",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-014",
+    "name": "Scale (MSR)",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-015",
+    "name": "Translate (MSR)",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-016",
+    "name": "Rotate (MSR)",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-017",
+    "name": "Set Pivot Point (MSR)",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-018",
+    "name": "Select Edge (Mode)",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-019",
+    "name": "Select Face (Mode)",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-020",
+    "name": "Select Vert (Mode)",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-021",
+    "name": "Extrude",
+    "command": "tsExtrude",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-022",
+    "name": "Select Object (Mode)",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-023",
+    "name": "Insert Edge Simple",
+    "command": "tsInsertEdgeSimple",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-024",
+    "name": "Insert Edge Exact",
+    "command": "tsInsertEdgeExact",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-025",
+    "name": "Insert Point Simple",
+    "command": "tsInsertPointSimple",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-026",
+    "name": "Insert Point Exact",
+    "command": "tsInsertPointExact",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-027",
+    "name": "Thicken",
+    "command": "tsThicken",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-028",
+    "name": "Append",
+    "command": "tsAppend",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-029",
+    "name": "Bridge",
+    "command": "tsBridge",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-030",
+    "name": "Pipe",
+    "command": "tsPipe",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-031",
+    "name": "Fill Hole",
+    "command": "tsFillHole",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-032",
+    "name": "Subdivide Simple",
+    "command": "tsSubdivideFaceSimple",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-033",
+    "name": "Crease",
+    "command": "tsCrease",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-034",
+    "name": "Subdivide Exact",
+    "command": "tsSubdivideFaceExact",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-035",
+    "name": "Merge",
+    "command": "tsMerge",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-036",
+    "name": "Remove Creases",
+    "command": "tsRemoveCreases",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-037",
+    "name": "Set Points",
+    "command": "SetPt",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-038",
+    "name": "Unweld",
+    "command": "tsUnweld",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-039",
+    "name": "Weld",
+    "command": "tsweld",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-040",
+    "name": "Make Uniform",
+    "command": "tsMakeUniform",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-041",
+    "name": "T-Spline Box",
+    "command": "tsBox",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-042",
+    "name": "T-Spline Primitives",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-043",
+    "name": "T-Spline Sphere",
+    "command": "tsSphere",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-044",
+    "name": "T-Spline Quadball",
+    "command": "tsQuadBall",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-045",
+    "name": "T-Spline Cylinder",
+    "command": "tsCylinder",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-046",
+    "name": "T-Spline Cone",
+    "command": "tsCone",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-047",
+    "name": "T-Spline Torus",
+    "command": "tsTorus",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-048",
+    "name": "Plane",
+    "command": "tsPlane",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-049",
+    "name": "T-Splines Tube from Curves",
+    "command": "gvtsTubeFromCrvs",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-050",
+    "name": "T-Spline Bezel Builder",
+    "command": "gvtsBezelBuilder",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-051",
+    "name": "T-Splines Under Bezel",
+    "command": "gvtsUnderBezel",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-052",
+    "name": "T-Splines Signet",
+    "command": "gvtsSignet",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-053",
+    "name": "Skin",
+    "command": "tsSkin",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-054",
+    "name": "Loft",
+    "command": "tsLoft",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-055",
+    "name": "Duplicate",
+    "command": "tsDuplicateFaces",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-056",
+    "name": "Match",
+    "command": "tsMatch",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-057",
+    "name": "Pull",
+    "command": "tsPull",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-058",
+    "name": "Selection Sets",
+    "command": "tsSelSet",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-059",
+    "name": "Weight",
+    "command": "tsWeight",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-060",
+    "name": "Edit Layout",
+    "command": "tsLayout",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-061",
+    "name": "T-Splines Library",
+    "command": "gvTSplinesLibrary",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-062",
+    "name": "Bevel",
+    "command": "tsBevel",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-063",
+    "name": "Extract Wireframe",
+    "command": "gvtsExtractWireframe",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-064",
+    "name": "Slide",
+    "command": "tsSlide",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-065",
+    "name": "Flatten",
+    "command": "tsFlattenPoints",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-066",
+    "name": "Flip Normals",
+    "command": "tsFlip",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-067",
+    "name": "Extract Edge Curves",
+    "command": "tsExtractEdges",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-068",
+    "name": "Retopology Snap Options",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-069",
+    "name": "Split Curves",
+    "command": "tsSplitCurves",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-070",
+    "name": "Edit UVs",
+    "command": "tsUVEditor",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-071",
+    "name": "Mesh T-Spline",
+    "command": "tsMesh",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-072",
+    "name": "From Lines",
+    "command": "tsFromLines",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-073",
+    "name": "Extrude Lines",
+    "command": "tsExtrudeLines",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-074",
+    "name": "Grow",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-075",
+    "name": "Shrink",
+    "command": null,
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-076",
+    "name": "Options",
+    "command": "tsOptions",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-077",
+    "name": "Standardize Surface",
+    "command": "tsStandardize",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-TSPLINE-078",
+    "name": "Proxy",
+    "command": "tsProxy",
+    "module": "T-Splines"
+  },
+  {
+    "id": "OM9-ART-001",
+    "name": "Matrix Art",
+    "command": null,
+    "module": "Matrix Art"
+  },
+  {
+    "id": "OM9-ART-002",
+    "name": "Layer Menu (Matrix Art)",
+    "command": null,
+    "module": "Matrix Art"
+  },
+  {
+    "id": "OM9-ART-003",
+    "name": "Picture Menu",
+    "command": null,
+    "module": "Matrix Art"
+  },
+  {
+    "id": "OM9-ART-004",
+    "name": "Tips and Tricks",
+    "command": null,
+    "module": "Matrix Art"
+  },
+  {
+    "id": "OM9-ART-005",
+    "name": "Effects Menu",
+    "command": null,
+    "module": "Matrix Art"
+  },
+  {
+    "id": "OM9-ART-006",
+    "name": "Sculpt Menu",
+    "command": null,
+    "module": "Matrix Art"
+  },
+  {
+    "id": "OM9-ART-007",
+    "name": "Convert to Bitmap",
+    "command": "SaveScreenAreaAsHeightfield",
+    "module": "Matrix Art"
+  },
+  {
+    "id": "OM9-BUILDER-001",
+    "name": "Eternity Band Builder",
+    "command": "gvEternity",
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-002",
+    "name": "Signet Builder",
+    "command": "gvSignet",
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-003",
+    "name": "T-Spline Signet Ring Builder",
+    "command": "gvtsSignet",
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-004",
+    "name": "Raised Band Builder",
+    "command": "gvBuilderRaisedBand",
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-005",
+    "name": "Award Ring Builder",
+    "command": null,
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-006",
+    "name": "Knot Builder",
+    "command": null,
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-007",
+    "name": "Freeform Knot Builder",
+    "command": null,
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-008",
+    "name": "Jump Ring Builder",
+    "command": null,
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-009",
+    "name": "Pattern Builder",
+    "command": null,
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-BUILDER-010",
+    "name": "Nautilus Builder",
+    "command": "gvNatBuiler",
+    "module": "Builders"
+  },
+  {
+    "id": "OM9-TOOLS-001",
+    "name": "Ring Rail",
+    "command": "gvRingRail",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-002",
+    "name": "Profile Placer",
+    "command": "gvProfilePlacer",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-003",
+    "name": "Outside Ring Rail",
+    "command": "gvOutsideRingRail",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-004",
+    "name": "Custom Rail",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-005",
+    "name": "Four Rail Profile",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-006",
+    "name": "Metal Weights",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-007",
+    "name": "Ring Resizer",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-008",
+    "name": "Surface Pullback",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-009",
+    "name": "Bermark Library",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-010",
+    "name": "Stuller Findings Library",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-011",
+    "name": "Smart Target",
+    "command": "gvSmartTarget",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-012",
+    "name": "Smart Blend",
+    "command": "gvSmartBlend",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-013",
+    "name": "Smart Target Add",
+    "command": "gvSmartTargetAdd",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-014",
+    "name": "Smart Targets on Curve End",
+    "command": "gvSmartTargetOnCrvEnd",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-015",
+    "name": "Smart MSR",
+    "command": "gvSmartMSR",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-016",
+    "name": "Image Trace",
+    "command": "gvImageTrace",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-017",
+    "name": "Join History",
+    "command": "gvJoinHistory",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-018",
+    "name": "Object Checker",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-019",
+    "name": "3D Printing",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-020",
+    "name": "Mesh Repair",
+    "command": "gvMeshRepair",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-021",
+    "name": "Support Region Analysis",
+    "command": "gvViewSupportRegions",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-022",
+    "name": "Orient Text on Surface",
+    "command": "gvRPOrientTextOnSrf",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-023",
+    "name": "Ring Rail Text",
+    "command": "gvRPFingerRailText",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-024",
+    "name": "Ring Support Sprue",
+    "command": "gvRPSupportSprue",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-025",
+    "name": "Support Base",
+    "command": "gvRPSupportBase",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-026",
+    "name": "Support Ring",
+    "command": "gvRPSupportRing",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-027",
+    "name": "Blend Supports",
+    "command": "gvRPSupport",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-028",
+    "name": "Cylinder Supports",
+    "command": "gvRPSupportCylinder",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-029",
+    "name": "Large Tapered Supports",
+    "command": "gvRPSupportLine",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-030",
+    "name": "Medium Tapered Supports",
+    "command": "gvRPSupportLine",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-031",
+    "name": "Supports",
+    "command": "gvRPSupportLine",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-032",
+    "name": "Profile",
+    "command": "gvProfile",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-033",
+    "name": "Profile End Cap",
+    "command": "gvProfileEndCap",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-034",
+    "name": "Profile Merge",
+    "command": "gvMergeProfiles",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-035",
+    "name": "Custom Rail Advanced",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-036",
+    "name": "Object on Curve",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-037",
+    "name": "Mesh Reducer",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-038",
+    "name": "Surface Inset",
+    "command": "gvInset",
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-039",
+    "name": "Mesh Mapper",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-040",
+    "name": "Curve Transform",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-041",
+    "name": "Boolean Builder",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-TOOLS-042",
+    "name": "Center Line Builder",
+    "command": null,
+    "module": "Tools"
+  },
+  {
+    "id": "OM9-GEM-001",
+    "name": "Gem Loader",
+    "command": "gvLoader",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-002",
+    "name": "Gem on Curve",
+    "command": "gvGemOnCrv",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-003",
+    "name": "Gem on Curve Advanced",
+    "command": "gvGemOnCrvAdvanced",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-004",
+    "name": "Gem Count on Curve",
+    "command": "gvGemCountOnCrv",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-005",
+    "name": "Gem List on Curve",
+    "command": "gvGemListOnCrv",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-006",
+    "name": "Gem on Curve Multi",
+    "command": "gvGemOnCrvMulti",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-007",
+    "name": "Gem Profile Curve",
+    "command": "gvGemProfile",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-008",
+    "name": "Gem Guides",
+    "command": "gvGemGemGuides",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-009",
+    "name": "Orient to Gem",
+    "command": "gvOrientGems",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-010",
+    "name": "Halo Builder",
+    "command": "gvHaloBuilder",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-011",
+    "name": "Gem on Surface",
+    "command": "gvOrientGems",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-012",
+    "name": "Custom Gem Builder",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-013",
+    "name": "Emerald Builder",
+    "command": "gvEmerald",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-014",
+    "name": "Baguette Builder",
+    "command": "gvBaguette",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-015",
+    "name": "Baguette Channel",
+    "command": "gvTaperBagChannel",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-016",
+    "name": "Gems Between 2 Curves",
+    "command": "gvGemsBetween2Crvs",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-017",
+    "name": "Cluster Builder",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-018",
+    "name": "Gem Map",
+    "command": "gvGemMap",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-019",
+    "name": "Gem Reporter",
+    "command": "gvBuilderGemReporter",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-020",
+    "name": "Auto Pavé Builder",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-021",
+    "name": "Pavé Builder",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-022",
+    "name": "Pavé Azure Builder",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-023",
+    "name": "Pavé Prong Builder",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-024",
+    "name": "Gem Follow",
+    "command": "gvGemFollow",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-025",
+    "name": "Gem Springs",
+    "command": "gvGemSprings",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-026",
+    "name": "Gem Control",
+    "command": "gvGemControl",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-027",
+    "name": "Match Attributes",
+    "command": "gvMatchAttributes",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-028",
+    "name": "Save Styles",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-029",
+    "name": "Gem Flow",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-030",
+    "name": "Load Styles",
+    "command": null,
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-031",
+    "name": "Gem Splop",
+    "command": "gvGemSplop",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-032",
+    "name": "Pavé Sphere",
+    "command": "gvPaveSphere",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-033",
+    "name": "Gem Positioner (MSR)",
+    "command": "gvGemPositioner",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-GEM-034",
+    "name": "Gem Update",
+    "command": "gvGemUpdater",
+    "module": "Placing Gems"
+  },
+  {
+    "id": "OM9-SETTING-001",
+    "name": "Head Builder",
+    "command": "gvHeadBuilder",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-002",
+    "name": "Bezel Builder",
+    "command": "gvBezelBuilder",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-003",
+    "name": "T-Splines Bezel",
+    "command": "gvtsBezel",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-004",
+    "name": "T-Splines Under Bezel",
+    "command": "gvtsUnderBezel",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-005",
+    "name": "Pull Object to Rail",
+    "command": "gvPullToRail",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-006",
+    "name": "Scallop Bezel",
+    "command": "gvBezelCutter",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-007",
+    "name": "Prong Builder",
+    "command": "gvProngAdder",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-008",
+    "name": "Prong Editor",
+    "command": "gvProngEditor",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-009",
+    "name": "Prong on Surface",
+    "command": "gvProngOnSurface",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-010",
+    "name": "Bead on Surface",
+    "command": "gvOrientOnSurface",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-011",
+    "name": "Metal from Gems",
+    "command": "gvMetalPiece",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-012",
+    "name": "Bead on Curve",
+    "command": "gvBeadOnCrv",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-SETTING-013",
+    "name": "Channel Border Curve",
+    "command": "gvChannelBorder",
+    "module": "Setting Menu"
+  },
+  {
+    "id": "OM9-CUTTER-001",
+    "name": "Gem Cutter",
+    "command": "gvAzureCutter",
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-002",
+    "name": "Gem Cutter Library",
+    "command": null,
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-003",
+    "name": "Channel Builder",
+    "command": "gvChannelBuilder",
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-004",
+    "name": "Micro Prong Cutter",
+    "command": "gvMicroProngCutter",
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-005",
+    "name": "Bright Cut Channel Builder",
+    "command": "gvBrightCutChannel",
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-006",
+    "name": "Bright Cutter",
+    "command": "gvBrightCutter",
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-007",
+    "name": "Bezel Cutter Builder",
+    "command": "gvBezelCutter",
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-008",
+    "name": "Cut to Finger Rail",
+    "command": "gvCutRingRail",
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-009",
+    "name": "Plane & Cube Cutters",
+    "command": null,
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-010",
+    "name": "Boolean Builder",
+    "command": null,
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-CUTTER-011",
+    "name": "Quad Flip Routines",
+    "command": null,
+    "module": "Creating Cutters"
+  },
+  {
+    "id": "OM9-RENDER-001",
+    "name": "Ground Plane",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-002",
+    "name": "Render Button",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-003",
+    "name": "Resolution Amount",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-004",
+    "name": "Show VRay Frame Buffer",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-005",
+    "name": "Choose a Style",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-006",
+    "name": "Export VRay Render",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-007",
+    "name": "Native VRay Controls",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-008",
+    "name": "Material Editor",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-009",
+    "name": "Create Spotlight",
+    "command": "Spotlight",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-010",
+    "name": "Create Directional Light",
+    "command": "DirectionalLight",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-011",
+    "name": "Create Point Light",
+    "command": "PointLight",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-012",
+    "name": "Create Rectangular Light",
+    "command": "RectangularLight",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-013",
+    "name": "Set Spotlight to View",
+    "command": "SetSpotLightToView",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-014",
+    "name": "Create Linear Light",
+    "command": "LinerLight",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-015",
+    "name": "Props Library",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-016",
+    "name": "Set Renderer",
+    "command": "SetRenderPlugin",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-017",
+    "name": "Apply Edge Softening",
+    "command": "ApplyEdgeSoftening",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-018",
+    "name": "Environment Map",
+    "command": "EMap",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-019",
+    "name": "Animation Builder",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-020",
+    "name": "Animation Builder Advanced",
+    "command": "gvAnimationBuilderAdvanced",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-021",
+    "name": "Matrix Movie Maker",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-022",
+    "name": "Render Editor",
+    "command": "gvRenderEditor",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-023",
+    "name": "Batch Render",
+    "command": "gvBatchRender",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-024",
+    "name": "Layout Tools",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-025",
+    "name": "4 View Capture",
+    "command": "gvFourViewCapture",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-026",
+    "name": "Render Scheduler",
+    "command": null,
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-027",
+    "name": "Alpha Erase",
+    "command": "gvAlphaErase",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-028",
+    "name": "Apply Displacement",
+    "command": "ApplyDisplacement",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-RENDER-029",
+    "name": "SaveRenderWindowAs",
+    "command": "SaveRenderWindowAs",
+    "module": "Render Menu"
+  },
+  {
+    "id": "OM9-SUBD-001",
+    "name": "Clay Edit",
+    "command": "ClayEdit",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-002",
+    "name": "Gumball Modes",
+    "command": "ClayGumballModes",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-003",
+    "name": "Selection Mode",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-004",
+    "name": "Hot Keys",
+    "command": "ClayHotKeys",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-005",
+    "name": "Points On Surface",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-006",
+    "name": "Clayoo Divide",
+    "command": "ClayDivide",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-007",
+    "name": "Visualization Mode",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-008",
+    "name": "Inset",
+    "command": "ClayInset",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-009",
+    "name": "Split Sides",
+    "command": "ClaySplitSides",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-010",
+    "name": "Clayoo Extrude",
+    "command": "ClayExtrude",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-011",
+    "name": "Clayoo Knife",
+    "command": "ClayKnife",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-012",
+    "name": "Clayoo Bridge",
+    "command": "ClayBridge",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-013",
+    "name": "Clayoo Offset",
+    "command": "ClayOffset",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-014",
+    "name": "Append Face",
+    "command": "ClayAppend",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-015",
+    "name": "Clayoo Pipe",
+    "command": "ClayPipe",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-016",
+    "name": "Clayoo Bezel",
+    "command": "ClayBezel",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-017",
+    "name": "Clayoo Ring",
+    "command": "ClayRing",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-018",
+    "name": "Clayoo Signet Ring",
+    "command": "ClaySignetRing",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-019",
+    "name": "Clayoo Project to Plane",
+    "command": "ClayProjectToPlane",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-020",
+    "name": "Crease Edges",
+    "command": "ClayCrease",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-021",
+    "name": "Uncrease Edges",
+    "command": "ClayUncrease",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-022",
+    "name": "Collapse",
+    "command": "ClayCollapse",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-023",
+    "name": "Match",
+    "command": "ClayMatch",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-024",
+    "name": "Clayoo Symmetry",
+    "command": "ClaySymmetry",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-025",
+    "name": "Weld",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-026",
+    "name": "Clayoo Box",
+    "command": "ClayBox",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-027",
+    "name": "Clayoo Sphere",
+    "command": "ClaySphere",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-028",
+    "name": "Clayoo Cylinder",
+    "command": "ClayCylinder",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-029",
+    "name": "Clayoo Cone",
+    "command": "ClayCone",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-030",
+    "name": "Clayoo Plane",
+    "command": "ClayPlane",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-031",
+    "name": "Clayoo Sweep 1",
+    "command": "ClaySweep1",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-032",
+    "name": "Clayoo Sweep 2",
+    "command": "ClaySweep2",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-033",
+    "name": "Clayoo Loft",
+    "command": "ClayLoft",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-034",
+    "name": "Clayoo Wrap",
+    "command": "ClayWrap",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-035",
+    "name": "Clayoo Revolve",
+    "command": "ClayRevolve",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-036",
+    "name": "Create By Curve",
+    "command": "ClayCreateByCurve",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-037",
+    "name": "Create By Two Curves",
+    "command": "ClayCreateBy2Curves",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-038",
+    "name": "Clayoo Extract",
+    "command": "ClayooExtract",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-039",
+    "name": "Clayoo Fill",
+    "command": "ClayFill",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-040",
+    "name": "Clayoo Shell",
+    "command": "ClayShell",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-041",
+    "name": "Clayoo Flip Normals",
+    "command": "ClayFlip",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-042",
+    "name": "Convert Surfaces",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-043",
+    "name": "Convert TSpline",
+    "command": "ClayConvertTSpline",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-044",
+    "name": "Convert to Nurbs",
+    "command": "ClaytoNurbs",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-045",
+    "name": "Create By Mesh",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-046",
+    "name": "Clayoo Sets",
+    "command": "ClaySets",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-047",
+    "name": "Clayoo Loop Selection",
+    "command": "ClaySelectEdgeLoop",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-048",
+    "name": "Clayoo Ring Selection",
+    "command": "ClaySelectRingEdges",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-049",
+    "name": "Select U",
+    "command": "ClaySelectUV",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-050",
+    "name": "Select V",
+    "command": "ClaySelectUV",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-051",
+    "name": "Clayoo Paint Selection",
+    "command": "ClayPaintSelection",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-052",
+    "name": "Clayoo Select All",
+    "command": "ClaySelectAll",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-053",
+    "name": "Clayoo Select None",
+    "command": "ClaySelectNone",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-054",
+    "name": "Clayoo Invert",
+    "command": "ClayInvert",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-055",
+    "name": "Clayoo Selection Grow",
+    "command": "ClaySelectionGrow",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-056",
+    "name": "Clayoo Selection Shrink",
+    "command": "ClaySelectionShrink",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-057",
+    "name": "Clayoo Select Crease Edges",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-058",
+    "name": "Clayoo Select Naked Edges",
+    "command": "ClaySelectNakedEdges",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-059",
+    "name": "Clayoo Select Uncrease Edges",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-060",
+    "name": "Clayoo Library",
+    "command": "gvUserLibraryCustom",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-061",
+    "name": "Select Coplanar",
+    "command": "ClaySelectCoplanar",
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-SUBD-062",
+    "name": "Subdivision Level",
+    "command": null,
+    "module": "SubD"
+  },
+  {
+    "id": "OM9-EMBOSS-001",
+    "name": "Emboss",
+    "command": "ClayEmboss",
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-002",
+    "name": "By Profile",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-003",
+    "name": "Extrude",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-004",
+    "name": "Base On Geometry",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-005",
+    "name": "Revolve",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-006",
+    "name": "Texture",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-007",
+    "name": "Stamp",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-008",
+    "name": "Carbon Copy",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-009",
+    "name": "Carbon Copy By Brush",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-010",
+    "name": "Brush",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-011",
+    "name": "Smooth",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-012",
+    "name": "Sculpting",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-013",
+    "name": "Heightfield Image",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-014",
+    "name": "Clay Emboss Resources",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-EMBOSS-015",
+    "name": "Decimator",
+    "command": null,
+    "module": "Emboss"
+  },
+  {
+    "id": "OM9-MATRIXTOOLS-001",
+    "name": "Smart Pattern",
+    "command": "gvSmartPattern",
+    "module": "Matrix Tools"
+  },
+  {
+    "id": "OM9-MATRIXTOOLS-002",
+    "name": "Texture Builder",
+    "command": "GVTextureBuilder",
+    "module": "Matrix Tools"
+  },
+  {
+    "id": "OM9-MATRIXTOOLS-003",
+    "name": "Rope",
+    "command": "gvRopeBuilder",
+    "module": "Matrix Tools"
+  },
+  {
+    "id": "OM9-MATRIXTOOLS-004",
+    "name": "Text On Curve",
+    "command": "ClayEmbossTextOnCurve",
+    "module": "Matrix Tools"
+  },
+  {
+    "id": "OM9-MATRIXTOOLS-005",
+    "name": "Styles",
+    "command": null,
+    "module": "Matrix Tools"
+  },
+  {
+    "id": "OM9-MATRIXTOOLS-006",
+    "name": "User Libraries",
+    "command": null,
+    "module": "Matrix Tools"
+  },
+  {
+    "id": "OM9-MATRIXTOOLS-007",
+    "name": "Blueprint",
+    "command": "ClayBluePrint",
+    "module": "Matrix Tools"
+  },
+  {
+    "id": "OM9-MATRIXTOOLS-008",
+    "name": "View Manager",
+    "command": "gvViewManager",
+    "module": "Matrix Tools"
+  },
+  {
+    "id": "OM9-MESH-STRESS",
+    "name": "Mesh Stress",
+    "command": "MeshStress",
+    "module": "Mesh Tools"
+  }
+]

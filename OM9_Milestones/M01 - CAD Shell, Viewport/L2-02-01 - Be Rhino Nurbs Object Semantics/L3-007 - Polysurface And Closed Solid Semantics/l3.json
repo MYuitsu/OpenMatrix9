@@ -181,6 +181,22 @@
     "OM9-L4-02-01-007-04",
     "OM9-L4-02-01-007-05"
   ],
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Closed shell = Solid; open one/multi-face = Surface/Polysurface; open/self-overlap refusal.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-02-01/crosswalk.json",
+      "implementation/design/M01/OM9-L2-02-01/l4-matrix.json",
+      "implementation/design/M01/OM9-L2-02-01/oracles.json",
+      "crates/om9-core/tests/rhino_semantics.rs:523"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Geometric face-face self-intersection requires OCCT; portable classification covers open shells and coincident faces."
+    ]
+  },
   "children_l4": [
     {
       "id": "OM9-L4-02-01-007-01",

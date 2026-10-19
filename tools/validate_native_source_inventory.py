@@ -63,7 +63,7 @@ def build_fixture():
 project(OM9AuthoredSourceFixture LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-add_executable(om9-source-fixture "{ROOT.as_posix()}/standalone/native/source_inventory_fixture.cpp")
+add_executable(om9-source-fixture "{ROOT.as_posix()}/native/source_inventory_fixture.cpp")
 target_include_directories(om9-source-fixture PRIVATE "{ROOT.as_posix()}/build/standalone-deps/opennurbs")
 target_compile_definitions(om9-source-fixture PRIVATE ON_CMAKE_BUILD NOMINMAX)
 target_compile_options(om9-source-fixture PRIVATE /W4 /WX /utf-8 /EHsc)
@@ -82,7 +82,7 @@ def main():
     parser.add_argument("--build-fixture", action="store_true")
     parser.add_argument("--binary", type=Path, default=ROOT / "build/standalone-native/Release/om9-exchange-native.exe")
     parser.add_argument("--fixture-binary", type=Path, default=ROOT / "build/native-source-fixture/Release/om9-source-fixture.exe")
-    parser.add_argument("--runner", type=Path, default=ROOT / "standalone/target/release/om9-native-runner.exe")
+    parser.add_argument("--runner", type=Path, default=ROOT / "target/release/om9-native-runner.exe")
     parser.add_argument("--receipt", type=Path, default=ROOT / "build/standalone-native/native-source-inventory-validation.json")
     args = parser.parse_args()
     if args.build_fixture:
@@ -257,11 +257,11 @@ def main():
                "status":"validated_source_inventory_and_circle_correspondence_slice","goal_complete":False,
                "opennurbs_commit":PIN,"runner_sha256":digest(runner),
                "owner_sources":[{"path":p.relative_to(ROOT).as_posix(),"sha256":digest(p)}
-                                for p in sorted((ROOT / "standalone/crates/om9-native-owner").rglob("*")) if p.is_file()],
+                                for p in sorted((ROOT / "crates/om9-native-owner").rglob("*")) if p.is_file()],
                "binary_sha256":digest(binary),"fixture_binary_sha256":digest(fixture_binary),
-               "source_sha256":digest(ROOT / "standalone/native/native_exchange.cpp"),
-               "header_sha256":digest(ROOT / "standalone/native/retained_merge.hpp"),
-               "fixture_source_sha256":digest(ROOT / "standalone/native/source_inventory_fixture.cpp"),
+               "source_sha256":digest(ROOT / "native/native_exchange.cpp"),
+               "header_sha256":digest(ROOT / "native/retained_merge.hpp"),
+               "fixture_source_sha256":digest(ROOT / "native/source_inventory_fixture.cpp"),
                "validator_sha256":digest(Path(__file__)),"runs":len(runs),"rejections":sum(r["status"]=="native_owner_rejected" for r in runs),
                "peak_committed_bytes":max(r["stats"]["peak_committed_bytes"] for r in runs),
                "operation_receipts":[{k:v for k,v in r.items() if k!="stdout"} for r in runs],"inventories":inventories,

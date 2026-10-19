@@ -1,0 +1,22 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+warning: unused import: `OptionValue`
+ --> crates\om9-app\tests\command_options_and_repeat.rs:4:44
+  |
+4 | use om9_app::option_parser::{parse_option, OptionValue};
+  |                                            ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-app` (test "command_options_and_repeat") generated 1 warning (run `cargo fix --test "command_options_and_repeat" -p om9-app` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.06s
+     Running tests\command_options_and_repeat.rs (target\debug\deps\command_options_and_repeat-96610504b8a3adb7.exe)
+
+running 5 tests
+test fixture_design_pairs_are_present ... ok
+test s1_to_s3_a_destructive_command_is_never_repeated ... ok
+test o1_to_o4_the_parser_reads_the_declared_options ... ok
+test p1_to_p10_every_bad_option_is_refused_with_a_reason ... ok
+test q1_to_q3_and_r1_to_r4_repeat_runs_the_last_repeatable_command ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

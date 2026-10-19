@@ -4,7 +4,7 @@
 
 ## Tra cứu phạm vi hiện hành
 
-Trong checkout đang làm việc, lấy `spec_path` theo exact ID từ catalog/feature lookup. Package là `OpenMatrix9_Codex_Spec_v2/` trực tiếp trong checkout; không fallback v1/ref/matrix9. Đọc implementation notes của spec đã chọn, phân biệt supported slice với hợp đồng mục tiêu và code mẫu request-planner.
+Trong checkout đang làm việc, tra exact ID qua workflow router. Nền tảng document/BRep/tessellation theo M01 L2-01-03/01-05/01-06; đọc exact feature trong milestone sở hữu. Phân biệt supported slice với hợp đồng mục tiêu và tài liệu code mẫu.
 
 - Box: `specs/04-solid/om9-solid-012-box.md`.
 - Sphere: `specs/04-solid/om9-solid-014-sphere.md`.

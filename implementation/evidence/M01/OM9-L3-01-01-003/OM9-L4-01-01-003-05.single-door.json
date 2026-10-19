@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m01.single-door.v1",
+  "l3_id": "OM9-L3-01-01-003",
+  "rule": "Menu placement in the UI has exactly one mutation path: MatrixApp::apply_panel_op.",
+  "banned_tokens": [
+    ".toggle_section(",
+    ".move_section(",
+    ".dock_section(",
+    ".float_section(",
+    ".place_section(",
+    ".set_section_collapsed(",
+    ".set_section_visible(",
+    ".set_section_height("
+  ],
+  "banned_token_source": "the six tokens come from the fixture N34-source-scan-single-door; the two extra height/visibility mutators come from the design review (MEDIUM 4)",
+  "scanned_files": [
+    "src/ui.rs",
+    "src/ui/chrome.rs",
+    "src/ui/panel_audit.rs"
+  ],
+  "allowlist": {
+    "DockLayout::section": "read one menu state (13 call sites)",
+    "DockLayout::state": "read one panel state",
+    "DockLayout::left_sections / right_sections / floating_sections": "read a column, every frame",
+    "DockLayout::resolve": "resolve panel sizes for the frame",
+    "MatrixApp::apply_panel_op -> DockLayout::apply_panel_op": "the single placement door",
+    "DockLayout::reset_to_default": "Reset Menus / Reload Menus baseline; an active drag is cancelled",
+    "DockLayout::clamp_floats": "load-time repair of unusable rectangles",
+    "DockLayout::save": "Set as Default, the documented writer",
+    "DockLayout::set_float / set_size / set_visible": "panel geometry (command search, rail, docks), never menu placement"
+  },
+  "removed_from_the_ui": [
+    "the 28 px right-drop-zone overlay (compute_right_drop_zone, right_drop_zone_ui, right_drop_zone_rect, RIGHT_DROP_ZONE_WIDTH) and the pointer-less settle_section_drag"
+  ],
+  "verified_by": [
+    "panel_ops.rs::n34_menu_placement_has_exactly_one_door_in_the_ui",
+    "panel_door.rs::n21_a_click_on_the_builders_bar_is_refused_and_starts_no_drag"
+  ],
+  "occurrences_outside_comments": 0,
+  "positive_check": "the N34 test also requires every self.dock.<method>( in ui.rs, ui/chrome.rs and ui/panel_audit.rs to be on this allowlist, so a new bypass cannot slip in unnoticed"
+}

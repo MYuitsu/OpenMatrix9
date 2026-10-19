@@ -1,0 +1,457 @@
+{
+  "schema": "om9.m01.fixture-coverage.v1",
+  "l3_id": "OM9-L3-01-01-003",
+  "generated_utc": "2026-10-16",
+  "totals": {
+    "positive": 13,
+    "negative": 34,
+    "total": 47,
+    "verified": 47
+  },
+  "human_only": {
+    "live_feel": "OM9-L4-01-01-003-05.ui-review.json items M1..M6 (indicator visibility while dragging, cursor, drag tracking, recovery on a shrinking real window)",
+    "real_window_audit": "N31's audit env knob is exercised by the real-window harness with OM9_UI_AUDIT_RIGHT_DOCK=1; the model part is covered by the unit test"
+  },
+  "cases": [
+    {
+      "case": "P1-collapse-then-expand-restores-the-exact-state",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p1_collapse_then_expand_restores_the_exact_state"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P2-collapsed-snaps-and-layers-keep-closed-bar-controls",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p2_collapsing_snaps_and_layers_keeps_the_documented_order"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P3-drag-projects-onto-the-upper-half-of-the-display-bar",
+      "level": "positive",
+      "covered_by": [
+        "panel_door.rs::p3_a_drag_onto_the_upper_half_of_the_display_bar_lands_at_position_2"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P4-drag-main-menu-onto-the-lower-half-of-the-snaps-bar",
+      "level": "positive",
+      "covered_by": [
+        "panel_door.rs::p4_a_drag_onto_the_lower_half_of_the_snaps_bar_lands_at_position_3"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P5-move-up-by-api-and-by-button-is-the-same-operation",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p5_move_is_one_operation_for_the_api_and_the_button"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P6-dock-right-by-drag-then-dock-left-restores-home-and-roll-up",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p6_dock_right_then_left_restores_home_and_roll_up"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P7-float-by-drag-then-close-returns-home",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p7_float_records_home_and_close_returns_to_it"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P8-floating-window-moved-by-the-user-is-readback-not-recovery",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p8_a_user_moved_floating_window_is_readback_not_recovery"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P9-menu-mouse-and-api-paths-give-identical-layouts",
+      "level": "positive",
+      "covered_by": [
+        "panel_door.rs::p9_the_mouse_path_and_the_api_path_produce_the_same_layout"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P10-layers-default-is-left-directly-below-info-and-settings",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p10_layers_defaults_to_left_directly_below_info_and_settings"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P11-layers-placement-holds-at-every-supported-size",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p11_layers_placement_holds_at_every_supported_size",
+        "real-window: tools/validate_m01_l3_002_ui_matrix.py --mode all (14 sizes, all_passed)"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P12-layers-docked-back-without-home-lands-below-info-and-settings",
+      "level": "positive",
+      "covered_by": [
+        "panel_ops.rs::p12_docking_back_without_home_lands_below_info_and_settings"
+      ],
+      "verified": true
+    },
+    {
+      "case": "P13-operations-touch-ui-state-only",
+      "level": "positive",
+      "covered_by": [
+        "panel_door.rs::p13_panel_operations_touch_ui_state_only"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N1-drop-beyond-the-right-edge",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n1_a_drop_beyond_the_right_edge_floats_inside_the_window"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N2-drop-beyond-the-left-edge",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n2_n3_n4_a_drop_outside_any_edge_is_pulled_back_inside"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N3-drop-beyond-the-top-edge",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n2_n3_n4_a_drop_outside_any_edge_is_pulled_back_inside"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N4-drop-beyond-the-bottom-edge",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n2_n3_n4_a_drop_outside_any_edge_is_pulled_back_inside"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N5-drop-in-a-view-near-the-bottom-right-corner",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n5_a_drop_in_a_view_inside_the_window_floats_without_the_outside_note"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N6-api-float-huge-rect",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n6_to_n12_a_float_rectangle_is_normalised_or_refused"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N7-api-float-far-negative-origin",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n6_to_n12_a_float_rectangle_is_normalised_or_refused"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N8-api-float-small-positive-size-is-normalised",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n6_to_n12_a_float_rectangle_is_normalised_or_refused"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N9-api-float-nan-x",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n6_to_n12_a_float_rectangle_is_normalised_or_refused"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N10-api-float-infinite-width",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n6_to_n12_a_float_rectangle_is_normalised_or_refused"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N11-api-float-zero-width",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n6_to_n12_a_float_rectangle_is_normalised_or_refused"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N12-api-float-negative-height",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n6_to_n12_a_float_rectangle_is_normalised_or_refused"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N13-readback-nan-from-a-floating-window",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n12_n13_a_non_finite_readback_is_refused_and_changes_nothing"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N14-window-shrink-recovers-a-floating-menu",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n14_a_window_shrink_recovers_the_floating_menu"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N15-shrink-below-the-plan-floor-does-not-rewrite-layout",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n15_a_window_below_the_floor_is_refused_without_rewriting_the_layout"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N16-work-area-from-an-invalid-window",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n16_an_invalid_window_has_no_work_area"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N17-float-before-the-first-frame",
+      "level": "negative",
+      "covered_by": [
+        "panel_door.rs::n17_floating_before_the_first_frame_reports_no_work_area"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N18-drop-over-the-toolbar-cancels",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n18_a_drop_over_the_toolbar_cancels"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N19-escape-cancels-a-drag-and-keeps-the-cmd-draft",
+      "level": "negative",
+      "covered_by": [
+        "panel_door.rs::n19_escape_cancels_a_drag_and_keeps_the_command_draft"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N20-pointer-lost-at-release",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n20_a_lost_pointer_cancels_the_drop"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N21-builders-bar-click-is-refused",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n21_n22_the_reserved_builders_area_refuses_every_operation"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N22-builders-api-operations-are-refused",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n21_n22_the_reserved_builders_area_refuses_every_operation"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N23-reorder-a-floating-menu",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n23_a_floating_menu_is_not_reordered"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N24-float-an-already-floating-menu",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n24_floating_an_already_floating_menu_is_refused"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N25-no-op-moves-are-reported-not-silent",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n25_a_no_op_is_reported_and_never_silent"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N26-dock-to-a-non-column-side",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n26_only_a_column_side_is_a_dock_target"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N27-unknown-section-key-at-the-audit-boundary",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n27_an_unknown_section_key_reports_the_key_back"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N28-hidden-section-cannot-be-moved",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n28_a_hidden_section_cannot_be_moved_or_floated"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N29-drag-in-progress-across-reset-reload-and-hide",
+      "level": "negative",
+      "covered_by": [
+        "panel_door.rs::n29_reset_reload_and_hiding_cancel_a_drag_in_progress"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N30-unacknowledged-error-is-not-hidden-by-panel-messages",
+      "level": "negative",
+      "covered_by": [
+        "panel_door.rs::n30_an_unacknowledged_failure_is_not_hidden_by_panel_messages"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N31-layers-is-never-moved-by-the-audit-hook",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n31_docking_another_menu_right_never_moves_layers",
+        "real-window audit env OM9_UI_AUDIT_RIGHT_DOCK=1 (L3-002 matrix user-docked-right cases)"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N32-layers-docked-right-then-narrow-window-is-not-auto-moved",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n32_a_narrow_window_yields_the_right_dock_without_moving_layers"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N33-randomized-operation-sweep",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n33_randomized_operation_sweep_holds_every_invariant"
+      ],
+      "verified": true
+    },
+    {
+      "case": "N34-source-scan-single-door",
+      "level": "negative",
+      "covered_by": [
+        "panel_ops.rs::n34_menu_placement_has_exactly_one_door_in_the_ui"
+      ],
+      "verified": true
+    }
+  ],
+  "real_window": {
+    "tool": "tools/validate_m01_l3_003_panels.py",
+    "summary": "OM9-L4-01-01-003-05.real-window-panels.json",
+    "scenarios": [
+      {
+        "scenario": "reorder",
+        "fixture": "positive.json P3 / P4 (drop index rule)",
+        "passed": true,
+        "screenshot": "screenshots/reorder.png",
+        "screenshot_sha256": "5069cb5cf0831898942a542eff2660bcc2ad5c58388c768b70c5d945596a9d28",
+        "limitations": null
+      },
+      {
+        "scenario": "float",
+        "fixture": "positive.json P7 (float keeps a home), negative.json N5 (recovery)",
+        "passed": true,
+        "screenshot": "screenshots/float.png",
+        "screenshot_sha256": "78e3813659ca925bac6225adf0dea34d5528453167b6f98dab5a7c54a6ccbfa9",
+        "limitations": null
+      },
+      {
+        "scenario": "dock-right",
+        "fixture": "positive.json P6 (dock right), derived_geometry right_drop_strip",
+        "passed": true,
+        "screenshot": "screenshots/dock-right.png",
+        "screenshot_sha256": "0f841d39873cda1f2586a962b28c3c87ed9c548af4bb2602e4f55e3992c3222e",
+        "limitations": null
+      },
+      {
+        "scenario": "escape",
+        "fixture": "negative.json N19 (Escape cancels and keeps the draft)",
+        "passed": true,
+        "screenshot": "screenshots/escape.png",
+        "screenshot_sha256": "9c682edbd88f88acb778adcbfed897077e1a44ff6c90c52ade9cf1a6dc75eca7",
+        "limitations": null
+      },
+      {
+        "scenario": "roll-up",
+        "fixture": "positive.json P1 (collapse then expand restores the state), P2",
+        "passed": true,
+        "screenshot": "screenshots/roll-up.png",
+        "screenshot_sha256": "51f4f344b420f39679979b2191975b8fb90bb24599d7be0603bbaad4a883e9a6",
+        "limitations": null
+      },
+      {
+        "scenario": "float-drop",
+        "fixture": "positive.json P7 (float records home), N5 (recovery in the drop)",
+        "passed": true,
+        "screenshot": "screenshots/float-drop.png",
+        "screenshot_sha256": "9ffb6264efb0e0aa1999d4a32017678cf58bf3497c72d45b6ebc9f085ec541dc",
+        "limitations": "the X of the floating window is not scripted (a 16 px target): closing it is p7 plus the owner's item M3"
+      },
+      {
+        "scenario": "readback-recover",
+        "fixture": "negative.json N14 (a shrink recovers the floating menu), M5",
+        "passed": true,
+        "screenshot": "screenshots/readback-recover.png",
+        "screenshot_sha256": "4e07c4ea76ae92451733c183917118b02dec28b1547ce91b5951d4b47ec7c427",
+        "limitations": "the window keeps its audit size, so the repair comes from the rectangle the real window reports; the shrinking-window case is the owner's item M5"
+      }
+    ]
+  }
+}

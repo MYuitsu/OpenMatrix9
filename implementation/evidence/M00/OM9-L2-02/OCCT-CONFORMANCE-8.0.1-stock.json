@@ -1,0 +1,97 @@
+{
+  "occt_version": "8.0.1",
+  "offset_derivatives_pass": false,
+  "verdict": "PATCH_REQUIRED",
+  "checks": [
+    {
+      "name": "line_offset_d2_zero",
+      "pass": true,
+      "measured": 0,
+      "limit": 1e-12
+    },
+    {
+      "name": "line_offset_d3_zero",
+      "pass": true,
+      "measured": 0,
+      "limit": 1e-12
+    },
+    {
+      "name": "circle_offset_d2_exact",
+      "pass": true,
+      "measured": 0,
+      "limit": 1e-10
+    },
+    {
+      "name": "circle_offset_d3_exact",
+      "pass": true,
+      "measured": 0,
+      "limit": 1e-10
+    },
+    {
+      "name": "ellipse_offset_d2_vs_fdiff",
+      "pass": false,
+      "measured": 0.41660713537987404,
+      "limit": 1e-06
+    },
+    {
+      "name": "ellipse_offset_d3_vs_fdiff",
+      "pass": false,
+      "measured": 0.9996234742906042,
+      "limit": 0.0001
+    },
+    {
+      "name": "spline_offset_d2_vs_fdiff",
+      "pass": false,
+      "measured": 0.7180477474422438,
+      "limit": 1e-06
+    },
+    {
+      "name": "spline_offset_d3_vs_fdiff",
+      "pass": false,
+      "measured": 1.0010220396887988,
+      "limit": 0.0001
+    },
+    {
+      "name": "box_valid",
+      "pass": true,
+      "measured": 0,
+      "limit": 0
+    },
+    {
+      "name": "box_volume_400",
+      "pass": true,
+      "measured": 1.1368683772161603e-13,
+      "limit": 1e-09
+    },
+    {
+      "name": "cut_volume_analytic",
+      "pass": true,
+      "measured": 5.684341886080802e-14,
+      "limit": 1e-06
+    },
+    {
+      "name": "cut_valid",
+      "pass": true,
+      "measured": 0,
+      "limit": 0
+    },
+    {
+      "name": "cut_faces_7",
+      "pass": true,
+      "measured": 7,
+      "limit": 7
+    },
+    {
+      "name": "mesh_triangles_positive",
+      "pass": true,
+      "measured": 196,
+      "limit": 1
+    },
+    {
+      "name": "mesh_indices_consistent",
+      "pass": true,
+      "measured": 0,
+      "limit": 0
+    }
+  ]
+}

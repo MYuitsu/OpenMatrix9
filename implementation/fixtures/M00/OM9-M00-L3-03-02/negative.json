@@ -1,0 +1,22 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-03-02",
+  "cases": [
+    {
+      "id": "M00-FX-03-02-NEG-01",
+      "check": "mesh_file_missing",
+      "expected": {
+        "error": "panic on read",
+        "note": "the probe expects a mesh; a missing file is a hard stop, not a silent fallback"
+      }
+    },
+    {
+      "id": "M00-FX-03-02-NEG-02",
+      "check": "device_loss",
+      "expected": {
+        "measured": false,
+        "note": "L4-03-02-04 still open"
+      }
+    }
+  ]
+}

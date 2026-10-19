@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-011",
+  "l4": "OM9-L4-01-03-011-02",
+  "title": "Document Change Notification",
+  "case": "om9-l3-01-03-011-negative",
+  "runtime_tests": "om9-app/tests/document_contract.rs::l3_011_one_edit_publishes_one_ordered_batch_with_a_new_revision|l3_011_undo_and_redo_are_published_with_their_own_cause|l3_011_a_panicking_observer_is_recorded_and_the_others_still_run|l3_011_an_observer_cannot_change_the_document_it_is_told_about; om9-core/tests/document_changes.rs",
+  "negative_oracle": "see cases",
+  "cases": [
+    {
+      "id": "panicking-observer",
+      "expect": {
+        "document_published": true,
+        "observer_removed": true,
+        "undo_len": 1,
+        "diagnostics": 1
+      }
+    },
+    {
+      "id": "no-op",
+      "expect": {
+        "new_batches": 0
+      }
+    },
+    {
+      "id": "reentrancy",
+      "note": "DocumentObserver receives &ChangeBatch only; no Controller handle exists, so a callback cannot mutate"
+    }
+  ]
+}

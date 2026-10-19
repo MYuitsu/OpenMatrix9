@@ -1,0 +1,29 @@
+task: OM9-L4-01-02-003-03 (implementation) Command Context And Active Document
+utc: 2026-10-16T15:14:51Z
+cwd: H:\OpenMatrix9\standalone
+
+RED: 4 passed; 2 failed (c2: a command whose view was gone still reported as running; c3: a snapshot from another view was not stale). GREEN: 5 passed; 0 failed.
+== GREEN: cargo test -p om9-app --test command_context ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests\command_context.rs (target\debug\deps\command_context-b6bef80407f77523.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... ok
+test c1_the_context_snapshot_names_document_view_selection_and_revisions ... ok
+test c3_a_context_captured_before_the_switch_is_refused_afterwards ... ok
+test c2_switching_the_active_view_mid_command_refuses_and_cancels ... ok
+test c4_a_command_keeps_the_context_it_started_against ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+exit=0
+== cargo test -p om9-app --lib ==
+
+test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.59s
+
+
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 101
+error: this `if` statement can be collapsed
+error: could not compile `om9-core` (test "command_registry") due to 1 previous error

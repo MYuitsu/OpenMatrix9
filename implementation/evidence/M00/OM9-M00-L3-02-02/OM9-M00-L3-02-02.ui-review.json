@@ -1,0 +1,47 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-M00-L3-02-02",
+  "reviewer": {
+    "name": "chủ dự án (OpenMatrix9)",
+    "role": "project owner",
+    "status": "SIGNED",
+    "signature": "signed in the working session on 2026-10-17; instruction: 'tôi ký và chuyển sang tiếp theo'"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-17T16:40:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "Lifetime and error safety measured: refcount 1 -> 2 -> 1, 9/9 invalid inputs rejected with a message, 10 000 create/destroy cycles grew the working set by 0.398 MiB, 1000 serialized calls from four threads produced no wrong result.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L4-02-02-01.raii-refcount.log",
+      "sha256": "a347339bd24e6af1a74bebedecd4b05b2b764876775af9ce7d18715c2850d401",
+      "bytes": 2692
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L4-02-02-02.invalid-inputs.log",
+      "sha256": "c92d09b2f18695d1033aef98f0437dc27622e905899ae1760bc1633bde9e33af",
+      "bytes": 2698
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L4-02-02-03.create-destroy-leak.log",
+      "sha256": "23bf6c4230ac6f9d8df84c6124f662b60417593e8d78d9cf0bd6cbb5e0c48201",
+      "bytes": 2686
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L4-02-02-04.thread-serialization.log",
+      "sha256": "a5f64b3d4f896cfedccd9a33e66431040290dfa6ff548659a5469a98c2c266de",
+      "bytes": 2714
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-02/lifetime.json",
+      "sha256": "af6b8eddf40b0cfb75a728e39ab75c3565b63d246f8d22b074e9b278137b039e",
+      "bytes": 1644
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-02/source_crosswalk.json",
+      "sha256": "7f3ea37fb127904d686cd3ef419582a764e4221f14d41b56242a10a2c54b11b6",
+      "bytes": 3199
+    }
+  ],
+  "note": "The reviewer signed in the session; the assistant recorded the record and did not self-approve. No manual test is required: every acceptance value above is an automated measurement."
+}

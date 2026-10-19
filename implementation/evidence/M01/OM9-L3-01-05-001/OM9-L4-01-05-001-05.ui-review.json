@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-05-001-05",
+  "l3_id": "OM9-L3-01-05-001",
+  "title": "OCCT FFI Safe Handle Lifecycle",
+  "oracle": {
+    "positive": "HandleStore cấp phát slot + generation; get/remove O(1); slot được tái dùng với generation mới.",
+    "negative": "Handle cũ sau khi xoá là stale (không alias object mới); xoá hai lần trả StaleHandle; store không rò slot."
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this L3 is the Rust-side adapter half and needs no human test",
+    "date_utc": "2026-10-17",
+    "statement": "This L3's oracle is the Rust adapter contract (records, validation, handle lifetime, error contract, policy) and it is fully covered by brep_kernel tests. The native OCCT implementation behind the trait is NOT part of this L3's claim: the unlinked backend refuses every kernel call by name.",
+    "scope": "the adapter and its records, never the OCCT kernel or the window"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test brep_kernel",
+    "cargo test --workspace --no-fail-fast -j 2: every crate ok",
+    "cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings: exit 0"
+  ],
+  "artefacts": [
+    "OM9-L4-01-05-001-03.target-test.log",
+    "OM9-L4-01-05-001-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_05_l3_001_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "native_kernel_linked": false,
+    "plan_tree_modified": false
+  }
+}

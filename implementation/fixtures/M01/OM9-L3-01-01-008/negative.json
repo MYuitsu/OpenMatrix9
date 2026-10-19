@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-008",
+  "l4": "OM9-L4-01-01-008-02",
+  "case": "builder-panel-docking-slot-negative",
+  "negative_oracle": "Absent Builder implementation shows noninteractive placeholder",
+  "cases": [
+    {
+      "id": "Y1-a-click-on-the-bar-is-refused",
+      "path": "mouse click on the BUILDERS bar",
+      "expect": {
+        "error": "NotPermitted",
+        "status": "Builders is reserved for builder tools and cannot be rolled up, moved or floated",
+        "collapsed": false,
+        "drag_cannot_start": true,
+        "layout_unchanged": true
+      }
+    },
+    {
+      "id": "Y2-the-placeholder-answers-no-input",
+      "expect": {
+        "buttons_enabled": 0,
+        "sliders_enabled": 0,
+        "gem_box_sense": "hover",
+        "icons_enabled": 0
+      }
+    },
+    {
+      "id": "Y3-no-builder-model-exists-before-m04",
+      "expect": {
+        "controller_holds_builder_state": false,
+        "document_has_builder_entities": 0,
+        "undo_len_from_slot": 0
+      }
+    },
+    {
+      "id": "Y4-a-file-cannot-hide-or-float-the-slot",
+      "bytes": "{\"schema_version\": 2, \"sections\": {\"builder-slot\": {\"visible\": false, \"collapsed\": false, \"dock\": \"floating\", \"order\": 3, \"height\": 120.0}}}",
+      "expect": {
+        "diagnostic_contains": "Builders is reserved",
+        "visible": true,
+        "dock": "left",
+        "order": 7,
+        "float_is_none": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "Y5-the-slot-is-not-a-menu-the-user-can-lose",
+      "expect": {
+        "right_order_excludes_builder_slot": true,
+        "floating_excludes_builder_slot": true
+      }
+    }
+  ]
+}

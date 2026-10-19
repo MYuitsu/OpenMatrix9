@@ -1,0 +1,104 @@
+# OM9-L2-01-03 regression suite: scene
+# command: cargo test -p om9-scene
+# cwd: H:\OpenMatrix9\standalone
+# utc: 2026-10-17T01:04:56Z
+# exit: 0
+
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.57s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_scene-64822c60d893137a.exe)
+
+running 1 test
+test workspace::tests::layout_overflow_rejects_before_active_maximized_or_view_state_changes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\affine_gesture.rs (L:\om9-target\debug\deps\affine_gesture-4973adc76110cb39.exe)
+
+running 5 tests
+test preview_and_pick_proxy_use_the_same_gesture_matrix ... ok
+test warm_affine_updates_reuse_buffers_and_cancel_keeps_geometry_and_undo ... ok
+test commit_updates_exact_placement_in_one_undo_and_redo ... ok
+test stale_gesture_is_rejected_without_touching_public_redo ... ok
+test unchanged_gesture_accepts_no_document_write_or_undo_and_keeps_redo ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\camera_grid.rs (L:\om9-target\debug\deps\camera_grid-1350e14951db56b9.exe)
+
+running 5 tests
+test cplane_coordinate_resolution_is_independent_from_camera_navigation ... ok
+test invalid_camera_frame_clipping_and_viewport_ranges_reject ... ok
+test maximize_restore_preserves_each_view_and_original_titles ... ok
+test orthographic_projection_and_ray_share_world_frame_after_pan ... ok
+test finite_grid_is_world_geometry_for_display_only_with_exact_subdivision ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\instance_admission.rs (L:\om9-target\debug\deps\instance_admission-bbd8fb9099b23a6c.exe)
+
+running 1 test
+test empty_shared_instances_charge_each_occurrence_before_descent ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests\layer_colors.rs (L:\om9-target\debug\deps\layer_colors-396ce7e9c6fa2cec.exe)
+
+running 2 tests
+test hidden_root_and_definition_member_mask_scene_display_pick_edit_and_reference ... ok
+test assigned_root_uses_layer_color_and_later_swatch_changes_without_geometry_edits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\metadata_cache.rs (L:\om9-target\debug\deps\metadata_cache-47df5e6762ca23c9.exe)
+
+running 2 tests
+test metadata_refresh_reuses_buffers_and_updates_instance_masks_color_and_stamps ... ok
+test cache_refresh_refuses_changed_geometry_owner_and_unreserved_metadata_clone ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\reference_workspace.rs (L:\om9-target\debug\deps\reference_workspace-7b8d707137d24cd8.exe)
+
+running 1 test
+test through_finger_reference_projects_world_xz_and_side_reference_projects_world_yz ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\shared_instances.rs (L:\om9-target\debug\deps\shared_instances-a4f8678796eae070.exe)
+
+running 4 tests
+test shared_definition_captures_both_occurrences_without_duplicating_members_as_roots ... ok
+test one_definition_insert_and_one_undo_remove_definition_both_occurrences_and_their_objects ... ok
+test each_occurrence_picks_its_own_root_and_reports_the_definition_member_path ... ok
+test occurrence_placements_are_independent_and_member_transform_equals_the_placement ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\tmp_probe.rs (L:\om9-target\debug\deps\tmp_probe-9199a88e5971a511.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\world_picking.rs (L:\om9-target\debug\deps\world_picking-d52eaa6fcc95a24d.exe)
+
+running 7 tests
+test mesh_triangle_pick_maps_to_original_polygon_face ... ok
+test mapped_circle_sampling_uses_angular_span_and_keeps_native_parameters ... ok
+test nested_mirrored_instance_pick_keeps_root_member_path_and_single_world_transform ... ok
+test rendered_curve_picking_resolves_source_parameter_and_never_creates_mesh_master ... ok
+test hidden_locked_and_unselectable_stay_distinct_for_reference_picking ... ok
+test stale_camera_or_source_invalidates_held_pick_before_dispatch ... ok
+test mapped_circle_extreme_domains_preserve_native_samples_or_disclose_unrepresentable_bindings ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_scene
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+

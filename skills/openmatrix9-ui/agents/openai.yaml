@@ -1,4 +1,4 @@
 interface:
   display_name: "OpenMatrix9 · Giao diện Matrix9"
   short_description: "Dựng menu, sidebar, icon và viewport theo nguồn gốc"
-  default_prompt: "Dùng $openmatrix9-ui để hiện thực đúng UI Matrix9 mô tả trong specs v2; QymCAD chỉ là code mẫu/routine bên trong."
+  default_prompt: "Dùng $openmatrix9-ui để hiện thực đúng UI Matrix9 mô tả trong milestone specs; QymCAD chỉ là code mẫu/routine bên trong."

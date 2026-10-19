@@ -1,0 +1,44 @@
+OM9-L2-01-02 automated verification (python tools/verify_m01_l2_01_02.py)
+exit=0
+
+
+OM9-L2-01-02 (Be Command Dispatch Undo Redo) — automated verification
+==============================================================
+OM9-L3-01-02-001  ok      Command IDs And Alias Registry
+                          0.1s
+OM9-L3-01-02-002  ok      Typed Command Descriptor
+                          0.1s
+OM9-L3-01-02-003  ok      Command Context And Active Document
+                          2.6s
+OM9-L3-01-02-004  ok      Interactive Command State Machine
+                          2.6s
+OM9-L3-01-02-005  ok      Command Option Parser
+                          2.6s
+OM9-L3-01-02-006  ok      Atomic Command Transactions
+                          2.6s
+OM9-L3-01-02-007  ok      Undo Redo Journal
+                          0.3s
+OM9-L3-01-02-008  ok      Command Cancel Rollback
+                          0.3s
+OM9-L3-01-02-009  ok      Command Repeat And Dispatch
+                          0.3s
+OM9-L3-01-02-010  ok      Command Event And Observer API
+                          2.6s
+OM9-L3-01-02-011  ok      Command Availability Preconditions
+                          0.1s
+lib               ok      the session and parser unit tests
+                          4.4s
+core              ok      the registry and coordinator contract
+                          4.1s
+workspace         ok      every crate (‑j 2: the host paging file cannot hold the default parallelism)
+                          99.1s
+check             ok      everything still compiles
+                          1.6s
+fmt               ok      formatting
+                          0.9s
+clippy            ok      lints, warnings are errors
+                          1.8s
+real-window       ok      the build still starts, docks and dispatches in a real window
+                          14.9s
+
+18/18 groups ok, 0 failed, 0 evidence gaps

@@ -1,0 +1,72 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-011-01",
+  "l3_id": "OM9-L3-01-02-011",
+  "l3_title": "Command Availability Preconditions",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "selection/feature readiness and unavailable action state",
+  "positive_oracle": "Unavailable command disabled when wrong selection/document state",
+  "negative_oracle": "Hidden implementation missing must not appear clickable or mutate doc",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:347 BarAsk::WidthPick => self.start_width_pick()",
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE",
+        "gui.rs:731/741 self.status = crate::i18n::tr(\"g-import-empty\") — the operation itself says why it cannot continue"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "QymCAD decides inside the command: a bar asks, and the answer is only refused once the user has already chosen the command. Nothing states beforehand that the command needs a document, a view or a selection, so the interface cannot offer it as disabled.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs (Preconditions, ContextState, availability_with, admit_with)"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": ["qymcad-shell/src/lib.rs:59 pub struct Place { key, … }"],
+      "decision": "ADD",
+      "what_is_missing": "No enabled/disabled state and no reason for a place.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": ["ui-state/src/lib.rs:206 pub fn set_measure(…)"],
+      "decision": "ADD",
+      "what_is_missing": "Interface state only; no command readiness.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": ["qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape; availability is pure data.",
+      "om9_owner": "standalone/crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "capability.rs::availability(id) decided from the recorded receipts alone (Rust semantic/runtime receipt, native ABI closure, commit receipt) and returned Availability { enabled, reason }",
+    "capability.rs::admit(id, kind, options, phase) — the gate a running command passes — checked availability(id) and compared option names EXACTLY"
+  ],
+  "gap_found_by_this_task": [
+    "Nothing in the descriptor could say what the command needs from the session, so an unavailable command could only be refused after it started, and admit() had no session state at all.",
+    "admit() compared option names case-sensitively while the descriptor declares them without case (Operation::option), so an option the descriptor accepts (`bothsides` for `BothSides`) was refused by the gate: the two readers of one name disagreed.",
+    "admit_with() is the gate that takes the real session context; admit() keeps its signature and delegates with an empty context, which means 'no context is claimed', so a command that needs a document is refused rather than run blind."
+  ],
+  "reuse_decision": "ADAPT the 'the operation says why it cannot continue' habit of gui.rs; ADD the declared preconditions, the context-checked availability and the context-checked gate.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-011/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-011/negative.json",
+    "standalone/crates/om9-core/tests/command_availability.rs"
+  ]
+}

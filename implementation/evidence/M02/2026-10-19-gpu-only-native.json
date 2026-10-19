@@ -1,0 +1,2408 @@
+{
+  "date": "2026-10-19T01:46:53.268121+00:00",
+  "scope": "GPU-only desktop viewport",
+  "native_runs": [
+    {
+      "name": "default-100",
+      "report": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-default-100/m02-report.json",
+      "report_sha256": "0fd243d6c10b77a63c986f25f51c5135a2941813ad687f09cd8242cedfb531e9",
+      "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+      "binary_sha256": "9c916c8279fa4a90a5c57ce4d7f4a4d0ea4d1c0fb4a090b9503030a240289968",
+      "source_sha256": {
+        "Cargo.lock": "aff95684d10fe5508733317d7c09c5d02587a2687446636843ada30dbbd33e61",
+        "Cargo.toml": "76e251465a3b9a69c7bd93b1a0910e3fc9fe5946326cbe294244ee2960c019bb",
+        "crates/om9-3dm/build.rs": "250353178f5e83c05610e9067be3438555b7c5ab81df72552ef29d39504e4557",
+        "crates/om9-3dm/Cargo.toml": "ed3cc761c88b53fd592315061257998c3c96f5a11157532c4c9666985a495291",
+        "crates/om9-3dm/src/bridge.cpp": "8e81201c31bfc69fe2212e69ad9714443cad6be6e25b60a8ca69374b441212a7",
+        "crates/om9-3dm/src/lib.rs": "8b7551c2236584741e5a22799e41d22abc795b185c48ae370a7d24183503c366",
+        "crates/om9-3dm/tests/import_roundtrip.rs": "271b02124aff12900f59a42d41d0267c673a5b17c4ddc3d3c1be804df7ff2125",
+        "crates/om9-3dm/tests/jewelry_scene.rs": "ac2183b9e1e65fe3b04cddad83dd26d2d7794f651e364c5d07e6f9e932e42b14",
+        "crates/om9-app/Cargo.toml": "944a77050fcbd990e64909f0a229b165d7af144aa0a7ef27eb7508b9bca357dd",
+        "crates/om9-app/src/command_events.rs": "033081f1c52b71302486d9c0bc4e92ad149aa026c46c5ac10d13da4e6f5e35ab",
+        "crates/om9-app/src/dock_layout.rs": "303be84f9aaa10461f6fbc265b86fb6094ce7715cf1c606d0b919c2d29728bd5",
+        "crates/om9-app/src/file_lifecycle.rs": "5dc049403247018d03e6e37a1171fa367b4568d82336482bfe3e6d152c63777d",
+        "crates/om9-app/src/gpu_viewport.rs": "6576090d17543ec8eed4a8434e3976d7726e81668cdef1c1d077149d0fab4d67",
+        "crates/om9-app/src/icons.rs": "bc7e0c7520f58f482ec97b0f77535c809867d0dcc750b9f4720ad9af1d4ec2a1",
+        "crates/om9-app/src/layer_command.rs": "0c4315edaa5ef76e12c0b36d9d78c5f7d7fb0da0a1c01ec85856cc27d5cf378a",
+        "crates/om9-app/src/layer_dialog.rs": "a9c4e47b2377d964e820ff6e56bcca01ee9cb659a0a474c044d551ae2d4b50e4",
+        "crates/om9-app/src/lib.rs": "ff3d992d32954cdbdfa7f67454a2f3da65ba1f99c9a330a086e1eacf8f1cd32c",
+        "crates/om9-app/src/main.rs": "32888b22929e75e473d6a0b2597d37d7d13aa2af3e59d089354e58fdf2bace99",
+        "crates/om9-app/src/native_picker.rs": "234d305c1675ffcee0c1ba7b9e406231e2cf35b9683d72f1fcfcd0026b89198a",
+        "crates/om9-app/src/option_parser.rs": "d7e3c3b1b3eb51ae0269da2151af789433d4fc03f62565987288699c7fb40478",
+        "crates/om9-app/src/panel_ops.rs": "5220b73fea64b29cbde56528bc4342f2de829ca16523240e00bc6af80ef7b496",
+        "crates/om9-app/src/report.rs": "70f9b25aefc4eb9cbb2056a3a357446e8e41010746ac0bf0246a2e46ee760dd5",
+        "crates/om9-app/src/session/contract.rs": "92a0bb32ae83ee5b54e90556fe29027bec47c0a3c34cf9fcfff4f36a9ba160f0",
+        "crates/om9-app/src/session/files.rs": "61b35d0eae5b465419bc55f69c2a20056ee508d8e0253f03ba077ce18e1a6af7",
+        "crates/om9-app/src/session/gumball.rs": "64ee3ca9576d9835c9957e6786a350f5895b2a4fb872352100d3eefce589234d",
+        "crates/om9-app/src/session/gumball_numeric.rs": "4f2550b7085f4fa4450c0e55d23614acf2bcd4bb56ed4b7edf255d31bd2c5995",
+        "crates/om9-app/src/session/layer_dialogs.rs": "f767e39ee7986bb31d06775cb4cc9815aacaadc6974f222d84d04738e38011c4",
+        "crates/om9-app/src/session/layers.rs": "07416e1a77f024ecc478f2e80417974abfe77cc4affea712ff067353ea4b3072",
+        "crates/om9-app/src/session/stress.rs": "c90bb5d7ce0ff24bab031a0cd92ada01e0c1fa4aef28967a683ec2e078b87c5d",
+        "crates/om9-app/src/session/subobjects.rs": "dc45b5a5361205d73ac9edb92c567274f021f7b9597ebbfd4cebbbd5595df12e",
+        "crates/om9-app/src/session.rs": "5e6732febfb8127537b0051c2a3cedb09ae35c577f958ede975f4c695b9cd21f",
+        "crates/om9-app/src/startup.rs": "ee4b1edaafdcbd2fcf5535673469de3df08e837752b626688053ab1b08ec5a7d",
+        "crates/om9-app/src/status_surface.rs": "468331b77210ae714be011723264e5010b1f1ab893b92f99eef330673057b47b",
+        "crates/om9-app/src/transcript.rs": "000de98ce3f3324ec42c9ccb0d212174316c05f8e0f937f03f3032ec3a7cd7c4",
+        "crates/om9-app/src/ui/chrome.rs": "23aedb978df6240b7ec2f429545ee5cd09b50a64da2b6dd16794531def948381",
+        "crates/om9-app/src/ui/command.rs": "a68ea475fda958b4ce2dfd67e1ce81ae3178285a6ebc39ef1f69e928e7db62d2",
+        "crates/om9-app/src/ui/file_audit.rs": "3707523f4eb98683b600c906778e2c6905223b280f5d552d1eb53a8d94a7129d",
+        "crates/om9-app/src/ui/file_success_audit.rs": "e741f048c62dec288e41bc4616401aa5cf0148d453d72a03f6f58e02d6e3f436",
+        "crates/om9-app/src/ui/files.rs": "c3a5a09cd2d4c839728c0ae07288ae3438782237cb7dffe64be5b392daf94e25",
+        "crates/om9-app/src/ui/layer_audit.rs": "99bcf7ac9c220769e80a752f049e6568870dc1d041e60595c61e58394a8d0e76",
+        "crates/om9-app/src/ui/layer_dialog_audit.rs": "e42ea42f9c867320b76a0dc6b34e25e2d74cb1e4727d0f6374cacd87b4f129f1",
+        "crates/om9-app/src/ui/layer_dialogs.rs": "dc0e24b79ce2fbcf67f6c7ca79488ff45eebd3f8499b4e81cbafc90d56455798",
+        "crates/om9-app/src/ui/layers.rs": "ed1451917515a9c28dc7d5de9236d67ecf9877edbafd9325f4e8f8f6f79bafd3",
+        "crates/om9-app/src/ui/occurrence_audit.rs": "58d5fb9a6d1016d738b6a10e81467522127dfb7c1aadd7c739fb3001f42589ef",
+        "crates/om9-app/src/ui/panel_audit.rs": "ed52f138379c5ff7c722c0a320e73d27c73c3a7fb76088920abb07310c3601bc",
+        "crates/om9-app/src/ui/rotation_feedback.rs": "7bc182fa4c217f28815e5f1a98633d9e5486e10ec239ae1b34ebbbd9d3a113db",
+        "crates/om9-app/src/ui/selection_audit.rs": "5410f15038595130a5cba7fba347d3e4073829c1ec625c93d4fae9e06b3b6d55",
+        "crates/om9-app/src/ui/startup_audit.rs": "af705f294071d856a673ea09e900c3abacd21beade70845a671271fe3fadeded",
+        "crates/om9-app/src/ui/viewport_audit.rs": "475ea933ec6908e79346942b110d38da60fdda52e29bfb67be0bc58b7b6ca551",
+        "crates/om9-app/src/ui/viewport_menu.rs": "debc0548d6f96e2dbc0ad8c681e1f65ee8345d9e9a0a856e3ab8d747b2b5de20",
+        "crates/om9-app/src/ui.rs": "b1ca38087afa59816e33d60132352d3ae9901c27a3ef85a892c362831ef0023f",
+        "crates/om9-app/src/viewport_menu.rs": "fa206837c53a97991b15991a0ec9be70169e52625fd353889efd44fccbbbbcb3",
+        "crates/om9-app/src/window_identity_guard.rs": "fee733314578ac11090899059d77deb817793c6fdc699a692e9a2f78ee441582",
+        "crates/om9-app/src/workbench_regions.rs": "d97820584f312c931d678bf0053f12f7bb0c5a468f733e293b54662786b7fc46",
+        "crates/om9-app/tests/acceptance_selection_set.rs": "9be57f75c896d7a32021196482f828709855eb272143cf8c922cde659ef88396",
+        "crates/om9-app/tests/acceptance_viewport_selection.rs": "8a9533bc97a2f9d4e7888080f5c0740962b46b1becc3e3921be403345e3640a7",
+        "crates/om9-app/tests/brep_selection.rs": "c6347a4c05cfe4f7d8c95a999b21c80e55c870207098be46a4cca7594f4095f5",
+        "crates/om9-app/tests/builder_slot.rs": "31e70321a9a44587b0aacf7f88f606f3b61951a7935ff5b2e1f8d7d381c6b953",
+        "crates/om9-app/tests/chrome_actions.rs": "194f32421dfbdab2e6d3b4c6034417c6788e76e9af229e96ca65d27e4ac9b901",
+        "crates/om9-app/tests/clip_behaviours.rs": "63484e5dbe335a4e66f552a324080bbdb05b84f6dae50cc5d8bec5b1cd337f02",
+        "crates/om9-app/tests/cold_layers.rs": "ede0eb6ad95ee60ac6c329de2458cdce98bc0f2cbf3e8680eb8fb1984e763244",
+        "crates/om9-app/tests/cold_reopen.rs": "67b9287af14122cd49556a20ea0fbd1f786f355faed946ddb0e4c87c3acb2f40",
+        "crates/om9-app/tests/command_context.rs": "0d726237fe674d53d92e07a8fddfcadc7b0613b7d7998712948c410e33ad0caf",
+        "crates/om9-app/tests/command_events_surface.rs": "664627d06f27d053832adb9a86965fa674d357b2aec9aba2d11d8cde1ee63f66",
+        "crates/om9-app/tests/command_options_and_repeat.rs": "5faf07729402ad9fdd11d95603e3f3ad09d2f463686b0af39beab0380e8b18e5",
+        "crates/om9-app/tests/command_sessions.rs": "0ec6ea6e39fbf8c499ef135cab1388d849ea437ca1b39c53270d1f0c75eef04c",
+        "crates/om9-app/tests/command_state_machine.rs": "980b64fd430f67a1a99503b2cf600f140cffe4decc16e53432f418123cbfe0c3",
+        "crates/om9-app/tests/command_transactions.rs": "7d70e9ab1b99ed984f12400585209327ea872e633fd1d9568be14216cbcf1118",
+        "crates/om9-app/tests/command_transcript.rs": "261d3a9e6fcbca924666ef0b767f53d24e9786a59f482dbc6f3a89e6049e1e2b",
+        "crates/om9-app/tests/common/mod.rs": "f8ea1fbbd8a6ee25af56179bad248cfb1bd3d8342e45589117f32d747cf2fd23",
+        "crates/om9-app/tests/dock_layout_default.rs": "a57b33ce4f867f495937086baf3f308cd3a5b90928c188ecfa236d1a64f21350",
+        "crates/om9-app/tests/dock_layout_persistence.rs": "63cdc5c4c2cc44f322aacb7769738cb1c6ffd0b61a86abea54951c508963ceb5",
+        "crates/om9-app/tests/document_contract.rs": "646f54a1ae86abda283bbdae51f518b60c6de2edb816c1ade166947cb337a64a",
+        "crates/om9-app/tests/document_window_state.rs": "b15b9714a2c6f63187db06b91a351e31fefd6ab4e4e15307923514f41985a9a5",
+        "crates/om9-app/tests/file_lifecycle.rs": "1a78d6744ee0330adefb4403eab0417631ba72325d7bda592f879d2e884391c4",
+        "crates/om9-app/tests/file_lifecycle_cold.rs": "6a4aced05a919bddd16ad14ac2bdb1b45d1f24f8082f4d1fd0f627d8c588ea5b",
+        "crates/om9-app/tests/file_widgets.rs": "c373cab54fc9d8cfd35af8e1500795b7d5fe357739242bf474359fac1988d8f1",
+        "crates/om9-app/tests/gesture_regressions.rs": "4efb8bade4c292e34a2758ecd4307ebb08e3fd13c953bdd17988719dbb6d9340",
+        "crates/om9-app/tests/global_status_surface.rs": "45492c6e200f642935a8c5210b1ab396e423a29663d8e04e2558ad6697bc1743",
+        "crates/om9-app/tests/gumball_cold.rs": "08faac6e5b47bf494d98744e79b98003eddc322daf7f3008cbedbabe83588a44",
+        "crates/om9-app/tests/gumball_interaction.rs": "a1c80bbb829a17596f636b0d4a3fc83752ef022000c15de04f878a821b8ece39",
+        "crates/om9-app/tests/gumball_numeric.rs": "b2ff3181cae3ae7a94f8e53145f2543ff35314e008aa5a16f31e737f40624f5d",
+        "crates/om9-app/tests/gumball_placement.rs": "49f7d9c7c45e0bc81d89a115f3536c29de05209c4860382a57f5dd17e9f9ca01",
+        "crates/om9-app/tests/gumball_viewport.rs": "c442001606cb4cd8e149da790f42fe9afec5bbe29821314cd2fd76353a47ff61",
+        "crates/om9-app/tests/layer_controller.rs": "5bfb99691cc1ea1945daba898d6bc3c0e99a2fd2949132d546d48ebb03b6d8d2",
+        "crates/om9-app/tests/layer_dialogs.rs": "aa184e288b420b465f91844ab5285adb65be795122a9cdf64989ac4a7e328db7",
+        "crates/om9-app/tests/layer_widgets.rs": "aa98b920623da4e44b2e707609255f33e3b9b089d7619de5331657e00dad5b73",
+        "crates/om9-app/tests/left_stack_layers.rs": "621bd7d01c306c6e0b95a01b47b9dfe098c2938f7c5aa659bbbdb8f52c26eb75",
+        "crates/om9-app/tests/mesh_fill.rs": "c9c38667c4ab7c1b1176c8978d983eaf16f0927b535a18b09431650b7a068282",
+        "crates/om9-app/tests/mesh_stress_command.rs": "567e9ab103806ac2e8c3179851bdbfde562d50a25519c77b0873f4f89ebc2d9c",
+        "crates/om9-app/tests/panel_door.rs": "b0cb76856160a2572cff751e7b73cdefcd8efef4a7312b451e4e393c964853d0",
+        "crates/om9-app/tests/panel_ops.rs": "423f4bac59bfa4f1535041199aef14e21cdbc7c982ac6d7c1059fa1e1cd39df1",
+        "crates/om9-app/tests/pick_disambiguation.rs": "2616a574ff77812b51c4eb07735d63a0c509b376da9928b6e27b99cd6dc34521",
+        "crates/om9-app/tests/pinned_command.rs": "adc4847f93f6331fa8c7eeb31bfc2184ed51f24ea96ae06381eddbff2bb6ba5c",
+        "crates/om9-app/tests/preview_drag.rs": "95f5bd60c8e0eba88d5d4f89f820c58341c2692a2ef2d8ddd2ab6548c910933e",
+        "crates/om9-app/tests/rubber_band.rs": "d2fba6773e250de5cedaa79020d990a5e0b54e09337149e63c15dc4b664e67f7",
+        "crates/om9-app/tests/scene_allocation_peak.rs": "2a47e1775b10910f8b50b009669c405fd70b42d42c6ea105d17470f63b46fb22",
+        "crates/om9-app/tests/selection_overlay.rs": "6e6c3d8245ff18a3bab5e11e85c811e2611326f158b047be48bf3af7c413e1a6",
+        "crates/om9-app/tests/shell_docking.rs": "0dcef2c137177a1c2d1d005fe73a8b5334674d6b4bde225c12167de9d4c40eda",
+        "crates/om9-app/tests/startup_contract.rs": "e0a3d6a5b91ff12b55ba954a04a2c8bb81ce9cb81668ea8f102715b7de3f3859",
+        "crates/om9-app/tests/status_bar_overlap.rs": "14623bfab5f5b36771e4f22905bee7c5d9f18f14ce52b12cff94fd9c7e663726",
+        "crates/om9-app/tests/subobject_occurrences.rs": "0672627470f57b82552606013c21f2ae8010f50279fbe761aba2ce427de5681e",
+        "crates/om9-app/tests/subobject_selection.rs": "4d9c8018c577122f1195035a1e7024fca568a8cdecb6dedf3f0dcc9bf67df8bf",
+        "crates/om9-app/tests/ui_events.rs": "e8d8966514c214583e1bba846a0e8ad89c420d09de2131d35cd68cc354afd3fe",
+        "crates/om9-app/tests/viewport_title_menu.rs": "5146694d3e44096ce6b24242ce2de232cbf5852cd5a3488cea6a3376dd9a5a00",
+        "crates/om9-app/tests/window_minimum.rs": "64faf8bb44900fdc5f261d94ad5efce256b3a5d3590713169792922151eb1458",
+        "crates/om9-app/tests/workbench_regions.rs": "32ac9b41271581cf57ff3a146f33737417d3d49277aec3a7ad8f1d4fe059ca71",
+        "crates/om9-app/tests/workbench_regions_sizes.rs": "45a4849254a3cd1243a78738d270d13dee5afce82befdbf1382ca635fa1cb0e0",
+        "crates/om9-archive/Cargo.toml": "7c93ab59ad64ccf9c6c8ab65354c8821efc8787324a76a80f8f1d7b6828d7498",
+        "crates/om9-archive/src/atomic_file.rs": "77a7020592fca5ce3b2ead9fef4634d4fa81d464fd1f30f37652cc877ab2b89b",
+        "crates/om9-archive/src/container.rs": "9993fea64c9617406d6083d9a094476454716b4f2100088346bc3ac24942e0b3",
+        "crates/om9-archive/src/json_admission.rs": "5b6f6c5fef21f235d74f219743bc7785a82c696b2d352cadd11981ebf4791a28",
+        "crates/om9-archive/src/lib.rs": "0fa834f104310fa606598a210e6aae0024912de597c4f4a41e0139c0de52624d",
+        "crates/om9-archive/src/restore.rs": "1af17f63cf002d35951e59cd9ba965712bd9447e78ae95e9ba1c15ba1c45f6f7",
+        "crates/om9-archive/src/snapshot.rs": "66f3b005ad53a78748bca35a47b8ac34b415419f4fc7daac4542cf4e81d70f8a",
+        "crates/om9-archive/tests/atomic_save.rs": "6ba9b9c4c3a6554bd773daa4c2e3ae3981a85876a4b96975931dda7963a0d605",
+        "crates/om9-archive/tests/container_admission.rs": "9c69dbb0655092ef7483a72d3e363e4b4100120a6f3adca6f9d401ad96cd6c92",
+        "crates/om9-archive/tests/definition_units.rs": "745319f262926759afb0fc47dbd84aa4def422f6c477541a88f21533abb65b2a",
+        "crates/om9-archive/tests/document_identity_round_trip.rs": "fdeccd8ff0b56e1628c2f24e0ea7ecbfbaf9104fe405b997554044c11586a1f5",
+        "crates/om9-archive/tests/document_snapshot.rs": "8dcfa851b1459d628b5acd3267b6095c27d63f59b52dca67c7d57ebbc7cfe09a",
+        "crates/om9-archive/tests/layer_schema.rs": "b87ca59d99c9f4069230a2dfcbc7e086e8d8353d0a9d140b3d37395b50176e6a",
+        "crates/om9-archive/tests/resource_chunks.rs": "4885591ddd016c5c4ef3e9e457eed1e10958929ef57e364507815a24776506de",
+        "crates/om9-archive/tests/restore_modules.rs": "5ed0b4baa9c79e83541258a9218fb40401de3909ddc6d442aba0cf36340e83e7",
+        "crates/om9-archive/tests/z_float_probe.rs": "59472207d0dece4cadea2722bff23a394b69462d95301b287934f5ed784255b4",
+        "crates/om9-core/Cargo.toml": "1f100a097c871ab5dddf4894eb351c148974972aebbe21a8248cf10cc6685f74",
+        "crates/om9-core/src/brep.rs": "1a60c0aa941337c80903481ff8c4dbd753a181d713db06f47b1c2da0e0b6418d",
+        "crates/om9-core/src/brep_kernel.rs": "96fae0ec5c20b3733b313775cd99fbdc2a778250030a6ef0ea46cd6c300546c0",
+        "crates/om9-core/src/budget.rs": "165bfd4a3003b09b0d9551e78829fcd4480daecfb9cd937a47d547f9383c4345",
+        "crates/om9-core/src/cage.rs": "9cfe6c4ecc70960e09ac103ae2e966499ce8aa20cffe205858e7529eaa6cbff3",
+        "crates/om9-core/src/capability.rs": "82ddde726b6f8ed9686898d04ac4e99e78bee28d446ee4f905a1ddba32edb4b4",
+        "crates/om9-core/src/changes.rs": "f52eba07ed34b2323a97cde99300b06dc2f161e7c8f3868b6bfe035ff85ea183",
+        "crates/om9-core/src/command_schema.rs": "21fb510431f16cace93d04df4f2a66f00eb3b165cd48b7f9160eb72a9d35e895",
+        "crates/om9-core/src/coords.rs": "2916abe92a82cbc4b44bec1d8a4be754bae497b6086c08cb911ab2683bc3b33c",
+        "crates/om9-core/src/curve_build.rs": "92532f49ba4a4b7e9866bb6284540fe017d1a64d8336313397cf1e12611ef47f",
+        "crates/om9-core/src/error.rs": "98e23a702a615a0be7e6eee18eac826c44d11ab79596570c878d3b97fad79941",
+        "crates/om9-core/src/evaluation.rs": "6087beb4a748228fe5409f5af1148c80db9df494989ddeeac6bc208e82c92a0d",
+        "crates/om9-core/src/geometry.rs": "4beadef360c28770f694f4db8ea46fa59ca60e08516a71c98a3a0fb09d33c7d2",
+        "crates/om9-core/src/gumball.rs": "a2fc9e487018e473cca5d0dd8ba79a0ecb7fedc4571b6d67f8cd5391e146139f",
+        "crates/om9-core/src/history.rs": "8e701cdbac07222ac83c8bf07cb526e8a9c43050fcf60a0f011d52f9992e81ce",
+        "crates/om9-core/src/history_ops.rs": "9ba5d917363949e28acedbbec37ecd1cc90d62ee7f9dbd688f50620f2d11d55a",
+        "crates/om9-core/src/identity.rs": "a7e8f8852e75f3bb3f819b6529b35ef1dab3cbe6a64a84e810ae99ab24fad9bb",
+        "crates/om9-core/src/jobs.rs": "aec15fd4cabea567348d07752ab07815cf6b93860c0852611524f17ec5823078",
+        "crates/om9-core/src/layer_ops.rs": "dca731c3865c6b9fe8897b1e13c1e4059e01e6ba09a9862cfc45e7af6632cba4",
+        "crates/om9-core/src/layers/preset.rs": "d57069281adc5bfe2e494314594265e40714bfd5d05d74139be092bfa50e1407",
+        "crates/om9-core/src/layers.rs": "99ba2c6c5c680c3327931b76c448b846d2d9bbc7b6c990235075e87030eba1e8",
+        "crates/om9-core/src/lib.rs": "7e9987584596356b87528467b90a633b1c4fb87cafacb7fa0fc46a03a0abd7c2",
+        "crates/om9-core/src/measure.rs": "0088893921dad9f14326fa298ba68f985143c43269f01dc854b4ba2f6ba9f127",
+        "crates/om9-core/src/model.rs": "4142b62196565cc54e3ee191a96f70b7b35b21ea2a05eb9a7351a632507f1698",
+        "crates/om9-core/src/modeling_capability.rs": "3d0e698819a205330881c75252b403eb7e7150107b0d98865f30e3d83afbcfc9",
+        "crates/om9-core/src/offset_curve.rs": "556154d6eda50f90755576137dd524c7fa253e60157c5acb974c7341319aa386",
+        "crates/om9-core/src/provenance.rs": "a471c76ef4f49189423138fed7fd395b2738989057469b4fd67210b77b7faadc",
+        "crates/om9-core/src/request.rs": "4f10a399a02909043d1ce253a2f078bcceba2641f606795609adaa111f8e213f",
+        "crates/om9-core/src/resource.rs": "c094512acf7e18d1c56e3bc5c02c4675cbe12307b3028624817d07b84958d98a",
+        "crates/om9-core/src/result.rs": "30d9fb17059de833e864ec918ecc4eafe8e4d16cab8bf1b01cbcd51af9fc7d24",
+        "crates/om9-core/src/retained.rs": "1e2cc724dd1eb03bd2bfd284aea8a0702643c390c43b48d857d1808fee2a69b2",
+        "crates/om9-core/src/scope.rs": "50e332e91690b56157ed30453356b1f5a0db30f3a95c362e4a6aa5d2cfa866ab",
+        "crates/om9-core/src/selection.rs": "8ec1678ce97604f9be80ee5f69a4b7a94713a07c2487f073a6c104fbd94624d1",
+        "crates/om9-core/src/surface_kernel.rs": "f6ee1938df7df299ba25e639c178c80c6e96c789c5e902af5b3406ace383ccc0",
+        "crates/om9-core/src/transaction.rs": "4f54dda648a7542854ac76fb506a30b742345c0c902c94c9370d910b96e0ef31",
+        "crates/om9-core/src/units.rs": "25d663a30f8ab4c6fb66797b4e38d48323921f013e09c18ce43a3528301dd21a",
+        "crates/om9-core/tests/atomic_transactions.rs": "ae43ba8d9dd7cc00e3c83a9e62f1fcc2909107db77e3bd8bf53d4b73e0e8bca4",
+        "crates/om9-core/tests/brep_kernel.rs": "de53c18e3a89a1abe7b362dca4cb41e73f3d67abfc31701c3d19711552428a62",
+        "crates/om9-core/tests/cancellation_links.rs": "d4b198dc2744caaae16c0fdde6f2eebdec0d2dbe9acc25e5eb3075e13e779a0f",
+        "crates/om9-core/tests/capability_gates.rs": "54d116d508494af418e93257a6239b07eee00b43024df1b1ea30a32742bebb4c",
+        "crates/om9-core/tests/command_availability.rs": "95a420aa37ce84d1ea76aa4b84bedea9a87efa9ca2e9939547e183cbd76f17c9",
+        "crates/om9-core/tests/command_descriptor.rs": "0652c58e4a5c28b3d6852bacb0a2f000d6eac34add399f9dac17fefb2bd2be37",
+        "crates/om9-core/tests/command_registry.rs": "cb573d90d43fb80e10586e18f54b543d4bb90215bb9d30d7575bacd029b27172",
+        "crates/om9-core/tests/command_schema.rs": "48061357c249a162daa08fdbad357fe6f111138318e7dd9c31cb0ef6f04ca1dd",
+        "crates/om9-core/tests/coordinates.rs": "d07b0348dad166a3640d3bc2949e3790c5a239fb6da24e6558e1f98b96eb2573",
+        "crates/om9-core/tests/coordinator_authority.rs": "420021c3f4298c1169f687c6947de4bd5c187040533ea8f703248446bc54f6b2",
+        "crates/om9-core/tests/coordinator_held_startup.rs": "1f492830fc74394c2333669ca9e5d29664fb1c42fd6dffc26097a65c2a293767",
+        "crates/om9-core/tests/curve_build.rs": "e6c2fc6b0c0ddb297bc0f35ba848e216f26c7dca39e8c30ca2d915f7c8620cc6",
+        "crates/om9-core/tests/curve_oracles.rs": "ca458b9f6cfa61ab1f5b892623ad70c5346276ccda27fcae3a883b2e234b8226",
+        "crates/om9-core/tests/definition_units.rs": "1f056e8ec3bc4ddd8e21140de99a02d9f1971922adf0a88671765077b94eb361",
+        "crates/om9-core/tests/document_changes.rs": "8da5a42405ae7d92f3da90384374eb911dc5ce60422dc7c3640b6296c6977c45",
+        "crates/om9-core/tests/document_graph.rs": "d21e461998812687b6b2989edf606785964f5b2ae22a81f86b91f4be9011350a",
+        "crates/om9-core/tests/document_tolerance.rs": "219bacbd15c6940936ab0b2d08c47260eb684a132f12239b248627c0e345f81f",
+        "crates/om9-core/tests/embedded_resources.rs": "b0040b82d4e15b2b35e8abc602259687706d9214a276b6566b356cade3f31c24",
+        "crates/om9-core/tests/gumball.rs": "7086f60ff794dee1296eea0ab36e5f9d719f23e5ece4392b35c914dcba24d49c",
+        "crates/om9-core/tests/held_preparation.rs": "6f55fad33d8f5483bf7c5cfd6cdfb5e89cced5d13b1b2789cf1fa7279186eca5",
+        "crates/om9-core/tests/history_ops.rs": "6ee04a27f9f04060ed57949d020f277ea9426ccd30f25499da0251eb3ee74086",
+        "crates/om9-core/tests/history_replay.rs": "62699ea49074b1834851cb11050650485581863e482a6dc063dca80a816ab01c",
+        "crates/om9-core/tests/job_lifecycle.rs": "aebc25bc07956ab5f8293bbec06cc2bb7dfcb677a3f4cb20c01879b89df07020",
+        "crates/om9-core/tests/l2_01_08_precision.rs": "0e592cea7b8f7e8ac65c023f1d3b4298e456113b7462a90d79e4201a277fb6c5",
+        "crates/om9-core/tests/layer_ops.rs": "c74b1785ffd9563ef6dc15a375d44fafaab321ff5895605b22855f065f03ed78",
+        "crates/om9-core/tests/layer_state.rs": "0ab85f56d17960eab21b921383932d38f125e80967e6a9817d52411865a67e5c",
+        "crates/om9-core/tests/layer_transactions.rs": "e58f7492da7c39f0441e98c52763ac50eb1f9f81f6e7c78d206cd325c90b1ef4",
+        "crates/om9-core/tests/lazy_layer_assignment.rs": "3125ad613a1d84650ee39f1530375f51364867151e15c6b3f8d29a3e6d262bb1",
+        "crates/om9-core/tests/model_admission.rs": "5e885449505a005dfc35c40fbdff7ea44442c04bcbe686acb3de837d30b631cd",
+        "crates/om9-core/tests/offset_curve.rs": "a74c21d623cd5416ba3777d5b9ac4c9102d7c8b9fdb0b9a0c65d0cd533211e01",
+        "crates/om9-core/tests/provenance.rs": "4b0674fbf58c3c172f9d584f7302ba4849c7bd723b1a3e0afae327d126dc2736",
+        "crates/om9-core/tests/resource_transactions.rs": "849a322eefeed6848b3451f8063758d47c2ab9e5a200e005f1f0d87333c7a580",
+        "crates/om9-core/tests/retained_entity_baselines.rs": "ec7014b4748c7abe345399cee6dda5e72f2a73319ae34f1b111241ef280fd2fa",
+        "crates/om9-core/tests/retained_imports.rs": "8fa804cb3690e53047bfa13cab067940cc7902ad056f2b8c8c733de307c509d6",
+        "crates/om9-core/tests/retained_peak_review.rs": "cbcb4e2fab403a6dd9b06cf88b966d42bf098acdf40d9074e715d7195a6d0216",
+        "crates/om9-core/tests/selection_state.rs": "0f00982524a950f224fc00c75783fbba1bb3b587ef5fbd7001346e9d485bc5fe",
+        "crates/om9-core/tests/source_binding.rs": "01ee792e7045c2d61cfedc8642b8f058c8308c4cd4188212c84c9e95ede2f591",
+        "crates/om9-core/tests/startup_layers.rs": "132fbd34207d495080fcfb29780230aac5c84180e65de4ace523f7f0c38edeb4",
+        "crates/om9-core/tests/surface_kernel.rs": "745ee2474868e91ff31b8f35d2cdf4a719cbb61367c10f0cf2e1d3e075796d17",
+        "crates/om9-core/tests/transaction_scopes.rs": "0fbf232e67235b26fb563a5267338350a18aa684eb58eed665c38522a354cd8d",
+        "crates/om9-core/tests/units_parameters.rs": "6c2321604460778f758e69c81ffb4e5293b9e3475744818b7514936f66158c40",
+        "crates/om9-core/tests/w8_w9_w10_kernels.rs": "de8737f8fc2ae8cefc6bf0cd4ba9dd6dde810dfb7eb39c6275197d8bd65cf4eb",
+        "crates/om9-exchange/Cargo.toml": "9c8f4334bc6e541b15c868631dfe220f07f00ba832fdd72ccbaa4579a7e9480b",
+        "crates/om9-exchange/src/current_overlay.rs": "ddf2b8398138a7ee683a5b8e7cd7a088f3b8e2c15be2d5eba196327ef376e2cf",
+        "crates/om9-exchange/src/dependency_cache.rs": "3e032e55f255c127da5c65bd5cf4598ebd57cf02c03936baa6b77439d6b334d8",
+        "crates/om9-exchange/src/export_document.rs": "ce51e910e22f7f3ace21f882696b7104589111e8e6dc46819d1b1021fdc8e09c",
+        "crates/om9-exchange/src/import_capture.rs": "92f38622da55023877c5b648374c2773e949d9103d876fcf49a9864d7b0b0c59",
+        "crates/om9-exchange/src/import_dto.rs": "cd6af3b9f9017246fc538b569bba8b8d5084c8812753c0c7d8b6387abe5a7085",
+        "crates/om9-exchange/src/import_graph.rs": "d532aa7f99ffa3524fff470cae6078f42aebf7476a8f7a5cbba88ed9975c214b",
+        "crates/om9-exchange/src/imported.rs": "fbbbebcb0144b05036ab958f043c80758b3bacd490e3e0364ca87a5fc75f0be8",
+        "crates/om9-exchange/src/inspection.rs": "f629199263ce6ea47fbd52f82b500e2ca431976f65bd656275eba7eb853e681e",
+        "crates/om9-exchange/src/lib.rs": "904b235fec3038457d94d12c5401c7a3bd040da63ea098725a5747f3dab6b132",
+        "crates/om9-exchange/src/merge_inputs.rs": "7d5a1a394d5f7cfee3b6223693648f00a03e195e0fc88de94718217e51f11924",
+        "crates/om9-exchange/src/output_identity.rs": "8538489a8ec0190a9375950ad9e2445cd95359ccf511929ecb5cabe91e5ba5c2",
+        "crates/om9-exchange/src/retained_cold.rs": "1cbe4c1b4441cf89bd9940887a2793a483346f5694740a152f26fb250c039c3d",
+        "crates/om9-exchange/src/retained_packet.rs": "52dc55801c95204f1d6af14168b89c13b6292307270bb2d60c7a877fd1101794",
+        "crates/om9-exchange/src/retained_stage.rs": "6958ae9bb6207794bcb8c199caa5030a1d55a64266ba0b3b63389b28df3ab996",
+        "crates/om9-exchange/src/retained_write.rs": "2276d6fa9aa1ba2c8829ebad3c78272e6af5dc1d85345d5b38ef972ada33ea9b",
+        "crates/om9-exchange/src/source_preparation.rs": "6afe7892979d88237966ca65fb48b08099963cc6c7a972063b06d6ce0d25eb95",
+        "crates/om9-exchange/src/staged.rs": "67a80a3b447971d9c6b5a3ac7fd8ff824f72c83717c0e88ca8ef707615844afb",
+        "crates/om9-exchange/src/stl.rs": "3b8244f2b1d96a8c90a22a5512556e73f52599b1acf65562a8a946d25a6e71d5",
+        "crates/om9-exchange/src/wire_output.rs": "75e477dc3afe4995a6cc04ba8e58b77a05799976c5b9540938ea93f89a7c3552",
+        "crates/om9-exchange/tests/current_overlay.rs": "99eeaeb9cb1403dba2bcaecbec7991406aed122df411819599ed4433e502de7c",
+        "crates/om9-exchange/tests/current_overlay_review.rs": "bfa033df2fcbfe1e8e1a8fa2962790216fc06a8968d548c526b1e1667861de7a",
+        "crates/om9-exchange/tests/export_authority.rs": "fd956d211748c7a128e008c6dfbf2e930d0a2a882e1f2669575acbdf79eb4d29",
+        "crates/om9-exchange/tests/import_capture.rs": "585ff1daaa156d639c38baff6759ed2bc3caa74c5670d7db42921de03c674a16",
+        "crates/om9-exchange/tests/layer_wire.rs": "ea054a2a8af71594836ae0a2be7314bcc5bdba8da11055e709f34b457e01e6f0",
+        "crates/om9-exchange/tests/retained_cold_review.rs": "1b520774302d2047c081c9a5a1019e57f9689f8e687f38edffa676e6b8e1079d",
+        "crates/om9-exchange/tests/retained_native_import.rs": "07a74e37f6f38db2fbba2fffde84dafb8d92e0c8a7f381d7da10a4f020535d63",
+        "crates/om9-exchange/tests/retained_native_inputs.rs": "326c9f767f2049a00b03b4936e945b63e827a1afb7d14347ad7fe33a17f8b50f",
+        "crates/om9-exchange/tests/retained_native_write.rs": "4cef57f9929644ea29c32cfa61fb42e4c7d99f2f18079ba44ad9a016414bd2c8",
+        "crates/om9-exchange/tests/retained_packet.rs": "9a627716740ca695c7c2ed2c3359e83c8c53d7cd66c86412077c35fa001ae861",
+        "crates/om9-exchange/tests/retained_packet_review.rs": "b14edc826e6e865d7e4e466a486cc1cb05a24458d1df3ed641361a7f4acf1066",
+        "crates/om9-exchange/tests/retained_stage.rs": "be0cf423d4e71f7226892d29ef9c306eeb2f681604524dc16be268c86d582e01",
+        "crates/om9-exchange/tests/retained_stage_review.rs": "d8f3a1ee39982d650fb0c2c747fab0927b9661aa10e681696c3705dd3deb57cf",
+        "crates/om9-exchange/tests/source_preparation.rs": "9e5ca3e4c923b82939fbda3057cfde2a46f07f76522cea02084eeb1963df0faf",
+        "crates/om9-exchange/tests/source_preparation_review.rs": "9139a415205b78cf068b80c97ba36696b51014fc09418ef77beca1fd72b4e689",
+        "crates/om9-exchange/tests/staged_export.rs": "a571c685ec08e2832f10459dc7e72b1cea1f82fc0ab6bdf3b02bd62c5ae7f371",
+        "crates/om9-exchange/tests/wire_capture.rs": "99437151171b39a319456f61b131fac931248ae92f27936bef274bbda20b0582",
+        "crates/om9-exchange/tests/wire_output_review.rs": "fa7616d58fc49e28e2e29d7ea079a0f34e71379d986ea69b86aac9eea6302f41",
+        "crates/om9-kernel/build.rs": "efaebee9cc72b7cecacaf72df1e593f3b18b398cfae3d32e06c7cb0e7835c934",
+        "crates/om9-kernel/Cargo.toml": "96c0c24378f4d714cf6588eb59e3e6fc6b34b9aec80d06115142c1a73c47a8b8",
+        "crates/om9-kernel/src/brep.rs": "1f74bc607c5c1b2a83a1dec5f0fa40ea0dfbe4ddab9596985aaa435e255ac2ba",
+        "crates/om9-kernel/src/brep_bridge.cpp": "2e0893936e2268b5f8966091697094ac4e8b338df9326fc0a4ee16389d7584fb",
+        "crates/om9-kernel/src/bridge.cpp": "ae34a737fa3990f1bf4994a6df33fe4ffb59c5698e500b6ce8348b4076673f86",
+        "crates/om9-kernel/src/lib.rs": "32742b285f14aa1fcaafe2ff929d95858f3a6fe38206f19d8d55d684fb749bbd",
+        "crates/om9-kernel/tests/kernel.rs": "e9922e9c0a083437dea9fd39e8ff4f6383e04a3f053a4600643f73fa2b196341",
+        "crates/om9-kernel/tests/l2_01_05.rs": "3d43ce5e37e3bef16dcbff78df6502e31e5c7ea3a377ee010237a9ed8dadbbc4",
+        "crates/om9-kernel/tests/lifetime.rs": "60b46a1bfae05f1643685be1cbda3ca61d6088deecb05d4f678c69efcc851fe3",
+        "crates/om9-kernel/tests/numeric.rs": "98e3ff1a7d324bfaba920c2829e7c8814816337a6759e3b3577289f36642a4dd",
+        "crates/om9-native-owner/Cargo.toml": "21a39d85329438395a31264d077ac508eced6a56fa3bf06650ec566703329a3a",
+        "crates/om9-native-owner/src/bin/native_runner.rs": "4c8892e951aa323a154507d180c1039d671658d541202e86cf807a71aea9b838",
+        "crates/om9-native-owner/src/bin/process_fixture.rs": "b4b78ca9a73627d39cd43db4613361e48a3b4e48ebb809cb145a2d2071d8c9e9",
+        "crates/om9-native-owner/src/dialog_probe.rs": "1e6f07a565fe8daeb927a0ed6c6e1bc325657cd4a2d003073ad583c84726946d",
+        "crates/om9-native-owner/src/file_dialog.rs": "4380da3b50d1c13f0e2e4b2cbf61e599d6dda88e3cbb7f7df3841b4ce36f8f3c",
+        "crates/om9-native-owner/src/lib.rs": "a29343777eee9a8183e53d4869a3c0b958a96f8e2efbfd1367b6e6900d4784fc",
+        "crates/om9-native-owner/src/verified_file.rs": "80cfcda63211ca8897272e73babfd9097a3a43050a8f215952ca9f14a7923799",
+        "crates/om9-native-owner/src/windows.rs": "47aa8da28393abd0f68b5bb55072959ba566eb3c836067ee70ffe5758f9b362b",
+        "crates/om9-native-owner/tests/process_owner.rs": "605062d78f0a4e9d814b0b2553c5b2b69766f1b84fd24e6168a00cb00b00dba9",
+        "crates/om9-native-owner/tests/teardown.rs": "ef61b002482f5ea4d619b176daf3ca90b99c5a71da0da853a1b00e62f59ef86a",
+        "crates/om9-native-owner/tests/verified_file.rs": "d9dbcd2edcca3f4004addf36cd5de86ec512ecf3559378a69f6ebb55844e4f66",
+        "crates/om9-render/Cargo.toml": "c8c06d9af87e79b175aad3f2f85d60fcbe5ba0c829bf215668923a2067745b02",
+        "crates/om9-render/src/cluster.rs": "a0f27ebb131379256d9984a8fa62442ea1cc0dd1ebf3291431ffeb438729d0bb",
+        "crates/om9-render/src/lib.rs": "de5f4c4ceb70975e08e1a0a0255907127a9c072e86d3557e8392c5487737c94d",
+        "crates/om9-render/src/lod.rs": "e9146a53229a29bb65e3207ddd1d12162794debb425927126780cba596c30f39",
+        "crates/om9-render/src/meshlet.rs": "fd4790edf343eab5a553de2ff1dc7a39d8af1d2afa4aa90032fe36f336e28959",
+        "crates/om9-render/src/occlusion.rs": "90a24df9cd53bc17de79abf91380783a81af6265883f17d5b72f70af83f27b00",
+        "crates/om9-render/src/overlay.rs": "e093a501ce6fe7268a87227b4f789eaa9b9d423cd2b7be4ed58d79c7ee31e2e3",
+        "crates/om9-render/src/pyramid.rs": "653f0ec9dc6b23f97dd178c2b41de9d4a9ba575c3583a751723ef2eb66771584",
+        "crates/om9-render/src/qem.rs": "15fdcd68dc6e0ddeb04f7bf7138c41425f8579c67a0cbd12909c596be999d2a0",
+        "crates/om9-render/src/scene.rs": "e081444753bfe0bb49f702889d0147a06de1b5d80fb875876ecec0d4fc99ea7e",
+        "crates/om9-render/src/shapes.rs": "3621620c80c70fbd42dc1d32e7800c8d81cb3cb991e1c769d86b896205e34ee8",
+        "crates/om9-render/src/streaming.rs": "294183a9e97eab84290905d92225bf02cbb555fbf33e4b55f71a20a23eb9fa1d",
+        "crates/om9-render/src/tests_support.rs": "7ddc4d8fe08db4d64f6a44a3e9e52c371604a1f5cada6436ac236ac1a790c380",
+        "crates/om9-render/tests/render_loop.rs": "207b4bdfa877923b18f825ac13025ca1a76904a1003a5f52179ee3852809256e",
+        "crates/om9-render/tests/scene_bench.rs": "2fe953a6f5d2dbe75091a71f9fd2ca7045840a61b3542e6a29282fe23a0da3c0",
+        "crates/om9-scene/Cargo.toml": "018aa366056483629b935c79f982ee42f49768d5e23eeeb4b9000744eb3dbc18",
+        "crates/om9-scene/src/affine.rs": "8e2d720f8e1fcdcaab8658bbc6834b794d2597391a01aa19afb013c7727aa660",
+        "crates/om9-scene/src/camera.rs": "60c98f1e02520786a3dbe4418140ff18b31d3db9b69e211900333bc418f23361",
+        "crates/om9-scene/src/grid.rs": "19ff0db7e01d399e439b20421a6dc1ee4e513f768909c7add0cc5d44b5b47ccf",
+        "crates/om9-scene/src/gumball_view.rs": "92631036caa1210676d018927d9b8b425e60dc4eabdb179a55bad7f687c5f709",
+        "crates/om9-scene/src/lib.rs": "ad404b40628b0892b4a022e4f9f0a0b8c09750ad1e48488d3dc93ede63928a2c",
+        "crates/om9-scene/src/picking.rs": "0f6d04a508e78ddbf166381e81be8f7223ee80b3022c4466800a40ad51f25a60",
+        "crates/om9-scene/src/scene/admission.rs": "bd457415cba5d7d9bb915116a62be888b40226bbb077f0891752cd91080042aa",
+        "crates/om9-scene/src/scene.rs": "4de312d1afd0cf48dcd5b0db8e7bf87e1d436c4eb19c4660d73d2f9758d4993f",
+        "crates/om9-scene/src/selection.rs": "699ad40d2bf7f28611754997910e7ed9e76d2a22e3a16c93e2d02181e62a98fc",
+        "crates/om9-scene/src/workspace.rs": "3154230bf8177a8207a4b76b022571877d336c072f6d713a04eb0362c0e3a3d9",
+        "crates/om9-scene/tests/acceptance_l2_01_07.rs": "8e0591533fe4960730bc054bfdfc859a19d5661ddc91e4b1fe4772d98a82a4c7",
+        "crates/om9-scene/tests/affine_gesture.rs": "aae21024632b72ce7eccb5a6dccddc657652cb0d0e44fb78cac27f501d754e87",
+        "crates/om9-scene/tests/camera_grid.rs": "5954928e0bd2d6b082e1a56c67cd8f7c8d4b3d1e21f2a20c056dbd7575254310",
+        "crates/om9-scene/tests/camera_orbit.rs": "18eef10b1f7a6fe489b31075207533c54f434f05b314025c00637ed6844a23f1",
+        "crates/om9-scene/tests/coordinate_frame.rs": "4a21144ec4f54baf0db86018821e455bdb07870ede27228bfaa2b1cb8101f92a",
+        "crates/om9-scene/tests/instance_admission.rs": "88d282cb9d6728491df6f234a9df9e49f75b25893598448fd517b2295e0635b8",
+        "crates/om9-scene/tests/layer_colors.rs": "e94b146f01772a6992f86f52b7874d93725237597b19c19f59d42437c2ad7baa",
+        "crates/om9-scene/tests/metadata_cache.rs": "8de7c197ac0b764fafc2632d42765f628d30efef54cdb067520a8c763137c2f2",
+        "crates/om9-scene/tests/reference_workspace.rs": "92c843d8959997149df16244ef7165bf5aa807c01b465ea05098b1f6102d5dec",
+        "crates/om9-scene/tests/selection_regressions.rs": "7e5de349a2f8386ab125e95a2e2a2df0f47a13b3b682845210ae82c602bfaf0a",
+        "crates/om9-scene/tests/shared_instances.rs": "c6c4f9574ba972b3d87b68176ea78f833c73fcfedc69cd4e0ca0994772584068",
+        "crates/om9-scene/tests/subobject_pick.rs": "208498259cb904c9262ab754285c688f0579434780f4dcdf0116b80fab2a4291",
+        "crates/om9-scene/tests/world_picking.rs": "77dd71b406aa2441115ce4b51e5553249fbddaf7101403d172fc440ca49594bb",
+        "native/occt/pin.json": "fdcb3b953014afc667f7527ddef77ee5c8d920ca7918730e1272aff8967127b9"
+      },
+      "checks": [
+        {
+          "actual": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "name": "click selects the curve and exposes a pivot",
+          "pass": true
+        },
+        {
+          "actual": {
+            "curve_samples": [
+              {
+                "screen": [
+                  702.5487804878048,
+                  360.4390243902439
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "screen": [
+                  1352.5588376307699,
+                  406.146697145643
+                ],
+                "view": "Perspective"
+              }
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "views": 4
+          },
+          "name": "first drag sample previews +5 mm without document or history writes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "release commits +5 mm as exactly one Undo entry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Undo restores original geometry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Redo restores +5 mm",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.9999996609157988,
+              0.0,
+              0.0,
+              5.000003051757814
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "scale square doubles X about current pivot",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "rotation arc makes 90 degree Z turn",
+          "pass": true
+        },
+        {
+          "actual": {
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "Escape discards preview and retains old Redo",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "old Redo remains usable after cancelled drag",
+          "pass": true
+        },
+        {
+          "actual": [
+            "e9c39e83-c52f-4a1c-8541-d289c009147e"
+          ],
+          "name": "GPU and painter paths select the polygon mesh",
+          "pass": true
+        },
+        {
+          "actual": {
+            "mesh_probe": [
+              565.9634146341464,
+              285.3170731707317
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                2.0000012207031252
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "mesh preview uses selected mesh indices after selection changes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              2.0000012207031252
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "mesh release commits one additional transaction",
+          "pass": true
+        }
+      ],
+      "visible_moved_curve_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            703,
+            360
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1353,
+            406
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Looking Down mesh",
+          "pixel": [
+            566,
+            285
+          ],
+          "selected_color_visible": true
+        }
+      ],
+      "preview_screenshots": {
+        "m02-mesh.png": "2dccf7290278c337a6cdea6cd6820853da3431255ffe90f47b3d6c85f113639e",
+        "m02-move.png": "029e35d327bd68f8558a8577f5559868296c771d1bbab3c01762764a73a058fc",
+        "m02-rotate.png": "ec6cc3adcea208df7e45eb375050d5e2138dea20b4b3bac9ce3a6e3321e74f40",
+        "m02-scale.png": "898e4665e86b79e4b310ba5613295461767c0739bf398db94efaf458a5176abb"
+      },
+      "human_approval": null
+    },
+    {
+      "name": "occurrences-150",
+      "report": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-occurrences-150/m02-report.json",
+      "report_sha256": "3d5015ffa47e000844fb91845387533282247bc8496d41c303ec559c5c31221f",
+      "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+      "binary_sha256": "9c916c8279fa4a90a5c57ce4d7f4a4d0ea4d1c0fb4a090b9503030a240289968",
+      "source_sha256": {
+        "Cargo.lock": "aff95684d10fe5508733317d7c09c5d02587a2687446636843ada30dbbd33e61",
+        "Cargo.toml": "76e251465a3b9a69c7bd93b1a0910e3fc9fe5946326cbe294244ee2960c019bb",
+        "crates/om9-3dm/build.rs": "250353178f5e83c05610e9067be3438555b7c5ab81df72552ef29d39504e4557",
+        "crates/om9-3dm/Cargo.toml": "ed3cc761c88b53fd592315061257998c3c96f5a11157532c4c9666985a495291",
+        "crates/om9-3dm/src/bridge.cpp": "8e81201c31bfc69fe2212e69ad9714443cad6be6e25b60a8ca69374b441212a7",
+        "crates/om9-3dm/src/lib.rs": "8b7551c2236584741e5a22799e41d22abc795b185c48ae370a7d24183503c366",
+        "crates/om9-3dm/tests/import_roundtrip.rs": "271b02124aff12900f59a42d41d0267c673a5b17c4ddc3d3c1be804df7ff2125",
+        "crates/om9-3dm/tests/jewelry_scene.rs": "ac2183b9e1e65fe3b04cddad83dd26d2d7794f651e364c5d07e6f9e932e42b14",
+        "crates/om9-app/Cargo.toml": "944a77050fcbd990e64909f0a229b165d7af144aa0a7ef27eb7508b9bca357dd",
+        "crates/om9-app/src/command_events.rs": "033081f1c52b71302486d9c0bc4e92ad149aa026c46c5ac10d13da4e6f5e35ab",
+        "crates/om9-app/src/dock_layout.rs": "303be84f9aaa10461f6fbc265b86fb6094ce7715cf1c606d0b919c2d29728bd5",
+        "crates/om9-app/src/file_lifecycle.rs": "5dc049403247018d03e6e37a1171fa367b4568d82336482bfe3e6d152c63777d",
+        "crates/om9-app/src/gpu_viewport.rs": "6576090d17543ec8eed4a8434e3976d7726e81668cdef1c1d077149d0fab4d67",
+        "crates/om9-app/src/icons.rs": "bc7e0c7520f58f482ec97b0f77535c809867d0dcc750b9f4720ad9af1d4ec2a1",
+        "crates/om9-app/src/layer_command.rs": "0c4315edaa5ef76e12c0b36d9d78c5f7d7fb0da0a1c01ec85856cc27d5cf378a",
+        "crates/om9-app/src/layer_dialog.rs": "a9c4e47b2377d964e820ff6e56bcca01ee9cb659a0a474c044d551ae2d4b50e4",
+        "crates/om9-app/src/lib.rs": "ff3d992d32954cdbdfa7f67454a2f3da65ba1f99c9a330a086e1eacf8f1cd32c",
+        "crates/om9-app/src/main.rs": "32888b22929e75e473d6a0b2597d37d7d13aa2af3e59d089354e58fdf2bace99",
+        "crates/om9-app/src/native_picker.rs": "234d305c1675ffcee0c1ba7b9e406231e2cf35b9683d72f1fcfcd0026b89198a",
+        "crates/om9-app/src/option_parser.rs": "d7e3c3b1b3eb51ae0269da2151af789433d4fc03f62565987288699c7fb40478",
+        "crates/om9-app/src/panel_ops.rs": "5220b73fea64b29cbde56528bc4342f2de829ca16523240e00bc6af80ef7b496",
+        "crates/om9-app/src/report.rs": "70f9b25aefc4eb9cbb2056a3a357446e8e41010746ac0bf0246a2e46ee760dd5",
+        "crates/om9-app/src/session/contract.rs": "92a0bb32ae83ee5b54e90556fe29027bec47c0a3c34cf9fcfff4f36a9ba160f0",
+        "crates/om9-app/src/session/files.rs": "61b35d0eae5b465419bc55f69c2a20056ee508d8e0253f03ba077ce18e1a6af7",
+        "crates/om9-app/src/session/gumball.rs": "64ee3ca9576d9835c9957e6786a350f5895b2a4fb872352100d3eefce589234d",
+        "crates/om9-app/src/session/gumball_numeric.rs": "4f2550b7085f4fa4450c0e55d23614acf2bcd4bb56ed4b7edf255d31bd2c5995",
+        "crates/om9-app/src/session/layer_dialogs.rs": "f767e39ee7986bb31d06775cb4cc9815aacaadc6974f222d84d04738e38011c4",
+        "crates/om9-app/src/session/layers.rs": "07416e1a77f024ecc478f2e80417974abfe77cc4affea712ff067353ea4b3072",
+        "crates/om9-app/src/session/stress.rs": "c90bb5d7ce0ff24bab031a0cd92ada01e0c1fa4aef28967a683ec2e078b87c5d",
+        "crates/om9-app/src/session/subobjects.rs": "dc45b5a5361205d73ac9edb92c567274f021f7b9597ebbfd4cebbbd5595df12e",
+        "crates/om9-app/src/session.rs": "5e6732febfb8127537b0051c2a3cedb09ae35c577f958ede975f4c695b9cd21f",
+        "crates/om9-app/src/startup.rs": "ee4b1edaafdcbd2fcf5535673469de3df08e837752b626688053ab1b08ec5a7d",
+        "crates/om9-app/src/status_surface.rs": "468331b77210ae714be011723264e5010b1f1ab893b92f99eef330673057b47b",
+        "crates/om9-app/src/transcript.rs": "000de98ce3f3324ec42c9ccb0d212174316c05f8e0f937f03f3032ec3a7cd7c4",
+        "crates/om9-app/src/ui/chrome.rs": "23aedb978df6240b7ec2f429545ee5cd09b50a64da2b6dd16794531def948381",
+        "crates/om9-app/src/ui/command.rs": "a68ea475fda958b4ce2dfd67e1ce81ae3178285a6ebc39ef1f69e928e7db62d2",
+        "crates/om9-app/src/ui/file_audit.rs": "3707523f4eb98683b600c906778e2c6905223b280f5d552d1eb53a8d94a7129d",
+        "crates/om9-app/src/ui/file_success_audit.rs": "e741f048c62dec288e41bc4616401aa5cf0148d453d72a03f6f58e02d6e3f436",
+        "crates/om9-app/src/ui/files.rs": "c3a5a09cd2d4c839728c0ae07288ae3438782237cb7dffe64be5b392daf94e25",
+        "crates/om9-app/src/ui/layer_audit.rs": "99bcf7ac9c220769e80a752f049e6568870dc1d041e60595c61e58394a8d0e76",
+        "crates/om9-app/src/ui/layer_dialog_audit.rs": "e42ea42f9c867320b76a0dc6b34e25e2d74cb1e4727d0f6374cacd87b4f129f1",
+        "crates/om9-app/src/ui/layer_dialogs.rs": "dc0e24b79ce2fbcf67f6c7ca79488ff45eebd3f8499b4e81cbafc90d56455798",
+        "crates/om9-app/src/ui/layers.rs": "ed1451917515a9c28dc7d5de9236d67ecf9877edbafd9325f4e8f8f6f79bafd3",
+        "crates/om9-app/src/ui/occurrence_audit.rs": "58d5fb9a6d1016d738b6a10e81467522127dfb7c1aadd7c739fb3001f42589ef",
+        "crates/om9-app/src/ui/panel_audit.rs": "ed52f138379c5ff7c722c0a320e73d27c73c3a7fb76088920abb07310c3601bc",
+        "crates/om9-app/src/ui/rotation_feedback.rs": "7bc182fa4c217f28815e5f1a98633d9e5486e10ec239ae1b34ebbbd9d3a113db",
+        "crates/om9-app/src/ui/selection_audit.rs": "5410f15038595130a5cba7fba347d3e4073829c1ec625c93d4fae9e06b3b6d55",
+        "crates/om9-app/src/ui/startup_audit.rs": "af705f294071d856a673ea09e900c3abacd21beade70845a671271fe3fadeded",
+        "crates/om9-app/src/ui/viewport_audit.rs": "475ea933ec6908e79346942b110d38da60fdda52e29bfb67be0bc58b7b6ca551",
+        "crates/om9-app/src/ui/viewport_menu.rs": "debc0548d6f96e2dbc0ad8c681e1f65ee8345d9e9a0a856e3ab8d747b2b5de20",
+        "crates/om9-app/src/ui.rs": "b1ca38087afa59816e33d60132352d3ae9901c27a3ef85a892c362831ef0023f",
+        "crates/om9-app/src/viewport_menu.rs": "fa206837c53a97991b15991a0ec9be70169e52625fd353889efd44fccbbbbcb3",
+        "crates/om9-app/src/window_identity_guard.rs": "fee733314578ac11090899059d77deb817793c6fdc699a692e9a2f78ee441582",
+        "crates/om9-app/src/workbench_regions.rs": "d97820584f312c931d678bf0053f12f7bb0c5a468f733e293b54662786b7fc46",
+        "crates/om9-app/tests/acceptance_selection_set.rs": "9be57f75c896d7a32021196482f828709855eb272143cf8c922cde659ef88396",
+        "crates/om9-app/tests/acceptance_viewport_selection.rs": "8a9533bc97a2f9d4e7888080f5c0740962b46b1becc3e3921be403345e3640a7",
+        "crates/om9-app/tests/brep_selection.rs": "c6347a4c05cfe4f7d8c95a999b21c80e55c870207098be46a4cca7594f4095f5",
+        "crates/om9-app/tests/builder_slot.rs": "31e70321a9a44587b0aacf7f88f606f3b61951a7935ff5b2e1f8d7d381c6b953",
+        "crates/om9-app/tests/chrome_actions.rs": "194f32421dfbdab2e6d3b4c6034417c6788e76e9af229e96ca65d27e4ac9b901",
+        "crates/om9-app/tests/clip_behaviours.rs": "63484e5dbe335a4e66f552a324080bbdb05b84f6dae50cc5d8bec5b1cd337f02",
+        "crates/om9-app/tests/cold_layers.rs": "ede0eb6ad95ee60ac6c329de2458cdce98bc0f2cbf3e8680eb8fb1984e763244",
+        "crates/om9-app/tests/cold_reopen.rs": "67b9287af14122cd49556a20ea0fbd1f786f355faed946ddb0e4c87c3acb2f40",
+        "crates/om9-app/tests/command_context.rs": "0d726237fe674d53d92e07a8fddfcadc7b0613b7d7998712948c410e33ad0caf",
+        "crates/om9-app/tests/command_events_surface.rs": "664627d06f27d053832adb9a86965fa674d357b2aec9aba2d11d8cde1ee63f66",
+        "crates/om9-app/tests/command_options_and_repeat.rs": "5faf07729402ad9fdd11d95603e3f3ad09d2f463686b0af39beab0380e8b18e5",
+        "crates/om9-app/tests/command_sessions.rs": "0ec6ea6e39fbf8c499ef135cab1388d849ea437ca1b39c53270d1f0c75eef04c",
+        "crates/om9-app/tests/command_state_machine.rs": "980b64fd430f67a1a99503b2cf600f140cffe4decc16e53432f418123cbfe0c3",
+        "crates/om9-app/tests/command_transactions.rs": "7d70e9ab1b99ed984f12400585209327ea872e633fd1d9568be14216cbcf1118",
+        "crates/om9-app/tests/command_transcript.rs": "261d3a9e6fcbca924666ef0b767f53d24e9786a59f482dbc6f3a89e6049e1e2b",
+        "crates/om9-app/tests/common/mod.rs": "f8ea1fbbd8a6ee25af56179bad248cfb1bd3d8342e45589117f32d747cf2fd23",
+        "crates/om9-app/tests/dock_layout_default.rs": "a57b33ce4f867f495937086baf3f308cd3a5b90928c188ecfa236d1a64f21350",
+        "crates/om9-app/tests/dock_layout_persistence.rs": "63cdc5c4c2cc44f322aacb7769738cb1c6ffd0b61a86abea54951c508963ceb5",
+        "crates/om9-app/tests/document_contract.rs": "646f54a1ae86abda283bbdae51f518b60c6de2edb816c1ade166947cb337a64a",
+        "crates/om9-app/tests/document_window_state.rs": "b15b9714a2c6f63187db06b91a351e31fefd6ab4e4e15307923514f41985a9a5",
+        "crates/om9-app/tests/file_lifecycle.rs": "1a78d6744ee0330adefb4403eab0417631ba72325d7bda592f879d2e884391c4",
+        "crates/om9-app/tests/file_lifecycle_cold.rs": "6a4aced05a919bddd16ad14ac2bdb1b45d1f24f8082f4d1fd0f627d8c588ea5b",
+        "crates/om9-app/tests/file_widgets.rs": "c373cab54fc9d8cfd35af8e1500795b7d5fe357739242bf474359fac1988d8f1",
+        "crates/om9-app/tests/gesture_regressions.rs": "4efb8bade4c292e34a2758ecd4307ebb08e3fd13c953bdd17988719dbb6d9340",
+        "crates/om9-app/tests/global_status_surface.rs": "45492c6e200f642935a8c5210b1ab396e423a29663d8e04e2558ad6697bc1743",
+        "crates/om9-app/tests/gumball_cold.rs": "08faac6e5b47bf494d98744e79b98003eddc322daf7f3008cbedbabe83588a44",
+        "crates/om9-app/tests/gumball_interaction.rs": "a1c80bbb829a17596f636b0d4a3fc83752ef022000c15de04f878a821b8ece39",
+        "crates/om9-app/tests/gumball_numeric.rs": "b2ff3181cae3ae7a94f8e53145f2543ff35314e008aa5a16f31e737f40624f5d",
+        "crates/om9-app/tests/gumball_placement.rs": "49f7d9c7c45e0bc81d89a115f3536c29de05209c4860382a57f5dd17e9f9ca01",
+        "crates/om9-app/tests/gumball_viewport.rs": "c442001606cb4cd8e149da790f42fe9afec5bbe29821314cd2fd76353a47ff61",
+        "crates/om9-app/tests/layer_controller.rs": "5bfb99691cc1ea1945daba898d6bc3c0e99a2fd2949132d546d48ebb03b6d8d2",
+        "crates/om9-app/tests/layer_dialogs.rs": "aa184e288b420b465f91844ab5285adb65be795122a9cdf64989ac4a7e328db7",
+        "crates/om9-app/tests/layer_widgets.rs": "aa98b920623da4e44b2e707609255f33e3b9b089d7619de5331657e00dad5b73",
+        "crates/om9-app/tests/left_stack_layers.rs": "621bd7d01c306c6e0b95a01b47b9dfe098c2938f7c5aa659bbbdb8f52c26eb75",
+        "crates/om9-app/tests/mesh_fill.rs": "c9c38667c4ab7c1b1176c8978d983eaf16f0927b535a18b09431650b7a068282",
+        "crates/om9-app/tests/mesh_stress_command.rs": "567e9ab103806ac2e8c3179851bdbfde562d50a25519c77b0873f4f89ebc2d9c",
+        "crates/om9-app/tests/panel_door.rs": "b0cb76856160a2572cff751e7b73cdefcd8efef4a7312b451e4e393c964853d0",
+        "crates/om9-app/tests/panel_ops.rs": "423f4bac59bfa4f1535041199aef14e21cdbc7c982ac6d7c1059fa1e1cd39df1",
+        "crates/om9-app/tests/pick_disambiguation.rs": "2616a574ff77812b51c4eb07735d63a0c509b376da9928b6e27b99cd6dc34521",
+        "crates/om9-app/tests/pinned_command.rs": "adc4847f93f6331fa8c7eeb31bfc2184ed51f24ea96ae06381eddbff2bb6ba5c",
+        "crates/om9-app/tests/preview_drag.rs": "95f5bd60c8e0eba88d5d4f89f820c58341c2692a2ef2d8ddd2ab6548c910933e",
+        "crates/om9-app/tests/rubber_band.rs": "d2fba6773e250de5cedaa79020d990a5e0b54e09337149e63c15dc4b664e67f7",
+        "crates/om9-app/tests/scene_allocation_peak.rs": "2a47e1775b10910f8b50b009669c405fd70b42d42c6ea105d17470f63b46fb22",
+        "crates/om9-app/tests/selection_overlay.rs": "6e6c3d8245ff18a3bab5e11e85c811e2611326f158b047be48bf3af7c413e1a6",
+        "crates/om9-app/tests/shell_docking.rs": "0dcef2c137177a1c2d1d005fe73a8b5334674d6b4bde225c12167de9d4c40eda",
+        "crates/om9-app/tests/startup_contract.rs": "e0a3d6a5b91ff12b55ba954a04a2c8bb81ce9cb81668ea8f102715b7de3f3859",
+        "crates/om9-app/tests/status_bar_overlap.rs": "14623bfab5f5b36771e4f22905bee7c5d9f18f14ce52b12cff94fd9c7e663726",
+        "crates/om9-app/tests/subobject_occurrences.rs": "0672627470f57b82552606013c21f2ae8010f50279fbe761aba2ce427de5681e",
+        "crates/om9-app/tests/subobject_selection.rs": "4d9c8018c577122f1195035a1e7024fca568a8cdecb6dedf3f0dcc9bf67df8bf",
+        "crates/om9-app/tests/ui_events.rs": "e8d8966514c214583e1bba846a0e8ad89c420d09de2131d35cd68cc354afd3fe",
+        "crates/om9-app/tests/viewport_title_menu.rs": "5146694d3e44096ce6b24242ce2de232cbf5852cd5a3488cea6a3376dd9a5a00",
+        "crates/om9-app/tests/window_minimum.rs": "64faf8bb44900fdc5f261d94ad5efce256b3a5d3590713169792922151eb1458",
+        "crates/om9-app/tests/workbench_regions.rs": "32ac9b41271581cf57ff3a146f33737417d3d49277aec3a7ad8f1d4fe059ca71",
+        "crates/om9-app/tests/workbench_regions_sizes.rs": "45a4849254a3cd1243a78738d270d13dee5afce82befdbf1382ca635fa1cb0e0",
+        "crates/om9-archive/Cargo.toml": "7c93ab59ad64ccf9c6c8ab65354c8821efc8787324a76a80f8f1d7b6828d7498",
+        "crates/om9-archive/src/atomic_file.rs": "77a7020592fca5ce3b2ead9fef4634d4fa81d464fd1f30f37652cc877ab2b89b",
+        "crates/om9-archive/src/container.rs": "9993fea64c9617406d6083d9a094476454716b4f2100088346bc3ac24942e0b3",
+        "crates/om9-archive/src/json_admission.rs": "5b6f6c5fef21f235d74f219743bc7785a82c696b2d352cadd11981ebf4791a28",
+        "crates/om9-archive/src/lib.rs": "0fa834f104310fa606598a210e6aae0024912de597c4f4a41e0139c0de52624d",
+        "crates/om9-archive/src/restore.rs": "1af17f63cf002d35951e59cd9ba965712bd9447e78ae95e9ba1c15ba1c45f6f7",
+        "crates/om9-archive/src/snapshot.rs": "66f3b005ad53a78748bca35a47b8ac34b415419f4fc7daac4542cf4e81d70f8a",
+        "crates/om9-archive/tests/atomic_save.rs": "6ba9b9c4c3a6554bd773daa4c2e3ae3981a85876a4b96975931dda7963a0d605",
+        "crates/om9-archive/tests/container_admission.rs": "9c69dbb0655092ef7483a72d3e363e4b4100120a6f3adca6f9d401ad96cd6c92",
+        "crates/om9-archive/tests/definition_units.rs": "745319f262926759afb0fc47dbd84aa4def422f6c477541a88f21533abb65b2a",
+        "crates/om9-archive/tests/document_identity_round_trip.rs": "fdeccd8ff0b56e1628c2f24e0ea7ecbfbaf9104fe405b997554044c11586a1f5",
+        "crates/om9-archive/tests/document_snapshot.rs": "8dcfa851b1459d628b5acd3267b6095c27d63f59b52dca67c7d57ebbc7cfe09a",
+        "crates/om9-archive/tests/layer_schema.rs": "b87ca59d99c9f4069230a2dfcbc7e086e8d8353d0a9d140b3d37395b50176e6a",
+        "crates/om9-archive/tests/resource_chunks.rs": "4885591ddd016c5c4ef3e9e457eed1e10958929ef57e364507815a24776506de",
+        "crates/om9-archive/tests/restore_modules.rs": "5ed0b4baa9c79e83541258a9218fb40401de3909ddc6d442aba0cf36340e83e7",
+        "crates/om9-archive/tests/z_float_probe.rs": "59472207d0dece4cadea2722bff23a394b69462d95301b287934f5ed784255b4",
+        "crates/om9-core/Cargo.toml": "1f100a097c871ab5dddf4894eb351c148974972aebbe21a8248cf10cc6685f74",
+        "crates/om9-core/src/brep.rs": "1a60c0aa941337c80903481ff8c4dbd753a181d713db06f47b1c2da0e0b6418d",
+        "crates/om9-core/src/brep_kernel.rs": "96fae0ec5c20b3733b313775cd99fbdc2a778250030a6ef0ea46cd6c300546c0",
+        "crates/om9-core/src/budget.rs": "165bfd4a3003b09b0d9551e78829fcd4480daecfb9cd937a47d547f9383c4345",
+        "crates/om9-core/src/cage.rs": "9cfe6c4ecc70960e09ac103ae2e966499ce8aa20cffe205858e7529eaa6cbff3",
+        "crates/om9-core/src/capability.rs": "82ddde726b6f8ed9686898d04ac4e99e78bee28d446ee4f905a1ddba32edb4b4",
+        "crates/om9-core/src/changes.rs": "f52eba07ed34b2323a97cde99300b06dc2f161e7c8f3868b6bfe035ff85ea183",
+        "crates/om9-core/src/command_schema.rs": "21fb510431f16cace93d04df4f2a66f00eb3b165cd48b7f9160eb72a9d35e895",
+        "crates/om9-core/src/coords.rs": "2916abe92a82cbc4b44bec1d8a4be754bae497b6086c08cb911ab2683bc3b33c",
+        "crates/om9-core/src/curve_build.rs": "92532f49ba4a4b7e9866bb6284540fe017d1a64d8336313397cf1e12611ef47f",
+        "crates/om9-core/src/error.rs": "98e23a702a615a0be7e6eee18eac826c44d11ab79596570c878d3b97fad79941",
+        "crates/om9-core/src/evaluation.rs": "6087beb4a748228fe5409f5af1148c80db9df494989ddeeac6bc208e82c92a0d",
+        "crates/om9-core/src/geometry.rs": "4beadef360c28770f694f4db8ea46fa59ca60e08516a71c98a3a0fb09d33c7d2",
+        "crates/om9-core/src/gumball.rs": "a2fc9e487018e473cca5d0dd8ba79a0ecb7fedc4571b6d67f8cd5391e146139f",
+        "crates/om9-core/src/history.rs": "8e701cdbac07222ac83c8bf07cb526e8a9c43050fcf60a0f011d52f9992e81ce",
+        "crates/om9-core/src/history_ops.rs": "9ba5d917363949e28acedbbec37ecd1cc90d62ee7f9dbd688f50620f2d11d55a",
+        "crates/om9-core/src/identity.rs": "a7e8f8852e75f3bb3f819b6529b35ef1dab3cbe6a64a84e810ae99ab24fad9bb",
+        "crates/om9-core/src/jobs.rs": "aec15fd4cabea567348d07752ab07815cf6b93860c0852611524f17ec5823078",
+        "crates/om9-core/src/layer_ops.rs": "dca731c3865c6b9fe8897b1e13c1e4059e01e6ba09a9862cfc45e7af6632cba4",
+        "crates/om9-core/src/layers/preset.rs": "d57069281adc5bfe2e494314594265e40714bfd5d05d74139be092bfa50e1407",
+        "crates/om9-core/src/layers.rs": "99ba2c6c5c680c3327931b76c448b846d2d9bbc7b6c990235075e87030eba1e8",
+        "crates/om9-core/src/lib.rs": "7e9987584596356b87528467b90a633b1c4fb87cafacb7fa0fc46a03a0abd7c2",
+        "crates/om9-core/src/measure.rs": "0088893921dad9f14326fa298ba68f985143c43269f01dc854b4ba2f6ba9f127",
+        "crates/om9-core/src/model.rs": "4142b62196565cc54e3ee191a96f70b7b35b21ea2a05eb9a7351a632507f1698",
+        "crates/om9-core/src/modeling_capability.rs": "3d0e698819a205330881c75252b403eb7e7150107b0d98865f30e3d83afbcfc9",
+        "crates/om9-core/src/offset_curve.rs": "556154d6eda50f90755576137dd524c7fa253e60157c5acb974c7341319aa386",
+        "crates/om9-core/src/provenance.rs": "a471c76ef4f49189423138fed7fd395b2738989057469b4fd67210b77b7faadc",
+        "crates/om9-core/src/request.rs": "4f10a399a02909043d1ce253a2f078bcceba2641f606795609adaa111f8e213f",
+        "crates/om9-core/src/resource.rs": "c094512acf7e18d1c56e3bc5c02c4675cbe12307b3028624817d07b84958d98a",
+        "crates/om9-core/src/result.rs": "30d9fb17059de833e864ec918ecc4eafe8e4d16cab8bf1b01cbcd51af9fc7d24",
+        "crates/om9-core/src/retained.rs": "1e2cc724dd1eb03bd2bfd284aea8a0702643c390c43b48d857d1808fee2a69b2",
+        "crates/om9-core/src/scope.rs": "50e332e91690b56157ed30453356b1f5a0db30f3a95c362e4a6aa5d2cfa866ab",
+        "crates/om9-core/src/selection.rs": "8ec1678ce97604f9be80ee5f69a4b7a94713a07c2487f073a6c104fbd94624d1",
+        "crates/om9-core/src/surface_kernel.rs": "f6ee1938df7df299ba25e639c178c80c6e96c789c5e902af5b3406ace383ccc0",
+        "crates/om9-core/src/transaction.rs": "4f54dda648a7542854ac76fb506a30b742345c0c902c94c9370d910b96e0ef31",
+        "crates/om9-core/src/units.rs": "25d663a30f8ab4c6fb66797b4e38d48323921f013e09c18ce43a3528301dd21a",
+        "crates/om9-core/tests/atomic_transactions.rs": "ae43ba8d9dd7cc00e3c83a9e62f1fcc2909107db77e3bd8bf53d4b73e0e8bca4",
+        "crates/om9-core/tests/brep_kernel.rs": "de53c18e3a89a1abe7b362dca4cb41e73f3d67abfc31701c3d19711552428a62",
+        "crates/om9-core/tests/cancellation_links.rs": "d4b198dc2744caaae16c0fdde6f2eebdec0d2dbe9acc25e5eb3075e13e779a0f",
+        "crates/om9-core/tests/capability_gates.rs": "54d116d508494af418e93257a6239b07eee00b43024df1b1ea30a32742bebb4c",
+        "crates/om9-core/tests/command_availability.rs": "95a420aa37ce84d1ea76aa4b84bedea9a87efa9ca2e9939547e183cbd76f17c9",
+        "crates/om9-core/tests/command_descriptor.rs": "0652c58e4a5c28b3d6852bacb0a2f000d6eac34add399f9dac17fefb2bd2be37",
+        "crates/om9-core/tests/command_registry.rs": "cb573d90d43fb80e10586e18f54b543d4bb90215bb9d30d7575bacd029b27172",
+        "crates/om9-core/tests/command_schema.rs": "48061357c249a162daa08fdbad357fe6f111138318e7dd9c31cb0ef6f04ca1dd",
+        "crates/om9-core/tests/coordinates.rs": "d07b0348dad166a3640d3bc2949e3790c5a239fb6da24e6558e1f98b96eb2573",
+        "crates/om9-core/tests/coordinator_authority.rs": "420021c3f4298c1169f687c6947de4bd5c187040533ea8f703248446bc54f6b2",
+        "crates/om9-core/tests/coordinator_held_startup.rs": "1f492830fc74394c2333669ca9e5d29664fb1c42fd6dffc26097a65c2a293767",
+        "crates/om9-core/tests/curve_build.rs": "e6c2fc6b0c0ddb297bc0f35ba848e216f26c7dca39e8c30ca2d915f7c8620cc6",
+        "crates/om9-core/tests/curve_oracles.rs": "ca458b9f6cfa61ab1f5b892623ad70c5346276ccda27fcae3a883b2e234b8226",
+        "crates/om9-core/tests/definition_units.rs": "1f056e8ec3bc4ddd8e21140de99a02d9f1971922adf0a88671765077b94eb361",
+        "crates/om9-core/tests/document_changes.rs": "8da5a42405ae7d92f3da90384374eb911dc5ce60422dc7c3640b6296c6977c45",
+        "crates/om9-core/tests/document_graph.rs": "d21e461998812687b6b2989edf606785964f5b2ae22a81f86b91f4be9011350a",
+        "crates/om9-core/tests/document_tolerance.rs": "219bacbd15c6940936ab0b2d08c47260eb684a132f12239b248627c0e345f81f",
+        "crates/om9-core/tests/embedded_resources.rs": "b0040b82d4e15b2b35e8abc602259687706d9214a276b6566b356cade3f31c24",
+        "crates/om9-core/tests/gumball.rs": "7086f60ff794dee1296eea0ab36e5f9d719f23e5ece4392b35c914dcba24d49c",
+        "crates/om9-core/tests/held_preparation.rs": "6f55fad33d8f5483bf7c5cfd6cdfb5e89cced5d13b1b2789cf1fa7279186eca5",
+        "crates/om9-core/tests/history_ops.rs": "6ee04a27f9f04060ed57949d020f277ea9426ccd30f25499da0251eb3ee74086",
+        "crates/om9-core/tests/history_replay.rs": "62699ea49074b1834851cb11050650485581863e482a6dc063dca80a816ab01c",
+        "crates/om9-core/tests/job_lifecycle.rs": "aebc25bc07956ab5f8293bbec06cc2bb7dfcb677a3f4cb20c01879b89df07020",
+        "crates/om9-core/tests/l2_01_08_precision.rs": "0e592cea7b8f7e8ac65c023f1d3b4298e456113b7462a90d79e4201a277fb6c5",
+        "crates/om9-core/tests/layer_ops.rs": "c74b1785ffd9563ef6dc15a375d44fafaab321ff5895605b22855f065f03ed78",
+        "crates/om9-core/tests/layer_state.rs": "0ab85f56d17960eab21b921383932d38f125e80967e6a9817d52411865a67e5c",
+        "crates/om9-core/tests/layer_transactions.rs": "e58f7492da7c39f0441e98c52763ac50eb1f9f81f6e7c78d206cd325c90b1ef4",
+        "crates/om9-core/tests/lazy_layer_assignment.rs": "3125ad613a1d84650ee39f1530375f51364867151e15c6b3f8d29a3e6d262bb1",
+        "crates/om9-core/tests/model_admission.rs": "5e885449505a005dfc35c40fbdff7ea44442c04bcbe686acb3de837d30b631cd",
+        "crates/om9-core/tests/offset_curve.rs": "a74c21d623cd5416ba3777d5b9ac4c9102d7c8b9fdb0b9a0c65d0cd533211e01",
+        "crates/om9-core/tests/provenance.rs": "4b0674fbf58c3c172f9d584f7302ba4849c7bd723b1a3e0afae327d126dc2736",
+        "crates/om9-core/tests/resource_transactions.rs": "849a322eefeed6848b3451f8063758d47c2ab9e5a200e005f1f0d87333c7a580",
+        "crates/om9-core/tests/retained_entity_baselines.rs": "ec7014b4748c7abe345399cee6dda5e72f2a73319ae34f1b111241ef280fd2fa",
+        "crates/om9-core/tests/retained_imports.rs": "8fa804cb3690e53047bfa13cab067940cc7902ad056f2b8c8c733de307c509d6",
+        "crates/om9-core/tests/retained_peak_review.rs": "cbcb4e2fab403a6dd9b06cf88b966d42bf098acdf40d9074e715d7195a6d0216",
+        "crates/om9-core/tests/selection_state.rs": "0f00982524a950f224fc00c75783fbba1bb3b587ef5fbd7001346e9d485bc5fe",
+        "crates/om9-core/tests/source_binding.rs": "01ee792e7045c2d61cfedc8642b8f058c8308c4cd4188212c84c9e95ede2f591",
+        "crates/om9-core/tests/startup_layers.rs": "132fbd34207d495080fcfb29780230aac5c84180e65de4ace523f7f0c38edeb4",
+        "crates/om9-core/tests/surface_kernel.rs": "745ee2474868e91ff31b8f35d2cdf4a719cbb61367c10f0cf2e1d3e075796d17",
+        "crates/om9-core/tests/transaction_scopes.rs": "0fbf232e67235b26fb563a5267338350a18aa684eb58eed665c38522a354cd8d",
+        "crates/om9-core/tests/units_parameters.rs": "6c2321604460778f758e69c81ffb4e5293b9e3475744818b7514936f66158c40",
+        "crates/om9-core/tests/w8_w9_w10_kernels.rs": "de8737f8fc2ae8cefc6bf0cd4ba9dd6dde810dfb7eb39c6275197d8bd65cf4eb",
+        "crates/om9-exchange/Cargo.toml": "9c8f4334bc6e541b15c868631dfe220f07f00ba832fdd72ccbaa4579a7e9480b",
+        "crates/om9-exchange/src/current_overlay.rs": "ddf2b8398138a7ee683a5b8e7cd7a088f3b8e2c15be2d5eba196327ef376e2cf",
+        "crates/om9-exchange/src/dependency_cache.rs": "3e032e55f255c127da5c65bd5cf4598ebd57cf02c03936baa6b77439d6b334d8",
+        "crates/om9-exchange/src/export_document.rs": "ce51e910e22f7f3ace21f882696b7104589111e8e6dc46819d1b1021fdc8e09c",
+        "crates/om9-exchange/src/import_capture.rs": "92f38622da55023877c5b648374c2773e949d9103d876fcf49a9864d7b0b0c59",
+        "crates/om9-exchange/src/import_dto.rs": "cd6af3b9f9017246fc538b569bba8b8d5084c8812753c0c7d8b6387abe5a7085",
+        "crates/om9-exchange/src/import_graph.rs": "d532aa7f99ffa3524fff470cae6078f42aebf7476a8f7a5cbba88ed9975c214b",
+        "crates/om9-exchange/src/imported.rs": "fbbbebcb0144b05036ab958f043c80758b3bacd490e3e0364ca87a5fc75f0be8",
+        "crates/om9-exchange/src/inspection.rs": "f629199263ce6ea47fbd52f82b500e2ca431976f65bd656275eba7eb853e681e",
+        "crates/om9-exchange/src/lib.rs": "904b235fec3038457d94d12c5401c7a3bd040da63ea098725a5747f3dab6b132",
+        "crates/om9-exchange/src/merge_inputs.rs": "7d5a1a394d5f7cfee3b6223693648f00a03e195e0fc88de94718217e51f11924",
+        "crates/om9-exchange/src/output_identity.rs": "8538489a8ec0190a9375950ad9e2445cd95359ccf511929ecb5cabe91e5ba5c2",
+        "crates/om9-exchange/src/retained_cold.rs": "1cbe4c1b4441cf89bd9940887a2793a483346f5694740a152f26fb250c039c3d",
+        "crates/om9-exchange/src/retained_packet.rs": "52dc55801c95204f1d6af14168b89c13b6292307270bb2d60c7a877fd1101794",
+        "crates/om9-exchange/src/retained_stage.rs": "6958ae9bb6207794bcb8c199caa5030a1d55a64266ba0b3b63389b28df3ab996",
+        "crates/om9-exchange/src/retained_write.rs": "2276d6fa9aa1ba2c8829ebad3c78272e6af5dc1d85345d5b38ef972ada33ea9b",
+        "crates/om9-exchange/src/source_preparation.rs": "6afe7892979d88237966ca65fb48b08099963cc6c7a972063b06d6ce0d25eb95",
+        "crates/om9-exchange/src/staged.rs": "67a80a3b447971d9c6b5a3ac7fd8ff824f72c83717c0e88ca8ef707615844afb",
+        "crates/om9-exchange/src/stl.rs": "3b8244f2b1d96a8c90a22a5512556e73f52599b1acf65562a8a946d25a6e71d5",
+        "crates/om9-exchange/src/wire_output.rs": "75e477dc3afe4995a6cc04ba8e58b77a05799976c5b9540938ea93f89a7c3552",
+        "crates/om9-exchange/tests/current_overlay.rs": "99eeaeb9cb1403dba2bcaecbec7991406aed122df411819599ed4433e502de7c",
+        "crates/om9-exchange/tests/current_overlay_review.rs": "bfa033df2fcbfe1e8e1a8fa2962790216fc06a8968d548c526b1e1667861de7a",
+        "crates/om9-exchange/tests/export_authority.rs": "fd956d211748c7a128e008c6dfbf2e930d0a2a882e1f2669575acbdf79eb4d29",
+        "crates/om9-exchange/tests/import_capture.rs": "585ff1daaa156d639c38baff6759ed2bc3caa74c5670d7db42921de03c674a16",
+        "crates/om9-exchange/tests/layer_wire.rs": "ea054a2a8af71594836ae0a2be7314bcc5bdba8da11055e709f34b457e01e6f0",
+        "crates/om9-exchange/tests/retained_cold_review.rs": "1b520774302d2047c081c9a5a1019e57f9689f8e687f38edffa676e6b8e1079d",
+        "crates/om9-exchange/tests/retained_native_import.rs": "07a74e37f6f38db2fbba2fffde84dafb8d92e0c8a7f381d7da10a4f020535d63",
+        "crates/om9-exchange/tests/retained_native_inputs.rs": "326c9f767f2049a00b03b4936e945b63e827a1afb7d14347ad7fe33a17f8b50f",
+        "crates/om9-exchange/tests/retained_native_write.rs": "4cef57f9929644ea29c32cfa61fb42e4c7d99f2f18079ba44ad9a016414bd2c8",
+        "crates/om9-exchange/tests/retained_packet.rs": "9a627716740ca695c7c2ed2c3359e83c8c53d7cd66c86412077c35fa001ae861",
+        "crates/om9-exchange/tests/retained_packet_review.rs": "b14edc826e6e865d7e4e466a486cc1cb05a24458d1df3ed641361a7f4acf1066",
+        "crates/om9-exchange/tests/retained_stage.rs": "be0cf423d4e71f7226892d29ef9c306eeb2f681604524dc16be268c86d582e01",
+        "crates/om9-exchange/tests/retained_stage_review.rs": "d8f3a1ee39982d650fb0c2c747fab0927b9661aa10e681696c3705dd3deb57cf",
+        "crates/om9-exchange/tests/source_preparation.rs": "9e5ca3e4c923b82939fbda3057cfde2a46f07f76522cea02084eeb1963df0faf",
+        "crates/om9-exchange/tests/source_preparation_review.rs": "9139a415205b78cf068b80c97ba36696b51014fc09418ef77beca1fd72b4e689",
+        "crates/om9-exchange/tests/staged_export.rs": "a571c685ec08e2832f10459dc7e72b1cea1f82fc0ab6bdf3b02bd62c5ae7f371",
+        "crates/om9-exchange/tests/wire_capture.rs": "99437151171b39a319456f61b131fac931248ae92f27936bef274bbda20b0582",
+        "crates/om9-exchange/tests/wire_output_review.rs": "fa7616d58fc49e28e2e29d7ea079a0f34e71379d986ea69b86aac9eea6302f41",
+        "crates/om9-kernel/build.rs": "efaebee9cc72b7cecacaf72df1e593f3b18b398cfae3d32e06c7cb0e7835c934",
+        "crates/om9-kernel/Cargo.toml": "96c0c24378f4d714cf6588eb59e3e6fc6b34b9aec80d06115142c1a73c47a8b8",
+        "crates/om9-kernel/src/brep.rs": "1f74bc607c5c1b2a83a1dec5f0fa40ea0dfbe4ddab9596985aaa435e255ac2ba",
+        "crates/om9-kernel/src/brep_bridge.cpp": "2e0893936e2268b5f8966091697094ac4e8b338df9326fc0a4ee16389d7584fb",
+        "crates/om9-kernel/src/bridge.cpp": "ae34a737fa3990f1bf4994a6df33fe4ffb59c5698e500b6ce8348b4076673f86",
+        "crates/om9-kernel/src/lib.rs": "32742b285f14aa1fcaafe2ff929d95858f3a6fe38206f19d8d55d684fb749bbd",
+        "crates/om9-kernel/tests/kernel.rs": "e9922e9c0a083437dea9fd39e8ff4f6383e04a3f053a4600643f73fa2b196341",
+        "crates/om9-kernel/tests/l2_01_05.rs": "3d43ce5e37e3bef16dcbff78df6502e31e5c7ea3a377ee010237a9ed8dadbbc4",
+        "crates/om9-kernel/tests/lifetime.rs": "60b46a1bfae05f1643685be1cbda3ca61d6088deecb05d4f678c69efcc851fe3",
+        "crates/om9-kernel/tests/numeric.rs": "98e3ff1a7d324bfaba920c2829e7c8814816337a6759e3b3577289f36642a4dd",
+        "crates/om9-native-owner/Cargo.toml": "21a39d85329438395a31264d077ac508eced6a56fa3bf06650ec566703329a3a",
+        "crates/om9-native-owner/src/bin/native_runner.rs": "4c8892e951aa323a154507d180c1039d671658d541202e86cf807a71aea9b838",
+        "crates/om9-native-owner/src/bin/process_fixture.rs": "b4b78ca9a73627d39cd43db4613361e48a3b4e48ebb809cb145a2d2071d8c9e9",
+        "crates/om9-native-owner/src/dialog_probe.rs": "1e6f07a565fe8daeb927a0ed6c6e1bc325657cd4a2d003073ad583c84726946d",
+        "crates/om9-native-owner/src/file_dialog.rs": "4380da3b50d1c13f0e2e4b2cbf61e599d6dda88e3cbb7f7df3841b4ce36f8f3c",
+        "crates/om9-native-owner/src/lib.rs": "a29343777eee9a8183e53d4869a3c0b958a96f8e2efbfd1367b6e6900d4784fc",
+        "crates/om9-native-owner/src/verified_file.rs": "80cfcda63211ca8897272e73babfd9097a3a43050a8f215952ca9f14a7923799",
+        "crates/om9-native-owner/src/windows.rs": "47aa8da28393abd0f68b5bb55072959ba566eb3c836067ee70ffe5758f9b362b",
+        "crates/om9-native-owner/tests/process_owner.rs": "605062d78f0a4e9d814b0b2553c5b2b69766f1b84fd24e6168a00cb00b00dba9",
+        "crates/om9-native-owner/tests/teardown.rs": "ef61b002482f5ea4d619b176daf3ca90b99c5a71da0da853a1b00e62f59ef86a",
+        "crates/om9-native-owner/tests/verified_file.rs": "d9dbcd2edcca3f4004addf36cd5de86ec512ecf3559378a69f6ebb55844e4f66",
+        "crates/om9-render/Cargo.toml": "c8c06d9af87e79b175aad3f2f85d60fcbe5ba0c829bf215668923a2067745b02",
+        "crates/om9-render/src/cluster.rs": "a0f27ebb131379256d9984a8fa62442ea1cc0dd1ebf3291431ffeb438729d0bb",
+        "crates/om9-render/src/lib.rs": "de5f4c4ceb70975e08e1a0a0255907127a9c072e86d3557e8392c5487737c94d",
+        "crates/om9-render/src/lod.rs": "e9146a53229a29bb65e3207ddd1d12162794debb425927126780cba596c30f39",
+        "crates/om9-render/src/meshlet.rs": "fd4790edf343eab5a553de2ff1dc7a39d8af1d2afa4aa90032fe36f336e28959",
+        "crates/om9-render/src/occlusion.rs": "90a24df9cd53bc17de79abf91380783a81af6265883f17d5b72f70af83f27b00",
+        "crates/om9-render/src/overlay.rs": "e093a501ce6fe7268a87227b4f789eaa9b9d423cd2b7be4ed58d79c7ee31e2e3",
+        "crates/om9-render/src/pyramid.rs": "653f0ec9dc6b23f97dd178c2b41de9d4a9ba575c3583a751723ef2eb66771584",
+        "crates/om9-render/src/qem.rs": "15fdcd68dc6e0ddeb04f7bf7138c41425f8579c67a0cbd12909c596be999d2a0",
+        "crates/om9-render/src/scene.rs": "e081444753bfe0bb49f702889d0147a06de1b5d80fb875876ecec0d4fc99ea7e",
+        "crates/om9-render/src/shapes.rs": "3621620c80c70fbd42dc1d32e7800c8d81cb3cb991e1c769d86b896205e34ee8",
+        "crates/om9-render/src/streaming.rs": "294183a9e97eab84290905d92225bf02cbb555fbf33e4b55f71a20a23eb9fa1d",
+        "crates/om9-render/src/tests_support.rs": "7ddc4d8fe08db4d64f6a44a3e9e52c371604a1f5cada6436ac236ac1a790c380",
+        "crates/om9-render/tests/render_loop.rs": "207b4bdfa877923b18f825ac13025ca1a76904a1003a5f52179ee3852809256e",
+        "crates/om9-render/tests/scene_bench.rs": "2fe953a6f5d2dbe75091a71f9fd2ca7045840a61b3542e6a29282fe23a0da3c0",
+        "crates/om9-scene/Cargo.toml": "018aa366056483629b935c79f982ee42f49768d5e23eeeb4b9000744eb3dbc18",
+        "crates/om9-scene/src/affine.rs": "8e2d720f8e1fcdcaab8658bbc6834b794d2597391a01aa19afb013c7727aa660",
+        "crates/om9-scene/src/camera.rs": "60c98f1e02520786a3dbe4418140ff18b31d3db9b69e211900333bc418f23361",
+        "crates/om9-scene/src/grid.rs": "19ff0db7e01d399e439b20421a6dc1ee4e513f768909c7add0cc5d44b5b47ccf",
+        "crates/om9-scene/src/gumball_view.rs": "92631036caa1210676d018927d9b8b425e60dc4eabdb179a55bad7f687c5f709",
+        "crates/om9-scene/src/lib.rs": "ad404b40628b0892b4a022e4f9f0a0b8c09750ad1e48488d3dc93ede63928a2c",
+        "crates/om9-scene/src/picking.rs": "0f6d04a508e78ddbf166381e81be8f7223ee80b3022c4466800a40ad51f25a60",
+        "crates/om9-scene/src/scene/admission.rs": "bd457415cba5d7d9bb915116a62be888b40226bbb077f0891752cd91080042aa",
+        "crates/om9-scene/src/scene.rs": "4de312d1afd0cf48dcd5b0db8e7bf87e1d436c4eb19c4660d73d2f9758d4993f",
+        "crates/om9-scene/src/selection.rs": "699ad40d2bf7f28611754997910e7ed9e76d2a22e3a16c93e2d02181e62a98fc",
+        "crates/om9-scene/src/workspace.rs": "3154230bf8177a8207a4b76b022571877d336c072f6d713a04eb0362c0e3a3d9",
+        "crates/om9-scene/tests/acceptance_l2_01_07.rs": "8e0591533fe4960730bc054bfdfc859a19d5661ddc91e4b1fe4772d98a82a4c7",
+        "crates/om9-scene/tests/affine_gesture.rs": "aae21024632b72ce7eccb5a6dccddc657652cb0d0e44fb78cac27f501d754e87",
+        "crates/om9-scene/tests/camera_grid.rs": "5954928e0bd2d6b082e1a56c67cd8f7c8d4b3d1e21f2a20c056dbd7575254310",
+        "crates/om9-scene/tests/camera_orbit.rs": "18eef10b1f7a6fe489b31075207533c54f434f05b314025c00637ed6844a23f1",
+        "crates/om9-scene/tests/coordinate_frame.rs": "4a21144ec4f54baf0db86018821e455bdb07870ede27228bfaa2b1cb8101f92a",
+        "crates/om9-scene/tests/instance_admission.rs": "88d282cb9d6728491df6f234a9df9e49f75b25893598448fd517b2295e0635b8",
+        "crates/om9-scene/tests/layer_colors.rs": "e94b146f01772a6992f86f52b7874d93725237597b19c19f59d42437c2ad7baa",
+        "crates/om9-scene/tests/metadata_cache.rs": "8de7c197ac0b764fafc2632d42765f628d30efef54cdb067520a8c763137c2f2",
+        "crates/om9-scene/tests/reference_workspace.rs": "92c843d8959997149df16244ef7165bf5aa807c01b465ea05098b1f6102d5dec",
+        "crates/om9-scene/tests/selection_regressions.rs": "7e5de349a2f8386ab125e95a2e2a2df0f47a13b3b682845210ae82c602bfaf0a",
+        "crates/om9-scene/tests/shared_instances.rs": "c6c4f9574ba972b3d87b68176ea78f833c73fcfedc69cd4e0ca0994772584068",
+        "crates/om9-scene/tests/subobject_pick.rs": "208498259cb904c9262ab754285c688f0579434780f4dcdf0116b80fab2a4291",
+        "crates/om9-scene/tests/world_picking.rs": "77dd71b406aa2441115ce4b51e5553249fbddaf7101403d172fc440ca49594bb",
+        "native/occt/pin.json": "fdcb3b953014afc667f7527ddef77ee5c8d920ca7918730e1272aff8967127b9"
+      },
+      "checks": [
+        {
+          "actual": {
+            "path": [
+              "2831253d-3ab9-4276-83c0-d5ffd0aae218",
+              "80bd71f8-5226-46df-b193-41c5bef27068"
+            ],
+            "probes": [
+              {
+                "expected_green": true,
+                "screen": [
+                  508.9275817871094,
+                  349.95123291015625
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1062.0308837890625,
+                  303.53466796875
+                ],
+                "view": "Perspective"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  508.9275817871094,
+                  622.6829223632812
+                ],
+                "view": "Through Finger"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1103.642578125,
+                  622.6829223632812
+                ],
+                "view": "Side View"
+              },
+              {
+                "expected_green": false,
+                "screen": [
+                  508.9275817871094,
+                  306.04876708984375
+                ],
+                "view": "unselected sibling"
+              }
+            ],
+            "root": "8d7a8a66-4f3f-47da-9dd4-c27c63701aec"
+          },
+          "name": "Ctrl+Shift stores the exact nested member path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "2831253d-3ab9-4276-83c0-d5ffd0aae218",
+                "80bd71f8-5226-46df-b193-41c5bef27068"
+              ],
+              [
+                "1ce00cb7-36c8-4b13-9589-3e361dfb211a",
+                "80bd71f8-5226-46df-b193-41c5bef27068"
+              ]
+            ],
+            "undo": 0
+          },
+          "name": "shared leaf face selected twice under two paths",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "1ce00cb7-36c8-4b13-9589-3e361dfb211a",
+                "80bd71f8-5226-46df-b193-41c5bef27068"
+              ]
+            ]
+          },
+          "name": "toggling the left path preserves the right path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "objects": 0,
+            "subobjects": 0,
+            "undo": 0
+          },
+          "name": "Escape clears occurrence selection without document history",
+          "pass": true
+        }
+      ],
+      "visible_moved_curve_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            763,
+            525
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1593,
+            455
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Through Finger",
+          "pixel": [
+            763,
+            934
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Side View",
+          "pixel": [
+            1655,
+            934
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "unselected sibling",
+          "pixel": [
+            763,
+            459
+          ],
+          "expected_green": false,
+          "observed_green": false
+        }
+      ],
+      "preview_screenshots": {
+        "m02-occurrence.png": "3809abd84db6fb87c4f451a2b8f0cbc9a2005972f4a58e3e9a33ef820a73bcdb"
+      },
+      "human_approval": null
+    },
+    {
+      "name": "brep-100",
+      "report": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-brep-100/m02-report.json",
+      "report_sha256": "e020d26bee7ceb0809f6239babfa35db639488d625527a4c66615c5869f5bb66",
+      "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+      "binary_sha256": "8f33efdd5e8c14020d3df222c74483d7c4fd37fdeb2a34562069281e21ec03fe",
+      "source_sha256": {
+        "Cargo.lock": "aff95684d10fe5508733317d7c09c5d02587a2687446636843ada30dbbd33e61",
+        "Cargo.toml": "76e251465a3b9a69c7bd93b1a0910e3fc9fe5946326cbe294244ee2960c019bb",
+        "crates/om9-3dm/build.rs": "250353178f5e83c05610e9067be3438555b7c5ab81df72552ef29d39504e4557",
+        "crates/om9-3dm/Cargo.toml": "ed3cc761c88b53fd592315061257998c3c96f5a11157532c4c9666985a495291",
+        "crates/om9-3dm/src/bridge.cpp": "8e81201c31bfc69fe2212e69ad9714443cad6be6e25b60a8ca69374b441212a7",
+        "crates/om9-3dm/src/lib.rs": "8b7551c2236584741e5a22799e41d22abc795b185c48ae370a7d24183503c366",
+        "crates/om9-3dm/tests/import_roundtrip.rs": "271b02124aff12900f59a42d41d0267c673a5b17c4ddc3d3c1be804df7ff2125",
+        "crates/om9-3dm/tests/jewelry_scene.rs": "ac2183b9e1e65fe3b04cddad83dd26d2d7794f651e364c5d07e6f9e932e42b14",
+        "crates/om9-app/Cargo.toml": "944a77050fcbd990e64909f0a229b165d7af144aa0a7ef27eb7508b9bca357dd",
+        "crates/om9-app/src/command_events.rs": "033081f1c52b71302486d9c0bc4e92ad149aa026c46c5ac10d13da4e6f5e35ab",
+        "crates/om9-app/src/dock_layout.rs": "303be84f9aaa10461f6fbc265b86fb6094ce7715cf1c606d0b919c2d29728bd5",
+        "crates/om9-app/src/file_lifecycle.rs": "5dc049403247018d03e6e37a1171fa367b4568d82336482bfe3e6d152c63777d",
+        "crates/om9-app/src/gpu_viewport.rs": "6576090d17543ec8eed4a8434e3976d7726e81668cdef1c1d077149d0fab4d67",
+        "crates/om9-app/src/icons.rs": "bc7e0c7520f58f482ec97b0f77535c809867d0dcc750b9f4720ad9af1d4ec2a1",
+        "crates/om9-app/src/layer_command.rs": "0c4315edaa5ef76e12c0b36d9d78c5f7d7fb0da0a1c01ec85856cc27d5cf378a",
+        "crates/om9-app/src/layer_dialog.rs": "a9c4e47b2377d964e820ff6e56bcca01ee9cb659a0a474c044d551ae2d4b50e4",
+        "crates/om9-app/src/lib.rs": "ff3d992d32954cdbdfa7f67454a2f3da65ba1f99c9a330a086e1eacf8f1cd32c",
+        "crates/om9-app/src/main.rs": "32888b22929e75e473d6a0b2597d37d7d13aa2af3e59d089354e58fdf2bace99",
+        "crates/om9-app/src/native_picker.rs": "234d305c1675ffcee0c1ba7b9e406231e2cf35b9683d72f1fcfcd0026b89198a",
+        "crates/om9-app/src/option_parser.rs": "d7e3c3b1b3eb51ae0269da2151af789433d4fc03f62565987288699c7fb40478",
+        "crates/om9-app/src/panel_ops.rs": "5220b73fea64b29cbde56528bc4342f2de829ca16523240e00bc6af80ef7b496",
+        "crates/om9-app/src/report.rs": "70f9b25aefc4eb9cbb2056a3a357446e8e41010746ac0bf0246a2e46ee760dd5",
+        "crates/om9-app/src/session/contract.rs": "92a0bb32ae83ee5b54e90556fe29027bec47c0a3c34cf9fcfff4f36a9ba160f0",
+        "crates/om9-app/src/session/files.rs": "61b35d0eae5b465419bc55f69c2a20056ee508d8e0253f03ba077ce18e1a6af7",
+        "crates/om9-app/src/session/gumball.rs": "64ee3ca9576d9835c9957e6786a350f5895b2a4fb872352100d3eefce589234d",
+        "crates/om9-app/src/session/gumball_numeric.rs": "4f2550b7085f4fa4450c0e55d23614acf2bcd4bb56ed4b7edf255d31bd2c5995",
+        "crates/om9-app/src/session/layer_dialogs.rs": "f767e39ee7986bb31d06775cb4cc9815aacaadc6974f222d84d04738e38011c4",
+        "crates/om9-app/src/session/layers.rs": "07416e1a77f024ecc478f2e80417974abfe77cc4affea712ff067353ea4b3072",
+        "crates/om9-app/src/session/stress.rs": "c90bb5d7ce0ff24bab031a0cd92ada01e0c1fa4aef28967a683ec2e078b87c5d",
+        "crates/om9-app/src/session/subobjects.rs": "dc45b5a5361205d73ac9edb92c567274f021f7b9597ebbfd4cebbbd5595df12e",
+        "crates/om9-app/src/session.rs": "5e6732febfb8127537b0051c2a3cedb09ae35c577f958ede975f4c695b9cd21f",
+        "crates/om9-app/src/startup.rs": "ee4b1edaafdcbd2fcf5535673469de3df08e837752b626688053ab1b08ec5a7d",
+        "crates/om9-app/src/status_surface.rs": "468331b77210ae714be011723264e5010b1f1ab893b92f99eef330673057b47b",
+        "crates/om9-app/src/transcript.rs": "000de98ce3f3324ec42c9ccb0d212174316c05f8e0f937f03f3032ec3a7cd7c4",
+        "crates/om9-app/src/ui/chrome.rs": "23aedb978df6240b7ec2f429545ee5cd09b50a64da2b6dd16794531def948381",
+        "crates/om9-app/src/ui/command.rs": "a68ea475fda958b4ce2dfd67e1ce81ae3178285a6ebc39ef1f69e928e7db62d2",
+        "crates/om9-app/src/ui/file_audit.rs": "3707523f4eb98683b600c906778e2c6905223b280f5d552d1eb53a8d94a7129d",
+        "crates/om9-app/src/ui/file_success_audit.rs": "e741f048c62dec288e41bc4616401aa5cf0148d453d72a03f6f58e02d6e3f436",
+        "crates/om9-app/src/ui/files.rs": "c3a5a09cd2d4c839728c0ae07288ae3438782237cb7dffe64be5b392daf94e25",
+        "crates/om9-app/src/ui/layer_audit.rs": "99bcf7ac9c220769e80a752f049e6568870dc1d041e60595c61e58394a8d0e76",
+        "crates/om9-app/src/ui/layer_dialog_audit.rs": "e42ea42f9c867320b76a0dc6b34e25e2d74cb1e4727d0f6374cacd87b4f129f1",
+        "crates/om9-app/src/ui/layer_dialogs.rs": "dc0e24b79ce2fbcf67f6c7ca79488ff45eebd3f8499b4e81cbafc90d56455798",
+        "crates/om9-app/src/ui/layers.rs": "ed1451917515a9c28dc7d5de9236d67ecf9877edbafd9325f4e8f8f6f79bafd3",
+        "crates/om9-app/src/ui/occurrence_audit.rs": "58d5fb9a6d1016d738b6a10e81467522127dfb7c1aadd7c739fb3001f42589ef",
+        "crates/om9-app/src/ui/panel_audit.rs": "ed52f138379c5ff7c722c0a320e73d27c73c3a7fb76088920abb07310c3601bc",
+        "crates/om9-app/src/ui/rotation_feedback.rs": "7bc182fa4c217f28815e5f1a98633d9e5486e10ec239ae1b34ebbbd9d3a113db",
+        "crates/om9-app/src/ui/selection_audit.rs": "5410f15038595130a5cba7fba347d3e4073829c1ec625c93d4fae9e06b3b6d55",
+        "crates/om9-app/src/ui/startup_audit.rs": "af705f294071d856a673ea09e900c3abacd21beade70845a671271fe3fadeded",
+        "crates/om9-app/src/ui/viewport_audit.rs": "475ea933ec6908e79346942b110d38da60fdda52e29bfb67be0bc58b7b6ca551",
+        "crates/om9-app/src/ui/viewport_menu.rs": "debc0548d6f96e2dbc0ad8c681e1f65ee8345d9e9a0a856e3ab8d747b2b5de20",
+        "crates/om9-app/src/ui.rs": "b1ca38087afa59816e33d60132352d3ae9901c27a3ef85a892c362831ef0023f",
+        "crates/om9-app/src/viewport_menu.rs": "fa206837c53a97991b15991a0ec9be70169e52625fd353889efd44fccbbbbcb3",
+        "crates/om9-app/src/window_identity_guard.rs": "fee733314578ac11090899059d77deb817793c6fdc699a692e9a2f78ee441582",
+        "crates/om9-app/src/workbench_regions.rs": "d97820584f312c931d678bf0053f12f7bb0c5a468f733e293b54662786b7fc46",
+        "crates/om9-app/tests/acceptance_selection_set.rs": "9be57f75c896d7a32021196482f828709855eb272143cf8c922cde659ef88396",
+        "crates/om9-app/tests/acceptance_viewport_selection.rs": "8a9533bc97a2f9d4e7888080f5c0740962b46b1becc3e3921be403345e3640a7",
+        "crates/om9-app/tests/brep_selection.rs": "c6347a4c05cfe4f7d8c95a999b21c80e55c870207098be46a4cca7594f4095f5",
+        "crates/om9-app/tests/builder_slot.rs": "31e70321a9a44587b0aacf7f88f606f3b61951a7935ff5b2e1f8d7d381c6b953",
+        "crates/om9-app/tests/chrome_actions.rs": "194f32421dfbdab2e6d3b4c6034417c6788e76e9af229e96ca65d27e4ac9b901",
+        "crates/om9-app/tests/clip_behaviours.rs": "63484e5dbe335a4e66f552a324080bbdb05b84f6dae50cc5d8bec5b1cd337f02",
+        "crates/om9-app/tests/cold_layers.rs": "ede0eb6ad95ee60ac6c329de2458cdce98bc0f2cbf3e8680eb8fb1984e763244",
+        "crates/om9-app/tests/cold_reopen.rs": "67b9287af14122cd49556a20ea0fbd1f786f355faed946ddb0e4c87c3acb2f40",
+        "crates/om9-app/tests/command_context.rs": "0d726237fe674d53d92e07a8fddfcadc7b0613b7d7998712948c410e33ad0caf",
+        "crates/om9-app/tests/command_events_surface.rs": "664627d06f27d053832adb9a86965fa674d357b2aec9aba2d11d8cde1ee63f66",
+        "crates/om9-app/tests/command_options_and_repeat.rs": "5faf07729402ad9fdd11d95603e3f3ad09d2f463686b0af39beab0380e8b18e5",
+        "crates/om9-app/tests/command_sessions.rs": "0ec6ea6e39fbf8c499ef135cab1388d849ea437ca1b39c53270d1f0c75eef04c",
+        "crates/om9-app/tests/command_state_machine.rs": "980b64fd430f67a1a99503b2cf600f140cffe4decc16e53432f418123cbfe0c3",
+        "crates/om9-app/tests/command_transactions.rs": "7d70e9ab1b99ed984f12400585209327ea872e633fd1d9568be14216cbcf1118",
+        "crates/om9-app/tests/command_transcript.rs": "261d3a9e6fcbca924666ef0b767f53d24e9786a59f482dbc6f3a89e6049e1e2b",
+        "crates/om9-app/tests/common/mod.rs": "f8ea1fbbd8a6ee25af56179bad248cfb1bd3d8342e45589117f32d747cf2fd23",
+        "crates/om9-app/tests/dock_layout_default.rs": "a57b33ce4f867f495937086baf3f308cd3a5b90928c188ecfa236d1a64f21350",
+        "crates/om9-app/tests/dock_layout_persistence.rs": "63cdc5c4c2cc44f322aacb7769738cb1c6ffd0b61a86abea54951c508963ceb5",
+        "crates/om9-app/tests/document_contract.rs": "646f54a1ae86abda283bbdae51f518b60c6de2edb816c1ade166947cb337a64a",
+        "crates/om9-app/tests/document_window_state.rs": "b15b9714a2c6f63187db06b91a351e31fefd6ab4e4e15307923514f41985a9a5",
+        "crates/om9-app/tests/file_lifecycle.rs": "1a78d6744ee0330adefb4403eab0417631ba72325d7bda592f879d2e884391c4",
+        "crates/om9-app/tests/file_lifecycle_cold.rs": "6a4aced05a919bddd16ad14ac2bdb1b45d1f24f8082f4d1fd0f627d8c588ea5b",
+        "crates/om9-app/tests/file_widgets.rs": "c373cab54fc9d8cfd35af8e1500795b7d5fe357739242bf474359fac1988d8f1",
+        "crates/om9-app/tests/gesture_regressions.rs": "4efb8bade4c292e34a2758ecd4307ebb08e3fd13c953bdd17988719dbb6d9340",
+        "crates/om9-app/tests/global_status_surface.rs": "45492c6e200f642935a8c5210b1ab396e423a29663d8e04e2558ad6697bc1743",
+        "crates/om9-app/tests/gumball_cold.rs": "08faac6e5b47bf494d98744e79b98003eddc322daf7f3008cbedbabe83588a44",
+        "crates/om9-app/tests/gumball_interaction.rs": "a1c80bbb829a17596f636b0d4a3fc83752ef022000c15de04f878a821b8ece39",
+        "crates/om9-app/tests/gumball_numeric.rs": "b2ff3181cae3ae7a94f8e53145f2543ff35314e008aa5a16f31e737f40624f5d",
+        "crates/om9-app/tests/gumball_placement.rs": "49f7d9c7c45e0bc81d89a115f3536c29de05209c4860382a57f5dd17e9f9ca01",
+        "crates/om9-app/tests/gumball_viewport.rs": "c442001606cb4cd8e149da790f42fe9afec5bbe29821314cd2fd76353a47ff61",
+        "crates/om9-app/tests/layer_controller.rs": "5bfb99691cc1ea1945daba898d6bc3c0e99a2fd2949132d546d48ebb03b6d8d2",
+        "crates/om9-app/tests/layer_dialogs.rs": "aa184e288b420b465f91844ab5285adb65be795122a9cdf64989ac4a7e328db7",
+        "crates/om9-app/tests/layer_widgets.rs": "aa98b920623da4e44b2e707609255f33e3b9b089d7619de5331657e00dad5b73",
+        "crates/om9-app/tests/left_stack_layers.rs": "621bd7d01c306c6e0b95a01b47b9dfe098c2938f7c5aa659bbbdb8f52c26eb75",
+        "crates/om9-app/tests/mesh_fill.rs": "c9c38667c4ab7c1b1176c8978d983eaf16f0927b535a18b09431650b7a068282",
+        "crates/om9-app/tests/mesh_stress_command.rs": "567e9ab103806ac2e8c3179851bdbfde562d50a25519c77b0873f4f89ebc2d9c",
+        "crates/om9-app/tests/panel_door.rs": "b0cb76856160a2572cff751e7b73cdefcd8efef4a7312b451e4e393c964853d0",
+        "crates/om9-app/tests/panel_ops.rs": "423f4bac59bfa4f1535041199aef14e21cdbc7c982ac6d7c1059fa1e1cd39df1",
+        "crates/om9-app/tests/pick_disambiguation.rs": "2616a574ff77812b51c4eb07735d63a0c509b376da9928b6e27b99cd6dc34521",
+        "crates/om9-app/tests/pinned_command.rs": "adc4847f93f6331fa8c7eeb31bfc2184ed51f24ea96ae06381eddbff2bb6ba5c",
+        "crates/om9-app/tests/preview_drag.rs": "95f5bd60c8e0eba88d5d4f89f820c58341c2692a2ef2d8ddd2ab6548c910933e",
+        "crates/om9-app/tests/rubber_band.rs": "d2fba6773e250de5cedaa79020d990a5e0b54e09337149e63c15dc4b664e67f7",
+        "crates/om9-app/tests/scene_allocation_peak.rs": "2a47e1775b10910f8b50b009669c405fd70b42d42c6ea105d17470f63b46fb22",
+        "crates/om9-app/tests/selection_overlay.rs": "6e6c3d8245ff18a3bab5e11e85c811e2611326f158b047be48bf3af7c413e1a6",
+        "crates/om9-app/tests/shell_docking.rs": "0dcef2c137177a1c2d1d005fe73a8b5334674d6b4bde225c12167de9d4c40eda",
+        "crates/om9-app/tests/startup_contract.rs": "e0a3d6a5b91ff12b55ba954a04a2c8bb81ce9cb81668ea8f102715b7de3f3859",
+        "crates/om9-app/tests/status_bar_overlap.rs": "14623bfab5f5b36771e4f22905bee7c5d9f18f14ce52b12cff94fd9c7e663726",
+        "crates/om9-app/tests/subobject_occurrences.rs": "0672627470f57b82552606013c21f2ae8010f50279fbe761aba2ce427de5681e",
+        "crates/om9-app/tests/subobject_selection.rs": "4d9c8018c577122f1195035a1e7024fca568a8cdecb6dedf3f0dcc9bf67df8bf",
+        "crates/om9-app/tests/ui_events.rs": "e8d8966514c214583e1bba846a0e8ad89c420d09de2131d35cd68cc354afd3fe",
+        "crates/om9-app/tests/viewport_title_menu.rs": "5146694d3e44096ce6b24242ce2de232cbf5852cd5a3488cea6a3376dd9a5a00",
+        "crates/om9-app/tests/window_minimum.rs": "64faf8bb44900fdc5f261d94ad5efce256b3a5d3590713169792922151eb1458",
+        "crates/om9-app/tests/workbench_regions.rs": "32ac9b41271581cf57ff3a146f33737417d3d49277aec3a7ad8f1d4fe059ca71",
+        "crates/om9-app/tests/workbench_regions_sizes.rs": "45a4849254a3cd1243a78738d270d13dee5afce82befdbf1382ca635fa1cb0e0",
+        "crates/om9-archive/Cargo.toml": "7c93ab59ad64ccf9c6c8ab65354c8821efc8787324a76a80f8f1d7b6828d7498",
+        "crates/om9-archive/src/atomic_file.rs": "77a7020592fca5ce3b2ead9fef4634d4fa81d464fd1f30f37652cc877ab2b89b",
+        "crates/om9-archive/src/container.rs": "9993fea64c9617406d6083d9a094476454716b4f2100088346bc3ac24942e0b3",
+        "crates/om9-archive/src/json_admission.rs": "5b6f6c5fef21f235d74f219743bc7785a82c696b2d352cadd11981ebf4791a28",
+        "crates/om9-archive/src/lib.rs": "0fa834f104310fa606598a210e6aae0024912de597c4f4a41e0139c0de52624d",
+        "crates/om9-archive/src/restore.rs": "1af17f63cf002d35951e59cd9ba965712bd9447e78ae95e9ba1c15ba1c45f6f7",
+        "crates/om9-archive/src/snapshot.rs": "66f3b005ad53a78748bca35a47b8ac34b415419f4fc7daac4542cf4e81d70f8a",
+        "crates/om9-archive/tests/atomic_save.rs": "6ba9b9c4c3a6554bd773daa4c2e3ae3981a85876a4b96975931dda7963a0d605",
+        "crates/om9-archive/tests/container_admission.rs": "9c69dbb0655092ef7483a72d3e363e4b4100120a6f3adca6f9d401ad96cd6c92",
+        "crates/om9-archive/tests/definition_units.rs": "745319f262926759afb0fc47dbd84aa4def422f6c477541a88f21533abb65b2a",
+        "crates/om9-archive/tests/document_identity_round_trip.rs": "fdeccd8ff0b56e1628c2f24e0ea7ecbfbaf9104fe405b997554044c11586a1f5",
+        "crates/om9-archive/tests/document_snapshot.rs": "8dcfa851b1459d628b5acd3267b6095c27d63f59b52dca67c7d57ebbc7cfe09a",
+        "crates/om9-archive/tests/layer_schema.rs": "b87ca59d99c9f4069230a2dfcbc7e086e8d8353d0a9d140b3d37395b50176e6a",
+        "crates/om9-archive/tests/resource_chunks.rs": "4885591ddd016c5c4ef3e9e457eed1e10958929ef57e364507815a24776506de",
+        "crates/om9-archive/tests/restore_modules.rs": "5ed0b4baa9c79e83541258a9218fb40401de3909ddc6d442aba0cf36340e83e7",
+        "crates/om9-archive/tests/z_float_probe.rs": "59472207d0dece4cadea2722bff23a394b69462d95301b287934f5ed784255b4",
+        "crates/om9-core/Cargo.toml": "1f100a097c871ab5dddf4894eb351c148974972aebbe21a8248cf10cc6685f74",
+        "crates/om9-core/src/brep.rs": "1a60c0aa941337c80903481ff8c4dbd753a181d713db06f47b1c2da0e0b6418d",
+        "crates/om9-core/src/brep_kernel.rs": "96fae0ec5c20b3733b313775cd99fbdc2a778250030a6ef0ea46cd6c300546c0",
+        "crates/om9-core/src/budget.rs": "165bfd4a3003b09b0d9551e78829fcd4480daecfb9cd937a47d547f9383c4345",
+        "crates/om9-core/src/cage.rs": "9cfe6c4ecc70960e09ac103ae2e966499ce8aa20cffe205858e7529eaa6cbff3",
+        "crates/om9-core/src/capability.rs": "82ddde726b6f8ed9686898d04ac4e99e78bee28d446ee4f905a1ddba32edb4b4",
+        "crates/om9-core/src/changes.rs": "f52eba07ed34b2323a97cde99300b06dc2f161e7c8f3868b6bfe035ff85ea183",
+        "crates/om9-core/src/command_schema.rs": "21fb510431f16cace93d04df4f2a66f00eb3b165cd48b7f9160eb72a9d35e895",
+        "crates/om9-core/src/coords.rs": "2916abe92a82cbc4b44bec1d8a4be754bae497b6086c08cb911ab2683bc3b33c",
+        "crates/om9-core/src/curve_build.rs": "92532f49ba4a4b7e9866bb6284540fe017d1a64d8336313397cf1e12611ef47f",
+        "crates/om9-core/src/error.rs": "98e23a702a615a0be7e6eee18eac826c44d11ab79596570c878d3b97fad79941",
+        "crates/om9-core/src/evaluation.rs": "6087beb4a748228fe5409f5af1148c80db9df494989ddeeac6bc208e82c92a0d",
+        "crates/om9-core/src/geometry.rs": "4beadef360c28770f694f4db8ea46fa59ca60e08516a71c98a3a0fb09d33c7d2",
+        "crates/om9-core/src/gumball.rs": "a2fc9e487018e473cca5d0dd8ba79a0ecb7fedc4571b6d67f8cd5391e146139f",
+        "crates/om9-core/src/history.rs": "8e701cdbac07222ac83c8bf07cb526e8a9c43050fcf60a0f011d52f9992e81ce",
+        "crates/om9-core/src/history_ops.rs": "9ba5d917363949e28acedbbec37ecd1cc90d62ee7f9dbd688f50620f2d11d55a",
+        "crates/om9-core/src/identity.rs": "a7e8f8852e75f3bb3f819b6529b35ef1dab3cbe6a64a84e810ae99ab24fad9bb",
+        "crates/om9-core/src/jobs.rs": "aec15fd4cabea567348d07752ab07815cf6b93860c0852611524f17ec5823078",
+        "crates/om9-core/src/layer_ops.rs": "dca731c3865c6b9fe8897b1e13c1e4059e01e6ba09a9862cfc45e7af6632cba4",
+        "crates/om9-core/src/layers/preset.rs": "d57069281adc5bfe2e494314594265e40714bfd5d05d74139be092bfa50e1407",
+        "crates/om9-core/src/layers.rs": "99ba2c6c5c680c3327931b76c448b846d2d9bbc7b6c990235075e87030eba1e8",
+        "crates/om9-core/src/lib.rs": "7e9987584596356b87528467b90a633b1c4fb87cafacb7fa0fc46a03a0abd7c2",
+        "crates/om9-core/src/measure.rs": "0088893921dad9f14326fa298ba68f985143c43269f01dc854b4ba2f6ba9f127",
+        "crates/om9-core/src/model.rs": "4142b62196565cc54e3ee191a96f70b7b35b21ea2a05eb9a7351a632507f1698",
+        "crates/om9-core/src/modeling_capability.rs": "3d0e698819a205330881c75252b403eb7e7150107b0d98865f30e3d83afbcfc9",
+        "crates/om9-core/src/offset_curve.rs": "556154d6eda50f90755576137dd524c7fa253e60157c5acb974c7341319aa386",
+        "crates/om9-core/src/provenance.rs": "a471c76ef4f49189423138fed7fd395b2738989057469b4fd67210b77b7faadc",
+        "crates/om9-core/src/request.rs": "4f10a399a02909043d1ce253a2f078bcceba2641f606795609adaa111f8e213f",
+        "crates/om9-core/src/resource.rs": "c094512acf7e18d1c56e3bc5c02c4675cbe12307b3028624817d07b84958d98a",
+        "crates/om9-core/src/result.rs": "30d9fb17059de833e864ec918ecc4eafe8e4d16cab8bf1b01cbcd51af9fc7d24",
+        "crates/om9-core/src/retained.rs": "1e2cc724dd1eb03bd2bfd284aea8a0702643c390c43b48d857d1808fee2a69b2",
+        "crates/om9-core/src/scope.rs": "50e332e91690b56157ed30453356b1f5a0db30f3a95c362e4a6aa5d2cfa866ab",
+        "crates/om9-core/src/selection.rs": "8ec1678ce97604f9be80ee5f69a4b7a94713a07c2487f073a6c104fbd94624d1",
+        "crates/om9-core/src/surface_kernel.rs": "f6ee1938df7df299ba25e639c178c80c6e96c789c5e902af5b3406ace383ccc0",
+        "crates/om9-core/src/transaction.rs": "4f54dda648a7542854ac76fb506a30b742345c0c902c94c9370d910b96e0ef31",
+        "crates/om9-core/src/units.rs": "25d663a30f8ab4c6fb66797b4e38d48323921f013e09c18ce43a3528301dd21a",
+        "crates/om9-core/tests/atomic_transactions.rs": "ae43ba8d9dd7cc00e3c83a9e62f1fcc2909107db77e3bd8bf53d4b73e0e8bca4",
+        "crates/om9-core/tests/brep_kernel.rs": "de53c18e3a89a1abe7b362dca4cb41e73f3d67abfc31701c3d19711552428a62",
+        "crates/om9-core/tests/cancellation_links.rs": "d4b198dc2744caaae16c0fdde6f2eebdec0d2dbe9acc25e5eb3075e13e779a0f",
+        "crates/om9-core/tests/capability_gates.rs": "54d116d508494af418e93257a6239b07eee00b43024df1b1ea30a32742bebb4c",
+        "crates/om9-core/tests/command_availability.rs": "95a420aa37ce84d1ea76aa4b84bedea9a87efa9ca2e9939547e183cbd76f17c9",
+        "crates/om9-core/tests/command_descriptor.rs": "0652c58e4a5c28b3d6852bacb0a2f000d6eac34add399f9dac17fefb2bd2be37",
+        "crates/om9-core/tests/command_registry.rs": "cb573d90d43fb80e10586e18f54b543d4bb90215bb9d30d7575bacd029b27172",
+        "crates/om9-core/tests/command_schema.rs": "48061357c249a162daa08fdbad357fe6f111138318e7dd9c31cb0ef6f04ca1dd",
+        "crates/om9-core/tests/coordinates.rs": "d07b0348dad166a3640d3bc2949e3790c5a239fb6da24e6558e1f98b96eb2573",
+        "crates/om9-core/tests/coordinator_authority.rs": "420021c3f4298c1169f687c6947de4bd5c187040533ea8f703248446bc54f6b2",
+        "crates/om9-core/tests/coordinator_held_startup.rs": "1f492830fc74394c2333669ca9e5d29664fb1c42fd6dffc26097a65c2a293767",
+        "crates/om9-core/tests/curve_build.rs": "e6c2fc6b0c0ddb297bc0f35ba848e216f26c7dca39e8c30ca2d915f7c8620cc6",
+        "crates/om9-core/tests/curve_oracles.rs": "ca458b9f6cfa61ab1f5b892623ad70c5346276ccda27fcae3a883b2e234b8226",
+        "crates/om9-core/tests/definition_units.rs": "1f056e8ec3bc4ddd8e21140de99a02d9f1971922adf0a88671765077b94eb361",
+        "crates/om9-core/tests/document_changes.rs": "8da5a42405ae7d92f3da90384374eb911dc5ce60422dc7c3640b6296c6977c45",
+        "crates/om9-core/tests/document_graph.rs": "d21e461998812687b6b2989edf606785964f5b2ae22a81f86b91f4be9011350a",
+        "crates/om9-core/tests/document_tolerance.rs": "219bacbd15c6940936ab0b2d08c47260eb684a132f12239b248627c0e345f81f",
+        "crates/om9-core/tests/embedded_resources.rs": "b0040b82d4e15b2b35e8abc602259687706d9214a276b6566b356cade3f31c24",
+        "crates/om9-core/tests/gumball.rs": "7086f60ff794dee1296eea0ab36e5f9d719f23e5ece4392b35c914dcba24d49c",
+        "crates/om9-core/tests/held_preparation.rs": "6f55fad33d8f5483bf7c5cfd6cdfb5e89cced5d13b1b2789cf1fa7279186eca5",
+        "crates/om9-core/tests/history_ops.rs": "6ee04a27f9f04060ed57949d020f277ea9426ccd30f25499da0251eb3ee74086",
+        "crates/om9-core/tests/history_replay.rs": "62699ea49074b1834851cb11050650485581863e482a6dc063dca80a816ab01c",
+        "crates/om9-core/tests/job_lifecycle.rs": "aebc25bc07956ab5f8293bbec06cc2bb7dfcb677a3f4cb20c01879b89df07020",
+        "crates/om9-core/tests/l2_01_08_precision.rs": "0e592cea7b8f7e8ac65c023f1d3b4298e456113b7462a90d79e4201a277fb6c5",
+        "crates/om9-core/tests/layer_ops.rs": "c74b1785ffd9563ef6dc15a375d44fafaab321ff5895605b22855f065f03ed78",
+        "crates/om9-core/tests/layer_state.rs": "0ab85f56d17960eab21b921383932d38f125e80967e6a9817d52411865a67e5c",
+        "crates/om9-core/tests/layer_transactions.rs": "e58f7492da7c39f0441e98c52763ac50eb1f9f81f6e7c78d206cd325c90b1ef4",
+        "crates/om9-core/tests/lazy_layer_assignment.rs": "3125ad613a1d84650ee39f1530375f51364867151e15c6b3f8d29a3e6d262bb1",
+        "crates/om9-core/tests/model_admission.rs": "5e885449505a005dfc35c40fbdff7ea44442c04bcbe686acb3de837d30b631cd",
+        "crates/om9-core/tests/offset_curve.rs": "a74c21d623cd5416ba3777d5b9ac4c9102d7c8b9fdb0b9a0c65d0cd533211e01",
+        "crates/om9-core/tests/provenance.rs": "4b0674fbf58c3c172f9d584f7302ba4849c7bd723b1a3e0afae327d126dc2736",
+        "crates/om9-core/tests/resource_transactions.rs": "849a322eefeed6848b3451f8063758d47c2ab9e5a200e005f1f0d87333c7a580",
+        "crates/om9-core/tests/retained_entity_baselines.rs": "ec7014b4748c7abe345399cee6dda5e72f2a73319ae34f1b111241ef280fd2fa",
+        "crates/om9-core/tests/retained_imports.rs": "8fa804cb3690e53047bfa13cab067940cc7902ad056f2b8c8c733de307c509d6",
+        "crates/om9-core/tests/retained_peak_review.rs": "cbcb4e2fab403a6dd9b06cf88b966d42bf098acdf40d9074e715d7195a6d0216",
+        "crates/om9-core/tests/selection_state.rs": "0f00982524a950f224fc00c75783fbba1bb3b587ef5fbd7001346e9d485bc5fe",
+        "crates/om9-core/tests/source_binding.rs": "01ee792e7045c2d61cfedc8642b8f058c8308c4cd4188212c84c9e95ede2f591",
+        "crates/om9-core/tests/startup_layers.rs": "132fbd34207d495080fcfb29780230aac5c84180e65de4ace523f7f0c38edeb4",
+        "crates/om9-core/tests/surface_kernel.rs": "745ee2474868e91ff31b8f35d2cdf4a719cbb61367c10f0cf2e1d3e075796d17",
+        "crates/om9-core/tests/transaction_scopes.rs": "0fbf232e67235b26fb563a5267338350a18aa684eb58eed665c38522a354cd8d",
+        "crates/om9-core/tests/units_parameters.rs": "6c2321604460778f758e69c81ffb4e5293b9e3475744818b7514936f66158c40",
+        "crates/om9-core/tests/w8_w9_w10_kernels.rs": "de8737f8fc2ae8cefc6bf0cd4ba9dd6dde810dfb7eb39c6275197d8bd65cf4eb",
+        "crates/om9-exchange/Cargo.toml": "9c8f4334bc6e541b15c868631dfe220f07f00ba832fdd72ccbaa4579a7e9480b",
+        "crates/om9-exchange/src/current_overlay.rs": "ddf2b8398138a7ee683a5b8e7cd7a088f3b8e2c15be2d5eba196327ef376e2cf",
+        "crates/om9-exchange/src/dependency_cache.rs": "3e032e55f255c127da5c65bd5cf4598ebd57cf02c03936baa6b77439d6b334d8",
+        "crates/om9-exchange/src/export_document.rs": "ce51e910e22f7f3ace21f882696b7104589111e8e6dc46819d1b1021fdc8e09c",
+        "crates/om9-exchange/src/import_capture.rs": "92f38622da55023877c5b648374c2773e949d9103d876fcf49a9864d7b0b0c59",
+        "crates/om9-exchange/src/import_dto.rs": "cd6af3b9f9017246fc538b569bba8b8d5084c8812753c0c7d8b6387abe5a7085",
+        "crates/om9-exchange/src/import_graph.rs": "d532aa7f99ffa3524fff470cae6078f42aebf7476a8f7a5cbba88ed9975c214b",
+        "crates/om9-exchange/src/imported.rs": "fbbbebcb0144b05036ab958f043c80758b3bacd490e3e0364ca87a5fc75f0be8",
+        "crates/om9-exchange/src/inspection.rs": "f629199263ce6ea47fbd52f82b500e2ca431976f65bd656275eba7eb853e681e",
+        "crates/om9-exchange/src/lib.rs": "904b235fec3038457d94d12c5401c7a3bd040da63ea098725a5747f3dab6b132",
+        "crates/om9-exchange/src/merge_inputs.rs": "7d5a1a394d5f7cfee3b6223693648f00a03e195e0fc88de94718217e51f11924",
+        "crates/om9-exchange/src/output_identity.rs": "8538489a8ec0190a9375950ad9e2445cd95359ccf511929ecb5cabe91e5ba5c2",
+        "crates/om9-exchange/src/retained_cold.rs": "1cbe4c1b4441cf89bd9940887a2793a483346f5694740a152f26fb250c039c3d",
+        "crates/om9-exchange/src/retained_packet.rs": "52dc55801c95204f1d6af14168b89c13b6292307270bb2d60c7a877fd1101794",
+        "crates/om9-exchange/src/retained_stage.rs": "6958ae9bb6207794bcb8c199caa5030a1d55a64266ba0b3b63389b28df3ab996",
+        "crates/om9-exchange/src/retained_write.rs": "2276d6fa9aa1ba2c8829ebad3c78272e6af5dc1d85345d5b38ef972ada33ea9b",
+        "crates/om9-exchange/src/source_preparation.rs": "6afe7892979d88237966ca65fb48b08099963cc6c7a972063b06d6ce0d25eb95",
+        "crates/om9-exchange/src/staged.rs": "67a80a3b447971d9c6b5a3ac7fd8ff824f72c83717c0e88ca8ef707615844afb",
+        "crates/om9-exchange/src/stl.rs": "3b8244f2b1d96a8c90a22a5512556e73f52599b1acf65562a8a946d25a6e71d5",
+        "crates/om9-exchange/src/wire_output.rs": "75e477dc3afe4995a6cc04ba8e58b77a05799976c5b9540938ea93f89a7c3552",
+        "crates/om9-exchange/tests/current_overlay.rs": "99eeaeb9cb1403dba2bcaecbec7991406aed122df411819599ed4433e502de7c",
+        "crates/om9-exchange/tests/current_overlay_review.rs": "bfa033df2fcbfe1e8e1a8fa2962790216fc06a8968d548c526b1e1667861de7a",
+        "crates/om9-exchange/tests/export_authority.rs": "fd956d211748c7a128e008c6dfbf2e930d0a2a882e1f2669575acbdf79eb4d29",
+        "crates/om9-exchange/tests/import_capture.rs": "585ff1daaa156d639c38baff6759ed2bc3caa74c5670d7db42921de03c674a16",
+        "crates/om9-exchange/tests/layer_wire.rs": "ea054a2a8af71594836ae0a2be7314bcc5bdba8da11055e709f34b457e01e6f0",
+        "crates/om9-exchange/tests/retained_cold_review.rs": "1b520774302d2047c081c9a5a1019e57f9689f8e687f38edffa676e6b8e1079d",
+        "crates/om9-exchange/tests/retained_native_import.rs": "07a74e37f6f38db2fbba2fffde84dafb8d92e0c8a7f381d7da10a4f020535d63",
+        "crates/om9-exchange/tests/retained_native_inputs.rs": "326c9f767f2049a00b03b4936e945b63e827a1afb7d14347ad7fe33a17f8b50f",
+        "crates/om9-exchange/tests/retained_native_write.rs": "4cef57f9929644ea29c32cfa61fb42e4c7d99f2f18079ba44ad9a016414bd2c8",
+        "crates/om9-exchange/tests/retained_packet.rs": "9a627716740ca695c7c2ed2c3359e83c8c53d7cd66c86412077c35fa001ae861",
+        "crates/om9-exchange/tests/retained_packet_review.rs": "b14edc826e6e865d7e4e466a486cc1cb05a24458d1df3ed641361a7f4acf1066",
+        "crates/om9-exchange/tests/retained_stage.rs": "be0cf423d4e71f7226892d29ef9c306eeb2f681604524dc16be268c86d582e01",
+        "crates/om9-exchange/tests/retained_stage_review.rs": "d8f3a1ee39982d650fb0c2c747fab0927b9661aa10e681696c3705dd3deb57cf",
+        "crates/om9-exchange/tests/source_preparation.rs": "9e5ca3e4c923b82939fbda3057cfde2a46f07f76522cea02084eeb1963df0faf",
+        "crates/om9-exchange/tests/source_preparation_review.rs": "9139a415205b78cf068b80c97ba36696b51014fc09418ef77beca1fd72b4e689",
+        "crates/om9-exchange/tests/staged_export.rs": "a571c685ec08e2832f10459dc7e72b1cea1f82fc0ab6bdf3b02bd62c5ae7f371",
+        "crates/om9-exchange/tests/wire_capture.rs": "99437151171b39a319456f61b131fac931248ae92f27936bef274bbda20b0582",
+        "crates/om9-exchange/tests/wire_output_review.rs": "fa7616d58fc49e28e2e29d7ea079a0f34e71379d986ea69b86aac9eea6302f41",
+        "crates/om9-kernel/build.rs": "efaebee9cc72b7cecacaf72df1e593f3b18b398cfae3d32e06c7cb0e7835c934",
+        "crates/om9-kernel/Cargo.toml": "96c0c24378f4d714cf6588eb59e3e6fc6b34b9aec80d06115142c1a73c47a8b8",
+        "crates/om9-kernel/src/brep.rs": "1f74bc607c5c1b2a83a1dec5f0fa40ea0dfbe4ddab9596985aaa435e255ac2ba",
+        "crates/om9-kernel/src/brep_bridge.cpp": "2e0893936e2268b5f8966091697094ac4e8b338df9326fc0a4ee16389d7584fb",
+        "crates/om9-kernel/src/bridge.cpp": "ae34a737fa3990f1bf4994a6df33fe4ffb59c5698e500b6ce8348b4076673f86",
+        "crates/om9-kernel/src/lib.rs": "32742b285f14aa1fcaafe2ff929d95858f3a6fe38206f19d8d55d684fb749bbd",
+        "crates/om9-kernel/tests/kernel.rs": "e9922e9c0a083437dea9fd39e8ff4f6383e04a3f053a4600643f73fa2b196341",
+        "crates/om9-kernel/tests/l2_01_05.rs": "3d43ce5e37e3bef16dcbff78df6502e31e5c7ea3a377ee010237a9ed8dadbbc4",
+        "crates/om9-kernel/tests/lifetime.rs": "60b46a1bfae05f1643685be1cbda3ca61d6088deecb05d4f678c69efcc851fe3",
+        "crates/om9-kernel/tests/numeric.rs": "98e3ff1a7d324bfaba920c2829e7c8814816337a6759e3b3577289f36642a4dd",
+        "crates/om9-native-owner/Cargo.toml": "21a39d85329438395a31264d077ac508eced6a56fa3bf06650ec566703329a3a",
+        "crates/om9-native-owner/src/bin/native_runner.rs": "4c8892e951aa323a154507d180c1039d671658d541202e86cf807a71aea9b838",
+        "crates/om9-native-owner/src/bin/process_fixture.rs": "b4b78ca9a73627d39cd43db4613361e48a3b4e48ebb809cb145a2d2071d8c9e9",
+        "crates/om9-native-owner/src/dialog_probe.rs": "1e6f07a565fe8daeb927a0ed6c6e1bc325657cd4a2d003073ad583c84726946d",
+        "crates/om9-native-owner/src/file_dialog.rs": "4380da3b50d1c13f0e2e4b2cbf61e599d6dda88e3cbb7f7df3841b4ce36f8f3c",
+        "crates/om9-native-owner/src/lib.rs": "a29343777eee9a8183e53d4869a3c0b958a96f8e2efbfd1367b6e6900d4784fc",
+        "crates/om9-native-owner/src/verified_file.rs": "80cfcda63211ca8897272e73babfd9097a3a43050a8f215952ca9f14a7923799",
+        "crates/om9-native-owner/src/windows.rs": "47aa8da28393abd0f68b5bb55072959ba566eb3c836067ee70ffe5758f9b362b",
+        "crates/om9-native-owner/tests/process_owner.rs": "605062d78f0a4e9d814b0b2553c5b2b69766f1b84fd24e6168a00cb00b00dba9",
+        "crates/om9-native-owner/tests/teardown.rs": "ef61b002482f5ea4d619b176daf3ca90b99c5a71da0da853a1b00e62f59ef86a",
+        "crates/om9-native-owner/tests/verified_file.rs": "d9dbcd2edcca3f4004addf36cd5de86ec512ecf3559378a69f6ebb55844e4f66",
+        "crates/om9-render/Cargo.toml": "c8c06d9af87e79b175aad3f2f85d60fcbe5ba0c829bf215668923a2067745b02",
+        "crates/om9-render/src/cluster.rs": "a0f27ebb131379256d9984a8fa62442ea1cc0dd1ebf3291431ffeb438729d0bb",
+        "crates/om9-render/src/lib.rs": "de5f4c4ceb70975e08e1a0a0255907127a9c072e86d3557e8392c5487737c94d",
+        "crates/om9-render/src/lod.rs": "e9146a53229a29bb65e3207ddd1d12162794debb425927126780cba596c30f39",
+        "crates/om9-render/src/meshlet.rs": "fd4790edf343eab5a553de2ff1dc7a39d8af1d2afa4aa90032fe36f336e28959",
+        "crates/om9-render/src/occlusion.rs": "90a24df9cd53bc17de79abf91380783a81af6265883f17d5b72f70af83f27b00",
+        "crates/om9-render/src/overlay.rs": "e093a501ce6fe7268a87227b4f789eaa9b9d423cd2b7be4ed58d79c7ee31e2e3",
+        "crates/om9-render/src/pyramid.rs": "653f0ec9dc6b23f97dd178c2b41de9d4a9ba575c3583a751723ef2eb66771584",
+        "crates/om9-render/src/qem.rs": "15fdcd68dc6e0ddeb04f7bf7138c41425f8579c67a0cbd12909c596be999d2a0",
+        "crates/om9-render/src/scene.rs": "e081444753bfe0bb49f702889d0147a06de1b5d80fb875876ecec0d4fc99ea7e",
+        "crates/om9-render/src/shapes.rs": "3621620c80c70fbd42dc1d32e7800c8d81cb3cb991e1c769d86b896205e34ee8",
+        "crates/om9-render/src/streaming.rs": "294183a9e97eab84290905d92225bf02cbb555fbf33e4b55f71a20a23eb9fa1d",
+        "crates/om9-render/src/tests_support.rs": "7ddc4d8fe08db4d64f6a44a3e9e52c371604a1f5cada6436ac236ac1a790c380",
+        "crates/om9-render/tests/render_loop.rs": "207b4bdfa877923b18f825ac13025ca1a76904a1003a5f52179ee3852809256e",
+        "crates/om9-render/tests/scene_bench.rs": "2fe953a6f5d2dbe75091a71f9fd2ca7045840a61b3542e6a29282fe23a0da3c0",
+        "crates/om9-scene/Cargo.toml": "018aa366056483629b935c79f982ee42f49768d5e23eeeb4b9000744eb3dbc18",
+        "crates/om9-scene/src/affine.rs": "8e2d720f8e1fcdcaab8658bbc6834b794d2597391a01aa19afb013c7727aa660",
+        "crates/om9-scene/src/camera.rs": "60c98f1e02520786a3dbe4418140ff18b31d3db9b69e211900333bc418f23361",
+        "crates/om9-scene/src/grid.rs": "19ff0db7e01d399e439b20421a6dc1ee4e513f768909c7add0cc5d44b5b47ccf",
+        "crates/om9-scene/src/gumball_view.rs": "92631036caa1210676d018927d9b8b425e60dc4eabdb179a55bad7f687c5f709",
+        "crates/om9-scene/src/lib.rs": "ad404b40628b0892b4a022e4f9f0a0b8c09750ad1e48488d3dc93ede63928a2c",
+        "crates/om9-scene/src/picking.rs": "0f6d04a508e78ddbf166381e81be8f7223ee80b3022c4466800a40ad51f25a60",
+        "crates/om9-scene/src/scene/admission.rs": "bd457415cba5d7d9bb915116a62be888b40226bbb077f0891752cd91080042aa",
+        "crates/om9-scene/src/scene.rs": "4de312d1afd0cf48dcd5b0db8e7bf87e1d436c4eb19c4660d73d2f9758d4993f",
+        "crates/om9-scene/src/selection.rs": "699ad40d2bf7f28611754997910e7ed9e76d2a22e3a16c93e2d02181e62a98fc",
+        "crates/om9-scene/src/workspace.rs": "3154230bf8177a8207a4b76b022571877d336c072f6d713a04eb0362c0e3a3d9",
+        "crates/om9-scene/tests/acceptance_l2_01_07.rs": "8e0591533fe4960730bc054bfdfc859a19d5661ddc91e4b1fe4772d98a82a4c7",
+        "crates/om9-scene/tests/affine_gesture.rs": "aae21024632b72ce7eccb5a6dccddc657652cb0d0e44fb78cac27f501d754e87",
+        "crates/om9-scene/tests/camera_grid.rs": "5954928e0bd2d6b082e1a56c67cd8f7c8d4b3d1e21f2a20c056dbd7575254310",
+        "crates/om9-scene/tests/camera_orbit.rs": "18eef10b1f7a6fe489b31075207533c54f434f05b314025c00637ed6844a23f1",
+        "crates/om9-scene/tests/coordinate_frame.rs": "4a21144ec4f54baf0db86018821e455bdb07870ede27228bfaa2b1cb8101f92a",
+        "crates/om9-scene/tests/instance_admission.rs": "88d282cb9d6728491df6f234a9df9e49f75b25893598448fd517b2295e0635b8",
+        "crates/om9-scene/tests/layer_colors.rs": "e94b146f01772a6992f86f52b7874d93725237597b19c19f59d42437c2ad7baa",
+        "crates/om9-scene/tests/metadata_cache.rs": "8de7c197ac0b764fafc2632d42765f628d30efef54cdb067520a8c763137c2f2",
+        "crates/om9-scene/tests/reference_workspace.rs": "92c843d8959997149df16244ef7165bf5aa807c01b465ea05098b1f6102d5dec",
+        "crates/om9-scene/tests/selection_regressions.rs": "7e5de349a2f8386ab125e95a2e2a2df0f47a13b3b682845210ae82c602bfaf0a",
+        "crates/om9-scene/tests/shared_instances.rs": "c6c4f9574ba972b3d87b68176ea78f833c73fcfedc69cd4e0ca0994772584068",
+        "crates/om9-scene/tests/subobject_pick.rs": "208498259cb904c9262ab754285c688f0579434780f4dcdf0116b80fab2a4291",
+        "crates/om9-scene/tests/world_picking.rs": "77dd71b406aa2441115ce4b51e5553249fbddaf7101403d172fc440ca49594bb",
+        "native/occt/pin.json": "fdcb3b953014afc667f7527ddef77ee5c8d920ca7918730e1272aff8967127b9"
+      },
+      "checks": [
+        {
+          "actual": {
+            "path": [
+              "adbfe374-5738-42ef-a5e5-90ad87199a95",
+              "dacbf873-e997-4da9-a52f-71e91754bedc"
+            ],
+            "probes": [
+              {
+                "expected_green": true,
+                "screen": [
+                  536.6951293945312,
+                  407.2682800292969
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1190.7496337890625,
+                  345.3795471191406
+                ],
+                "view": "Perspective"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  536.6951293945312,
+                  770.243896484375
+                ],
+                "view": "Through Finger"
+              },
+              {
+                "expected_green": true,
+                "screen": [
+                  1246.231689453125,
+                  770.243896484375
+                ],
+                "view": "Side View"
+              },
+              {
+                "expected_green": false,
+                "screen": [
+                  536.6951293945312,
+                  348.7317199707031
+                ],
+                "view": "unselected sibling"
+              }
+            ],
+            "root": "1d569189-5298-4255-8125-3aabadf0be78"
+          },
+          "name": "Ctrl+Shift stores the exact nested member path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "adbfe374-5738-42ef-a5e5-90ad87199a95",
+                "dacbf873-e997-4da9-a52f-71e91754bedc"
+              ],
+              [
+                "f18e42bd-fa41-4222-af9c-7839a19294e6",
+                "dacbf873-e997-4da9-a52f-71e91754bedc"
+              ]
+            ],
+            "undo": 0
+          },
+          "name": "shared leaf face selected twice under two paths",
+          "pass": true
+        },
+        {
+          "actual": {
+            "paths": [
+              [
+                "f18e42bd-fa41-4222-af9c-7839a19294e6",
+                "dacbf873-e997-4da9-a52f-71e91754bedc"
+              ]
+            ]
+          },
+          "name": "toggling the left path preserves the right path",
+          "pass": true
+        },
+        {
+          "actual": {
+            "objects": 0,
+            "subobjects": 0,
+            "undo": 0
+          },
+          "name": "Escape clears occurrence selection without document history",
+          "pass": true
+        }
+      ],
+      "visible_moved_curve_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            537,
+            407
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1191,
+            345
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Through Finger",
+          "pixel": [
+            537,
+            770
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "Side View",
+          "pixel": [
+            1246,
+            770
+          ],
+          "expected_green": true,
+          "observed_green": true
+        },
+        {
+          "view": "unselected sibling",
+          "pixel": [
+            537,
+            349
+          ],
+          "expected_green": false,
+          "observed_green": false
+        }
+      ],
+      "preview_screenshots": {
+        "m02-occurrence.png": "8c7152626d10facb76cf7e5eff73e9e67f72e90260c46ece1422f41c123091e9"
+      },
+      "human_approval": null
+    },
+    {
+      "name": "delivery-100",
+      "report": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-delivery-100/m02-report.json",
+      "report_sha256": "0f9fd79fbd8b6ea9786c3e2f4cca17cdd15c5a188dab30483e7fffac9bcbac9a",
+      "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+      "binary_sha256": "20f1d0fd957332ffc294954ede3ec07561e5576a4678c159d18a498750f1eb6a",
+      "source_sha256": {
+        "Cargo.lock": "aff95684d10fe5508733317d7c09c5d02587a2687446636843ada30dbbd33e61",
+        "Cargo.toml": "76e251465a3b9a69c7bd93b1a0910e3fc9fe5946326cbe294244ee2960c019bb",
+        "crates/om9-3dm/build.rs": "250353178f5e83c05610e9067be3438555b7c5ab81df72552ef29d39504e4557",
+        "crates/om9-3dm/Cargo.toml": "ed3cc761c88b53fd592315061257998c3c96f5a11157532c4c9666985a495291",
+        "crates/om9-3dm/src/bridge.cpp": "8e81201c31bfc69fe2212e69ad9714443cad6be6e25b60a8ca69374b441212a7",
+        "crates/om9-3dm/src/lib.rs": "8b7551c2236584741e5a22799e41d22abc795b185c48ae370a7d24183503c366",
+        "crates/om9-3dm/tests/import_roundtrip.rs": "271b02124aff12900f59a42d41d0267c673a5b17c4ddc3d3c1be804df7ff2125",
+        "crates/om9-3dm/tests/jewelry_scene.rs": "ac2183b9e1e65fe3b04cddad83dd26d2d7794f651e364c5d07e6f9e932e42b14",
+        "crates/om9-app/Cargo.toml": "944a77050fcbd990e64909f0a229b165d7af144aa0a7ef27eb7508b9bca357dd",
+        "crates/om9-app/src/command_events.rs": "033081f1c52b71302486d9c0bc4e92ad149aa026c46c5ac10d13da4e6f5e35ab",
+        "crates/om9-app/src/dock_layout.rs": "303be84f9aaa10461f6fbc265b86fb6094ce7715cf1c606d0b919c2d29728bd5",
+        "crates/om9-app/src/file_lifecycle.rs": "5dc049403247018d03e6e37a1171fa367b4568d82336482bfe3e6d152c63777d",
+        "crates/om9-app/src/gpu_viewport.rs": "6576090d17543ec8eed4a8434e3976d7726e81668cdef1c1d077149d0fab4d67",
+        "crates/om9-app/src/icons.rs": "bc7e0c7520f58f482ec97b0f77535c809867d0dcc750b9f4720ad9af1d4ec2a1",
+        "crates/om9-app/src/layer_command.rs": "0c4315edaa5ef76e12c0b36d9d78c5f7d7fb0da0a1c01ec85856cc27d5cf378a",
+        "crates/om9-app/src/layer_dialog.rs": "a9c4e47b2377d964e820ff6e56bcca01ee9cb659a0a474c044d551ae2d4b50e4",
+        "crates/om9-app/src/lib.rs": "ff3d992d32954cdbdfa7f67454a2f3da65ba1f99c9a330a086e1eacf8f1cd32c",
+        "crates/om9-app/src/main.rs": "32888b22929e75e473d6a0b2597d37d7d13aa2af3e59d089354e58fdf2bace99",
+        "crates/om9-app/src/native_picker.rs": "234d305c1675ffcee0c1ba7b9e406231e2cf35b9683d72f1fcfcd0026b89198a",
+        "crates/om9-app/src/option_parser.rs": "d7e3c3b1b3eb51ae0269da2151af789433d4fc03f62565987288699c7fb40478",
+        "crates/om9-app/src/panel_ops.rs": "5220b73fea64b29cbde56528bc4342f2de829ca16523240e00bc6af80ef7b496",
+        "crates/om9-app/src/report.rs": "70f9b25aefc4eb9cbb2056a3a357446e8e41010746ac0bf0246a2e46ee760dd5",
+        "crates/om9-app/src/session/contract.rs": "92a0bb32ae83ee5b54e90556fe29027bec47c0a3c34cf9fcfff4f36a9ba160f0",
+        "crates/om9-app/src/session/files.rs": "61b35d0eae5b465419bc55f69c2a20056ee508d8e0253f03ba077ce18e1a6af7",
+        "crates/om9-app/src/session/gumball.rs": "64ee3ca9576d9835c9957e6786a350f5895b2a4fb872352100d3eefce589234d",
+        "crates/om9-app/src/session/gumball_numeric.rs": "4f2550b7085f4fa4450c0e55d23614acf2bcd4bb56ed4b7edf255d31bd2c5995",
+        "crates/om9-app/src/session/layer_dialogs.rs": "f767e39ee7986bb31d06775cb4cc9815aacaadc6974f222d84d04738e38011c4",
+        "crates/om9-app/src/session/layers.rs": "07416e1a77f024ecc478f2e80417974abfe77cc4affea712ff067353ea4b3072",
+        "crates/om9-app/src/session/stress.rs": "c90bb5d7ce0ff24bab031a0cd92ada01e0c1fa4aef28967a683ec2e078b87c5d",
+        "crates/om9-app/src/session/subobjects.rs": "dc45b5a5361205d73ac9edb92c567274f021f7b9597ebbfd4cebbbd5595df12e",
+        "crates/om9-app/src/session.rs": "5e6732febfb8127537b0051c2a3cedb09ae35c577f958ede975f4c695b9cd21f",
+        "crates/om9-app/src/startup.rs": "ee4b1edaafdcbd2fcf5535673469de3df08e837752b626688053ab1b08ec5a7d",
+        "crates/om9-app/src/status_surface.rs": "468331b77210ae714be011723264e5010b1f1ab893b92f99eef330673057b47b",
+        "crates/om9-app/src/transcript.rs": "000de98ce3f3324ec42c9ccb0d212174316c05f8e0f937f03f3032ec3a7cd7c4",
+        "crates/om9-app/src/ui/chrome.rs": "23aedb978df6240b7ec2f429545ee5cd09b50a64da2b6dd16794531def948381",
+        "crates/om9-app/src/ui/command.rs": "a68ea475fda958b4ce2dfd67e1ce81ae3178285a6ebc39ef1f69e928e7db62d2",
+        "crates/om9-app/src/ui/file_audit.rs": "3707523f4eb98683b600c906778e2c6905223b280f5d552d1eb53a8d94a7129d",
+        "crates/om9-app/src/ui/file_success_audit.rs": "e741f048c62dec288e41bc4616401aa5cf0148d453d72a03f6f58e02d6e3f436",
+        "crates/om9-app/src/ui/files.rs": "c3a5a09cd2d4c839728c0ae07288ae3438782237cb7dffe64be5b392daf94e25",
+        "crates/om9-app/src/ui/layer_audit.rs": "99bcf7ac9c220769e80a752f049e6568870dc1d041e60595c61e58394a8d0e76",
+        "crates/om9-app/src/ui/layer_dialog_audit.rs": "e42ea42f9c867320b76a0dc6b34e25e2d74cb1e4727d0f6374cacd87b4f129f1",
+        "crates/om9-app/src/ui/layer_dialogs.rs": "dc0e24b79ce2fbcf67f6c7ca79488ff45eebd3f8499b4e81cbafc90d56455798",
+        "crates/om9-app/src/ui/layers.rs": "ed1451917515a9c28dc7d5de9236d67ecf9877edbafd9325f4e8f8f6f79bafd3",
+        "crates/om9-app/src/ui/occurrence_audit.rs": "58d5fb9a6d1016d738b6a10e81467522127dfb7c1aadd7c739fb3001f42589ef",
+        "crates/om9-app/src/ui/panel_audit.rs": "ed52f138379c5ff7c722c0a320e73d27c73c3a7fb76088920abb07310c3601bc",
+        "crates/om9-app/src/ui/rotation_feedback.rs": "7bc182fa4c217f28815e5f1a98633d9e5486e10ec239ae1b34ebbbd9d3a113db",
+        "crates/om9-app/src/ui/selection_audit.rs": "5410f15038595130a5cba7fba347d3e4073829c1ec625c93d4fae9e06b3b6d55",
+        "crates/om9-app/src/ui/startup_audit.rs": "af705f294071d856a673ea09e900c3abacd21beade70845a671271fe3fadeded",
+        "crates/om9-app/src/ui/viewport_audit.rs": "475ea933ec6908e79346942b110d38da60fdda52e29bfb67be0bc58b7b6ca551",
+        "crates/om9-app/src/ui/viewport_menu.rs": "debc0548d6f96e2dbc0ad8c681e1f65ee8345d9e9a0a856e3ab8d747b2b5de20",
+        "crates/om9-app/src/ui.rs": "b1ca38087afa59816e33d60132352d3ae9901c27a3ef85a892c362831ef0023f",
+        "crates/om9-app/src/viewport_menu.rs": "fa206837c53a97991b15991a0ec9be70169e52625fd353889efd44fccbbbbcb3",
+        "crates/om9-app/src/window_identity_guard.rs": "fee733314578ac11090899059d77deb817793c6fdc699a692e9a2f78ee441582",
+        "crates/om9-app/src/workbench_regions.rs": "d97820584f312c931d678bf0053f12f7bb0c5a468f733e293b54662786b7fc46",
+        "crates/om9-app/tests/acceptance_selection_set.rs": "9be57f75c896d7a32021196482f828709855eb272143cf8c922cde659ef88396",
+        "crates/om9-app/tests/acceptance_viewport_selection.rs": "8a9533bc97a2f9d4e7888080f5c0740962b46b1becc3e3921be403345e3640a7",
+        "crates/om9-app/tests/brep_selection.rs": "c6347a4c05cfe4f7d8c95a999b21c80e55c870207098be46a4cca7594f4095f5",
+        "crates/om9-app/tests/builder_slot.rs": "31e70321a9a44587b0aacf7f88f606f3b61951a7935ff5b2e1f8d7d381c6b953",
+        "crates/om9-app/tests/chrome_actions.rs": "194f32421dfbdab2e6d3b4c6034417c6788e76e9af229e96ca65d27e4ac9b901",
+        "crates/om9-app/tests/clip_behaviours.rs": "63484e5dbe335a4e66f552a324080bbdb05b84f6dae50cc5d8bec5b1cd337f02",
+        "crates/om9-app/tests/cold_layers.rs": "ede0eb6ad95ee60ac6c329de2458cdce98bc0f2cbf3e8680eb8fb1984e763244",
+        "crates/om9-app/tests/cold_reopen.rs": "67b9287af14122cd49556a20ea0fbd1f786f355faed946ddb0e4c87c3acb2f40",
+        "crates/om9-app/tests/command_context.rs": "0d726237fe674d53d92e07a8fddfcadc7b0613b7d7998712948c410e33ad0caf",
+        "crates/om9-app/tests/command_events_surface.rs": "664627d06f27d053832adb9a86965fa674d357b2aec9aba2d11d8cde1ee63f66",
+        "crates/om9-app/tests/command_options_and_repeat.rs": "5faf07729402ad9fdd11d95603e3f3ad09d2f463686b0af39beab0380e8b18e5",
+        "crates/om9-app/tests/command_sessions.rs": "0ec6ea6e39fbf8c499ef135cab1388d849ea437ca1b39c53270d1f0c75eef04c",
+        "crates/om9-app/tests/command_state_machine.rs": "980b64fd430f67a1a99503b2cf600f140cffe4decc16e53432f418123cbfe0c3",
+        "crates/om9-app/tests/command_transactions.rs": "7d70e9ab1b99ed984f12400585209327ea872e633fd1d9568be14216cbcf1118",
+        "crates/om9-app/tests/command_transcript.rs": "261d3a9e6fcbca924666ef0b767f53d24e9786a59f482dbc6f3a89e6049e1e2b",
+        "crates/om9-app/tests/common/mod.rs": "f8ea1fbbd8a6ee25af56179bad248cfb1bd3d8342e45589117f32d747cf2fd23",
+        "crates/om9-app/tests/dock_layout_default.rs": "a57b33ce4f867f495937086baf3f308cd3a5b90928c188ecfa236d1a64f21350",
+        "crates/om9-app/tests/dock_layout_persistence.rs": "63cdc5c4c2cc44f322aacb7769738cb1c6ffd0b61a86abea54951c508963ceb5",
+        "crates/om9-app/tests/document_contract.rs": "646f54a1ae86abda283bbdae51f518b60c6de2edb816c1ade166947cb337a64a",
+        "crates/om9-app/tests/document_window_state.rs": "b15b9714a2c6f63187db06b91a351e31fefd6ab4e4e15307923514f41985a9a5",
+        "crates/om9-app/tests/file_lifecycle.rs": "1a78d6744ee0330adefb4403eab0417631ba72325d7bda592f879d2e884391c4",
+        "crates/om9-app/tests/file_lifecycle_cold.rs": "6a4aced05a919bddd16ad14ac2bdb1b45d1f24f8082f4d1fd0f627d8c588ea5b",
+        "crates/om9-app/tests/file_widgets.rs": "c373cab54fc9d8cfd35af8e1500795b7d5fe357739242bf474359fac1988d8f1",
+        "crates/om9-app/tests/gesture_regressions.rs": "4efb8bade4c292e34a2758ecd4307ebb08e3fd13c953bdd17988719dbb6d9340",
+        "crates/om9-app/tests/global_status_surface.rs": "45492c6e200f642935a8c5210b1ab396e423a29663d8e04e2558ad6697bc1743",
+        "crates/om9-app/tests/gumball_cold.rs": "08faac6e5b47bf494d98744e79b98003eddc322daf7f3008cbedbabe83588a44",
+        "crates/om9-app/tests/gumball_interaction.rs": "a1c80bbb829a17596f636b0d4a3fc83752ef022000c15de04f878a821b8ece39",
+        "crates/om9-app/tests/gumball_numeric.rs": "b2ff3181cae3ae7a94f8e53145f2543ff35314e008aa5a16f31e737f40624f5d",
+        "crates/om9-app/tests/gumball_placement.rs": "49f7d9c7c45e0bc81d89a115f3536c29de05209c4860382a57f5dd17e9f9ca01",
+        "crates/om9-app/tests/gumball_viewport.rs": "c442001606cb4cd8e149da790f42fe9afec5bbe29821314cd2fd76353a47ff61",
+        "crates/om9-app/tests/layer_controller.rs": "5bfb99691cc1ea1945daba898d6bc3c0e99a2fd2949132d546d48ebb03b6d8d2",
+        "crates/om9-app/tests/layer_dialogs.rs": "aa184e288b420b465f91844ab5285adb65be795122a9cdf64989ac4a7e328db7",
+        "crates/om9-app/tests/layer_widgets.rs": "aa98b920623da4e44b2e707609255f33e3b9b089d7619de5331657e00dad5b73",
+        "crates/om9-app/tests/left_stack_layers.rs": "621bd7d01c306c6e0b95a01b47b9dfe098c2938f7c5aa659bbbdb8f52c26eb75",
+        "crates/om9-app/tests/mesh_fill.rs": "c9c38667c4ab7c1b1176c8978d983eaf16f0927b535a18b09431650b7a068282",
+        "crates/om9-app/tests/mesh_stress_command.rs": "567e9ab103806ac2e8c3179851bdbfde562d50a25519c77b0873f4f89ebc2d9c",
+        "crates/om9-app/tests/panel_door.rs": "b0cb76856160a2572cff751e7b73cdefcd8efef4a7312b451e4e393c964853d0",
+        "crates/om9-app/tests/panel_ops.rs": "423f4bac59bfa4f1535041199aef14e21cdbc7c982ac6d7c1059fa1e1cd39df1",
+        "crates/om9-app/tests/pick_disambiguation.rs": "2616a574ff77812b51c4eb07735d63a0c509b376da9928b6e27b99cd6dc34521",
+        "crates/om9-app/tests/pinned_command.rs": "adc4847f93f6331fa8c7eeb31bfc2184ed51f24ea96ae06381eddbff2bb6ba5c",
+        "crates/om9-app/tests/preview_drag.rs": "95f5bd60c8e0eba88d5d4f89f820c58341c2692a2ef2d8ddd2ab6548c910933e",
+        "crates/om9-app/tests/rubber_band.rs": "d2fba6773e250de5cedaa79020d990a5e0b54e09337149e63c15dc4b664e67f7",
+        "crates/om9-app/tests/scene_allocation_peak.rs": "2a47e1775b10910f8b50b009669c405fd70b42d42c6ea105d17470f63b46fb22",
+        "crates/om9-app/tests/selection_overlay.rs": "6e6c3d8245ff18a3bab5e11e85c811e2611326f158b047be48bf3af7c413e1a6",
+        "crates/om9-app/tests/shell_docking.rs": "0dcef2c137177a1c2d1d005fe73a8b5334674d6b4bde225c12167de9d4c40eda",
+        "crates/om9-app/tests/startup_contract.rs": "e0a3d6a5b91ff12b55ba954a04a2c8bb81ce9cb81668ea8f102715b7de3f3859",
+        "crates/om9-app/tests/status_bar_overlap.rs": "14623bfab5f5b36771e4f22905bee7c5d9f18f14ce52b12cff94fd9c7e663726",
+        "crates/om9-app/tests/subobject_occurrences.rs": "0672627470f57b82552606013c21f2ae8010f50279fbe761aba2ce427de5681e",
+        "crates/om9-app/tests/subobject_selection.rs": "4d9c8018c577122f1195035a1e7024fca568a8cdecb6dedf3f0dcc9bf67df8bf",
+        "crates/om9-app/tests/ui_events.rs": "e8d8966514c214583e1bba846a0e8ad89c420d09de2131d35cd68cc354afd3fe",
+        "crates/om9-app/tests/viewport_title_menu.rs": "5146694d3e44096ce6b24242ce2de232cbf5852cd5a3488cea6a3376dd9a5a00",
+        "crates/om9-app/tests/window_minimum.rs": "64faf8bb44900fdc5f261d94ad5efce256b3a5d3590713169792922151eb1458",
+        "crates/om9-app/tests/workbench_regions.rs": "32ac9b41271581cf57ff3a146f33737417d3d49277aec3a7ad8f1d4fe059ca71",
+        "crates/om9-app/tests/workbench_regions_sizes.rs": "45a4849254a3cd1243a78738d270d13dee5afce82befdbf1382ca635fa1cb0e0",
+        "crates/om9-archive/Cargo.toml": "7c93ab59ad64ccf9c6c8ab65354c8821efc8787324a76a80f8f1d7b6828d7498",
+        "crates/om9-archive/src/atomic_file.rs": "77a7020592fca5ce3b2ead9fef4634d4fa81d464fd1f30f37652cc877ab2b89b",
+        "crates/om9-archive/src/container.rs": "9993fea64c9617406d6083d9a094476454716b4f2100088346bc3ac24942e0b3",
+        "crates/om9-archive/src/json_admission.rs": "5b6f6c5fef21f235d74f219743bc7785a82c696b2d352cadd11981ebf4791a28",
+        "crates/om9-archive/src/lib.rs": "0fa834f104310fa606598a210e6aae0024912de597c4f4a41e0139c0de52624d",
+        "crates/om9-archive/src/restore.rs": "1af17f63cf002d35951e59cd9ba965712bd9447e78ae95e9ba1c15ba1c45f6f7",
+        "crates/om9-archive/src/snapshot.rs": "66f3b005ad53a78748bca35a47b8ac34b415419f4fc7daac4542cf4e81d70f8a",
+        "crates/om9-archive/tests/atomic_save.rs": "6ba9b9c4c3a6554bd773daa4c2e3ae3981a85876a4b96975931dda7963a0d605",
+        "crates/om9-archive/tests/container_admission.rs": "9c69dbb0655092ef7483a72d3e363e4b4100120a6f3adca6f9d401ad96cd6c92",
+        "crates/om9-archive/tests/definition_units.rs": "745319f262926759afb0fc47dbd84aa4def422f6c477541a88f21533abb65b2a",
+        "crates/om9-archive/tests/document_identity_round_trip.rs": "fdeccd8ff0b56e1628c2f24e0ea7ecbfbaf9104fe405b997554044c11586a1f5",
+        "crates/om9-archive/tests/document_snapshot.rs": "8dcfa851b1459d628b5acd3267b6095c27d63f59b52dca67c7d57ebbc7cfe09a",
+        "crates/om9-archive/tests/layer_schema.rs": "b87ca59d99c9f4069230a2dfcbc7e086e8d8353d0a9d140b3d37395b50176e6a",
+        "crates/om9-archive/tests/resource_chunks.rs": "4885591ddd016c5c4ef3e9e457eed1e10958929ef57e364507815a24776506de",
+        "crates/om9-archive/tests/restore_modules.rs": "5ed0b4baa9c79e83541258a9218fb40401de3909ddc6d442aba0cf36340e83e7",
+        "crates/om9-archive/tests/z_float_probe.rs": "59472207d0dece4cadea2722bff23a394b69462d95301b287934f5ed784255b4",
+        "crates/om9-core/Cargo.toml": "1f100a097c871ab5dddf4894eb351c148974972aebbe21a8248cf10cc6685f74",
+        "crates/om9-core/src/brep.rs": "1a60c0aa941337c80903481ff8c4dbd753a181d713db06f47b1c2da0e0b6418d",
+        "crates/om9-core/src/brep_kernel.rs": "96fae0ec5c20b3733b313775cd99fbdc2a778250030a6ef0ea46cd6c300546c0",
+        "crates/om9-core/src/budget.rs": "165bfd4a3003b09b0d9551e78829fcd4480daecfb9cd937a47d547f9383c4345",
+        "crates/om9-core/src/cage.rs": "9cfe6c4ecc70960e09ac103ae2e966499ce8aa20cffe205858e7529eaa6cbff3",
+        "crates/om9-core/src/capability.rs": "82ddde726b6f8ed9686898d04ac4e99e78bee28d446ee4f905a1ddba32edb4b4",
+        "crates/om9-core/src/changes.rs": "f52eba07ed34b2323a97cde99300b06dc2f161e7c8f3868b6bfe035ff85ea183",
+        "crates/om9-core/src/command_schema.rs": "21fb510431f16cace93d04df4f2a66f00eb3b165cd48b7f9160eb72a9d35e895",
+        "crates/om9-core/src/coords.rs": "2916abe92a82cbc4b44bec1d8a4be754bae497b6086c08cb911ab2683bc3b33c",
+        "crates/om9-core/src/curve_build.rs": "92532f49ba4a4b7e9866bb6284540fe017d1a64d8336313397cf1e12611ef47f",
+        "crates/om9-core/src/error.rs": "98e23a702a615a0be7e6eee18eac826c44d11ab79596570c878d3b97fad79941",
+        "crates/om9-core/src/evaluation.rs": "6087beb4a748228fe5409f5af1148c80db9df494989ddeeac6bc208e82c92a0d",
+        "crates/om9-core/src/geometry.rs": "4beadef360c28770f694f4db8ea46fa59ca60e08516a71c98a3a0fb09d33c7d2",
+        "crates/om9-core/src/gumball.rs": "a2fc9e487018e473cca5d0dd8ba79a0ecb7fedc4571b6d67f8cd5391e146139f",
+        "crates/om9-core/src/history.rs": "8e701cdbac07222ac83c8bf07cb526e8a9c43050fcf60a0f011d52f9992e81ce",
+        "crates/om9-core/src/history_ops.rs": "9ba5d917363949e28acedbbec37ecd1cc90d62ee7f9dbd688f50620f2d11d55a",
+        "crates/om9-core/src/identity.rs": "a7e8f8852e75f3bb3f819b6529b35ef1dab3cbe6a64a84e810ae99ab24fad9bb",
+        "crates/om9-core/src/jobs.rs": "aec15fd4cabea567348d07752ab07815cf6b93860c0852611524f17ec5823078",
+        "crates/om9-core/src/layer_ops.rs": "dca731c3865c6b9fe8897b1e13c1e4059e01e6ba09a9862cfc45e7af6632cba4",
+        "crates/om9-core/src/layers/preset.rs": "d57069281adc5bfe2e494314594265e40714bfd5d05d74139be092bfa50e1407",
+        "crates/om9-core/src/layers.rs": "99ba2c6c5c680c3327931b76c448b846d2d9bbc7b6c990235075e87030eba1e8",
+        "crates/om9-core/src/lib.rs": "7e9987584596356b87528467b90a633b1c4fb87cafacb7fa0fc46a03a0abd7c2",
+        "crates/om9-core/src/measure.rs": "0088893921dad9f14326fa298ba68f985143c43269f01dc854b4ba2f6ba9f127",
+        "crates/om9-core/src/model.rs": "4142b62196565cc54e3ee191a96f70b7b35b21ea2a05eb9a7351a632507f1698",
+        "crates/om9-core/src/modeling_capability.rs": "3d0e698819a205330881c75252b403eb7e7150107b0d98865f30e3d83afbcfc9",
+        "crates/om9-core/src/offset_curve.rs": "556154d6eda50f90755576137dd524c7fa253e60157c5acb974c7341319aa386",
+        "crates/om9-core/src/provenance.rs": "a471c76ef4f49189423138fed7fd395b2738989057469b4fd67210b77b7faadc",
+        "crates/om9-core/src/request.rs": "4f10a399a02909043d1ce253a2f078bcceba2641f606795609adaa111f8e213f",
+        "crates/om9-core/src/resource.rs": "c094512acf7e18d1c56e3bc5c02c4675cbe12307b3028624817d07b84958d98a",
+        "crates/om9-core/src/result.rs": "30d9fb17059de833e864ec918ecc4eafe8e4d16cab8bf1b01cbcd51af9fc7d24",
+        "crates/om9-core/src/retained.rs": "1e2cc724dd1eb03bd2bfd284aea8a0702643c390c43b48d857d1808fee2a69b2",
+        "crates/om9-core/src/scope.rs": "50e332e91690b56157ed30453356b1f5a0db30f3a95c362e4a6aa5d2cfa866ab",
+        "crates/om9-core/src/selection.rs": "8ec1678ce97604f9be80ee5f69a4b7a94713a07c2487f073a6c104fbd94624d1",
+        "crates/om9-core/src/surface_kernel.rs": "f6ee1938df7df299ba25e639c178c80c6e96c789c5e902af5b3406ace383ccc0",
+        "crates/om9-core/src/transaction.rs": "4f54dda648a7542854ac76fb506a30b742345c0c902c94c9370d910b96e0ef31",
+        "crates/om9-core/src/units.rs": "25d663a30f8ab4c6fb66797b4e38d48323921f013e09c18ce43a3528301dd21a",
+        "crates/om9-core/tests/atomic_transactions.rs": "ae43ba8d9dd7cc00e3c83a9e62f1fcc2909107db77e3bd8bf53d4b73e0e8bca4",
+        "crates/om9-core/tests/brep_kernel.rs": "de53c18e3a89a1abe7b362dca4cb41e73f3d67abfc31701c3d19711552428a62",
+        "crates/om9-core/tests/cancellation_links.rs": "d4b198dc2744caaae16c0fdde6f2eebdec0d2dbe9acc25e5eb3075e13e779a0f",
+        "crates/om9-core/tests/capability_gates.rs": "54d116d508494af418e93257a6239b07eee00b43024df1b1ea30a32742bebb4c",
+        "crates/om9-core/tests/command_availability.rs": "95a420aa37ce84d1ea76aa4b84bedea9a87efa9ca2e9939547e183cbd76f17c9",
+        "crates/om9-core/tests/command_descriptor.rs": "0652c58e4a5c28b3d6852bacb0a2f000d6eac34add399f9dac17fefb2bd2be37",
+        "crates/om9-core/tests/command_registry.rs": "cb573d90d43fb80e10586e18f54b543d4bb90215bb9d30d7575bacd029b27172",
+        "crates/om9-core/tests/command_schema.rs": "48061357c249a162daa08fdbad357fe6f111138318e7dd9c31cb0ef6f04ca1dd",
+        "crates/om9-core/tests/coordinates.rs": "d07b0348dad166a3640d3bc2949e3790c5a239fb6da24e6558e1f98b96eb2573",
+        "crates/om9-core/tests/coordinator_authority.rs": "420021c3f4298c1169f687c6947de4bd5c187040533ea8f703248446bc54f6b2",
+        "crates/om9-core/tests/coordinator_held_startup.rs": "1f492830fc74394c2333669ca9e5d29664fb1c42fd6dffc26097a65c2a293767",
+        "crates/om9-core/tests/curve_build.rs": "e6c2fc6b0c0ddb297bc0f35ba848e216f26c7dca39e8c30ca2d915f7c8620cc6",
+        "crates/om9-core/tests/curve_oracles.rs": "ca458b9f6cfa61ab1f5b892623ad70c5346276ccda27fcae3a883b2e234b8226",
+        "crates/om9-core/tests/definition_units.rs": "1f056e8ec3bc4ddd8e21140de99a02d9f1971922adf0a88671765077b94eb361",
+        "crates/om9-core/tests/document_changes.rs": "8da5a42405ae7d92f3da90384374eb911dc5ce60422dc7c3640b6296c6977c45",
+        "crates/om9-core/tests/document_graph.rs": "d21e461998812687b6b2989edf606785964f5b2ae22a81f86b91f4be9011350a",
+        "crates/om9-core/tests/document_tolerance.rs": "219bacbd15c6940936ab0b2d08c47260eb684a132f12239b248627c0e345f81f",
+        "crates/om9-core/tests/embedded_resources.rs": "b0040b82d4e15b2b35e8abc602259687706d9214a276b6566b356cade3f31c24",
+        "crates/om9-core/tests/gumball.rs": "7086f60ff794dee1296eea0ab36e5f9d719f23e5ece4392b35c914dcba24d49c",
+        "crates/om9-core/tests/held_preparation.rs": "6f55fad33d8f5483bf7c5cfd6cdfb5e89cced5d13b1b2789cf1fa7279186eca5",
+        "crates/om9-core/tests/history_ops.rs": "6ee04a27f9f04060ed57949d020f277ea9426ccd30f25499da0251eb3ee74086",
+        "crates/om9-core/tests/history_replay.rs": "62699ea49074b1834851cb11050650485581863e482a6dc063dca80a816ab01c",
+        "crates/om9-core/tests/job_lifecycle.rs": "aebc25bc07956ab5f8293bbec06cc2bb7dfcb677a3f4cb20c01879b89df07020",
+        "crates/om9-core/tests/l2_01_08_precision.rs": "0e592cea7b8f7e8ac65c023f1d3b4298e456113b7462a90d79e4201a277fb6c5",
+        "crates/om9-core/tests/layer_ops.rs": "c74b1785ffd9563ef6dc15a375d44fafaab321ff5895605b22855f065f03ed78",
+        "crates/om9-core/tests/layer_state.rs": "0ab85f56d17960eab21b921383932d38f125e80967e6a9817d52411865a67e5c",
+        "crates/om9-core/tests/layer_transactions.rs": "e58f7492da7c39f0441e98c52763ac50eb1f9f81f6e7c78d206cd325c90b1ef4",
+        "crates/om9-core/tests/lazy_layer_assignment.rs": "3125ad613a1d84650ee39f1530375f51364867151e15c6b3f8d29a3e6d262bb1",
+        "crates/om9-core/tests/model_admission.rs": "5e885449505a005dfc35c40fbdff7ea44442c04bcbe686acb3de837d30b631cd",
+        "crates/om9-core/tests/offset_curve.rs": "a74c21d623cd5416ba3777d5b9ac4c9102d7c8b9fdb0b9a0c65d0cd533211e01",
+        "crates/om9-core/tests/provenance.rs": "4b0674fbf58c3c172f9d584f7302ba4849c7bd723b1a3e0afae327d126dc2736",
+        "crates/om9-core/tests/resource_transactions.rs": "849a322eefeed6848b3451f8063758d47c2ab9e5a200e005f1f0d87333c7a580",
+        "crates/om9-core/tests/retained_entity_baselines.rs": "ec7014b4748c7abe345399cee6dda5e72f2a73319ae34f1b111241ef280fd2fa",
+        "crates/om9-core/tests/retained_imports.rs": "8fa804cb3690e53047bfa13cab067940cc7902ad056f2b8c8c733de307c509d6",
+        "crates/om9-core/tests/retained_peak_review.rs": "cbcb4e2fab403a6dd9b06cf88b966d42bf098acdf40d9074e715d7195a6d0216",
+        "crates/om9-core/tests/selection_state.rs": "0f00982524a950f224fc00c75783fbba1bb3b587ef5fbd7001346e9d485bc5fe",
+        "crates/om9-core/tests/source_binding.rs": "01ee792e7045c2d61cfedc8642b8f058c8308c4cd4188212c84c9e95ede2f591",
+        "crates/om9-core/tests/startup_layers.rs": "132fbd34207d495080fcfb29780230aac5c84180e65de4ace523f7f0c38edeb4",
+        "crates/om9-core/tests/surface_kernel.rs": "745ee2474868e91ff31b8f35d2cdf4a719cbb61367c10f0cf2e1d3e075796d17",
+        "crates/om9-core/tests/transaction_scopes.rs": "0fbf232e67235b26fb563a5267338350a18aa684eb58eed665c38522a354cd8d",
+        "crates/om9-core/tests/units_parameters.rs": "6c2321604460778f758e69c81ffb4e5293b9e3475744818b7514936f66158c40",
+        "crates/om9-core/tests/w8_w9_w10_kernels.rs": "de8737f8fc2ae8cefc6bf0cd4ba9dd6dde810dfb7eb39c6275197d8bd65cf4eb",
+        "crates/om9-exchange/Cargo.toml": "9c8f4334bc6e541b15c868631dfe220f07f00ba832fdd72ccbaa4579a7e9480b",
+        "crates/om9-exchange/src/current_overlay.rs": "ddf2b8398138a7ee683a5b8e7cd7a088f3b8e2c15be2d5eba196327ef376e2cf",
+        "crates/om9-exchange/src/dependency_cache.rs": "3e032e55f255c127da5c65bd5cf4598ebd57cf02c03936baa6b77439d6b334d8",
+        "crates/om9-exchange/src/export_document.rs": "ce51e910e22f7f3ace21f882696b7104589111e8e6dc46819d1b1021fdc8e09c",
+        "crates/om9-exchange/src/import_capture.rs": "92f38622da55023877c5b648374c2773e949d9103d876fcf49a9864d7b0b0c59",
+        "crates/om9-exchange/src/import_dto.rs": "cd6af3b9f9017246fc538b569bba8b8d5084c8812753c0c7d8b6387abe5a7085",
+        "crates/om9-exchange/src/import_graph.rs": "d532aa7f99ffa3524fff470cae6078f42aebf7476a8f7a5cbba88ed9975c214b",
+        "crates/om9-exchange/src/imported.rs": "fbbbebcb0144b05036ab958f043c80758b3bacd490e3e0364ca87a5fc75f0be8",
+        "crates/om9-exchange/src/inspection.rs": "f629199263ce6ea47fbd52f82b500e2ca431976f65bd656275eba7eb853e681e",
+        "crates/om9-exchange/src/lib.rs": "904b235fec3038457d94d12c5401c7a3bd040da63ea098725a5747f3dab6b132",
+        "crates/om9-exchange/src/merge_inputs.rs": "7d5a1a394d5f7cfee3b6223693648f00a03e195e0fc88de94718217e51f11924",
+        "crates/om9-exchange/src/output_identity.rs": "8538489a8ec0190a9375950ad9e2445cd95359ccf511929ecb5cabe91e5ba5c2",
+        "crates/om9-exchange/src/retained_cold.rs": "1cbe4c1b4441cf89bd9940887a2793a483346f5694740a152f26fb250c039c3d",
+        "crates/om9-exchange/src/retained_packet.rs": "52dc55801c95204f1d6af14168b89c13b6292307270bb2d60c7a877fd1101794",
+        "crates/om9-exchange/src/retained_stage.rs": "6958ae9bb6207794bcb8c199caa5030a1d55a64266ba0b3b63389b28df3ab996",
+        "crates/om9-exchange/src/retained_write.rs": "2276d6fa9aa1ba2c8829ebad3c78272e6af5dc1d85345d5b38ef972ada33ea9b",
+        "crates/om9-exchange/src/source_preparation.rs": "6afe7892979d88237966ca65fb48b08099963cc6c7a972063b06d6ce0d25eb95",
+        "crates/om9-exchange/src/staged.rs": "67a80a3b447971d9c6b5a3ac7fd8ff824f72c83717c0e88ca8ef707615844afb",
+        "crates/om9-exchange/src/stl.rs": "3b8244f2b1d96a8c90a22a5512556e73f52599b1acf65562a8a946d25a6e71d5",
+        "crates/om9-exchange/src/wire_output.rs": "75e477dc3afe4995a6cc04ba8e58b77a05799976c5b9540938ea93f89a7c3552",
+        "crates/om9-exchange/tests/current_overlay.rs": "99eeaeb9cb1403dba2bcaecbec7991406aed122df411819599ed4433e502de7c",
+        "crates/om9-exchange/tests/current_overlay_review.rs": "bfa033df2fcbfe1e8e1a8fa2962790216fc06a8968d548c526b1e1667861de7a",
+        "crates/om9-exchange/tests/export_authority.rs": "fd956d211748c7a128e008c6dfbf2e930d0a2a882e1f2669575acbdf79eb4d29",
+        "crates/om9-exchange/tests/import_capture.rs": "585ff1daaa156d639c38baff6759ed2bc3caa74c5670d7db42921de03c674a16",
+        "crates/om9-exchange/tests/layer_wire.rs": "ea054a2a8af71594836ae0a2be7314bcc5bdba8da11055e709f34b457e01e6f0",
+        "crates/om9-exchange/tests/retained_cold_review.rs": "1b520774302d2047c081c9a5a1019e57f9689f8e687f38edffa676e6b8e1079d",
+        "crates/om9-exchange/tests/retained_native_import.rs": "07a74e37f6f38db2fbba2fffde84dafb8d92e0c8a7f381d7da10a4f020535d63",
+        "crates/om9-exchange/tests/retained_native_inputs.rs": "326c9f767f2049a00b03b4936e945b63e827a1afb7d14347ad7fe33a17f8b50f",
+        "crates/om9-exchange/tests/retained_native_write.rs": "4cef57f9929644ea29c32cfa61fb42e4c7d99f2f18079ba44ad9a016414bd2c8",
+        "crates/om9-exchange/tests/retained_packet.rs": "9a627716740ca695c7c2ed2c3359e83c8c53d7cd66c86412077c35fa001ae861",
+        "crates/om9-exchange/tests/retained_packet_review.rs": "b14edc826e6e865d7e4e466a486cc1cb05a24458d1df3ed641361a7f4acf1066",
+        "crates/om9-exchange/tests/retained_stage.rs": "be0cf423d4e71f7226892d29ef9c306eeb2f681604524dc16be268c86d582e01",
+        "crates/om9-exchange/tests/retained_stage_review.rs": "d8f3a1ee39982d650fb0c2c747fab0927b9661aa10e681696c3705dd3deb57cf",
+        "crates/om9-exchange/tests/source_preparation.rs": "9e5ca3e4c923b82939fbda3057cfde2a46f07f76522cea02084eeb1963df0faf",
+        "crates/om9-exchange/tests/source_preparation_review.rs": "9139a415205b78cf068b80c97ba36696b51014fc09418ef77beca1fd72b4e689",
+        "crates/om9-exchange/tests/staged_export.rs": "a571c685ec08e2832f10459dc7e72b1cea1f82fc0ab6bdf3b02bd62c5ae7f371",
+        "crates/om9-exchange/tests/wire_capture.rs": "99437151171b39a319456f61b131fac931248ae92f27936bef274bbda20b0582",
+        "crates/om9-exchange/tests/wire_output_review.rs": "fa7616d58fc49e28e2e29d7ea079a0f34e71379d986ea69b86aac9eea6302f41",
+        "crates/om9-kernel/build.rs": "efaebee9cc72b7cecacaf72df1e593f3b18b398cfae3d32e06c7cb0e7835c934",
+        "crates/om9-kernel/Cargo.toml": "96c0c24378f4d714cf6588eb59e3e6fc6b34b9aec80d06115142c1a73c47a8b8",
+        "crates/om9-kernel/src/brep.rs": "1f74bc607c5c1b2a83a1dec5f0fa40ea0dfbe4ddab9596985aaa435e255ac2ba",
+        "crates/om9-kernel/src/brep_bridge.cpp": "2e0893936e2268b5f8966091697094ac4e8b338df9326fc0a4ee16389d7584fb",
+        "crates/om9-kernel/src/bridge.cpp": "ae34a737fa3990f1bf4994a6df33fe4ffb59c5698e500b6ce8348b4076673f86",
+        "crates/om9-kernel/src/lib.rs": "32742b285f14aa1fcaafe2ff929d95858f3a6fe38206f19d8d55d684fb749bbd",
+        "crates/om9-kernel/tests/kernel.rs": "e9922e9c0a083437dea9fd39e8ff4f6383e04a3f053a4600643f73fa2b196341",
+        "crates/om9-kernel/tests/l2_01_05.rs": "3d43ce5e37e3bef16dcbff78df6502e31e5c7ea3a377ee010237a9ed8dadbbc4",
+        "crates/om9-kernel/tests/lifetime.rs": "60b46a1bfae05f1643685be1cbda3ca61d6088deecb05d4f678c69efcc851fe3",
+        "crates/om9-kernel/tests/numeric.rs": "98e3ff1a7d324bfaba920c2829e7c8814816337a6759e3b3577289f36642a4dd",
+        "crates/om9-native-owner/Cargo.toml": "21a39d85329438395a31264d077ac508eced6a56fa3bf06650ec566703329a3a",
+        "crates/om9-native-owner/src/bin/native_runner.rs": "4c8892e951aa323a154507d180c1039d671658d541202e86cf807a71aea9b838",
+        "crates/om9-native-owner/src/bin/process_fixture.rs": "b4b78ca9a73627d39cd43db4613361e48a3b4e48ebb809cb145a2d2071d8c9e9",
+        "crates/om9-native-owner/src/dialog_probe.rs": "1e6f07a565fe8daeb927a0ed6c6e1bc325657cd4a2d003073ad583c84726946d",
+        "crates/om9-native-owner/src/file_dialog.rs": "4380da3b50d1c13f0e2e4b2cbf61e599d6dda88e3cbb7f7df3841b4ce36f8f3c",
+        "crates/om9-native-owner/src/lib.rs": "a29343777eee9a8183e53d4869a3c0b958a96f8e2efbfd1367b6e6900d4784fc",
+        "crates/om9-native-owner/src/verified_file.rs": "80cfcda63211ca8897272e73babfd9097a3a43050a8f215952ca9f14a7923799",
+        "crates/om9-native-owner/src/windows.rs": "47aa8da28393abd0f68b5bb55072959ba566eb3c836067ee70ffe5758f9b362b",
+        "crates/om9-native-owner/tests/process_owner.rs": "605062d78f0a4e9d814b0b2553c5b2b69766f1b84fd24e6168a00cb00b00dba9",
+        "crates/om9-native-owner/tests/teardown.rs": "ef61b002482f5ea4d619b176daf3ca90b99c5a71da0da853a1b00e62f59ef86a",
+        "crates/om9-native-owner/tests/verified_file.rs": "d9dbcd2edcca3f4004addf36cd5de86ec512ecf3559378a69f6ebb55844e4f66",
+        "crates/om9-render/Cargo.toml": "c8c06d9af87e79b175aad3f2f85d60fcbe5ba0c829bf215668923a2067745b02",
+        "crates/om9-render/src/cluster.rs": "a0f27ebb131379256d9984a8fa62442ea1cc0dd1ebf3291431ffeb438729d0bb",
+        "crates/om9-render/src/lib.rs": "de5f4c4ceb70975e08e1a0a0255907127a9c072e86d3557e8392c5487737c94d",
+        "crates/om9-render/src/lod.rs": "e9146a53229a29bb65e3207ddd1d12162794debb425927126780cba596c30f39",
+        "crates/om9-render/src/meshlet.rs": "fd4790edf343eab5a553de2ff1dc7a39d8af1d2afa4aa90032fe36f336e28959",
+        "crates/om9-render/src/occlusion.rs": "90a24df9cd53bc17de79abf91380783a81af6265883f17d5b72f70af83f27b00",
+        "crates/om9-render/src/overlay.rs": "e093a501ce6fe7268a87227b4f789eaa9b9d423cd2b7be4ed58d79c7ee31e2e3",
+        "crates/om9-render/src/pyramid.rs": "653f0ec9dc6b23f97dd178c2b41de9d4a9ba575c3583a751723ef2eb66771584",
+        "crates/om9-render/src/qem.rs": "15fdcd68dc6e0ddeb04f7bf7138c41425f8579c67a0cbd12909c596be999d2a0",
+        "crates/om9-render/src/scene.rs": "e081444753bfe0bb49f702889d0147a06de1b5d80fb875876ecec0d4fc99ea7e",
+        "crates/om9-render/src/shapes.rs": "3621620c80c70fbd42dc1d32e7800c8d81cb3cb991e1c769d86b896205e34ee8",
+        "crates/om9-render/src/streaming.rs": "294183a9e97eab84290905d92225bf02cbb555fbf33e4b55f71a20a23eb9fa1d",
+        "crates/om9-render/src/tests_support.rs": "7ddc4d8fe08db4d64f6a44a3e9e52c371604a1f5cada6436ac236ac1a790c380",
+        "crates/om9-render/tests/render_loop.rs": "207b4bdfa877923b18f825ac13025ca1a76904a1003a5f52179ee3852809256e",
+        "crates/om9-render/tests/scene_bench.rs": "2fe953a6f5d2dbe75091a71f9fd2ca7045840a61b3542e6a29282fe23a0da3c0",
+        "crates/om9-scene/Cargo.toml": "018aa366056483629b935c79f982ee42f49768d5e23eeeb4b9000744eb3dbc18",
+        "crates/om9-scene/src/affine.rs": "8e2d720f8e1fcdcaab8658bbc6834b794d2597391a01aa19afb013c7727aa660",
+        "crates/om9-scene/src/camera.rs": "60c98f1e02520786a3dbe4418140ff18b31d3db9b69e211900333bc418f23361",
+        "crates/om9-scene/src/grid.rs": "19ff0db7e01d399e439b20421a6dc1ee4e513f768909c7add0cc5d44b5b47ccf",
+        "crates/om9-scene/src/gumball_view.rs": "92631036caa1210676d018927d9b8b425e60dc4eabdb179a55bad7f687c5f709",
+        "crates/om9-scene/src/lib.rs": "ad404b40628b0892b4a022e4f9f0a0b8c09750ad1e48488d3dc93ede63928a2c",
+        "crates/om9-scene/src/picking.rs": "0f6d04a508e78ddbf166381e81be8f7223ee80b3022c4466800a40ad51f25a60",
+        "crates/om9-scene/src/scene/admission.rs": "bd457415cba5d7d9bb915116a62be888b40226bbb077f0891752cd91080042aa",
+        "crates/om9-scene/src/scene.rs": "4de312d1afd0cf48dcd5b0db8e7bf87e1d436c4eb19c4660d73d2f9758d4993f",
+        "crates/om9-scene/src/selection.rs": "699ad40d2bf7f28611754997910e7ed9e76d2a22e3a16c93e2d02181e62a98fc",
+        "crates/om9-scene/src/workspace.rs": "3154230bf8177a8207a4b76b022571877d336c072f6d713a04eb0362c0e3a3d9",
+        "crates/om9-scene/tests/acceptance_l2_01_07.rs": "8e0591533fe4960730bc054bfdfc859a19d5661ddc91e4b1fe4772d98a82a4c7",
+        "crates/om9-scene/tests/affine_gesture.rs": "aae21024632b72ce7eccb5a6dccddc657652cb0d0e44fb78cac27f501d754e87",
+        "crates/om9-scene/tests/camera_grid.rs": "5954928e0bd2d6b082e1a56c67cd8f7c8d4b3d1e21f2a20c056dbd7575254310",
+        "crates/om9-scene/tests/camera_orbit.rs": "18eef10b1f7a6fe489b31075207533c54f434f05b314025c00637ed6844a23f1",
+        "crates/om9-scene/tests/coordinate_frame.rs": "4a21144ec4f54baf0db86018821e455bdb07870ede27228bfaa2b1cb8101f92a",
+        "crates/om9-scene/tests/instance_admission.rs": "88d282cb9d6728491df6f234a9df9e49f75b25893598448fd517b2295e0635b8",
+        "crates/om9-scene/tests/layer_colors.rs": "e94b146f01772a6992f86f52b7874d93725237597b19c19f59d42437c2ad7baa",
+        "crates/om9-scene/tests/metadata_cache.rs": "8de7c197ac0b764fafc2632d42765f628d30efef54cdb067520a8c763137c2f2",
+        "crates/om9-scene/tests/reference_workspace.rs": "92c843d8959997149df16244ef7165bf5aa807c01b465ea05098b1f6102d5dec",
+        "crates/om9-scene/tests/selection_regressions.rs": "7e5de349a2f8386ab125e95a2e2a2df0f47a13b3b682845210ae82c602bfaf0a",
+        "crates/om9-scene/tests/shared_instances.rs": "c6c4f9574ba972b3d87b68176ea78f833c73fcfedc69cd4e0ca0994772584068",
+        "crates/om9-scene/tests/subobject_pick.rs": "208498259cb904c9262ab754285c688f0579434780f4dcdf0116b80fab2a4291",
+        "crates/om9-scene/tests/world_picking.rs": "77dd71b406aa2441115ce4b51e5553249fbddaf7101403d172fc440ca49594bb",
+        "native/occt/pin.json": "fdcb3b953014afc667f7527ddef77ee5c8d920ca7918730e1272aff8967127b9"
+      },
+      "checks": [
+        {
+          "actual": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "name": "click selects the curve and exposes a pivot",
+          "pass": true
+        },
+        {
+          "actual": {
+            "curve_samples": [
+              {
+                "screen": [
+                  702.5487804878048,
+                  360.4390243902439
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "screen": [
+                  1352.5588376307699,
+                  406.146697145643
+                ],
+                "view": "Perspective"
+              }
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "views": 4
+          },
+          "name": "first drag sample previews +5 mm without document or history writes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "release commits +5 mm as exactly one Undo entry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Undo restores original geometry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Redo restores +5 mm",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.9999996609157988,
+              0.0,
+              0.0,
+              5.000003051757814
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "scale square doubles X about current pivot",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "rotation arc makes 90 degree Z turn",
+          "pass": true
+        },
+        {
+          "actual": {
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "Escape discards preview and retains old Redo",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "old Redo remains usable after cancelled drag",
+          "pass": true
+        },
+        {
+          "actual": [
+            "9f98e88b-1d21-44f9-b40a-e545ec38342c"
+          ],
+          "name": "GPU and painter paths select the polygon mesh",
+          "pass": true
+        },
+        {
+          "actual": {
+            "mesh_probe": [
+              565.9634146341464,
+              285.3170731707317
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                2.0000012207031252
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "mesh preview uses selected mesh indices after selection changes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              2.0000012207031252
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "mesh release commits one additional transaction",
+          "pass": true
+        }
+      ],
+      "visible_moved_curve_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            703,
+            360
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1353,
+            406
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Looking Down mesh",
+          "pixel": [
+            566,
+            285
+          ],
+          "selected_color_visible": true
+        }
+      ],
+      "preview_screenshots": {
+        "m02-mesh.png": "2dccf7290278c337a6cdea6cd6820853da3431255ffe90f47b3d6c85f113639e",
+        "m02-move.png": "029e35d327bd68f8558a8577f5559868296c771d1bbab3c01762764a73a058fc",
+        "m02-rotate.png": "ec6cc3adcea208df7e45eb375050d5e2138dea20b4b3bac9ce3a6e3321e74f40",
+        "m02-scale.png": "898e4665e86b79e4b310ba5613295461767c0739bf398db94efaf458a5176abb"
+      },
+      "human_approval": null
+    }
+  ],
+  "state_checks": 32,
+  "pixel_probes": 16,
+  "delivery_binary": "L:\\om9-target\\validated-gpu-only-20261019\\om9.exe",
+  "delivery_binary_sha256": "20f1d0fd957332ffc294954ede3ec07561e5576a4678c159d18a498750f1eb6a",
+  "default_dependencies_include_gpu_renderer": true,
+  "default_dependencies_include_occt_kernel": false,
+  "skill_approval": {
+    "source": "direct user reply",
+    "answer": "Có, lưu quy tắc GPU này",
+    "file": "skills/openmatrix9-ui/SKILL.md",
+    "installed_file": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-ui\\SKILL.md",
+    "sha256": "5b91ccc1da5a904b6967e283118814085a35c8f990ddcb140a5dc470a809aa4d"
+  },
+  "human_ui_approval": null
+}

@@ -1,0 +1,4 @@
+# OM9-L4-01-05-008-05 — nghiệm thu Shape tessellation interface
+# utc: 2026-10-18
+# oracle: deviation <= deflection at 0.01 and 0.001, zero boundary edges (closed), positive triangle count
+# result: all crate tests pass (see the kernel-test log beside this file)

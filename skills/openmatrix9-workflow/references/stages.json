@@ -1,195 +1,89 @@
 {
-  "schema_version": 2,
-  "active_spec_package": "OpenMatrix9_Codex_Spec_v2",
+  "schema_version": 3,
+  "active_spec_package": "OM9_Milestones/M01 - CAD Shell, Viewport",
+  "feature_package": "OM9_Milestones",
   "target": "OM9Standalone",
-  "ui_contract": "matrix9_described_v1",
+  "ui_contract": "Matrix9 milestone references and user-approved workspace/layers contracts",
   "stages": {
     "inventory": {
       "skill": "openmatrix9-workflow",
       "read_now": [
-        "docs/openmatrix9-progress.json",
-        "OpenMatrix9_Codex_Spec_v2/README.md",
-        "OpenMatrix9_Codex_Spec_v2/INDEX.md",
-        "OpenMatrix9_Codex_Spec_v2/MIGRATION_LEDGER.json"
+        "AGENTS.md",
+        "skills/openmatrix9-workflow/references/milestones-target.md",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L1.json",
+        "docs/openmatrix9-progress.json"
       ],
-      "read_if": [
-        {
-          "when": "Auditing original behavior not resolved by v2",
-          "paths": [
-            "docs/openmatrix9-reference-locations.json",
-            "Matrix90_Codex_Guide_MD/00_PROJECT_FACTS.md"
-          ]
-        }
-      ],
-      "exit_criteria": "Record active v2/target and legacy-vs-standalone evidence; select next authorized stage, never infer completion from catalog or file presence."
+      "read_if": [],
+      "exit_criteria": "Record target-scoped code/test/runtime evidence and remaining gaps; source/planning presence is not completion. Preserve Matrix9 UI and shared owners."
     },
     "standalone-foundation": {
       "skill": "openmatrix9-feature-port",
       "read_now": [
-        "OpenMatrix9_Codex_Spec_v2/AGENTS.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/00-qymcad-foundation-migration.md",
-        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
-        "OpenMatrix9_Codex_Spec_v2/CODE_GUIDE.md",
-        "OpenMatrix9_Codex_Spec_v2/BACKEND_POLICY.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/01-object-model-kernel.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/10-persistence-3dm-clipboard.md"
+        "AGENTS.md",
+        "skills/openmatrix9-workflow/references/milestones-target.md",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L1.json",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L2.json",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-05 - Be Occt Brep Kernel Bridge/L2.json",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L2.json"
       ],
-      "read_if": [
-        {
-          "when": "Selecting QymCAD source/routine",
-          "paths": [
-            "OpenMatrix9_Codex_Spec_v2/UPSTREAM_REUSE.md",
-            "OpenMatrix9_Codex_Spec_v2/UPSTREAM_SOURCE_AUDIT.json",
-            "OpenMatrix9_Codex_Spec_v2/LICENSING_AND_PROVENANCE.md"
-          ]
-        }
-      ],
-      "exit_criteria": "Own OM9 document/journal/geometry/UI boundaries specified and tested on actual target; missing executable/build/dependency closure remains unimplemented."
+      "read_if": [],
+      "exit_criteria": "Record target-scoped code/test/runtime evidence and remaining gaps; source/planning presence is not completion. Preserve Matrix9 UI and shared owners."
     },
     "ui-menu": {
       "skill": "openmatrix9-ui",
       "read_now": [
-        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-iface-001-matrix-interface.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-main-001-main-menu.md",
+        "AGENTS.md",
+        "skills/openmatrix9-workflow/references/milestones-target.md",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-07 - Febe Matrix Main Menu Iconhistory And Docking/L2.json",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L2.json",
         "Resources/menu/MainMenu.ini"
       ],
-      "read_if": [
-        {
-          "when": "Implementing F6/context",
-          "paths": [
-            "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-f6-001-f6-context-menu.md",
-            "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/UI_DETAILS.md",
-            "Resources/menu/ContextMenu.xml"
-          ]
-        },
-        {
-          "when": "Porting the existing legacy native menu adapter",
-          "paths": [
-            "Gui/Workbench.cpp",
-            "Gui/MatrixSidebar.cpp",
-            "rust/src/menu.rs"
-          ]
-        }
-      ],
-      "exit_criteria": "Actual standalone menu/panels match Matrix9-described-v1 UI; common dispatcher, focus/lifecycle and disabled branches have own runtime evidence; QymCAD code does not dictate style/workflow."
+      "read_if": [],
+      "exit_criteria": "Record target-scoped code/test/runtime evidence and remaining gaps; source/planning presence is not completion. Preserve Matrix9 UI and shared owners."
     },
     "ui-viewports": {
       "skill": "openmatrix9-ui",
       "read_now": [
-        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-viewport-001-four-viewports-c-plane-f4.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/03-coordinates-cplanes.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/12-display-render-resources.md"
+        "AGENTS.md",
+        "skills/openmatrix9-workflow/references/milestones-target.md",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L2.json",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-01 - Febe Jewelry Viewport Layout And Cplanes/L2.json",
+        "skills/openmatrix9-workspace-contract/SKILL.md"
       ],
-      "read_if": [
-        {
-          "when": "Porting legacy camera/grid/overlay behavior",
-          "paths": [
-            "Gui/Workbench.cpp",
-            "skills/openmatrix9-workspace-contract/references/grid-and-viewports.md"
-          ]
-        }
-      ],
-      "exit_criteria": "Own four-view camera/CPlane/grid/pick/display interaction matches Matrix9 contract, real document edits/lifecycle are proven; no mock viewport or old FreeCAD screenshot closes target gate."
+      "read_if": [],
+      "exit_criteria": "Record target-scoped code/test/runtime evidence and remaining gaps; source/planning presence is not completion. Preserve Matrix9 UI and shared owners."
     },
     "native-mapping": {
       "skill": "openmatrix9-native-mapping",
       "read_now": [
-        "OpenMatrix9_Codex_Spec_v2/TERMINOLOGY.md",
-        "docs/openmatrix9-reference-locations.json",
-        "Matrix90_Codex_Guide_MD/01_SOURCE_OF_TRUTH.md",
-        "Matrix90_Codex_Guide_MD/02_ADDRESS_MAPPING.md",
-        "Matrix90_Codex_Guide_MD/05_MAPPING_WORKFLOW.md",
-        "Matrix90_Codex_Guide_MD/07_CONFIDENCE_AND_VALIDATION.md"
+        "AGENTS.md",
+        "skills/openmatrix9-workflow/references/milestones-target.md",
+        "docs/openmatrix9-reference-locations.json"
       ],
-      "read_if": [
-        {
-          "when": "Parser/missing-definition/thunk issues on a selected procedure",
-          "paths": [
-            "Matrix90_Codex_Guide_MD/03_PARSING_VB_OUTPUT.md",
-            "Matrix90_Codex_Guide_MD/04_PARSING_GHIDRA_C.md",
-            "Matrix90_Codex_Guide_MD/08_FAILURE_CASES.md"
-          ]
-        },
-        {
-          "when": "User explicitly asks for a recovered VB6 listing",
-          "paths": [
-            "Matrix90_Codex_Guide_MD/06_RECONSTRUCTION_RULES.md",
-            "Matrix90_Codex_Guide_MD/13_TARGET_LAYOUT.md"
-          ]
-        }
-      ],
-      "exit_criteria": "Exact procedure/VA/body bounded evidence and uncertainty serve selected v2 feature; imported recovery mission does not alter Rust target or authorize whole-export reading."
+      "read_if": [],
+      "exit_criteria": "Record target-scoped code/test/runtime evidence and remaining gaps; source/planning presence is not completion. Preserve Matrix9 UI and shared owners."
     },
     "feature-port": {
       "skill": "openmatrix9-feature-port",
       "read_now": [
-        "OpenMatrix9_Codex_Spec_v2/AGENTS.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/00-qymcad-foundation-migration.md",
-        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
-        "OpenMatrix9_Codex_Spec_v2/IMPLEMENTATION_RULES.md",
-        "OpenMatrix9_Codex_Spec_v2/CODE_GUIDE.md",
-        "OpenMatrix9_Codex_Spec_v2/BACKEND_POLICY.md",
-        "OpenMatrix9_Codex_Spec_v2/TERMINOLOGY.md"
+        "AGENTS.md",
+        "skills/openmatrix9-workflow/references/milestones-target.md",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L1.json",
+        "docs/private-reference-policy.md"
       ],
-      "read_if": [
-        {
-          "when": "Feature uses Builder/History/Styles",
-          "paths": [
-            "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-buildercore-001-builder-framework.md",
-            "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-history-001-history-workflow.md",
-            "OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-style-001-styles-framework.md"
-          ]
-        },
-        {
-          "when": "Source evidence or third-party routine selection is unresolved",
-          "paths": [
-            "docs/openmatrix9-reference-locations.json",
-            "OpenMatrix9_Codex_Spec_v2/UPSTREAM_REUSE.md",
-            "OpenMatrix9_Codex_Spec_v2/LICENSING_AND_PROVENANCE.md"
-          ]
-        }
-      ],
-      "exit_criteria": "Exact ID/alias/options/defaults/unknowns and backend migration fulfilled on own target with relevant geometry/state/UI/Undo/.om9/3DM evidence; local normalized specs do not require PDF reread."
+      "read_if": [],
+      "exit_criteria": "Record target-scoped code/test/runtime evidence and remaining gaps; source/planning presence is not completion. Preserve Matrix9 UI and shared owners."
     },
     "build-validation": {
       "skill": "openmatrix9-build-validation",
       "read_now": [
-        "OpenMatrix9_Codex_Spec_v2/AGENTS.md",
-        "OpenMatrix9_Codex_Spec_v2/specs/00-rhino-core/00-qymcad-foundation-migration.md",
-        "OpenMatrix9_Codex_Spec_v2/MATRIX9_UI_CONTRACT.md",
-        "OpenMatrix9_Codex_Spec_v2/CODE_GUIDE.md",
-        "OpenMatrix9_Codex_Spec_v2/BACKEND_POLICY.md",
+        "AGENTS.md",
+        "skills/openmatrix9-workflow/references/milestones-target.md",
+        "Cargo.toml",
         "skills/openmatrix9-build-validation/references/validation-playbook.md"
       ],
-      "read_if": [
-        {
-          "when": "Verifying the request-planner examples only",
-          "paths": [
-            "OpenMatrix9_Codex_Spec_v2/examples/rust/Cargo.toml",
-            "OpenMatrix9_Codex_Spec_v2/examples/rust/README.md"
-          ]
-        },
-        {
-          "when": "Porting/testing a selected existing Rust component",
-          "paths": [
-            "rust/Cargo.toml",
-            "rust/src/lib.rs"
-          ]
-        },
-        {
-          "when": "Explicit legacy FreeCAD plugin maintenance/comparison",
-          "paths": [
-            "CMakeLists.txt",
-            "Gui/CMakeLists.txt",
-            "Gui/RustBridge.h",
-            "../../build/build-om9-plugin.ps1",
-            "../../build/run-om9-plugin.ps1"
-          ]
-        }
-      ],
-      "exit_criteria": "Actual selected manifests/build targets, native dependency closure/ABI and standalone lifecycle/UI/feature evidence recorded; old plugin/planner passes remain component or historical evidence."
+      "read_if": [],
+      "exit_criteria": "Record target-scoped code/test/runtime evidence and remaining gaps; source/planning presence is not completion. Preserve Matrix9 UI and shared owners."
     }
   }
 }

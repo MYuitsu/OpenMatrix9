@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-007-01",
+  "l3_id": "OM9-L3-01-02-007",
+  "l3_title": "Undo Redo Journal",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "undo/redo stack with reversible document changes",
+  "positive_oracle": "Create object -> undo removes -> redo restores stable ID and layer",
+  "negative_oracle": "Undo after delete/reorder must not replay corrupted references",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:118 comment: only the nodes that depend on a datum are marked dirty"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the document is not the interface. OM9 keeps the idea that the document is the source of truth and adds the journal proper.",
+      "om9_owner": "standalone/crates/om9-core/src/transaction.rs + standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "No journal."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No journal.",
+      "om9_owner": "standalone/crates/om9-core/src/transaction.rs + standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "No journal."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No journal.",
+      "om9_owner": "standalone/crates/om9-core/src/transaction.rs + standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "Dependency shape only."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "standalone/crates/om9-core/src/transaction.rs + standalone/crates/om9-app/src/session.rs"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session.rs::undo/redo were already guarded by is_running() -> Busy, and refresh_scene rebuilds the scene from the document after either",
+    "TransactionCoordinator owns undo()/redo()/undo_len()/redo_len() and the publication epoch"
+  ],
+  "gap_found_by_this_task": [
+    "Pinned and verified: undo removes the entity and moves the entry to the redo side, redo restores the SAME entity id and layer (probe: same_id=true), and a new command after an undo CLEARS the redo side (probe: redo_before=1, redo_after=0) so stale forward references are dropped rather than replayed.",
+    "Added nothing to the coordinator: the item's job was to make these rules checkable, and they are now fixture-driven (V1/V2, W1..W4)."
+  ],
+  "reuse_decision": "ADAPT the document-is-the-truth habit of gui.rs; ADD the journal rules as contract tests.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-007/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-007/negative.json",
+    "standalone/crates/om9-app/tests/command_transactions.rs"
+  ]
+}

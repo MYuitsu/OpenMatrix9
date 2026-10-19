@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-08-004-05",
+  "l3_id": "OM9-L3-01-08-004",
+  "title": "Typed Numeric Parameter Values",
+  "oracle": {
+    "positive": "Value giữ đúng chiều; đọc lại bằng as_length/as_angle/as_count/as_ratio.",
+    "negative": "Số trần không phải length/angle; count 2.5 là NotAnInteger; sai chiều là WrongDimension."
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-17",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-08 (L2.json acceptance_gate=AUTO, manual_test_required=false), so acceptance rests on the automated checks below. A human owner may replace this file with reviewer.status=SIGNED.",
+    "scope": "the typed numeric API and the document policy, never the window"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test units_parameters l3_004",
+    "cargo test --workspace --no-fail-fast -j 2: every crate ok",
+    "cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings: exit 0"
+  ],
+  "artefacts": [
+    "OM9-L4-01-08-004-03.target-test.log",
+    "OM9-L4-01-08-004-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_08_l3_004_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

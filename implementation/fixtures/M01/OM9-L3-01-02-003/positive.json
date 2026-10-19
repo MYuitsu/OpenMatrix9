@@ -1,0 +1,21 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-003",
+  "l4": "OM9-L4-01-02-003-02",
+  "case": "command-context-and-active-document-positive",
+  "positive_oracle": "Context includes active document, viewport and typed selection consistently",
+  "cases": [
+    {
+      "id": "C1-the-snapshot-is-complete-and-deterministic",
+      "expect": { "selection_is_typed_object_ids": true, "two_snapshots_agree": true }
+    },
+    {
+      "id": "C2-a-command-keeps-the-context-it-started-against",
+      "expect": { "entities": 1 }
+    },
+    {
+      "id": "C3-the-snapshot-follows-the-typed-selection",
+      "expect": { "selection_is_ordered_and_typed": true, "changing_it_does_not_kill_a_point_command": true }
+    }
+  ]
+}

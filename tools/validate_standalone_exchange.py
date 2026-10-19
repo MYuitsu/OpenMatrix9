@@ -29,11 +29,11 @@ def main():
     before = digest(binary)
     def source_paths():
         return {p for p in (ROOT / "standalone").rglob("*") if p.is_file()
-                and "target" not in p.parts and p.suffix in {".rs", ".toml", ".lock", ".json", ".cpp", ".hpp"}} | {ROOT / "standalone/native/CMakeLists.txt", Path(__file__).resolve()}
+                and "target" not in p.parts and p.suffix in {".rs", ".toml", ".lock", ".json", ".cpp", ".hpp"}} | {ROOT / "native/CMakeLists.txt", Path(__file__).resolve()}
     source_before = {p:digest(p) for p in source_paths()}
     env = os.environ.copy()
     env["OM9_EXCHANGE_NATIVE"] = str(binary)
-    command = ["rtk", "proxy", "cargo", "test", "--manifest-path", "standalone/Cargo.toml",
+    command = ["rtk", "proxy", "cargo", "test", "--manifest-path", "Cargo.toml",
                "-p", "om9-exchange", "--test", "staged_export", "--", "--ignored", "--test-threads=1", "--nocapture"]
     result = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, timeout=120)
     output = result.stdout.decode("utf-8", errors="strict")

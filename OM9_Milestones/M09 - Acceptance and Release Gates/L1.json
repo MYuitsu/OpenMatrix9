@@ -133,5 +133,16 @@
     "G-FULL": "NOT_TESTED"
   },
   "release_decision": "UNDECIDED",
-  "evidence_state": "NOT_CREATED"
+  "evidence_state": "NOT_CREATED",
+  "depends_on_milestones": [
+    "M00",
+    "M01",
+    "M02",
+    "M03",
+    "M04",
+    "M05",
+    "M06",
+    "M07",
+    "M08"
+  ]
 }

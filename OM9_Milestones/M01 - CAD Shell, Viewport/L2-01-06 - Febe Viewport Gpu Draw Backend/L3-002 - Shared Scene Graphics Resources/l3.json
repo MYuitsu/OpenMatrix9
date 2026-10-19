@@ -206,5 +206,13 @@
       "id": "OM9-L4-01-06-002-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-002 - Shared Scene Graphics Resources/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "execution_evidence": {
+    "crate": "crates/om9-render",
+    "state": "automated slice done; manual test pending",
+    "api": "implementation/design/M01/OM9-L3-01-06-002/api.md",
+    "evidence": "implementation/evidence/M01/OM9-L3-01-06-002/",
+    "manual_pending": "visual confirmation that all four viewports share the same buffers",
+    "next": "surface/swapchain integration through eframe, then the wireframe and highlight passes"
+  }
 }

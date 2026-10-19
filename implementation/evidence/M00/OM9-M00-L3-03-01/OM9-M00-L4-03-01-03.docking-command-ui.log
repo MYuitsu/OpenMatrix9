@@ -1,0 +1,26 @@
+# M00-L4-03-01-03 - Docking va command-driven UI
+# utc: 2026-10-17
+
+## L4-03-01-03 — docking và command-driven UI
+
+| Sự thật | Bằng chứng |
+| --- | --- |
+| Dock layout **tự viết** (không dùng crate docking ngoài): `DockLayout`, `PanelId`, `Regions`, `SectionId`, `FloatRect` | `crates/om9-app/src/dock_layout.rs` |
+| Vùng workbench tách riêng (menu/rails/canvas) | `crates/om9-app/src/workbench_regions.rs` (44 KB) |
+| Thao tác panel có module riêng | `crates/om9-app/src/panel_ops.rs` (37 KB) |
+| Sự kiện lệnh **thuần**, không phụ thuộc egui | `command_events.rs:8` — "Pure: no document, no session, no egui" |
+| Option của lệnh được parse theo schema | `option_parser.rs` + `om9-core::command_schema` |
+| Icon lấy từ SVG, cache texture egui | `icons.rs:343,349,362` |
+| Menu lệnh có view menu riêng | `viewport_menu.rs` |
+
+**Kết luận:** mô hình **command-driven** đúng hướng: sự kiện lệnh tách khỏi UI, option có schema, panel
+thao tác qua module riêng. Docking tự viết là lựa chọn có chủ ý (kiểm soát layout Matrix9), đổi lại phải
+tự nuôi code layout.
+
+## Tổng hợp cho gate
+
+- **VIABLE** cho hướng egui + eframe + wgpu: đã chạy, có 4 viewport, scene chia sẻ, command-driven.
+- **Hai thiếu hụt phải ghi vào M01**: (1) đường render 3D GPU (pipeline + buffer + tessellation từ OCCT)
+  chưa có; (2) không có fallback glow — nếu cần phải là software adapter của wgpu hoặc bật `glow`.
+- Gate không tự tạo code sản phẩm: đánh giá này chỉ đọc mã có sẵn; phần triển khai thuộc **M01-L2-01-06**.
+

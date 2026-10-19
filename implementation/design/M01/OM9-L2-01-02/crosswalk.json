@@ -1,0 +1,185 @@
+{
+  "schema": "om9.m01.module_crosswalk.v1",
+  "l2_id": "OM9-L2-01-02",
+  "l2_title": "Be Command Dispatch Undo Redo",
+  "milestone": "M01",
+  "audited_utc": "2026-10-16",
+  "workspace": "h:/OpenMatrix9/standalone",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "working_tree_note": "Line numbers are 1-based on the working tree at audit time. ui.rs/ui/chrome.rs are being edited by a concurrent UI workflow, so their line numbers are indicative only; session.rs, session/*.rs, file_lifecycle.rs and om9-core are stable.",
+  "spec_package": "OpenMatrix9_Codex_Spec_v2/ is ABSENT locally; the planning tree and AGENTS.md are the only spec sources.",
+  "m00_scope": "Only QymCAD code reuse is approved (2026-10-16). Nothing in this module needs OCCT, 3DM, Associative, License or Reproducible decisions. The ui.rs stub swap is UI work and is gated in the integration note, not here.",
+  "exclusion": "One command engine only: om9-app::session::Controller stays the single dispatcher for menu, mouse, F6 and CMD. No second Rhino/Matrix engine.",
+  "counts": { "DONE_WITH_EVIDENCE": 3, "PARTIAL": 7, "MISSING": 1 },
+  "l3": [
+    {
+      "id": "OM9-L3-01-02-001",
+      "title": "Command IDs And Alias Registry",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-app/src/session.rs:15-16 LINE = \"OM9-CURVE-002\", POINT = \"OM9-CURVE-034\"",
+        "om9-app/src/file_lifecycle.rs:19-43 FileKind::feature_id (OM9-FILE-002/003/005/006), from_feature, from_command (label or 'SaveAs')",
+        "om9-app/src/session.rs:294-299 CMD names 'line' | 'point' | 'undo' | 'redo' matched inline",
+        "om9-app/assets/features.json: 607 catalog entries {id, name, command, module} loaded only by ui.rs:274 for menus",
+        "om9-app/src/ui.rs:685-697 menus/F6 dispatch by feature ID through Controller::dispatch_effect",
+        "TEST om9-app/tests/command_sessions.rs:13 menu_cmd_and_f6_dispatch_the_same_line_phases_and_atomic_commit",
+        "TEST om9-app/tests/file_widgets.rs:168 file_menu_and_cmd_dispatch_owned_intents_through_same_controller"
+      ],
+      "gaps": [
+        "No single registry: IDs/names live in session.rs, file_lifecycle.rs and the UI-only catalog.",
+        "The catalog has duplicate command names (Dim x2, ExtrudeCrv x2, gvRPSupportLine x3, ...) and duplicate display names (Boolean, Loft, Revolve, ...) with no ambiguity diagnostic.",
+        "Unknown names and IDs return a generic Unsupported; Undo/Redo have no stable ID at all."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-02-002",
+      "title": "Typed Command Descriptor",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/request.rs:65-97 OptionDomain, Role {kinds, min, max, access}, RequestSchema {feature, roles, options}",
+        "om9-core/src/request.rs:431 unknown option -> Invalid(\"unknown option\"); :560 missing required role -> Invalid(\"missing required role\")",
+        "TEST om9-core/tests/source_binding.rs:110 unknown_role_option_wrong_kind_and_stale_generation_reject"
+      ],
+      "gaps": [
+        "No command-level descriptor (point inputs, options with initials, output kind, repeatable flag, implemented flag).",
+        "Not serializable/deterministic: OptionDomain has no Serialize; the Line/Point sessions do not use RequestSchema."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-02-003",
+      "title": "Command Context And Active Document",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-app/src/session.rs:30-38 CommandSession {feature, epoch, context, plane, unit, start, both_sides}; :206-226 captured at dispatch from the active view",
+        "om9-app/src/session.rs:240-249 validate_session -> Stale(\"command document/context\") on epoch/context change",
+        "om9-app/src/session/files.rs:124-131 a file intent validates the running session; replace_with_new/replace_from_file (:415, :426) drop it atomically",
+        "TEST om9-app/tests/file_lifecycle.rs:260 dirty_new_cancel_preserves_pending_line_and_discard_replaces_only_after_acceptance",
+        "TEST om9-app/tests/layer_controller.rs:38 pending_line_preserves_start_both_sides_and_binds_current_at_acceptance"
+      ],
+      "gaps": [
+        "No typed CommandContext (document id, active ViewId, selection) and no query API; selection is not captured."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-02-004",
+      "title": "Interactive Command State Machine",
+      "status": "PARTIAL",
+      "evidence": [
+        "Implicit states: session.start Option (session.rs:332-344) and prompts (session.rs:228-238)",
+        "TEST om9-app/tests/command_sessions.rs:13 phases Start -> AwaitPoint -> AwaitPoint -> Commit",
+        "TEST om9-app/tests/command_sessions.rs:78 empty Enter during a session is refused and commits nothing",
+        "TEST om9-app/tests/command_sessions.rs:44 invalid second point keeps the world; cancel keeps it",
+        "TEST om9-app/tests/ui_events.rs:34 Escape aborts without an Undo entry"
+      ],
+      "gaps": [
+        "No typed, observable step (CommandStep) - required by the CMD host state query.",
+        "No test that a point arriving after the commit (extra click) is refused with no mutation."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-02-005",
+      "title": "Command Option Parser",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-app/src/session.rs:305-315 only 'BothSides=Yes|No' (full name, '=' required) for Line",
+        "TEST om9-app/tests/command_sessions.rs:99 unknown options cannot publish or replace the session"
+      ],
+      "gaps": [
+        "No descriptor-driven parser; the approved initials 'B', 'B=Y', 'B=N' (skills/openmatrix9-workspace-contract/references/command-and-curve.md, Line row) are not accepted.",
+        "No numeric options with units (length=2.5mm, angle=90deg); no typed parse error for malformed/NaN/inf option values."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-02-006",
+      "title": "Atomic Command Transactions",
+      "status": "DONE_WITH_EVIDENCE",
+      "evidence": [
+        "om9-core/src/transaction.rs:1151 prepare stages every mutation on a private World; :1896-1899 bumps each participant's revision exactly once per transaction; :1950-2005 commit/commit_with_guard publish atomically behind a barrier",
+        "om9-core/src/transaction.rs:700-883 caller scopes with savepoints (book/begin/savepoint/rollback_savepoint/abort/finish)",
+        "om9-app/src/session.rs:368-405 one Line/Point = one TransactionRequest",
+        "TEST om9-core/tests/resource_transactions.rs:93 resources_and_geometry_publish_privately_as_one_undo_entry (undo_len 1, revision + 1, two mutations)",
+        "TEST om9-core/tests/history_replay.rs:91 geometry_result_recipe_and_metadata_publish_in_one_undo_group",
+        "TEST om9-core/tests/atomic_transactions.rs:239 cross_document_prepare_failure_never_transfers_first_participant",
+        "TEST om9-core/tests/resource_transactions.rs:140 invalid_resource_batches_preserve_the_snapshot_and_executable_redo",
+        "TEST om9-core/tests/transaction_scopes.rs:117 active_scope_merge_retains_first_write_baseline_and_one_undo"
+      ],
+      "gaps": [],
+      "note": "Proposed API Document::apply(Command) is realised as TransactionCoordinator::prepare/commit (ADR in api.md). Acceptance = rerun the listed tests."
+    },
+    {
+      "id": "OM9-L3-01-02-007",
+      "title": "Undo Redo Journal",
+      "status": "DONE_WITH_EVIDENCE",
+      "evidence": [
+        "om9-core/src/transaction.rs:348-398 UndoEntry before/after document Arcs; :2027-2081 restored() refuses Stale(\"Undo participant\"); :2082-2111 undo/redo",
+        "om9-core/src/transaction.rs:477-583 IdentityLedger: an Undo never makes an ID reusable",
+        "TEST om9-core/tests/atomic_transactions.rs:98 undo_of_new_insert_does_not_make_its_uuid_available_for_another_object",
+        "TEST om9-core/tests/atomic_transactions.rs:51 deleted_uuid_cannot_be_reallocated_to_resurrect_an_old_source_stamp",
+        "TEST om9-core/tests/atomic_transactions.rs:166 accepted_move_is_one_atomic_undo_and_redo; :269 cross_document_move_undo_restores_both_document_owners",
+        "TEST om9-core/tests/layer_transactions.rs:146 assign ... undo restores the original LayerId membership",
+        "TEST om9-core/tests/atomic_transactions.rs:197 invalid_source_keeps_immediate_state_and_executable_prior_redo",
+        "TEST om9-app/tests/command_sessions.rs:13 Controller undo/redo of a Line; scene refresh at session.rs:409-431"
+      ],
+      "gaps": [],
+      "note": "L4-04 integration (rollback/identity/viewport) is covered by command_sessions.rs:111 scene_is_derived_from_published_document... and om9-scene/tests/affine_gesture.rs:56."
+    },
+    {
+      "id": "OM9-L3-01-02-008",
+      "title": "Command Cancel Rollback",
+      "status": "DONE_WITH_EVIDENCE",
+      "evidence": [
+        "om9-app/src/session.rs:262-264 cancel() drops the session; preview (session.rs:432-450) is computed, never a document entity",
+        "om9-core/src/transaction.rs:803-808 abort of a caller scope",
+        "TEST om9-app/tests/command_sessions.rs:44 cancel_and_invalid_second_point_preserve_world_and_executable_redo (coordinator snapshot equal, redo still executable)",
+        "TEST om9-app/tests/ui_events.rs:34 Escape: undo_len unchanged, entity count unchanged",
+        "TEST om9-core/tests/transaction_scopes.rs:142 nested_savepoint_abort_restores_parent_pending_state"
+      ],
+      "gaps": [],
+      "note": "The Finished{Canceled} event is added by OM9-L3-01-02-010, not required by this L3."
+    },
+    {
+      "id": "OM9-L3-01-02-009",
+      "title": "Command Repeat And Dispatch",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-app/src/session.rs:287-293 empty Enter while idle re-dispatches self.repeat; :404 repeat is set only after a Line/Point commit",
+        "TEST om9-app/tests/command_sessions.rs:78 empty Enter after completion repeats Line"
+      ],
+      "gaps": [
+        "Repeatability is implicit (only geometry sets it); no descriptor flag.",
+        "No test that Undo/Redo/New/Open/Save/SaveAs are never repeated and that the command before them is repeated instead (Rhino 5 manual p.22 note)."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-02-010",
+      "title": "Command Event And Observer API",
+      "status": "MISSING",
+      "evidence": [
+        "Transaction-level pattern only: om9-core/src/transaction.rs:2006-2026 commit_with_observer catches a panicking callback and reports a diagnostic",
+        "TEST om9-core/tests/atomic_transactions.rs:312 panicking_callback_is_rejected_and_barrier_is_released; :322 postacceptance_notification_failure_reports_committed_receipt"
+      ],
+      "gaps": [
+        "No command events (Started/Prompt/Progress/Warning/Finished), no sequence numbers, no command observer registration."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-02-011",
+      "title": "Command Availability Preconditions",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-app/src/session.rs:181-192 static Controller::availability(feature): Ok only for LINE, POINT and file kinds",
+        "om9-app/src/ui/chrome.rs (Controller::availability call sites at :209 and :513 when re-read; file under concurrent edit) menus/icons use add_enabled(availability) so unimplemented commands stay visible and disabled",
+        "TEST om9-app/tests/command_sessions.rs:99 unavailable OM9-SOLID-012 cannot publish or replace the session",
+        "TEST om9-app/tests/chrome_actions.rs:182 display_toolbar_tab_does_not_reuse_enabled_geometry_palette"
+      ],
+      "gaps": [
+        "No state-aware preconditions: Undo/Redo with an empty journal, geometry commands while a file operation or layer dialog owns input (dispatch_geometry only checks is_running), scene unavailable."
+      ]
+    }
+  ],
+  "qymcad": {
+    "consulted": false,
+    "reason": "Anchors crates/qymcad/src/command_catalog.rs and qymcad-core/src/feature.rs describe a different (FreeCAD-like) command model; OM9 already owns dispatch, sessions and the journal. Nothing copied; no build dependency."
+  },
+  "line_save_bug": "Not owned here: Controller save calls om9_archive::Archive::save (session/files.rs:375); the transaction/Undo path is correct. Root cause and fix: OM9-L2-01-08 crosswalk.json line_save_bug."
+}

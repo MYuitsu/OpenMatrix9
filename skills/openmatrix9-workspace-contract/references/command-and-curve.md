@@ -1,6 +1,6 @@
 # Command and Curve input
 
-Target: specs v2, own OM9 scene/UI và Matrix9 như mô tả. Các số native tests/Qt-Coin/FreeCAD reports dưới đây là historical evidence, phải replay trên target mới. Runtime ownership theo [v2](../../openmatrix9-workflow/references/spec-v2-target.md), không link host cũ.
+Target: milestones, own OM9 scene/UI và Matrix9 như mô tả. Các số native tests/Qt-Coin/FreeCAD reports dưới đây là historical evidence, phải replay trên target mới. Runtime ownership theo [v2](../../openmatrix9-workflow/references/milestones-target.md), không link host cũ.
 
 
 ## Shared, copyable transcript

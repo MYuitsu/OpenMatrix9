@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-008",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "convert",
+      "call": "Extrusion(10x20 rectangle, +Z, 30, capped).convert()",
+      "expect": {
+        "class": "Solid",
+        "vertices": 8,
+        "faces": 6,
+        "extents": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            10,
+            20,
+            30
+          ]
+        ]
+      }
+    },
+    {
+      "id": "provenance",
+      "call": "ExtrusionConversion.source",
+      "expect": {
+        "equals original": true
+      }
+    },
+    {
+      "id": "save-open",
+      "call": "entity with om9.extrusion roundtrip",
+      "expect": {
+        "kind": "Extrusion",
+        "convert after reload": true
+      }
+    }
+  ]
+}

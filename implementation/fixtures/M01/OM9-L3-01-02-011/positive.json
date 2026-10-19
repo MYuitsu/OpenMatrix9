@@ -1,0 +1,135 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-011",
+  "l4": "OM9-L4-01-02-011-02",
+  "case": "command-availability-preconditions-positive",
+  "positive_oracle": "Unavailable command disabled when wrong selection/document state",
+  "operation": {
+    "id": "line",
+    "feature": "OM9-FEAT-001",
+    "prompt": "Start of line: ",
+    "input_types": [
+      "Point",
+      "Point"
+    ],
+    "requires_input": true,
+    "output": [
+      "Curve"
+    ],
+    "options": [
+      "BothSides"
+    ],
+    "preconditions": {
+      "needs_document": true,
+      "needs_selection": false,
+      "needs_active_view": true
+    },
+    "receipt": "complete"
+  },
+  "contexts": {
+    "ready": {
+      "has_document": true,
+      "selection": 2,
+      "has_active_view": true
+    },
+    "no_document": {
+      "has_document": false,
+      "selection": 2,
+      "has_active_view": true
+    },
+    "no_view": {
+      "has_document": true,
+      "selection": 0,
+      "has_active_view": false
+    },
+    "no_selection": {
+      "has_document": true,
+      "selection": 0,
+      "has_active_view": true
+    }
+  },
+  "cases": [
+    {
+      "id": "A1-a-ready-session-enables-the-command",
+      "context": "ready",
+      "expect": {
+        "enabled": true,
+        "reason": ""
+      }
+    },
+    {
+      "id": "A2-no-document-disables-it-with-the-reason",
+      "context": "no_document",
+      "expect": {
+        "enabled": false,
+        "reason": "No document is open"
+      }
+    },
+    {
+      "id": "A3-no-active-view-disables-it-with-the-reason",
+      "context": "no_view",
+      "expect": {
+        "enabled": false,
+        "reason": "No active view"
+      }
+    },
+    {
+      "id": "A4-the-document-reason-comes-first-when-several-fail",
+      "context": "no_document",
+      "expect": {
+        "enabled": false,
+        "reason": "No document is open"
+      }
+    },
+    {
+      "id": "A5-a-command-that-needs-a-selection-says-so",
+      "operation_override": {
+        "preconditions": {
+          "needs_document": true,
+          "needs_selection": true,
+          "needs_active_view": true
+        }
+      },
+      "context": "no_selection",
+      "expect": {
+        "enabled": false,
+        "reason": "Select an object first"
+      }
+    },
+    {
+      "id": "A6-a-command-with-no-preconditions-is-enabled-in-any-session",
+      "operation_override": {
+        "preconditions": {
+          "needs_document": false,
+          "needs_selection": false,
+          "needs_active_view": false
+        }
+      },
+      "context": "no_document",
+      "expect": {
+        "enabled": true,
+        "reason": ""
+      }
+    },
+    {
+      "id": "A7-admit-uses-the-session-context-that-was-given",
+      "options": [
+        "BothSides"
+      ],
+      "context": "ready",
+      "expect": {
+        "admitted": true
+      }
+    },
+    {
+      "id": "A8-admit-accepts-an-option-typed-in-another-case",
+      "options": [
+        "bothsides"
+      ],
+      "context": "ready",
+      "expect": {
+        "admitted": true
+      }
+    }
+  ]
+}

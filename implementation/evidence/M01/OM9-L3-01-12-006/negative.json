@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-006",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "bad-magic",
+      "expect": {
+        "error": "Invalid(OM9 magic)"
+      }
+    },
+    {
+      "id": "unsupported-schema",
+      "expect": {
+        "error": "Unsupported"
+      }
+    },
+    {
+      "id": "offset-overflow",
+      "expect": {
+        "error": "Invalid/Overflow"
+      }
+    },
+    {
+      "id": "duplicate-key",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "orphan-resource",
+      "expect": {
+        "error": "Invalid"
+      }
+    }
+  ]
+}

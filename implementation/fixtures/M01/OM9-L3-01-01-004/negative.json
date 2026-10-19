@@ -1,0 +1,97 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-004",
+  "l4": "OM9-L4-01-01-004-02",
+  "case": "docking-layout-default-restore-negative",
+  "negative_oracle": "Unknown layout version does not crash, resets to default",
+  "bytes_format": "the exact layout document bytes handed to DockLayout::from_bytes",
+  "cases": [
+    {
+      "id": "N1-schema-one-is-not-supported",
+      "bytes": "{\"schema_version\": 1, \"panels\": {\"right-dock\": {\"visible\": true, \"collapsed\": false, \"size\": 0.0}}}",
+      "expect": {
+        "diagnostic_contains": "layout version 1 is not supported; restored the Matrix default",
+        "equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "N2-a-future-schema-is-not-supported",
+      "bytes": "{\"schema_version\": 99, \"sections\": {\"display\": {\"order\": 0}}}",
+      "expect": {
+        "diagnostic_contains": "layout version 99 is not supported; restored the Matrix default",
+        "equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "N3-a-document-without-a-version-is-not-supported",
+      "bytes": "{\"panels\": {}}",
+      "expect": {
+        "diagnostic_contains": "layout version 0 is not supported; restored the Matrix default",
+        "equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "N4-not-a-layout-document-is-refused",
+      "bytes": "{not json at all",
+      "expect": {
+        "error": "Invalid",
+        "equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "N5-an-empty-document-is-refused",
+      "bytes": "",
+      "expect": {
+        "error": "Invalid",
+        "equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "N6-a-version-mismatch-never-half-applies",
+      "bytes": "{\"schema_version\": 1, \"panels\": {\"left-rail\": {\"visible\": false, \"collapsed\": true, \"size\": 420.0}}, \"sections\": {\"projects\": {\"visible\": false, \"collapsed\": true, \"dock\": \"right\", \"order\": 0, \"height\": 400.0}}}",
+      "expect": {
+        "equals_matrix_default_bytes": true,
+        "left_rail_visible": true,
+        "left_rail_size": 300.0,
+        "projects_visible": true,
+        "projects_collapsed": false,
+        "projects_dock": "left",
+        "projects_order": 6,
+        "panics": false
+      }
+    },
+    {
+      "id": "N7-a-layout-over-the-byte-budget-is-refused",
+      "bytes_padding": 2000000,
+      "expect": {
+        "error": "Budget",
+        "equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "N8-reset-after-a-mismatch-stays-the-baseline",
+      "bytes": "{\"schema_version\": 7}",
+      "expect": {
+        "equals_matrix_default_bytes": true,
+        "after_reset_equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "N9-an-impossible-stored-home-is-repaired",
+      "why": "a document may carry a home that cannot exist in its column; the model repairs it to the documented position instead of surprising the user later",
+      "bytes": "{\"schema_version\": 2, \"sections\": {\"projects\": {\"visible\": true, \"collapsed\": false, \"dock\": \"left\", \"order\": 6, \"height\": 120.0, \"home\": {\"side\": \"left\", \"index\": 99}}}}",
+      "expect": {
+        "diagnostic_contains": "Projects home",
+        "equal_panels_to_the_default": true,
+        "panics": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+task: OM9-L4-01-01-005-03 (implementation) Docking Layout Persistence
+utc: 2026-10-16T13:11:53Z
+cwd: H:\OpenMatrix9\standalone
+
+== RED: cargo test -p om9-app --test dock_layout_persistence (truoc khi sua) ==
+xem OM9-L4-01-01-005-02.red.log: 4 passed; 2 failed (S1/S2: Set as Default khong ghi gi vi bo qua dirty flag khi doi qua app.dock; M3..M8: thieu chan doan cho 5 kieu sua am tham)
+== GREEN: cargo test -p om9-app --test dock_layout_persistence ==
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.79s
+     Running tests\dock_layout_persistence.rs (target\debug\deps\dock_layout_persistence-c0caec79a6c929cb.exe)
+
+running 6 tests
+test fixture_design_pair_is_present ... ok
+test s4_a_session_without_a_kept_file_is_the_baseline ... ok
+test s3_a_kept_file_reopens_the_same_named_ids ... ok
+test m1_to_m13_a_file_that_cannot_be_honoured_is_repaired_with_a_warning ... ok
+test s1_a_session_keeps_what_the_user_arranged ... ok
+test s2_a_written_file_is_a_fixed_point ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+exit=0
+== cargo test -p om9-app --lib ==
+
+test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.96s
+
+
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 0

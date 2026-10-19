@@ -1,0 +1,35 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-05-006",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-05-006-01",
+      "capability": "Transform matrix service",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-006/",
+      "test": "a_transform_moves_the_box_and_keeps_its_volume"
+    },
+    {
+      "l4": "OM9-L4-01-05-006-02",
+      "capability": "Transform matrix service",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-006/",
+      "test": "a_transform_moves_the_box_and_keeps_its_volume"
+    },
+    {
+      "l4": "OM9-L4-01-05-006-03",
+      "capability": "Transform matrix service",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-006/",
+      "test": "a_transform_moves_the_box_and_keeps_its_volume"
+    },
+    {
+      "l4": "OM9-L4-01-05-006-05",
+      "capability": "Transform matrix service",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-006/",
+      "test": "a_transform_moves_the_box_and_keeps_its_volume"
+    }
+  ],
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  }
+}

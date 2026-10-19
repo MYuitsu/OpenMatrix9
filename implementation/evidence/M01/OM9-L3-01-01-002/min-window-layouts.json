@@ -1,0 +1,837 @@
+{
+  "schema": "om9.m01.l3-002.min-window-layouts.v1",
+  "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+  "user_decision": "2026-10-16: smallest supported device 1366x768; window not shrinkable below 1280x720 logical; right-dock threshold delegated to the agent",
+  "constants": {
+    "supported_min_window_points": [
+      1280,
+      720
+    ],
+    "plan_floor_window_points": [
+      800,
+      400
+    ],
+    "shell_reserve_points": [
+      16,
+      80
+    ],
+    "reserve_note": "16 frame width; 80 = 48 taskbar + 32 title bar. Conservative, not measured; the real work area needs a native call and is not read.",
+    "right_dock_threshold_points": 1200,
+    "old_right_dock_threshold_points": 900,
+    "old_first_dock_width_measured": 915
+  },
+  "effective_min_size": [
+    {
+      "screen": "2560x1440 @100%",
+      "monitor_points": [
+        2560.0,
+        1440.0
+      ],
+      "effective_min_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "screen": "1920x1080 @100%",
+      "monitor_points": [
+        1920.0,
+        1080.0
+      ],
+      "effective_min_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "screen": "1366x768 @100%",
+      "monitor_points": [
+        1366.0,
+        768.0
+      ],
+      "effective_min_points": [
+        1280.0,
+        688.0
+      ]
+    },
+    {
+      "screen": "1366x768 @125%",
+      "monitor_points": [
+        1092.8,
+        614.4
+      ],
+      "effective_min_points": [
+        1076.8,
+        534.4
+      ]
+    },
+    {
+      "screen": "1366x768 @150%",
+      "monitor_points": [
+        910.67,
+        512.0
+      ],
+      "effective_min_points": [
+        894.67,
+        432.0
+      ]
+    },
+    {
+      "screen": "640x480 (degenerate small)",
+      "monitor_points": [
+        640.0,
+        480.0
+      ],
+      "effective_min_points": [
+        800.0,
+        400.0
+      ]
+    },
+    {
+      "screen": "unknown monitor",
+      "monitor_points": null,
+      "effective_min_points": [
+        1280.0,
+        720.0
+      ]
+    }
+  ],
+  "threshold_rationale": {
+    "viewport_width_formula": "pure planner, default rails 300 + 300, gap 2: (W - 602) / 2",
+    "at_1200": 299,
+    "at_old_915": 156.5,
+    "reasoning": "A viewport needs about 300 pt to stay useful. 1200 gives 299 pt (frame measures ~304 because egui rails are ~295 after margins). The old 915 rule left ~157 pt. 1200 is below the supported minimum 1280, so the dock shows at every supported size on a normal screen and yields on capped high-DPI laptop screens (1366x768 at 125%/150%).",
+    "sweep": "first_dock_width=1200 height=800 layers_docked_right=true"
+  },
+  "layouts_note": "pure = compute_regions with the default layout and Layers docked right (hand-computed, asserted exactly); frame = the real MatrixApp::show frame under headless egui (rails measured after egui margins, within 8 pt of pure). DPI rows are logical points of a SIMULATED scale.",
+  "layouts": [
+    {
+      "frame": {
+        "center": [
+          295.0,
+          171.0,
+          690.0,
+          529.0
+        ],
+        "right_dock": [
+          985.0,
+          171.0,
+          295.0,
+          549.0
+        ],
+        "views": {
+          "LookingDown": [
+            295.0,
+            171.0,
+            344.0,
+            263.5
+          ],
+          "Perspective": [
+            641.0,
+            171.0,
+            344.0,
+            263.5
+          ],
+          "SideView": [
+            641.0,
+            436.5,
+            344.0,
+            263.5
+          ],
+          "ThroughFinger": [
+            295.0,
+            436.5,
+            344.0,
+            263.5
+          ]
+        }
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          680.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": [
+          980.0,
+          178.0,
+          300.0,
+          542.0
+        ],
+        "views": {
+          "LookingDown": [
+            300.0,
+            178.0,
+            339.0,
+            260.0
+          ],
+          "Perspective": [
+            641.0,
+            178.0,
+            339.0,
+            260.0
+          ],
+          "SideView": [
+            641.0,
+            440.0,
+            339.0,
+            260.0
+          ],
+          "ThroughFinger": [
+            300.0,
+            440.0,
+            339.0,
+            260.0
+          ]
+        }
+      },
+      "right_dock": true,
+      "window_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "center": [
+          295.0,
+          171.0,
+          776.0,
+          537.0
+        ],
+        "right_dock": [
+          1071.0,
+          171.0,
+          295.0,
+          557.0
+        ],
+        "views": {
+          "LookingDown": [
+            295.0,
+            171.0,
+            387.0,
+            267.5
+          ],
+          "Perspective": [
+            684.0,
+            171.0,
+            387.0,
+            267.5
+          ],
+          "SideView": [
+            684.0,
+            440.5,
+            387.0,
+            267.5
+          ],
+          "ThroughFinger": [
+            295.0,
+            440.5,
+            387.0,
+            267.5
+          ]
+        }
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          766.0,
+          530.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          707.0
+        ],
+        "notes": [],
+        "right_dock": [
+          1066.0,
+          178.0,
+          300.0,
+          550.0
+        ],
+        "views": {
+          "LookingDown": [
+            300.0,
+            178.0,
+            382.0,
+            264.0
+          ],
+          "Perspective": [
+            684.0,
+            178.0,
+            382.0,
+            264.0
+          ],
+          "SideView": [
+            684.0,
+            444.0,
+            382.0,
+            264.0
+          ],
+          "ThroughFinger": [
+            300.0,
+            444.0,
+            382.0,
+            264.0
+          ]
+        }
+      },
+      "right_dock": true,
+      "window_points": [
+        1366.0,
+        728.0
+      ]
+    },
+    {
+      "frame": {
+        "center": [
+          295.0,
+          171.0,
+          798.0,
+          394.0
+        ],
+        "right_dock": null,
+        "views": {
+          "LookingDown": [
+            295.0,
+            171.0,
+            398.0,
+            196.0
+          ],
+          "Perspective": [
+            695.0,
+            171.0,
+            398.0,
+            196.0
+          ],
+          "SideView": [
+            695.0,
+            369.0,
+            398.0,
+            196.0
+          ],
+          "ThroughFinger": [
+            295.0,
+            369.0,
+            398.0,
+            196.0
+          ]
+        }
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          793.0,
+          387.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          564.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null,
+        "views": {
+          "LookingDown": [
+            300.0,
+            178.0,
+            395.5,
+            192.5
+          ],
+          "Perspective": [
+            697.5,
+            178.0,
+            395.5,
+            192.5
+          ],
+          "SideView": [
+            697.5,
+            372.5,
+            395.5,
+            192.5
+          ],
+          "ThroughFinger": [
+            300.0,
+            372.5,
+            395.5,
+            192.5
+          ]
+        }
+      },
+      "right_dock": false,
+      "window_points": [
+        1093.0,
+        585.0
+      ]
+    },
+    {
+      "frame": {
+        "center": [
+          295.0,
+          171.0,
+          616.0,
+          289.0
+        ],
+        "right_dock": null,
+        "views": {
+          "LookingDown": [
+            295.0,
+            171.0,
+            307.0,
+            143.5
+          ],
+          "Perspective": [
+            604.0,
+            171.0,
+            307.0,
+            143.5
+          ],
+          "SideView": [
+            604.0,
+            316.5,
+            307.0,
+            143.5
+          ],
+          "ThroughFinger": [
+            295.0,
+            316.5,
+            307.0,
+            143.5
+          ]
+        }
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          611.0,
+          282.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          459.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null,
+        "views": {
+          "LookingDown": [
+            300.0,
+            178.0,
+            304.5,
+            140.0
+          ],
+          "Perspective": [
+            606.5,
+            178.0,
+            304.5,
+            140.0
+          ],
+          "SideView": [
+            606.5,
+            320.0,
+            304.5,
+            140.0
+          ],
+          "ThroughFinger": [
+            300.0,
+            320.0,
+            304.5,
+            140.0
+          ]
+        }
+      },
+      "right_dock": false,
+      "window_points": [
+        911.0,
+        480.0
+      ]
+    },
+    {
+      "frame": {
+        "center": [
+          295.0,
+          171.0,
+          1330.0,
+          889.0
+        ],
+        "right_dock": [
+          1625.0,
+          171.0,
+          295.0,
+          909.0
+        ],
+        "views": {
+          "LookingDown": [
+            295.0,
+            171.0,
+            664.0,
+            443.5
+          ],
+          "Perspective": [
+            961.0,
+            171.0,
+            664.0,
+            443.5
+          ],
+          "SideView": [
+            961.0,
+            616.5,
+            664.0,
+            443.5
+          ],
+          "ThroughFinger": [
+            295.0,
+            616.5,
+            664.0,
+            443.5
+          ]
+        }
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          1320.0,
+          882.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          1059.0
+        ],
+        "notes": [],
+        "right_dock": [
+          1620.0,
+          178.0,
+          300.0,
+          902.0
+        ],
+        "views": {
+          "LookingDown": [
+            300.0,
+            178.0,
+            659.0,
+            440.0
+          ],
+          "Perspective": [
+            961.0,
+            178.0,
+            659.0,
+            440.0
+          ],
+          "SideView": [
+            961.0,
+            620.0,
+            659.0,
+            440.0
+          ],
+          "ThroughFinger": [
+            300.0,
+            620.0,
+            659.0,
+            440.0
+          ]
+        }
+      },
+      "right_dock": true,
+      "window_points": [
+        1920.0,
+        1080.0
+      ]
+    },
+    {
+      "frame": {
+        "center": [
+          295.0,
+          171.0,
+          4530.0,
+          1249.0
+        ],
+        "right_dock": [
+          4825.0,
+          171.0,
+          295.0,
+          1269.0
+        ],
+        "views": {
+          "LookingDown": [
+            295.0,
+            171.0,
+            2264.0,
+            623.5
+          ],
+          "Perspective": [
+            2561.0,
+            171.0,
+            2264.0,
+            623.5
+          ],
+          "SideView": [
+            2561.0,
+            796.5,
+            2264.0,
+            623.5
+          ],
+          "ThroughFinger": [
+            295.0,
+            796.5,
+            2264.0,
+            623.5
+          ]
+        }
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          4520.0,
+          1242.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          1419.0
+        ],
+        "notes": [],
+        "right_dock": [
+          4820.0,
+          178.0,
+          300.0,
+          1262.0
+        ],
+        "views": {
+          "LookingDown": [
+            300.0,
+            178.0,
+            2259.0,
+            620.0
+          ],
+          "Perspective": [
+            2561.0,
+            178.0,
+            2259.0,
+            620.0
+          ],
+          "SideView": [
+            2561.0,
+            800.0,
+            2259.0,
+            620.0
+          ],
+          "ThroughFinger": [
+            300.0,
+            800.0,
+            2259.0,
+            620.0
+          ]
+        }
+      },
+      "right_dock": true,
+      "window_points": [
+        5120.0,
+        1440.0
+      ]
+    },
+    {
+      "frame": {
+        "center": [
+          295.0,
+          171.0,
+          610.0,
+          529.0
+        ],
+        "right_dock": [
+          905.0,
+          171.0,
+          295.0,
+          549.0
+        ],
+        "views": {
+          "LookingDown": [
+            295.0,
+            171.0,
+            304.0,
+            263.5
+          ],
+          "Perspective": [
+            601.0,
+            171.0,
+            304.0,
+            263.5
+          ],
+          "SideView": [
+            601.0,
+            436.5,
+            304.0,
+            263.5
+          ],
+          "ThroughFinger": [
+            295.0,
+            436.5,
+            304.0,
+            263.5
+          ]
+        }
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          600.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": [
+          900.0,
+          178.0,
+          300.0,
+          542.0
+        ],
+        "views": {
+          "LookingDown": [
+            300.0,
+            178.0,
+            299.0,
+            260.0
+          ],
+          "Perspective": [
+            601.0,
+            178.0,
+            299.0,
+            260.0
+          ],
+          "SideView": [
+            601.0,
+            440.0,
+            299.0,
+            260.0
+          ],
+          "ThroughFinger": [
+            300.0,
+            440.0,
+            299.0,
+            260.0
+          ]
+        }
+      },
+      "right_dock": true,
+      "window_points": [
+        1200.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "center": [
+          295.0,
+          171.0,
+          904.0,
+          529.0
+        ],
+        "right_dock": null,
+        "views": {
+          "LookingDown": [
+            295.0,
+            171.0,
+            451.0,
+            263.5
+          ],
+          "Perspective": [
+            748.0,
+            171.0,
+            451.0,
+            263.5
+          ],
+          "SideView": [
+            748.0,
+            436.5,
+            451.0,
+            263.5
+          ],
+          "ThroughFinger": [
+            295.0,
+            436.5,
+            451.0,
+            263.5
+          ]
+        }
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          899.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          699.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null,
+        "views": {
+          "LookingDown": [
+            300.0,
+            178.0,
+            448.5,
+            260.0
+          ],
+          "Perspective": [
+            750.5,
+            178.0,
+            448.5,
+            260.0
+          ],
+          "SideView": [
+            750.5,
+            440.0,
+            448.5,
+            260.0
+          ],
+          "ThroughFinger": [
+            300.0,
+            440.0,
+            448.5,
+            260.0
+          ]
+        }
+      },
+      "right_dock": false,
+      "window_points": [
+        1199.0,
+        720.0
+      ]
+    }
+  ]
+}

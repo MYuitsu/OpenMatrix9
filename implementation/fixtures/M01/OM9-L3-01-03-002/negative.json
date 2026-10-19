@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-002",
+  "l4": "OM9-L4-01-03-002-02",
+  "title": "Typed Scene Entity Records",
+  "case": "om9-l3-01-03-002-negative",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_002_every_typed_entity_record_keeps_its_kind_when_round_tripped|l3_002_unsupported_entity_kinds_are_reported_never_downgraded",
+  "negative_oracle": "see cases",
+  "cases": [
+    {
+      "call": "GeometryKind::from_tag(\"T-Spline\")",
+      "id": "unknown-kind",
+      "expect": {
+        "not": "downgrade",
+        "error": "Unsupported(\"geometry kind\")"
+      }
+    },
+    {
+      "call": "GeometryKind::from_tag(\"Brep\")",
+      "id": "brep",
+      "expect": {
+        "status": "BLOCKED_DEPENDENCY OM9-L2-01-05 (OCCT)",
+        "error": "Unsupported(\"brep geometry\")"
+      }
+    }
+  ]
+}

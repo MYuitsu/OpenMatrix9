@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-02-01-006",
+  "title": "Surface Edge And Isocurve Semantics",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "Boundary edges are pickable topology; exact isocurves are display-only and never persistent geometry.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-core/src/surface_kernel.rs:196-259",
+      "what": "exact rational isocurve"
+    },
+    {
+      "path_line": "crates/om9-core/src/rhino_semantics.rs:537-615",
+      "what": "DisplayIsocurve + BoundaryEdge"
+    }
+  ],
+  "reuse_decision": "REUSE surface_kernel::isocurve; ADD authored display/pickable distinction.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-02-01/crosswalk.json"
+}

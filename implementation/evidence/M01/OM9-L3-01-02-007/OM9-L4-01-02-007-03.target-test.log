@@ -1,0 +1,59 @@
+task: OM9-L4-01-02-007-03 (implementation) Undo Redo Journal
+utc: 2026-10-16T15:24:37Z
+cwd: H:\OpenMatrix9\standalone
+
+== RED ==
+KHONG CO ASSERTION DO. Lan chay dau tien cua tests/command_transactions.rs da xanh ca 5 test: hanh vi ma ba L3 nay doi hoi da dung san trong code. Do la ket qua trung thuc, khong phai bang chung bi thieu: fixture o day GHIM hop dong, va phat hien that cua cum nay la mot dieu ke hoach noi sai - xem dong 'context_revision' ben duoi.
+Phat hien that: oracle cua L3-006 noi 'one transaction and one revision'. Do thi cho thay context_revision KHONG tang theo moi lenh (van la 1 sau khi commit mot duong thang): no la token dinh danh tai lieu, dung de danh dau phien cu khi tai lieu bi thay the. Bo dem theo tung hanh dong la journal/epoch. api.md cua 006 ghi dung dieu nay thay vi gia vo rang revision tang.
+== GREEN: cargo test -p om9-app --test command_transactions ==
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.68s
+     Running tests\command_transactions.rs (target\debug\deps\command_transactions-e7580d4be9e522e5.exe)
+
+running 5 tests
+test fixture_design_pairs_are_present ... ok
+test u1_to_u4_a_failure_writes_nothing ... ok
+test x1_to_x3_and_y1_to_y4_a_cancel_leaves_no_orphan ... ok
+test t1_to_t3_one_action_is_one_journal_entry ... ok
+test v1_to_v2_and_w1_to_w4_the_journal_walks_back_and_forward ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+== cargo test -p om9-app --lib ==
+test result: ok. 87 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.61s
+== cargo test -p om9-core (hop dong all-or-nothing cua coordinator) ==
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test commit_requires_actual_target_receipt_and_failed_or_legacy_receipt_is_insufficient ... ok
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test late_cancellation_stale_import_and_failed_acceptance_keep_prior_redo_and_unaccepted_ids ... ok
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.34s
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test booked_scope_failed_prepare_keeps_booking_and_prior_redo ... ok
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 101
+error: this `if` statement can be collapsed
+error: could not compile `om9-core` (test "command_registry") due to 1 previous error

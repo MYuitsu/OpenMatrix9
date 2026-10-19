@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-001-01",
+  "l3_id": "OM9-L3-01-02-001",
+  "l3_title": "Command IDs And Alias Registry",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "stable command IDs, built-in names and Rhino/Matrix aliases",
+  "positive_oracle": "Registry maps stable command ID from menu/name/alias to one descriptor",
+  "negative_oracle": "Duplicate alias ambiguous or unknown ID refused with explicit diagnostic",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:39 pub fn key(self) -> &'static str — every place has a stable catalogue key",
+        "qymcad-shell/src/lib.rs:59 pub struct Place { key, ... }",
+        "qymcad-shell/src/lib.rs:119 pub fn keys(&self) -> Vec<&'static str>"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A stable key per place and a way to enumerate keys. There is no alias concept and no registry that refuses an ambiguous name.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs (CapabilityRegistry, Operation.id, Operation.aliases, resolve, try_register)"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE",
+        "gui.rs:347 BarAsk::WidthPick => self.start_width_pick()"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "QymCAD dispatches by a Rust enum variant per command. Names are typed by the user into one doorway, but the mapping name → command is a hand-written match with no registry, no alias table and no ambiguity diagnostic.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs + standalone/crates/om9-app/src/session.rs (the command-line doorway)"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": ["ui-state/src/lib.rs:87 pub fn cmd_val(cmd: &FeatCommand, key: &str) -> f64"],
+      "decision": "ADD",
+      "what_is_missing": "Feature parameter lookup by key inside one command; nothing about command identity.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": ["qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only; the registry is pure Rust and needs no dependency.",
+      "om9_owner": "standalone/crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "capability.rs:79 pub fn register(&mut self, operation) -> Result<()> — refused an empty id/feature/inputs, a duplicate id and empty or repeated options, with one generic message",
+    "capability.rs:98 pub fn availability(&self, id: &str) -> Availability — availability by exact id only",
+    "Operation { id, feature, input_types, options, backend, prepare, preview, commit, receipts }"
+  ],
+  "gap_found_by_this_task": [
+    "There was no alias at all and no way to resolve a name: availability() matched an exact id, and the command line had its own hand-written match. A duplicate or ambiguous name was therefore not detected anywhere, and an unknown name produced no diagnostic naming it.",
+    "Added: Operation.aliases, RegistryError with a message per refused name, try_register (the alias rules) and resolve (id or alias, ignoring case). register() keeps its signature by delegating."
+  ],
+  "reuse_decision": "ADAPT the stable-key idea from qymcad-shell and the single doorway from gui.rs; ADD the alias table, the ambiguity rules and the diagnostics.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-001/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-001/negative.json",
+    "standalone/crates/om9-core/tests/command_registry.rs"
+  ]
+}

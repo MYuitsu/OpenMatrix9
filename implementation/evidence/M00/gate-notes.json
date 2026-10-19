@@ -1,0 +1,104 @@
+{
+  "schema": "om9.m00.gate_notes.v1",
+  "note": "curated by a human; the generator merges these into the computed registry",
+  "gates": {
+    "G00-01": {
+      "verified_facts": [
+        "the plan pin and the on-disk QymCAD checkout are both 746a17f127897e921a57118b6caad08968602bf5; the re-pin (3015 files, 19 642 SHA references) is complete",
+        "the M00 execution protocol tools now exist: validate_m00_v013.py passes (7 L2 / 19 L3 / 73 L4, DAG and evidence schema consistent), next_m00_task.py reports the blocked task and exits 2, validate_m00_execution.py validates the 12 existing records and its --self-test rejects 5 kinds of forged evidence (6/6)"
+      ],
+      "blockers": [
+        "two L4 need a human decision (L4-01-01-01 architecture, L4-01-03-03 reuse model)",
+        "the ten dependent L4 stay blocked until those two are signed"
+      ],
+      "human_approval_required": [
+        "OM9-M00-L4-01-01-01",
+        "OM9-M00-L4-01-03-03"
+      ],
+      "next": "the owner signs the two approval L4, or authorises the three missing protocol tools"
+    },
+    "G00-02": {
+      "verified_facts": [
+        "OCCT 8.0.1 pinned (tag V8_0_1, commit b8f597c677811d1f9f4d8a97f5ae2825c0353a42) with release + 3rdparty + source archive SHA-256",
+        "probe: topology 6F/24E/48V, mesh 24 nodes/12 triangles, 2 line-face hits, boolean 7 faces valid, volumes 400.0 and 349.73451754256325 (error <= 1e-13)",
+        "accuracy defect measured on the stock kernel: offset D2 error 41.7% and D3 99.96% (ellipse), 71.8%/100.1% (non-uniform spline); the patched TKG3d passes at <= 1.6e-05",
+        "lifetime: refcount 1 -> 2 -> 1; 9/9 invalid inputs rejected with a message; 10 000 create/destroy cycles grew the working set by 0.398 MiB; 1000 serialized calls from 4 threads produced no wrong result",
+        "numeric: box 400/360, sphere and cylinder exact to 1e-13, fillet 399.141592653590, inward offset 128.0, degenerate cases reported, sphere mesh closed with 2 non-manifold pole edges",
+        "offset derivatives are owned by Rust (crates/om9-core/src/offset_curve.rs, 12 tests), so the TKG3d patch is a backstop rather than a dependency"
+      ],
+      "blockers": [],
+      "closed_at_utc": "2026-10-17T16:40:00Z",
+      "closed_by": "chủ dự án (project owner)",
+      "next": "none: G00-02 is closed; the kernel work continues in M01-L2-01-05"
+    },
+    "G00-03": {
+      "verified_facts": [
+        "eframe 0.36.2 with Renderer::Wgpu; four viewports as (W-602)/2; one shared Scene with per-view camera; command events are egui-free",
+        "no custom wgpu pipeline/WGSL exists yet and glow is not compiled in: the 3D GPU path is the gap recorded for M01-L2-01-06",
+        "the OCCT sphere mesh (2542 vertices, 5008 triangles) is uploaded and rendered at 0.755 ms mean / 1.278 ms p99 for 1280x720; camera orbit/pan/zoom and DPI behave as geometry predicts",
+        "device loss: the lost callback fires once on destroy, the destroyed device refuses to draw, and a fresh device recovers in 0.337 s; the machine offers a software adapter (Microsoft Basic Render Driver, Dx12, Cpu) as the fallback",
+        "picking: 7/7 checks on the OCCT mesh (object, face t=9.147 vs analytic 9.0, vertex distance 0, edge 1e-6, tolerance 0.0207 from 2 px); the existing gumball (15) and affine (5) tests prove one-undo-step move and cancel that keeps undo"
+      ],
+      "blockers": [
+        "the three L3 need a review record before the gate closes"
+      ],
+      "next": "the owner signs L3-03-01..03, then G00-03 closes and the work moves to G00-04"
+    },
+    "G00-04": {
+      "verified_facts": [
+        "QymCAD's Format enum has ten variants and no 3DM (QymCAD/crates/qymcad-io/src/formats.rs:21-33)",
+        "the openNURBS pin eb92af3… writes a version-5 3DM fixture (9 528 B: point, line, rational arc, mesh, cloud) and an independent read returns the identical JSON, including rational weights, domain and mesh topology",
+        "a 512-byte garbage archive is rejected with exit 1 and a message, no crash",
+        "the pin is the only available 3DM decoder: OCCT has no 3DM reader and QymCAD lists none"
+      ],
+      "blockers": [
+        "L4-04-02-03 NURBS/trim 3DM -> OCCT TopoDS conversion is not implemented",
+        "L4-04-02-04 block/nested-instance transforms are not tested",
+        "L4-04-02-05 inch->mm, tolerance and UV trims are not tested"
+      ],
+      "next": "implement the NURBS/trim conversion in M03, then the instance and unit tests"
+    },
+    "G00-05": {
+      "verified_facts": [
+        "QymCAD naming.rs documents four deterministic rules (split pieces after the parent face, seams after a neighbour, unnamed by position, edges by the face pair) with a per-document NameMint",
+        "QymCAD refs.rs defines Ref/RefError and drivers.rs DriverRef; OM9 MVP uses explicit ObjectId/EntityId instead of query-based refs",
+        "history_ops and history_replay pass (run during this closeout)"
+      ],
+      "blockers": [
+        "L4-05-01-04 split/merge topology baseline is not recorded",
+        "L4-05-02-02 conflict UI and command rollback need the real UI (M04)",
+        "L4-05-02-03 feature-id persistence and cache are not tested"
+      ],
+      "next": "add the split/merge baseline and the persistence test when M04 starts"
+    },
+    "G00-06": {
+      "verified_facts": [
+        "QymCAD LICENSE is AGPL-3.0; it stays reference material only (not linked, not shipped)",
+        "OCCT 8.0.1 ships LGPL-2.1 plus the OCCT exception; the project links dynamically and publishes the modified TKG3d through the patch and build script",
+        "cargo metadata over 345 packages shows no GPL/AGPL dependency in the Rust tree; the six LGPL-2.1-or-later entries are the workspace members themselves",
+        "design/M00/G00-06/THIRD-PARTY-NOTICES-M00.md records the OCCT modified component, the openNURBS notice and the QymCAD reference-only status"
+      ],
+      "blockers": [
+        "L4-06-01-04 product license decision needs the owner",
+        "L4-06-02-04 legal readiness signature needs the owner"
+      ],
+      "next": "the owner signs the license decision and legal readiness"
+    },
+    "G00-07": {
+      "verified_facts": [
+        "toolchain: MSVC 14.44.35207, CMake 4.x, VS2022 x64; OCCT pin 8.0.1 (the L4 text still says 7.8.1, superseded by the pin)",
+        "fetch_occt.py --verify-only confirms every upstream digest; audit_milestone_tree.py reports 0 findings",
+        "test matrix: cargo test -p om9-core (44 suites, 374 tests) and the native harness (12 tests) pass with -j 2",
+        "fallback renderer measured: Microsoft Basic Render Driver (WARP) renders at 6.9 ms per 640x360 frame",
+        "the five M00 protocol tools exist and were run: validate_m00_v013 (PASS), next_m00_task (blocked on the approval L4), validate_m00_execution (12 records, 0 invalid; self-test 6/6), m00_capture and m00_init_evidence"
+      ],
+      "blockers": [
+        "L4-07-01-02 clean-checkout release build is not recorded",
+        "L4-07-01-03 cold start plus create/open/save is not tested",
+        "L4-07-03-02 deterministic artifacts and attestations are not built",
+        "L4-07-02-01/02 are N/A because Linux was not chosen; L4-07-03-04 needs the owner"
+      ],
+      "next": "record the release build from a clean checkout and the cold-start test, then the owner decides the final M00 evidence"
+    }
+  }
+}

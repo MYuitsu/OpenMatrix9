@@ -21,7 +21,7 @@ MILESTONES = ROOT / "OM9_Milestones"
 STAGING = ROOT / "build/m08-incoming/OpenMatrix9"
 PACKAGE_MANIFEST = STAGING / "planning/M08/M08_L4_EXECUTION_MANIFEST.json"
 M08_DIR = "M08 - Jewelry Modeling"
-M03_DIR = "M03 - Curve, Surface, Solid and 3DM Exchange"
+M03_DIR = "M03 - Geometry 3DM"
 REFERENCE_FILES = [
     "M08_L4_EXECUTION_MANIFEST.json", "M08_L4_EXECUTION_MANIFEST.csv",
     "PACKAGING_REPORT.json", "SELF_REVIEW.md", "RELEASE_GATE.md",

@@ -1,0 +1,15 @@
+task: OM9-L4-01-02-006-05 (acceptance) regression
+utc: 2026-10-16T15:24:37Z
+
+== cargo test --workspace -j 2 ==
+test result: ok. 87 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.57s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+test view_tab_restores_cmd_focus_and_preserves_numeric_draft ... FAILED
+test view_menu_restores_cmd_focus_and_preserves_numeric_draft ... FAILED
+assertion `left == right` failed
+assertion `left == right` failed
+test result: FAILED. 3 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s
+error: test failed, to rerun pass `-p om9-app --test chrome_actions`
+== cargo check --workspace --all-targets ==
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.42s

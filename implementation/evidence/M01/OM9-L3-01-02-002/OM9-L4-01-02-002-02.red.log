@@ -1,0 +1,33 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.69s
+     Running tests\command_descriptor.rs (target\debug\deps\command_descriptor-142e361638f16f0a.exe)
+
+running 6 tests
+test d1_the_descriptor_declares_its_signature ... ok
+test d2_a_declared_option_resolves_ignoring_case ... ok
+test d5_an_option_less_command_is_still_a_descriptor ... ok
+test fixture_design_pair_is_present ... FAILED
+test e1_to_e4_a_descriptor_that_cannot_be_honoured_is_refused ... FAILED
+test d3_to_d4_the_descriptor_is_serializable_and_deterministic ... ok
+
+failures:
+
+---- fixture_design_pair_is_present stdout ----
+
+thread 'fixture_design_pair_is_present' (32708) panicked at crates\om9-core\tests\command_descriptor.rs:219:5:
+H:\OpenMatrix9\standalone\crates\om9-core\../../../implementation/design/M01/OM9-L3-01-02-002/api.md
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- e1_to_e4_a_descriptor_that_cannot_be_honoured_is_refused stdout ----
+
+thread 'e1_to_e4_a_descriptor_that_cannot_be_honoured_is_refused' (50124) panicked at crates\om9-core\tests\command_descriptor.rs:174:18:
+E4-an-empty-option-name-is-refused: must be refused: ()
+
+
+failures:
+    e1_to_e4_a_descriptor_that_cannot_be_honoured_is_refused
+    fixture_design_pair_is_present
+
+test result: FAILED. 4 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-core --test command_descriptor`

@@ -206,5 +206,12 @@
       "id": "OM9-L4-01-06-004-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-004 - Wireframe And Isocurve Pass/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "execution_evidence": {
+    "crate": "crates/om9-render",
+    "state": "automated slice done; manual test pending",
+    "api": "implementation/design/M01/OM9-L3-01-06-004/api.md",
+    "evidence": "implementation/evidence/M01/OM9-L3-01-06-004/",
+    "manual_pending": "edges must look crisp and not z-fight on the real window"
+  }
 }

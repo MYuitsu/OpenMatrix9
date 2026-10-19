@@ -1,0 +1,11 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-011",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-011-POS",
+      "test": "the_reference_fixtures_match_their_analytic_values",
+      "expected": "box 400 mm3 / 360 mm2, sphere 523.598775598299 / 314.159265358979, cylinder 50.265482457437 / 75.398223686155"
+    }
+  ]
+}

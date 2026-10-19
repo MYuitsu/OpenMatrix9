@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-005",
+  "l4": "OM9-L4-01-02-005-02",
+  "case": "command-option-parser-negative",
+  "negative_oracle": "Unknown options, malformed numeric, NaN/Infinity report parse error",
+  "cases": [
+    {
+      "id": "P1-an-unknown-option-is-refused",
+      "typed": "Angles=90",
+      "expect": {
+        "error": "Unsupported"
+      }
+    },
+    {
+      "id": "P2-a-malformed-number-is-refused",
+      "typed": "Length=abc",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "P3-nan-is-refused-as-a-number",
+      "typed": "Length=NaN",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "P4-infinity-is-refused-as-a-number",
+      "typed": "Length=inf",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "P5-an-overflowing-literal-is-refused",
+      "typed": "Length=1e400",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "P6-an-unknown-unit-is-refused",
+      "typed": "Length=2.5kg",
+      "expect": {
+        "error": "Unsupported"
+      }
+    },
+    {
+      "id": "P7-an-empty-value-is-refused",
+      "typed": "Length=",
+      "expect": {
+        "error": "Missing"
+      }
+    },
+    {
+      "id": "P8-a-value-that-is-neither-flag-nor-number-is-refused",
+      "typed": "BothSides=maybe",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "P9-an-option-without-a-name-is-refused",
+      "typed": "=Yes",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "P10-the-command-keeps-running-after-a-refused-option",
+      "typed": "Length=NaN",
+      "expect": {
+        "error": "Invalid",
+        "phase_after": "AwaitPoint",
+        "entities": 0
+      }
+    }
+  ]
+}

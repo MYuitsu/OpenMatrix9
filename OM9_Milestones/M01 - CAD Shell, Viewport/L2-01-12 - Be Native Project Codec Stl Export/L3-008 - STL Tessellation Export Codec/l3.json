@@ -96,5 +96,18 @@
     "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
     "execution_status": "SPEC_ONLY; NOT READY TO CODE UNTIL M00 AND TASK L4 AUDIT"
   },
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "DEFERRED_TO_M07_NOT_IN_M01_SCOPE",
+    "target": "standalone Rust OM9",
+    "evidence": [
+      "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/l3.json:8-10",
+      "implementation/design/M01/OM9-L2-01-12/crosswalk.json"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "M07 owns tessellation and the document STL export command."
+    ]
+  },
   "children_l4": []
 }

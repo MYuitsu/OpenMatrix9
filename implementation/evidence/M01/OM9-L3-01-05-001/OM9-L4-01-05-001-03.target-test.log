@@ -1,0 +1,36 @@
+# command: cargo test -p om9-core --test brep_kernel
+# exit: 0
+
+
+running 11 tests
+test a_body_over_the_object_budget_is_refused ... ok
+test a_handle_store_rejects_stale_and_double_dropped_handles ... ok
+test a_brep_body_refuses_broken_topology ... ok
+test a_valid_triangle_passes_brep_validation ... ok
+test the_unlinked_backend_refuses_every_kernel_call_with_one_contract_error ... ok
+test the_adapter_contract_holds_against_a_fixture_backend ... ok
+test the_kernel_policy_serializes_calls_and_transactions ... ok
+test a_handle_store_round_trips_many_objects_without_leaking ... ok
+test every_kernel_error_maps_to_one_contract_error ... ok
+test tolerance_rules_are_exact_at_their_boundaries ... ok
+test handle_and_validation_throughput_is_stated ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+warning: field `live` is never read
+   --> crates\om9-core\src\brep_kernel.rs:340:5
+    |
+335 | pub struct HandleStore<T> {
+    |            ----------- field in this struct
+...
+340 |     live: usize,
+    |     ^^^^
+    |
+    = note: `HandleStore` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-core` (lib) generated 1 warning
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.78s
+     Running tests\brep_kernel.rs (L:\om9-target\debug\deps\brep_kernel-e38391bb18f91301.exe)
+

@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-008",
+  "l4": "OM9-L4-01-01-008-02",
+  "case": "builder-panel-docking-slot-positive",
+  "positive_oracle": "Reserve Builder docking slot below Projects without creating a second Builder model",
+  "documented_left_order": [
+    "icon-history",
+    "main-menu",
+    "display",
+    "snaps",
+    "info-settings",
+    "layers",
+    "projects",
+    "builder-slot"
+  ],
+  "cases": [
+    {
+      "id": "B1-the-slot-is-reserved-directly-below-projects",
+      "expect": {
+        "left_order": "documented_left_order",
+        "builder_slot_order": 7,
+        "projects_order": 6,
+        "builder_slot_visible": true,
+        "builder_slot_is_reserved": true,
+        "builder_slot_is_movable": false,
+        "floating": []
+      }
+    },
+    {
+      "id": "B2-every-placement-is-refused-and-changes-nothing",
+      "ops": [
+        { "op": "ToggleCollapsed", "section": "builder-slot" },
+        { "op": "Move", "section": "builder-slot", "delta": -1 },
+        { "op": "Place", "section": "builder-slot", "side": "left", "index": 0 },
+        { "op": "Dock", "section": "builder-slot", "side": "right" },
+        { "op": "DockHome", "section": "builder-slot" },
+        { "op": "Float", "section": "builder-slot", "rect": [100, 100, 300, 240] },
+        { "op": "SetFloatRect", "section": "builder-slot", "rect": [200, 200, 300, 240] }
+      ],
+      "expect": { "each": { "error": "NotPermitted", "layout_unchanged": true } }
+    },
+    {
+      "id": "B3-the-slot-owns-no-model",
+      "action": "draw a line, then look at the slot",
+      "expect": {
+        "builder_entities": 0,
+        "document_entities": 1,
+        "slot_state_is_layout_only": true,
+        "no_second_model_in_source": true
+      }
+    },
+    {
+      "id": "B4-the-bar-carries-no-close-box-and-starts-no-drag",
+      "expect": { "close_box": false, "drag_can_start": false }
+    },
+    {
+      "id": "B5-the-placeholder-is-noninteractive",
+      "expect": {
+        "every_widget_disabled_or_hover_only": true,
+        "checked_by": "tests/builder_slot.rs scans ui/chrome.rs::builder_slot_ui"
+      }
+    },
+    {
+      "id": "B6-a-layout-file-cannot-break-the-reservation",
+      "bytes": "{\"schema_version\": 2, \"sections\": {\"builder-slot\": {\"visible\": false, \"collapsed\": true, \"dock\": \"right\", \"order\": 0, \"height\": 120.0, \"float\": {\"x\": 100.0, \"y\": 100.0, \"width\": 300.0, \"height\": 240.0}}}}",
+      "expect": {
+        "diagnostic_contains": "Builders is reserved",
+        "builder_slot_dock": "left",
+        "builder_slot_order": 7,
+        "builder_slot_visible": true,
+        "builder_slot_collapsed": false,
+        "builder_slot_float_is_none": true,
+        "left_order": "documented_left_order"
+      }
+    }
+  ]
+}

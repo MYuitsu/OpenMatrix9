@@ -1,0 +1,35 @@
+# OM9-L2-01-08 focused verification
+# utc: 2026-10-17
+
+# command: cargo test -p om9-core --test coordinates
+# exit: 0
+
+
+running 4 tests
+test l3_007_a_local_point_needs_a_frame ... ok
+test l3_007_a_parsed_local_point_becomes_world_only_through_the_frame ... ok
+test l3_007_a_world_point_resolves_without_a_frame_and_round_trips ... ok
+test l3_007_the_parser_keeps_the_session_grammar_and_error_labels ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\coordinates.rs (L:\om9-target\debug\deps\coordinates-74d374396b42d5bc.exe)
+
+
+# command: cargo test -p om9-scene --test coordinate_frame
+# exit: 0
+
+
+running 4 tests
+test a_shifted_cplane_maps_local_coordinates_to_world ... ok
+test the_world_xy_plane_keeps_millimetre_coordinates_unchanged ... ok
+test a_local_point_without_a_frame_is_refused_by_the_typed_door ... ok
+test to_local_is_the_inverse_of_to_world_for_a_shifted_and_rotated_plane ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.97s
+     Running tests\coordinate_frame.rs (L:\om9-target\debug\deps\coordinate_frame-8877ba7770d8b85b.exe)
+

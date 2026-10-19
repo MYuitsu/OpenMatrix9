@@ -1,0 +1,84 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-01-007-01",
+  "l3_id": "OM9-L3-01-01-007",
+  "l3_title": "Global Status And Error Surface",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "goal": "show nonfatal errors and command state to user",
+  "positive_oracle": "Invalid command/OCCT diagnostic visible in status, not lost in console",
+  "negative_oracle": "Error popup cannot swallow escape/cancel state or dismiss silently",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "checkout_note": "As recorded for OM9-L3-01-01-004: the pinned revision is verified in vendor-research/QymCAD; QymCAD/ is not a git checkout here.",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "lines": 2419,
+      "observed_symbols": [
+        "gui.rs:34 report: crate::gui::report_problem::ReportDraft::default()",
+        "gui.rs:731 self.status = crate::i18n::tr(\"g-import-empty\")",
+        "gui.rs:741 self.status = crate::i18n::tr1(\"g-import-place\", \"n\", &n.to_string())",
+        "gui.rs:748 resolve_placement_plane(&mut self.tools.cmd, &mut self.project, &mut self.status, plane)",
+        "gui.rs:198, 298, 338, 365, 424, 538, 586, 644 — the status is threaded as &mut into the feature code"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "QymCAD's status is one String that the next message overwrites: there is no severity, no acknowledgement and no history, so a failure is lost as soon as anything else is said. Its report_problem::ReportDraft is a document the user composes, not a surface. OM9 keeps the threading idea (the operation tells the surface what happened) and adds severity, an explicit acknowledgement and a bounded tail.",
+      "om9_owner": "standalone/crates/om9-app/src/status_surface.rs + ui/chrome.rs::status_bar_ui"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "lines": 130,
+      "observed_symbols": ["qymcad-shell/src/lib.rs:21 pub enum Slot { ... Bottom }"],
+      "decision": "ADAPT",
+      "what_is_missing": "A 'bar across the bottom: the status line' slot exists as a KIND. The shell decides nothing about its content, severity or lifetime.",
+      "om9_owner": "standalone/crates/om9-app/src/workbench_regions.rs (the status bar region) + ui/chrome.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "lines": 1913,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:22 pub struct ClipV", "ui-state/src/lib.rs:206 pub fn set_measure"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No status or error surface at all.",
+      "om9_owner": "standalone/crates/om9-app/src/status_surface.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "lines": 67,
+      "observed_symbols": ["qymcad/Cargo.toml:24 eframe 0.35 with persistence and wgpu"],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only; OM9 pins eframe/egui 0.36.2.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "status_surface.rs:81 pub fn report(&mut self, kind, message) -> bool",
+    "status_surface.rs:93/97/101 info / warning / error",
+    "status_surface.rs:107 pub fn complete_success — never clears an unacknowledged failure",
+    "status_surface.rs:116 pub fn acknowledge — the only way a failure leaves the line",
+    "status_surface.rs:75 pub fn tail — a bounded rolling list of recent messages",
+    "status_surface.rs:121 pub fn line — 'Kind: message' for the status bar",
+    "ui/chrome.rs::status_bar_ui — the always-visible line, the Dismiss button for a failure, elided summary",
+    "ui.rs:506/511/763 — complete_success after a good frame, error on a failed command, report for a typed status"
+  ],
+  "gap_found_by_this_task": [
+    "The bounded tail was reachable only from the unit test: the interface never showed it and the audit receipt never carried it, so 'not lost' rested on the command transcript alone. The item exposes the tail on the status line (hover) and in the receipt (status_tail), which is what the L4-04 integration check records."
+  ],
+  "reuse_decision": "ADAPT the 'the operation tells the surface' threading from gui.rs and the Bottom slot from qymcad-shell; ADD severity, acknowledgement, the bounded tail and its exposure.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-01-007/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-01-007/negative.json",
+    "standalone/crates/om9-app/tests/global_status_surface.rs",
+    "implementation/evidence/M01/OM9-L3-01-01-007/OM9-L4-01-01-007-04.integration.log"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-006",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-006-NEG",
+      "expected": "a non-finite scale is refused by the bridge guard"
+    }
+  ]
+}

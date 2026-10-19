@@ -1,0 +1,543 @@
+# OM9-L2-01-03 regression suite: core
+# command: cargo test -p om9-core
+# cwd: H:\OpenMatrix9\standalone
+# utc: 2026-10-17T01:04:56Z
+# exit: 0
+
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling syn v2.0.119
+   Compiling serde_derive v1.0.228
+   Compiling serde v1.0.228
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-core)
+warning: variable does not need to be mutable
+   --> crates\om9-core\tests\document_graph.rs:868:10
+    |
+868 |     let (mut c, d, a, _b) = grouped_coordinator();
+    |          ----^
+    |          |
+    |          help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-core` (test "document_graph") generated 1 warning (run `cargo fix --test "document_graph" -p om9-core` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.25s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)
+
+running 3 tests
+test retained::indexed_reconciliation_tests::aggregate_held_owners_refuse_reconciliation_scratch_before_changing_disposition ... ok
+test retained::indexed_reconciliation_tests::indexed_reconciliation_rejects_live_reparented_members_and_deleted_parent_aliases ... ok
+test retained::indexed_reconciliation_tests::indexed_reconciliation_keeps_original_member_baselines_and_marks_missing_members_deleted ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\atomic_transactions.rs (L:\om9-target\debug\deps\atomic_transactions-5170427a18c6b716.exe)
+
+running 16 tests
+test legacy_nil_session_is_format_data_until_explicit_runtime_restore ... ok
+test close_and_reopen_of_a_document_clone_cannot_restore_an_old_owner_stamp ... ok
+test revision_overflow_rejects_before_public_state_or_redo_changes ... ok
+test source_document_close_invalidates_job_without_resurrection ... ok
+test postacceptance_notification_failure_reports_committed_receipt ... ok
+test accepted_move_is_one_atomic_undo_and_redo ... ok
+test invalid_source_keeps_immediate_state_and_executable_prior_redo ... ok
+test undo_of_new_insert_does_not_make_its_uuid_available_for_another_object ... ok
+test cross_document_prepare_failure_never_transfers_first_participant ... ok
+test cross_document_move_undo_restores_both_document_owners ... ok
+test no_op_commit_never_erases_redo_or_creates_empty_group ... ok
+test intervening_commit_and_undo_do_not_resurrect_a_prepared_job ... ok
+test panicking_callback_is_rejected_and_barrier_is_released ... ok
+test cancellation_after_prepare_keeps_every_record_and_redo ... ok
+test preacceptance_callback_cannot_mutate_or_veto_with_partial_state ... ok
+test deleted_uuid_cannot_be_reallocated_to_resurrect_an_old_source_stamp ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\cancellation_links.rs (L:\om9-target\debug\deps\cancellation_links-6386d48d71f70502.exe)
+
+running 3 tests
+test cancellation_union_deduplicates_shared_flags_and_bounds_distinct_owners ... ok
+test cancellation_union_is_transitive_and_own_cancel_remains_shared ... ok
+test cancellation_union_observes_both_original_owners ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\capability_gates.rs (L:\om9-target\debug\deps\capability_gates-abca6b1b61522415.exe)
+
+running 4 tests
+test source_presence_never_enables_a_capability ... ok
+test matching_semantic_receipt_enables_only_declared_internal_rust_family ... ok
+test native_subset_needs_matching_native_abi_closure_and_runtime_receipts ... ok
+test commit_requires_actual_target_receipt_and_failed_or_legacy_receipt_is_insufficient ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_availability.rs (L:\om9-target\debug\deps\command_availability-4be5106acb1013e9.exe)
+
+running 4 tests
+test a7_to_a8_admit_reads_the_context_and_the_option_names_it_was_given ... ok
+test a1_to_a6_availability_follows_the_session_state ... ok
+test fixture_design_pair_is_present ... ok
+test b1_to_b7_a_command_that_cannot_run_is_never_offered ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_descriptor.rs (L:\om9-target\debug\deps\command_descriptor-8a1d9bddaff701e3.exe)
+
+running 6 tests
+test d1_the_descriptor_declares_its_signature ... ok
+test d2_a_declared_option_resolves_ignoring_case ... ok
+test d5_an_option_less_command_is_still_a_descriptor ... ok
+test e1_to_e4_a_descriptor_that_cannot_be_honoured_is_refused ... ok
+test fixture_design_pair_is_present ... ok
+test d3_to_d4_the_descriptor_is_serializable_and_deterministic ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_registry.rs (L:\om9-target\debug\deps\command_registry-afaa0ce0b3b26aa5.exe)
+
+running 4 tests
+test r1_to_r6_a_name_resolves_to_one_descriptor ... ok
+test fixture_design_pair_is_present ... ok
+test n1_to_n7_a_name_the_registry_cannot_give_one_answer_for_is_refused ... ok
+test r7_an_operation_round_trips_through_json_with_its_aliases ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\coordinator_authority.rs (L:\om9-target\debug\deps\coordinator_authority-643793c7513c0adf.exe)
+
+running 2 tests
+test prepared_transaction_cannot_publish_into_an_equal_coordinator_sharing_the_world ... ok
+test aborting_a_caller_cannot_revive_a_prepared_global_transaction ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\coordinator_held_startup.rs (L:\om9-target\debug\deps\coordinator_held_startup-92f9d35aa47991c4.exe)
+
+running 1 test
+test externally_held_startup_is_rejected_before_new_authority_allocation ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\curve_oracles.rs (L:\om9-target\debug\deps\curve_oracles-b5fc3b526dcebb04.exe)
+
+running 9 tests
+test analytic_circle_d0_d1_d2_d3_use_native_radians_and_world_frame ... ok
+test circle_native_parameter_mapping_preserves_phase_and_scales_every_derivative ... ok
+test endpoints_are_one_sided_and_parameters_outside_domain_reject ... ok
+test interior_discontinuity_cannot_claim_unqualified_derivative ... ok
+test captured_curve_evaluator_retains_admission_limits_and_uses_polynomial_oracle ... ok
+test overflowing_native_parameter_span_never_produces_a_false_finite_line_value ... ok
+test reversed_fraction_derivatives_scale_each_order_without_translating_vectors ... ok
+test mapped_circle_fraction_derivatives_do_not_overflow_canceling_native_scales ... ok
+test rational_quadratic_has_nonzero_third_derivative_from_quotient ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\definition_units.rs (L:\om9-target\debug\deps\definition_units-6ad5f06a420902f1.exe)
+
+running 8 tests
+test earlier_source_units_without_definition_context_remain_compatible ... ok
+test definition_unit_map_rejects_uuid_aliases_and_duplicate_keys_before_the_value ... ok
+test definition_resolution_requires_a_native_definition_in_its_source_namespace ... ok
+test nonfinite_declared_resolution_and_unresolved_bound_definitions_reject ... ok
+test unresolved_definition_units_are_retained_without_fabricating_a_resolution ... ok
+test definition_context_owned_name_capacity_is_admitted ... ok
+test explicit_definition_units_survive_owned_serialization_and_are_distinct_from_model_units ... ok
+test incomplete_conflicting_or_nonpositive_definition_resolutions_reject ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\document_changes.rs (L:\om9-target\debug\deps\document_changes-7deb1fc613c5a156.exe)
+
+running 6 tests
+test a_diff_between_two_documents_is_refused ... ok
+test an_idle_document_produces_no_batch ... ok
+test deleting_an_entity_reports_removal_and_group_pruning ... ok
+test an_extension_edit_is_reported_as_an_extension_change ... ok
+test feature_and_group_lifecycle_changes_are_ordered_and_deterministic ... ok
+test adding_an_entity_and_a_group_is_one_ordered_batch_each_with_a_new_revision ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\document_graph.rs (L:\om9-target\debug\deps\document_graph-b1a683feb2892502.exe)
+
+running 30 tests
+test l3_002_unsupported_entity_kinds_are_reported_never_downgraded ... ok
+test l3_003_a_stale_or_dangling_handle_is_never_a_live_object ... ok
+test l3_003_geometry_handle_and_display_attributes_are_queryable_separately ... ok
+test l3_006_a_hidden_layer_hides_and_a_locked_layer_denies_editing ... ok
+test l3_008_nested_cycles_are_refused_by_document_validation ... ok
+test l3_009_a_malformed_extension_payload_is_refused ... ok
+test l3_004_layer_with_an_unknown_parent_is_refused ... ok
+test l3_005_a_deleted_layer_never_leaves_dangling_membership ... ok
+test l3_004_layer_record_keeps_its_identity_when_renamed ... ok
+test l3_004_layer_order_must_list_every_layer_exactly_once ... ok
+test l3_009_an_unknown_slot_survives_a_json_round_trip ... ok
+test l3_002_every_typed_entity_record_keeps_its_kind_when_round_tripped ... ok
+test l3_001_a_feature_output_must_be_a_live_object ... ok
+test l3_006_a_locked_layer_refuses_the_write_without_mutating_the_document ... ok
+test l3_009_a_bare_slot_name_is_not_a_slot ... ok
+test l3_009_a_locked_source_refuses_the_extension_write ... ok
+test l3_007_unknown_or_duplicate_members_are_refused_atomically ... ok
+test l3_008_a_self_referencing_definition_is_refused_without_a_partial_write ... ok
+test l3_005_reassigning_an_object_to_another_layer_keeps_its_entity_id ... ok
+test l3_008_a_definition_insert_is_admitted_on_a_layerless_document ... ok
+test l3_007_a_group_can_reference_an_object_created_by_the_same_request ... ok
+test l3_001_retired_feature_id_is_never_reallocated ... ok
+test l3_008_one_undo_removes_the_definition_and_all_of_its_occurrences ... ok
+test l3_001_two_entities_and_one_feature_receive_unique_stable_ids ... ok
+test l3_007_grouping_and_ungrouping_never_changes_geometry_or_object_ids ... ok
+test l3_007_an_undone_group_id_is_never_reallocated ... ok
+test l3_009_extension_slots_keep_object_identity_and_bump_attributes_only ... ok
+test l3_008_two_instances_share_one_definition_without_cloning_topology ... ok
+test l3_007_deleting_the_last_member_removes_the_empty_group_and_keeps_the_rest ... ok
+test l3_009_clearing_a_slot_removes_it_and_reports_it_as_unknown_when_replaced ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\embedded_resources.rs (L:\om9-target\debug\deps\embedded_resources-9380885598c3686f.exe)
+
+running 3 tests
+test resource_admission_counts_payload_copy_peak_and_rejects_bad_metadata ... ok
+test admitted_resource_owns_immutable_bytes_hash_and_typed_identity ... ok
+test descriptor_without_matching_payload_is_not_a_valid_live_document ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\held_preparation.rs (L:\om9-target\debug\deps\held_preparation-e8b017e930207441.exe)
+
+running 6 tests
+test prepared_receipt_reservation_checks_bound_cancellation ... ok
+test held_output_reservation_uses_the_same_counter_as_new_mutations ... ok
+test prepared_receipt_reservation_cannot_cross_coordinator_or_caller_lifecycle ... ok
+test external_input_is_reserved_before_preparing_a_candidate_and_undo ... ok
+test prepared_receipt_reservation_replaces_all_counters_instead_of_accumulating_old_metadata ... ok
+test extending_prepared_receipt_reserves_full_candidate_and_failure_keeps_old_reservation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\history_replay.rs (L:\om9-target\debug\deps\history_replay-494d76acd3f0242b.exe)
+
+running 7 tests
+test mismatch_between_shape_snapshot_result_and_source_stamp_rejects_all_outputs ... ok
+test geometry_result_recipe_and_metadata_publish_in_one_undo_group ... ok
+test cycle_is_rejected_before_graph_or_shape_mutation ... ok
+test history_child_geometry_lock_does_not_block_reference_input_or_appearance ... ok
+test missing_parent_is_unresolved_without_rebinding_same_label ... ok
+test replay_preserves_child_identity_and_current_source_revision ... ok
+test source_change_marks_two_generations_dirty_and_old_results_stale ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\job_lifecycle.rs (L:\om9-target\debug\deps\job_lifecycle-bd3deff05cdaac57.exe)
+
+running 5 tests
+test worker_budget_uses_floor_sixty_percent_without_four_worker_ceiling ... ok
+test canceled_and_duplicate_late_replies_never_become_ready ... ok
+test immutable_worker_input_survives_close_and_reply_is_discarded ... ok
+test commit_then_undo_still_invalidates_job_even_when_source_stamp_matches_again ... ok
+test active_savepoints_share_aggregate_budget_with_next_private_clone ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_state.rs (L:\om9-target\debug\deps\layer_state-4eded658f259dc0b.exe)
+
+running 7 tests
+test hidden_masks_all_interaction_without_mutating_explicit_selectability ... ok
+test restored_custom_labels_cannot_collide_but_generic_import_names_can ... ok
+test preset_slot_is_durable_identity_not_label_and_duplicate_slots_refuse ... ok
+test basic_preset_palette_cannot_be_customized_on_creation_or_restore ... ok
+test two_proposed_advanced_renames_cannot_collide_in_one_batch ... ok
+test preset_updates_keep_slot_identity_and_reject_basic_customization_and_reserved_aliases ... ok
+test hiding_and_showing_do_not_restore_explicit_invisible_or_unselectable_state ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_transactions.rs (L:\om9-target\debug\deps\layer_transactions-0fecc822c7eb7e96.exe)
+
+running 12 tests
+test layer_revision_overflow_and_new_layer_node_budget_preserve_immediate_world ... ok
+test one_batch_cannot_lock_a_target_then_assign_using_its_old_permission ... ok
+test cycle_locked_current_and_cancel_reject_before_any_publication ... ok
+test assign_changes_membership_and_color_atomically_without_changing_current_or_placement ... ok
+test lazy_create_and_current_are_one_undo_and_retired_uuid_cannot_be_reused ... ok
+test current_noop_at_full_history_budget_succeeds_and_keeps_prior_redo ... ok
+test foreign_coordinator_and_reopened_equal_counter_document_reject_layer_capture ... ok
+test mixed_assignment_locked_source_refuses_whole_batch_and_preserves_redo ... ok
+test current_only_preserves_existing_entities_and_noop_keeps_executable_redo ... ok
+test oversized_assignment_capture_and_late_cancel_keep_world_and_old_redo ... ok
+test caller_savepoint_rollback_retires_created_layer_and_keeps_global_redo ... ok
+test visibility_lock_and_unlock_preserve_explicit_object_preferences ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\lazy_layer_assignment.rs (L:\om9-target\debug\deps\lazy_layer_assignment-0bc2c99bc7f682e3.exe)
+
+running 1 test
+test create_and_assign_new_preset_is_one_atomic_undo_in_either_request_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\model_admission.rs (L:\om9-target\debug\deps\model_admission-0727b1fec776db28.exe)
+
+running 13 tests
+test aggregate_budget_rejects_overflow_and_sum_of_admitted_items ... ok
+test bounds_distinguish_unknown_empty_and_invalid_range ... ok
+test finite_and_nurbs_admission_rejects_before_entity_creation ... ok
+test mesh_and_cloud_have_distinct_master_types_and_ordered_channels ... ok
+test surface_grid_dimensions_are_checked_without_overflow ... ok
+test unit_conversion_changes_lengths_without_scaling_dimensionless_basis ... ok
+test reused_label_never_resolves_a_deleted_object_stamp ... ok
+test retained_unused_string_and_geometry_capacity_is_part_of_the_byte_budget ... ok
+test permission_visibility_selection_edit_and_locked_reference_are_separate ... ok
+test point_map_cannot_be_admitted_below_its_fixed_entity_storage_floor ... ok
+test nested_instances_compose_world_placement_once_and_preserve_definition ... ok
+test coordinator_retention_includes_undo_label_capacity_and_both_document_snapshots ... ok
+test replacing_redo_branch_accounts_old_redo_and_new_undo_together_before_acceptance ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\provenance.rs (L:\om9-target\debug\deps\provenance-c84f41d8daa39d4f.exe)
+
+running 4 tests
+test an_object_with_no_import_namespace_has_no_provenance ... ok
+test an_imported_object_reports_source_path_checksum_and_original_identity ... ok
+test a_source_without_a_matching_embedded_hash_has_no_provenance ... ok
+test a_natively_created_object_is_never_labelled_as_an_import ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\resource_transactions.rs (L:\om9-target\debug\deps\resource_transactions-fb965e556e2cbc50.exe)
+
+running 12 tests
+test a_resource_cannot_be_owned_by_two_documents ... ok
+test resource_and_object_identity_authority_are_tagged_independently ... ok
+test initial_resource_id_cannot_be_replaced_or_reallocated_after_deletion ... ok
+test resources_and_geometry_publish_privately_as_one_undo_entry ... ok
+test resource_revisions_use_the_initial_batch_snapshot ... ok
+test caller_rejected_resource_batch_keeps_pending_state_and_prior_redo ... ok
+test cancellation_after_prepare_does_not_publish_or_retire_the_resource_id ... ok
+test rejected_acceptance_guard_preserves_resource_authority_and_prior_redo ... ok
+test caller_resource_identity_stays_retired_after_savepoint_rollback_and_abort ... ok
+test resource_id_stays_retired_after_undo_and_after_delete ... ok
+test resource_insert_rejects_aggregate_retention_before_a_candidate_is_returned ... ok
+test invalid_resource_batches_preserve_the_snapshot_and_executable_redo ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\retained_entity_baselines.rs (L:\om9-target\debug\deps\retained_entity_baselines-e0860d8aabd850db.exe)
+
+running 13 tests
+test entity_baseline_helper_rejects_wrong_kind_host_and_native_identity_alias ... ok
+test unknown_policy_and_incomplete_baseline_packets_reject ... ok
+test legacy_bound_helper_never_invents_per_field_baselines ... ok
+test field_fingerprints_ignore_entity_identity_and_revision_counters ... ok
+test legacy_policy_and_field_baselines_stay_unknown_after_cold_serde ... ok
+test retained_only_records_do_not_collapse_preserve_geometry_or_unknown_policy ... ok
+test geometry_placement_attributes_and_label_edits_have_independent_hashes ... ok
+test root_and_definition_member_helpers_capture_full_entity_and_independent_fields ... ok
+test policy_and_independent_baselines_survive_cold_serde_without_reinterpretation ... ok
+test field_baseline_is_invalid_on_retained_only_or_layer_records ... ok
+test unchanged_record_cannot_claim_forged_independent_baselines ... ok
+test spare_record_capacity_charges_inline_field_baselines_and_rejects_tight_limits ... ok
+test field_baselines_remain_original_across_edit_and_delete_dispositions ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\retained_imports.rs (L:\om9-target\debug\deps\retained_imports-0b292a9cda059b3b.exe)
+
+running 17 tests
+test aggregate_object_count_rejects_import_before_candidate_allocation ... ok
+test retained_only_native_record_has_no_fabricated_entity_and_referenced_resource_cannot_be_deleted ... ok
+test caller_rollback_preserves_retired_namespace_authority_and_prior_redo ... ok
+test retained_transfer_is_rejected_before_changing_either_document ... ok
+test invalid_import_has_no_partial_source_namespace_objects_or_undo ... ok
+test direct_cold_metadata_tampering_cannot_claim_unchanged_or_resurrect_deleted_source ... ok
+test deleted_member_aliases_cannot_claim_two_retired_owners_in_a_cold_document ... ok
+test source_and_namespace_id_reuse_after_import_undo_is_rejected_but_redo_restores_them ... ok
+test unresolved_units_require_an_explicit_owned_resolution_before_import ... ok
+test layers_assignment_refuses_retained_root_without_erasing_namespace_or_redo ... ok
+test two_imports_of_identical_source_use_separate_host_and_retained_namespaces ... ok
+test definition_member_binding_remains_local_to_its_shared_definition ... ok
+test import_requires_every_root_layer_definition_and_local_member_to_be_source_bound ... ok
+test edited_deleted_and_new_records_remain_distinct_and_undo_restores_original_binding ... ok
+test late_cancellation_stale_import_and_failed_acceptance_keep_prior_redo_and_unaccepted_ids ... ok
+test placement_attributes_and_prepared_replacement_all_update_the_retained_disposition ... ok
+test retained_validation_admits_record_scratch_with_all_owned_payload_and_document_storage ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\retained_peak_review.rs (L:\om9-target\debug\deps\retained_peak_review-4f9635ddac60e578.exe)
+
+running 3 tests
+test held_reservations_cover_both_peer_orders_and_undo_snapshot_owners ... ok
+test mutation_input_remains_reserved_during_initial_coordinator_validation ... ok
+test validation_scratch_must_fit_alongside_other_retained_documents ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.37s
+
+     Running tests\selection_state.rs (L:\om9-target\debug\deps\selection_state-7d526e8cd8198c3e.exe)
+
+running 7 tests
+test a_stale_list_index_is_never_resolved_as_a_neighbour ... ok
+test a_selection_from_another_document_generation_is_stale ... ok
+test selection_is_typed_identity_and_survives_a_stable_document ... ok
+test selecting_an_unknown_object_is_refused ... ok
+test deleting_an_object_invalidates_its_selection_entry ... ok
+test a_subshape_reference_must_name_a_live_object ... ok
+test the_selection_only_describes_a_document_that_validates ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\source_binding.rs (L:\om9-target\debug\deps\source_binding-4f835c8b22168df4.exe)
+
+running 8 tests
+test selected_point_peak_copy_is_part_of_aggregate_admission ... ok
+test owned_option_bytes_share_budget_with_source_snapshot ... ok
+test whole_fit_points_is_not_replaced_by_a_prefix_or_subset ... ok
+test capture_owns_immutable_provenance_and_revalidation_detects_context_change ... ok
+test ordered_subset_preserves_original_native_indices_including_hidden_points ... ok
+test numeric_option_domain_and_dimension_are_explicit ... ok
+test unknown_role_option_wrong_kind_and_stale_generation_reject ... ok
+test duplicate_out_of_range_and_overlapping_subsets_are_rejected ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\startup_layers.rs (L:\om9-target\debug\deps\startup_layers-8b9a41d676a89ada.exe)
+
+running 3 tests
+test current_none_preserves_default_curve_style_without_creating_a_group ... ok
+test new_document_has_no_current_layer_or_eager_groups ... ok
+test output_on_off_layer_is_admitted_invisible_and_locked_layer_rejects ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\transaction_scopes.rs (L:\om9-target\debug\deps\transaction_scopes-809678b12e593889.exe)
+
+running 8 tests
+test booked_scope_failed_prepare_keeps_booking_and_prior_redo ... ok
+test scope_owned_by_another_thread_cannot_be_finished ... ok
+test cancellation_keeps_active_nested_scope_and_old_redo_immediately ... ok
+test wrong_transaction_identity_cannot_borrow_caller_scope ... ok
+test nonrecording_empty_scope_keeps_prior_stacks_and_success_creates_no_undo ... ok
+test active_scope_merge_retains_first_write_baseline_and_one_undo ... ok
+test nested_savepoint_abort_restores_parent_pending_state ... ok
+test rolled_back_caller_identity_is_retired_and_global_prior_redo_remains_executable ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+# OM9-L2-01-03 regression suite: scene
+# command: cargo test -p om9-scene
+# cwd: H:\OpenMatrix9\standalone
+# utc: 2026-10-17T01:04:56Z
+# exit: 0
+
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.57s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_scene-64822c60d893137a.exe)
+
+running 1 test
+test workspace::tests::layout_overflow_rejects_before_active_maximized_or_view_state_changes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\affine_gesture.rs (L:\om9-target\debug\deps\affine_gesture-4973adc76110cb39.exe)
+
+running 5 tests
+test preview_and_pick_proxy_use_the_same_gesture_matrix ... ok
+test warm_affine_updates_reuse_buffers_and_cancel_keeps_geometry_and_undo ... ok
+test commit_updates_exact_placement_in_one_undo_and_redo ... ok
+test stale_gesture_is_rejected_without_touching_public_redo ... ok
+test unchanged_gesture_accepts_no_document_write_or_undo_and_keeps_redo ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\camera_grid.rs (L:\om9-target\debug\deps\camera_grid-1350e14951db56b9.exe)
+
+running 5 tests
+test cplane_coordinate_resolution_is_independent_from_camera_navigation ... ok
+test invalid_camera_frame_clipping_and_viewport_ranges_reject ... ok
+test maximize_restore_preserves_each_view_and_original_titles ... ok
+test orthographic_projection_and_ray_share_world_frame_after_pan ... ok
+test finite_grid_is_world_geometry_for_display_only_with_exact_subdivision ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\instance_admission.rs (L:\om9-target\debug\deps\instance_admission-bbd8fb9099b23a6c.exe)
+
+running 1 test
+test empty_shared_instances_charge_each_occurrence_before_descent ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests\layer_colors.rs (L:\om9-target\debug\deps\layer_colors-396ce7e9c6fa2cec.exe)
+
+running 2 tests
+test hidden_root_and_definition_member_mask_scene_display_pick_edit_and_reference ... ok
+test assigned_root_uses_layer_color_and_later_swatch_changes_without_geometry_edits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\metadata_cache.rs (L:\om9-target\debug\deps\metadata_cache-47df5e6762ca23c9.exe)
+
+running 2 tests
+test metadata_refresh_reuses_buffers_and_updates_instance_masks_color_and_stamps ... ok
+test cache_refresh_refuses_changed_geometry_owner_and_unreserved_metadata_clone ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\reference_workspace.rs (L:\om9-target\debug\deps\reference_workspace-7b8d707137d24cd8.exe)
+
+running 1 test
+test through_finger_reference_projects_world_xz_and_side_reference_projects_world_yz ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\shared_instances.rs (L:\om9-target\debug\deps\shared_instances-a4f8678796eae070.exe)
+
+running 4 tests
+test shared_definition_captures_both_occurrences_without_duplicating_members_as_roots ... ok
+test one_definition_insert_and_one_undo_remove_definition_both_occurrences_and_their_objects ... ok
+test each_occurrence_picks_its_own_root_and_reports_the_definition_member_path ... ok
+test occurrence_placements_are_independent_and_member_transform_equals_the_placement ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\tmp_probe.rs (L:\om9-target\debug\deps\tmp_probe-9199a88e5971a511.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\world_picking.rs (L:\om9-target\debug\deps\world_picking-d52eaa6fcc95a24d.exe)
+
+running 7 tests
+test mesh_triangle_pick_maps_to_original_polygon_face ... ok
+test mapped_circle_sampling_uses_angular_span_and_keeps_native_parameters ... ok
+test nested_mirrored_instance_pick_keeps_root_member_path_and_single_world_transform ... ok
+test rendered_curve_picking_resolves_source_parameter_and_never_creates_mesh_master ... ok
+test hidden_locked_and_unselectable_stay_distinct_for_reference_picking ... ok
+test stale_camera_or_source_invalidates_held_pick_before_dispatch ... ok
+test mapped_circle_extreme_domains_preserve_native_samples_or_disclose_unrepresentable_bindings ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_scene
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+

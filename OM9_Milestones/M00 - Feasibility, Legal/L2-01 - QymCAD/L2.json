@@ -41,5 +41,7 @@
       "id": "OM9-M00-L3-01-03",
       "file": "M00 - Feasibility, Legal/L2-01 - QymCAD/L3-03 - REUSE ADAPT ADD architecture/l3.json"
     }
-  ]
+  ],
+  "gate_id": "G00-01",
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
 }

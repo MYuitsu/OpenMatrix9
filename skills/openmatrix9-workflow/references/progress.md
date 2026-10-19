@@ -1,6 +1,6 @@
 # Persistent implementation progress
 
-Use `docs/openmatrix9-progress.json` in the project checkout as the evidence ledger. Spec v2 and the project README are synchronized progress views; their status fields do not replace the ledger.
+Use `docs/openmatrix9-progress.json` in the project checkout as the evidence ledger. milestone specs and the project README are synchronized progress views; their status fields do not replace the ledger.
 
 Each work item records:
 
@@ -21,13 +21,13 @@ Update the ledger after a meaningful verified step; preserve unrelated work item
 
 Completion is stage-specific. A mapped procedure can still be behaviorally uncertain. An implemented feature can still lack runtime validation. A skill suite being available does not advance product implementation status.
 
-## Kiểm tra Spec v2 và README sau khi implement
+## Kiểm tra milestone specs và README sau khi implement
 
 Sau mỗi phần triển khai và kiểm tra, thực hiện bước đồng bộ này trước khi báo hoàn tất; không cần xin lại phép để ghi tiến độ kỹ thuật.
 
-1. Xác định package Spec v2 trong checkout hiện tại: `OpenMatrix9_Codex_Spec_v2/` trực tiếp trong checkout; không fallback v1/ref/matrix9, v1 giữ bất biến. Đối chiếu đúng OM9 ID, command key và phạm vi đã làm với spec tương ứng.
-2. Cập nhật phần quyết định/tiến độ triển khai và checklist nghiệm thu của từng spec liên quan: phần đã làm, giới hạn, ngày kiểm tra và đường dẫn bằng chứng. Chỉ đánh dấu `[x]` cho tiêu chí thực sự đã kiểm chứng; giữ `[ ]` cho phần chưa làm hoặc chưa kiểm tra. Giữ nguyên nội dung hành vi nguồn. Rust tests qua nhưng chưa chạy executable OM9/native backend phù hợp thì ghi `implemented` và native chưa kiểm chứng, không ghi `validated`.
-3. Đồng bộ `IMPLEMENTATION_STATUS.md` trong package nếu có. Nếu `FEATURES.json` và `FEATURES.yaml` đang chứa trạng thái triển khai theo quy ước của package, cập nhật cùng các ID đã kiểm tra và giữ hai bản nhất quán; không thay đổi metadata nguồn hoặc các ID không liên quan. Một slice đã kiểm chứng vẫn là feature triển khai một phần khi còn yêu cầu chưa hỗ trợ. Sau khi sửa nội dung package, làm mới `MANIFEST.json` nếu có, theo `IMPLEMENTATION_RULES.md` của package.
+1. Nguồn nền tảng là `OM9_Milestones/M01 - CAD Shell, Viewport`; tra exact milestone/ID và owner bằng router. Không yêu cầu package policy cũ.
+2. Cập nhật `runtime_implementation` riêng trong JSON milestone liên quan, giữ nguyên planning/source content và IDs: phạm vi đã làm, giới hạn, ngày kiểm tra, bằng chứng. Chỉ ghi validated khi có kiểm chứng đúng target; manual review giữ pending đến khi reviewer thực xác nhận.
+3. Giữ các status/traceability views liên quan nhất quán với phạm vi đã kiểm chứng. Không tự tạo catalog/manifest cũ hoặc đổi hàng không liên quan.
 4. Cập nhật mục tiến độ lệnh trong `README.md` ở gốc OpenMatrix9: trạng thái, phạm vi hỗ trợ, giới hạn và ngày cập nhật theo quy ước bảng hiện có. Đối chiếu các dòng lặp lại hoặc alias với đường thực thi thực tế; một alias chưa được kiểm tra không tự động hưởng trạng thái của lệnh khác. Nếu README nhóm đang có bảng tiến độ riêng, đồng bộ các dòng liên quan; README chỉ làm mục lục thì giữ vai trò điều hướng của nó.
 5. Ghi bằng chứng chi tiết, tests, phần chưa kiểm chứng và bước tiếp theo vào ledger. Đọc lại diff của spec, các bảng trạng thái và README để bảo đảm cùng mô tả một phạm vi; dẫn tới các tài liệu đã cập nhật trong báo cáo cuối.
 
@@ -37,4 +37,4 @@ Việc ghi tiến độ độc lập với xác nhận lưu nghiệp vụ mới 
 
 ## Tách bằng chứng chuyển nền
 
-Ledger phải ghi target/scope và fingerprint thực. Native passes cũ vẫn là legacy_freecad, không nâng standalone status. Đồng bộ FEATURES JSON/YAML/lookup/status/MIGRATION_LEDGER và MANIFEST v2 theo evidence; giữ v1/hash/báo cáo cũ. Kiểm skill/routing chỉ ghi documentation_validated, không feature completion.
+Ledger phải ghi target/scope và fingerprint thực. Native passes cũ vẫn là legacy_freecad, không nâng standalone status. Đồng bộ milestone runtime_implementation/status và README theo evidence; giữ hash/báo cáo cũ. Kiểm skill/routing chỉ ghi documentation_validated, không feature completion.

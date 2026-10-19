@@ -1,0 +1,15 @@
+[package]
+name = "om9-render"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Headless wgpu render loop for the OM9 viewport (colour + depth target, mesh upload, readback)"
+
+[dependencies]
+wgpu = "=30.0.1"
+pollster = "0.4"
+bytemuck = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+om9-kernel = { path = "../om9-kernel" }

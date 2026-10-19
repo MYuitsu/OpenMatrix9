@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-08-004",
+  "l4": "OM9-L4-01-08-004-02",
+  "title": "Typed Numeric Parameter Values",
+  "case": "om9-l3-01-08-004-negative",
+  "negative_oracle": "Số trần không phải length/angle; count 2.5 là NotAnInteger; sai chiều là WrongDimension.",
+  "refusals": [
+    "UnitError::MissingUnit { .. }      -> Invalid(\"missing unit\")",
+    "UnitError::WrongDimension { .. }   -> Invalid(\"numeric dimension\")",
+    "UnitError::NotAnInteger { .. }     -> Invalid(\"integer value\")"
+  ],
+  "runtime_tests": [
+    "cargo test -p om9-core --test units_parameters l3_004"
+  ]
+}

@@ -18,7 +18,7 @@ def source_paths():
     return {p for p in (ROOT / "standalone").rglob("*") if p.is_file()
             and "target" not in p.parts and p.suffix in {".rs", ".toml", ".lock", ".json", ".cpp", ".hpp"}} | {
                 Path(__file__).resolve(), ROOT / "tools/validate_standalone_exchange.py",
-                ROOT / "standalone/native/CMakeLists.txt", ROOT / "rust/src/layers.rs"}
+                ROOT / "native/CMakeLists.txt", ROOT / "rust/src/layers.rs"}
 
 
 def main():
@@ -26,8 +26,8 @@ def main():
     scratch = ROOT / "build/standalone-validation"
     scratch.mkdir(parents=True, exist_ok=True)
     commands = [
-        ["rtk", "proxy", "cargo", "fmt", "--manifest-path", "standalone/Cargo.toml", "--all", "--", "--check"],
-        ["rtk", "proxy", "cargo", "clippy", "--manifest-path", "standalone/Cargo.toml", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"],
+        ["rtk", "proxy", "cargo", "fmt", "--manifest-path", "Cargo.toml", "--all", "--", "--check"],
+        ["rtk", "proxy", "cargo", "clippy", "--manifest-path", "Cargo.toml", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"],
     ]
     tests = [
         ["-p", "om9-core", "--test", "layer_transactions"],
@@ -40,7 +40,7 @@ def main():
         ["-p", "om9-app", "--test", "cold_layers"],
         ["--workspace"],
     ]
-    commands += [["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path", "standalone/Cargo.toml", *args, "--", "--nocapture"] for args in tests]
+    commands += [["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path", "Cargo.toml", *args, "--", "--nocapture"] for args in tests]
     commands += [["rtk", "proxy", "python", "tools/validate_standalone_exchange.py"]]
     runs = []
     cold = []

@@ -1,11 +1,11 @@
 ---
 name: openmatrix9-build-validation
-description: Build and validate OpenMatrix9 standalone Rust, selected OCCT/openNURBS adapters and Matrix9 UI against specs v2; use FreeCAD plugin checks only for explicit legacy maintenance.
+description: Build and validate OpenMatrix9 standalone Rust, selected OCCT/openNURBS adapters and Matrix9 UI against milestone contracts; use FreeCAD plugin checks only for explicit legacy maintenance.
 ---
 
 # Kiểm chứng đúng target OM9
 
-Đọc [đích v2](../openmatrix9-workflow/references/spec-v2-target.md) và [Rust/FFI](../openmatrix9-workflow/references/rust-first.md). Workflow `route build-validation` cung cấp policy/design, không chứng minh executable đã tồn tại.
+Đọc [đích milestone](../openmatrix9-workflow/references/milestones-target.md) và [Rust/FFI](../openmatrix9-workflow/references/rust-first.md). Workflow `route build-validation` cung cấp policy/design, không chứng minh executable đã tồn tại.
 
 Theo [validation-playbook](references/validation-playbook.md), resolve target/crate/build config thực trước khi chạy. Rust core hiện có và examples là portable/legacy component evidence, không thay executable standalone. Không reconfigure/build FreeCAD root cho v2. Toolkit dependencies, ABI, version và scheduler phải kiểm theo operation được chọn.
 

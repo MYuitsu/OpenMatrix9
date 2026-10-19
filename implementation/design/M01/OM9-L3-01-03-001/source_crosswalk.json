@@ -1,0 +1,52 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-001-01",
+  "l3_id": "OM9-L3-01-03-001",
+  "l3_title": "Document Entity IDs",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "stable EntityId and FeatureId allocation and lifetime",
+  "positive_oracle": "Hai entity và một feature nhận ID duy nhất; Undo/Redo và save/reopen giữ nguyên ID.",
+  "negative_oracle": "ID đã nghỉ không được cấp lại; feature trỏ tới output không tồn tại bị từ chối.",
+  "reuse_decision": "EXTEND",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/identity.rs",
+      "symbols": [
+        "identifier! macro (FeatureId, GroupId)",
+        "unique_named_slot_map"
+      ],
+      "decision": "EXTEND"
+    },
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "symbols": [
+        "Feature",
+        "FeatureKind",
+        "Document.features",
+        "Document::feature",
+        "validate_internal feature rules"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-core/src/transaction.rs",
+      "symbols": [
+        "Mutation::FeatureInsert",
+        "AllocatedIdentity::Feature",
+        "IdentityLedger::contains_feature"
+      ],
+      "decision": "EXTEND"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/{identity,model,transaction}.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_001           -> 3 passed",
+    "cargo test -p om9-archive --test document_identity_round_trip -> 4 passed"
+  ],
+  "notes": "EXTEND the typed-UUID ledger; ADD the typed feature record"
+}

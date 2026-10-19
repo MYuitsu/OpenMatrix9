@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-007",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "failed-read",
+      "expect": {
+        "current document": "unchanged"
+      }
+    },
+    {
+      "id": "solver-mismatch",
+      "expect": {
+        "recipe": "unresolved"
+      }
+    },
+    {
+      "id": "foreign-snapshot",
+      "expect": {
+        "error": "Invalid(snapshot document)"
+      }
+    },
+    {
+      "id": "unknown-snapshot-version",
+      "expect": {
+        "error": "Unsupported"
+      }
+    }
+  ]
+}

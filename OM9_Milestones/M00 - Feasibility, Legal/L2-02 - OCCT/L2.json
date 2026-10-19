@@ -41,5 +41,30 @@
       "id": "OM9-M00-L3-02-03",
       "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/l3.json"
     }
-  ]
+  ],
+  "kernel_pin": {
+    "version": "8.0.1",
+    "tag": "V8_0_1",
+    "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
+    "pin_file": "native/occt/pin.json",
+    "fetch_tool": "implementation/tools/fetch_occt.py",
+    "accuracy_patch": "tools/patches/occt-8.0.1-offset-d3.patch",
+    "upgrade_gate": "implementation/tools/occt_upgrade_gate.py",
+    "gate_evidence": "implementation/evidence/M00/OM9-L2-02/OCCT-CONFORMANCE-8.0.1-stock.json",
+    "gate_record": "implementation/design/M00/OM9-L2-02/OCCT-UPGRADE-GATE.md"
+  },
+  "gate_state": {
+    "as_of": "2026-10-17",
+    "l3_01": "4/4 L4 evidenced (audit, reference compile attempt, C-ABI/exception probe, Rust calls OCCT); 4/4 counted by the dashboard; awaiting sign-off",
+    "l3_02": "4/4 L4 evidenced (RAII, invalid inputs, create/destroy leak, thread serialization); dashboard WIP, awaiting sign-off",
+    "l3_03": "4/4 L4 evidenced (unit fixtures, boolean/fillet/offset + degenerate, tessellation vs B-Rep, viability decision); dashboard WIP",
+    "evidence_root": "implementation/evidence/M00/OM9-M00-L3-02-01",
+    "note": "the tree stays SPEC_ONLY_NOT_IMPLEMENTED; the dashboard derives WIP/DONE from evidence, and DONE needs a review record",
+    "summary": "L3-01..03 each have 4/4 evidence and a signed review record; gate G00-02 is closed",
+    "status": "CLOSED",
+    "closed_at_utc": "2026-10-17T16:40:00Z",
+    "closed_by": "chủ dự án (project owner)"
+  },
+  "gate_id": "G00-02",
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
 }

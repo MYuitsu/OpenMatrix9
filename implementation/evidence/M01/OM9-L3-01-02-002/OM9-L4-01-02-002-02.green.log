@@ -1,0 +1,14 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.66s
+     Running tests\command_descriptor.rs (target\debug\deps\command_descriptor-142e361638f16f0a.exe)
+
+running 6 tests
+test d1_the_descriptor_declares_its_signature ... ok
+test d2_a_declared_option_resolves_ignoring_case ... ok
+test fixture_design_pair_is_present ... ok
+test d5_an_option_less_command_is_still_a_descriptor ... ok
+test e1_to_e4_a_descriptor_that_cannot_be_honoured_is_refused ... ok
+test d3_to_d4_the_descriptor_is_serializable_and_deterministic ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

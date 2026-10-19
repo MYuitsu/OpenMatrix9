@@ -24,10 +24,10 @@ import implementation_sample_templates as tpl  # noqa: E402
 import apply_matrix_ref_supplements as refs  # noqa: E402
 
 MILESTONES = {
-    "M00": "M00 - Feasibility, QymCAD Source, OCCT, Legal and Environment",
+    "M00": "M00 - Feasibility, Legal",
     "M01": "M01 - CAD Shell, Viewport",
     "M02": "M02 - Viewport, Gumball",
-    "M03": "M03 - Curve, Surface, Solid and 3DM Exchange",
+    "M03": "M03 - Geometry 3DM",
     "M04": "M04 - Builder and History",
     "M05": "M05 - Gems and Layout",
     "M06": "M06 - Settings and Prongs",

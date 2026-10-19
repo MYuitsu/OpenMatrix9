@@ -1,0 +1,32 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.00s
+     Running tests\command_context.rs (target\debug\deps\command_context-b6bef80407f77523.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... FAILED
+test c1_the_context_snapshot_names_document_view_selection_and_revisions ... ok
+test c3_a_context_captured_before_the_switch_is_refused_afterwards ... FAILED
+test c2_switching_the_active_view_mid_command_refuses_and_cancels ... FAILED
+test c4_a_command_keeps_the_context_it_started_against ... ok
+
+failures:
+
+---- fixture_design_pair_is_present stdout ----
+
+thread 'fixture_design_pair_is_present' (13804) panicked at crates\om9-app\tests\command_context.rs:132:5:
+H:\OpenMatrix9\standalone\crates\om9-app\../../../implementation/design/M01/OM9-L3-01-02-003/api.md
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- c3_a_context_captured_before_the_switch_is_refused_afterwards stdout ----
+
+thread 'c3_a_context_captured_before_the_switch_is_refused_afterwards' (44856) panicked at crates\om9-app\tests\command_context.rs:94:10:
+another view is another context: ()
+
+---- c2_switching_the_active_view_mid_command_refuses_and_cancels stdout ----
+
+thread 'c2_switching_the_active_view_mid_command_refuses_and_cancels' (28204) panicked at crates\om9-app\tests\command_context.rs:63:5:
+"K1-losing-the-active-view-cancels-the-command-without-mutation": a command does not survive the loss of its view
+
+
+failures:
+    c2_switching_the_active_view_mid_command_refuses_and_cancels

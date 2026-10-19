@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-05-010",
+  "title": "Kernel Thread And Transaction Policy",
+  "case": "om9-l3-01-05-010-negative",
+  "negative_oracle": "Call chồng -> Busy; transaction chồng -> Busy; sai thread -> Permission.",
+  "refusals": [
+    "Error::Busy (call/transaction đang mở)",
+    "Error::Permission(\"kernel thread affinity\")"
+  ],
+  "runtime_tests": [
+    "cargo test -p om9-core --test brep_kernel"
+  ]
+}

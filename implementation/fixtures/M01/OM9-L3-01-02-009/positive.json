@@ -1,0 +1,92 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-009",
+  "l4": "OM9-L4-01-02-009-02",
+  "case": "command-repeat-and-dispatch",
+  "positive_oracle": "Repeat last repeatable action invokes same registered command ID with new context",
+  "negative_oracle": "Nonrepeatable/file destructive commands cannot be silently repeated",
+  "positive_cases": [
+    {
+      "id": "Q1-an-empty-enter-repeats-the-last-geometry-command",
+      "sequence": [
+        "dispatch LINE",
+        "point 0,0,0",
+        "point 10,0,0",
+        "Enter \"\""
+      ],
+      "expect": {
+        "repeat_slot": "OM9-CURVE-002",
+        "phase": "AwaitPoint",
+        "entities": 1
+      }
+    },
+    {
+      "id": "Q2-the-repeat-runs-against-the-context-of-now",
+      "sequence": [
+        "dispatch POINT",
+        "point 1,1,1",
+        "Enter \"\"",
+        "point 2,2,2"
+      ],
+      "expect": {
+        "entities": 2,
+        "phase": "Idle"
+      }
+    },
+    {
+      "id": "Q3-the-recent-list-keeps-the-last-completed-commands",
+      "expect": {
+        "recent_len_at_most": 9,
+        "recent_contains": "OM9-CURVE-002"
+      }
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "R1-a-file-command-is-not-repeatable",
+      "features": [
+        "Open",
+        "Save",
+        "SaveAs",
+        "New",
+        "Close"
+      ],
+      "expect": {
+        "is_repeatable": false
+      }
+    },
+    {
+      "id": "R2-a-geometry-command-is-repeatable",
+      "features": [
+        "Line",
+        "POINT",
+        "line"
+      ],
+      "expect": {
+        "is_repeatable": true
+      }
+    },
+    {
+      "id": "R3-a-file-command-never-enters-the-repeat-slot",
+      "sequence": [
+        "dispatch LINE",
+        "point 0,0,0",
+        "point 5,0,0",
+        "dispatch New"
+      ],
+      "expect": {
+        "repeat_slot": "OM9-CURVE-002",
+        "never_a_file_feature": true
+      }
+    },
+    {
+      "id": "R4-an-empty-enter-before-any-command-reports-missing",
+      "sequence": [
+        "Enter \"\""
+      ],
+      "expect": {
+        "error": "Missing"
+      }
+    }
+  ]
+}

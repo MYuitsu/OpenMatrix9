@@ -96,5 +96,28 @@
       "id": "OM9-L3-01-05-011",
       "file": "M01 - CAD Shell, Viewport/L2-01-05 - Be Occt Brep Kernel Bridge/L3-011 - Reference Shape Fixture Evaluation/l3.json"
     }
-  ]
+  ],
+  "kernel_pin": {
+    "version": "8.0.1",
+    "tag": "V8_0_1",
+    "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
+    "pin_file": "native/occt/pin.json"
+  },
+  "product_crate": {
+    "path": "crates/om9-kernel",
+    "promoted_from": "native/occt-rust-proof (M00-L2-02 gate proof)",
+    "capabilities": [
+      "version, primitive measures (box/sphere/cylinder), boolean drilled volume, fillet, inward offset",
+      "unique topology access (vertex/edge/face/wire) with BRepCheck validity",
+      "transform service (translate, rotate about Z, scale) with bounds and volume",
+      "rational NURBS curve evaluation (point + D1)",
+      "NURBS surface evaluation (point + unit normal)",
+      "line/face intersection query",
+      "tessellation (deviation, triangle count, boundary and non-manifold edge counts)",
+      "degenerate cases, working set, handle refcount, create/destroy"
+    ],
+    "tests": "cargo test -p om9-kernel: 19 passed (4 kernel + 7 l2_01_05 + 4 lifetime + 4 numeric)",
+    "clippy": "clean with --all-targets",
+    "state": "all eleven L3 of L2-01-05 accepted; seven of them through the AUTOMATED_EVIDENCE_ONLY gate (requires_manual_test=false)"
+  }
 }

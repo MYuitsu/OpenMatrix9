@@ -4,7 +4,7 @@
   "milestone": "M00",
   "parent_l3_id": "OM9-M00-L3-01-01",
   "owner_l2_id": "OM9-M00-L2-01",
-  "title": "Xác minh repository và nguồn chính thức",
+  "title": "Xác minh repository và nguồn chính thức (human approval required)",
   "planning_state": "NOT_STARTED",
   "task": {
     "task_id": "OM9-M00-L4-01-01-01",
@@ -376,4 +376,5 @@
     "must_not_be_reported_as_implemented": true,
     "reference_note": "read the pinned file and record symbol + line range; no runtime claim",
     "sketch": "// Xác minh repository và nguồn chính thức\n// ROLE: SOURCE_AUDIT - this task produces an inventory, not code.\n\n//\n// Capability: Bắt buộc xác minh owner/repository, nhánh mặc định, khả năng truy cập công khai, không tự coi fork khác là upstream\n// Proposed contract on record: (none frozen yet)\n//\n// Inventory to fill from the pinned checkout (record file, symbol, line range, verdict):\n    // - None\n//\n// Decision skeleton to complete with real evidence:\n//   reuse_decision: REUSE | ADAPT | ADD | BLOCKED_SOURCE\n//   evidence: <path>:<line-range> at pinned SHA\n//   license: <reviewed scope from M00>\n//\n// Do not claim \"implemented\", \"works\" or a PASS from this file."
-  }}
+  }
+}

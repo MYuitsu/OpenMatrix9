@@ -7,7 +7,7 @@
   "planning_only": true,
   "module_count": 3,
   "l3_count": 19,
-  "l4_count": 69,
+  "l4_count": 65,
   "modules": [
     {
       "id": "OM9-L2-04-16",
@@ -38,5 +38,19 @@
     "stage": "E12",
     "source_audit_status": "REMOTE_REVIEW_ONLY_NO_LOCAL_BUILD",
     "qymcad_reviewed_revision": "746a17f127897e921a57118b6caad08968602bf5"
+  },
+  "placement_records": [
+    "placements/OM9-01-12-008"
+  ],
+  "cross_milestone_note": "M01 owns OM9-L2-01-12 and OM9-L3-01-12-008, including their ids; M07 executes the delegated STL export queue as four L4 placement records under placements/OM9-01-12-008. M07's own L4 count is 65; the tree holds 69 because those four are hosted here.",
+  "depends_on_milestones": [
+    "M03"
+  ],
+  "l4_count_in_tree": 69,
+  "hosted_l4_from": {
+    "M01": 4
+  },
+  "delegated_l3_from_milestone": {
+    "OM9-L3-01-12-008": "M01"
   }
 }

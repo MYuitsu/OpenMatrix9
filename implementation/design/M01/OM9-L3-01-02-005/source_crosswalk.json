@@ -1,0 +1,79 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-005-01",
+  "l3_id": "OM9-L3-01-02-005",
+  "l3_title": "Command Option Parser",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "parse flags and numeric option values at runtime",
+  "positive_oracle": "Option parser reads length=2.5mm angle=90deg from typed descriptors",
+  "negative_oracle": "Unknown options, malformed numeric, NaN/Infinity report parse error",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:87 pub fn cmd_val(cmd: &FeatCommand, key: &str) -> f64",
+        "ui-state/src/lib.rs:95 pub fn set_thread_params(cmd: &mut FeatCommand, thread: ThreadParams)"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A keyed parameter table with typed values: the idea OM9 keeps (a declared name, a typed value). What is missing is a runtime TEXT parser: QymCAD reads a value the interface already put in the table, so nothing turns 'Length=2.5mm' into a checked number, and nothing refuses an unknown key by name before it is used.",
+      "om9_owner": "standalone/crates/om9-app/src/option_parser.rs"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:338 then.take(&mut self.params.boolean, &mut self.status)",
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Options are taken through typed handles as the command runs; there is no textual option language and no unit handling.",
+      "om9_owner": "standalone/crates/om9-app/src/option_parser.rs + session.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:59 pub struct Place { key, … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No command option surface at all.",
+      "om9_owner": "standalone/crates/om9-app/src/option_parser.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only; the parser is pure Rust.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session.rs::submit_geometry_text parsed one hard-coded assignment by hand: it split on '=', required the key to be exactly BothSides (no trimming), accepted only yes/no, and refused every other assignment with one generic message"
+  ],
+  "gap_found_by_this_task": [
+    "No numeric options and no units: length=2.5mm / angle=90deg (the oracle) could not be typed at all.",
+    "The hand-written key check did not trim, so ' BothSides = No ' (a legitimate spelling, and the whole text IS trimmed first only at the outside) was refused as an unknown option.",
+    "Nothing refused NaN/Infinity as option values because no numeric option existed; the parser now reads them as numbers first and refuses them as non-finite.",
+    "Added option_parser.rs (pure): parse_option(operation, text) reads a flag or a number with a unit, names the declared spelling, and refuses unknown names, malformed numbers, non-finite values, unknown units, empty names and empty values, each with its own error.",
+    "Session wiring: BothSides sets the flag (through the parser, so padding and case are accepted), Length fixes the end point's distance from the start and the click chooses the direction."
+  ],
+  "reuse_decision": "ADAPT the keyed typed parameter idea of qymcad-ui-state; ADD the textual option language with units and the named refusals.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-005/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-005/negative.json",
+    "standalone/crates/om9-app/tests/command_options_and_repeat.rs"
+  ]
+}

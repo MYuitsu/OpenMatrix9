@@ -1,0 +1,1506 @@
+{
+  "schema": "om9.m01.l3-002.ui-matrix.v2",
+  "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+  "binary": {
+    "path": "standalone/target/debug/om9.exe",
+    "sha256": "d18b10e00e13d332b20e9382b4ed1d7063a2edce961d396fb35a46885c720cf9"
+  },
+  "runner": {
+    "path": "tools/validate_m01_l3_002_ui_matrix.py",
+    "sha256": "f0151766bef77ecb02150c96b086183b5773f5274b29bb1a2b72173cf89a105e"
+  },
+  "rust_first_exception": "Python launcher only: needs a real GPU window, cannot run inside cargo test, holds no business logic.",
+  "modes": {
+    "default": "Matrix-parity capture",
+    "user-docked-right": "user-initiated OM9-extension layout, NOT a Matrix9 parity capture"
+  },
+  "mode_filter": "all",
+  "first_dock_width_points": 1200,
+  "honest_limits": [
+    "Primary display only (it reported 1440x900 at 100% in this run); no second monitor was involved. Windows larger than that are clamped by the host and are covered by frame tests (1600x1000, 1920x1080) and the computed layout table, not by real windows.",
+    "dpi150-* and lap125/lap150 cases use OM9_UI_AUDIT_ZOOM (egui zoom), not real OS per-monitor DPI.",
+    "lap100/lap125/lap150 cases use OM9_UI_AUDIT_MONITOR=1366x768, a SIMULATED monitor size; the real monitor of the test machine is larger.",
+    "The usable area is estimated as monitor size minus a fixed reserve of 16 x 80 points (frame, title bar, taskbar); the real work area needs a native call and is not read.",
+    "rail240/rail460 set the left-rail width through the audit-only OM9_UI_AUDIT_RAIL_WIDTH; dragging the rail edge with a mouse is not exercised by this launcher.",
+    "user-docked-right cases dock the neutral fixture (Snaps) through the audit hook; dragging a panel to the right edge with a mouse is covered only by the chrome.rs frame test.",
+    "A maximized start on a real 1366x768 device at 125%/150% DPI is not covered here.",
+    "No human looked at the window while it ran; this is not the M01-UI sign-off."
+  ],
+  "frame_test_only": [
+    {
+      "case": "dock-boundary-1199-and-1200",
+      "covered_by": "workbench_regions_sizes::dock_threshold_sweep_1150_to_1250, left_stack_layers::max_rail_keeps_the_canvas_minimum and dock_layout::right_dock_threshold_boundary_is_1200_logical_points"
+    },
+    {
+      "case": "normal-1920x1080, 1600x1000, 1280x720 at 150% zoom, ultrawide-5120x1440 (larger than the 1440x900 test display; the host clamps a bigger window)",
+      "covered_by": "workbench_regions_sizes::supported_sizes_keep_the_contract, simulated_dpi_scales_keep_the_contract_in_point_space, left_rail_max_justification_table and left_stack_layers::layers_sits_between_info_and_projects_at_supported_frames"
+    },
+    {
+      "case": "capped-high-dpi-911x480 (1366x768 at 150%)",
+      "covered_by": "workbench_regions_sizes::capped_high_dpi_case_911x480 and left_stack_layers"
+    },
+    {
+      "case": "unsupported size, error path (799x600, 800x399)",
+      "covered_by": "workbench_regions_sizes::unsupported_size_error_path"
+    },
+    {
+      "case": "Layers position after Reset and after save/reload, rail 380 and the drop zone drag",
+      "covered_by": "left_stack_layers::layers_stays_in_the_left_column_after_reset_menus_from_a_perturbed_layout / ..._after_a_save_and_reload_round_trip / icon_edge_follows_the_rail_width and chrome::dragging_a_menu_to_the_right_edge_docks_it_and_shows_the_hidden_dock"
+    }
+  ],
+  "cases": [
+    {
+      "case": "min-1280x720",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "AUTOMATED real window (primary display, OS scale as reported)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1280x720",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default"
+      },
+      "requested_window": [
+        1280,
+        720
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1280.0,
+        720.0
+      ],
+      "simulated_dpi": false,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 2.0,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1280.0,
+          720.0
+        ],
+        "screen_points": [
+          1280.0,
+          720.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.0,
+          "x": 2.0,
+          "y": 337.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          695.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          295.0,
+          821.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          704.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          686.90625,
+          705.0,
+          591.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            2560.0,
+            1440.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1280,
+          720
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/min-1280x720/ui-receipt.json",
+      "receipt_sha256": "324fad22cf0155e0caced9c3a12a96aa1814fcd763cda6894f90fa5f6ddb5334",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/min-1280x720/workspace.png",
+      "screenshot_sha256": "4f4a9f634137fe0cf4f3cdc4cf82c4f7effce09fd1e704ac6c547e20dd1cca22",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "laptop-1366x728",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "AUTOMATED real window (primary display, OS scale as reported)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1366x728",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default"
+      },
+      "requested_window": [
+        1366,
+        728
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1280.0,
+        720.0
+      ],
+      "simulated_dpi": false,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.95,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1366.0,
+          728.0
+        ],
+        "screen_points": [
+          1366.0,
+          728.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.0,
+          "x": 2.0,
+          "y": 337.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          703.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          295.0,
+          821.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          712.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          772.90625,
+          713.0,
+          591.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            2560.0,
+            1440.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1366,
+          728
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/laptop-1366x728/ui-receipt.json",
+      "receipt_sha256": "a07228280c578efb3b562538d1f7c8e674d4af39fcdd164df13aaf5587e208fc",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/laptop-1366x728/workspace.png",
+      "screenshot_sha256": "5348f018fd1bcfcb66ba62f382a8fe8efac0719372bd5a0ffbcdaba55ff81767",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "wide-1440x720",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "AUTOMATED real window (primary display, OS scale as reported)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1440x720",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default"
+      },
+      "requested_window": [
+        1440,
+        720
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1280.0,
+        720.0
+      ],
+      "simulated_dpi": false,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.96,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1440.0,
+          720.0
+        ],
+        "screen_points": [
+          1440.0,
+          720.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.0,
+          "x": 2.0,
+          "y": 337.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          695.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          295.0,
+          821.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          704.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          846.90625,
+          705.0,
+          591.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            2560.0,
+            1440.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1440,
+          720
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/wide-1440x720/ui-receipt.json",
+      "receipt_sha256": "2bef65f24ac2d506ba9b75363461b79958dfe65a204666d3069f251522f7ad63",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/wide-1440x720/workspace.png",
+      "screenshot_sha256": "64cbf19a67218a2c8713f2cc477ced45ce3d4cd9f857bccddf5bb550472bd6dd",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "display-1440x900",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "AUTOMATED real window (primary display, OS scale as reported)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1440x900",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default"
+      },
+      "requested_window": [
+        1440,
+        900
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1280.0,
+        720.0
+      ],
+      "simulated_dpi": false,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 2.09,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1440.0,
+          900.0
+        ],
+        "screen_points": [
+          1440.0,
+          900.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.0,
+          "x": 2.0,
+          "y": 337.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          875.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          295.0,
+          821.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          884.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          846.90625,
+          885.0,
+          591.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            2560.0,
+            1440.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1440,
+          900
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/display-1440x900/ui-receipt.json",
+      "receipt_sha256": "0f4300ba14f0fe1ca8d9e444393814bc840b3e052c57eea195b15784b13b31f6",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/display-1440x900/workspace.png",
+      "screenshot_sha256": "3531cf51efa23a4cef0e500e758d000eaf3e9df4439d6956f59ff8f1ee8f8440",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "tall-1280x900",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "AUTOMATED real window (primary display, OS scale as reported)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1280x900",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default"
+      },
+      "requested_window": [
+        1280,
+        900
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1280.0,
+        720.0
+      ],
+      "simulated_dpi": false,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 2.04,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1280.0,
+          900.0
+        ],
+        "screen_points": [
+          1280.0,
+          900.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.0,
+          "x": 2.0,
+          "y": 337.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          875.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          295.0,
+          821.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          884.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          686.90625,
+          885.0,
+          591.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            2560.0,
+            1440.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1280,
+          900
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/tall-1280x900/ui-receipt.json",
+      "receipt_sha256": "24f80c420725b09c1c359b904a7bb50e3835ea55280d2dff5364c99f66a33f60",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/tall-1280x900/workspace.png",
+      "screenshot_sha256": "c2c4b710f0d9d5764d854f03f83a0ffc96909c1b12be00f2f79e5160ba7a3b6f",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "lap100-1366x690",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1366x690",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default",
+        "OM9_UI_AUDIT_MONITOR": "1366x768"
+      },
+      "requested_window": [
+        1366,
+        690
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1280.0,
+        688.0
+      ],
+      "simulated_dpi": true,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.95,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1366.0,
+          690.0
+        ],
+        "screen_points": [
+          1366.0,
+          690.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.0,
+          "x": 2.0,
+          "y": 337.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          665.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          295.0,
+          821.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          674.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          772.90625,
+          675.0,
+          591.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            1366.0,
+            768.0
+          ],
+          "sent": [
+            1280.0,
+            688.0
+          ],
+          "source": "audit-simulated"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1366,
+          690
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/lap100-1366x690/ui-receipt.json",
+      "receipt_sha256": "078542a546a811d02ec0634279577b4d12c5f0beb4c9ddf41536c98a03555cf7",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/lap100-1366x690/workspace.png",
+      "screenshot_sha256": "7c3da231bfb416f20cddff2e2b8ff03e26110e0af6ea7477d2ae892553062d60",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "lap125-1366x680",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1366x680",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default",
+        "OM9_UI_AUDIT_ZOOM": "1.25",
+        "OM9_UI_AUDIT_MONITOR": "1366x768"
+      },
+      "requested_window": [
+        1366,
+        680
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1076.8,
+        534.4
+      ],
+      "simulated_dpi": true,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.89,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1092.8125,
+          544.0
+        ],
+        "screen_points": [
+          1092.8125,
+          544.0
+        ],
+        "pixels_per_point": 1.25,
+        "zoom_factor": 1.25,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 294.4375,
+          "x": 2.40625,
+          "y": 337.1875
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          519.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          294.4375,
+          820.8125
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          528.09375,
+          65.3125,
+          12.8125
+        ],
+        "status_summary_px": [
+          499.625,
+          528.90625,
+          591.1875,
+          11.1875
+        ],
+        "min_window": {
+          "monitor_points": [
+            1092.800048828125,
+            614.4000244140625
+          ],
+          "sent": [
+            1076.800048828125,
+            534.4000244140625
+          ],
+          "source": "audit-simulated"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1366,
+          680
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/lap125-1366x680/ui-receipt.json",
+      "receipt_sha256": "6242bc7d1eac96562667441782213bb7f51e9cdf7f480f4054012fb3e58ab45a",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/lap125-1366x680/workspace.png",
+      "screenshot_sha256": "8d4562af94fe1763a539da0fedc8ac65b83036f38cf27467498841d9023b685b",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "lap150-1366x700",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1366x700",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default",
+        "OM9_UI_AUDIT_ZOOM": "1.5",
+        "OM9_UI_AUDIT_MONITOR": "1366x768"
+      },
+      "requested_window": [
+        1366,
+        700
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        894.6666666666666,
+        432.0
+      ],
+      "simulated_dpi": true,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.98,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          910.65625,
+          466.65625
+        ],
+        "screen_points": [
+          910.65625,
+          466.65625
+        ],
+        "pixels_per_point": 1.5,
+        "zoom_factor": 1.5,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.375,
+          "x": 2.0,
+          "y": 337.6875
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.375,
+          441.65625
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.375,
+        "left_rail_inner_px": 295.375,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          295.375,
+          821.34375
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.375,
+          450.84375,
+          65.3125,
+          12.65625
+        ],
+        "status_summary_px": [
+          370.0,
+          451.5,
+          538.65625,
+          11.34375
+        ],
+        "min_window": {
+          "monitor_points": [
+            910.6666870117188,
+            512.0
+          ],
+          "sent": [
+            894.6666870117188,
+            432.0
+          ],
+          "source": "audit-simulated"
+        },
+        "passes": 22,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1366,
+          700
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/lap150-1366x700/ui-receipt.json",
+      "receipt_sha256": "8d68a4e36244db89c9dcd8cb99ccf33ecffd07324a331441e8d8ff058dc945df",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/lap150-1366x700/workspace.png",
+      "screenshot_sha256": "cfde71e939b2c99705fc77ae7cd6d0e5d069cb3d254798bda48ce82f8e311153",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "rail240-1280x720",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "AUTOMATED real window (primary display, OS scale as reported)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1280x720",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default",
+        "OM9_UI_AUDIT_RAIL_WIDTH": "240"
+      },
+      "requested_window": [
+        1280,
+        720
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 240.0,
+      "expect_min_window": [
+        1280.0,
+        720.0
+      ],
+      "simulated_dpi": false,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.88,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1280.0,
+          720.0
+        ],
+        "screen_points": [
+          1280.0,
+          720.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 235.0,
+          "x": 2.0,
+          "y": 377.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          235.0,
+          695.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 240.0,
+        "left_rail_inner_px": 235.0,
+        "left_icon_edge_px": 18.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          235.0,
+          989.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          242.0,
+          704.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          686.90625,
+          705.0,
+          591.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            2560.0,
+            1440.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1280,
+          720
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/rail240-1280x720/ui-receipt.json",
+      "receipt_sha256": "d538348f80d4d988c17f19fb8a7db28042f001f726cc13b2e34dcdd2ecada2b5",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/rail240-1280x720/workspace.png",
+      "screenshot_sha256": "3337098ef17f6ee1a0112231f873940cf3f038b19d22e4ec7ee7c5372a6167e0",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "rail460-1280x720",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "AUTOMATED real window (primary display, OS scale as reported)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1280x720",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default",
+        "OM9_UI_AUDIT_RAIL_WIDTH": "460"
+      },
+      "requested_window": [
+        1280,
+        720
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 460.0,
+      "expect_min_window": [
+        1280.0,
+        720.0
+      ],
+      "simulated_dpi": false,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.88,
+      "observed": {
+        "layout_mode": "default",
+        "regions_error": null,
+        "window_points": [
+          1280.0,
+          720.0
+        ],
+        "screen_points": [
+          1280.0,
+          720.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 455.0,
+          "x": 2.0,
+          "y": 397.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          455.0,
+          695.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 460.0,
+        "left_rail_inner_px": 455.0,
+        "left_icon_edge_px": 34.0,
+        "left_icon_count": 52,
+        "left_stack_content_px": [
+          455.0,
+          893.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          462.0,
+          704.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          686.90625,
+          705.0,
+          591.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            2560.0,
+            1440.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1280,
+          720
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/rail460-1280x720/ui-receipt.json",
+      "receipt_sha256": "07245f211aac0e05638c90fcd84f43d38208850e83987e073fd9774093121f72",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/default/rail460-1280x720/workspace.png",
+      "screenshot_sha256": "414f73015776c69c9c9fd44573214536b646ad2dc25cfb246ece82d89b487bf5",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "udr-1280x720",
+      "mode": "user-docked-right",
+      "mode_label": "user-initiated OM9-extension layout, NOT a Matrix9 parity capture",
+      "label": "AUTOMATED real window (primary display, OS scale as reported)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1280x720",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "user-docked-right"
+      },
+      "requested_window": [
+        1280,
+        720
+      ],
+      "expect_right_dock": true,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1280.0,
+        720.0
+      ],
+      "simulated_dpi": false,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.87,
+      "observed": {
+        "layout_mode": "user-docked-right",
+        "regions_error": null,
+        "window_points": [
+          1280.0,
+          720.0
+        ],
+        "screen_points": [
+          1280.0,
+          720.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": true,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [
+          "snaps"
+        ],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.0,
+          "x": 2.0,
+          "y": 278.0
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          695.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 44,
+        "left_stack_content_px": [
+          295.0,
+          762.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          704.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          381.90625,
+          705.0,
+          596.09375,
+          11.0
+        ],
+        "min_window": {
+          "monitor_points": [
+            2560.0,
+            1440.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "passes": 21,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1280,
+          720
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/user-docked-right/udr-1280x720/ui-receipt.json",
+      "receipt_sha256": "9da8c6d9456be3d49d2b60087cca51eadb4f814d21e61d3a7fd8f95b1ea72c6e",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/user-docked-right/udr-1280x720/workspace.png",
+      "screenshot_sha256": "46f9369193d4d46d9ab50ce27c23c9556495d80f2e26c1d9996798e8a06bec27",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "udr-lap125-1366x680",
+      "mode": "user-docked-right",
+      "mode_label": "user-initiated OM9-extension layout, NOT a Matrix9 parity capture",
+      "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1366x680",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "user-docked-right",
+        "OM9_UI_AUDIT_ZOOM": "1.25",
+        "OM9_UI_AUDIT_MONITOR": "1366x768"
+      },
+      "requested_window": [
+        1366,
+        680
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        1076.8,
+        534.4
+      ],
+      "simulated_dpi": true,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.9,
+      "observed": {
+        "layout_mode": "user-docked-right",
+        "regions_error": null,
+        "window_points": [
+          1092.8125,
+          544.0
+        ],
+        "screen_points": [
+          1092.8125,
+          544.0
+        ],
+        "pixels_per_point": 1.25,
+        "zoom_factor": 1.25,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [
+          "snaps"
+        ],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 294.4375,
+          "x": 2.40625,
+          "y": 278.1875
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.0,
+          519.0
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.0,
+        "left_rail_inner_px": 295.0,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 44,
+        "left_stack_content_px": [
+          294.4375,
+          761.8125
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          528.09375,
+          65.3125,
+          12.8125
+        ],
+        "status_summary_px": [
+          505.21875,
+          528.90625,
+          585.59375,
+          11.1875
+        ],
+        "min_window": {
+          "monitor_points": [
+            1092.800048828125,
+            614.4000244140625
+          ],
+          "sent": [
+            1076.800048828125,
+            534.4000244140625
+          ],
+          "source": "audit-simulated"
+        },
+        "passes": 22,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1366,
+          680
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/user-docked-right/udr-lap125-1366x680/ui-receipt.json",
+      "receipt_sha256": "a5d1626abdd33ea30b56fd90901578b142e675fa37ddb0c61166eb1d0a798ed3",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/user-docked-right/udr-lap125-1366x680/workspace.png",
+      "screenshot_sha256": "54a43564392be9b144428fb9521e0b7a856708a629b9e8b9854391e38955863c",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "udr-lap150-1366x700",
+      "mode": "user-docked-right",
+      "mode_label": "user-initiated OM9-extension layout, NOT a Matrix9 parity capture",
+      "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1366x700",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "user-docked-right",
+        "OM9_UI_AUDIT_ZOOM": "1.5",
+        "OM9_UI_AUDIT_MONITOR": "1366x768"
+      },
+      "requested_window": [
+        1366,
+        700
+      ],
+      "expect_right_dock": false,
+      "expect_left_rail_outer": 300.0,
+      "expect_min_window": [
+        894.6666666666666,
+        432.0
+      ],
+      "simulated_dpi": true,
+      "exit_code": 0,
+      "stderr": "",
+      "elapsed_seconds": 1.96,
+      "observed": {
+        "layout_mode": "user-docked-right",
+        "regions_error": null,
+        "window_points": [
+          910.65625,
+          466.65625
+        ],
+        "screen_points": [
+          910.65625,
+          466.65625
+        ],
+        "pixels_per_point": 1.5,
+        "zoom_factor": 1.5,
+        "right_dock_shown": false,
+        "left_sections": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_sections": [
+          "snaps"
+        ],
+        "layers_title_bar_px": {
+          "column": "left",
+          "h": 14.0,
+          "w": 295.375,
+          "x": 2.0,
+          "y": 278.6875
+        },
+        "sidebar_px": [
+          2.0,
+          23.0,
+          295.375,
+          441.65625
+        ],
+        "sidebar_scroll_offset": 0.0,
+        "left_rail_outer_px": 300.375,
+        "left_rail_inner_px": 295.375,
+        "left_icon_edge_px": 22.0,
+        "left_icon_count": 44,
+        "left_stack_content_px": [
+          295.375,
+          762.34375
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.375,
+          450.84375,
+          65.3125,
+          12.65625
+        ],
+        "status_summary_px": [
+          373.3125,
+          451.5,
+          535.34375,
+          11.34375
+        ],
+        "min_window": {
+          "monitor_points": [
+            910.6666870117188,
+            512.0
+          ],
+          "sent": [
+            894.6666870117188,
+            432.0
+          ],
+          "source": "audit-simulated"
+        },
+        "passes": 22,
+        "audit_checks": 5,
+        "pixels_per_point_flag": "as requested",
+        "screenshot_px": [
+          1366,
+          700
+        ]
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/user-docked-right/udr-lap150-1366x700/ui-receipt.json",
+      "receipt_sha256": "6e7fa1429ffe207e4a73a5b60a73ec1809bf84de3a51130eeab88030e01f56e2",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-recheck/user-docked-right/udr-lap150-1366x700/workspace.png",
+      "screenshot_sha256": "fa9d2384733d26bfacdab44aab6aec7b71172cd1f385b96556dc1ab0b5245b4f",
+      "problems": [],
+      "passed": true
+    },
+    {
+      "case": "unsupported-1000x600-startup-refused",
+      "mode": "default",
+      "mode_label": "Matrix-parity capture",
+      "label": "unsupported size, error path (real om9.exe, window below 1280x720)",
+      "env": {
+        "OM9_UI_AUDIT_WINDOW": "1000x600",
+        "OM9_UI_AUDIT_LAYOUT_MODE": "default",
+        "OM9_STARTUP_DIALOG": "0"
+      },
+      "requested_window": [
+        1000,
+        600
+      ],
+      "expect": "startup refused: non-zero exit and no ui-receipt.json / workspace.png",
+      "exit_code": 1,
+      "stderr": "OM9: OpenMatrix9 could not start (renderer): window size is below the minimum window size\n",
+      "problems": [],
+      "passed": true
+    }
+  ],
+  "all_passed": true,
+  "timestamp": "2026-10-16T16:34:24+07:00"
+}

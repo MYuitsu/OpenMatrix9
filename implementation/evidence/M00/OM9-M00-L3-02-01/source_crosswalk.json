@@ -1,0 +1,88 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-M00-L3-02-01",
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "tag": "V8_0_1",
+    "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
+    "pin": "native/occt/pin.json"
+  },
+  "entries": [
+    {
+      "l4": "OM9-M00-L4-02-01-01",
+      "capability": "read the reference bridge's build recipe and C++ ABI flags",
+      "upstream_sources": [
+        "QymCAD/crates/qymcad-kernel/build.rs (revision 746a17f127897e921a57118b6caad08968602bf5)",
+        "QymCAD/crates/qymcad-kernel/src/occt_common.hpp",
+        "QymCAD/crates/qymcad-kernel/src/cxx_runtime.rs"
+      ],
+      "occt_symbols": [
+        "OCCT_INCLUDE_DIR",
+        "OCCT_LIB_DIR",
+        "Standard_Version.hxx"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-01.qymcad-buildrs-audit.md",
+      "finding": "the recipe (cc, C++17, /EHa, NOMINMAX, OCCT_* env vars, TK* list) applies to 8.0.1; the reference source itself does not, because 8.0 removed TopTools_ListIteratorOfListOfShape.hxx"
+    },
+    {
+      "l4": "OM9-M00-L4-02-01-02",
+      "capability": "attempt to compile the reference bridge at the pinned revision against the installed OCCT",
+      "upstream_sources": [
+        "QymCAD/crates/qymcad-kernel (all bridge translation units)"
+      ],
+      "occt_symbols": [
+        "TopTools_ListIteratorOfListOfShape.hxx",
+        "TDF_LabelSequence.hxx",
+        "TColgp_Array2OfPnt.hxx"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-02.compile-reference-bridge.log",
+      "finding": "compile fails at occt_common.hpp:169 (header removed in 8.0); the OM9 bridge is authored for the 8.0 API instead of porting the 7.x source"
+    },
+    {
+      "l4": "OM9-M00-L4-02-01-03",
+      "capability": "confirm the C ABI ownership and exception contract on the pinned kernel",
+      "upstream_sources": [
+        "src/ModelingData/TKG3d/Geom/Geom_OffsetCurveUtils.pxx (accuracy patch target)"
+      ],
+      "occt_symbols": [
+        "BRepPrimAPI_MakeBox",
+        "TopExp_Explorer",
+        "BRepBuilderAPI_Transform",
+        "BRepMesh_IncrementalMesh",
+        "IntCurvesFace_ShapeIntersector",
+        "BRepAlgoAPI_Cut",
+        "BRepGProp::VolumeProperties",
+        "Standard_Failure"
+      ],
+      "evidence": [
+        "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-03.occt-probe.json",
+        "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-03.occt-probe.log"
+      ],
+      "finding": "topology, transform, tessellation, intersections and booleans work; volumes are exact to 1e-13; an invalid input returns Standard_ConstructionError as a catchable exception"
+    },
+    {
+      "l4": "OM9-M00-L4-02-01-04",
+      "capability": "prove that a Rust application can call the pinned kernel",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bridge.cpp",
+        "native/occt-rust-proof/src/lib.rs",
+        "native/occt-rust-proof/build.rs"
+      ],
+      "occt_symbols": [
+        "BRepPrimAPI_MakeBox",
+        "BRepAlgoAPI_Cut",
+        "BRepGProp::VolumeProperties",
+        "BRepCheck_Analyzer"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L4-02-01-04.rust-calls-occt.log",
+      "finding": "cargo test: 4 passed; the proof binary prints occt_version 8.0.1, box volume 399.99999999999988631 (1.1e-13 from 400), drilled volume 349.73451754256325330 against the analytic 349.73451754256331014, and invalid input arrives as \"Standard_ConstructionError\". The harness is feasibility-only: the product bridge is created in M01-L2-01-05."
+    }
+  ],
+  "not_owned_here": [
+    "tessellation policy and mesh caching (M01 L2-01-06)",
+    "trimmed B-Rep editing (M03 OCCT modules)",
+    "3DM read/write (openNURBS, M01 L2-01-12 / M03)",
+    "product bridge crate (M01-L2-01-05)"
+  ]
+}

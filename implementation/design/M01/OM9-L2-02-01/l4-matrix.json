@@ -1,0 +1,667 @@
+{
+  "schema": "om9.m01.l4_matrix.v1",
+  "l2_id": "OM9-L2-02-01",
+  "milestone": "M01",
+  "audited_utc": "2026-10-19",
+  "l3_count": 10,
+  "l4_count": 50,
+  "status_counts": {
+    "VERIFIED_WITH_EVIDENCE": 50
+  },
+  "entries": [
+    {
+      "id": "OM9-L4-02-01-001-01",
+      "l3_id": "OM9-L3-02-01-001",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Point And Polyline Semantic Types",
+      "purpose": "Point/Line/Polyline/Polycurve semantics",
+      "positive_case": "Point, Line, Polyline, Polycurve carry distinct kind and endpoints control",
+      "negative_case": "Degenerate line zero-length refused or marked explicit, not silently polygon",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:33-75 SemanticKind and curve classification",
+        "crates/om9-core/src/geometry.rs:340-430 Curve validation",
+        "Decision EXTEND geometry; ADD classification"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-001-02",
+      "l3_id": "OM9-L3-02-01-001",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Point And Polyline Semantic Types",
+      "purpose": "Point/Line/Polyline/Polycurve semantics",
+      "positive_case": "Point, Line, Polyline, Polycurve carry distinct kind and endpoints control",
+      "negative_case": "Degenerate line zero-length refused or marked explicit, not silently polygon",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/tests/rhino_semantics.rs:83 distinct kinds",
+        "crates/om9-core/tests/rhino_semantics.rs:134 degenerate line refusal"
+      ],
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-001-03",
+      "l3_id": "OM9-L3-02-01-001",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Point And Polyline Semantic Types",
+      "purpose": "Point/Line/Polyline/Polycurve semantics",
+      "positive_case": "Point, Line, Polyline, Polycurve carry distinct kind and endpoints control",
+      "negative_case": "Degenerate line zero-length refused or marked explicit, not silently polygon",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:118-225",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-001-04",
+      "l3_id": "OM9-L3-02-01-001",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Point And Polyline Semantic Types",
+      "purpose": "Point/Line/Polyline/Polycurve semantics",
+      "positive_case": "Point, Line, Polyline, Polycurve carry distinct kind and endpoints control",
+      "negative_case": "Degenerate line zero-length refused or marked explicit, not silently polygon",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:83",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-001-05",
+      "l3_id": "OM9-L3-02-01-001",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Point And Polyline Semantic Types",
+      "purpose": "Point/Line/Polyline/Polycurve semantics",
+      "positive_case": "Point, Line, Polyline, Polycurve carry distinct kind and endpoints control",
+      "negative_case": "Degenerate line zero-length refused or marked explicit, not silently polygon",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-core --test rhino_semantics (11 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-002-01",
+      "l3_id": "OM9-L3-02-01-002",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — NURBS Curve Control Points Knots Weights",
+      "purpose": "control point, degree, knot, weight semantics",
+      "positive_case": "Cubic NURBS curve stores degree=3, knot vector, weights/control point count correctly",
+      "negative_case": "Mismatch knot cardinality/zero weights rejected before OCCT conversion",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/geometry.rs:187-292 NurbsCurve validate",
+        "crates/om9-core/src/rhino_semantics.rs:230-273 inspection",
+        "Decision REUSE validation"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-002-02",
+      "l3_id": "OM9-L3-02-01-002",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — NURBS Curve Control Points Knots Weights",
+      "purpose": "control point, degree, knot, weight semantics",
+      "positive_case": "Cubic NURBS curve stores degree=3, knot vector, weights/control point count correctly",
+      "negative_case": "Mismatch knot cardinality/zero weights rejected before OCCT conversion",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:156 cubic counts + mismatches",
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-002-03",
+      "l3_id": "OM9-L3-02-01-002",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — NURBS Curve Control Points Knots Weights",
+      "purpose": "control point, degree, knot, weight semantics",
+      "positive_case": "Cubic NURBS curve stores degree=3, knot vector, weights/control point count correctly",
+      "negative_case": "Mismatch knot cardinality/zero weights rejected before OCCT conversion",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:243-273",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-002-04",
+      "l3_id": "OM9-L3-02-01-002",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — NURBS Curve Control Points Knots Weights",
+      "purpose": "control point, degree, knot, weight semantics",
+      "positive_case": "Cubic NURBS curve stores degree=3, knot vector, weights/control point count correctly",
+      "negative_case": "Mismatch knot cardinality/zero weights rejected before OCCT conversion",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:156",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-002-05",
+      "l3_id": "OM9-L3-02-01-002",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — NURBS Curve Control Points Knots Weights",
+      "purpose": "control point, degree, knot, weight semantics",
+      "positive_case": "Cubic NURBS curve stores degree=3, knot vector, weights/control point count correctly",
+      "negative_case": "Mismatch knot cardinality/zero weights rejected before OCCT conversion",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-core --test rhino_semantics (11 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-003-01",
+      "l3_id": "OM9-L3-02-01-003",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Open Closed And Planar Curve Rules",
+      "purpose": "correctly distinguish curve closedness and plane",
+      "positive_case": "Closed circle reports closed=true, planar=true; open spline false",
+      "negative_case": "Near-closed distance below tol must follow documented policy not raw ==",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:118-225 tolerance policy",
+        "Decision ADD policy"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-003-02",
+      "l3_id": "OM9-L3-02-01-003",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Open Closed And Planar Curve Rules",
+      "purpose": "correctly distinguish curve closedness and plane",
+      "positive_case": "Closed circle reports closed=true, planar=true; open spline false",
+      "negative_case": "Near-closed distance below tol must follow documented policy not raw ==",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:191 near-closed boundary",
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-003-03",
+      "l3_id": "OM9-L3-02-01-003",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Open Closed And Planar Curve Rules",
+      "purpose": "correctly distinguish curve closedness and plane",
+      "positive_case": "Closed circle reports closed=true, planar=true; open spline false",
+      "negative_case": "Near-closed distance below tol must follow documented policy not raw ==",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:199-225",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-003-04",
+      "l3_id": "OM9-L3-02-01-003",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Open Closed And Planar Curve Rules",
+      "purpose": "correctly distinguish curve closedness and plane",
+      "positive_case": "Closed circle reports closed=true, planar=true; open spline false",
+      "negative_case": "Near-closed distance below tol must follow documented policy not raw ==",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:191",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-003-05",
+      "l3_id": "OM9-L3-02-01-003",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Open Closed And Planar Curve Rules",
+      "purpose": "correctly distinguish curve closedness and plane",
+      "positive_case": "Closed circle reports closed=true, planar=true; open spline false",
+      "negative_case": "Near-closed distance below tol must follow documented policy not raw ==",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-core --test rhino_semantics (11 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-004-01",
+      "l3_id": "OM9-L3-02-01-004",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Surface UV Domain And Seam Rules",
+      "purpose": "U/V parameter domains, periodic surfaces and seam",
+      "positive_case": "Periodic surface U seam, domain and V orientation reported without truncation",
+      "negative_case": "U/V swapped or periodic flag missing triggers domain validation error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/geometry.rs:294-338 NurbsSurface",
+        "crates/om9-core/src/rhino_semantics.rs:276-382 seam/orientation",
+        "Decision ADD rules"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-004-02",
+      "l3_id": "OM9-L3-02-01-004",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Surface UV Domain And Seam Rules",
+      "purpose": "U/V parameter domains, periodic surfaces and seam",
+      "positive_case": "Periodic surface U seam, domain and V orientation reported without truncation",
+      "negative_case": "U/V swapped or periodic flag missing triggers domain validation error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:242 periodic/missing/swapped",
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-004-03",
+      "l3_id": "OM9-L3-02-01-004",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Surface UV Domain And Seam Rules",
+      "purpose": "U/V parameter domains, periodic surfaces and seam",
+      "positive_case": "Periodic surface U seam, domain and V orientation reported without truncation",
+      "negative_case": "U/V swapped or periodic flag missing triggers domain validation error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:331-382",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-004-04",
+      "l3_id": "OM9-L3-02-01-004",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Surface UV Domain And Seam Rules",
+      "purpose": "U/V parameter domains, periodic surfaces and seam",
+      "positive_case": "Periodic surface U seam, domain and V orientation reported without truncation",
+      "negative_case": "U/V swapped or periodic flag missing triggers domain validation error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:242",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-004-05",
+      "l3_id": "OM9-L3-02-01-004",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Surface UV Domain And Seam Rules",
+      "purpose": "U/V parameter domains, periodic surfaces and seam",
+      "positive_case": "Periodic surface U seam, domain and V orientation reported without truncation",
+      "negative_case": "U/V swapped or periodic flag missing triggers domain validation error",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-core --test rhino_semantics (11 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-005-01",
+      "l3_id": "OM9-L3-02-01-005",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Trimmed Vs Underlying Surface Model",
+      "purpose": "preserve underlying surface and trim boundaries",
+      "positive_case": "Underlying NURBS surface retained while trim wires constrain visible face",
+      "negative_case": "Trimmed patch must not become full untrimmed visible surface after save/load",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:449-532 TrimmedSurface",
+        "crates/om9-core/src/model.rs:100-111 slots + :716 hook",
+        "Decision ADD trim record; REUSE extension persistence"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-005-02",
+      "l3_id": "OM9-L3-02-01-005",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Trimmed Vs Underlying Surface Model",
+      "purpose": "preserve underlying surface and trim boundaries",
+      "positive_case": "Underlying NURBS surface retained while trim wires constrain visible face",
+      "negative_case": "Trimmed patch must not become full untrimmed visible surface after save/load",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/tests/rhino_semantics.rs:328 trim validation/untrimmed refusal",
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:62 save/load"
+      ],
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-005-03",
+      "l3_id": "OM9-L3-02-01-005",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Trimmed Vs Underlying Surface Model",
+      "purpose": "preserve underlying surface and trim boundaries",
+      "positive_case": "Underlying NURBS surface retained while trim wires constrain visible face",
+      "negative_case": "Trimmed patch must not become full untrimmed visible surface after save/load",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:457-532",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-005-04",
+      "l3_id": "OM9-L3-02-01-005",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Trimmed Vs Underlying Surface Model",
+      "purpose": "preserve underlying surface and trim boundaries",
+      "positive_case": "Underlying NURBS surface retained while trim wires constrain visible face",
+      "negative_case": "Trimmed patch must not become full untrimmed visible surface after save/load",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:62",
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:139"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-005-05",
+      "l3_id": "OM9-L3-02-01-005",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Trimmed Vs Underlying Surface Model",
+      "purpose": "preserve underlying surface and trim boundaries",
+      "positive_case": "Underlying NURBS surface retained while trim wires constrain visible face",
+      "negative_case": "Trimmed patch must not become full untrimmed visible surface after save/load",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-archive (56 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-006-01",
+      "l3_id": "OM9-L3-02-01-006",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Surface Edge And Isocurve Semantics",
+      "purpose": "edge vs construction/display isocurve distinctions",
+      "positive_case": "Boundary edge is pickable topology; drawn isocurve is display-only",
+      "negative_case": "Isocurve must not become persistent model edge or be exported as geometry",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:537-615 DisplayIsocurve/BoundaryEdge",
+        "crates/om9-core/src/surface_kernel.rs:196-259 exact isocurve",
+        "Decision REUSE isocurve; ADD display distinction"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-006-02",
+      "l3_id": "OM9-L3-02-01-006",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Surface Edge And Isocurve Semantics",
+      "purpose": "edge vs construction/display isocurve distinctions",
+      "positive_case": "Boundary edge is pickable topology; drawn isocurve is display-only",
+      "negative_case": "Isocurve must not become persistent model edge or be exported as geometry",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:391 display-only + pickable edge",
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-006-03",
+      "l3_id": "OM9-L3-02-01-006",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Surface Edge And Isocurve Semantics",
+      "purpose": "edge vs construction/display isocurve distinctions",
+      "positive_case": "Boundary edge is pickable topology; drawn isocurve is display-only",
+      "negative_case": "Isocurve must not become persistent model edge or be exported as geometry",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:544-615",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-006-04",
+      "l3_id": "OM9-L3-02-01-006",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Surface Edge And Isocurve Semantics",
+      "purpose": "edge vs construction/display isocurve distinctions",
+      "positive_case": "Boundary edge is pickable topology; drawn isocurve is display-only",
+      "negative_case": "Isocurve must not become persistent model edge or be exported as geometry",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:391",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-006-05",
+      "l3_id": "OM9-L3-02-01-006",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Surface Edge And Isocurve Semantics",
+      "purpose": "edge vs construction/display isocurve distinctions",
+      "positive_case": "Boundary edge is pickable topology; drawn isocurve is display-only",
+      "negative_case": "Isocurve must not become persistent model edge or be exported as geometry",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-core --test rhino_semantics (11 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-007-01",
+      "l3_id": "OM9-L3-02-01-007",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Polysurface And Closed Solid Semantics",
+      "purpose": "manifold/closed BRep as solid",
+      "positive_case": "Closed box BRep recognized solid; open face shell surface, not solid",
+      "negative_case": "Open, self-intersecting shell must not claim closed watertight solid",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/brep_kernel.rs:91-152 topology",
+        "crates/om9-core/src/rhino_semantics.rs:619-680 classification",
+        "Decision REUSE BrepBody; ADD classification"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-007-02",
+      "l3_id": "OM9-L3-02-01-007",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Polysurface And Closed Solid Semantics",
+      "purpose": "manifold/closed BRep as solid",
+      "positive_case": "Closed box BRep recognized solid; open face shell surface, not solid",
+      "negative_case": "Open, self-intersecting shell must not claim closed watertight solid",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:523 solid/open/overlap",
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-007-03",
+      "l3_id": "OM9-L3-02-01-007",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Polysurface And Closed Solid Semantics",
+      "purpose": "manifold/closed BRep as solid",
+      "positive_case": "Closed box BRep recognized solid; open face shell surface, not solid",
+      "negative_case": "Open, self-intersecting shell must not claim closed watertight solid",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:643-680",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-007-04",
+      "l3_id": "OM9-L3-02-01-007",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Polysurface And Closed Solid Semantics",
+      "purpose": "manifold/closed BRep as solid",
+      "positive_case": "Closed box BRep recognized solid; open face shell surface, not solid",
+      "negative_case": "Open, self-intersecting shell must not claim closed watertight solid",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:523",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-007-05",
+      "l3_id": "OM9-L3-02-01-007",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Polysurface And Closed Solid Semantics",
+      "purpose": "manifold/closed BRep as solid",
+      "positive_case": "Closed box BRep recognized solid; open face shell surface, not solid",
+      "negative_case": "Open, self-intersecting shell must not claim closed watertight solid",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-core --test rhino_semantics (11 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-008-01",
+      "l3_id": "OM9-L3-02-01-008",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Extrusion Vs Full B-Rep Representations",
+      "purpose": "lightweight extrusion and conversion boundary",
+      "positive_case": "Simple extrusion records lightweight primitive and converts to BRep on demand",
+      "negative_case": "Conversion must preserve geometry and original feature provenance",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:683-933 extrusion/convert",
+        "crates/om9-core/src/model.rs:102-111 slot",
+        "Decision ADD primitive"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-008-02",
+      "l3_id": "OM9-L3-02-01-008",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Extrusion Vs Full B-Rep Representations",
+      "purpose": "lightweight extrusion and conversion boundary",
+      "positive_case": "Simple extrusion records lightweight primitive and converts to BRep on demand",
+      "negative_case": "Conversion must preserve geometry and original feature provenance",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/tests/rhino_semantics.rs:611 convert + provenance",
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:101 save/load"
+      ],
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-008-03",
+      "l3_id": "OM9-L3-02-01-008",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Extrusion Vs Full B-Rep Representations",
+      "purpose": "lightweight extrusion and conversion boundary",
+      "positive_case": "Simple extrusion records lightweight primitive and converts to BRep on demand",
+      "negative_case": "Conversion must preserve geometry and original feature provenance",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:778-895",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-008-04",
+      "l3_id": "OM9-L3-02-01-008",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Extrusion Vs Full B-Rep Representations",
+      "purpose": "lightweight extrusion and conversion boundary",
+      "positive_case": "Simple extrusion records lightweight primitive and converts to BRep on demand",
+      "negative_case": "Conversion must preserve geometry and original feature provenance",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-archive/tests/rhino_semantics_persistence.rs:101",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-008-05",
+      "l3_id": "OM9-L3-02-01-008",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Extrusion Vs Full B-Rep Representations",
+      "purpose": "lightweight extrusion and conversion boundary",
+      "positive_case": "Simple extrusion records lightweight primitive and converts to BRep on demand",
+      "negative_case": "Conversion must preserve geometry and original feature provenance",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-archive (56 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-009-01",
+      "l3_id": "OM9-L3-02-01-009",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Mesh Vs NURBS Object Type Rules",
+      "purpose": "never imply arbitrary mesh is exact NURBS",
+      "positive_case": "Mesh cube and exact box remain different semantic kinds despite same triangles",
+      "negative_case": "No implicit mesh->exact BRep or false NURBS status",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:936-959 exact refusal",
+        "crates/om9-core/src/geometry.rs:455-499 kinds",
+        "Decision ADD refusal"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-009-02",
+      "l3_id": "OM9-L3-02-01-009",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Mesh Vs NURBS Object Type Rules",
+      "purpose": "never imply arbitrary mesh is exact NURBS",
+      "positive_case": "Mesh cube and exact box remain different semantic kinds despite same triangles",
+      "negative_case": "No implicit mesh->exact BRep or false NURBS status",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/tests/rhino_semantics.rs:756 mesh vs Brep",
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:165 codec"
+      ],
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-009-03",
+      "l3_id": "OM9-L3-02-01-009",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Mesh Vs NURBS Object Type Rules",
+      "purpose": "never imply arbitrary mesh is exact NURBS",
+      "positive_case": "Mesh cube and exact box remain different semantic kinds despite same triangles",
+      "negative_case": "No implicit mesh->exact BRep or false NURBS status",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:936-959",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-009-04",
+      "l3_id": "OM9-L3-02-01-009",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Mesh Vs NURBS Object Type Rules",
+      "purpose": "never imply arbitrary mesh is exact NURBS",
+      "positive_case": "Mesh cube and exact box remain different semantic kinds despite same triangles",
+      "negative_case": "No implicit mesh->exact BRep or false NURBS status",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-archive/tests/rhino_semantics_persistence.rs:165",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-009-05",
+      "l3_id": "OM9-L3-02-01-009",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Mesh Vs NURBS Object Type Rules",
+      "purpose": "never imply arbitrary mesh is exact NURBS",
+      "positive_case": "Mesh cube and exact box remain different semantic kinds despite same triangles",
+      "negative_case": "No implicit mesh->exact BRep or false NURBS status",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-archive (56 passed)",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-010-01",
+      "l3_id": "OM9-L3-02-01-010",
+      "role": "SOURCE_AUDIT",
+      "title": "Xác minh mã nguồn, phạm vi và ownership — Instance And Block Semantic Type",
+      "purpose": "definition identity vs object instance identity",
+      "positive_case": "Instance I1/I2 share one definition but have distinct instance IDs+transforms",
+      "negative_case": "Modifying instance transform must not mutate shared definition",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:961-1018 instance semantics",
+        "crates/om9-core/src/model.rs:632-650 instance creation",
+        "Decision REUSE model"
+      ],
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-010-02",
+      "l3_id": "OM9-L3-02-01-010",
+      "role": "CONTRACT_TEST",
+      "title": "Chốt API/fixture và phép thử đỏ — Instance And Block Semantic Type",
+      "purpose": "definition identity vs object instance identity",
+      "positive_case": "Instance I1/I2 share one definition but have distinct instance IDs+transforms",
+      "negative_case": "Modifying instance transform must not mutate shared definition",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:774 shared def/distinct transforms",
+      "red_receipt": "RED receipt predates this gold-standard pass; the contract is pinned by the named regression test."
+    },
+    {
+      "id": "OM9-L4-02-01-010-03",
+      "l3_id": "OM9-L3-02-01-010",
+      "role": "IMPLEMENT",
+      "title": "Triển khai logic có kiểm thử — Instance And Block Semantic Type",
+      "purpose": "definition identity vs object instance identity",
+      "positive_case": "Instance I1/I2 share one definition but have distinct instance IDs+transforms",
+      "negative_case": "Modifying instance transform must not mutate shared definition",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/src/rhino_semantics.rs:968-1018",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-010-04",
+      "l3_id": "OM9-L3-02-01-010",
+      "role": "INTEGRATE",
+      "title": "Tích hợp qua đúng owner và kiểm tra lỗi — Instance And Block Semantic Type",
+      "purpose": "definition identity vs object instance identity",
+      "positive_case": "Instance I1/I2 share one definition but have distinct instance IDs+transforms",
+      "negative_case": "Modifying instance transform must not mutate shared definition",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "crates/om9-core/tests/rhino_semantics.rs:774",
+      "red_receipt": null
+    },
+    {
+      "id": "OM9-L4-02-01-010-05",
+      "l3_id": "OM9-L3-02-01-010",
+      "role": "ACCEPTANCE",
+      "title": "Hồi quy, thủ công và bàn giao — Instance And Block Semantic Type",
+      "purpose": "definition identity vs object instance identity",
+      "positive_case": "Instance I1/I2 share one definition but have distinct instance IDs+transforms",
+      "negative_case": "Modifying instance transform must not mutate shared definition",
+      "status": "VERIFIED_WITH_EVIDENCE",
+      "evidence": "cargo test -p om9-core --test rhino_semantics (11 passed)",
+      "red_receipt": null
+    }
+  ]
+}

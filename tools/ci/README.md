@@ -13,6 +13,13 @@ CMake builds only OpenMatrix9Gui and its module dependencies, using 60% of logic
 CPUs, rounded down with a minimum of one. The native BRep oracle is a separate
 test target. No OM9 binary from a previous release is a build input.
 
+A separate `native-exchange` job builds the pinned openNURBS library and the native 3DM
+reader/writer (`native/native_exchange.cpp`) for the standalone Rust host adapter. It uses
+`tools/ci/build-native-exchange.ps1` and publishes `om9-exchange-native.exe`,
+`om9-exchange-native.sha256` and `om9-exchange-native.manifest.json` as the
+`om9-native-exchange` artifact. Like the plugin job, it is build-only and does not claim runtime
+tests.
+
 The native header-order regression loads the stock Windows distance-macro prelude
 before the kernel headers and host zlib. It requires flat x64 FAR, no near/far
 CAD-name collisions and an unprefixed system-zlib CRC32 oracle. The bundled

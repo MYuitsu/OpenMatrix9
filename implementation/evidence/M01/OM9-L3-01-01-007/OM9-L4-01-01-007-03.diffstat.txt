@@ -1,0 +1,83 @@
+== git status (standalone + implementation) ==
+ M implementation/evidence/M01/OM9-L3-01-01-001/OM9-L4-01-01-001-05.ui-review.json
+ M implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-05.ui-review.json
+ M implementation/fixtures/M01/OM9-L3-01-01-002/negative.json
+ M implementation/fixtures/M01/OM9-L3-01-01-002/positive.json
+ M implementation/tools/om9_shorten_milestone_paths.py
+ M implementation/tools/record_path_shortening_progress.py
+ M standalone/crates/om9-app/src/dock_layout.rs
+ M standalone/crates/om9-app/src/lib.rs
+ M standalone/crates/om9-app/src/session/files.rs
+ M standalone/crates/om9-app/src/startup.rs
+ M standalone/crates/om9-app/src/ui.rs
+ M standalone/crates/om9-app/src/ui/chrome.rs
+ M standalone/crates/om9-app/src/workbench_regions.rs
+ M standalone/crates/om9-app/tests/shell_docking.rs
+ M standalone/crates/om9-app/tests/workbench_regions.rs
+?? implementation/design/M01/IMPLEMENTATION-CHECKLIST.md
+?? implementation/design/M01/OM9-L2-01-02/
+?? implementation/design/M01/OM9-L2-01-03/
+?? implementation/design/M01/OM9-L2-01-08/
+?? implementation/design/M01/OM9-L3-01-01-003/
+?? implementation/design/M01/OM9-L3-01-01-004/
+?? implementation/design/M01/OM9-L3-01-01-005/
+?? implementation/design/M01/OM9-L3-01-01-006/
+?? implementation/design/M01/OM9-L3-01-01-007/
+?? implementation/design/M01/design-review.json
+?? implementation/design/M01/design-review.md
+?? implementation/evidence/M01/OM9-L3-01-01-002/closeout-01.green.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/closeout-01.red.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/closeout-03.scoped-audit.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/left-dock-layouts.json
+?? implementation/evidence/M01/OM9-L3-01-01-002/left-dock-layouts.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/left-dock-mutation.green.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/left-dock-mutation.red.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/left-dock-selftest.green.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/left-dock-selftest.red.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/left-dock-validator.green.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/left-dock-validator.red.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/min-window-01.green.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/min-window-01.red.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/min-window-layouts.json
+?? implementation/evidence/M01/OM9-L3-01-01-002/min-window-layouts.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/min-window.scoped-audit.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/recheck-2026-10-16.cargo-workbench-regions.log
+?? implementation/evidence/M01/OM9-L3-01-01-002/recheck-2026-10-16.ui-matrix-summary.json
+?? implementation/evidence/M01/OM9-L3-01-01-003/
+?? implementation/evidence/M01/OM9-L3-01-01-004/
+?? implementation/evidence/M01/OM9-L3-01-01-005/
+?? implementation/evidence/M01/OM9-L3-01-01-006/
+?? implementation/evidence/M01/OM9-L3-01-01-007/
+?? implementation/fixtures/M01/OM9-L3-01-01-003/
+?? implementation/fixtures/M01/OM9-L3-01-01-004/
+?? implementation/fixtures/M01/OM9-L3-01-01-005/
+?? implementation/fixtures/M01/OM9-L3-01-01-006/
+?? implementation/fixtures/M01/OM9-L3-01-01-007/
+?? standalone/build/
+?? standalone/cargo
+?? standalone/crates/om9-app/src/panel_ops.rs
+?? standalone/crates/om9-app/src/ui/panel_audit.rs
+?? standalone/crates/om9-app/tests/common/
+?? standalone/crates/om9-app/tests/dock_layout_default.rs
+?? standalone/crates/om9-app/tests/dock_layout_persistence.rs
+?? standalone/crates/om9-app/tests/document_window_state.rs
+?? standalone/crates/om9-app/tests/global_status_surface.rs
+?? standalone/crates/om9-app/tests/left_stack_layers.rs
+?? standalone/crates/om9-app/tests/panel_door.rs
+?? standalone/crates/om9-app/tests/panel_ops.rs
+?? standalone/crates/om9-app/tests/status_bar_overlap.rs
+?? standalone/crates/om9-app/tests/window_minimum.rs
+?? standalone/crates/om9-app/tests/workbench_regions_sizes.rs
+
+== git diff --stat ==
+ standalone/crates/om9-app/src/dock_layout.rs       | 292 +++++++-
+ standalone/crates/om9-app/src/lib.rs               |   1 +
+ standalone/crates/om9-app/src/session/files.rs     |  13 +-
+ standalone/crates/om9-app/src/startup.rs           | 148 +++-
+ standalone/crates/om9-app/src/ui.rs                | 776 ++++++++++++++++++---
+ standalone/crates/om9-app/src/ui/chrome.rs         | 399 +++++++----
+ standalone/crates/om9-app/src/workbench_regions.rs | 195 ++++--
+ standalone/crates/om9-app/tests/shell_docking.rs   |  14 +-
+ .../crates/om9-app/tests/workbench_regions.rs      |  11 +-
+ 9 files changed, 1521 insertions(+), 328 deletions(-)
+

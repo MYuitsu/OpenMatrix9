@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-002",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "missing-layer",
+      "expect": {
+        "error": "Invalid(layer order)"
+      }
+    },
+    {
+      "id": "corrupt-preset",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "migration-invents-slot",
+      "expect": {
+        "error": "Invalid"
+      }
+    }
+  ]
+}

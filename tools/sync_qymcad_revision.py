@@ -21,8 +21,8 @@ APPLY = "--apply" in sys.argv
 
 # milestone -> (tree dir, package dir containing the same relative layout)
 PACKAGES = {
-    "M03": ("OM9_Milestones/M03 - Curve, Surface, Solid and 3DM Exchange",
-            "build/m03-incoming/OpenMatrix9/M03 - Curve, Surface, Solid and 3DM Exchange"),
+    "M03": ("OM9_Milestones/M03 - Geometry 3DM",
+            "build/m03-incoming/OpenMatrix9/M03 - Geometry 3DM"),
     "M04": ("OM9_Milestones/M04 - Builder and History",
             "build/m04-incoming/OpenMatrix9/M04 - Builder and History"),
     "M05": ("OM9_Milestones/M05 - Gems and Layout", "build/m05-incoming"),

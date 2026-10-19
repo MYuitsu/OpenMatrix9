@@ -1,0 +1,44 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-02-001-05",
+  "l3_id": "OM9-L3-01-02-001",
+  "title": "Command IDs And Alias Registry",
+  "oracle": {
+    "positive": "Registry maps stable command ID from menu/name/alias to one descriptor",
+    "negative": "Duplicate alias ambiguous or unknown ID refused with explicit diagnostic"
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-16",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-02, so acceptance rests on the automated checks below; no human item is requested.",
+    "scope": "no on-screen behaviour: the registry is pure data with no UI of its own"
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-core --test command_registry -> 1 passed; 3 failed (alias resolution missing, ambiguous names not refused, no api.md)",
+    "GREEN: cargo test -p om9-core --test command_registry -> 4 passed; 0 failed (8 positive cases, 7 negative cases)",
+    "cargo test -p om9-core: every group ok (lib 8, capability_gates 8, integration 3)",
+    "cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: tools/validate_m01_l3_003_panels.py -> 7/7 PASS (the application still starts and dispatches after the registry change)"
+  ],
+  "code_change": [
+    "capability.rs: Operation.aliases (serde default, so an older document still loads).",
+    "capability.rs: RegistryError with one message per refused name (UnknownName, DuplicateName, EmptyName, DuplicateId, InvalidOperation).",
+    "capability.rs: try_register applies the name rules; resolve answers by id or alias, ignoring case; register() keeps its signature by delegating."
+  ],
+  "artefacts": [
+    "OM9-L4-01-02-001-02.red.log",
+    "OM9-L4-01-02-001-02.green.log",
+    "OM9-L4-01-02-001-03.diffstat.txt",
+    "OM9-L4-01-02-001-03.target-test.log",
+    "OM9-L4-01-02-001-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_02_l3_001_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

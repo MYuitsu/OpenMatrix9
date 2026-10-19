@@ -21,7 +21,7 @@ def source_paths():
                 (ROOT / "Resources/icons").rglob("*.svg")) | {
                     Path(__file__).resolve(), ROOT / "tools/validate_standalone_ui.py",
                     ROOT / "tools/validate_standalone_foundation.py",
-                    ROOT / "standalone/native/CMakeLists.txt", ROOT / "rust/src/layers.rs", ROOT / "Resources/licenses/windows-0.62.2.txt"}
+                    ROOT / "native/CMakeLists.txt", ROOT / "rust/src/layers.rs", ROOT / "Resources/licenses/windows-0.62.2.txt"}
 
 
 def main():
@@ -90,7 +90,7 @@ def main():
     assert len(cold) == 7 and all(row["exited"] and row["active_processes"] == 0 for row in cold)
     assert {row["run"] for row in scene_peaks} == {"scene_allocation_peak", "workspace"} and len(scene_peaks) == 2
     assert {row["run"] for row in modal_peaks} == {"scene_allocation_peak", "workspace"} and len(modal_peaks) == 2
-    binary = ROOT / "standalone/target/release/om9.exe"
+    binary = ROOT / "target/release/om9.exe"
     binary_sha = digest(binary)
     native_ui = []
     startup_fixture = None

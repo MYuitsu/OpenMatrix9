@@ -34,7 +34,7 @@ def main():
         path=ROOT/'OpenMatrix9_Codex_Spec_v1'/row['path']
         assert path.stat().st_size==row['bytes'] and digest(path)==row['sha256']
     passed,focused,ignored=receipt['workspace_passed'],receipt['focused_tests'],receipt['workspace_ignored']
-    lock=tomllib.loads((ROOT/'standalone/Cargo.lock').read_text())
+    lock=tomllib.loads((ROOT/'Cargo.lock').read_text())
     rfd=next(row for row in lock['package'] if row['name']=='rfd')
     assert rfd['version']=='0.17.2'
     meta={'scope':'native_om9_common_file_ui_and_real_windows_cancel', 'receipt':'../'+RECEIPT,'report':'../'+REPORT,
@@ -162,10 +162,10 @@ original File/RCORE/Matrix9 requirement. Future full batch count remains unknown
     for path in [PACKAGE/'IMPLEMENTATION_STATUS.md',PACKAGE/'README.md']:append(path,note.replace('../../../'+REPORT,'../'+REPORT))
     append(ROOT/'README.en.md',note.replace('../../../'+REPORT,REPORT))
     append(ROOT/'README.md',MARKER+f'\n\nĐã nối [giao diện File native OM9]({REPORT}): {passed} test workspace,16 ca widget và8 kiểm tra File trong cửa sổ native;3 dialog Windows mở/hủy/đóng sạch. Đã sửa Enter lặp và IME chuyển focus có thể tự xác nhận Save/New. Chọn/lưu/mở thành công bằng OS, xử lý lỗi native, persistence đầy đủ, đóng cửa sổ chưa lưu và `.3dm` còn tiếp tục; toàn goal chưa hoàn tất.')
-    append(ROOT/'standalone/README.md',note.replace('../../../'+REPORT,'../'+REPORT))
+    append(ROOT/'docs/standalone-foundation.md',note.replace('../../../'+REPORT,'../'+REPORT))
     progress=ROOT/'docs/openmatrix9-progress.json';data=json.loads(progress.read_text(encoding='utf-8'));data['updated_at']=dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds')
     item=next(row for row in data['items'] if row.get('key')=='rcore00-standalone-foundation')
-    for path in [RECEIPT,REPORT,'standalone/crates/om9-app/src/ui/files.rs','standalone/crates/om9-app/src/native_picker.rs','standalone/crates/om9-native-owner/src/dialog_probe.rs']:
+    for path in [RECEIPT,REPORT,'crates/om9-app/src/ui/files.rs','crates/om9-app/src/native_picker.rs','crates/om9-native-owner/src/dialog_probe.rs']:
         if path not in item['outputs']:item['outputs'].append(path)
     prefix='Owned File UI/native cancellation;';item['evidence']=[row for row in item['evidence'] if not row.startswith(prefix)]
     item['evidence'].append(prefix+f' {passed} workspace/{focused} focused subset;16 widgets;8 File native checks/3 real OS cancels;10+13+6 regressions/7 cold children. Source/binary bound;review fixes RED→GREEN;0 new SDK geometry jobs;full gates open.')

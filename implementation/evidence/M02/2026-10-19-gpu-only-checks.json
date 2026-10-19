@@ -1,0 +1,193 @@
+{
+  "date": "2026-10-19T01:43:50.826363+00:00",
+  "scope": "GPU-only viewport rendering; no CPU scene painter or software-adapter fallback",
+  "checks": [
+    {
+      "name": "default-regressions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--lib",
+        "--test",
+        "startup_contract",
+        "--test",
+        "gumball_viewport",
+        "--test",
+        "gumball_interaction",
+        "--test",
+        "selection_overlay",
+        "--test",
+        "subobject_occurrences",
+        "--test",
+        "acceptance_viewport_selection",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 128,
+      "seconds": 20.188,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/default-regressions.log",
+      "log_sha256": "b6fc1b7646af1c1709c745caf4467ab81330d5b942f5862fa2b00c9a47e658d2"
+    },
+    {
+      "name": "clippy-default",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-app",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 0.518,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/clippy-default.log",
+      "log_sha256": "b2c020f27a01faabb96e5d55c11fd219cf7c484c9cf34b3342bfc8444d934c89"
+    },
+    {
+      "name": "optional-native-brep",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "--test",
+        "brep_selection",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 5,
+      "seconds": 16.858,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/optional-native-brep.log",
+      "log_sha256": "78c11a070b93562b97911821f61c5da4dd1aeec91b410572a7038ee39e560c52"
+    },
+    {
+      "name": "clippy-native",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 8.839,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/clippy-native.log",
+      "log_sha256": "56b4d18e3276d9cb64ed809afdd341d5bd3acec82abb35f10865b56893b3b627"
+    },
+    {
+      "name": "build-native",
+      "command": [
+        "cargo",
+        "build",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 0.389,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/build-native.log",
+      "log_sha256": "32d47f791eadf1ea833d9f8c84fbfea5cab1f438e113e93be05bd5b908e1c2ac"
+    },
+    {
+      "name": "native-brep",
+      "command": [
+        "python",
+        "tools/validate_m02_selection.py",
+        "--brep",
+        "--output",
+        "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-brep-100"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 3.937,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/native-brep.log",
+      "log_sha256": "0a75ffd851bce34e18dd294e096fea60022f5b78798c65e1e3799a2d013568c6"
+    },
+    {
+      "name": "build-default",
+      "command": [
+        "cargo",
+        "build",
+        "-p",
+        "om9-app",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 4.562,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/build-default.log",
+      "log_sha256": "977c91bf19bcee45b22e33e0833c9b69bee991f5ebc3dd2f5f5c26918aafba48"
+    },
+    {
+      "name": "default-dependencies",
+      "command": [
+        "cargo",
+        "tree",
+        "-p",
+        "om9-app",
+        "--edges",
+        "normal",
+        "--depth",
+        "1",
+        "--prefix",
+        "none"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 0.223,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/default-dependencies.log",
+      "log_sha256": "e08fa13786c52cc4472063d792d0955cabda8278e86942f7f32b440602e4b689"
+    },
+    {
+      "name": "python-compile",
+      "command": [
+        "python",
+        "-m",
+        "py_compile",
+        "tools/validate_m02_selection.py"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 0.08,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/python-compile.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "public-source-audit",
+      "command": [
+        "python",
+        "tools/public_source_audit.py"
+      ],
+      "exit_code": 1,
+      "passed_tests": 0,
+      "seconds": 2.17,
+      "log": "build/standalone-validation/ui-artifacts/m02-gpu-only-20261019-checks/public-source-audit.log",
+      "log_sha256": "25c98ade0e8ea36440d340ce2d414842f007a39f7e0dff6b321f40df6be841bd",
+      "existing_findings": 11735
+    }
+  ]
+}

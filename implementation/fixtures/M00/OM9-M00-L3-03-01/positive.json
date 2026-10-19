@@ -1,0 +1,33 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-03-01",
+  "cases": [
+    {
+      "id": "M00-FX-03-01-POS-01",
+      "check": "four_viewports",
+      "input": {
+        "width": 1600
+      },
+      "expected": {
+        "viewports": 4,
+        "each_width": 499.0
+      }
+    },
+    {
+      "id": "M00-FX-03-01-POS-02",
+      "check": "shared_scene",
+      "expected": {
+        "scenes": 1,
+        "cameras": 4
+      }
+    },
+    {
+      "id": "M00-FX-03-01-POS-03",
+      "check": "renderer",
+      "expected": {
+        "eframe": "0.36.2",
+        "renderer": "Wgpu"
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+# OM9-L2-01-03 focused verification
+# utc: 2026-10-17T01:04:56Z
+
+# command: cargo test -p om9-core --test selection_state
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\selection_state.rs (L:\om9-target\debug\deps\selection_state-7d526e8cd8198c3e.exe)
+
+running 7 tests
+test a_stale_list_index_is_never_resolved_as_a_neighbour ... ok
+test a_selection_from_another_document_generation_is_stale ... ok
+test a_subshape_reference_must_name_a_live_object ... ok
+test deleting_an_object_invalidates_its_selection_entry ... ok
+test selection_is_typed_identity_and_survives_a_stable_document ... ok
+test selecting_an_unknown_object_is_refused ... ok
+test the_selection_only_describes_a_document_that_validates ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+# command: cargo test -p om9-app --test document_contract l3_010
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests\document_contract.rs (L:\om9-target\debug\deps\document_contract-b700f62a9f572b35.exe)
+
+running 3 tests
+test l3_010_a_selection_from_another_document_generation_is_stale ... ok
+test l3_010_selection_is_pruned_after_undo_and_redo_restores_the_object ... ok
+test l3_010_a_stale_list_index_is_detected_instead_of_mapped_to_a_neighbour ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+

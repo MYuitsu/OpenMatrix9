@@ -1,0 +1,174 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-005",
+  "l4": "OM9-L4-01-01-005-02",
+  "case": "docking-layout-persistence-positive",
+  "positive_oracle": "Persist dock positions and reopen same named panel IDs",
+  "documented_left_order": [
+    "icon-history",
+    "main-menu",
+    "display",
+    "snaps",
+    "info-settings",
+    "layers",
+    "projects",
+    "builder-slot"
+  ],
+  "cases": [
+    {
+      "id": "S1-a-session-keeps-what-the-user-arranged",
+      "why": "every kind of arrangement state is written, then read back by a fresh session",
+      "arrangement": [
+        {
+          "op": "Dock",
+          "section": "snaps",
+          "side": "right"
+        },
+        {
+          "op": "ToggleCollapsed",
+          "section": "projects"
+        },
+        {
+          "op": "Move",
+          "section": "layers",
+          "delta": -1
+        },
+        {
+          "op": "Float",
+          "section": "display",
+          "rect": [
+            600,
+            300,
+            320,
+            240
+          ],
+          "origin": "Api"
+        },
+        {
+          "op": "set_section_visible",
+          "section": "info-settings",
+          "visible": false
+        },
+        {
+          "op": "set_section_height",
+          "section": "layers",
+          "height": 200
+        },
+        {
+          "op": "set_size",
+          "panel": "left-rail",
+          "size": 380
+        },
+        {
+          "op": "set_visible",
+          "panel": "right-dock",
+          "visible": true
+        }
+      ],
+      "expect": {
+        "reopened_equals_saved_bytes": true,
+        "left_order": [
+          "icon-history",
+          "main-menu",
+          "layers",
+          "info-settings",
+          "projects",
+          "builder-slot"
+        ],
+        "right_order": [
+          "snaps"
+        ],
+        "floating": [
+          "display"
+        ],
+        "display_float": [
+          600,
+          300,
+          320,
+          240
+        ],
+        "projects_collapsed": true,
+        "info_settings_visible": false,
+        "layers_height": 200,
+        "left_rail_size": 380,
+        "right_dock_visible": true,
+        "snaps_home": {
+          "side": "left",
+          "index": 3
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "S2-a-written-file-is-a-fixed-point",
+      "why": "save, load, save again must produce the same bytes: a session cannot drift by reopening",
+      "arrangement": [
+        {
+          "op": "Dock",
+          "section": "projects",
+          "side": "right"
+        },
+        {
+          "op": "Float",
+          "section": "layers",
+          "rect": [
+            420,
+            260,
+            300,
+            240
+          ],
+          "origin": "Api"
+        },
+        {
+          "op": "ToggleCollapsed",
+          "section": "main-menu"
+        }
+      ],
+      "expect": {
+        "reopened_equals_saved_bytes": true,
+        "second_save_equals_first": true
+      }
+    },
+    {
+      "id": "S3-a-kept-file-reopens-the-same-named-ids",
+      "why": "the names are the contract: every documented key is present after a round trip",
+      "arrangement": [
+        {
+          "op": "Dock",
+          "section": "layers",
+          "side": "right"
+        }
+      ],
+      "expect": {
+        "panel_keys": [
+          "command-line",
+          "command-search",
+          "left-rail",
+          "right-dock",
+          "toolbar"
+        ],
+        "section_keys": [
+          "builder-slot",
+          "display",
+          "icon-history",
+          "info-settings",
+          "layers",
+          "main-menu",
+          "projects",
+          "snaps"
+        ],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "S4-a-session-without-a-kept-file-is-the-baseline",
+      "why": "the first run of a program has no layout file",
+      "store": null,
+      "expect": {
+        "equals_matrix_default_bytes": true,
+        "diagnostics": [],
+        "menus_have_unsaved_changes": false
+      }
+    }
+  ]
+}

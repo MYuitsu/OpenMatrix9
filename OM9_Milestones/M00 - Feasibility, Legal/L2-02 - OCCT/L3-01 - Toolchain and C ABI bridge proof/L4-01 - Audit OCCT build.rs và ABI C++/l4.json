@@ -16,7 +16,7 @@
     "title": "Audit OCCT build.rs và ABI C++",
     "work_kind": "AUDIT",
     "mandatory_for_windows_mvp": true,
-    "purpose": "Kiểm tra OCCT 7.8+, libs, MSVC C++17, linker, flags và đường dẫn hệ thống",
+    "purpose": "Kiểm tra OCCT 8.0.1 (pin: native/occt/pin.json), libs, MSVC C++17, linker, flags và đường dẫn hệ thống",
     "inputs": [
       "QymCAD pinned HEAD SHA = 746a17f127897e921a57118b6caad08968602bf5",
       "Relevant OpenMatrix9 v0.10 contracts and manifest",
@@ -200,7 +200,7 @@
       "Ghi matrix per-platform với version mismatches và cách khóa version cho OpenMatrix9"
     ],
     "fixture": "build.rs, workflows",
-    "oracle": "Không trộn OCCT 7.8.1 của tài liệu với 7.9.3 CI; mỗi version có source line",
+    "oracle": "Chỉ dùng OCCT 8.0.1 theo pin native/occt/pin.json; mọi bằng chứng trích version + commit của pin",
     "negative": "Không khẳng định build thành công từ build.rs",
     "commands_preview": [
       "cd vendor-research/QymCAD",
@@ -262,7 +262,7 @@
       "Đối chiếu include dir, lib dir, MSVC runtime và TK* linked modules",
       "Ghi matrix per-platform với version mismatches và cách khóa version cho OpenMatrix9"
     ],
-    "acceptance_oracle": "Không trộn OCCT 7.8.1 của tài liệu với 7.9.3 CI; mỗi version có source line",
+    "acceptance_oracle": "Chỉ dùng OCCT 8.0.1 theo pin native/occt/pin.json; mọi bằng chứng trích version + commit của pin",
     "stop_condition": "Không khẳng định build thành công từ build.rs",
     "fixture_requirement": "build.rs, workflows",
     "auto_approval_forbidden": false,
@@ -426,7 +426,7 @@
     "role_label_on_record": "INFERRED_FROM_TITLE:CONTRACT_TEST",
     "role_provenance": "inferred (title contains 'audit')",
     "owner_boundary": "OM9-M00-L2-02",
-    "goal": "Kiểm tra OCCT 7.8+, libs, MSVC C++17, linker, flags và đường dẫn hệ thống",
+    "goal": "Kiểm tra OCCT 8.0.1 (pin: native/occt/pin.json), libs, MSVC C++17, linker, flags và đường dẫn hệ thống",
     "algorithm_on_record": "None",
     "proposed_signature_on_record": "",
     "sketch_is_untested": true,
@@ -439,7 +439,11 @@
       "stage": "Dùng chung cho bước 1, 2, 8 (thân, vành, cutter)",
       "why_for_this_task": "Bản đồ thao tác kernel là danh sách việc lớp FFI phải bao phủ, kèm thao tác nào thuộc OCCT và thao tác nào chỉ là số học thuần.",
       "om9_backend": "OCCT cho sweep/loft/boolean/offset; openNURBS cho curve và 3DM",
-      "steps_cited": [1, 2, 3],
+      "steps_cited": [
+        1,
+        2,
+        3
+      ],
       "algorithm_steps": [
         "K1. Định hướng: từ curve/rail, dựng frame và định hướng profile trước khi sweep (nhóm hàm Orient*Nalp, OrientProfileToRailNalp).",
         "K2. Dựng mặt: chọn sweep 1 rail, sweep 2 rail, rail revolve, loft hoặc extrude tuỳ số rail và kiểu profile; rail revolve có cả biến thể gen và biến thể tương thích Rhino4.",
@@ -481,4 +485,5 @@
       ],
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
-  }}
+  }
+}

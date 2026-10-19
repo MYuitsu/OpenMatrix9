@@ -178,7 +178,7 @@ publication evidence. No feature/catalog implementation status is promoted.
     data["updated_at"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     item = next(row for row in data["items"] if row.get("key") == "rcore00-standalone-foundation")
     for path in [RECEIPT, REPORT, "docs/superpowers/plans/2026-10-14-owned-file-lifecycle.md",
-                 "standalone/crates/om9-app/src/file_lifecycle.rs", "standalone/crates/om9-app/src/session/files.rs"]:
+                 "crates/om9-app/src/file_lifecycle.rs", "crates/om9-app/src/session/files.rs"]:
         if path not in item["outputs"]:
             item["outputs"].append(path)
     prefix = "Owned File lifecycle service;"

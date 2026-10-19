@@ -1,0 +1,662 @@
+{
+  "schema": "om9.m01.l3_003.panels-summary.v1",
+  "l3_id": "OM9-L3-01-01-003",
+  "binary": "H:\\OpenMatrix9\\standalone\\target\\debug\\om9.exe",
+  "window": "1600x1000",
+  "timestamp": "2026-10-16T12:46:43Z",
+  "cases": [
+    {
+      "scenario": "reorder",
+      "label": "drag PROJECTS onto the upper half of the DISPLAY bar",
+      "fixture": "positive.json P3 / P4 (drop index rule)",
+      "limitations": null,
+      "env": {
+        "OM9_UI_AUDIT_PANELS": "reorder",
+        "OM9_UI_AUDIT_WINDOW": "1600x1000"
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/reorder/ui-receipt.json",
+      "receipt_sha256": "593c39c07f1042fd70a45caf875c14c0db3793f43ce6af979890aea155411fc2",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/reorder/workspace.png",
+      "screenshot_sha256": "5069cb5cf0831898942a542eff2660bcc2ad5c58388c768b70c5d945596a9d28",
+      "observed": {
+        "exit_code": 0,
+        "elapsed_seconds": 2.1,
+        "preview_target": {
+          "Place": {
+            "index": 2,
+            "side": "left"
+          }
+        },
+        "indicator": {
+          "line": true,
+          "rect": {
+            "height": 3.0,
+            "width": 235.0,
+            "x": 2.0,
+            "y": 170.5
+          }
+        },
+        "last_op": {
+          "error": null,
+          "notes": [],
+          "ok": true,
+          "op": {
+            "Place": {
+              "index": 2,
+              "section": "projects",
+              "side": "left"
+            }
+          },
+          "outcome": {
+            "Moved": {
+              "index": 2,
+              "section": "projects",
+              "side": "left"
+            }
+          }
+        },
+        "left_order": [
+          "icon-history",
+          "main-menu",
+          "projects",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "builder-slot"
+        ],
+        "right_order": [],
+        "floating": [],
+        "status_kind": "Info",
+        "status_message": "Projects moved to menu position 3",
+        "history_tail": [
+          "Projects moved to menu position 3"
+        ],
+        "work_area": [
+          8.0,
+          29.0,
+          1584.0,
+          943.0
+        ],
+        "entities": 0,
+        "undo_len": 0,
+        "passes": 11,
+        "screenshot_px": [
+          1600,
+          1000
+        ]
+      },
+      "problems": [],
+      "passed": true
+    },
+    {
+      "scenario": "float",
+      "label": "drag DISPLAY into a viewport and float it",
+      "fixture": "positive.json P7 (float keeps a home), negative.json N5 (recovery)",
+      "limitations": null,
+      "env": {
+        "OM9_UI_AUDIT_PANELS": "float",
+        "OM9_UI_AUDIT_WINDOW": "1600x1000"
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/float/ui-receipt.json",
+      "receipt_sha256": "17f12dbd56a6721507d8d00bd11e05a8cd9bd08d3b1ce7838a07cd33eab33e98",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/float/workspace.png",
+      "screenshot_sha256": "78e3813659ca925bac6225adf0dea34d5528453167b6f98dab5a7c54a6ccbfa9",
+      "observed": {
+        "exit_code": 0,
+        "elapsed_seconds": 2.08,
+        "preview_target": {
+          "Float": {
+            "pointer": [
+              579.5,
+              775.25
+            ]
+          }
+        },
+        "indicator": {
+          "line": false,
+          "rect": {
+            "height": 240.0,
+            "width": 300.0,
+            "x": 429.5,
+            "y": 732.0
+          }
+        },
+        "last_op": {
+          "error": null,
+          "notes": [
+            {
+              "Recovered": {
+                "from": {
+                  "height": 240.0,
+                  "width": 300.0,
+                  "x": 429.5,
+                  "y": 768.25
+                },
+                "section": "display",
+                "to": {
+                  "height": 240.0,
+                  "width": 300.0,
+                  "x": 429.5,
+                  "y": 732.0
+                }
+              }
+            }
+          ],
+          "ok": true,
+          "op": {
+            "Float": {
+              "origin": "Drop",
+              "rect": {
+                "height": 240.0,
+                "width": 300.0,
+                "x": 429.5,
+                "y": 768.25
+              },
+              "section": "display",
+              "work": {
+                "height": 943.0,
+                "width": 1584.0,
+                "x": 8.0,
+                "y": 29.0
+              }
+            }
+          },
+          "outcome": {
+            "Floated": {
+              "rect": {
+                "height": 240.0,
+                "width": 300.0,
+                "x": 429.5,
+                "y": 732.0
+              },
+              "section": "display"
+            }
+          }
+        },
+        "left_order": [
+          "icon-history",
+          "main-menu",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_order": [],
+        "floating": [
+          "display"
+        ],
+        "status_kind": "Warning",
+        "status_message": "Display was moved back inside the window",
+        "history_tail": [
+          "Display was moved back inside the window"
+        ],
+        "work_area": [
+          8.0,
+          29.0,
+          1584.0,
+          943.0
+        ],
+        "entities": 0,
+        "undo_len": 0,
+        "passes": 11,
+        "screenshot_px": [
+          1600,
+          1000
+        ]
+      },
+      "problems": [],
+      "passed": true
+    },
+    {
+      "scenario": "dock-right",
+      "label": "drag DISPLAY into the 48 px strip at the right edge",
+      "fixture": "positive.json P6 (dock right), derived_geometry right_drop_strip",
+      "limitations": null,
+      "env": {
+        "OM9_UI_AUDIT_PANELS": "dock-right",
+        "OM9_UI_AUDIT_WINDOW": "1600x1000"
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/dock-right/ui-receipt.json",
+      "receipt_sha256": "ecb5c80c75c9e68b3a24103492724eb00b28afeba40e04a9c39105c9d6845383",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/dock-right/workspace.png",
+      "screenshot_sha256": "0f841d39873cda1f2586a962b28c3c87ed9c548af4bb2602e4f55e3992c3222e",
+      "observed": {
+        "exit_code": 0,
+        "elapsed_seconds": 2.06,
+        "preview_target": {
+          "Place": {
+            "index": 0,
+            "side": "right"
+          }
+        },
+        "indicator": {
+          "line": true,
+          "rect": {
+            "height": 3.0,
+            "width": 48.0,
+            "x": 1552.0,
+            "y": 159.0
+          }
+        },
+        "last_op": {
+          "error": null,
+          "notes": [],
+          "ok": true,
+          "op": {
+            "Place": {
+              "index": 0,
+              "section": "display",
+              "side": "right"
+            }
+          },
+          "outcome": {
+            "Docked": {
+              "index": 0,
+              "restored_home": false,
+              "section": "display",
+              "side": "right"
+            }
+          }
+        },
+        "left_order": [
+          "icon-history",
+          "main-menu",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_order": [
+          "display"
+        ],
+        "floating": [],
+        "status_kind": "Info",
+        "status_message": "Display docked to the right menu column",
+        "history_tail": [
+          "Display docked to the right menu column"
+        ],
+        "work_area": [
+          8.0,
+          29.0,
+          1584.0,
+          943.0
+        ],
+        "entities": 0,
+        "undo_len": 0,
+        "passes": 11,
+        "screenshot_px": [
+          1600,
+          1000
+        ]
+      },
+      "problems": [],
+      "passed": true
+    },
+    {
+      "scenario": "escape",
+      "label": "press DISPLAY, drag into a viewport and press Escape",
+      "fixture": "negative.json N19 (Escape cancels and keeps the draft)",
+      "limitations": null,
+      "env": {
+        "OM9_UI_AUDIT_PANELS": "escape",
+        "OM9_UI_AUDIT_WINDOW": "1600x1000"
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/escape/ui-receipt.json",
+      "receipt_sha256": "f2a4801df5a48ebb20969b90ee8064f20cab0c31b69f4e2f09ed1e99d4b93690",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/escape/workspace.png",
+      "screenshot_sha256": "9c682edbd88f88acb778adcbfed897077e1a44ff6c90c52ade9cf1a6dc75eca7",
+      "observed": {
+        "exit_code": 0,
+        "elapsed_seconds": 2.11,
+        "preview_target": {
+          "Float": {
+            "pointer": [
+              579.5,
+              775.25
+            ]
+          }
+        },
+        "indicator": {
+          "line": false,
+          "rect": {
+            "height": 240.0,
+            "width": 300.0,
+            "x": 429.5,
+            "y": 732.0
+          }
+        },
+        "last_op": null,
+        "left_order": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_order": [],
+        "floating": [],
+        "status_kind": "Info",
+        "status_message": "Display drag cancelled (Esc)",
+        "history_tail": [
+          "Display drag cancelled (Esc)"
+        ],
+        "work_area": [
+          8.0,
+          29.0,
+          1584.0,
+          943.0
+        ],
+        "entities": 0,
+        "undo_len": 0,
+        "passes": 12,
+        "screenshot_px": [
+          1600,
+          1000
+        ]
+      },
+      "problems": [],
+      "passed": true
+    },
+    {
+      "scenario": "roll-up",
+      "label": "click the PROJECTS title bar, then click it again",
+      "fixture": "positive.json P1 (collapse then expand restores the state), P2",
+      "limitations": null,
+      "env": {
+        "OM9_UI_AUDIT_PANELS": "roll-up",
+        "OM9_UI_AUDIT_WINDOW": "1600x1000"
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/roll-up/ui-receipt.json",
+      "receipt_sha256": "cd7e84d4518771045294e52698e5a3c253a2a1fa65058433e50dda41d0351b11",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/roll-up/workspace.png",
+      "screenshot_sha256": "51f4f344b420f39679979b2191975b8fb90bb24599d7be0603bbaad4a883e9a6",
+      "observed": {
+        "exit_code": 0,
+        "elapsed_seconds": 2.07,
+        "preview_target": null,
+        "indicator": null,
+        "last_op": {
+          "error": null,
+          "notes": [],
+          "ok": true,
+          "op": {
+            "ToggleCollapsed": {
+              "section": "projects"
+            }
+          },
+          "outcome": {
+            "Collapsed": {
+              "collapsed": false,
+              "section": "projects"
+            }
+          }
+        },
+        "left_order": [
+          "icon-history",
+          "main-menu",
+          "display",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_order": [],
+        "floating": [],
+        "status_kind": "Info",
+        "status_message": "Projects expanded",
+        "history_tail": [
+          "Projects expanded",
+          "Projects rolled up"
+        ],
+        "work_area": [
+          8.0,
+          29.0,
+          1584.0,
+          943.0
+        ],
+        "entities": 0,
+        "undo_len": 0,
+        "passes": 11,
+        "screenshot_px": [
+          1600,
+          1000
+        ]
+      },
+      "problems": [],
+      "passed": true
+    },
+    {
+      "scenario": "float-drop",
+      "label": "drag DISPLAY into a viewport: it floats and keeps its home",
+      "fixture": "positive.json P7 (float records home), N5 (recovery in the drop)",
+      "limitations": "the X of the floating window is not scripted (a 16 px target): closing it is p7 plus the owner's item M3",
+      "env": {
+        "OM9_UI_AUDIT_PANELS": "float-drop",
+        "OM9_UI_AUDIT_WINDOW": "1600x1000"
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/float-drop/ui-receipt.json",
+      "receipt_sha256": "956de43ec933f1e9b2a183232fd715cab9deb6e20f6807e01832dc6adb8d8201",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/float-drop/workspace.png",
+      "screenshot_sha256": "9ffb6264efb0e0aa1999d4a32017678cf58bf3497c72d45b6ebc9f085ec541dc",
+      "observed": {
+        "exit_code": 0,
+        "elapsed_seconds": 2.06,
+        "preview_target": {
+          "Float": {
+            "pointer": [
+              579.5,
+              775.25
+            ]
+          }
+        },
+        "indicator": {
+          "line": false,
+          "rect": {
+            "height": 240.0,
+            "width": 300.0,
+            "x": 429.5,
+            "y": 732.0
+          }
+        },
+        "last_op": {
+          "error": null,
+          "notes": [
+            {
+              "Recovered": {
+                "from": {
+                  "height": 240.0,
+                  "width": 300.0,
+                  "x": 429.5,
+                  "y": 768.25
+                },
+                "section": "display",
+                "to": {
+                  "height": 240.0,
+                  "width": 300.0,
+                  "x": 429.5,
+                  "y": 732.0
+                }
+              }
+            }
+          ],
+          "ok": true,
+          "op": {
+            "Float": {
+              "origin": "Drop",
+              "rect": {
+                "height": 240.0,
+                "width": 300.0,
+                "x": 429.5,
+                "y": 768.25
+              },
+              "section": "display",
+              "work": {
+                "height": 943.0,
+                "width": 1584.0,
+                "x": 8.0,
+                "y": 29.0
+              }
+            }
+          },
+          "outcome": {
+            "Floated": {
+              "rect": {
+                "height": 240.0,
+                "width": 300.0,
+                "x": 429.5,
+                "y": 732.0
+              },
+              "section": "display"
+            }
+          }
+        },
+        "left_order": [
+          "icon-history",
+          "main-menu",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_order": [],
+        "floating": [
+          "display"
+        ],
+        "status_kind": "Warning",
+        "status_message": "Display was moved back inside the window",
+        "history_tail": [
+          "Display was moved back inside the window"
+        ],
+        "work_area": [
+          8.0,
+          29.0,
+          1584.0,
+          943.0
+        ],
+        "entities": 0,
+        "undo_len": 0,
+        "passes": 11,
+        "screenshot_px": [
+          1600,
+          1000
+        ]
+      },
+      "problems": [],
+      "passed": true
+    },
+    {
+      "scenario": "readback-recover",
+      "label": "float DISPLAY, then let the real window report a rectangle that cannot fit",
+      "fixture": "negative.json N14 (a shrink recovers the floating menu), M5",
+      "limitations": "the window keeps its audit size, so the repair comes from the rectangle the real window reports; the shrinking-window case is the owner's item M5",
+      "env": {
+        "OM9_UI_AUDIT_PANELS": "readback-recover",
+        "OM9_UI_AUDIT_WINDOW": "1600x1000"
+      },
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/readback-recover/ui-receipt.json",
+      "receipt_sha256": "bfdaf27ad9b0f32de510330ec28ebd4a9b8b8ae26f6c72f34ffa83f1acb1d86d",
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-003-panels/readback-recover/workspace.png",
+      "screenshot_sha256": "4e07c4ea76ae92451733c183917118b02dec28b1547ce91b5951d4b47ec7c427",
+      "observed": {
+        "exit_code": 0,
+        "elapsed_seconds": 2.08,
+        "preview_target": null,
+        "indicator": null,
+        "last_op": {
+          "error": null,
+          "notes": [
+            {
+              "Recovered": {
+                "from": {
+                  "height": 104.0,
+                  "width": 300.0,
+                  "x": 190.0,
+                  "y": 732.0
+                },
+                "section": "display",
+                "to": {
+                  "height": 120.0,
+                  "width": 300.0,
+                  "x": 190.0,
+                  "y": 732.0
+                }
+              }
+            }
+          ],
+          "ok": true,
+          "op": {
+            "SetFloatRect": {
+              "rect": {
+                "height": 104.0,
+                "width": 300.0,
+                "x": 190.0,
+                "y": 732.0
+              },
+              "section": "display",
+              "work": {
+                "height": 943.0,
+                "width": 1584.0,
+                "x": 8.0,
+                "y": 29.0
+              }
+            }
+          },
+          "outcome": {
+            "FloatRectSet": {
+              "rect": {
+                "height": 120.0,
+                "width": 300.0,
+                "x": 190.0,
+                "y": 732.0
+              },
+              "section": "display"
+            }
+          }
+        },
+        "left_order": [
+          "icon-history",
+          "main-menu",
+          "snaps",
+          "info-settings",
+          "layers",
+          "projects",
+          "builder-slot"
+        ],
+        "right_order": [],
+        "floating": [
+          "display"
+        ],
+        "status_kind": "Warning",
+        "status_message": "Display was moved back inside the window",
+        "history_tail": [
+          "Display was moved back inside the window",
+          "Display was moved back inside the window"
+        ],
+        "work_area": [
+          8.0,
+          29.0,
+          1584.0,
+          943.0
+        ],
+        "entities": 0,
+        "undo_len": 0,
+        "passes": 11,
+        "screenshot_px": [
+          1600,
+          1000
+        ]
+      },
+      "problems": [],
+      "passed": true
+    }
+  ],
+  "all_passed": true
+}

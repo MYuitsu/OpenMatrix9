@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-013",
+  "l4": "OM9-L4-01-03-013-02",
+  "title": "Import Source Provenance Metadata",
+  "case": "om9-l3-01-03-013-negative",
+  "runtime_tests": "om9-core/tests/provenance.rs::an_imported_object_reports_source_path_checksum_and_original_identity|a_natively_created_object_is_never_labelled_as_an_import|a_source_without_a_matching_embedded_hash_has_no_provenance|an_object_with_no_import_namespace_has_no_provenance",
+  "negative_oracle": "see cases",
+  "cases": [
+    {
+      "call": "provenance(id of a Mutation::Insert entity)",
+      "id": "native-entity",
+      "expect": null
+    },
+    {
+      "call": "namespace_summary(random)",
+      "id": "unknown-namespace",
+      "expect": {
+        "error": "Missing(\"import namespace\")"
+      }
+    },
+    {
+      "call": "retained source sha256 no longer matches the embedded resource",
+      "id": "broken-source-proof",
+      "expect": {
+        "provenance": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-004",
+  "l4": "OM9-L4-01-01-004-02",
+  "case": "docking-layout-default-restore-positive",
+  "positive_oracle": "Reset custom layout recreates Matrix-oriented baseline positions",
+  "rect_format": "[x, y, width, height] in logical window points, origin top-left",
+  "documented_left_order": [
+    "icon-history",
+    "main-menu",
+    "display",
+    "snaps",
+    "info-settings",
+    "layers",
+    "projects",
+    "builder-slot"
+  ],
+  "documented_panels": {
+    "left-rail": 300.0,
+    "right-dock": 300.0,
+    "command-line": 90.0,
+    "toolbar": 67.0
+  },
+  "documented_right_dock_visible": false,
+  "cases": [
+    {
+      "id": "D1-reset-after-every-placement-kind",
+      "why": "every field a user can change is changed first, then reset once",
+      "customisation": [
+        { "op": "Dock", "section": "snaps", "side": "right" },
+        { "op": "ToggleCollapsed", "section": "projects" },
+        { "op": "Move", "section": "layers", "delta": -1 },
+        { "op": "Float", "section": "display", "rect": [600, 300, 300, 240], "origin": "Api" },
+        { "op": "set_section_visible", "section": "info-settings", "visible": false },
+        { "op": "set_size", "panel": "left-rail", "size": 420 },
+        { "op": "set_visible", "panel": "right-dock", "visible": true }
+      ],
+      "expect": {
+        "differs_from_default_before_reset": true,
+        "after_reset_equals_matrix_default_bytes": true,
+        "left_order": "documented_left_order",
+        "right_order": [],
+        "floating": [],
+        "every_section_visible": true,
+        "every_section_expanded": true,
+        "no_stored_home": true,
+        "panels": "documented_panels",
+        "right_dock_visible": false,
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "D2-reset-is-idempotent",
+      "why": "a second reset changes nothing, so the baseline is a fixed point",
+      "customisation": [
+        { "op": "Dock", "section": "layers", "side": "right" },
+        { "op": "Float", "section": "snaps", "rect": [200, 200, 300, 240], "origin": "Api" }
+      ],
+      "expect": {
+        "after_reset_equals_matrix_default_bytes": true,
+        "second_reset_equals_matrix_default_bytes": true
+      }
+    },
+    {
+      "id": "D3-reset-touches-interface-only",
+      "why": "the model has no document, but the caller must not publish anything",
+      "customisation": [
+        { "op": "Dock", "section": "projects", "side": "right" },
+        { "op": "set_section_visible", "section": "layers", "visible": false }
+      ],
+      "expect": {
+        "after_reset_equals_matrix_default_bytes": true,
+        "dock_dirty_is_the_callers_decision": true
+      }
+    },
+    {
+      "id": "D4-reload-without-a-store-is-the-factory-default",
+      "why": "a session without a kept configuration still has a documented baseline",
+      "store": null,
+      "expect": {
+        "after_reload_equals_matrix_default_bytes": true,
+        "command_status": "Menus reloaded from the factory default"
+      }
+    }
+  ]
+}

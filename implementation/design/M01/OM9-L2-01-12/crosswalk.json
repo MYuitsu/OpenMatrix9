@@ -1,0 +1,213 @@
+{
+  "schema": "om9.m01.module_crosswalk.v1",
+  "l2_id": "OM9-L2-01-12",
+  "l2_title": "Be Native Project Codec Stl Export",
+  "milestone": "M01",
+  "target": "standalone Rust OM9",
+  "audited_utc": "2026-10-19",
+  "workspace": "H:/OpenMatrix9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "working_tree_note": "crates/om9-archive and crates/om9-exchange are untracked in this checkout; line numbers are 1-based on the working tree at audit time.",
+  "spec_package": "OpenMatrix9_Codex_Spec_v2/ is ABSENT in this checkout. The local OM9_Milestones/M01 L2/L3/L4 records and the user direction of 2026-10-19 are the specification source; no upstream source was copied into this module.",
+  "m00_scope": "No QymCAD code is reused by this module. The pinned QymCAD paths in the L3 records were read for architecture only (qcad zipped project, formats registry, serialized model, exact shape io); OM9 defines its own schema-4 chunk container, migration policy and STL policy. OCCT is used only through the existing om9-kernel adapter for live B-Rep measurement, not inside the codec.",
+  "status_vocabulary": {
+    "DONE_WITH_EVIDENCE": "owner code exists AND positive and negative oracles are proven by named automated tests that ran in this audit",
+    "DEFERRED": "the L3/L4 record targets another milestone and is not part of M01",
+    "PARTIAL": "owner code exists but a named oracle is not covered",
+    "MISSING": "no owner code for the capability"
+  },
+  "counts": { "DONE_WITH_EVIDENCE": 9, "DEFERRED": 1, "PARTIAL": 0, "MISSING": 0 },
+  "owner_crates": [
+    "om9-core: Document, Entity, Layer, Group, Feature, Brep, Geometry, HistoryGraph, Resource, budget validation",
+    "om9-archive: schema-4 container, admission, atomic save, snapshot, runtime restoration, legacy migration",
+    "om9-native-owner: Windows VerifiedFile publication used by atomic save",
+    "om9-exchange: STL unit/winding policy (stl module)",
+    "om9-app: file lifecycle integration and real cold-process reopen tests"
+  ],
+  "l3": [
+    {
+      "id": "OM9-L3-01-12-001",
+      "title": "Native Project Container Format",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Versioned container with magic, schema version, chunk table, document metadata manifest and deterministic encoding.",
+      "evidence": [
+        "crates/om9-archive/src/container.rs:14-15 magic + VERSION=4",
+        "crates/om9-archive/src/container.rs:44 encode(): validate, bounded JSON, manifest header fields (schema at 102, chunk count 103, metadata hash 107)",
+        "crates/om9-archive/src/container.rs:156-176 decode(): magic and exact schema match, no implicit migration",
+        "crates/om9-archive/src/container.rs:241-267 duplicate chunk IDs, unsupported flags/compression and SHA-256 chunk checksums",
+        "TEST crates/om9-archive/tests/project_codec_acceptance.rs:317 container_states_schema_document_id_layers_and_brep_payload",
+        "TEST crates/om9-archive/tests/container_admission.rs:66 typed_document_roundtrip_preserves_master_identity_basis_attributes_and_channels",
+        "TEST crates/om9-archive/tests/container_admission.rs:74 checksum_truncation_version_and_trailing_payload_corruption_reject"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored OM9 container; qcad project_file.rs read as reference only, no copy"
+    },
+    {
+      "id": "OM9-L3-01-12-002",
+      "title": "Scene And Layer State Encoding",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Entity, layer, visibility, lock, color and membership state round-trip with stable typed UUIDs.",
+      "evidence": [
+        "crates/om9-core/src/model.rs:13-24 Attributes (layer/visible/hidden/selectable/locked/color)",
+        "crates/om9-core/src/model.rs:289-300 Layer, :330-385 Document tables and typed UUID map admission",
+        "crates/om9-core/src/model.rs:709-714 entity layer must exist; :1132-1142 layer_order and current_layer consistency",
+        "crates/om9-core/src/model.rs:505-546 effective layer permissions compose visibility and lock",
+        "TEST crates/om9-archive/tests/layer_schema.rs:24 schema4_roundtrip_keeps_preset_hidden_explicit_permissions_and_uuid",
+        "TEST crates/om9-archive/tests/project_codec_acceptance.rs:358 layer_visibility_and_lock_state_round_trip_with_stable_ids (including missing-layer refusal)",
+        "TEST crates/om9-app/tests/cold_layers.rs:15 independent_owned_process_restores_layer_current_and_explicit_object_preferences",
+        "TEST crates/om9-app/tests/file_lifecycle.rs:531 save_keeps_hidden_locked_off_layers_and_explicit_preferences_in_complete_document"
+      ],
+      "gaps": [],
+      "reuse": "REUSE_IN_PLACE document model; EXTEND archive container only"
+    },
+    {
+      "id": "OM9-L3-01-12-003",
+      "title": "B-Rep Mesh And Instance Encoding",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Canonical B-Rep source plus disposable display/topology snapshot, mesh display data and definition/instance links survive close/open without mesh substitution.",
+      "evidence": [
+        "crates/om9-core/src/geometry.rs:490-499 Geometry::{Point,Curve,Surface,Mesh,Cloud,Instance,Brep}; :539 Brep validation; :570-604 mesh face/vertex validation",
+        "crates/om9-core/src/brep.rs:14-39 Brep + BrepDisplay (source, source_sha256, display_sha256, points, triangles, segments, vertices, faces, edges, vertex_ids, face_edges)",
+        "crates/om9-core/src/brep.rs:43-55 from_native binds source digest to the display; :59-128 validates bounds, topology indices and unique non-nil UUIDs",
+        "crates/om9-core/src/model.rs:632-650 Definition instance creation; :724-728 instance definition existence",
+        "TEST crates/om9-archive/tests/project_codec_acceptance.rs:398 brep_source_and_display_round_trip_without_mesh_substitution (missing/tampered source refused)",
+        "TEST crates/om9-archive/tests/project_codec_acceptance.rs:511 roundtrip_fixture_keeps_two_layers_box_instance_group_and_jobbag_reference",
+        "TEST crates/om9-app/tests/brep_selection.rs:103 source_and_topology_survive_cold_archive_and_transform_undo_without_reviving_old_picks (real OCCT box 10x20x30, volume 6000 mm3, fresh process --inspect)",
+        "TEST crates/om9-app/tests/brep_selection.rs:157 source_binding_corrupt_cache_invalid_native_source_and_budgets_are_rejected",
+        "TEST crates/om9-core/tests/document_graph.rs:613 l3_008_two_instances_share_one_definition_without_cloning_topology (and :725/:752 cycle refusals)"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored rust-owned B-Rep snapshot; OCCT only through om9-kernel adapter for measurement"
+    },
+    {
+      "id": "OM9-L3-01-12-004",
+      "title": "Builder History Stub Persistence",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Persistent feature and recipe placeholders reopen unchanged; an unknown module is reported at runtime restoration instead of inventing recompute support.",
+      "evidence": [
+        "crates/om9-core/src/model.rs:199-245 Feature/FeatureKind and stable FeatureId",
+        "crates/om9-core/src/history.rs:110-149 Recipe (document, command, environment, inputs, parameters, outputs, policy, state); :350-364 history validation and execution order",
+        "crates/om9-archive/src/restore.rs:147-198 runtime restoration marks unregistered recipes Unresolved with an owned diagnostic and stale results",
+        "TEST crates/om9-archive/tests/project_codec_acceptance.rs:435 history_and_feature_placeholders_reopen_without_recompute_support (opaque recipe strings survive decode; unknown feature kind refused with Unsupported(\"document variant\"))",
+        "TEST crates/om9-archive/tests/document_identity_round_trip.rs:99 entity_feature_and_group_ids_survive_save_and_reopen",
+        "TEST crates/om9-archive/tests/document_snapshot.rs:48 snapshot_restore_reproduces_ids_and_geometry_bits",
+        "TEST crates/om9-archive/tests/restore_modules.rs:126 missing_replay_module_keeps_geometry_but_marks_recipe_and_result_unresolved_stale",
+        "TEST crates/om9-app/tests/file_lifecycle.rs:481 missing_replay_module_is_diagnostic_and_not_a_clean_restore"
+      ],
+      "gaps": [],
+      "reuse": "EXTEND existing Feature/Recipe; no second history schema"
+    },
+    {
+      "id": "OM9-L3-01-12-005",
+      "title": "Atomic Save And Write Failure Recovery",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Encode, verify, write a unique staging file, fsync, re-read and only then publish over the destination; every failure path keeps the last known good file.",
+      "evidence": [
+        "crates/om9-archive/src/atomic_file.rs:26 read_bounded; :58 save; :60-75 encode + private decode equality before any file is created",
+        "crates/om9-archive/src/atomic_file.rs:86-90 readonly destination refused; :91-101 unique staging file; :103-104 flush + sync_all; :107-110 staged re-read equality",
+        "crates/om9-archive/src/atomic_file.rs:112-135 Windows publication through VerifiedFile (fingerprint + rename); :137 non-Windows rename",
+        "crates/om9-native-owner/src/verified_file.rs:13 VerifiedFile, :24 open with max bytes/cancel, :52 publish",
+        "crates/om9-archive/src/atomic_file.rs:43-46 Staging Drop removes only the staging name",
+        "TEST crates/om9-archive/tests/atomic_save.rs:24 successful_same_volume_replacement_reopens_current_document",
+        "TEST crates/om9-archive/tests/atomic_save.rs:35 canceled_and_invalid_save_preserve_good_destination_and_remove_staging",
+        "TEST crates/om9-archive/tests/atomic_save.rs:56 destination_permission_failure_preserves_existing_file_and_removes_staging",
+        "TEST crates/om9-archive/tests/atomic_save.rs:79 validation_copy_shares_point_budget_with_live_model_before_file_mutation",
+        "TEST crates/om9-app/tests/file_lifecycle.rs:197 save_as_cancel_failure_and_unsupported_format_preserve_identity_and_target",
+        "TEST crates/om9-app/tests/file_lifecycle.rs:644 failing_save_to_active_path_does_not_turn_into_a_save_as_picker"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored atomic save; reuse om9-native-owner VerifiedFile on Windows"
+    },
+    {
+      "id": "OM9-L3-01-12-006",
+      "title": "Project Load Validation And Compatibility",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Validate magic, schema, chunk table bounds, checksums, JSON admission, typed document invariants and legacy ownership before any document is published.",
+      "evidence": [
+        "crates/om9-archive/src/container.rs:168-179 schema/version/byte budget; :180-240 chunk table bounds, gaps, overlaps and trailing bytes",
+        "crates/om9-archive/src/container.rs:241-266 duplicate IDs, flags, checksum and chunk kind admission",
+        "crates/om9-archive/src/container.rs:269-296 JSON admission then typed decode with explicit Unsupported for unknown variants",
+        "crates/om9-archive/src/container.rs:297-326 legacy ownership guards, resource hydration by descriptor/hash and final document validation",
+        "crates/om9-archive/src/json_admission.rs duplicate keys, string/node/depth and allocation preflight",
+        "TEST crates/om9-archive/tests/project_codec_acceptance.rs:472 damaged_container_is_refused_before_any_document_is_published",
+        "TEST crates/om9-archive/tests/container_admission.rs:74 checksum_truncation_version_and_trailing_payload_corruption_reject",
+        "TEST crates/om9-archive/tests/container_admission.rs:91/104/124/140 offset overflow, overlap, duplicate identity and UUID alias rejection",
+        "TEST crates/om9-archive/tests/resource_chunks.rs:70 missing_or_unreferenced_resource_chunks_reject_even_with_valid_container_checksums",
+        "TEST crates/om9-app/tests/file_lifecycle.rs:320 open_invalid_or_missing_candidate_keeps_document_scene_command_and_redo",
+        "TEST crates/om9-app/tests/cold_reopen.rs:132 actual_process_requires_explicit_v1_upgrade_and_preserves_durable_identity"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored admission; no ZIP reader, so ZIP path-traversal and ZIP-bomb inputs do not exist in this format (there is no external path or decompression surface)"
+    },
+    {
+      "id": "OM9-L3-01-12-007",
+      "title": "Document Reload And Restoration",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Reopen restores durable IDs, layers, geometry, instance links and runtime ownership; a failed read leaves the currently open document untouched.",
+      "evidence": [
+        "crates/om9-archive/src/lib.rs:182 open, :188 restore, :200 open_restored; :174 save",
+        "crates/om9-archive/src/restore.rs:13-19 ReplayKey; :62-123 restoration admission; :147-198 restore with owned diagnostics",
+        "crates/om9-core/src/model.rs:463-504 renew_session rebinds only verified current stamps and keeps stale references stale",
+        "TEST crates/om9-archive/tests/restore_modules.rs:75/87/126/150/175/198 independent sessions, legacy owner migration, missing module, matching key, solver mismatch, long diagnostics",
+        "TEST crates/om9-archive/tests/document_snapshot.rs:48/84/103/146 snapshot identity, foreign snapshot, tamper, unknown version",
+        "TEST crates/om9-archive/tests/project_codec_acceptance.rs:589 replay_key_matches_are_not_required_for_plain_document_reopen",
+        "TEST crates/om9-app/tests/cold_reopen.rs:34 actual_standalone_process_creates_and_cold_reopens_owned_om9_document",
+        "TEST crates/om9-app/tests/file_lifecycle.rs:425 open_candidate_must_fit_alongside_old_world_scene_and_undo"
+      ],
+      "gaps": [],
+      "reuse": "REUSE Archive::open/decode; ADD authored restoration diagnostics"
+    },
+    {
+      "id": "OM9-L3-01-12-008",
+      "title": "STL Tessellation Export Codec",
+      "status": "DEFERRED",
+      "scope": "Recorded target_implementation_milestone=M07, execution_stage=E12 and l4_status=DEFERRED_TO_M07_NOT_INCLUDED_IN_M01; the directory contains no L4 tasks.",
+      "evidence": [
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/l3.json:8-10",
+        "crates/om9-exchange/src/stl.rs:1 names OM9-L3-01-12-008 as the STL writer surface, but document tessellation/export command remains M07"
+      ],
+      "gaps": [
+        "Real B-Rep to watertight STL command and M07 tessellation integration are out of M01 scope."
+      ],
+      "reuse": "DEFERRED to M07"
+    },
+    {
+      "id": "OM9-L3-01-12-009",
+      "title": "Export Mesh Units And Winding",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "STL policy states millimetre scale and winding in the file, computes unit normals and refuses geometry a slicer would misread.",
+      "evidence": [
+        "crates/om9-exchange/src/lib.rs:17 pub mod stl",
+        "crates/om9-exchange/src/stl.rs:84-97 StlOptions {scale, flip_winding, strict} with explicit millimetre semantics",
+        "crates/om9-exchange/src/stl.rs:123-137 open_edges watertightness count",
+        "crates/om9-exchange/src/stl.rs:141-210 write_binary_stl: scale (:190), winding swap (:193-197), unit normal (:198), 80-byte header stating scale (:172-180)",
+        "TEST crates/om9-exchange/src/stl.rs:258-352 seven unit tests (layout, outward normal, flip, scale, open surface, degenerate, bad input)",
+        "TEST crates/om9-exchange/tests/stl_export_policy.rs:62 the_file_header_states_the_scale_so_units_are_never_implicit",
+        "TEST crates/om9-exchange/tests/stl_export_policy.rs:93 a_closed_surface_is_watertight_and_its_normals_point_outwards",
+        "TEST crates/om9-exchange/tests/stl_export_policy.rs:128 geometry_a_slicer_would_misread_is_refused_before_a_file_exists"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored codec policy; the M07 command will call it"
+    },
+    {
+      "id": "OM9-L3-01-12-010",
+      "title": "Project Roundtrip Regression Fixtures",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Golden roundtrip fixture with two layers, a 10x20x30 mm box (6000 mm3), an instance, a group, a semantic feature, a history placeholder and an embedded jobbag reference; damaged bundles and duplicate identities fail closed.",
+      "evidence": [
+        "TEST crates/om9-archive/tests/project_codec_acceptance.rs:511 roundtrip_fixture_keeps_two_layers_box_instance_group_and_jobbag_reference (save/open file, byte-level reopen equality, 6000 mm3 display volume, resource payload equality, damaged bundle refused, duplicate identity refused)",
+        "TEST crates/om9-app/tests/brep_selection.rs:103 real OCCT box cold archive, volume 6000 mm3 and matching IDs through a fresh process",
+        "TEST crates/om9-archive/tests/document_identity_round_trip.rs:99 entity/feature/group IDs survive save and reopen",
+        "TEST crates/om9-app/tests/cold_layers.rs:15 independent process restores layers and explicit object preferences",
+        "TEST crates/om9-app/tests/cold_reopen.rs:67 corrupt_archive_causes_real_process_failure_without_success_json",
+        "TEST crates/om9-app/tests/cold_reopen.rs:432 schema4_cold_process_preserves_namespaces_current_edits_tombstones_and_original_unit_context"
+      ],
+      "gaps": [],
+      "reuse": "REUSE archive + app file lifecycle; fixture authored for this audit"
+    }
+  ],
+  "manual_review_remaining": [
+    "M01 FEBE/manual sign-off is not applicable to this backend module (manual_test_gate=AUTO_ONLY on every L3).",
+    "An external reviewer has not signed this record; status is AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING."
+  ]
+}

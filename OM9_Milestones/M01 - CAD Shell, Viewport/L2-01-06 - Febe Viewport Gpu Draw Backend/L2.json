@@ -88,5 +88,15 @@
       "id": "OM9-L3-01-06-009",
       "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-009 - GPU Device Loss Graceful Recovery/l3.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "desktop_viewport_backend": "GPU_ONLY",
+    "gpu_only_evidence": [
+      "implementation/evidence/M02/2026-10-19-gpu-only.md",
+      "implementation/evidence/M02/2026-10-19-gpu-only-checks.json",
+      "implementation/evidence/M02/2026-10-19-gpu-only-native.json"
+    ],
+    "software_fallback": false,
+    "human_approval": null
+  }
 }

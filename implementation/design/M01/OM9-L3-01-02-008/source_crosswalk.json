@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-008-01",
+  "l3_id": "OM9-L3-01-02-008",
+  "l3_title": "Command Cancel Rollback",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "cancel preview and roll back incomplete geometry changes",
+  "positive_oracle": "Preview geometry canceled with Escape restores document and no undo entry",
+  "negative_oracle": "Cancel after partial state or C++ error must not leave orphan preview entity",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:347 BarAsk::WidthPick => self.start_width_pick()"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "a step can be abandoned; OM9 keeps abandonable steps and adds the rule that an abandoned step leaves nothing behind.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "No cancel surface."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No cancel surface.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "No cancel surface."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No cancel surface.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "Dependency shape only."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session.rs::preview(&self, point) computes the rubber band from the session state WITHOUT mutating anything, and returns Ok(None) when nothing runs",
+    "session.rs::cancel() drops the session; the document is only touched at the commit inside accept_world_point"
+  ],
+  "gap_found_by_this_task": [
+    "Pinned and verified: a preview exists during the command and is gone after Escape (probe: preview_was=true, preview_now=None), the document and the journal are untouched, and a click after the cancel is refused with Missing('active command') — no orphan preview entity can survive, because the preview never becomes an entity until the command commits.",
+    "Also pinned: a REFUSAL is not a cancel — a zero-length line keeps the command open with its preview so the user can retry, and the retry commits exactly one entity and one journal entry."
+  ],
+  "reuse_decision": "ADAPT the abandonable step of gui.rs; ADD the rule that a cancel leaves neither entity nor journal entry.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-008/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-008/negative.json",
+    "standalone/crates/om9-app/tests/command_transactions.rs"
+  ]
+}

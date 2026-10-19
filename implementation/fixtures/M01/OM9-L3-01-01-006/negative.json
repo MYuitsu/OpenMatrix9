@@ -1,0 +1,82 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-006",
+  "l4": "OM9-L4-01-01-006-02",
+  "case": "active-document-window-state-negative",
+  "negative_oracle": "Close document with unsaved changes requires explicit decision",
+  "cases": [
+    {
+      "id": "C1-a-dirty-close-asks-and-changes-nothing",
+      "start": "dirty",
+      "intent": "WindowClose",
+      "expect": {
+        "phase": "Unsaved",
+        "closed": false,
+        "file_written": false,
+        "document_unchanged": true,
+        "still_dirty": true
+      }
+    },
+    {
+      "id": "C2-discard-closes-without-writing",
+      "start": "dirty",
+      "intent": "WindowClose",
+      "decision": "Discard",
+      "expect": { "outcome": "CloseReady", "file_written": false, "still_dirty": true }
+    },
+    {
+      "id": "C3-save-then-close-writes-the-file",
+      "start": "dirty-saved",
+      "intent": "WindowClose",
+      "decision": "Save",
+      "expect": { "outcome": "SavedAndCloseReady", "file_written": true, "dirty": false }
+    },
+    {
+      "id": "C4-saving-a-document-with-no-path-asks-for-one-first",
+      "start": "dirty",
+      "intent": "WindowClose",
+      "decision": "Save",
+      "expect": { "phase": "SavePath", "closed": false, "file_written": false }
+    },
+    {
+      "id": "C5-cancelling-the-prompt-leaves-everything-alone",
+      "start": "dirty",
+      "intent": "WindowClose",
+      "decision": "Cancel",
+      "expect": {
+        "has_operation": false,
+        "closed": false,
+        "file_written": false,
+        "still_dirty": true,
+        "document_unchanged": true
+      }
+    },
+    {
+      "id": "C6-a-stale-token-can-never-close-or-save",
+      "start": "dirty",
+      "intent": "WindowClose",
+      "decision": "Cancel",
+      "then": "decide_unsaved with the cancelled token",
+      "expect": { "error": true, "closed": false, "file_written": false }
+    },
+    {
+      "id": "C7-a-clean-close-never-asks",
+      "start": "clean",
+      "intent": "WindowClose",
+      "expect": { "outcome": "CloseReady", "phase": null, "file_written": false }
+    },
+    {
+      "id": "C8-a-new-document-with-unsaved-work-asks-the-same-question",
+      "start": "dirty",
+      "intent": "Command(New)",
+      "expect": { "phase": "Unsaved", "file_written": false, "document_unchanged": true }
+    },
+    {
+      "id": "C9-discarding-a-new-document-starts-an-empty-one",
+      "start": "dirty",
+      "intent": "Command(New)",
+      "decision": "Discard",
+      "expect": { "entities": 0, "undo_len": 0, "dirty": false, "title_suffix": "Untitled" }
+    }
+  ]
+}

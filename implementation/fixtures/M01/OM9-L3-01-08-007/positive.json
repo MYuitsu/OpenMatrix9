@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-08-007",
+  "l4": "OM9-L4-01-08-007-02",
+  "title": "Coordinate Numeric Input Primitives",
+  "case": "om9-l3-01-08-007-positive",
+  "positive_oracle": "CPlane là frame có kiểu: local (1,2,3) trên plane dịch ([10,20,30]) thành world (13,21,32); to_local là nghịch đảo.",
+  "runtime_tests": [
+    "cargo test -p om9-core --test coordinates",
+    "cargo test -p om9-scene --test coordinate_frame"
+  ]
+}

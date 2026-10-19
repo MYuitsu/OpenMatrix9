@@ -1,0 +1,1668 @@
+{
+  "constants": {
+    "CANVAS_MIN_WIDTH": 320.0,
+    "LEFT_RAIL_DEFAULT": 300.0,
+    "LEFT_RAIL_MAX": 460.0,
+    "LEFT_RAIL_MIN": 240.0,
+    "NARROW_WINDOW_WIDTH": 1200.0,
+    "RIGHT_DOCK_MAX": 420.0
+  },
+  "evidence_kind": "SIMULATED/AUTOMATED headless egui frames; not a human sign-off",
+  "purpose": "justify LEFT_RAIL_MAX 460 (plan floor 800 >= 460 + 320; 1200 >= 460 + 420 + 320 with equality)",
+  "rows": [
+    {
+      "frame": {
+        "canvas_union_width": 1040.0,
+        "center": [
+          240.0,
+          171.0,
+          1040.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          377.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          1040.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 240.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 740.0,
+        "center": [
+          240.0,
+          171.0,
+          740.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          322.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          740.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": [
+          980.0,
+          178.0,
+          300.0,
+          542.0
+        ]
+      },
+      "rail": 240.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 980.0,
+        "center": [
+          300.0,
+          171.0,
+          980.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          337.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          980.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 300.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 680.0,
+        "center": [
+          300.0,
+          171.0,
+          680.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          278.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          680.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": [
+          980.0,
+          178.0,
+          300.0,
+          542.0
+        ]
+      },
+      "rail": 300.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 820.0,
+        "center": [
+          460.0,
+          171.0,
+          820.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          397.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          820.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 460.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 520.0,
+        "center": [
+          460.0,
+          171.0,
+          520.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          326.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          520.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": [
+          980.0,
+          178.0,
+          300.0,
+          542.0
+        ]
+      },
+      "rail": 460.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1280.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 1040.0,
+        "center": [
+          240.0,
+          171.0,
+          1040.0,
+          497.0
+        ],
+        "layers_bar": [
+          2.0,
+          377.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          686.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          1040.0,
+          490.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          667.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 240.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1280.0,
+        688.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 740.0,
+        "center": [
+          240.0,
+          171.0,
+          740.0,
+          497.0
+        ],
+        "layers_bar": [
+          2.0,
+          322.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          686.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          740.0,
+          490.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          667.0
+        ],
+        "notes": [],
+        "right_dock": [
+          980.0,
+          178.0,
+          300.0,
+          510.0
+        ]
+      },
+      "rail": 240.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1280.0,
+        688.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 980.0,
+        "center": [
+          300.0,
+          171.0,
+          980.0,
+          497.0
+        ],
+        "layers_bar": [
+          2.0,
+          337.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          686.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          980.0,
+          490.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          667.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 300.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1280.0,
+        688.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 680.0,
+        "center": [
+          300.0,
+          171.0,
+          680.0,
+          497.0
+        ],
+        "layers_bar": [
+          2.0,
+          278.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          686.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          680.0,
+          490.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          667.0
+        ],
+        "notes": [],
+        "right_dock": [
+          980.0,
+          178.0,
+          300.0,
+          510.0
+        ]
+      },
+      "rail": 300.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1280.0,
+        688.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 820.0,
+        "center": [
+          460.0,
+          171.0,
+          820.0,
+          497.0
+        ],
+        "layers_bar": [
+          2.0,
+          397.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          686.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          820.0,
+          490.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          667.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 460.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1280.0,
+        688.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 520.0,
+        "center": [
+          460.0,
+          171.0,
+          520.0,
+          497.0
+        ],
+        "layers_bar": [
+          2.0,
+          326.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          686.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          520.0,
+          490.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          667.0
+        ],
+        "notes": [],
+        "right_dock": [
+          980.0,
+          178.0,
+          300.0,
+          510.0
+        ]
+      },
+      "rail": 460.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1280.0,
+        688.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 853.0,
+        "center": [
+          240.0,
+          171.0,
+          853.0,
+          394.0
+        ],
+        "layers_bar": [
+          2.0,
+          377.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          583.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          853.0,
+          387.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          564.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 240.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1093.0,
+        585.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 853.0,
+        "center": [
+          240.0,
+          171.0,
+          853.0,
+          394.0
+        ],
+        "layers_bar": [
+          2.0,
+          322.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          583.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          853.0,
+          387.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          564.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null
+      },
+      "rail": 240.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1093.0,
+        585.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 793.0,
+        "center": [
+          300.0,
+          171.0,
+          793.0,
+          394.0
+        ],
+        "layers_bar": [
+          2.0,
+          337.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          583.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          793.0,
+          387.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          564.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 300.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1093.0,
+        585.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 793.0,
+        "center": [
+          300.0,
+          171.0,
+          793.0,
+          394.0
+        ],
+        "layers_bar": [
+          2.0,
+          278.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          583.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          793.0,
+          387.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          564.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null
+      },
+      "rail": 300.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1093.0,
+        585.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 633.0,
+        "center": [
+          460.0,
+          171.0,
+          633.0,
+          394.0
+        ],
+        "layers_bar": [
+          2.0,
+          397.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          583.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          633.0,
+          387.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          564.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 460.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1093.0,
+        585.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 633.0,
+        "center": [
+          460.0,
+          171.0,
+          633.0,
+          394.0
+        ],
+        "layers_bar": [
+          2.0,
+          326.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          583.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          633.0,
+          387.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          564.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null
+      },
+      "rail": 460.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1093.0,
+        585.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 671.0,
+        "center": [
+          240.0,
+          171.0,
+          671.0,
+          289.0
+        ],
+        "layers_bar": [
+          2.0,
+          377.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          478.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          671.0,
+          282.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          459.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 240.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        911.0,
+        480.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 671.0,
+        "center": [
+          240.0,
+          171.0,
+          671.0,
+          289.0
+        ],
+        "layers_bar": [
+          2.0,
+          322.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          478.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          671.0,
+          282.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          459.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null
+      },
+      "rail": 240.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        911.0,
+        480.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 611.0,
+        "center": [
+          300.0,
+          171.0,
+          611.0,
+          289.0
+        ],
+        "layers_bar": [
+          2.0,
+          337.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          478.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          611.0,
+          282.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          459.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 300.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        911.0,
+        480.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 611.0,
+        "center": [
+          300.0,
+          171.0,
+          611.0,
+          289.0
+        ],
+        "layers_bar": [
+          2.0,
+          278.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          478.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          611.0,
+          282.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          459.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null
+      },
+      "rail": 300.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        911.0,
+        480.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 451.0,
+        "center": [
+          460.0,
+          171.0,
+          451.0,
+          289.0
+        ],
+        "layers_bar": [
+          2.0,
+          397.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          478.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          451.0,
+          282.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          459.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 460.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        911.0,
+        480.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 451.0,
+        "center": [
+          460.0,
+          171.0,
+          451.0,
+          289.0
+        ],
+        "layers_bar": [
+          2.0,
+          326.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          478.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          451.0,
+          282.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          459.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null
+      },
+      "rail": 460.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        911.0,
+        480.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 1680.0,
+        "center": [
+          240.0,
+          171.0,
+          1680.0,
+          889.0
+        ],
+        "layers_bar": [
+          2.0,
+          377.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          1078.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          1680.0,
+          882.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          1059.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 240.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1920.0,
+        1080.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 1380.0,
+        "center": [
+          240.0,
+          171.0,
+          1380.0,
+          889.0
+        ],
+        "layers_bar": [
+          2.0,
+          322.0,
+          235.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 18.0,
+        "left_rail_outer_px": 240.0,
+        "sidebar_y": [
+          23.0,
+          1078.0
+        ]
+      },
+      "pure": {
+        "center": [
+          240.0,
+          178.0,
+          1380.0,
+          882.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          240.0,
+          1059.0
+        ],
+        "notes": [],
+        "right_dock": [
+          1620.0,
+          178.0,
+          300.0,
+          902.0
+        ]
+      },
+      "rail": 240.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1920.0,
+        1080.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 1620.0,
+        "center": [
+          300.0,
+          171.0,
+          1620.0,
+          889.0
+        ],
+        "layers_bar": [
+          2.0,
+          337.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          1078.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          1620.0,
+          882.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          1059.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 300.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1920.0,
+        1080.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 1320.0,
+        "center": [
+          300.0,
+          171.0,
+          1320.0,
+          889.0
+        ],
+        "layers_bar": [
+          2.0,
+          278.0,
+          295.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 22.0,
+        "left_rail_outer_px": 300.0,
+        "sidebar_y": [
+          23.0,
+          1078.0
+        ]
+      },
+      "pure": {
+        "center": [
+          300.0,
+          178.0,
+          1320.0,
+          882.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          300.0,
+          1059.0
+        ],
+        "notes": [],
+        "right_dock": [
+          1620.0,
+          178.0,
+          300.0,
+          902.0
+        ]
+      },
+      "rail": 300.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1920.0,
+        1080.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 1460.0,
+        "center": [
+          460.0,
+          171.0,
+          1460.0,
+          889.0
+        ],
+        "layers_bar": [
+          2.0,
+          397.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          1078.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          1460.0,
+          882.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          1059.0
+        ],
+        "notes": [],
+        "right_dock": null
+      },
+      "rail": 460.0,
+      "right_dock_shown": false,
+      "right_dock_width": 300.0,
+      "user_docked_right": null,
+      "window_points": [
+        1920.0,
+        1080.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 1160.0,
+        "center": [
+          460.0,
+          171.0,
+          1160.0,
+          889.0
+        ],
+        "layers_bar": [
+          2.0,
+          326.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          1078.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          1160.0,
+          882.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          1059.0
+        ],
+        "notes": [],
+        "right_dock": [
+          1620.0,
+          178.0,
+          300.0,
+          902.0
+        ]
+      },
+      "rail": 460.0,
+      "right_dock_shown": true,
+      "right_dock_width": 300.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1920.0,
+        1080.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 320.0,
+        "center": [
+          460.0,
+          171.0,
+          320.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          326.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          320.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": [
+          780.0,
+          178.0,
+          420.0,
+          542.0
+        ]
+      },
+      "rail": 460.0,
+      "right_dock_shown": true,
+      "right_dock_width": 420.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1200.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 739.0,
+        "center": [
+          460.0,
+          171.0,
+          739.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          326.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          739.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          699.0
+        ],
+        "notes": [
+          "right dock hidden: window is narrow"
+        ],
+        "right_dock": null
+      },
+      "rail": 460.0,
+      "right_dock_shown": false,
+      "right_dock_width": 420.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1199.0,
+        720.0
+      ]
+    },
+    {
+      "frame": {
+        "canvas_union_width": 321.0,
+        "center": [
+          460.0,
+          171.0,
+          321.0,
+          529.0
+        ],
+        "layers_bar": [
+          2.0,
+          326.0,
+          455.0,
+          14.0
+        ],
+        "layers_visible_without_scroll": true,
+        "left_icon_edge_px": 34.0,
+        "left_rail_outer_px": 460.0,
+        "sidebar_y": [
+          23.0,
+          718.0
+        ]
+      },
+      "pure": {
+        "center": [
+          460.0,
+          178.0,
+          321.0,
+          522.0
+        ],
+        "left_rail": [
+          0.0,
+          21.0,
+          460.0,
+          699.0
+        ],
+        "notes": [],
+        "right_dock": [
+          781.0,
+          178.0,
+          420.0,
+          542.0
+        ]
+      },
+      "rail": 460.0,
+      "right_dock_shown": true,
+      "right_dock_width": 420.0,
+      "user_docked_right": "snaps",
+      "window_points": [
+        1201.0,
+        720.0
+      ]
+    }
+  ],
+  "task": "OM9-L3-01-01-002"
+}

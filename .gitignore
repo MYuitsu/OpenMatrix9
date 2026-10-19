@@ -2,7 +2,7 @@
 /build/
 /cmake-build-*/
 /rust/target/
-/standalone/target/
+/target/
 /.superpowers/
 
 # Python caches

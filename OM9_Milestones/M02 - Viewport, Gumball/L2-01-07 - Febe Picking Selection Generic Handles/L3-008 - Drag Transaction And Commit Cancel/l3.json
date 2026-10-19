@@ -223,5 +223,25 @@
     },
     "algorithm_and_coverage": "Dùng begin/preview/commit/rollback qua M01 atomic transaction, snapshot + stable ids + undo-depth",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "target": "standalone Rust OM9",
+    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "scope": "Single commit, copy toggle, cancel/context/focus guards, Undo/Redo and cold archive placement",
+    "evidence": [
+      "implementation/evidence/M02/2026-10-19-selection-video-review.md",
+      "implementation/evidence/M02/2026-10-19-native-selection.json",
+      "implementation/evidence/M02/2026-10-19-selection-checks.json",
+      "implementation/evidence/M02/2026-10-19-brep-selection.md",
+      "implementation/evidence/M02/2026-10-19-brep-checks.json",
+      "implementation/evidence/M02/2026-10-19-brep-native.json"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "External M02-UI review; pinned upstream reuse not claimed"
+    ],
+    "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
+    "native_brep_selection": "VALIDATED_SOURCE_BOUND_UUID_TOPOLOGY"
   }
 }

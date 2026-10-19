@@ -37,11 +37,11 @@ def main():
     progress["updated_at"] = dt.datetime.now(dt.timezone(dt.timedelta(hours=7))).isoformat(timespec="seconds")
     item = next(i for i in progress["items"] if i.get("key") == "rcore00-standalone-foundation")
     item["scope"] = "RCORE-00 owned foundation/schema3 resources/source namespace ledger/archive/scene/session, actual Matrix9 UI, source import and selected current-geometry/retained-current export slices"
-    for path in ["standalone/crates/om9-scene", "tools/validate_standalone_ui.py",
+    for path in ["crates/om9-scene", "tools/validate_standalone_ui.py",
                  "docs/validation/2026-10-13-standalone-ui/ui-receipt.json",
-                 "standalone/native", "tools/validate_standalone_opennurbs_probe.py",
-                 "docs/validation/2026-10-13-standalone-opennurbs-probe.json", "standalone/crates/om9-native-owner",
-                 "standalone/crates/om9-exchange", "tools/validate_standalone_exchange.py", "tools/validate_native_exchange_conversion.py",
+                 "native", "tools/validate_standalone_opennurbs_probe.py",
+                 "docs/validation/2026-10-13-standalone-opennurbs-probe.json", "crates/om9-native-owner",
+                 "crates/om9-exchange", "tools/validate_standalone_exchange.py", "tools/validate_native_exchange_conversion.py",
                  "docs/validation/2026-10-13-standalone-exchange.json", "docs/validation/2026-10-13-standalone-native-conversion.json",
                  "tools/validate_standalone_resources.py", "docs/validation/2026-10-13-standalone-resources.json",
                  "tools/validate_native_source_inventory.py", "docs/validation/2026-10-13-standalone-native-source-inventory.json",
@@ -56,7 +56,7 @@ def main():
     item["evidence"].append("Matrix9 reference workspace; compact gray 300-point left sidebar, green pinned/unwrapped CMD with one protected document/editor state, authored SVG icons, exact view order/XZ-YZ CPlanes/positive colored axes, truthful disabled controls and numeric-draft focus restoration. Actual pointer/clipboard/Unicode history/IME ordering regressions pass; full UI/DPI/OS IME and performance acceptance stays open.")
     item["evidence"] = [e for e in item["evidence"] if not e.startswith("Matrix9 S6 viewport title menu;")]
     item["evidence"].append("Matrix9 S6 viewport title menu; exact ordered typed registry, visible unsupported preset/submenu gates, bounded scrolling and target radio state. Maximize/restore and Wireframe bind document/view/layout owners and independent action generation; clone rollback/fresh layout aliases refuse, menu keyboard owns focus, dismissal pointer/Escape preserve pending command and draft. 17 focused tests are a workspace subset; actual native window replay has six checks. Full Shaded/render/DPI/task-modal acceptance remains open.")
-    for path in ["standalone/crates/om9-app/src/viewport_menu.rs", "standalone/crates/om9-app/tests/viewport_title_menu.rs", "docs/validation/2026-10-14-viewport-title-menu/ui-receipt.json", "docs/validation/2026-10-14-viewport-title-menu.md"]:
+    for path in ["crates/om9-app/src/viewport_menu.rs", "crates/om9-app/tests/viewport_title_menu.rs", "docs/validation/2026-10-14-viewport-title-menu/ui-receipt.json", "docs/validation/2026-10-14-viewport-title-menu.md"]:
         if path not in item["outputs"]: item["outputs"].append(path)
     item["evidence"] = [e for e in item["evidence"] if not e.startswith("Native owner containment;")]
     item["evidence"].append("Native owner containment; suspended job assignment before entry, committed-memory/output/deadline/Cancel/descendant limits, exclusive nonblocking pipe captures and one bounded teardown clock for process/pipes/observed job accounting. No waiting Drop/reader thread; deterministic actual-pipe/failed-stop/accounting cases and 128 concurrent short jobs pass. Sorted session identity authority survives Undo/caller rollback; fresh UUID owner sessions prevent close/reopen and equal-counter cold aliases; legacy nil format data requires explicit runtime restore.")

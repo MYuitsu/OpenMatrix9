@@ -1,0 +1,119 @@
+{
+  "schema": "om9.l4.evidence.v1",
+  "task_id": "OM9-L4-03-03-001-01",
+  "l3_id": "OM9-L3-03-03-001",
+  "role": "SOURCE_AUDIT",
+  "status": "PASS_ORACLE_MEASURED",
+  "status_reason": "Behaviour measured against the Matrix9/Rhino5 documentation oracle (highest authority). QymCAD pin mismatch is reference-only and not a blocker under the user authority order of 2026-10-19.",
+  "commands": [
+    {
+      "command": "git -C QymCAD rev-parse HEAD",
+      "exit": 0,
+      "output": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a"
+    },
+    {
+      "command": "cargo test -p om9-app --test acceptance_viewport_selection --test acceptance_selection_set",
+      "exit": 0,
+      "summary": [
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.49s"
+      ]
+    }
+  ],
+  "oracle": {
+    "positive": "Shift click thêm, Ctrl click toggle selection, plain click replace theo mapping đã chốt",
+    "positive_expected": "selection grows with Shift, toggles with Ctrl, is replaced by a plain click",
+    "positive_actual": "7 tests in acceptance_viewport_selection and 6 in acceptance_selection_set passed, including shift_click_adds_and_keeps_an_already_selected_object",
+    "positive_result": "PASS",
+    "negative": "Click đối tượng locked không tạo ID vào selection",
+    "negative_expected": "locked and hidden objects are refused and the selection stays empty",
+    "negative_actual": "a_locked_or_hidden_object_is_refused_and_not_stored passed",
+    "negative_result": "PASS"
+  },
+  "changes": [
+    "Shift click was toggling (select_root extend removed an already selected id); it now only adds, which matches the Rhino text and this L4 oracle. Ctrl click remains the toggle."
+  ],
+  "files_sha256": [
+    {
+      "path": "crates/om9-app/src/session/layers.rs",
+      "sha256": "587b2fbced725dca491bd7f9b7d17e93572f0d70b32c072e1c933dd1b36801eb"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "sha256": "b1ca38087afa59816e33d60132352d3ae9901c27a3ef85a892c362831ef0023f"
+    },
+    {
+      "path": "crates/om9-app/tests/acceptance_viewport_selection.rs",
+      "sha256": "15324dd1a835a90e46f04772b4981b297741a37423f66be1eecd8cca0523b2e0"
+    },
+    {
+      "path": "crates/om9-app/tests/acceptance_selection_set.rs",
+      "sha256": "9be57f75c896d7a32021196482f828709855eb272143cf8c922cde659ef88396"
+    }
+  ],
+  "generated": "2026-10-19T09:23:43+07:00",
+  "not_a_human_approval": true,
+  "authority_order": [
+    "matrix9_rhino5_documentation",
+    "matrix9_decompiled_reference",
+    "qymcad_rust_reference"
+  ],
+  "documentation_evidence": [
+    {
+      "source": "ref/rhino5 (Rhino 5 User Guide) p33-34, text rhino5__p33-34__selecting-objects.md",
+      "rule": "Click selects one object; \"Hold the Shift key while clicking the objects\" adds; \"Hold the Ctrl key and click the objects again\" removes; \"Click away from the objects or press the Esc key\" cancels.",
+      "om9_behaviour": "ui.rs click branch: plain -> select_root(replace), Shift -> select_root(add), Ctrl -> toggle_selection, empty -> clear, Esc -> clear_selection",
+      "status": "PASS"
+    },
+    {
+      "source": "ref/rhino5 p34-35, text rhino5__p34-35__select-objects-with.md",
+      "rule": "Window (left to right) takes only objects completely enclosed; crossing (right to left) also takes objects the window crosses; Shift adds and Ctrl removes with window/crossing.",
+      "om9_behaviour": "ui.rs objects_in_band(window) + add_objects/remove_objects; clipped objects are excluded from window",
+      "status": "PASS"
+    }
+  ],
+  "matrix9_reference_evidence": [
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "SelectObject(strObject, bolUnselectall)",
+      "line": 1690,
+      "reading": "one object plus an explicit unselect-all flag, i.e. replace-or-add semantics"
+    },
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "SelectObjects(arrObjects, bolUnselectall)",
+      "line": 1873,
+      "reading": "same flag for a set (window/crossing result)"
+    },
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "SelectedObjects(arg_C)",
+      "line": 1351,
+      "reading": "the facade returns the current selection for commands"
+    },
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "UnSelectObject(arrObjects) / UnSelectObjects(arrObjects)",
+      "line": 2212,
+      "reading": "explicit removal path used by Ctrl-style remove"
+    },
+    {
+      "path": "ref/matrix/vb6-lite/Matrix90/clsMInterface.cls",
+      "symbol": "UnselectAllObjects()",
+      "line": 1210,
+      "reading": "clearing path used by click-away/Esc"
+    },
+    {
+      "path": "ref/matrix/decompiled-ui/Matrix/SmartTargets/MSR/MSRMouseCallBack.cs",
+      "symbol": "Control.ModifierKeys == Keys.Control",
+      "line": 48,
+      "reading": "Matrix9 reads Ctrl during SmartTargets picking to change selection behaviour; confirms modifier-driven picking in the product"
+    },
+    {
+      "path": "ref/matrix/decompiled-ui/Matrix/SmartTargets/MSR/MSRCommand.cs",
+      "symbol": "Control.ModifierKeys == Keys.Control",
+      "line": 88,
+      "reading": "same Ctrl check on the command side"
+    }
+  ]
+}

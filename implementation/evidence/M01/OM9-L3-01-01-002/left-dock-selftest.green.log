@@ -1,0 +1,20 @@
+rejected as expected: min-1280x720 / Layers moved to right_sections -> layers in right_sections
+rejected as expected: min-1280x720 / Layers removed from left -> layers missing from left_sections
+rejected as expected: min-1280x720 / Layers placed before Info & Settings -> layers title bar is not between info-settings and projects
+rejected as expected: min-1280x720 / Layers placed before Info & Settings (order) -> left_sections is
+rejected as expected: min-1280x720 / Layers title bar below the sidebar -> outside the sidebar
+rejected as expected: min-1280x720 / Layers floating -> layers in floating_sections
+rejected as expected: min-1280x720 / default mode with a visible right dock -> in default mode
+rejected as expected: min-1280x720 / sidebar scrolled -> sidebar_scroll_offset
+rejected as expected: min-1280x720 / wrong icon edge -> left_icon_edge_px
+rejected as expected: rail460-1280x720 / wrong icon edge at rail 460 -> left_icon_edge_px
+rejected as expected: min-1280x720 / wrong mode label -> audit.mode_label
+rejected as expected: min-1280x720 / wrong layout mode -> audit.layout_mode
+rejected as expected: rail240-1280x720 / wrong outer width -> left_rail_outer_px
+rejected as expected: min-1280x720 / icons outside the sidebar -> left_icon_rects_in_sidebar
+rejected as expected: min-1280x720 / spurious CMD error text -> cmd contains 'unsupported'
+rejected as expected: min-1280x720 / missing CMD focus check -> audit CMD focus ready
+rejected as expected: udr-1280x720 / Layers as the user-docked fixture -> layers in right_sections
+rejected as expected: udr-1280x720 / udr Layers as the user-docked fixture (fixture check) -> right_sections is
+self-test passed: 5 known-good receipts accepted, 18 doctored receipts rejected
+green exit=0

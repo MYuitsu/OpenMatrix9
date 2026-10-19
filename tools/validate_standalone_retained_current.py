@@ -21,7 +21,7 @@ def digest(path):
 
 
 def source_paths():
-    root = ROOT / "standalone"
+    root = 
     paths = {p for p in root.rglob("*") if p.is_file() and "target" not in p.parts
              and p.suffix in {".rs", ".toml", ".lock", ".cpp", ".hpp", ".h"}}
     paths.add(root / "native/CMakeLists.txt")
@@ -41,7 +41,7 @@ def main():
     environment["OM9_NATIVE_IMPORT_SCRATCH"] = str(scratch.resolve(strict=True))
     before = {p: digest(p) for p in binaries.values()}
     source_before = {p: digest(p) for p in sorted(source_paths())}
-    command = ["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path", "standalone/Cargo.toml",
+    command = ["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path", "Cargo.toml",
                "-p", "om9-exchange", "--test", "retained_native_write", "--", "--ignored", "--nocapture", "--test-threads=1"]
     run = subprocess.run(command, cwd=ROOT, env=environment, capture_output=True, timeout=120)
     output = run.stdout.decode("utf-8", errors="strict") + run.stderr.decode("utf-8", errors="replace")

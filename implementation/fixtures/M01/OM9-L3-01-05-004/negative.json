@@ -1,0 +1,10 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-004",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-004-NEG",
+      "expected": "a degenerate parameter pair is rejected instead of returning a zero normal"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-010",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "two-occurrences",
+      "call": "block_instances(document, definition)",
+      "expect": {
+        "count": 2,
+        "shared definition": true,
+        "distinct object ids": true,
+        "distinct transforms": true
+      }
+    },
+    {
+      "id": "move-one",
+      "call": "set_instance_transform(first, [5,2,1])",
+      "expect": {
+        "definition unchanged": true,
+        "sibling transform unchanged": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-007",
+  "l4": "OM9-L4-01-01-007-02",
+  "case": "global-status-and-error-surface-negative",
+  "negative_oracle": "Error popup cannot swallow escape/cancel state or dismiss silently",
+  "cases": [
+    {
+      "id": "X1-escape-still-cancels-a-running-command-under-a-failure",
+      "start": "failure on screen, a command running",
+      "action": "Escape",
+      "expect": {
+        "command_running_after": false,
+        "kind": "Error",
+        "draft_cleared_by_the_status": false
+      }
+    },
+    {
+      "id": "X2-escape-does-not-dismiss-the-failure",
+      "start": "failure on screen",
+      "action": "Escape with no command running",
+      "expect": { "kind": "Error", "revision_unchanged": true }
+    },
+    {
+      "id": "X3-the-surface-never-answers-for-another-owner",
+      "start": "failure on screen",
+      "action": "a layer dialog is open",
+      "expect": { "dialog_still_open": true, "kind": "Error" }
+    },
+    {
+      "id": "X4-a-dismissed-failure-does-not-come-back-by-itself",
+      "start": "failure, dismissed",
+      "action": "one quiet frame",
+      "expect": { "kind": "Ready" }
+    },
+    {
+      "id": "X5-a-blank-or-whitespace-diagnostic-never-blanks-the-line",
+      "report": ["Error", "   "],
+      "expect": { "kind": "Error", "message": "Ready" }
+    },
+    {
+      "id": "X6-a-newline-cannot-break-the-line",
+      "report": ["Error", "line one\nline two"],
+      "expect": { "message": "line one line two", "single_line": true }
+    },
+    {
+      "id": "X7-the-surface-is-pure",
+      "expect": {
+        "no_io": true,
+        "no_document": true,
+        "no_egui": true,
+        "checked_by": "panel_ops.rs::n34 style source scan in tests/global_status_surface.rs"
+      }
+    }
+  ]
+}

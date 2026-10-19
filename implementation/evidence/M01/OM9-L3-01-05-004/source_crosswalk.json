@@ -1,0 +1,41 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-05-004",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-05-004-01",
+      "capability": "NURBS surface evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-004/",
+      "test": "the_sphere_normal_is_the_unit_radial_direction"
+    },
+    {
+      "l4": "OM9-L4-01-05-004-02",
+      "capability": "NURBS surface evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-004/",
+      "test": "the_sphere_normal_is_the_unit_radial_direction"
+    },
+    {
+      "l4": "OM9-L4-01-05-004-03",
+      "capability": "NURBS surface evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-004/",
+      "test": "the_sphere_normal_is_the_unit_radial_direction"
+    },
+    {
+      "l4": "OM9-L4-01-05-004-04",
+      "capability": "NURBS surface evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-004/",
+      "test": "the_sphere_normal_is_the_unit_radial_direction"
+    },
+    {
+      "l4": "OM9-L4-01-05-004-05",
+      "capability": "NURBS surface evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-004/",
+      "test": "the_sphere_normal_is_the_unit_radial_direction"
+    }
+  ],
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  }
+}

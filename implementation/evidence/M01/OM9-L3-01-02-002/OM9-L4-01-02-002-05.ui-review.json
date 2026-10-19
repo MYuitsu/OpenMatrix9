@@ -1,0 +1,44 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-02-002-05",
+  "l3_id": "OM9-L3-01-02-002",
+  "title": "Typed Command Descriptor",
+  "oracle": {
+    "positive": "Descriptor declares typed inputs/options/output and is serializable/deterministic",
+    "negative": "Missing mandatory input or unregistered option rejected"
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-16",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-02, so acceptance rests on the automated checks below; no human item is requested.",
+    "scope": "no on-screen behaviour of its own: the descriptor and the availability rules are pure data"
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-core --test command_descriptor -> 4 passed; 2 failed. The product defect the fixture caught: the descriptor accepted an option whose name is only whitespace (E4), a name the parser can never match. The declared prompt/output/requires_input/preconditions were added in this round, so their absence was recorded in the crosswalk rather than as a failing assertion.",
+    "GREEN: cargo test -p om9-core --test command_descriptor -> 6 passed; 0 failed (5 positive cases, 4 negative cases)",
+    "cargo test -p om9-core: every group ok",
+    "cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: tools/validate_m01_l3_003_panels.py -> 7/7 PASS (the application still starts and dispatches)"
+  ],
+  "code_change": [
+    "capability.rs: Operation gains prompt, requires_input, output and preconditions (all serde-defaulted, so an older document still loads) and derives PartialEq.",
+    "capability.rs: Operation::option(name) returns the declared spelling without case, or UnknownOption naming the option and the command.",
+    "capability.rs: the option rule now trims and compares without case, so '  ' and 'Length'/'length' are refused instead of silently unusable."
+  ],
+  "artefacts": [
+    "OM9-L4-01-02-002-02.red.log",
+    "OM9-L4-01-02-002-02.green.log",
+    "OM9-L4-01-02-002-03.diffstat.txt",
+    "OM9-L4-01-02-002-03.target-test.log",
+    "OM9-L4-01-02-002-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_02_l3_002_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

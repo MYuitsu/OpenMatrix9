@@ -31,7 +31,7 @@ def main():
                        OM9_NATIVE_IMPORT_SCRATCH=str(scratch.resolve(strict=True)))
     before = {str(p): digest(p) for p in [native, fixture]}
     command = ["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path",
-               "standalone/Cargo.toml", "-p", "om9-exchange", "--test",
+               "Cargo.toml", "-p", "om9-exchange", "--test",
                "retained_native_import", "--", "--ignored", "--nocapture"]
     run = subprocess.run(command, cwd=ROOT, env=environment, capture_output=True, timeout=120)
     output = run.stdout.decode("utf-8", errors="strict") + run.stderr.decode("utf-8", errors="replace")
@@ -46,9 +46,9 @@ def main():
     assert not list(scratch.glob("om9-source-import-*")), "test scratch cleanup incomplete"
     sources = [p for p in (ROOT / "standalone").rglob("*") if p.is_file()
                and "target" not in p.parts and p.suffix in {".rs", ".toml", ".lock"}]
-    sources += [Path(__file__).resolve(), ROOT / "standalone/native/native_exchange.cpp",
-                ROOT / "standalone/native/retained_merge.hpp",
-                ROOT / "standalone/native/source_inventory_fixture.cpp", ROOT / "standalone/native/CMakeLists.txt"]
+    sources += [Path(__file__).resolve(), ROOT / "native/native_exchange.cpp",
+                ROOT / "native/retained_merge.hpp",
+                ROOT / "native/source_inventory_fixture.cpp", ROOT / "native/CMakeLists.txt"]
     receipt = {
         "schema_version": 1, "validated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "status": "validated_native_to_host_import_slice", "goal_complete": False,

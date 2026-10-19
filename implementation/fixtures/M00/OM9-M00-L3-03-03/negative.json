@@ -1,0 +1,43 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-03-03",
+  "cases": [
+    {
+      "id": "M00-FX-03-03-NEG-01",
+      "check": "object_pick",
+      "input": {
+        "ram": "corner"
+      },
+      "expected": {
+        "hit": false
+      }
+    },
+    {
+      "id": "M00-FX-03-03-NEG-02",
+      "check": "vertex_pick",
+      "input": {
+        "offset_pixels": 20,
+        "tolerance_pixels": 2
+      },
+      "expected": {
+        "hit": false
+      }
+    },
+    {
+      "id": "M00-FX-03-03-NEG-03",
+      "check": "stale_gesture",
+      "expected": {
+        "rejected": true,
+        "redo_untouched": true
+      }
+    },
+    {
+      "id": "M00-FX-03-03-NEG-04",
+      "check": "unchanged_gesture",
+      "expected": {
+        "document_write": false,
+        "undo_unchanged": true
+      }
+    }
+  ]
+}

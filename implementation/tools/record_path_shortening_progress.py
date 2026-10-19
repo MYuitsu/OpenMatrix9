@@ -132,11 +132,83 @@ def build_item() -> dict:
     }
 
 
+def build_completion_item() -> dict:
+    index = json.load(open(INDEX, encoding="utf-8"))
+    applied = [row for row in index["modules"] if row.get("applied")]
+    return {
+        "id": "om9-milestones-path-shortening-completion-2026-10-16",
+        "date": "2026-10-16",
+        "status": "complete_verified_all_modules_renamed_staged_not_committed",
+        "scope": (
+            "Hoan tat doi ten module M00/M03 (truoc do bi Windows giu handle) + chuan hoa ten + "
+            "dong bo lai tham chieu. Khong nang planning_state/gate nao."
+        ),
+        "why": (
+            "Nguoi dung tu doi ten M00 va M03 sau khi handle duoc giai phong. Ten M03 bi thua mot dau cach "
+            "('M03 -  Geometry 3DM') nen chua the coi la xong; tham chieu trong cay va tools/ con tro ten cu."
+        ),
+        "source_audit": {
+            "action": (
+                "python implementation/tools/om9_shorten_milestone_paths.py --finalize : chuan hoa ten module, "
+                "viet lai tham chieu, dong bo hang so tools/, cap nhat index anh xa."
+            ),
+            "files_rewritten": 1117,
+            "tool_files_synced": [
+                "tools/apply_implementation_samples.py",
+                "tools/sync_qymcad_revision.py",
+                "tools/verify_m08_l4_merge.py",
+            ],
+            "measured_after": {
+                "files": 11883,
+                "max_path": 210,
+                "files_over_210": 0,
+                "json_parse_errors": 0,
+                "stale_names": 0,
+                "references_audited": 4028,
+                "references_dangling": 0,
+            },
+        },
+        "code_added": [
+            "implementation/tools/om9_shorten_milestone_paths.py (them che do --finalize va --sync-tools)",
+        ],
+        "validation_commands": [
+            "python implementation/tools/om9_shorten_milestone_paths.py --finalize -> FINALIZE: PASS",
+            "python tools/validate_implementation_samples.py -> exit 0, errors: []",
+            "python tools/validate_m09_l4.py -> exit 0, PASS 30 L4 / 177 cases",
+            "python implementation/tools/test_om9_shorten_milestone_paths.py -> PASS",
+        ],
+        "behaviour_changes_pending_consent": [],
+        "gate_state": {
+            "promoted": "none",
+            "note": "Chi doi ten thu muc/duong dan; moi duong dan trong OM9_Milestones <= 210 ky tu.",
+        },
+        "not_yet_done": [
+            "Chua commit: OM9_Milestones + tools dang duoc stage (rename) nhung chua tao commit.",
+            "Tai lieu lich su docs/validation/** va .agents/** co chu y giu ten module cu.",
+        ],
+        "final_reconciliation": {
+            "modules_renamed": [row["old"] + " -> " + row["new"] for row in applied],
+            "inner_dirs_renamed": len(index["dirs"]),
+            "budget": index["budget"],
+            "index": "OM9_Milestones/PATH_RENAMES.json",
+        },
+        "next_action": "Review diff rename (git status/diff --cached) roi commit; sau do tiep tuc cong viec M01 dang do.",
+        "artefacts": [
+            "OM9_Milestones/PATH_RENAMES.json",
+            "OM9_Milestones/PATH_RENAMES.md",
+            "implementation/design/om9-milestone-path-shortening.md",
+        ],
+    }
+
+
 def main() -> int:
+    kind = sys.argv[1] if len(sys.argv) > 1 else "applied"
+    item = build_completion_item() if kind == "completion" else build_item()
+    item_id = item["id"]
     text = open(LEDGER, "rb").read().decode("utf-8")
     data = json.loads(text)
-    if any(item.get("id") == ITEM_ID for item in data["items"]):
-        print("da co muc nay trong ledger, khong chen lai")
+    if any(existing.get("id") == item_id for existing in data["items"]):
+        print(f"da co muc {item_id} trong ledger, khong chen lai")
         return 0
     marker = '"items": ['
     start = text.index(marker) + len(marker) - 1
@@ -144,15 +216,15 @@ def main() -> int:
     head = text[:end]
     stripped = head.rstrip(" \r\n\t")
     tail_ws = head[len(stripped):]
-    blob = json.dumps(build_item(), ensure_ascii=False, indent=2)
+    blob = json.dumps(item, ensure_ascii=False, indent=2)
     blob = "\r\n".join("  " + line for line in blob.split("\n"))
     new_text = stripped + ",\r\n" + blob + tail_ws + text[end:]
     parsed = json.loads(new_text)
-    if len(parsed["items"]) != len(data["items"]) + 1 or parsed["items"][-1]["id"] != ITEM_ID:
+    if len(parsed["items"]) != len(data["items"]) + 1 or parsed["items"][-1]["id"] != item_id:
         print("KIEM TRA THAT BAI: muc moi khong nam cuoi items")
         return 2
     open(LEDGER, "wb").write(new_text.encode("utf-8"))
-    print(f"ledger updated: items {len(data['items'])} -> {len(parsed['items'])} (id={ITEM_ID})")
+    print(f"ledger updated: items {len(data['items'])} -> {len(parsed['items'])} (id={item_id})")
     return 0
 
 

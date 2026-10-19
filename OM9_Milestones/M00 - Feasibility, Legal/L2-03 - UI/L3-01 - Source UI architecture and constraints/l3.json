@@ -52,5 +52,15 @@
       "id": "OM9-M00-L4-03-01-03",
       "file": "M00 - Feasibility, Legal/L2-03 - UI/L3-01 - Source UI architecture and constraints/L4-03 - Đánh giá docking và command-driven UI/l4.json"
     }
-  ]
+  ],
+  "execution_evidence": {
+    "l4_done": [
+      "OM9-M00-L4-03-01-01",
+      "OM9-M00-L4-03-01-02",
+      "OM9-M00-L4-03-01-03"
+    ],
+    "method": "source evaluation of the existing checkout; no product code created in M00",
+    "evidence_root": "implementation/evidence/M00/OM9-M00-L3-03-01",
+    "verdict": "VIABLE, with two gaps recorded for M01: no custom wgpu 3D pipeline and no glow fallback"
+  }
 }

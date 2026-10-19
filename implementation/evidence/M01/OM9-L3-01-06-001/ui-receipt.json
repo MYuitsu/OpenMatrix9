@@ -1,0 +1,402 @@
+{
+  "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+  "audit": {
+    "layout_mode": "default",
+    "mode_label": "Matrix-parity capture",
+    "rail_width_override": null
+  },
+  "checks": [
+    "audit CMD focus ready",
+    "CMD line accepted once",
+    "actual CMD Undo",
+    "actual CMD Redo",
+    "Esc canceled draft without publication"
+  ],
+  "cmd": "Command Search was moved back inside the window\nCommand: Line\nStart of line (BothSides=No): 0,0,0\nEnd of line (BothSides=No): 12,6,0\nCommand: Undo\nCommand: Redo\nCommand: Line\nStart of line (BothSides=No): 2,2,0\nCommand: ",
+  "dock": {
+    "builder_slot_visible": true,
+    "command_line_px": 64.0,
+    "diagnostics": [
+      "Command Search was moved back inside the window"
+    ],
+    "floating_sections": [],
+    "layers_rect_px": {
+      "column": "left",
+      "h": 14.0,
+      "w": 235.0,
+      "x": 2.0,
+      "y": 377.0
+    },
+    "left_icon_count": 52,
+    "left_icon_edge_px": 18.0,
+    "left_icon_rects_in_sidebar": true,
+    "left_rail_inner_px": 235.0,
+    "left_rail_outer_px": 240.0,
+    "left_rail_px": 240.0,
+    "left_sections": [
+      "icon-history",
+      "main-menu",
+      "display",
+      "snaps",
+      "info-settings",
+      "layers",
+      "projects",
+      "builder-slot"
+    ],
+    "left_stack_content_px": [
+      235.0,
+      989.0
+    ],
+    "panels": {
+      "checks": [],
+      "drag_in_progress": false,
+      "drop_preview": null,
+      "last_op": null,
+      "scenario": null,
+      "work_area": [
+        8.0,
+        29.0,
+        1264.0,
+        743.0
+      ]
+    },
+    "right_dock_outer_px": 0.0,
+    "right_dock_sections": [],
+    "right_dock_visible": false,
+    "right_sections": [],
+    "section_title_bars_px": {
+      "builder-slot": {
+        "column": "left",
+        "h": 14.0,
+        "w": 235.0,
+        "x": 2.0,
+        "y": 847.0
+      },
+      "display": {
+        "column": "left",
+        "h": 14.0,
+        "w": 235.0,
+        "x": 2.0,
+        "y": 172.0
+      },
+      "icon-history": {
+        "column": "left",
+        "h": 14.0,
+        "w": 235.0,
+        "x": 2.0,
+        "y": 23.0
+      },
+      "info-settings": {
+        "column": "left",
+        "h": 14.0,
+        "w": 235.0,
+        "x": 2.0,
+        "y": 302.0
+      },
+      "layers": {
+        "column": "left",
+        "h": 14.0,
+        "w": 235.0,
+        "x": 2.0,
+        "y": 377.0
+      },
+      "main-menu": {
+        "column": "left",
+        "h": 14.0,
+        "w": 235.0,
+        "x": 2.0,
+        "y": 59.0
+      },
+      "projects": {
+        "column": "left",
+        "h": 14.0,
+        "w": 235.0,
+        "x": 2.0,
+        "y": 567.0
+      },
+      "snaps": {
+        "column": "left",
+        "h": 14.0,
+        "w": 235.0,
+        "x": 2.0,
+        "y": 247.0
+      }
+    },
+    "sidebar_scroll_offset": 0.0,
+    "status_bar_px": 20.0,
+    "status_kind": "Ready",
+    "status_message": "Ready",
+    "status_tail": [
+      "Command Search was moved back inside the window",
+      "Ready"
+    ]
+  },
+  "document": {
+    "context_revision": 1,
+    "current_layer": null,
+    "definitions": {},
+    "entities": {
+      "7e665731-43d0-480a-91da-31424d0f83a7": {
+        "attributes": {
+          "color": [
+            0,
+            130,
+            85,
+            255
+          ],
+          "layer": null,
+          "locked": false,
+          "selectable": true,
+          "visible": true
+        },
+        "attributes_revision": 1,
+        "generation": 1,
+        "geometry": {
+          "Curve": {
+            "Line": {
+              "domain": [
+                0.0,
+                13.416407864998739
+              ],
+              "end": [
+                12.0,
+                6.0,
+                0.0
+              ],
+              "start": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "geometry_revision": 1,
+        "id": "7e665731-43d0-480a-91da-31424d0f83a7",
+        "label": "Line",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "epoch": 1,
+    "history": {
+      "recipes": {}
+    },
+    "id": "283f6178-9ecb-44c2-89bc-f58226e2d326",
+    "layer_order": [],
+    "layers": {},
+    "name": "Untitled",
+    "owner_session": "c2671729-847d-49c5-bba3-89295429f67e",
+    "page_unit": "Millimeter",
+    "results": {},
+    "revision": 2,
+    "session_generation": 1
+  },
+  "limitations": [
+    "full Matrix9 UI acceptance pending",
+    "CAD native adapters pending",
+    "GPU geometry caching and performance acceptance pending",
+    "DPI/multi-monitor acceptance pending"
+  ],
+  "objects": 1,
+  "panels": {
+    "checks": [],
+    "drag_in_progress": false,
+    "drop_preview": null,
+    "last_op": null,
+    "scenario": null,
+    "work_area": [
+      8.0,
+      29.0,
+      1264.0,
+      743.0
+    ]
+  },
+  "passes": 21,
+  "regions": {
+    "command_input_px": [
+      243.0,
+      72.03125,
+      1034.0,
+      15.96875
+    ],
+    "error": null,
+    "min_window": {
+      "monitor_points": [
+        2560.0,
+        1440.0
+      ],
+      "sent": [
+        1280.0,
+        720.0
+      ],
+      "source": "viewport"
+    },
+    "pixels_per_point": 1.0,
+    "plan": {
+      "center": {
+        "height": 628.0,
+        "width": 1040.0,
+        "x": 240.0,
+        "y": 152.0
+      },
+      "command_input": {
+        "height": 64.0,
+        "width": 1040.0,
+        "x": 240.0,
+        "y": 21.0
+      },
+      "left_rail": {
+        "height": 779.0,
+        "width": 240.0,
+        "x": 0.0,
+        "y": 21.0
+      },
+      "menu_bar": {
+        "height": 21.0,
+        "width": 1280.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "notes": [],
+      "right_dock": null,
+      "status_bar": {
+        "height": 20.0,
+        "width": 1040.0,
+        "x": 240.0,
+        "y": 780.0
+      },
+      "toolbar": {
+        "height": 67.0,
+        "width": 1040.0,
+        "x": 240.0,
+        "y": 85.0
+      },
+      "views": [
+        {
+          "rect": {
+            "height": 313.0,
+            "width": 519.0,
+            "x": 240.0,
+            "y": 152.0
+          },
+          "view": "LookingDown"
+        },
+        {
+          "rect": {
+            "height": 313.0,
+            "width": 519.0,
+            "x": 761.0,
+            "y": 152.0
+          },
+          "view": "Perspective"
+        },
+        {
+          "rect": {
+            "height": 313.0,
+            "width": 519.0,
+            "x": 240.0,
+            "y": 467.0
+          },
+          "view": "ThroughFinger"
+        },
+        {
+          "rect": {
+            "height": 313.0,
+            "width": 519.0,
+            "x": 761.0,
+            "y": 467.0
+          },
+          "view": "SideView"
+        }
+      ],
+      "window": {
+        "height": 800.0,
+        "width": 1280.0
+      }
+    },
+    "right_dock_px": null,
+    "screen_points": [
+      1280.0,
+      800.0
+    ],
+    "sidebar_px": [
+      2.0,
+      23.0,
+      235.0,
+      775.0
+    ],
+    "status_message_px": [
+      242.0,
+      784.0,
+      65.3125,
+      13.0
+    ],
+    "status_summary_px": [
+      686.90625,
+      785.0,
+      591.09375,
+      11.0
+    ],
+    "status_text_overlap": false,
+    "window": [
+      1280.0,
+      800.0
+    ],
+    "zoom_factor": 1.0
+  },
+  "scope": "initial_standalone_ui_slice",
+  "screenshot": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\gpu-sphere-run\\workspace.png",
+  "screenshot_saved": true,
+  "undo": 1,
+  "view_rects": {
+    "Looking Down": [
+      240.0,
+      159.0,
+      519.0,
+      309.5
+    ],
+    "Perspective": [
+      761.0,
+      159.0,
+      519.0,
+      309.5
+    ],
+    "Side View": [
+      761.0,
+      470.5,
+      519.0,
+      309.5
+    ],
+    "Through Finger": [
+      240.0,
+      470.5,
+      519.0,
+      309.5
+    ]
+  }
+}

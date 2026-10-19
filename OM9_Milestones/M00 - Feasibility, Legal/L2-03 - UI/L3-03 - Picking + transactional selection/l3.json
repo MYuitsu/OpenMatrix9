@@ -52,5 +52,24 @@
       "id": "OM9-M00-L4-03-03-03",
       "file": "M00 - Feasibility, Legal/L2-03 - UI/L3-03 - Picking + transactional selection/L4-03 - Chốt kiến trúc viewport UI cho E02 - E03/l4.json"
     }
-  ]
+  ],
+  "execution_evidence": {
+    "l4_done": [
+      "OM9-M00-L4-03-03-01",
+      "OM9-M00-L4-03-03-02",
+      "OM9-M00-L4-03-03-03"
+    ],
+    "l4_open": [],
+    "harness": "native/pick-probe (ray picking) + the existing product tests run as evaluation (cargo test -p om9-core --test gumball, -p om9-scene --test affine_gesture)",
+    "evidence_root": "implementation/evidence/M00/OM9-M00-L3-03-03",
+    "design": "implementation/design/M00/OM9-M00-L3-03-03/api.md",
+    "fixtures": "implementation/fixtures/M00/OM9-M00-L3-03-03/{positive,negative}.json",
+    "measured": {
+      "hit_test": "7/7 checks: object/face/edge/vertex hit and miss with a pixel tolerance converted at depth",
+      "gumball": "15 gumball tests + 5 affine tests pass, including one-undo-step move, cancel that keeps undo, commit as one undo/redo",
+      "architecture": "ADOPT: four views over one scene, object->face->edge/vertex picking, one-undo-step gestures, DPI keeps the framing"
+    },
+    "sign_off": "pending human review",
+    "next": "none inside M00: picking and gestures integrate in M02"
+  }
 }

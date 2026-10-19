@@ -1,0 +1,81 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-02-03",
+  "cases": [
+    {
+      "id": "M00-FX-02-03-POS-01",
+      "call": "box_measures",
+      "input": {
+        "width": 10,
+        "height": 10,
+        "depth": 4
+      },
+      "expected": {
+        "volume": 400.0,
+        "area": 360.0
+      }
+    },
+    {
+      "id": "M00-FX-02-03-POS-02",
+      "call": "sphere_measures",
+      "input": {
+        "radius": 5
+      },
+      "expected": {
+        "volume": 523.5987755982989,
+        "area": 314.1592653589793
+      }
+    },
+    {
+      "id": "M00-FX-02-03-POS-03",
+      "call": "cylinder_measures",
+      "input": {
+        "radius": 2,
+        "height": 4
+      },
+      "expected": {
+        "volume": 50.26548245743669,
+        "area": 75.39822368615503
+      }
+    },
+    {
+      "id": "M00-FX-02-03-POS-04",
+      "call": "fillet_volume",
+      "input": {
+        "width": 10,
+        "height": 10,
+        "depth": 4,
+        "radius": 1
+      },
+      "expected": {
+        "volume": 399.1415926535898
+      }
+    },
+    {
+      "id": "M00-FX-02-03-POS-05",
+      "call": "offset_volume",
+      "input": {
+        "width": 10,
+        "height": 10,
+        "depth": 4,
+        "distance": -1
+      },
+      "expected": {
+        "volume": 128.0
+      }
+    },
+    {
+      "id": "M00-FX-02-03-POS-06",
+      "call": "sphere_mesh",
+      "input": {
+        "radius": 5,
+        "tolerance": 0.01
+      },
+      "expected": {
+        "boundary_edges": 0,
+        "non_manifold_edges": 2,
+        "closed": true
+      }
+    }
+  ]
+}

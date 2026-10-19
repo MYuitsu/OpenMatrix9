@@ -2,9 +2,9 @@
 import hashlib,json,tomllib
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-path=ROOT/'standalone/provenance.json'
+path=ROOT/'native/provenance.json'
 data=json.loads(path.read_text(encoding='utf-8'))
-lock=tomllib.loads((ROOT/'standalone/Cargo.lock').read_text())
+lock=tomllib.loads((ROOT/'Cargo.lock').read_text())
 assert not any(row['name']=='rfd' for row in lock['package'])
 windows=next(row for row in lock['package'] if row['name']=='windows')
 for row in data['native_adapters']:
@@ -12,7 +12,7 @@ for row in data['native_adapters']:
         row['mode']='historical_adapter_dependency_superseded';row['runtime_dependency']=False;row['replaced_by']='authored_windows_common_file_dialog'
 entry={
     'name':'authored_windows_common_file_dialog','mode':'authored_selected_native_os_adapter',
-    'source_path':'standalone/crates/om9-native-owner/src/file_dialog.rs',
+    'source_path':'crates/om9-native-owner/src/file_dialog.rs',
     'upstream_url':'https://github.com/microsoft/windows-rs','bindings_version':'0.62.2','cargo_checksum':windows['checksum'],
     'license_notice':'Resources/licenses/windows-0.62.2.txt','license':'MIT (selected dual-license option)',
     'license_sha256':hashlib.sha256((ROOT/'Resources/licenses/windows-0.62.2.txt').read_bytes()).hexdigest(),

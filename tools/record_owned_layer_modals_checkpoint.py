@@ -164,8 +164,8 @@ feature, capability or migration gate is promoted by this checkpoint.
     data = json.loads(progress.read_text(encoding="utf-8"))
     data["updated_at"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     item = next(row for row in data["items"] if row.get("key") == "rcore00-standalone-foundation")
-    for path in [RECEIPT, REPORT, "standalone/crates/om9-app/src/layer_dialog.rs",
-                 "standalone/crates/om9-app/src/session/layer_dialogs.rs", "standalone/crates/om9-app/src/ui/layer_dialogs.rs"]:
+    for path in [RECEIPT, REPORT, "crates/om9-app/src/layer_dialog.rs",
+                 "crates/om9-app/src/session/layer_dialogs.rs", "crates/om9-app/src/ui/layer_dialogs.rs"]:
         if path not in item["outputs"]:
             item["outputs"].append(path)
     prefix = "Owned Layers modal checkpoint;"

@@ -1,0 +1,90 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-01-006-01",
+  "l3_id": "OM9-L3-01-01-006",
+  "l3_title": "Active Document Window State",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "goal": "window title, current document and unsaved marker",
+  "positive_oracle": "Switch active document changes title and unsaved indicator without stale UI refs",
+  "negative_oracle": "Close document with unsaved changes requires explicit decision",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "checkout_note": "As recorded for OM9-L3-01-01-004: the pinned revision is verified in vendor-research/QymCAD; QymCAD/ is not a git checkout here.",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "lines": 2419,
+      "observed_symbols": [
+        "gui.rs:22 comment: the title starts as the program's name, not empty — an empty title bar at launch reads as a window without a program",
+        "gui.rs:35 title_shown: APP_NAME.to_string()",
+        "gui.rs:1588 fn keep_the_title_current — the title follows the document: which file is open, and whether it holds unsaved work",
+        "gui.rs:1596 let dirty = qymcad_ui_state::is_dirty(&mut self.rebuild_ctx())",
+        "gui.rs:1597 crate::gui::window_title::window_title(self.disk.project_path.as_deref(), dirty)",
+        "gui.rs:1598-1601 the viewport title is sent only when it changed, because a command every frame makes some window managers flicker"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "The title rule and the send-only-on-change rule are the same in OM9. QymCAD's dirty flag is a REBUILD flag (gui.rs:118, 816, 1001) — 'the geometry needs work', not 'the document differs from the file'. OM9 keeps the two apart.",
+      "om9_owner": "standalone/crates/om9-app/src/ui/files.rs::update_file_title + startup.rs::window_title"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "lines": 2419,
+      "observed_symbols": [
+        "gui.rs:838 Nav::Exit => { self.wait_bg(); self.disk.edits.allow_close = true; ctx.send_viewport_cmd(egui::ViewportCommand::Close) }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "QymCAD's exit path uses an allow_close flag: unsaved work is not put to the user as a decision. OM9 requires an explicit Save/Discard/Cancel answer before a close with unsaved changes (the negative oracle of this item).",
+      "om9_owner": "standalone/crates/om9-app/src/session/files.rs (FilePhase::Unsaved, UnsavedDecision, decide_unsaved, begin_window_close) + ui/files.rs (the modal)"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "lines": 130,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:39 pub fn key(self) -> &'static str",
+        "qymcad-shell/src/lib.rs:113 pub fn put(&mut self, p: Place)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "The shell has no notion of an active document: no title, no file identity, no unsaved marker.",
+      "om9_owner": "standalone/crates/om9-app/src/session/files.rs + ui/files.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "lines": 1913,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:22 pub struct ClipV", "ui-state/src/lib.rs:301 pub fn doing(&self)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Tool and geometry state only; nothing about the active document or the window title.",
+      "om9_owner": "standalone/crates/om9-app/src/session/files.rs"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "startup.rs:131 pub fn window_title(&self) -> &str — the configured base title",
+    "session/files.rs:19 pub fn active_file_path(&self)", "session/files.rs:73 pub fn is_dirty(&self)",
+    "session/files.rs:118 pub fn begin_file_operation(&mut self, kind: FileKind)",
+    "session/files.rs:121 pub fn begin_window_close(&mut self)",
+    "session/files.rs:189 pub fn decide_unsaved(&mut self, token, UnsavedDecision)",
+    "session/files.rs:271 pub fn accept_file_path(&mut self, token, path)",
+    "session/files.rs:313 pub fn confirm_file_overwrite(&mut self, token, yes)",
+    "session/files.rs:463 pub fn cancel_file_operation(&mut self, token)",
+    "ui/files.rs:451 pub(super) fn update_file_title — 'OpenMatrix9 — {file or document name}' plus ' *' while dirty, sent only when it changed"
+  ],
+  "gap_found_by_this_task": [
+    "See the evidence: the switch path, the title after a save, and the close decision were exercised end to end; the defects found are recorded in OM9-L4-01-01-006-03.target-test.log and the ledger."
+  ],
+  "reuse_decision": "ADAPT the title rule (follows the document, sent only on change) and the launch rule (never an empty title) from gui.rs; ADD the unsaved-work decision path that QymCAD does not have.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-01-006/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-01-006/negative.json",
+    "standalone/crates/om9-app/tests/document_window_state.rs"
+  ]
+}

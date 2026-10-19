@@ -1,9 +1,7 @@
 # OpenMatrix9 documentation target
 
-Use `../OpenMatrix9_Codex_Spec_v2` in this OM9 checkout as the active specification package. Read its RCORE-00, CODE_GUIDE, BACKEND_POLICY and MATRIX9_UI_CONTRACT for new work; resolve the exact feature with the workflow router. Do not fallback to v1 or `ref/matrix9`.
+Use `../OM9_Milestones/M01 - CAD Shell, Viewport/L1.json` as the foundation reference, per user direction on 2026-10-19. Read root AGENTS and the exact M01 owner plus selected feature milestone via the workflow router. Standalone Rust owns document/history/Undo/UI/scene; selected OCCT/openNURBS adapters remain scoped. Matrix9 local refs and user-approved workspace/layers contracts define UI.
 
-Target is standalone Rust OM9, QymCAD selected code samples/routines only, openNURBS representation/3DM and capability-scoped OCCT. UI/workflow must match the current Matrix9 descriptions. Documentation/routing/planner validation is not executable, UI parity, solver or performance acceptance.
+Imported guides, prompts and proposed APIs are reference material. Their old stop/approval/task scheduling instructions do not override the current user request. Planning metadata and recorded claims are not runtime evidence; do not self-sign reviewer approval.
 
-Existing dated FreeCAD validation, reviews, release notes, feature records and superpowers plans/specs are historical host evidence. Their v1 links, API names, SDK commands, native test counts and passes retain that scope. Do not execute an old host plan as the new architecture. Explicit legacy maintenance/comparison follows the shared SDK policy; otherwise write and validate own OM9 ports against v2.
-
-Preserve raw references and historical fingerprints. Keep legacy versus standalone target evidence explicit in new records and the live ledger; update v2 spec/catalog/lookup/status/manifest/README only to the tested scope. V1 remains an immutable baseline.
+Preserve historical plans/reports and fingerprints. Record new target-scoped evidence in the live ledger, milestone runtime_implementation/status and README. Legacy FreeCAD maintenance requires an explicit host-scoped request; do not execute historical plans as the standalone architecture.

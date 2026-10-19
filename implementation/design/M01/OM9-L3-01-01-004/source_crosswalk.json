@@ -1,0 +1,90 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-01-004-01",
+  "l3_id": "OM9-L3-01-01-004",
+  "l3_title": "Docking Layout Default Restore",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "goal": "load Matrix-oriented default docking layout",
+  "positive_oracle": "Reset custom layout recreates Matrix-oriented baseline positions",
+  "negative_oracle": "Unknown layout version does not crash, resets to default",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "checkout_note": "The workspace also contains QymCAD/ (the path AGENTS.md names). It is not a git checkout: `git -C QymCAD rev-parse --show-toplevel` answers H:/OpenMatrix9, and its crates/qymcad/src/gui.rs differs from the pinned blob (sha256 25087F50… vs 1AB1DD62…). The pinned revision is therefore verified in vendor-research/QymCAD, as the L3-001/L3-002/L3-003 crosswalks already record.",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied (AGPL-3.0-or-later, user-approved QymCAD reuse 2026-10-16).",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "lines": 130,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { Menu, Top, Left, Right, Bottom, Centre }",
+        "qymcad-shell/src/lib.rs:39 pub fn key(self) -> &'static str  (slot-menu, slot-top, slot-left, slot-right, slot-bottom, slot-centre)",
+        "qymcad-shell/src/lib.rs:51 pub const ORDER: [Slot; 6]  (Menu, Top, Bottom, Left, Right, Centre — the centre opens last)",
+        "qymcad-shell/src/lib.rs:59 pub struct Place { key, slot, size, resizable, framed, separator }",
+        "qymcad-shell/src/lib.rs:73 pub fn new(key, slot)", "qymcad-shell/src/lib.rs:76 pub fn sized(w, resizable)",
+        "qymcad-shell/src/lib.rs:104 pub struct Shell", "qymcad-shell/src/lib.rs:113 pub fn put(&mut self, p: Place)",
+        "qymcad-shell/src/lib.rs:119 pub fn keys(&self) -> Vec<&'static str>"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A KIND of place with a documented frame order, and a per-place container size. QymCAD has no named menu sections, no documented column order, no default baseline and no reset command.",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs (SectionId order, PanelId sizes, matrix_default, reset_to_default)"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "lines": 2419,
+      "observed_symbols": [
+        "gui.rs:21 impl Default for OnDisk", "gui.rs:155 #[derive(Clone, Default)]",
+        "gui.rs:654 impl Default for App", "gui.rs:655 fn default()",
+        "gui.rs:1393 fn save(&mut self, storage: &mut dyn eframe::Storage)"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "eframe storage persists document/IO state. There is no schema version for the panel arrangement, no reset-to-baseline and no layout file of its own.",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs (SCHEMA_VERSION, matrix_default, reset_to_default, from_json/load)"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "lines": 67,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:12 name = \"qymcad\"", "qymcad/Cargo.toml:15 [[bin]]",
+        "qymcad/Cargo.toml:24 eframe = { version = \"0.35\", features = [\"persistence\", \"wgpu\"] }"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "The dependency shape only. OM9 pins eframe/egui 0.36.2 and keeps eframe persistence off for the layout, which OM9 stores itself.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "lines": 1913,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:22 pub struct ClipV", "ui-state/src/lib.rs:87 pub fn cmd_val",
+        "ui-state/src/lib.rs:206 pub fn set_measure", "ui-state/src/lib.rs:301 pub fn doing(&self)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "This anchor carries geometry, clipping and feature-tool state; it holds no interface placement at all. The default layout and its restore are OM9 additions.",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "dock_layout.rs:550 pub fn normalize(&mut self) -> Vec<String>",
+    "dock_layout.rs:624 pub fn reset_to_default(&mut self)",
+    "dock_layout.rs:746 pub fn to_json(&self) -> Result<String>",
+    "dock_layout.rs:753 pub fn from_json(bytes, limits) — rejects a foreign schema_version and returns the default with a diagnostic",
+    "dock_layout.rs:772 pub fn load(path, limits) — missing file is a clean default; unreadable bytes reset with a diagnostic"
+  ],
+  "added_by_this_task": [
+    "dock_layout.rs: pub fn from_bytes(bytes) — the same parse with the built-in limits, so tests and tools reach the version gate without owning a path"
+  ],
+  "reuse_decision": "ADAPT the slot/container idea from qymcad-shell; ADD the versioned Matrix default, the reset command and the version gate (no upstream code copied).",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-01-004/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-01-004/negative.json",
+    "standalone/crates/om9-app/tests/dock_layout_default.rs"
+  ]
+}

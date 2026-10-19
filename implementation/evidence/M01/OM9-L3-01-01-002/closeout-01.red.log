@@ -1,0 +1,41 @@
+COMMAND: cargo test -p om9-app --test status_bar_overlap (cwd h:\OpenMatrix9\standalone)
+EXIT CODE: 101
+----- stdout+stderr -----
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.66s
+     Running tests\status_bar_overlap.rs (target\debug\deps\status_bar_overlap-107d3a2128996e24.exe)
+
+running 4 tests
+test normal_1600x1000_control_shows_the_full_summary ... ok
+test minimum_720x480_with_right_dock_does_not_overlap ... FAILED
+test narrow_800x600_with_right_dock_does_not_overlap ... FAILED
+test long_error_at_560x300_keeps_dismiss_and_message_apart ... FAILED
+
+failures:
+
+---- minimum_720x480_with_right_dock_does_not_overlap stdout ----
+
+thread 'minimum_720x480_with_right_dock_does_not_overlap' (39352) panicked at crates\om9-app\tests\status_bar_overlap.rs:44:9:
+720x480: summary [[132.9 466.0] - [718.0 477.0]] leaves the status panel [[302.0 463.0] - [718.0 478.0]]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- narrow_800x600_with_right_dock_does_not_overlap stdout ----
+
+thread 'narrow_800x600_with_right_dock_does_not_overlap' (48884) panicked at crates\om9-app\tests\status_bar_overlap.rs:44:9:
+800x600: summary [[212.9 586.0] - [798.0 597.0]] leaves the status panel [[302.0 583.0] - [798.0 598.0]]
+
+---- long_error_at_560x300_keeps_dismiss_and_message_apart stdout ----
+
+thread 'long_error_at_560x300_keeps_dismiss_and_message_apart' (8116) panicked at crates\om9-app\tests\status_bar_overlap.rs:44:9:
+560x300 error: message [[302.0 285.0] - [2189.0 298.0]] leaves the status panel [[302.0 283.0] - [558.0 298.0]]
+
+
+failures:
+    long_error_at_560x300_keeps_dismiss_and_message_apart
+    minimum_720x480_with_right_dock_does_not_overlap
+    narrow_800x600_with_right_dock_does_not_overlap
+
+test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s
+
+error: test failed, to rerun pass `-p om9-app --test status_bar_overlap`
+

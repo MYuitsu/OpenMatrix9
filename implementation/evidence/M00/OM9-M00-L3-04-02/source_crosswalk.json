@@ -1,0 +1,15 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-M00-L3-04-02",
+  "entries": [
+    {
+      "l4": "OM9-M00-L4-04-02-01",
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-04-02/OM9-M00-L4-04-02-01.note.md"
+    },
+    {
+      "l4": "OM9-M00-L4-04-02-02",
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-04-02/OM9-M00-L4-04-02-02.note.md"
+    }
+  ],
+  "open_note": "L4 with no evidence file is OPEN; see implementation/evidence/M00/G00-04/GATE-CLOSEOUT.md"
+}

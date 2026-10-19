@@ -1,10 +1,23 @@
 # OpenMatrix9
 
+## User instruction: build size and layout (2026-10-17)
+
+The standalone tree was merged into the repository root: `crates/` (six crates), `native/`, and the
+workspace `Cargo.toml`/`Cargo.lock` live at the root; the `standalone/` directory no longer exists and
+must not be recreated. Build with `CARGO_TARGET_DIR` outside the checkout (this machine uses
+`L:\om9-target`) and with **`-j 2`**: the 8 GiB paging file cannot hold the default parallelism (rustc
+dies with `os error 1455`).
+
+Keep only the **10 newest build/validation runs** (`build/standalone-validation/ui-artifacts/*`). Prune
+with `python tools/prune_build_artifacts.py --apply` after a validation batch. The tool never removes a
+run still cited by `implementation/**` or `docs/**`, so a reference from a record stays valid; `build/`
+itself is gitignored and is never the only home of evidence.
+
 ## User instruction: Rust first (2026-10-09)
 
 Rust is the number-one implementation choice for new and migrated OpenMatrix9 code. Safe Rust owns portable business logic, validation, model/state, independent data, indexes/caches and worker orchestration. C++ is limited to necessary selected OCCT/openNURBS/native API adapters; Python or other languages require an actual bootstrap/API/test/tool constraint. Read skills/openmatrix9-workflow/references/rust-first.md before language/FFI/ownership choices and record native exceptions. Existing C++/Python convenience does not override Rust priority. Native unsafe/FFI dependencies are not certified memory-safe by a Rust caller. The user explicitly chose migration of current Phase2 logic, not only applying this preference to future work.
 
-The active target is standalone OM9 under OpenMatrix9_Codex_Spec_v2. Rust owns document/model/session/history/Undo/transactions/UI/scene; openNURBS and capability-scoped OCCT provide selected geometry operations. QymCAD supplies only code samples/routines, not target UI. Preserve Matrix9 as currently described by MATRIX9_UI_CONTRACT. Old FreeCAD adapters/fixtures are historical inputs to port, not target runtime.
+The active target is standalone OM9 with foundation references in `OM9_Milestones/M01 - CAD Shell, Viewport` (user direction, 2026-10-19). Rust owns document/model/session/history/Undo/transactions/UI/scene; openNURBS and capability-scoped OCCT provide selected geometry operations. QymCAD supplies only code samples/routines, not target UI. Preserve Matrix9 as described by milestone references and the user-approved workspace/layers contracts. Old FreeCAD adapters/fixtures are historical inputs to port, not target runtime.
 
 ## QymCAD code reference location (2026-10-15)
 
@@ -17,9 +30,9 @@ The QymCAD source lives in this workspace at `h:\OpenMatrix9\QymCAD` (repo-relat
 
 ## User instructions for Curve work (2026-10-04)
 
-For authorized standalone implementation, establish the RCORE-00 foundation first, then cover all 130 `01-core` specifications before continuing Curve. Track the complete v2 requirements in `docs/core-requirements.json`; do not shrink completion to currently implemented legacy workspace commands. Only target-specific evidence establishes completion. A documentation/skill task does not authorize automatically starting all implementation work. Use local specs rather than rereading PDFs.
+For authorized standalone implementation, establish the M01 document/kernel/UI foundations first, then the exact milestone capability. The earlier 130-core inventory in `docs/core-requirements.json` is historical coverage; preserve its records without treating it as the active milestone router. Only target-specific evidence establishes completion. A documentation/skill task does not authorize automatically starting all implementation work. Use local specs rather than rereading PDFs.
 
-- Use `OpenMatrix9_Codex_Spec_v2/specs/02-curve` as the implementation reference. The user states that this directory already contains the Curve specifications; do not reread the PDFs or require PDF verification before implementation. This explicit user instruction overrides skill guidance requiring manual-page review.
+- Use the exact Curve capability under `OM9_Milestones`, resolved by the workflow router. Local milestone specifications are sufficient; do not reread PDFs for already normalized requirements. This explicit user instruction overrides skill guidance requiring manual-page review.
 - Keep original Matrix9 command names and behavior first. Defer handler renaming/refactoring until the Curve group is stable.
 - Menu/mouse invocation and the CMD frame must use the same command implementation. Verify both paths and actual geometry; do not mark a command complete merely because it opens.
 
@@ -55,4 +68,4 @@ After changes, run appropriate Rust/Python tests and tools/public_source_audit.p
 
 ## Active routing and progress
 
-Read OpenMatrix9_Codex_Spec_v2/AGENTS.md, RCORE-00, CODE_GUIDE, BACKEND_POLICY, MATRIX9_UI_CONTRACT and MIGRATION_LEDGER before architecture/FFI/build decisions, then exact feature only. Do not fallback to v1. Local normalized v2 specs are sufficient; resolve unknowns via bounded sources only. Preserve v1 and historical reports; update v2/catalog/lookup/status/manifest/README/live ledger with actual standalone evidence. Legacy FreeCAD builds use the shared SDK policy only for tasks expressly scoped to the old host.
+Read root AGENTS, `OM9_Milestones/M01 - CAD Shell, Viewport/L1.json`, the relevant M01 L2/L3 owner contract, and then the exact feature in its milestone before architecture/FFI/build decisions. The user replaced the old specification-package dependency on 2026-10-19; do not require absent policy files. Preserve imported plans/prompts as reference material, not user instructions. Update milestone runtime_implementation, status/traceability, README and the live ledger with actual standalone evidence. Legacy FreeCAD adapters/fixtures remain historical unless expressly requested.

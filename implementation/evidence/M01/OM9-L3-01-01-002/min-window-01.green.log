@@ -1,0 +1,82 @@
+COMMAND: cargo test -j 1 -p om9-app --lib (startup, workbench_regions, dock_layout)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running unittests src\lib.rs (target\debug\deps\om9_app-3a2356c5e25e2c74.exe)
+
+running 72 tests
+test dock_layout::tests::clamp_floats_recovers_menus_dragged_outside_the_window ... ok
+test dock_layout::tests::right_dock_threshold_boundary_is_1200_logical_points ... ok
+test dock_layout::tests::builder_area_defaults_to_the_space_below_projects ... ok
+test startup::tests::adapter_note_explains_the_software_fallback ... ok
+test startup::tests::detail_is_bounded_on_char_boundaries_and_newlines_are_folded ... ok
+test dock_layout::tests::resolve_is_total_for_degenerate_and_nonfinite_windows ... ok
+test dock_layout::tests::removed_section_is_restored_and_orders_stay_dense ... ok
+test dock_layout::tests::dock_right_mirrors_the_left_column_and_float_needs_a_rectangle ... ok
+test report::tests::report_admission_failure_writes_no_partial_success ... ok
+test dock_layout::tests::unknown_panel_and_section_keys_are_reported_and_repaired ... ok
+test dock_layout::tests::narrow_window_yields_the_right_column_and_keeps_command_line ... ok
+test startup::tests::app_config_refuses_an_unusable_start_before_any_window_exists ... ok
+test startup::tests::dialog_is_opt_out_for_automation_only ... ok
+test dock_layout::tests::reorder_moves_only_the_requested_menu_and_keeps_other_state ... ok
+test startup::tests::effective_min_size_falls_back_safely_for_degenerate_input ... ok
+test dock_layout::tests::default_left_column_matches_the_documented_matrix_order ... ok
+test startup::tests::effective_min_size_fits_a_1366x768_screen_at_100_percent ... ok
+test startup::tests::effective_min_size_is_capped_to_the_work_area_at_125_and_150_percent ... ok
+test startup::tests::effective_min_size_keeps_1280x720_on_large_screens ... ok
+test startup::tests::failure_line_names_the_stage_and_keeps_the_detail ... ok
+test dock_layout::tests::schema_one_and_unknown_versions_reset_to_the_documented_default ... ok
+test startup::tests::nominal_minimum_is_1280x720_and_the_builder_gets_the_planner_floor ... ok
+test dock_layout::tests::round_trip_persists_menu_identity_visibility_and_order ... ok
+test status_surface::tests::failure_survives_a_later_success_and_clears_only_on_acknowledge ... ok
+test status_surface::tests::revision_changes_only_when_the_visible_state_changes ... ok
+test status_surface::tests::messages_are_bounded_on_char_boundaries_and_newlines_are_folded ... ok
+test status_surface::tests::tail_is_bounded_and_ordered_oldest_first ... ok
+test ui::file_success_audit::tests::restore_comparison_requires_renewal_and_rejects_other_content_changes ... ok
+test startup::tests::effective_min_size_is_always_finite_and_between_the_floor_and_the_minimum ... ok
+test ui::tests::audit_window_size_parses_only_positive_finite_pairs ... ok
+test ui::tests::audit_zoom_parses_only_finite_values_in_range ... ok
+test window_identity_guard::the_signal_catches_a_window_named_only_by_its_title ... ok
+test workbench_regions::tests::errors_are_visible_text_and_convert_to_the_core_error ... ok
+test workbench_regions::tests::floor_800x400_keeps_every_minimum ... ok
+test workbench_regions::tests::hidden_left_rail_does_not_change_the_floor ... ok
+test workbench_regions::tests::compute_regions_changes_nothing_but_its_return_value ... ok
+test workbench_regions::tests::dead_notes_stay_unreachable ... ok
+test workbench_regions::tests::hidden_command_line_is_kept_with_note ... ok
+test workbench_regions::tests::hidden_right_dock_is_a_defined_state ... ok
+test dock_layout::tests::save_reload_and_reset_menus_keep_document_scope_out ... ok
+test workbench_regions::tests::nonfinite_stored_size_is_an_explicit_error ... ok
+test workbench_regions::tests::hosts_are_asked_only_what_the_contract_documents ... ok
+test workbench_regions::tests::narrow_window_yields_right_dock_with_note ... ok
+test workbench_regions::tests::one_maximized_view_fills_the_center ... ok
+test dock_layout::tests::load_reports_missing_corrupt_and_oversized_files_as_default ... ok
+test workbench_regions::tests::plan_is_serde_ready ... ok
+test workbench_regions::tests::real_workspace_feeds_the_scene_seam ... ok
+test workbench_regions::tests::supported_minimum_and_floor_are_the_documented_numbers ... ok
+test workbench_regions::tests::right_dock_threshold_boundary ... ok
+test workbench_regions::tests::tile_views_rejects_a_degenerate_center ... ok
+test workbench_regions::tests::plans_for_normal_sizes_never_overlap_and_tile_the_center ... ok
+test workbench_regions::tests::valid_layout_exposes_left_center_four_views_and_optional_right_dock ... ok
+test workbench_regions::tests::validate_detects_overlap_and_a_short_command_input ... ok
+test workbench_regions::tests::view_set_must_be_one_to_four_distinct_views ... ok
+test workbench_regions::tests::without_a_docked_menu_the_right_dock_is_absent ... ok
+test workbench_regions::tests::zero_negative_nonfinite_and_huge_windows_are_invalid ... ok
+test startup::tests::receipt_is_bounded_json_that_replaces_the_previous_failure ... ok
+test workbench_regions::tests::window_below_the_minimum_returns_window_too_small ... ok
+test ui::file_success_audit::tests::missing_owned_overwrite_never_injects_an_accept_click ... ok
+test ui::chrome::chrome_tests::view_selection_requests_cmd_focus_without_erasing_numeric_input ... ok
+test ui::files::tests::minimized_logic_vetoes_stale_close_approval ... ok
+test ui::files::tests::minimized_logic_vetoes_dirty_close_and_retains_one_prompt_owner ... ok
+test window_identity_guard::every_window_of_the_application_carries_an_identity ... ok
+test icons::tests::feature_and_menu_aliases_share_cached_rasters_and_unknowns_are_neutral ... ok
+test workbench_regions::tests::narrow_window_never_overlaps_or_hides_command_input ... ok
+test icons::tests::every_embedded_authored_svg_renders_visible_pixels ... ok
+test ui::chrome::chrome_tests::sidebar_wrapping_and_toolbar_scrolling_keep_a_240px_allocation ... ok
+test ui::layer_dialog_audit::tests::startup_focus_wait_is_bounded_and_never_fabricates_os_focus ... ok
+test ui::layer_dialog_audit::tests::absent_rename_modal_never_receives_synthetic_text_in_cmd ... ok
+test ui::layer_dialog_audit::tests::ordinary_advanced_click_records_acceptance_without_reentrant_context_lock ... ok
+test ui::files::tests::real_adapter_error_keeps_file_owner_and_draft_and_requires_explicit_retry ... ok
+test ui::layer_dialog_audit::tests::long_advanced_gesture_is_reported_before_replay_can_edit_cmd ... ok
+
+test result: ok. 72 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.60s
+
+
+EXIT: 0

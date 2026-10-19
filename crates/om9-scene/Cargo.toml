@@ -1,0 +1,11 @@
+[package]
+name = "om9-scene"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+uuid.workspace = true
+om9-core = { path = "../om9-core" }
+serde.workspace = true

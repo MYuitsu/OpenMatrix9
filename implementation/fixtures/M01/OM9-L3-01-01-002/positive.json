@@ -71,25 +71,26 @@
       }
     },
     {
-      "id": "smallest-usable-window-560x286",
+      "id": "floor-800x400",
       "kind": "positive",
-      "window": [560, 286],
+      "window": [800, 400],
       "layout": {},
       "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
       "expect": {
-        "left_rail": [0, 21, 240, 265],
+        "menu_bar": [0, 0, 800, 21],
+        "left_rail": [0, 21, 300, 379],
         "right_dock": null,
-        "command_input": [240, 21, 320, 58],
-        "toolbar": [240, 79, 320, 67],
-        "status_bar": [240, 266, 320, 20],
-        "center": [240, 146, 320, 120],
+        "command_input": [300, 21, 500, 90],
+        "toolbar": [300, 111, 500, 67],
+        "status_bar": [300, 380, 500, 20],
+        "center": [300, 178, 500, 202],
         "views": {
-          "LookingDown": [240, 146, 159, 59],
-          "Perspective": [401, 146, 159, 59],
-          "ThroughFinger": [240, 207, 159, 59],
-          "SideView": [401, 207, 159, 59]
+          "LookingDown": [300, 178, 249, 100],
+          "Perspective": [551, 178, 249, 100],
+          "ThroughFinger": [300, 280, 249, 100],
+          "SideView": [551, 280, 249, 100]
         },
-        "notes": ["LeftRailShrunk"]
+        "notes": []
       }
     }
   ]

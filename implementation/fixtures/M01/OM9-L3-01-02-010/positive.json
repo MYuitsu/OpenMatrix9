@@ -1,0 +1,70 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-010",
+  "l4": "OM9-L4-01-02-010-02",
+  "case": "command-event-and-observer-positive",
+  "positive_oracle": "Commands emit started/progress/warn/finished typed events with monotonic ordering",
+  "line_feature": "OM9-CURVE-002",
+  "cases": [
+    {
+      "id": "Z1-a-run-reports-its-steps-in-order",
+      "steps": [
+        "dispatch LINE",
+        "point 0,0,0",
+        "warn 'Length=NaN refused'",
+        "point 10,0,0"
+      ],
+      "expect": {
+        "kinds": [
+          "started",
+          "progress",
+          "warn",
+          "finished"
+        ],
+        "sequences": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "outcomes": [
+          null,
+          null,
+          null,
+          "Committed"
+        ],
+        "monotonic": true,
+        "run_len": 4
+      }
+    },
+    {
+      "id": "Z2-a-cancelled-run-finished-with-the-cancel-outcome",
+      "steps": [
+        "dispatch LINE",
+        "point 0,0,0",
+        "Escape"
+      ],
+      "expect": {
+        "last_kind": "finished",
+        "last_outcome": "Cancelled",
+        "monotonic": true
+      }
+    },
+    {
+      "id": "Z3-the-sequence-keeps-rising-across-runs",
+      "runs": 2,
+      "expect": {
+        "first_of_second_run_is_greater": true,
+        "monotonic": true
+      }
+    },
+    {
+      "id": "Z4-the-log-is-bounded",
+      "emit": 300,
+      "expect": {
+        "len": 256,
+        "monotonic": true
+      }
+    }
+  ]
+}

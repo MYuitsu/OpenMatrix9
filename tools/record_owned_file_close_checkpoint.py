@@ -144,7 +144,7 @@ count remains unknown; all unclosed packages are retained.
     for path in [PACKAGE / "IMPLEMENTATION_STATUS.md", PACKAGE / "README.md"]:
         append(path, note.replace("../../../" + REPORT, "../" + REPORT))
     append(ROOT / "README.en.md", note.replace("../../../" + REPORT, REPORT))
-    append(ROOT / "standalone/README.md", note.replace("../../../" + REPORT, "../" + REPORT))
+    append(ROOT / "docs/standalone-foundation.md", note.replace("../../../" + REPORT, "../" + REPORT))
     append(ROOT / "README.md", MARKER + f"\n\nĐã nối [luồng đóng cửa sổ khi chưa lưu]({REPORT}) qua Save/Discard/Cancel, kể cả nhánh thu nhỏ cửa sổ. {passed} test workspace;2 yêu cầu WM_CLOSE thật và4 dialog Windows hủy sạch trong replay mới. Lưu lỗi hoặc hủy giữ tài liệu/bản nháp/cửa sổ. Goal đầy đủ vẫn đang thực hiện; chọn/lưu/mở thành công qua OS, startup, teardown/budgets/persistence/.3dm và các gate đầy đủ còn mở.")
     path = ROOT / "docs/openmatrix9-progress.json"
     data = json.loads(path.read_text(encoding="utf-8"))

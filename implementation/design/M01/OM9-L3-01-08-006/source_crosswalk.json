@@ -1,0 +1,25 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-08-006-01",
+  "l3_id": "OM9-L3-01-08-006",
+  "l3_title": "Unit Safe Parameter Serialization",
+  "owner_module_id": "OM9-L2-01-08",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "preserve numeric dimensional semantics in project data",
+  "positive_oracle": "Wire form có tag đơn vị, round-trip bit-chính-xác cho f64.",
+  "negative_oracle": "Payload radian không đọc được thành độ; số trần không đọc được thành mm.",
+  "legacy_source": [
+    "rust/src/units.rs",
+    "rust/src/prepared_result.rs (stored options)"
+  ],
+  "reuse_decision": "ADAPT",
+  "decision_note": "Legacy stored a raw f64 with a separate context; OM9 stores the unit in the value, so a stored number can never be read with the wrong dimension.",
+  "method": "Read the legacy `rust/` module named above and the target crate; the portable behaviour is re-implemented in safe Rust (AGENTS.md rust-first) without the legacy C ABI. No legacy code is copied verbatim.",
+  "verified_utc": "2026-10-17",
+  "om9_owner": "crates/om9-core/src/units.rs, request.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test units_parameters l3_006"
+  ]
+}

@@ -1,0 +1,31 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.58s
+     Running tests\global_status_surface.rs (target\debug\deps\global_status_surface-0fbe48d719cfa2fe.exe)
+
+running 10 tests
+test x7_the_surface_is_pure ... ok
+test fixture_design_pair_is_present ... ok
+test g5_to_g10_the_surface_reports_what_the_fixture_states ... ok
+test g4_a_panel_message_never_hides_a_failure ... ok
+test x3_the_surface_never_answers_for_another_owner ... ok
+test g1_an_invalid_command_is_visible_and_retrievable ... FAILED
+test x1_escape_still_cancels_a_running_command_under_a_failure ... ok
+test g3_only_dismiss_clears_a_failure ... ok
+test x2_to_x6_the_surface_never_swallows_state ... ok
+test g2_a_failure_survives_a_later_success ... ok
+
+failures:
+
+---- g1_an_invalid_command_is_visible_and_retrievable stdout ----
+
+thread 'g1_an_invalid_command_is_visible_and_retrievable' (54616) panicked at crates\om9-app\tests\global_status_surface.rs:81:5:
+unsupported unknown/unavailable command
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    g1_an_invalid_command_is_visible_and_retrievable
+
+test result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.66s
+
+error: test failed, to rerun pass `-p om9-app --test global_status_surface`

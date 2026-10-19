@@ -1,0 +1,83 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-01-006-05",
+  "l3_id": "OM9-L3-01-01-006",
+  "title": "Active Document Window State",
+  "oracle": {
+    "positive": "Switch active document changes title and unsaved indicator without stale UI refs",
+    "negative": "Close document with unsaved changes requires explicit decision"
+  },
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) running the app on Windows",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-app --test document_window_state -> 8 passed; 1 failed. The one product defect: after opening a file the document kept the name 'Untitled'.",
+    "GREEN: cargo test -p om9-app --test document_window_state -> 9 passed; 0 failed (W1..W7 title and switch, C1..C9 the close decision)",
+    "cargo test -p om9-app --lib: 83 passed",
+    "cargo test --workspace -j 2: every group ok (the host paging file cannot hold the default parallel workspace build: os error 1455; -j 2 is the working invocation and is recorded in the regression log)",
+    "cargo check --workspace --all-targets: exit 0; cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: L3-002 size matrix 14/14 PASS; L3-003 panel scenarios 7/7 PASS"
+  ],
+  "code_change": [
+    "session/files.rs::replace_from_file now gives the loaded document the name of the file it came from (bounded to 240 characters), so the title, the status line and a later Save As name the same document. Before, opening first.om9 left Document::name as 'Untitled'.",
+    "No other product behaviour changed: the title rule, the send-only-on-change rule and the whole close decision state machine already existed and are now pinned by fixtures."
+  ],
+  "artefacts": [
+    "OM9-L4-01-01-006-02.red.log",
+    "OM9-L4-01-01-006-02.green.log",
+    "OM9-L4-01-01-006-03.diffstat.txt",
+    "OM9-L4-01-01-006-03.target-test.log",
+    "OM9-L4-01-01-006-05.regression.log"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The title string and the decision state machine are machine-proven; the window manager's title bar and the look of the prompt are the owner's to confirm.",
+    "items": [
+      {
+        "id": "T1",
+        "step": "Start the app without a document and read the title bar.",
+        "machine_proven": "W1: the title is 'OpenMatrix9 — Untitled' and the document is clean.",
+        "human_must_verify": "The title bar really shows that text (never empty) and no ' *' is present.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "T2",
+        "step": "Draw something, watch the title, then Save (or Save As) and watch it again.",
+        "machine_proven": "W2/W3/W4: the marker appears while the document differs from its file, disappears after the save, and the file name replaces the document name.",
+        "human_must_verify": "The title bar updates at once, names the file and drops the marker after saving.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "T3",
+        "step": "Open another document while the current one has unsaved changes, choose Discard, then look at the title, the layers list and the undo state.",
+        "machine_proven": "W5: the title, the document name, the entity count and the undo journal all belong to the newly opened document; nothing of the old one is left.",
+        "human_must_verify": "The window really shows the opened file everywhere (title, layer list, objects) and Undo has nothing from the previous document.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "T4",
+        "step": "Move, roll up, dock and float menus, then look at the title.",
+        "machine_proven": "W6: panel placement never makes the document dirty.",
+        "human_must_verify": "The title keeps no ' *' after rearranging menus, and running a file command afterwards does not ask to save.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "T5",
+        "step": "With unsaved changes, close the window and answer Cancel, then Discard, then (with unsaved changes again) Save.",
+        "machine_proven": "C1..C9: a dirty close asks first; Cancel leaves everything alone; Discard closes without writing; Save writes and then closes; a clean close never asks; a stale answer cannot close or save anything.",
+        "human_must_verify": "The prompt is clear, Cancel really keeps the app open with the work intact, Discard does not write, and Save writes before closing.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "environment_note": "cargo test --workspace exhausts this host's paging file (os error 1455) unless it runs with reduced parallelism; `cargo test --workspace -j 2` passes and is what the regression log records.",
+  "gate": {
+    "m01_ui_l3_006_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

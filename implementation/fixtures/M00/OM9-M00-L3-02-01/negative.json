@@ -1,0 +1,24 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-02-01",
+  "cases": [
+    {
+      "id": "M00-FX-02-01-NEG-01",
+      "call": "box_volume",
+      "input": { "width": 0.0, "height": 1.0, "depth": 1.0 },
+      "expected": { "error": "InvalidInput", "message_contains": "finite and positive" }
+    },
+    {
+      "id": "M00-FX-02-01-NEG-02",
+      "call": "box_volume",
+      "input": { "width": "NaN", "height": 1.0, "depth": 1.0 },
+      "expected": { "error": "InvalidInput" }
+    },
+    {
+      "id": "M00-FX-02-01-NEG-03",
+      "call": "reject_invalid_cylinder",
+      "input": { "radius": -1.0 },
+      "expected": { "error": "Failure", "message_non_empty": true }
+    }
+  ]
+}

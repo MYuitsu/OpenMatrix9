@@ -72,5 +72,10 @@
     "stage": "E13",
     "source_audit_status": "REMOTE_REVIEW_ONLY_NO_LOCAL_BUILD",
     "qymcad_reviewed_revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d"
-  }
+  },
+  "depends_on_milestones": [
+    "M03",
+    "M05",
+    "M06"
+  ]
 }

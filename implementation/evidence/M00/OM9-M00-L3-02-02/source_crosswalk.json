@@ -1,0 +1,71 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-M00-L3-02-02",
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  },
+  "entries": [
+    {
+      "l4": "OM9-M00-L4-02-02-01",
+      "capability": "RAII and the free path for a kernel handle",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bridge.cpp#om9_occt_handle_refcount"
+      ],
+      "occt_symbols": [
+        "Handle(Geom_Circle)",
+        "Standard_Transient::GetRefCount",
+        "Handle::Nullify"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L4-02-02-01.raii-refcount.log",
+      "finding": "refcount 1 -> 2 on copy -> 1 after Nullify; every kernel handle in the bridge is a local Handle that dies at scope exit"
+    },
+    {
+      "l4": "OM9-M00-L4-02-02-02",
+      "capability": "invalid inputs are rejected with a reason, no partial result",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bridge.cpp#om9_occt_box_volume",
+        "native/occt-rust-proof/src/lib.rs"
+      ],
+      "occt_symbols": [
+        "BRep_Builder::Infinite parameter",
+        "Standard_DomainError",
+        "Standard_ConstructionError"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L4-02-02-02.invalid-inputs.log",
+      "finding": "9/9 invalid cases rejected: 7 by the bridge guard before the kernel, 2 by OCCT (huge -> BRep_Builder::Infinite parameter, tiny -> Standard_DomainError); all carry a message and the process survives"
+    },
+    {
+      "l4": "OM9-M00-L4-02-02-03",
+      "capability": "create/destroy cycles do not leak",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bridge.cpp#om9_occt_create_destroy"
+      ],
+      "occt_symbols": [
+        "BRepPrimAPI_MakeBox",
+        "BRepGProp::VolumeProperties",
+        "GetProcessMemoryInfo"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L4-02-02-03.create-destroy-leak.log",
+      "finding": "10 000 cycles in 0.73 s; working set 10 805 248 B -> 11 223 040 B, growth 0.398 MiB (allocator cache level, not per-shape growth)"
+    },
+    {
+      "l4": "OM9-M00-L4-02-02-04",
+      "capability": "thread serialization policy and UI handoff",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bin/lifetime.rs"
+      ],
+      "occt_symbols": [
+        "BRepPrimAPI_MakeBox"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-02/OM9-M00-L4-02-02-04.thread-serialization.log",
+      "finding": "1000 calls from 4 threads through one mutex: 0 wrong results in 0.41 s; 100 independent calls (no mutex) also succeeded in 0.013 s, recorded as an observation, not as a thread-safety promise"
+    }
+  ],
+  "policy": {
+    "kernel_calls": "one at a time, marshalled through the application layer (mutex)",
+    "ui_handoff": "the UI thread never calls the kernel directly; it posts a request and the response is applied on the UI thread",
+    "rationale": "OCCT 8 keeps its error-handler stack thread_local, but the toolkits do not promise arbitrary concurrent mutation of shared shapes"
+  }
+}

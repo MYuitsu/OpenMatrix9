@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-009-01",
+  "l3_id": "OM9-L3-01-02-009",
+  "l3_title": "Command Repeat And Dispatch",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "restart prior supported command from command history",
+  "positive_oracle": "Repeat last repeatable action invokes same registered command ID with new context",
+  "negative_oracle": "Nonrepeatable/file destructive commands cannot be silently repeated",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE",
+        "gui.rs:448 comment: carry out what the properties panel asked for, after it has drawn"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "One doorway for every command, which is the structure OM9 keeps for dispatch. What is missing is a repeat rule: QymCAD has no repeat slot, so nothing distinguishes a command that may run again from a destructive one.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs (repeatable_last, is_repeatable, repeat_slot, recent)"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:113 pub fn put(&mut self, p: Place)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No command history.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs + transcript.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Interface state, not command history.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session.rs kept `repeat: Option<String>` and `recent: VecDeque<String>` (bounded to 9) and refreshed both only for a committed geometry command",
+    "the empty-Enter path read the raw slot: let repeat = self.repeat.clone().ok_or(Error::Missing(\"previous command\"))",
+    "transcript.rs::record_command kept the typed history in the CMD frame"
+  ],
+  "gap_found_by_this_task": [
+    "There was no way to ASK whether a command may be repeated: the rule (only the interactive geometry commands) lived implicitly in the fact that only they reach the commit path, so nothing checked the slot before running it and nothing could be asserted about a file command.",
+    "Added repeated_last()/is_repeatable()/repeat_slot(): an empty Enter now runs repeatable_last(), so a slot that somehow held a non-repeatable feature would be refused instead of silently re-run; the fixture R1/R3 cases pin that a file feature is never repeatable and never occupies the slot.",
+    "Pinned, unchanged: the repeat starts a NEW session against the context of now (fixture Q2: a second POINT lands in the document), and an empty Enter with nothing to repeat reports Missing."
+  ],
+  "reuse_decision": "ADAPT the single doorway of gui.rs; ADD the repeat slot with an explicit repeatability rule.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-009/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-009/negative.json",
+    "standalone/crates/om9-app/tests/command_options_and_repeat.rs"
+  ]
+}

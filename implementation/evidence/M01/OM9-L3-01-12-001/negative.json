@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-001",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "unknown-version",
+      "expect": {
+        "error": "Unsupported"
+      }
+    },
+    {
+      "id": "truncated",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "trailing",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "bad-checksum",
+      "expect": {
+        "error": "Invalid(chunk checksum)"
+      }
+    }
+  ]
+}

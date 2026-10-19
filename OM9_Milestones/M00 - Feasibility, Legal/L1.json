@@ -42,20 +42,23 @@
     }
   ],
   "execution_scope": {
-    "this_is_only_planning": true,
-    "no_code_implemented": true,
-    "no_real_tests_executed": true,
-    "original_l2_l3_l4_ids_unchanged": true,
+    "this_is_only_a_gate": true,
+    "no_cad_implementation": true,
+    "no_product_crates": true,
+    "feasibility_probes_executed": true,
+    "probes_live_under": "native/ (occt_probe.cpp, occt_conformance.cpp, occt-rust-proof/)",
+    "exit_criteria": "M00-L2-02 closes when L3-01..L3-03 have evidence and a review record; no CAD code exists here",
     "not_included": [
+      "product crates",
+      "CAD features",
       "changelogs",
-      "lịch sử phiên bản",
-      "log thực thi",
-      "bằng chứng thực thi chưa có",
-      "công cụ kiểm thử thực thi",
-      "tệp báo cáo và manifest trùng lặp"
+      "duplicate reports and manifests"
     ],
-    "readme": "Giai đoạn lập kế hoạch: chỉ lưu JSON theo cấp L1/L2/L3/L4; tất cả L4 chưa triển khai. Các milestone khác ở L1–L3.",
-    "scope_other_milestones": "M03–M09 và AFTER được lưu riêng ở cấp L1–L3."
+    "readme": "Gate milestone: it verifies toolchain, kernel behaviour, licensing and environment with native probes; the implementation starts in M01.",
+    "scope_other_milestones": "M01-M09 and AFTER hold the implementation and acceptance records.",
+    "history": {
+      "2026-10-17": "replaced the earlier \"no_code_implemented/no_real_tests_executed\" declaration, which contradicted this gate's own L4-04 (a Rust proof) and the probes already committed under native/"
+    }
   },
   "technical_reference_material": {
     "human_approval_policy": "# Human approval protocol (never auto-sign)\n\nFour L4 require a human decision: `01-03-03` architecture strategy, `06-01-04` product license, `06-02-04` legal gate, `07-03-04` release/E01 gate. AI may write the ADR but must set `BLOCKED_APPROVAL` until a reviewer actually reviews and signs.\n\nFor PASS, evidence review fields must have decision APPROVED, reviewer name, verified artifact/log reference, and a genuine JSON approval record with `task_id`, `decision`, `reviewer`, `approved_at_utc`, `evidence_sha256`. Structural validator cannot establish whether a person truly signed; independent review is still required.\n\nAGPL, OCCT exception, openNURBS custom license and Matrix documentation/assets require rights review; do not publish copied manuals, proprietary examples or branding.\n",
@@ -407,7 +410,7 @@
         "QymCAD io Format::ALL at pinned source has no 3dm entry",
         "QymCAD .qcad format does not guarantee backwards compatibility",
         "FFI is Rust+ C++ bridge against OCCT, not pure Rust kernel",
-        "Some documentation pins OCCT 7.8.1 while workflows reference 7.9.3: reconcile by platform/revision",
+        "RESOLVED 2026-10-17: OCCT 8.0.1 is the single pinned kernel (native/occt/pin.json, tag V8_0_1); the 7.8.1 FreeCAD bundle and the 7.9.3 workflow references are historical and must not be used",
         "QymCAD under AGPL-3.0-or-later: formal human licensing approval required"
       ]
     },
@@ -563,5 +566,70 @@
         }
       }
     }
-  }
+  },
+  "gate_status": {
+    "G00-01": {
+      "status": "IN_PROGRESS",
+      "l3_total": 3,
+      "l3_signed": 0,
+      "l4_total": 12,
+      "l4_evidenced": 2,
+      "next": "the owner signs the two approval L4, or authorises the three missing protocol tools"
+    },
+    "G00-02": {
+      "status": "CLOSED",
+      "l3_total": 3,
+      "l3_signed": 3,
+      "l4_total": 12,
+      "l4_evidenced": 12,
+      "next": "none: G00-02 is closed; the kernel work continues in M01-L2-01-05",
+      "closed_at_utc": "2026-10-17T16:40:00Z",
+      "closed_by": "chủ dự án (project owner)"
+    },
+    "G00-03": {
+      "status": "CLOSED",
+      "l3_total": 3,
+      "l3_signed": 3,
+      "l4_total": 10,
+      "l4_evidenced": 10,
+      "next": "the owner signs L3-03-01..03, then G00-03 closes and the work moves to G00-04",
+      "closed_at_utc": "2026-10-17T19:56:28Z",
+      "closed_by": ""
+    },
+    "G00-04": {
+      "status": "IN_PROGRESS",
+      "l3_total": 3,
+      "l3_signed": 0,
+      "l4_total": 12,
+      "l4_evidenced": 9,
+      "next": "implement the NURBS/trim conversion in M03, then the instance and unit tests"
+    },
+    "G00-05": {
+      "status": "IN_PROGRESS",
+      "l3_total": 2,
+      "l3_signed": 0,
+      "l4_total": 8,
+      "l4_evidenced": 5,
+      "next": "add the split/merge baseline and the persistence test when M04 starts"
+    },
+    "G00-06": {
+      "status": "CLOSED",
+      "l3_total": 2,
+      "l3_signed": 2,
+      "l4_total": 8,
+      "l4_evidenced": 8,
+      "next": "the owner signs the license decision and legal readiness",
+      "closed_at_utc": "2026-10-17T19:56:28Z",
+      "closed_by": ""
+    },
+    "G00-07": {
+      "status": "IN_PROGRESS",
+      "l3_total": 3,
+      "l3_signed": 0,
+      "l4_total": 11,
+      "l4_evidenced": 5,
+      "next": "record the release build from a clean checkout and the cold-start test, then the owner decides the final M00 evidence"
+    }
+  },
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
 }

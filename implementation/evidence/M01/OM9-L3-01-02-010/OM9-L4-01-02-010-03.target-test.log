@@ -1,0 +1,27 @@
+task: OM9-L4-01-02-010-03 (implementation) Command Event And Observer API
+utc: 2026-10-16T15:28:16Z
+
+== RED ==
+Khong co enum Event/notify nao o tang lenh: fixture khong the viet duoc vi khong co gi de doc. Lan chay dau tien cua tests/command_events_surface.rs: 4 passed; 1 failed - run_len('line') tra 0 vi truong command cua su kien giu FEATURE ID (OM9-CURVE-002), khong phai ten hien thi. Day la mot phat hien that ve cach dat ten: su kien dinh danh lenh bang feature id, dung nhu registry (L3-001), va test da duoc sua theo su that do chu khong theo gia dinh.
+== GREEN: cargo test -p om9-app --test command_events_surface ==
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.86s
+     Running tests\command_events_surface.rs (target\debug\deps\command_events_surface-51963efe137cb09d.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... ok
+test z2_a_cancelled_run_finishes_with_the_cancel_outcome ... ok
+test z3_and_z4_the_order_is_total_and_the_log_is_bounded ... ok
+test z1_a_run_reports_its_steps_in_order ... ok
+test aa1_to_aa4_a_broken_observer_cannot_touch_the_run ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+exit=0
+== cargo test -p om9-app --lib (gom 3 unit test cua command_events) ==
+test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 101
+error: this `if` statement can be collapsed
+error: could not compile `om9-core` (test "command_registry") due to 1 previous error

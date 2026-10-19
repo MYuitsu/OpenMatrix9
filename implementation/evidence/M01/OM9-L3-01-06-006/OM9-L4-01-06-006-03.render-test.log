@@ -1,0 +1,9 @@
+# OM9-L4-01-06-006-03 — Depth clipping and grid overlays
+# utc: 2026-10-18
+# command: cargo test -p om9-render -j 2
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.21s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+grid draws > 200 px; a sphere entirely past the far plane paints < 200 px

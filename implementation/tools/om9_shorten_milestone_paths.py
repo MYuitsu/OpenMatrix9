@@ -487,6 +487,116 @@ def finish_module(old: str, new: str) -> int:
     return 0 if dangling == 0 else 4
 
 
+def finalize() -> int:
+    """Chuan hoa ten module (ke ca sua khoang trang) + viet lai tham chieu + dong bo tools.
+
+    Dung khi thu muc module da duoc doi ten ben ngoai tool nay (vi du bang
+    Explorer) hoac khi ten bi lech khoang trang.
+    """
+
+    def norm(value: str) -> str:
+        return " ".join(value.split()).casefold()
+
+    drift_pairs: list[tuple[str, str]] = []
+    actual_names: dict[str, str | None] = {}
+    for original, planned in MODULE_TARGET.items():
+        if not os.path.isdir(os.path.join(MS, original)) and os.path.isdir(os.path.join(MS, planned)):
+            actual_names[original] = planned
+            continue
+        if planned == original:
+            actual_names[original] = original if os.path.isdir(os.path.join(MS, original)) else None
+            continue
+        target = os.path.join(MS, planned)
+        if os.path.isdir(target):
+            actual_names[original] = planned
+            continue
+        match = None
+        for name in sorted(os.listdir(MS)):
+            candidate = os.path.join(MS, name)
+            if os.path.isdir(candidate) and norm(name) == norm(planned):
+                match = (candidate, name)
+                break
+        if match:
+            try:
+                os.rename(match[0], target)
+            except OSError as exc:
+                print(f"  KHONG SUA DUOC TEN {match[1]!r}: {exc}")
+                actual_names[original] = match[1]
+                continue
+            print(f"  chuan hoa ten module: {match[1]!r} -> {planned!r}")
+            drift_pairs.append((match[1], planned))
+            actual_names[original] = planned
+        elif os.path.isdir(os.path.join(MS, original)):
+            actual_names[original] = original
+            print(f"  module giu ten goc   : {original}")
+        else:
+            actual_names[original] = None
+            print(f"  CANH BAO: khong thay module {original!r} (ke ca {planned!r})")
+
+    pairs = drift_pairs + [
+        (original, actual)
+        for original, actual in actual_names.items()
+        if actual and actual != original
+    ]
+    changed = 0
+    for path in target_files():
+        text = read_text(path)
+        new_text, hits = rewrite_text(text, pairs)
+        if hits and new_text != text:
+            write_text(path, new_text)
+            changed += 1
+    print(f"  tham chieu da sua    : {changed} file ({len(pairs)} cap ten)")
+    print(f"  tools dong bo        : {sync_tools()} file")
+
+    index_path = os.path.join(MS, "PATH_RENAMES.json")
+    if os.path.isfile(index_path):
+        index = json.load(open(index_path, encoding="utf-8"))
+        for row in index["modules"]:
+            actual = actual_names.get(row["old"])
+            if actual:
+                row["new"] = actual
+                row["applied"] = actual == row.get("planned_new", actual)
+                row["blocked_reason"] = None if row["applied"] else "giu ten goc"
+        index["notes"] = [note for note in index.get("notes", []) if "--finish-module" not in note]
+        index["notes"].append(
+            "Ten module con lai da doi ben ngoai tool; dung "
+            "`python implementation/tools/om9_shorten_milestone_paths.py --finalize` de dong bo lai."
+        )
+        index["created_utc"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        write_index(index)
+        print("  index cap nhat       : OM9_Milestones/PATH_RENAMES.json + .md")
+
+    files_after = [os.path.join(dp, f) for dp, _, fn in os.walk(MS) for f in fn]
+    lens = sorted(len(p) for p in files_after)
+    over = [p for p in files_after if len(p) > BUDGET]
+    bad_json = []
+    for dp, _, fn in os.walk(MS):
+        for f in fn:
+            if f.lower().endswith(".json"):
+                p = os.path.join(dp, f)
+                try:
+                    json.load(open(p, encoding="utf-8"))
+                except ValueError as exc:
+                    bad_json.append(f"{os.path.relpath(p, ROOT)}: {exc}")
+    stale = []
+    for path in target_files():
+        text = read_text(path)
+        for old, new in pairs:
+            if old != new and old in text:
+                stale.append(f"{os.path.relpath(path, ROOT)}: {old}")
+                break
+    total_ref, dangling, samples = audit_references(target_files())
+    print(f"  files={len(files_after)} max={max(lens)} over_budget={len(over)}")
+    print(f"  json_errors={len(bad_json)} stale={len(stale)} references={total_ref} dangling={dangling}")
+    for item in stale[:5]:
+        print(f"    STALE {item}")
+    for item in samples[:5]:
+        print(f"    DANGLING {item}")
+    ok = not over and not bad_json and not stale and dangling == 0
+    print("FINALIZE:", "PASS" if ok else "CHECK")
+    return 0 if ok else 4
+
+
 def target_files() -> list[str]:
     out: list[str] = []
     for dp, dn, fn in os.walk(MS):
@@ -563,8 +673,15 @@ def write_text(path: str, text: str) -> None:
 def referenced_paths(text: str) -> list[str]:
     found = []
     for m in REF_RE.finditer(text):
-        raw = m.group(1).rstrip(" \\,;:).]")
-        found.append(raw)
+        raw = m.group(1)
+        # cat phan van xuoi dinh sau duong dan (": 8 tai lieu...", " (manifest...")
+        for marker in (": ", " (", "``", ", "):
+            cut = raw.find(marker)
+            if cut > 0:
+                raw = raw[:cut]
+        raw = raw.rstrip(" \\,;:).]")
+        if raw:
+            found.append(raw)
     return found
 
 
@@ -608,7 +725,15 @@ def main() -> int:
         action="store_true",
         help="dong bo hang so ten module trong tools/ voi ten thu muc thuc te",
     )
+    ap.add_argument(
+        "--finalize",
+        action="store_true",
+        help="chuan hoa ten module (sua khoang trang), viet lai tham chieu, dong bo tools",
+    )
     args = ap.parse_args()
+
+    if args.finalize:
+        return finalize()
 
     if args.sync_tools:
         changed = sync_tools(apply=True)

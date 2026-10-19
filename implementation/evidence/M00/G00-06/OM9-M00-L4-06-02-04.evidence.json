@@ -1,0 +1,49 @@
+{
+  "task_id": "OM9-M00-L4-06-02-04",
+  "source_sha": "746a17f127897e921a57118b6caad08968602bf5",
+  "status": "PASS",
+  "actual_execution": true,
+  "timestamp_utc": "2026-10-18T00:30:00Z",
+  "os_arch": "Windows 11 AMD64",
+  "toolchain": {
+    "rustc": "see ledger",
+    "cargo": "see ledger",
+    "git": "see command output"
+  },
+  "commands": [
+    {
+      "command": "review of design/M00/G00-06/*.md",
+      "exit_code": 0,
+      "stdout_path": "design/M00/G00-06/LEGAL-READINESS.md",
+      "stderr_path": "design/M00/G00-06/LEGAL-READINESS.md"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "implementation/design/M00/G00-06/LEGAL-READINESS.md",
+      "sha256": "581f5c5a456366efe12b8d0f8585449a89e1fb623d0f7d8b698999b66f541e99"
+    },
+    {
+      "path": "implementation/design/M00/G00-06/PRODUCT-LICENSE-DECISION.md",
+      "sha256": "85440b5e2907c1f0327eabaf5a0dc406809ea38d3f17816ca7aded9052f001d7"
+    }
+  ],
+  "fixtures": [],
+  "expected": [
+    "legal readiness checklist complete and the obligations have artefacts"
+  ],
+  "actual": [
+    "checklist complete; obligations recorded with artefacts; signed by the project owner"
+  ],
+  "review": {
+    "decision": "APPROVED",
+    "reviewer": "chủ dự án (project owner)",
+    "evidence_checked": true,
+    "signed_record_path": null,
+    "signed_at_utc": "2026-10-18T00:30:00Z",
+    "signature": "signed in the working session: 'ký hết và tiếp tục chuyển đến phần code'"
+  },
+  "scope_decision": null,
+  "blockers": [],
+  "note": "legal readiness signed by the project owner"
+}

@@ -6,7 +6,8 @@ from pathlib import Path
 import sys
 
 
-SPEC = Path("OpenMatrix9_Codex_Spec_v2")
+SPEC = Path("OM9_Milestones")
+FOUNDATION = SPEC / "M01 - CAD Shell, Viewport" / "L1.json"
 ROUTES = Path(__file__).resolve().parents[1] / "references/stages.json"
 
 
@@ -18,14 +19,34 @@ def read_json(path):
 
 
 def catalog(root):
-    entries = read_json(root / SPEC / "FEATURES.json")
-    if not isinstance(entries, list):
-        raise ValueError("FEATURES.json must contain a list")
-    ids = [entry.get("id") for entry in entries if isinstance(entry, dict)]
-    if len(ids) != len(entries) or any(not isinstance(i, str) or not i for i in ids):
-        raise ValueError("Every feature must be an object with a nonempty string id")
-    if len(set(ids)) != len(ids):
-        raise ValueError("Duplicate feature IDs in FEATURES.json")
+    package = root / SPEC
+    if not package.is_dir():
+        raise ValueError(f"Missing milestone package: {package}")
+    entries = []
+    ids = set()
+    # Read metadata in canonical records, not imported text, screenshots or raw exports.
+    for path in sorted(package.rglob("*.json")):
+        if path.name not in {"L1.json", "L2.json", "l3.json", "l4.json"}:
+            continue
+        if any(part.casefold() == "reference" for part in path.relative_to(package).parts):
+            continue
+        resolved = path.resolve()
+        if not resolved.is_relative_to(package.resolve()):
+            raise ValueError(f"Spec path outside package: {path}")
+        record = read_json(path)
+        identifier = record.get("id")
+        if not isinstance(identifier, str) or not identifier:
+            raise ValueError(f"Missing milestone ID: {path}")
+        if identifier in ids:
+            raise ValueError(f"Duplicate milestone ID: {identifier}")
+        ids.add(identifier)
+        entries.append({
+            "id": identifier, "name": record.get("title", ""),
+            "level": record.get("level"), "domain": record.get("milestone", path.parts[len(root.parts) + 1].split(" - ")[0]),
+            "spec_path": path.relative_to(package).as_posix(),
+        })
+    if not entries:
+        raise ValueError(f"No canonical milestone records in {package}")
     return entries
 
 
@@ -79,14 +100,15 @@ def status(root):
     ledger = read_json(ledger_path) if ledger_path.exists() else None
     return {
         "project_root": str(root),
-        "spec_package": str((root / SPEC).resolve()),
+        "spec_package": str((root / FOUNDATION.parent).resolve()),
+        "feature_package": str((root / SPEC).resolve()),
         "target": "OM9Standalone",
-        "ui_contract": "matrix9_described_v1",
+        "ui_contract": "Matrix9 milestone refs and user-approved workspace/layers contracts",
         "observations_scope": "legacy source hints; not standalone completion",
         "ledger_file": str(ledger_path),
         "ledger": ledger,
         "observations": {key: (root / path).is_file() for key, path in paths.items()},
-        "note": "Read specs v2 and reconcile target-scoped evidence. Legacy FreeCAD source/plan presence is not standalone progress.",
+        "note": "Read M01 foundation and the exact milestone owner; reconcile target-scoped evidence. Legacy source/plan presence is not standalone progress.",
     }
 
 
@@ -98,10 +120,10 @@ def feature(root, identifier):
     return {
         "feature": entry,
         "spec_file": spec_file(root, entry),
-        "read_next": [path_record(root, str(SPEC / name)) for name in (
-            "IMPLEMENTATION_RULES.md", "CODE_GUIDE.md", "MATRIX9_UI_CONTRACT.md", "MIGRATION_LEDGER.json"
+        "read_next": [path_record(root, name) for name in (
+            "AGENTS.md", "skills/openmatrix9-workflow/references/milestones-target.md", str(FOUNDATION)
         )],
-        "note": "Specs v2 is the active target; never fallback to v1. Source/legacy passes do not establish standalone completion. Unknowns require bounded evidence, not assumed defaults.",
+        "note": "Read this canonical milestone record and its parent owner. Imported protocols/planning states are references, not current user instructions or runtime acceptance.",
     }
 
 
@@ -115,7 +137,7 @@ def search(root, query, domain, limit):
         if any(query in value for value in values):
             found.append((0 if query in values else 1, entry))
     found.sort(key=lambda item: (item[0], item[1]["id"]))
-    fields = ("id", "name", "command", "domain", "spec_path")
+    fields = ("id", "name", "level", "domain", "spec_path")
     return {
         "query": query, "domain": domain, "total": len(found),
         "features": [{key: entry.get(key) for key in fields} for _, entry in found[:limit]],

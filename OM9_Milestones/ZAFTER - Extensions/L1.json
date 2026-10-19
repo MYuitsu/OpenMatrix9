@@ -149,5 +149,8 @@
   "note": "Phạm vi nằm trong specs/90-after của bản gốc; giữ tất cả 34 L2 và 170 L3, không tạo L4.",
   "implementation_targets_by_milestone": {
     "AFTER": 170
-  }
+  },
+  "depends_on_milestones": [
+    "M09"
+  ]
 }

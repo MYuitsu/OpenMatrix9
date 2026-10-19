@@ -1,0 +1,14 @@
+# A standalone feasibility harness, deliberately outside the workspace: M00 is a gate, and the
+# product bridge crate (crates/om9-kernel) is created in M01-L2-01-05 from this proof.
+[package]
+name = "om9-occt-rust-proof"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Its own workspace root, so `cargo test --manifest-path native/occt-rust-proof/Cargo.toml` works
+# without touching the product workspace members.
+[workspace]
+
+[build-dependencies]
+cc = "1"

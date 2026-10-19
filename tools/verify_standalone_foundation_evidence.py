@@ -12,7 +12,7 @@ native = root / 'docs/validation/2026-10-14-native-retained-current-conversion.j
 report = json.loads(native.read_text())
 assert len(report['runs']) == 50 and len(report['rejection_cases']) == 40
 assert report['binary_sha256'] == digest(root / 'build/standalone-native/Release/om9-exchange-native.exe')
-assert report['runner_sha256'] == digest(root / 'standalone/target/release/om9-native-runner.exe')
+assert report['runner_sha256'] == digest(root / 'target/release/om9-native-runner.exe')
 for row in report['authored_sources']:
     assert row['sha256'] == digest(root / row['path']), row['path']
 checked = 0
@@ -52,9 +52,9 @@ assert source['status'] == 'validated_source_inventory_and_circle_correspondence
 assert source['runs'] == 68 and source['rejections'] == 17 and not source['goal_complete']
 assert source['binary_sha256'] == report['binary_sha256']
 assert source['runner_sha256'] == report['runner_sha256']
-for path, key in [('standalone/native/native_exchange.cpp','source_sha256'),
-                  ('standalone/native/retained_merge.hpp','header_sha256'),
-                  ('standalone/native/source_inventory_fixture.cpp','fixture_source_sha256'),
+for path, key in [('native/native_exchange.cpp','source_sha256'),
+                  ('native/retained_merge.hpp','header_sha256'),
+                  ('native/source_inventory_fixture.cpp','fixture_source_sha256'),
                   ('tools/validate_native_source_inventory.py','validator_sha256'),
                   ('build/native-source-fixture/Release/om9-source-fixture.exe','fixture_binary_sha256')]:
     assert source[key] == digest(root/path), path
@@ -75,9 +75,9 @@ assert imported['log']['sha256'] == digest(root/imported['log']['path'])
 projection = json.loads((root/'docs/validation/2026-10-14-native-retained-current-projection.json').read_text())
 assert projection['runs'] == 82 and projection['rejections'] == 32 and not projection['goal_complete']
 assert projection['binary_sha256'] == report['binary_sha256'] and projection['runner_sha256'] == report['runner_sha256']
-for path, key in [('standalone/native/native_exchange.cpp','source_sha256'),
-                  ('standalone/native/retained_merge.hpp','header_sha256'),
-                  ('standalone/native/source_inventory_fixture.cpp','fixture_source_sha256'),
+for path, key in [('native/native_exchange.cpp','source_sha256'),
+                  ('native/retained_merge.hpp','header_sha256'),
+                  ('native/source_inventory_fixture.cpp','fixture_source_sha256'),
                   ('tools/validate_native_source_projection.py','validator_sha256'),
                   ('build/native-source-fixture/Release/om9-source-fixture.exe','fixture_binary_sha256')]:
     assert projection[key] == digest(root/path), path
@@ -108,12 +108,12 @@ selected = json.loads((root/'docs/validation/2026-10-14-native-retained-current-
 assert selected['total_runs'] == len(selected['runs']) == 107 and selected['expected_rejections'] == 34
 assert (selected['sdk_authored_source_files'],selected['successful_writer_output_files'],selected['authored_valid_stale_cache_output_files'],selected['semantic_scenarios']) == (8,23,7,57)
 for path,key in [('build/standalone-native/Release/om9-exchange-native.exe','binary_sha256'),
-                 ('standalone/native/native_exchange.cpp','source_sha256'),
-                 ('standalone/native/retained_merge.hpp','header_sha256'),
-                 ('standalone/native/retained_current_fixture.cpp','fixture_source_sha256'),
+                 ('native/native_exchange.cpp','source_sha256'),
+                 ('native/retained_merge.hpp','header_sha256'),
+                 ('native/retained_current_fixture.cpp','fixture_source_sha256'),
                  ('build/native-retained-current-fixture/Release/om9-retained-current-fixture.exe','fixture_binary_sha256'),
                  ('tools/validate_native_retained_current.py','validator_sha256'),
-                 ('standalone/target/release/om9-native-runner.exe','runner_sha256')]:
+                 ('target/release/om9-native-runner.exe','runner_sha256')]:
     assert selected[key] == digest(root/path), path
     checked += 1
 for path,sha in selected['dependencies'].items():

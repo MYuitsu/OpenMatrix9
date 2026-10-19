@@ -67,5 +67,8 @@
       "Resizer manual says non-history; L3 conflict must be reviewed before implementation"
     ],
     "scope": "Planning-only JSON; no binary, runtime receipts or changelog"
-  }
+  },
+  "depends_on_milestones": [
+    "M01"
+  ]
 }

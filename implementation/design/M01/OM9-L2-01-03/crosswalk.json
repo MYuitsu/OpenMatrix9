@@ -1,0 +1,225 @@
+{
+  "schema": "om9.m01.module_crosswalk.v1",
+  "l2_id": "OM9-L2-01-03",
+  "l2_title": "Be Document Scene Entities",
+  "milestone": "M01",
+  "audited_utc": "2026-10-16",
+  "workspace": "h:/OpenMatrix9/standalone",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "working_tree_note": "om9-core, om9-scene, om9-archive, om9-exchange and om9-app/src/session/** are clean at audit time; line numbers there are stable.",
+  "spec_package": "OpenMatrix9_Codex_Spec_v2/ is ABSENT locally; the planning tree and AGENTS.md are the only spec sources.",
+  "m00_scope": "Only QymCAD code reuse is approved (2026-10-16). NEEDS_USER_M00_DECISION here: (1) persisting new document data (Document.groups, Entity.extensions) adds keys to the .om9 metadata = archive format decision; (2) the BRep envelope needs OCCT (OM9-L2-01-05). 3DM: provenance only READS already-retained import metadata; no 3DM decision is taken.",
+  "dependency": "OM9-L2-01-08 (typed units/tolerance) per L2.json; implemented by the first loop.",
+  "exclusion": "No Layers management UI (L2 exclusion). The LAYERS panel position (left column below INFO & SETTINGS) is a UI concern of the concurrent workflow; this module only exposes layer records and rules.",
+  "early_slice": "M01: EntityId, LayerId, instance ref, per-entity data, visibility/lock, snapshot. M04/M05 FeatureRef and gem/setting metadata attach later through Entity.extensions WITHOUT changing ObjectId/LayerId.",
+  "counts": { "DONE_WITH_EVIDENCE": 2, "PARTIAL": 8, "MISSING": 3 },
+  "audit_status_note": "The per-L3 `status`/`gaps` fields below are the PRE-IMPLEMENTATION audit of 2026-10-16 and are kept as history. The implemented state per L3 is in implementation_record below and in api.md section 7.1; every L3 now has code, a fixture pair and a named runtime test.",
+  "implementation_record": {
+    "date": "2026-10-17",
+    "status": "IMPLEMENTED_WITH_EVIDENCE",
+    "implemented_l3": 13,
+    "counts": { "IMPLEMENTED_WITH_EVIDENCE": 13 },
+    "verification": "cargo test -p om9-core / -p om9-archive / -p om9-scene / -p om9-app (isolated CARGO_TARGET_DIR); logs in implementation/evidence/M01/OM9-L3-01-03-00N/",
+    "one_command": "python tools/verify_m01_l2_01_03.py",
+    "deviations": ["ADR-03-5 (owner decision 2026-10-17: KEEP): FeatureId/Feature/Document.features are real typed records instead of FeatureId = HistoryId, including Feature.outputs; ownership split and the M04 recipe link are recorded in api.md 7.2", "ADR-03-6: persistence option A applied for groups/features/extensions; Document.tolerance left out because OM9-L2-01-08 is not implemented"],
+    "blocked": "BRep stays Unsupported (OM9-L2-01-05 / OCCT not approved); not counted as implemented"
+  },
+  "l3": [
+    {
+      "id": "OM9-L3-01-03-001",
+      "title": "Document Entity IDs",
+      "status": "DONE_WITH_EVIDENCE",
+      "evidence": [
+        "om9-core/src/identity.rs:47-75 typed UUID-v4 IDs (DocumentId, ObjectId, DefinitionId, LayerId, HistoryId, ...); unique_uuid_map rejects duplicate/noncanonical keys (:8-45)",
+        "om9-core/src/transaction.rs:477-583 IdentityLedger: an accepted ID is never reallocated; :1432-1436 Insert refuses Invalid(\"allocated object UUID\"); :1789-1793 Invalid(\"duplicate object ID\")",
+        "om9-core/src/model.rs:196-216 SourceStamp generation/revision counters; resolve() refuses a stamp of a deleted/replaced object",
+        "TEST om9-core/tests/atomic_transactions.rs:51 deleted_uuid_cannot_be_reallocated_to_resurrect_an_old_source_stamp",
+        "TEST om9-core/tests/atomic_transactions.rs:98 undo_of_new_insert_does_not_make_its_uuid_available_for_another_object",
+        "TEST om9-core/tests/model_admission.rs:172 reused_label_never_resolves_a_deleted_object_stamp",
+        "TEST om9-archive/tests/container_admission.rs:66 typed_document_roundtrip_preserves_master_identity_basis_attributes_and_channels; :124 duplicate_json_identity_is_rejected_without_silent_last_record_wins",
+        "TEST om9-app/tests/cold_reopen.rs:132 actual_process_requires_explicit_v1_upgrade_and_preserves_durable_identity"
+      ],
+      "gaps": [],
+      "note": "ADR: 'EntityId' in the planning record is ObjectId; 'FeatureId' is HistoryId (recipe identity). No alias types are added. FeatureRef (M04/M05) will reference HistoryId."
+    },
+    {
+      "id": "OM9-L3-01-03-002",
+      "title": "Typed Scene Entity Records",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/geometry.rs:404-421 GeometryKind {Point, Curve, Surface, Mesh, Cloud, Instance}; Geometry enum; :442 kind()",
+        "om9-core/src/model.rs:27-36 Entity envelope {id, label, generation, geometry_revision, attributes_revision, geometry, placement, attributes}",
+        "TEST om9-archive/tests/container_admission.rs:66 round-trip keeps master kinds, basis, attributes and channels",
+        "TEST om9-core/tests/model_admission.rs:72 mesh_and_cloud_have_distinct_master_types_and_ordered_channels"
+      ],
+      "gaps": [
+        "An unknown kind in an archive decodes to the generic Invalid(\"typed document metadata/schema\") (om9-archive/src/container.rs:264-272) - it must be reported as Unsupported, not as corruption, and never downgraded.",
+        "BRep: no B-rep kind exists. NEEDS_USER_M00_DECISION (OCCT not approved) and BLOCKED_DEPENDENCY on OM9-L2-01-05; not implemented in this loop."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-003",
+      "title": "Geometry Handle And Attributes",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/model.rs:11-21 Attributes {layer, visible, hidden, selectable, locked, color}; Entity.label = name; geometry inline, handle = (ObjectId, geometry_revision) via SourceStamp",
+        "om9-core/src/model.rs:338-341 an Instance whose definition is missing fails Missing(\"instance definition\")",
+        "om9-core/src/resource.rs:24-34 embedded resource descriptors need their exact payload",
+        "TEST om9-core/tests/retained_entity_baselines.rs:191 geometry_placement_attributes_and_label_edits_have_independent_hashes (separately queryable fields)",
+        "TEST om9-core/tests/embedded_resources.rs:32 descriptor_without_matching_payload_is_not_a_valid_live_document"
+      ],
+      "gaps": [
+        "PARTIAL(test-only): no test proves a dangling Instance(DefinitionId) is refused by Document::validate, by Archive::encode and by Scene capture."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-004",
+      "title": "Layer Domain Records",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/model.rs:86-118 Layer {id, name, parent, visible, selectable, locked, color, revision, preset_slot}",
+        "om9-core/src/model.rs:263-295 layer_permissions walks parents, Missing(\"layer\") for an unknown parent, Invalid(\"layer cycle\")",
+        "om9-core/src/layers.rs:19-39 LayerAction {Create, Update, SetCurrent, Assign, Hidden}",
+        "TEST om9-core/tests/layer_state.rs:10 preset_slot_is_durable_identity_not_label_and_duplicate_slots_refuse; :97 preset_updates_keep_slot_identity...",
+        "TEST om9-core/tests/layer_transactions.rs:32 lazy_create_and_current_are_one_undo_and_retired_uuid_cannot_be_reused; :186 cycle (parent = self) rejected",
+        "TEST om9-app/tests/layer_dialogs.rs:49 rename keeps the layer ID",
+        "TEST om9-archive/tests/layer_schema.rs:24 schema4 round-trip keeps preset, hidden, explicit permissions and UUID"
+      ],
+      "gaps": [
+        "PARTIAL(test-only): no test that a layer whose parent ID does not exist is refused (LayerAction::Create/Update and Document::validate)."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-005",
+      "title": "Entity To Layer Membership",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/model.rs:321-327 an entity whose layer does not exist fails Missing(\"entity layer\")",
+        "om9-core/src/layers.rs:30-33 LayerAction::Assign; om9-app/src/session/layers.rs:158 Controller::assign_layer",
+        "TEST om9-core/tests/layer_transactions.rs:146 assign_changes_membership_and_color_atomically_without_changing_current_or_placement (ObjectId kept, one Undo)",
+        "TEST om9-core/tests/layer_transactions.rs:289 mixed_assignment_locked_source_refuses_whole_batch_and_preserves_redo; :228 lock-then-assign batch refused"
+      ],
+      "gaps": [
+        "PARTIAL(test-only): no test that Assign to an unknown LayerId is refused, and none that a document with a dangling membership (layer removed) is refused by validate/archive decode. There is no layer-delete operation, so 'explicit refusal' is the documented M01 behavior (ADR in api.md)."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-006",
+      "title": "Layer Selection Visibility Rules",
+      "status": "DONE_WITH_EVIDENCE",
+      "evidence": [
+        "om9-core/src/model.rs:263-304 Permissions {visible, selectable, editable, reference_snappable} from the layer chain and entity flags",
+        "om9-core/src/transaction.rs:1309-1315 every source mutation requires editable, else Permission(\"source edit\")",
+        "TEST om9-core/tests/model_admission.rs:197 permission_visibility_selection_edit_and_locked_reference_are_separate",
+        "TEST om9-scene/tests/layer_colors.rs:57 hidden_root_and_definition_member_mask_scene_display_pick_edit_and_reference",
+        "TEST om9-scene/tests/world_picking.rs:208 hidden_locked_and_unselectable_stay_distinct_for_reference_picking",
+        "TEST om9-core/tests/layer_transactions.rs:186 locked layer cannot become current; :289 locked source refuses the batch",
+        "TEST om9-core/tests/startup_layers.rs:32 output on an Off layer is admitted invisible; a locked layer rejects output"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "OM9-L3-01-03-007",
+      "title": "Group Membership Model",
+      "status": "MISSING",
+      "evidence": [
+        "No group type in om9-core; features.json lists Group (OM9-UTIL-012) and UnGroup (OM9-UTIL-015) as catalog-only commands"
+      ],
+      "gaps": [
+        "GroupId, Group record, Document.groups, create/ungroup mutations, membership validation, pruning on delete/move.",
+        "Persisting Document.groups in .om9: NEEDS_USER_M00_DECISION (archive format)."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-008",
+      "title": "Block Definition And Instance Graph",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/model.rs:68-85 Definition {id, label, revision, members}; Geometry::Instance(DefinitionId) + Entity.placement",
+        "om9-core/src/model.rs:344-370, :520-549 cycle detection Invalid(\"definition cycle\") and depth budget",
+        "om9-core/src/model.rs:737-768 member_transform composes the occurrence path",
+        "om9-core/src/retained.rs:907-915 definitions enter a document only through ImportBundle (3DM import)",
+        "TEST om9-core/tests/model_admission.rs:231 nested_instances_compose_world_placement_once_and_preserve_definition",
+        "TEST om9-scene/tests/instance_admission.rs:13 empty_shared_instances_charge_each_occurrence_before_descent",
+        "TEST om9-scene/tests/world_picking.rs:174 nested_mirrored_instance_pick_keeps_root_member_path_and_single_world_transform"
+      ],
+      "gaps": [
+        "No native mutation to create a definition (only Import); no insert_instance helper.",
+        "No test that two instances share one definition (no member clone) with distinct transforms.",
+        "No test that a self/nested definition cycle is refused atomically by the coordinator."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-009",
+      "title": "Jewelry Semantic Extension Record",
+      "status": "MISSING",
+      "evidence": ["No extension slot on Entity (model.rs:27-36 is deny_unknown_fields)"],
+      "gaps": [
+        "Versioned, optional per-entity extension slots (gem, rail, head, cutter) that preserve unknown slots and report them.",
+        "Persisting Entity.extensions in .om9: NEEDS_USER_M00_DECISION (archive format)."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-010",
+      "title": "Selection State Document Contract",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-app/src/session.rs:47 Controller.selection: BTreeSet<ObjectId> (keyed by stable ID, not UI index)",
+        "om9-app/src/session/layers.rs:231-290 selected/clear_selection/select_root (refuses unselectable roots: Permission(\"selected root\"))",
+        "om9-core/src/request.rs:105-110 Selection {Whole, Indices, Spans, Member} for typed sub-selection bindings",
+        "TEST om9-app/tests/layer_controller.rs:131 selection_filters_hidden_definition_members_and_counts_before_source_allocation"
+      ],
+      "gaps": [
+        "Selection is not invalidated when an entity disappears (Undo/Redo/Delete): refresh_scene (session.rs:409-417) keeps stale IDs.",
+        "No typed selection payload carrying document/session/epoch, so a selection captured before a reload cannot be detected as stale."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-011",
+      "title": "Document Change Notification",
+      "status": "MISSING",
+      "evidence": ["Only the transaction-level observer callback exists (om9-core/src/transaction.rs:2006-2026); it carries no change description"],
+      "gaps": ["Ordered change batches (entities, layers, current layer, definitions, groups, context) per publication with an increasing sequence, and non-reentrant observers."]
+    },
+    {
+      "id": "OM9-L3-01-03-012",
+      "title": "Document Snapshot And Restore",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/transaction.rs:449-458, :671-683 CoordinatorSnapshot (in-session world snapshot, used for equality checks)",
+        "om9-core/src/transaction.rs:747-808 savepoint / rollback_savepoint / abort (in-session restore)",
+        "om9-archive/src/lib.rs Archive::encode/decode/restore (versioned, checksummed bytes; restore issues a fresh owner session)",
+        "TEST om9-core/tests/transaction_scopes.rs:142 nested_savepoint_abort_restores_parent_pending_state",
+        "TEST om9-archive/tests/container_admission.rs:74 truncation/version/checksum corruption rejected",
+        "TEST om9-archive/tests/restore_modules.rs:75 two_independent_restores_of_the_same_bytes_have_distinct_owner_sessions"
+      ],
+      "gaps": [
+        "No document snapshot object that binds bytes to a DocumentId; no restore that refuses another document's snapshot.",
+        "No Controller restore that is atomic (old document kept on any failure) and preserves IDs, layers and revision.",
+        "Exact geometry restore depends on the float_roundtrip fix (OM9-L2-01-08)."
+      ]
+    },
+    {
+      "id": "OM9-L3-01-03-013",
+      "title": "Import Source Provenance Metadata",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/retained.rs:155-161 RetainedSource {id, resource, sha256, archive_version, units}; :201-206 NativeRecordKey {kind, id, native_index}; :285-294 SourceRecord {key, family, host, disposition, relations}; :418-424 ImportNamespace",
+        "om9-core/src/resource.rs:25-34 Resource.name = source file name (om9-exchange/src/imported.rs:230 takes file_name only)",
+        "om9-exchange/src/imported.rs:80-92 ImportReceipt {source_sha256, root_objects, retained_records, diagnostics, ...}",
+        "TEST om9-core/tests/retained_imports.rs:853 import_requires_every_root_layer_definition_and_local_member_to_be_source_bound",
+        "TEST om9-core/tests/retained_imports.rs:319 retained_only_native_record_has_no_fabricated_entity...",
+        "TEST om9-core/tests/retained_imports.rs:475 direct_cold_metadata_tampering_cannot_claim_unchanged_or_resurrect_deleted_source"
+      ],
+      "gaps": [
+        "No per-entity provenance query (source name, checksum, native ID/index, disposition) and no per-namespace summary with the retained-only (unsupported) count; a native-created entity must report None."
+      ],
+      "note": "Absolute source paths are NOT persisted (only the file name); kept as is - privacy of user paths."
+    }
+  ],
+  "qymcad": {
+    "consulted": false,
+    "reason": "Anchors crates/qymcad-core/src/{model,names,feature}.rs were not needed; OM9 already owns the document model. Nothing copied; no build dependency."
+  },
+  "line_save_bug": "Not an L2-01-03 snapshot defect: in-memory snapshots are Arc clones and exact. Serialized snapshots reuse the .om9 codec and therefore need the OM9-L2-01-08 float_roundtrip fix, which runs first."
+}

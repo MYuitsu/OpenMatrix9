@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-010",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "golden",
+      "expect": {
+        "document": "equal",
+        "layers": 2,
+        "volume_mm3": 6000,
+        "instance": "same id",
+        "group": "box+instance",
+        "jobbag": "jobbag/A-102.om9"
+      }
+    },
+    {
+      "id": "real-occt",
+      "expect": {
+        "volume": 6000,
+        "ids": "matching"
+      }
+    }
+  ]
+}

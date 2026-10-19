@@ -1,4 +1,4 @@
 interface:
   display_name: "OpenMatrix9 · Build và kiểm chứng"
   short_description: "Kiểm chứng Rust, selective backend và UI Matrix9 v2"
-  default_prompt: "Dùng $openmatrix9-build-validation để kiểm target OM9 standalone theo specs v2; tách legacy FreeCAD evidence khỏi runtime mới."
+  default_prompt: "Dùng $openmatrix9-build-validation để kiểm target OM9 standalone theo milestone specs; tách legacy FreeCAD evidence khỏi runtime mới."

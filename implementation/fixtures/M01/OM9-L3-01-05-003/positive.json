@@ -1,0 +1,11 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-003",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-003-POS",
+      "test": "the_rational_nurbs_quarter_circle_evaluates_exactly",
+      "expected": "at u=0.5 the point is (5/sqrt2, 5/sqrt2, 0) with |P| = 5, and the derivative magnitude is positive"
+    }
+  ]
+}

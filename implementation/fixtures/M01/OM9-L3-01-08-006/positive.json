@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-08-006",
+  "l4": "OM9-L4-01-08-006-02",
+  "title": "Unit Safe Parameter Serialization",
+  "case": "om9-l3-01-08-006-positive",
+  "positive_oracle": "Wire form có tag đơn vị, round-trip bit-chính-xác cho f64.",
+  "runtime_tests": [
+    "cargo test -p om9-core --test units_parameters l3_006"
+  ]
+}

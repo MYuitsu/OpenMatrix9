@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-002",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "two-layers",
+      "expect": {
+        "layers.len": 2,
+        "detail.parent": "root"
+      }
+    },
+    {
+      "id": "visibility-lock",
+      "expect": {
+        "detail.locked": true,
+        "instance.hidden": true,
+        "box.editable": false
+      }
+    },
+    {
+      "id": "preset-slot",
+      "expect": {
+        "preset_slot": "preserved",
+        "uuid": "stable"
+      }
+    }
+  ]
+}

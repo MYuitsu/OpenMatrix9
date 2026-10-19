@@ -1,0 +1,28 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-01-05-004",
+  "reviewer": {
+    "name": "cổng AUTO_ONLY (bằng chứng tự động)",
+    "role": "automated evidence gate",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T03:20:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "NURBS surface evaluation adapter: |P| = 5, |N| = 1, and N is parallel to P (the radial direction). The L3 declares requires_manual_test=false, so its acceptance is the automated test the_sphere_normal_is_the_unit_radial_direction.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-004/OM9-L4-01-05-004-03.kernel-test.log",
+      "sha256": "2d404d495dabcac09316992a84aed6f82c647eb09632ea13ae30a436ea207fc0"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-004/OM9-L4-01-05-004-05.acceptance.log",
+      "sha256": "75cee3736a0d7a951745e27369cc9745cd73813d2198d39a86c7bbb2d7098d08"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-004/source_crosswalk.json",
+      "sha256": "682e8ca6552d7ff999e38b789fba4238629992cec21eaaca6b2d9d33e3bbed85"
+    }
+  ],
+  "note": "no human test is required for this L3; the record is the documented AUTO_ONLY path, not a human signature"
+}

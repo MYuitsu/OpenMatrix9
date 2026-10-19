@@ -1,0 +1,72 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-02-02",
+  "cases": [
+    {
+      "id": "M00-FX-02-02-NEG-01",
+      "call": "box_volume",
+      "input": {
+        "width": 0.0
+      },
+      "expected": {
+        "error": "InvalidInput"
+      }
+    },
+    {
+      "id": "M00-FX-02-02-NEG-02",
+      "call": "box_volume",
+      "input": {
+        "width": "NaN"
+      },
+      "expected": {
+        "error": "InvalidInput"
+      }
+    },
+    {
+      "id": "M00-FX-02-02-NEG-03",
+      "call": "box_volume",
+      "input": {
+        "width": "Infinity"
+      },
+      "expected": {
+        "error": "InvalidInput"
+      }
+    },
+    {
+      "id": "M00-FX-02-02-NEG-04",
+      "call": "drilled_volume",
+      "input": {
+        "radius": -2.0
+      },
+      "expected": {
+        "error": "InvalidInput"
+      }
+    },
+    {
+      "id": "M00-FX-02-02-NEG-05",
+      "call": "box_volume",
+      "input": {
+        "width": 1e+300,
+        "height": 1e+300,
+        "depth": 1e+300
+      },
+      "expected": {
+        "error": "Failure",
+        "message_contains": "Infinite"
+      }
+    },
+    {
+      "id": "M00-FX-02-02-NEG-06",
+      "call": "box_volume",
+      "input": {
+        "width": 1e-300,
+        "height": 1e-300,
+        "depth": 1e-300
+      },
+      "expected": {
+        "error": "Failure",
+        "message_contains": "DomainError"
+      }
+    }
+  ]
+}

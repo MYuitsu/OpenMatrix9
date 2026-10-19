@@ -1,0 +1,73 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-002-01",
+  "l3_id": "OM9-L3-01-02-002",
+  "l3_title": "Typed Command Descriptor",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "input/output signature, prompt and option descriptor",
+  "positive_oracle": "Descriptor declares typed inputs/options/output and is serializable/deterministic",
+  "negative_oracle": "Missing mandatory input or unregistered option rejected",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:87 pub fn cmd_val(cmd: &FeatCommand, key: &str) -> f64",
+        "ui-state/src/lib.rs:95 pub fn set_thread_params(cmd: &mut FeatCommand, thread: ThreadParams)"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A keyed parameter table per feature command (`cmd_val` reads a named value). The table is a Rust struct with typed fields and a lookup by key: the idea OM9 keeps. What is missing is a DECLARATION of the signature (which inputs, which options, what output) that can be inspected, serialized and validated before the command runs.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs (Operation, Preconditions, Operation::option)"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:338 then.take(&mut self.params.boolean, &mut self.status)",
+        "gui.rs:347 BarAsk::WidthPick => self.start_width_pick()",
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "QymCAD takes options through typed handles as it runs (`then.take(&mut self.params.boolean, …)`) with no descriptor: nothing states up front which options exist, which input is mandatory, or what the command produces, so an unknown option cannot be refused before it is read.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": ["qymcad-shell/src/lib.rs:59 pub struct Place { key, size, resizable, … }"],
+      "decision": "ADD",
+      "what_is_missing": "Container geometry only; no command signature.",
+      "om9_owner": "standalone/crates/om9-core/src/capability.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": ["qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape; the descriptor is pure data and uses serde only.",
+      "om9_owner": "standalone/crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "capability.rs::Operation { id, feature, aliases, input_types, options, backend, prepare, preview, commit, receipts } — inputs and option NAMES were declared, but there was no prompt, no output, no mandatory-input flag and no option lookup"
+  ],
+  "gap_found_by_this_task": [
+    "The descriptor could not state what the command asks or produces, and it accepted an option whose name is only whitespace (or two options differing by case), which the parser could never match: the fixture E4 case found that, and the option rule now trims and compares without case.",
+    "Added: prompt, requires_input, output, preconditions, and Operation::option returning the declared spelling or UnknownOption naming the option and the command."
+  ],
+  "reuse_decision": "ADAPT the keyed parameter idea from qymcad-ui-state; ADD the declared signature, the prompt and the output, and the refusal of an undeclared option.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-002/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-002/negative.json",
+    "standalone/crates/om9-core/tests/command_descriptor.rs"
+  ]
+}

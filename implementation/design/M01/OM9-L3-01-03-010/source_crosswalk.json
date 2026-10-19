@@ -1,0 +1,49 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-010-01",
+  "l3_id": "OM9-L3-01-03-010",
+  "l3_title": "Selection State Document Contract",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "stable typed selection and document event payloads",
+  "positive_oracle": "Selection là identity có kiểu, thứ tự tất định; prune khi đối tượng mất.",
+  "negative_oracle": "Selection cũ/khác document là Stale; index cũ không được map sang đối tượng lân cận.",
+  "reuse_decision": "ADD",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/selection.rs",
+      "symbols": [
+        "SelectionState",
+        "SubshapeRef",
+        "SubshapePart"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-app/src/session/contract.rs",
+      "symbols": [
+        "Controller::selection_state",
+        "Controller::validate_selection",
+        "Controller::prune_selection"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-app/src/session/layers.rs",
+      "symbols": [
+        "selection_revision bumps in select_root/select_layer/clear_selection"
+      ],
+      "decision": "EXTEND"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/selection.rs, crates/om9-app/src/session/contract.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test selection_state -> 7 passed",
+    "cargo test -p om9-app --test document_contract l3_010 -> 3 passed"
+  ],
+  "notes": "ADD the typed selection contract over the existing ObjectId set in the controller"
+}

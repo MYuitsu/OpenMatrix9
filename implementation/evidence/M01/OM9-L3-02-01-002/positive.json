@@ -1,0 +1,28 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-002",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "cubic",
+      "call": "inspect_nurbs_curve(cubic, 4 poles)",
+      "expect": {
+        "degree": 3,
+        "pole_count": 4,
+        "weight_count": 4,
+        "knot_count": 8,
+        "expected_knot_count": 8,
+        "rational": false
+      }
+    },
+    {
+      "id": "rational",
+      "call": "weights [1, 0.5, 0.5, 1]",
+      "expect": {
+        "rational": true
+      }
+    }
+  ]
+}

@@ -32,5 +32,7 @@
       "id": "OM9-M00-L3-06-02",
       "file": "M00 - Feasibility, Legal/L2-06 - License/L3-02 - Assets, trademarks and release/l3.json"
     }
-  ]
+  ],
+  "gate_id": "G00-06",
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
 }

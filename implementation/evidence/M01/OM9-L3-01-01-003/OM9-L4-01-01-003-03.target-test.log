@@ -1,0 +1,86 @@
+task: OM9-L4-01-01-003-03 (implementation) - vong 4: kich ban audit cua so that
+utc: 2026-10-16T12:45:16Z
+cwd: H:\OpenMatrix9\standalone
+
+== cargo test -p om9-app --lib panel_ops ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running unittests src\lib.rs (target\debug\deps\om9_app-3a2356c5e25e2c74.exe)
+
+running 3 tests
+test panel_ops::tests::float_drop_rect_is_the_pointer_minus_the_grab_offset ... ok
+test panel_ops::tests::work_area_matches_the_documented_numbers ... ok
+test panel_ops::tests::work_area_refuses_unusable_windows ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 80 filtered out; finished in 0.00s
+
+
+exit=0
+== cargo test -p om9-app --test panel_ops ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running tests\panel_ops.rs (target\debug\deps\panel_ops-7f1da5a3b1d8bc7e.exe)
+
+running 33 tests
+test fixture_directory_is_the_expected_one ... ok
+test n26_only_a_column_side_is_a_dock_target ... ok
+test n15_a_window_below_the_floor_is_refused_without_rewriting_the_layout ... ok
+test n27_an_unknown_section_key_reports_the_key_back ... ok
+test n31_docking_another_menu_right_never_moves_layers ... ok
+test n24_floating_an_already_floating_menu_is_refused ... ok
+test every_error_leaves_the_serialized_layout_identical ... ok
+test n28_a_hidden_section_cannot_be_moved_or_floated ... ok
+test n14_a_window_shrink_recovers_the_floating_menu ... ok
+test p10_layers_defaults_to_left_directly_below_info_and_settings ... ok
+test n12_n13_a_non_finite_readback_is_refused_and_changes_nothing ... ok
+test n16_an_invalid_window_has_no_work_area ... ok
+test n23_a_floating_menu_is_not_reordered ... ok
+test n32_a_narrow_window_yields_the_right_dock_without_moving_layers ... ok
+test p12_docking_back_without_home_lands_below_info_and_settings ... ok
+test n18_a_drop_over_the_toolbar_cancels ... ok
+test n25_a_no_op_is_reported_and_never_silent ... ok
+test n1_a_drop_beyond_the_right_edge_floats_inside_the_window ... ok
+test p1_collapse_then_expand_restores_the_exact_state ... ok
+test n20_a_lost_pointer_cancels_the_drop ... ok
+test p8_a_user_moved_floating_window_is_readback_not_recovery ... ok
+test the_drop_index_is_the_first_bar_centre_at_or_below_the_pointer ... ok
+test p7_float_records_home_and_close_returns_to_it ... ok
+test p6_dock_right_then_left_restores_home_and_roll_up ... ok
+test p2_collapsing_snaps_and_layers_keeps_the_documented_order ... ok
+test p5_move_is_one_operation_for_the_api_and_the_button ... ok
+test n5_a_drop_in_a_view_inside_the_window_floats_without_the_outside_note ... ok
+test n6_to_n12_a_float_rectangle_is_normalised_or_refused ... ok
+test n21_n22_the_reserved_builders_area_refuses_every_operation ... ok
+test n2_n3_n4_a_drop_outside_any_edge_is_pulled_back_inside ... ok
+test p11_layers_placement_holds_at_every_supported_size ... ok
+test n34_menu_placement_has_exactly_one_door_in_the_ui ... ok
+test n33_randomized_operation_sweep_holds_every_invariant ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.49s
+
+
+exit=0
+== cargo test -p om9-app --test panel_door ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running tests\panel_door.rs (target\debug\deps\panel_door-c77d005c342a4083.exe)
+
+running 12 tests
+test n17_floating_before_the_first_frame_reports_no_work_area ... ok
+test p13_panel_operations_touch_ui_state_only ... ok
+test the_door_is_the_only_way_the_tests_and_the_ui_place_menus ... ok
+test p9_the_mouse_path_and_the_api_path_produce_the_same_layout ... ok
+test p3_a_drag_onto_the_upper_half_of_the_display_bar_lands_at_position_2 ... ok
+test n30_an_unacknowledged_failure_is_not_hidden_by_panel_messages ... ok
+test n21_a_click_on_the_builders_bar_is_refused_and_starts_no_drag ... ok
+test p4_a_drag_onto_the_lower_half_of_the_snaps_bar_lands_at_position_3 ... ok
+test p2_a_rolled_up_snaps_and_layers_report_their_closed_bar_controls ... ok
+test panel_history_never_drops_a_keystroke_from_the_command_draft ... ok
+test n19_escape_cancels_a_drag_and_keeps_the_command_draft ... ok
+test n29_reset_reload_and_hiding_cancel_a_drag_in_progress ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.25s
+
+
+exit=0
+== python tools/validate_m01_l3_003_panels.py --self-test ==
+self-test: comparators and expectations are consistent
+
+exit=0

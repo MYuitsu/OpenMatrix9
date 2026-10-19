@@ -1,0 +1,22 @@
+task: OM9-L4-01-01-007-04 (integrate) status surface in a real window
+utc: 2026-10-16T13:28:00Z
+
+== real-window run that writes a receipt ==
+om9.exe --ui-audit exit=0
+receipt status_kind    : Ready
+receipt status_message : Ready
+receipt status_tail    : 
+receipt carries the three keys: True
+screenshot_saved       : True
+== real-window harnesses (same build) ==
+PASS [reorder] drag PROJECTS onto the upper half of the DISPLAY bar
+PASS [float] drag DISPLAY into a viewport and float it
+PASS [dock-right] drag DISPLAY into the 48 px strip at the right edge
+PASS [escape] press DISPLAY, drag into a viewport and press Escape
+PASS [roll-up] click the PROJECTS title bar, then click it again
+PASS [float-drop] drag DISPLAY into a viewport: it floats and keeps its home
+PASS [readback-recover] float DISPLAY, then let the real window report a rectangle that cannot fit
+panels-summary: H:\OpenMatrix9\build\standalone-validation\ui-artifacts\2026-10-16-m01-l3-007-panels\panels-summary.json
+
+== honesty note ==
+The scripted --ui-audit run ends on successful commands, so its receipt shows status_kind=Ready and an empty status_tail: the integration check proves the receipt EXPOSES the three keys (status_kind, status_message, status_tail) after the change, not that a failure was on screen in that run. The failure content and lifetime are proven by tests/global_status_surface.rs (G1..G10, X1..X6: an invalid command names the typed command, the failure survives a later success, only Dismiss clears it, Esc still cancels the command) and by OM9-L3-01-01-003 N30 (a panel message never hides a failure).

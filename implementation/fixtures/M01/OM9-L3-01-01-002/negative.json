@@ -12,9 +12,9 @@
   "non_finite_tokens": "JSON cannot carry NaN/inf, so the strings \"NaN\", \"inf\" and \"-inf\" stand for those f32 values",
   "constants": {
     "command_min_height": 58,
-    "minimum_window_with_left_rail": [560, 286],
-    "minimum_window_without_left_rail": [320, 286],
-    "narrow_window_width": 900
+    "supported_minimum_window": [1280, 720],
+    "plan_floor_window": [800, 400],
+    "narrow_window_width": 1200
   },
   "cases": [
     {
@@ -75,33 +75,33 @@
       "id": "window-300x150-too-small",
       "kind": "negative",
       "window": [300, 150],
-      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [560, 286], "layout_unchanged": true }
+      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [800, 400], "layout_unchanged": true }
     },
     {
       "id": "one-pixel-below-minimum-width",
       "kind": "negative",
-      "window": [559, 286],
-      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [560, 286], "layout_unchanged": true }
+      "window": [799, 400],
+      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [800, 400], "layout_unchanged": true }
     },
     {
       "id": "one-pixel-below-minimum-height",
       "kind": "negative",
-      "window": [560, 285],
-      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [560, 286], "layout_unchanged": true }
+      "window": [800, 399],
+      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [800, 400], "layout_unchanged": true }
     },
     {
-      "id": "left-rail-hidden-lowers-the-minimum-width",
+      "id": "left-rail-hidden-does-not-change-the-floor-799x400",
       "kind": "negative",
-      "window": [319, 286],
+      "window": [799, 400],
       "layout": { "hide_panels": ["left-rail"] },
-      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [320, 286], "layout_unchanged": true }
+      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [800, 400], "layout_unchanged": true }
     },
     {
-      "id": "left-rail-hidden-320x286-is-usable",
+      "id": "left-rail-hidden-800x400-is-usable",
       "kind": "negative",
-      "window": [320, 286],
+      "window": [800, 400],
       "layout": { "hide_panels": ["left-rail"] },
-      "expect": { "result": "ok", "left_rail": null, "command_input": [0, 21, 320, 58], "center": [0, 146, 320, 120] }
+      "expect": { "result": "ok", "left_rail": null, "command_input": [0, 21, 800, 90], "center": [0, 178, 800, 202] }
     },
     {
       "id": "hidden-right-dock-is-a-defined-state-not-an-error",

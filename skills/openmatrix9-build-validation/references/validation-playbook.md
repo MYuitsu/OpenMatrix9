@@ -1,6 +1,6 @@
 # Build và runtime theo target v2
 
-Đọc [target](../../openmatrix9-workflow/references/spec-v2-target.md), spec v2 CODE_GUIDE/BACKEND_POLICY/MATRIX9_UI_CONTRACT. Resolve checkout và actual manifests/targets; chưa có standalone executable thì ghi not_implemented, không invent build command hoặc dùng FreeCAD module thay nó.
+Đọc [target](../../openmatrix9-workflow/references/milestones-target.md), M01 L1 và L2/L3 owner liên quan. Resolve checkout và actual manifests/targets; chưa có standalone executable thì ghi not_implemented, không invent build command hoặc dùng FreeCAD module thay nó.
 
 ## Standalone
 

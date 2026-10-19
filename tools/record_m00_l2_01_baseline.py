@@ -227,7 +227,7 @@ def main() -> int:
             ),
             "propagated_to": [
                 "OM9_Milestones/** (19642 SHA references and 1096 blob_sha values)",
-                "standalone/provenance.json (m00_baseline_pin added; the consulted revision stays as history)",
+                "native/provenance.json (m00_baseline_pin added; the consulted revision stays as history)",
             ],
             "tool": "tools/repin_qymcad_baseline.py",
         },

@@ -1,0 +1,79 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-003-01",
+  "l3_id": "OM9-L3-01-02-003",
+  "l3_title": "Command Context And Active Document",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "selected objects, active viewport, active document context",
+  "positive_oracle": "Context includes active document, viewport and typed selection consistently",
+  "negative_oracle": "Close active doc during command must cancel/refuse without mutation",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:118 comment: only the nodes that depend on a datum are marked dirty — the document is not the interface",
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "QymCAD threads &mut self.project and &mut self.status through one doorway, so a command always reads the live project. OM9 keeps the single doorway but must also be able to say WHICH document and view a run started against, because OM9 can replace the document while a command is alive. QymCAD has no such snapshot.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs (CommandContext, Controller::context, validate_context)"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:59 pub struct Place { key, slot, size, … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No document/view identity and no notion of a stale interface state.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Interface state per command; not session identity.",
+      "om9_owner": "standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session.rs::CommandSession { feature, epoch: u64, context: u64, plane, unit, start, both_sides } — the session recorded the document's context_revision and the coordinator epoch, but NOT which view it started in and not the typed selection",
+    "session.rs::validate_session compared the epoch and context_revision only",
+    "session.rs::is_running() was self.session.is_some(), so a command whose document or view was gone still counted as running"
+  ],
+  "gap_found_by_this_task": [
+    "The active view was not part of the context: a command started in view A went on asking for points after the user switched to view B, and the second point was accepted (fixture K1/K2, test c2/c3 failed before the fix).",
+    "Context loss did not cancel anything: is_running() stayed true and the prompt kept asking, so closing or replacing the active document left a command that could only fail later (fixture K1/K4).",
+    "Added: CommandContext { document, view, selection, revision, epoch }, Controller::context(), validate_context (Stale on any of the four), is_running()/phase()/prompt() treating a stale session as Idle, and cancel_if_stale() so a caller can drop it and report the cancellation.",
+    "CORRECTION (same day): the view rule was too strong at first. The pre-existing tests/chrome_actions.rs cases (a view-tab switch must keep a running command and its numeric draft) showed that switching the ACTIVE view is not losing the context. validate_context now refuses when the document identity changes, when the view the run started in is gone, or when the revision/epoch moved; a view-tab switch keeps the run with the view and plane it captured. Fixtures and tests were corrected with it."
+  ],
+  "reuse_decision": "ADAPT the single doorway of gui.rs; ADD the document/view snapshot, its validation and the cancellation on context loss.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-003/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-003/negative.json",
+    "standalone/crates/om9-app/tests/command_context.rs"
+  ]
+}

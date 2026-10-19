@@ -1,0 +1,11 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-007",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-007-POS",
+      "test": "a_line_through_the_box_hits_two_faces",
+      "expected": "two hits, the first at (5, 5, 0)"
+    }
+  ]
+}

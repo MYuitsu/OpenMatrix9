@@ -21,7 +21,7 @@ def source_paths():
             and p.suffix in {".rs", ".toml", ".lock", ".json", ".cpp", ".hpp"}} | {
                 Path(__file__).resolve(), ROOT / "tools/validate_standalone_ui.py",
                 ROOT / "tools/validate_standalone_foundation.py",
-                ROOT / "standalone/native/CMakeLists.txt", ROOT / "rust/src/layers.rs"}
+                ROOT / "native/CMakeLists.txt", ROOT / "rust/src/layers.rs"}
 
 
 def main():
@@ -29,8 +29,8 @@ def main():
     scratch = ROOT / "build/standalone-validation"
     scratch.mkdir(parents=True, exist_ok=True)
     commands = [
-        ["rtk", "proxy", "cargo", "fmt", "--manifest-path", "standalone/Cargo.toml", "--all", "--", "--check"],
-        ["rtk", "proxy", "cargo", "clippy", "--manifest-path", "standalone/Cargo.toml", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"],
+        ["rtk", "proxy", "cargo", "fmt", "--manifest-path", "Cargo.toml", "--all", "--", "--check"],
+        ["rtk", "proxy", "cargo", "clippy", "--manifest-path", "Cargo.toml", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"],
     ]
     focused = [
         ["-p", "om9-core", "--test", "lazy_layer_assignment"],
@@ -41,10 +41,10 @@ def main():
         ["-p", "om9-app", "--test", "scene_allocation_peak"],
         ["-p", "om9-app", "--test", "viewport_title_menu"],
     ]
-    commands += [["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path", "standalone/Cargo.toml", *args, "--", "--nocapture"]
+    commands += [["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path", "Cargo.toml", *args, "--", "--nocapture"]
                  for args in focused + [["--workspace"]]]
     commands += [
-        ["rtk", "proxy", "cargo", "build", "--release", "--locked", "--manifest-path", "standalone/Cargo.toml", "-p", "om9-app", "--bin", "om9"],
+        ["rtk", "proxy", "cargo", "build", "--release", "--locked", "--manifest-path", "Cargo.toml", "-p", "om9-app", "--bin", "om9"],
         ["rtk", "proxy", "python", "tools/validate_standalone_ui.py", "--layers", "--output", "docs/validation/2026-10-14-owned-layers-ui"],
         ["rtk", "proxy", "python", "tools/validate_standalone_ui.py", "--viewport-menu", "--output", "docs/validation/2026-10-14-owned-layers-viewport-regression"],
     ]

@@ -1,0 +1,28 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-01-05-007",
+  "reviewer": {
+    "name": "cổng AUTO_ONLY (bằng chứng tự động)",
+    "role": "automated evidence gate",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T03:20:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "Geom intersection query adapter: two hits, the first at (5, 5, 0). The L3 declares requires_manual_test=false, so its acceptance is the automated test a_line_through_the_box_hits_two_faces.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-007/OM9-L4-01-05-007-03.kernel-test.log",
+      "sha256": "35be36305fbd2b6fa449ba947b886f8d7eaa0386c0eeea9e09f215527f3e3804"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-007/OM9-L4-01-05-007-05.acceptance.log",
+      "sha256": "e3932d331aa7bbcd225cf538b971aff36b06897333a2d6cc12cd1e0c26c344e0"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-007/source_crosswalk.json",
+      "sha256": "23aeb734e567da47f1f41a793d524855a51c7ea8bff300be6dd42bb0bf5f17d4"
+    }
+  ],
+  "note": "no human test is required for this L3; the record is the documented AUTO_ONLY path, not a human signature"
+}

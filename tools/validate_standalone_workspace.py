@@ -28,7 +28,7 @@ def source_paths():
 def main():
     source_before = {p: digest(p) for p in sorted(source_paths())}
     command = ["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path",
-               "standalone/Cargo.toml", "--workspace"]
+               "Cargo.toml", "--workspace"]
     result = subprocess.run(command, cwd=ROOT, capture_output=True, timeout=180)
     output = result.stdout.decode("utf-8", errors="strict")
     errors = result.stderr.decode("utf-8", errors="replace")

@@ -63,5 +63,24 @@
       "id": "OM9-M00-L4-03-02-04",
       "file": "M00 - Feasibility, Legal/L2-03 - UI/L3-02 - GPU renderer stability and performance/L4-04 - Giả lập device loss và fallback renderer/l4.json"
     }
-  ]
+  ],
+  "execution_evidence": {
+    "l4_done": [
+      "OM9-M00-L4-03-02-01",
+      "OM9-M00-L4-03-02-02",
+      "OM9-M00-L4-03-02-03",
+      "OM9-M00-L4-03-02-04"
+    ],
+    "l4_open": [],
+    "harness": "native/gpu-probe (main = mesh/camera/bench, bin loss = device loss + fallback) + native/occt-rust-proof --bin export_mesh",
+    "evidence_root": "implementation/evidence/M00/OM9-M00-L3-03-02",
+    "measured": {
+      "device_loss": "callback fired once on destroy; draw after destroy returned null; a fresh device recovered in 0.337 s and painted the same 38 016 pixels",
+      "fallback": "Microsoft Basic Render Driver (Dx12, Cpu) renders the same frame at 6.9 ms",
+      "mesh": "2 542 vertices / 5 008 triangles from OCCT on the GPU; 0.755 ms mean frame",
+      "camera_dpi": "orbit invariant, pan/zoom follow the area law, DPI keeps the framing"
+    },
+    "sign_off": "pending human review",
+    "next": "none inside M00: the viewport implementation is M01-L2-01-06"
+  }
 }

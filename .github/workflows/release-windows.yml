@@ -86,6 +86,26 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  native-exchange:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Build pinned openNURBS and the native 3DM reader/writer
+        shell: pwsh
+        run: ./tools/ci/build-native-exchange.ps1 -OutDir "$env:GITHUB_WORKSPACE/build/ci/native-exchange"
+      - name: Keep native exchange binary, manifest and SHA256
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: om9-native-exchange
+          path: build/ci/native-exchange/*
+          if-no-files-found: error
+          retention-days: 30
+
   publish:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
     needs: build

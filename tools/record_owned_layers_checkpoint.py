@@ -90,7 +90,7 @@ primitive batch. No feature/capability or full acceptance gate is promoted.
     path.write_text(text,encoding="utf-8")
     path=ROOT/"docs/openmatrix9-progress.json";data=json.loads(path.read_text(encoding="utf-8"));item=next(i for i in data["items"] if i.get("key")=="rcore00-standalone-foundation")
     data["updated_at"]=dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
-    for value in ["docs/validation/2026-10-14-owned-layer-primitives.json","docs/validation/2026-10-14-owned-layer-primitives.md","standalone/crates/om9-core/src/layers.rs"]:
+    for value in ["docs/validation/2026-10-14-owned-layer-primitives.json","docs/validation/2026-10-14-owned-layer-primitives.md","crates/om9-core/src/layers.rs"]:
         if value not in item["outputs"]:item["outputs"].append(value)
     prefix="Owned Layers primitive;"
     item["evidence"]=[e for e in item["evidence"] if not e.startswith(prefix)]

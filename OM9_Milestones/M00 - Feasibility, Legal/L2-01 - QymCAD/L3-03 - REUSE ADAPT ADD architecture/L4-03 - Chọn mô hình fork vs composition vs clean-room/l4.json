@@ -4,7 +4,7 @@
   "milestone": "M00",
   "parent_l3_id": "OM9-M00-L3-01-03",
   "owner_l2_id": "OM9-M00-L2-01",
-  "title": "Chọn mô hình fork vs composition vs clean-room",
+  "title": "Chọn mô hình fork vs composition vs clean-room (human approval required)",
   "planning_state": "NOT_STARTED",
   "task": {
     "task_id": "OM9-M00-L4-01-03-03",
@@ -398,7 +398,12 @@
       "stage": "Nền chung - mẫu đối tượng tuỳ chọn (mọi builder dùng)",
       "why_for_this_task": "Mẫu đối tượng tuỳ chọn là ví dụ cụ thể nhất về một abstraction đáng REUSE/ADAPT: tên, giá trị mặc định riêng, khoá lưu, cờ dirty, hai hệ lưu trữ.",
       "om9_backend": "pure Rust: kiểu option có tên, dùng chung cho command line và UI, có bền vững",
-      "steps_cited": [1, 2, 3, 4],
+      "steps_cited": [
+        1,
+        2,
+        3,
+        4
+      ],
       "algorithm_steps": [
         "T1. Khai báo: mỗi tham số của một builder là một đối tượng tuỳ chọn có tên, có khoá lưu, và có giá trị mặc định riêng.",
         "T2. Đăng ký command line: nếu tuỳ chọn dùng được ở command line thì thêm một mục tương ứng và giữ chỉ số để đọc kết quả.",
@@ -406,7 +411,13 @@
         "T4. Lưu khi chốt: ghi giá trị theo khoá user data, qua một trong hai hệ lưu trữ."
       ],
       "source_file": "MatrixData/MatrixBoolean.cs",
-      "source_methods": ["MatrixBoolean", "AddCommandLine", "GetCommandResult", "WriteUserData", "ReadUserData"],
+      "source_methods": [
+        "MatrixBoolean",
+        "AddCommandLine",
+        "GetCommandResult",
+        "WriteUserData",
+        "ReadUserData"
+      ],
       "boundaries_carried": [
         "Đây là mẫu tham số, KHÔNG phải thuật toán hình học - đừng nhầm tên tệp với phép boolean hình học.",
         "Chưa đọc hết họ đối tượng dữ liệu (số, độ dài, góc, điểm, điểm-trên-curve, profile, style); mới đọc kỹ một thành viên.",
@@ -415,4 +426,5 @@
       ],
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
-  }}
+  }
+}

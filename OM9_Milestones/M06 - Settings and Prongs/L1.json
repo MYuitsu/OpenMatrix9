@@ -32,5 +32,9 @@
     "l4_planned": 76,
     "l3_covered": 19,
     "manual_basis": "Matrix 8 Book 2 PDF pp.242-271 (Chapter 28); see per-task origin refs"
-  }
+  },
+  "depends_on_milestones": [
+    "M03",
+    "M05"
+  ]
 }

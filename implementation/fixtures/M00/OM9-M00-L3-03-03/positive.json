@@ -1,0 +1,63 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-03-03",
+  "cases": [
+    {
+      "id": "M00-FX-03-03-POS-01",
+      "check": "object_pick",
+      "input": {
+        "ram": "centre"
+      },
+      "expected": {
+        "hit": true
+      }
+    },
+    {
+      "id": "M00-FX-03-03-POS-02",
+      "check": "face_pick",
+      "input": {
+        "ram": "centre"
+      },
+      "expected": {
+        "triangle": 4861,
+        "t": 9.1466
+      }
+    },
+    {
+      "id": "M00-FX-03-03-POS-03",
+      "check": "vertex_pick",
+      "input": {
+        "ram": "vertex",
+        "tolerance_pixels": 2
+      },
+      "expected": {
+        "hit": true
+      }
+    },
+    {
+      "id": "M00-FX-03-03-POS-04",
+      "check": "edge_pick",
+      "input": {
+        "ram": "edge",
+        "tolerance_pixels": 2
+      },
+      "expected": {
+        "hit": true
+      }
+    },
+    {
+      "id": "M00-FX-03-03-POS-05",
+      "check": "gumball_move_one_undo",
+      "expected": {
+        "undo_steps": 1
+      }
+    },
+    {
+      "id": "M00-FX-03-03-POS-06",
+      "check": "affine_cancel_keeps_undo",
+      "expected": {
+        "undo_len_unchanged": true
+      }
+    }
+  ]
+}

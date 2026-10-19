@@ -1,0 +1,27 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-M00-L3-06-02",
+  "reviewer": {
+    "name": "chủ dự án (OpenMatrix9)",
+    "role": "project owner",
+    "status": "SIGNED",
+    "signature": "signed in the working session: 'ký hết và tiếp tục chuyển đến phần code'"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T00:30:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "assets and notices (4/4): authored SVG only, THIRD-PARTY-NOTICES-M00.md records the OCCT modified component and the openNURBS notice, no commercial manual shipped, legal readiness signed",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-06-02/OM9-M00-L4-06-02-02.note.md",
+      "sha256": "9defd0b1d74b181d5a0f4d6b138a1345c1d54772fd659dcf165a6bbb7a792782",
+      "bytes": 198
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-06-02/source_crosswalk.json",
+      "sha256": "f173672cba4c9b28f772037e9b749c7e0fda9a1b3bd1868394e1954f322da6f9",
+      "bytes": 352
+    }
+  ],
+  "note": "recorded by the assistant from the owner instruction; the assistant did not self-approve"
+}

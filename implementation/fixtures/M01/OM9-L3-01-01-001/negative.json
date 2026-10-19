@@ -40,8 +40,7 @@
       "stage": "renderer",
       "adapter": null,
       "expect": {
-        "adapter": "software-fallback",
-        "diagnostic_contains": "GPU adapter unavailable",
+        "diagnostic_contains": "hardware GPU adapter required",
         "document_unchanged": true
       }
     },

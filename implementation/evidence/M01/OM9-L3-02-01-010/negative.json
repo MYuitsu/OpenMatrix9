@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-010",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "unknown-definition",
+      "call": "block_instances(random DefinitionId)",
+      "expect": {
+        "error": "Missing(instance definition)"
+      }
+    }
+  ]
+}

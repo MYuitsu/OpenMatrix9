@@ -1,0 +1,50 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-008-01",
+  "l3_id": "OM9-L3-01-03-008",
+  "l3_title": "Block Definition And Instance Graph",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "definition vs instance transformation and nesting",
+  "positive_oracle": "Hai occurrence dùng chung một definition, placement độc lập; một Undo xoá cả definition và các occurrence.",
+  "negative_oracle": "Self-cycle bị từ chối không ghi một phần; vòng lặp lồng nhau bị validate bắt.",
+  "reuse_decision": "REUSE",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "symbols": [
+        "Definition",
+        "Definition::new",
+        "Document::instance",
+        "Document::member_transform",
+        "Document::validate_entity instance check"
+      ],
+      "decision": "REUSE"
+    },
+    {
+      "path": "crates/om9-core/src/transaction.rs",
+      "symbols": [
+        "Mutation::DefinitionInsert",
+        "DefinitionInsert admission (nodes = 1 + members.len())"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-scene/tests/shared_instances.rs",
+      "symbols": [
+        "4 integration tests: capture, pick, placements, undo"
+      ],
+      "decision": "ADD"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/{model,transaction}.rs, crates/om9-scene/tests/shared_instances.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_008 -> 5 passed",
+    "cargo test -p om9-scene --test shared_instances -> 4 passed"
+  ],
+  "notes": "REUSE Definition/member_transform/cycle detection; ADD one atomic DefinitionInsert"
+}

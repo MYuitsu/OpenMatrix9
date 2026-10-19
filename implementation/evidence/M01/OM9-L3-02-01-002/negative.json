@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-002",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "short-knot-vector",
+      "call": "drop one knot",
+      "expect": {
+        "error": "Invalid(NURBS knots)"
+      }
+    },
+    {
+      "id": "zero-weight",
+      "call": "weights[1] = 0",
+      "expect": {
+        "error": "Invalid(supported positive rational weights)"
+      }
+    }
+  ]
+}

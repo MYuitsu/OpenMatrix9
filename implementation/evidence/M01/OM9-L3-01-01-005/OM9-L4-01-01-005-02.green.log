@@ -1,0 +1,13 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests\dock_layout_persistence.rs (target\debug\deps\dock_layout_persistence-c0caec79a6c929cb.exe)
+
+running 6 tests
+test fixture_design_pair_is_present ... ok
+test s4_a_session_without_a_kept_file_is_the_baseline ... ok
+test m1_to_m13_a_file_that_cannot_be_honoured_is_repaired_with_a_warning ... ok
+test s3_a_kept_file_reopens_the_same_named_ids ... ok
+test s1_a_session_keeps_what_the_user_arranged ... ok
+test s2_a_written_file_is_a_fixed_point ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

@@ -149,7 +149,7 @@ unknown; all unclosed packages are retained.
     for path in [*(PACKAGE / name for name in specs), PACKAGE / "specs/00-rhino-core/00-qymcad-foundation-migration.md", PACKAGE / "specs/00-rhino-core/MATRIX9_SCREENSHOT_DETAILS_2026-10-14.md", PACKAGE / "specs/00-rhino-core/UI_DETAILS.md"]: append(path, note)
     for path in [PACKAGE / "IMPLEMENTATION_STATUS.md", PACKAGE / "README.md"]: append(path, note.replace("../../../" + REPORT, "../" + REPORT))
     append(ROOT / "README.en.md", note.replace("../../../" + REPORT, REPORT))
-    append(ROOT / "standalone/README.md", note.replace("../../../" + REPORT, "../" + REPORT))
+    append(ROOT / "docs/standalone-foundation.md", note.replace("../../../" + REPORT, "../" + REPORT))
     append(ROOT / "README.md", MARKER + f"\n\nĐã kiểm chứng [chọn/lưu/mở tệp qua Windows thật]({REPORT}): {passed} test workspace,3 đường dẫn được Show/GetResult trả về, SaveAs sang tệp khác chỉ nhận đường dẫn sau Replace và giữ nguyên SHA256 tệp gốc. Tiến trình mới chạy --ui path giữ đúng dữ liệu/đường dẫn/tiêu đề và bốn viewport. Goal đầy đủ tiếp tục: persistence hoàn chỉnh/.3dm, missing-module startup, teardown/budgets/async và các gate đầy đủ còn mở.")
     path = ROOT / "docs/openmatrix9-progress.json"
     data = json.loads(path.read_text(encoding="utf-8")); data["updated_at"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")

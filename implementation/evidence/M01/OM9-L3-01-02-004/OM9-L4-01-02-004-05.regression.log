@@ -1,0 +1,21 @@
+task: OM9-L4-01-02-004-05 (acceptance) regression
+utc: 2026-10-16T15:15:48Z
+
+== cargo test --workspace -j 2 ==
+test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.59s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+test view_tab_restores_cmd_focus_and_preserves_numeric_draft ... FAILED
+test view_menu_restores_cmd_focus_and_preserves_numeric_draft ... FAILED
+assertion `left == right` failed
+assertion `left == right` failed
+test result: FAILED. 3 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s
+error: test failed, to rerun pass `-p om9-app --test chrome_actions`
+== cargo check --workspace --all-targets ==
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
+== real-window regression ==
+PASS [readback-recover] float DISPLAY, then let the real window report a rectangle that cannot fit
+panels-summary: H:\OpenMatrix9\build\standalone-validation\ui-artifacts\2026-10-16-m01-l3-02-004-panels\panels-summary.json
+== real-window regression: size matrix ==
+PASS [default] unsupported-1000x600-startup-refused exit=1 
+matrix-summary: H:\OpenMatrix9\build\standalone-validation\ui-artifacts\2026-10-16-m01-l3-02-004-verify\matrix-summary.json

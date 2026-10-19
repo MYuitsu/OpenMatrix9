@@ -5,7 +5,7 @@ description: Use when interpreting Matrix90 VB6 exports or Ghidra pseudocode, ma
 
 # Matrix90 native evidence
 
-Đọc [đích specs v2 và hợp đồng UI Matrix9](../openmatrix9-workflow/references/spec-v2-target.md) trước lựa chọn kiến trúc, spec hoặc runtime. Package đích `OpenMatrix9_Codex_Spec_v2`; QymCAD chỉ cho code mẫu/routine, giao diện giữ Matrix9 như mô tả hiện tại.
+Đọc [đích milestone và giao diện Matrix9](../openmatrix9-workflow/references/milestones-target.md) trước lựa chọn kiến trúc, spec hoặc runtime. Nguồn nền tảng `OM9_Milestones/M01 - CAD Shell, Viewport`; QymCAD chỉ cho code mẫu/routine, giao diện giữ Matrix9 như mô tả hiện tại.
 
 Rust là ưu tiên số 1 khi triển khai hoặc chuyển code OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Safe Rust sở hữu logic, validation và dữ liệu độc lập; C++ chỉ là bridge cho API native bắt buộc, Python cho bootstrap/test/tool khi cần. Ghi rõ lý do và owner của mọi ngoại lệ; không coi native FFI là memory-safe hoặc skill update là migration hoàn tất.
 

@@ -84,5 +84,43 @@
       "id": "OM9-L3-01-07-008",
       "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-008 - Drag Transaction And Commit Cancel/l3.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "target": "standalone Rust OM9",
+    "evidence": [
+      "implementation/evidence/M02/2026-10-19-selection-video-review.md",
+      "implementation/evidence/M02/2026-10-19-native-selection.json",
+      "implementation/evidence/M02/2026-10-19-selection-checks.json",
+      "implementation/evidence/M02/2026-10-19-occurrence-selection.md",
+      "implementation/evidence/M02/2026-10-19-occurrence-native.json",
+      "implementation/evidence/M02/2026-10-19-occurrence-checks.json",
+      "implementation/evidence/M02/2026-10-19-brep-selection.md",
+      "implementation/evidence/M02/2026-10-19-brep-checks.json",
+      "implementation/evidence/M02/2026-10-19-brep-native.json",
+      "implementation/evidence/M02/2026-10-19-rotation-feedback.md",
+      "implementation/evidence/M02/2026-10-19-rotation-feedback-checks.json",
+      "implementation/evidence/M02/2026-10-19-rotation-feedback-native.json"
+    ],
+    "l3_with_verified_supported_scope": 8,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "human_approval": null,
+    "remaining": [
+      "M02-UI external review; QymCAD pinned-source audit is not certified (no reuse)"
+    ],
+    "occurrence_path_subselection": "VALIDATED",
+    "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
+    "native_brep_selection": "VALIDATED_SOURCE_BOUND_UUID_TOPOLOGY",
+    "technical_scope_complete": true,
+    "rotation_feedback_overdraw": "CORRECTED_AND_AUTOMATED_TARGET_VALIDATED",
+    "desktop_viewport_backend": "GPU_ONLY",
+    "gpu_only_evidence": [
+      "implementation/evidence/M02/2026-10-19-gpu-only.md",
+      "implementation/evidence/M02/2026-10-19-gpu-only-checks.json",
+      "implementation/evidence/M02/2026-10-19-gpu-only-native.json"
+    ],
+    "software_fallback": false
+  }
 }

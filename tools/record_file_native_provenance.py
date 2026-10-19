@@ -5,14 +5,14 @@ from pathlib import Path
 import tomllib
 
 ROOT=Path(__file__).resolve().parents[1]
-path=ROOT/'standalone/provenance.json'
+path=ROOT/'native/provenance.json'
 data=json.loads(path.read_text(encoding='utf-8'))
-lock=tomllib.loads((ROOT/'standalone/Cargo.lock').read_text())
+lock=tomllib.loads((ROOT/'Cargo.lock').read_text())
 rfd=next(row for row in lock['package'] if row['name']=='rfd')
 entry={
     'name':'selected_windows_owned_file_dialog',
     'mode':'selected_native_os_adapter_dependency',
-    'source_path':'standalone/crates/om9-app/src/native_picker.rs',
+    'source_path':'crates/om9-app/src/native_picker.rs',
     'upstream_url':'https://github.com/PolyMeilex/rfd',
     'upstream_version':'0.17.2','cargo_checksum':rfd['checksum'],
     'license':'MIT','license_notice':'Resources/licenses/rfd-0.17.2.txt',

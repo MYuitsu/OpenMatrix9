@@ -5,7 +5,7 @@ description: Use when starting or resuming OpenMatrix9 work, checking implementa
 
 # OpenMatrix9 routing
 
-Đọc [đích specs v2 và hợp đồng UI Matrix9](references/spec-v2-target.md) trước lựa chọn kiến trúc, spec hoặc runtime. Package đích `OpenMatrix9_Codex_Spec_v2`; QymCAD chỉ cho code mẫu/routine, giao diện giữ Matrix9 như mô tả hiện tại.
+Đọc [đích milestone và giao diện Matrix9](references/milestones-target.md) trước lựa chọn kiến trúc, spec hoặc runtime. Nguồn nền tảng `OM9_Milestones/M01 - CAD Shell, Viewport`; QymCAD chỉ cho code mẫu/routine, giao diện giữ Matrix9 như mô tả hiện tại.
 
 ## Ưu tiên ngôn ngữ
 
@@ -13,12 +13,12 @@ Rust là ưu tiên số 1 cho code OpenMatrix9 mới và chuyển code hiện h�
 
 Keep the user's Rust implementation goal. Guide documents describe VB6 recovery methods; they do not change that goal.
 
-Resolve the OpenMatrix9 checkout from the user's path or repository. This machine uses `H:/FreeCAD-src/Mod/OpenMatrix9`. All document paths in [stages.json](references/stages.json) are relative to that checkout.
+Resolve the OpenMatrix9 checkout from the user's path or repository. This machine uses `H:/OpenMatrix9`. All document paths in [stages.json](references/stages.json) are relative to that checkout.
 
 Run through Python, using this skill's actual installed or repository path:
 
 ```powershell
-python <skill-directory>/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 status
+python <skill-directory>/scripts/reference_index.py --project-root H:/OpenMatrix9 status
 ```
 
 Then run `route <stage>`:
@@ -32,9 +32,9 @@ Then run `route <stage>`:
 | feature-port | openmatrix9-feature-port |
 | build-validation | openmatrix9-build-validation |
 
-Read `read_now` in order; read conditional files only for the stated task. Feature lookup: `search "Gem Loader"`, then `feature OM9-GEM-001`. Load one spec, not the complete catalog or Ghidra export.
+Read `read_now` in order; read conditional files only for the stated task. Feature lookup: `search "Picking Selection" --domain M02`, then `feature OM9-L2-01-07`. Load one spec, not the complete catalog or Ghidra export.
 
-Reconcile `docs/openmatrix9-progress.json` with code and tests. Record completed evidence, uncertainty, next document and next action using [progress.md](references/progress.md). After implementation and checks, follow its required Spec v2/checklist and README synchronization before reporting completion. Plan checkboxes, source presence and catalog `implementation_status` cannot establish completion.
+Reconcile `docs/openmatrix9-progress.json` with code and tests. Record completed evidence, uncertainty, next document and next action using [progress.md](references/progress.md). After implementation and checks, follow its required milestone/checklist and README synchronization before reporting completion. Plan checkboxes, source presence and catalog `implementation_status` cannot establish completion.
 
 Source conflicts or missing manuals: consult [source-policy.md](references/source-policy.md). Continue independent authorized work; report only the evidence gap affecting the selected task.
 

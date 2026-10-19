@@ -181,6 +181,20 @@
     "OM9-L4-02-01-010-04",
     "OM9-L4-02-01-010-05"
   ],
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Block occurrences share one definition but keep distinct identity and transform.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-02-01/crosswalk.json",
+      "implementation/design/M01/OM9-L2-02-01/l4-matrix.json",
+      "implementation/design/M01/OM9-L2-02-01/oracles.json",
+      "crates/om9-core/tests/rhino_semantics.rs:774"
+    ],
+    "human_approval": null,
+    "remaining": []
+  },
   "children_l4": [
     {
       "id": "OM9-L4-02-01-010-01",

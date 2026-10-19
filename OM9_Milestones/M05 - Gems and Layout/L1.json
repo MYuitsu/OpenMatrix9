@@ -40,5 +40,8 @@
     "upstream_baseline_status": "FROZEN_NOT_MODIFIED",
     "l4_planned": 126,
     "l3_covered": 43
-  }
+  },
+  "depends_on_milestones": [
+    "M03"
+  ]
 }

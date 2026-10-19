@@ -33,11 +33,11 @@ def main():
     before = {path: digest(path) for path in binaries.values()}
     sources = [p for p in (ROOT / "standalone").rglob("*") if p.is_file()
                and "target" not in p.parts and p.suffix in {".rs", ".toml", ".lock"}]
-    sources += [ROOT / "standalone/native" / name for name in
+    sources += [ROOT / "native" / name for name in
                 ["native_exchange.cpp", "retained_merge.hpp", "source_inventory_fixture.cpp", "retained_source_fixture.cpp", "CMakeLists.txt"]]
     sources += [Path(__file__).resolve()]
     source_before = {p: digest(p) for p in sorted(set(sources))}
-    command = ["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path", "standalone/Cargo.toml",
+    command = ["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path", "Cargo.toml",
                "-p", "om9-exchange", "--test", "retained_native_inputs", "--", "--ignored", "--nocapture", "--test-threads=1"]
     run = subprocess.run(command, cwd=ROOT, env=environment, capture_output=True, timeout=120)
     output = run.stdout.decode("utf-8", errors="strict") + run.stderr.decode("utf-8", errors="replace")

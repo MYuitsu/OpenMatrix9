@@ -19,7 +19,7 @@ def digest(path):
 
 def run(arguments, expected):
     command = ["rtk", "proxy", "cargo", "test", "--locked", "--manifest-path",
-               "standalone/Cargo.toml", *arguments, "--", "--test-threads=1", "--nocapture"]
+               "Cargo.toml", *arguments, "--", "--test-threads=1", "--nocapture"]
     result = subprocess.run(command, cwd=ROOT, capture_output=True, timeout=120)
     output = result.stdout.decode("utf-8", errors="strict")
     if result.returncode:

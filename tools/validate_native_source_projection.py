@@ -35,7 +35,7 @@ def main():
     parser.add_argument("--build-fixture",action="store_true")
     parser.add_argument("--binary",type=Path,default=ROOT/"build/standalone-native/Release/om9-exchange-native.exe")
     parser.add_argument("--fixture-binary",type=Path,default=ROOT/"build/native-source-fixture/Release/om9-source-fixture.exe")
-    parser.add_argument("--runner",type=Path,default=ROOT/"standalone/target/release/om9-native-runner.exe")
+    parser.add_argument("--runner",type=Path,default=ROOT/"target/release/om9-native-runner.exe")
     parser.add_argument("--receipt",type=Path,default=ROOT/"build/standalone-native/native-source-projection-validation.json")
     args=parser.parse_args()
     if args.build_fixture: build_fixture()
@@ -226,8 +226,8 @@ def main():
         assert "file-byte budget" in rejected["stderr"]
     receipt={"scope":"actual_native_source_projection_only","schema_version":1,"goal_complete":False,"opennurbs_commit":PIN,
         "binary_sha256":digest(binary),"fixture_binary_sha256":digest(fixture),"runner_sha256":digest(runner),
-        "source_sha256":digest(ROOT/"standalone/native/native_exchange.cpp"),"fixture_source_sha256":digest(ROOT/"standalone/native/source_inventory_fixture.cpp"),
-        "header_sha256":digest(ROOT/"standalone/native/retained_merge.hpp"),
+        "source_sha256":digest(ROOT/"native/native_exchange.cpp"),"fixture_source_sha256":digest(ROOT/"native/source_inventory_fixture.cpp"),
+        "header_sha256":digest(ROOT/"native/retained_merge.hpp"),
         "validator_sha256":digest(Path(__file__)),"runs":len(runs),"rejections":sum(r["status"]=="native_owner_rejected" for r in runs),
         "peak_committed_bytes":max(r["stats"]["peak_committed_bytes"] for r in runs),
         "operation_receipts":[{k:v for k,v in r.items() if k!="stdout"} for r in runs],"projections":projections}

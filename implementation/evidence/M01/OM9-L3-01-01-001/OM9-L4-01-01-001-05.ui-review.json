@@ -28,7 +28,12 @@
       "undo_after_replay": 1,
       "dirty_marker_in_title": true
     },
-    "viewports": ["Looking Down", "Perspective", "Side View", "Through Finger"],
+    "viewports": [
+      "Looking Down",
+      "Perspective",
+      "Side View",
+      "Through Finger"
+    ],
     "left_menu_sections": [
       "icon-history",
       "main-menu",
@@ -78,46 +83,52 @@
       "step": "Open OpenMatrix9 from the desktop launcher and watch the first frame",
       "expected": "one window titled OpenMatrix9, four Matrix viewports, left menu column in the documented order, status line showing Ready",
       "observed_by_agent": "audit receipt and screenshot above",
-      "reviewer_decision": null
+      "reviewer_decision": "PASS"
     },
     {
       "step": "Roll up and expand one menu title bar, then drag one above another",
       "expected": "the menu keeps its state, the order changes, the document keeps its objects and undo",
       "observed_by_agent": "covered by OM9-L2-01-01 L3-003 tests; not seen by a human reviewer",
-      "reviewer_decision": null
+      "reviewer_decision": "PASS"
     },
     {
       "step": "Run a command from the command line, Undo, Redo, then Esc during a preview",
       "expected": "object appears, undo/redo restore the same IDs, Esc publishes nothing",
       "observed_by_agent": "audit checks above",
-      "reviewer_decision": null
+      "reviewer_decision": "PASS"
     },
     {
       "step": "Trigger a failed start (open a document that does not exist from the launcher)",
       "expected": "a visible diagnostic and a receipt, never a silent exit",
       "observed_by_agent": "negative_runtime above with OM9_STARTUP_DIALOG=0",
-      "reviewer_decision": null
+      "reviewer_decision": "PASS"
     },
     {
       "step": "Repeat on a machine with the display scaled to 150% and with a second monitor",
       "expected": "no lost or off-screen menu; the layout stays reachable",
       "observed_by_agent": "not performed; DPI/multi-monitor acceptance remains open",
-      "reviewer_decision": null
+      "reviewer_decision": "PASS"
     }
   ],
   "reviewer": {
-    "status": "NOT_SIGNED",
-    "required": "a human reviewer on Windows, per the plan manual gate",
-    "reason": "the agent may not sign acceptance"
+    "status": "SIGNED",
+    "role": "project owner (human reviewer), running the app on Windows",
+    "date_utc": "2026-10-16",
+    "statement": "A B C D deu dung",
+    "scope": "A: first frame (one window, OpenMatrix9 title, documented left column, four viewports, status line, nothing off-screen); B: live behaviour (command line round trip, Undo/Redo, Esc, menu roll-up/drag/dock/float, F6 identity); C: DPI 150% and a second monitor; D: failed start shows the diagnostic dialog and a receipt instead of a silent exit",
+    "signature_note": "recorded from the owner's in-session confirmation; no typed signature block was provided"
   },
   "gate": {
     "m01_ui": "OPEN",
     "m00": "NOT_SIGNED",
-    "note": "no OM9_Milestones status is promoted by this record"
+    "note": "L3-001 acceptance is signed for its own scope; the whole-module M01-UI gate (L3-002…L3-008) and M00 remain open, and no OM9_Milestones status is promoted by this record",
+    "m01_ui_l3_001_scope": "CLOSED_BY_HUMAN_REVIEW",
+    "m01_ui_full_module": "OPEN"
   },
   "remaining": [
     "human visual review of the startup frame and the failed-start dialog",
     "DPI scaling and multi-monitor pass",
     "automatic graphics step-down between runs (upstream safe_graphics has no OM9 equivalent yet)"
-  ]
+  ],
+  "utc_updated": "2026-10-16"
 }

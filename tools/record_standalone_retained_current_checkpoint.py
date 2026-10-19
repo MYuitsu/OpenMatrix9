@@ -23,8 +23,8 @@ def digest(path):
 
 def main():
     binary = digest(ROOT / "build/standalone-native/Release/om9-exchange-native.exe")
-    cpp = digest(ROOT / "standalone/native/native_exchange.cpp")
-    header = digest(ROOT / "standalone/native/retained_merge.hpp")
+    cpp = digest(ROOT / "native/native_exchange.cpp")
+    header = digest(ROOT / "native/retained_merge.hpp")
     selected = json.loads((ROOT / "build/standalone-native" / BATCHES[0][-1]).read_text())
     assert (selected["binary_sha256"], selected["source_sha256"], selected["header_sha256"]) == (binary, cpp, header)
     stamp = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")

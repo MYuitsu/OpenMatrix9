@@ -1,0 +1,202 @@
+{
+  "date": "2026-10-19T01:06:52.128498+00:00",
+  "module": "OM9-L2-01-07",
+  "scope": "canonical native BRep picking and milestone routing",
+  "checks": [
+    {
+      "name": "native-brep-selection-regressions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "-j",
+        "2",
+        "--test",
+        "brep_selection",
+        "--test",
+        "subobject_occurrences",
+        "--test",
+        "subobject_selection",
+        "--test",
+        "acceptance_viewport_selection",
+        "--test",
+        "selection_overlay",
+        "--test",
+        "pick_disambiguation",
+        "--test",
+        "gumball_interaction",
+        "--test",
+        "gumball_cold"
+      ],
+      "exit_code": 0,
+      "passed_tests": 42,
+      "seconds": 25.35,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/native-brep-selection-regressions.log",
+      "log_sha256": "e0ed9e43d36a1231b1101a68ad1396f23a17395fafe9169613a77e8eae0852d1"
+    },
+    {
+      "name": "scene-regressions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-scene",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 69,
+      "seconds": 20.082,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/scene-regressions.log",
+      "log_sha256": "548da9ddc4d30b2bd5697f362f79dcd0c69bb1357b5072fb2b0e3f3fdee42be4"
+    },
+    {
+      "name": "document-graph",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "document_graph",
+        "--test",
+        "brep_kernel",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 41,
+      "seconds": 4.078,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/document-graph.log",
+      "log_sha256": "c84d82f78ab6343d5a33510191d005f4dd652059f7d3dd0b655d3d50c055a189"
+    },
+    {
+      "name": "archive-identity",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-archive",
+        "--test",
+        "document_identity_round_trip",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 5,
+      "seconds": 17.208,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/archive-identity.log",
+      "log_sha256": "5b4190121bcb24b374efefdb03c227632db4cfcacbdfccdf3459882e660ae636"
+    },
+    {
+      "name": "kernel-regressions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-kernel",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 19,
+      "seconds": 5.569,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/kernel-regressions.log",
+      "log_sha256": "2840a04dad8eb0daa745873ba7f489e10d72eb9e2f2eff712feaac76043daf88"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-app",
+        "-p",
+        "om9-scene",
+        "-p",
+        "om9-kernel",
+        "--features",
+        "om9-app/gpu-sphere",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 11.546,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/clippy.log",
+      "log_sha256": "4c4d1efe15950537274fead1d7ac416d03f7237399f1a030edf0fd0b9c308ddd"
+    },
+    {
+      "name": "routing-tests",
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "tools.tests.test_skill_reference_index"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 7.155,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/routing-tests.log",
+      "log_sha256": "46fd10adfefb40a7d8841381271395faa57aa2ac48813c65c51bc999de654929"
+    },
+    {
+      "name": "routing-audit",
+      "command": [
+        "python",
+        "skills/openmatrix9-workflow/scripts/reference_index.py",
+        "--project-root",
+        "H:\\OpenMatrix9",
+        "audit"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 2.961,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/routing-audit.log",
+      "log_sha256": "88c717d87b547f41f83c47e27d3d1a5d61339952c408143fa0aefc4f4a598d8d",
+      "result": {
+        "feature_count": 3485,
+        "domain_count": 11,
+        "stage_count": 7,
+        "invalid_specs": [],
+        "missing_required_documents": [],
+        "missing_conditional_documents": [],
+        "ok": true
+      }
+    },
+    {
+      "name": "python-compile",
+      "command": [
+        "python",
+        "-m",
+        "py_compile",
+        "tools/validate_m02_selection.py"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 0.087,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/python-compile.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "public-source-audit",
+      "command": [
+        "python",
+        "tools/public_source_audit.py"
+      ],
+      "exit_code": 1,
+      "passed_tests": 0,
+      "seconds": 2.311,
+      "log": "build/standalone-validation/ui-artifacts/m02-brep-20261019-checks/public-source-audit.log",
+      "log_sha256": "724ff24deb777eb3c65b623cf77fcb5cd8bbb20f123828db69b9cce4ee6505b2",
+      "artifact_errors": 11735
+    }
+  ]
+}

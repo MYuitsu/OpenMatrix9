@@ -1,0 +1,26 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-003",
+  "l4": "OM9-L4-01-03-003-02",
+  "title": "Geometry Handle And Attributes",
+  "case": "om9-l3-01-03-003-positive",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_003_geometry_handle_and_display_attributes_are_queryable_separately|l3_003_a_stale_or_dangling_handle_is_never_a_live_object",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "entity": "Point named, color [9,8,7,255]",
+      "id": "separate-queries",
+      "expect": {
+        "color": [
+          9,
+          8,
+          7,
+          255
+        ],
+        "geometry_revision_unchanged": 1,
+        "name": "Named",
+        "visible": true
+      }
+    }
+  ]
+}

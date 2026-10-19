@@ -1,0 +1,49 @@
+
+OM9-L2-01-03 (Be Document Scene Entities) — automated verification
+==============================================================
+OM9-L3-01-03-001  ok      Document Entity IDs
+                          0.2s
+                  ok      
+                          0.2s
+OM9-L3-01-03-002  ok      Typed Scene Entity Records
+                          0.1s
+OM9-L3-01-03-003  ok      Geometry Handle And Attributes
+                          0.1s
+OM9-L3-01-03-004  ok      Layer Domain Records
+                          0.1s
+OM9-L3-01-03-005  ok      Entity To Layer Membership
+                          0.1s
+OM9-L3-01-03-006  ok      Layer Selection Visibility Rules
+                          0.1s
+OM9-L3-01-03-007  ok      Group Membership Model
+                          0.1s
+OM9-L3-01-03-008  ok      Block Definition And Instance Graph
+                          0.1s
+                  ok      
+                          0.1s
+OM9-L3-01-03-009  ok      Jewelry Semantic Extension Record
+                          0.1s
+OM9-L3-01-03-010  ok      Selection State Document Contract
+                          0.1s
+                  ok      
+                          0.3s
+OM9-L3-01-03-011  ok      Document Change Notification
+                          0.2s
+                  ok      
+                          0.3s
+OM9-L3-01-03-012  ok      Document Snapshot And Restore
+                          0.2s
+                  ok      
+                          0.3s
+OM9-L3-01-03-013  ok      Import Source Provenance Metadata
+                          0.2s
+workspace         ok      every crate together (covers the four crate suites)
+                          61.4s
+check             ok      everything still compiles
+                          0.4s
+fmt               ok      formatting
+                          0.9s
+clippy            ok      lints, warnings are errors
+                          8.4s
+
+22/22 groups ok, 0 failed, 0 evidence gaps

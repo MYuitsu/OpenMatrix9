@@ -1,6 +1,6 @@
 # Bộ skill OpenMatrix9
 
-Nguồn skill được quản lý trong `skills/` của repository. Bản dùng cho Codex được cài vào `C:/Users/nguye/.codex/skills/`. Specs đích ở `OpenMatrix9_Codex_Spec_v2/`; tài liệu gốc/private registry được giữ nguyên, đọc theo nhu cầu thay vì sao chép tất cả vào từng skill.
+Nguồn skill được quản lý trong `skills/` của repository. Bản dùng cho Codex được cài vào `C:/Users/nguye/.codex/skills/`. Specs đích ở `OM9_Milestones/M01 - CAD Shell, Viewport/`; tài liệu gốc/private registry được giữ nguyên, đọc theo nhu cầu thay vì sao chép tất cả vào từng skill.
 
 | Khi làm việc này | Skill | Tài liệu được chọn |
 |---|---|---|
@@ -8,7 +8,7 @@ Nguồn skill được quản lý trong `skills/` của repository. Bản dùng 
 | Menu, sidebar, icon, màn hình khởi động, viewport | `openmatrix9-ui` | Thiết kế/kế hoạch đã có, INI/RUI, đúng form VB6 và đặc tả UI |
 | Nghiệp vụ workspace đã duyệt: grid, Command, viewport | `openmatrix9-workspace-contract` | Quy tắc theo nhóm workspace và ảnh Matrix do người dùng cung cấp |
 | Một event/hàm gốc chưa rõ | `openmatrix9-native-mapping` | Guide đối chiếu địa chỉ, đúng procedure VB6 và đúng hàm Ghidra |
-| Một chức năng trang sức/hình học | `openmatrix9-feature-port` | Mã `OM9-*`, spec v2 của chức năng, migration/backend requirements; manual chỉ cho unknown |
+| Một chức năng trang sức/hình học | `openmatrix9-feature-port` | Mã `OM9-*`, milestone spec của chức năng, migration/backend requirements; manual chỉ cho unknown |
 | Build Rust OM9 độc lập + selective native backend và nghiệm thu | `openmatrix9-build-validation` | Cargo/CMake/ABI, cấu hình máy hiện tại, bằng chứng runtime |
 
 ## Cách gọi
@@ -18,7 +18,7 @@ Ví dụ yêu cầu trong Codex:
 - “Dùng `$openmatrix9-workflow` xem đã làm tới đâu và tiếp tục menu.”
 - “Dùng `$openmatrix9-ui` làm tiếp MAIN MENU theo ảnh và INI.”
 - “Dùng `$openmatrix9-native-mapping` tìm hành vi `frmMaster.tmrProfileBrowser_Timer` để chuyển sang Rust.”
-- “Dùng `$openmatrix9-feature-port` chuẩn hóa `OM9-GEM-001` trước khi triển khai.”
+- “Dùng `$openmatrix9-feature-port` chuẩn hóa `OM9-L2-01-07` trước khi triển khai.”
 
 Các description cũng hỗ trợ chọn skill tự động. Nếu catalog của phiên hiện tại chưa cập nhật, đọc trực tiếp `skills/<tên>/SKILL.md` trong repository; không cần chờ để sử dụng tài liệu.
 
@@ -27,18 +27,18 @@ Các description cũng hỗ trợ chọn skill tự động. Nếu catalog của
 Chạy ở thư mục OpenMatrix9:
 
 ```powershell
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 status
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 route ui-menu
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 search "Gem Loader"
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 feature OM9-GEM-001
-python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/FreeCAD-src/Mod/OpenMatrix9 audit
+rtk proxy python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/OpenMatrix9 status
+rtk proxy python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/OpenMatrix9 route ui-menu
+rtk proxy python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/OpenMatrix9 search "Picking Selection"
+rtk proxy python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/OpenMatrix9 feature OM9-L2-01-07
+rtk proxy python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/OpenMatrix9 audit
 ```
 
 `route` trả về tài liệu phải đọc ngay, tài liệu chỉ đọc khi điều kiện phù hợp và tiêu chí kết thúc giai đoạn. Các giai đoạn gồm `inventory`, `standalone-foundation`, `ui-menu`, `ui-viewports`, `native-mapping`, `feature-port`, `build-validation`.
 
-`search` chỉ trả tối đa 5 kết quả mặc định; xem `total`, tăng `--limit` và lọc `--domain` khi cần. `feature` tra exact ID và trả file spec v2/command cùng các hướng dẫn target thực có. `audit` kiểm tra toàn bộ đường dẫn đặc tả và tài liệu định tuyến, không chứng minh code đã hoạt động.
+`search` chỉ trả tối đa 5 kết quả mặc định; xem `total`, tăng `--limit` và lọc `--domain` khi cần. `feature` tra exact ID và trả file JSON L1/L2/L3/L4 cùng các hướng dẫn target thực có. `audit` kiểm tra toàn bộ đường dẫn đặc tả và tài liệu định tuyến, không chứng minh code đã hoạt động.
 
-`status` đọc [openmatrix9-progress.json](openmatrix9-progress.json), sau đó đối chiếu dấu hiệu file. Tiến độ phải được cập nhật theo code/test/runtime, không dựa vào `implementation_status` của bộ spec. Old menu/native evidence là historical. Target v2 có own Rust document/session/history/UI; selected OCCT/openNURBS adapters và Matrix9 UI theo hợp đồng, QymCAD chỉ là code mẫu/routine.
+`status` đọc [openmatrix9-progress.json](openmatrix9-progress.json), sau đó đối chiếu dấu hiệu file. Tiến độ phải được cập nhật theo code/test/runtime, không dựa vào `implementation_status` của bộ spec. Old menu/native evidence là historical. Target standalone có own Rust document/session/history/UI; selected OCCT/openNURBS adapters và Matrix9 UI theo hợp đồng, QymCAD chỉ là code mẫu/routine.
 
 ## Khi có tài liệu mới
 
@@ -54,6 +54,6 @@ Ngày2026-10-09, theo yêu cầu rõ của người dùng,7 skill OM9 ưu tiên 
 
 Phase2 Rust migration đã được kiểm chứng riêng bằng code/native/application gates; xem [báo cáo](validation/2026-10-09-phase2-rust-owned-core.md). Việc kiểm tra skill chỉ đánh giá policy/routing.
 
-## Đích mặc định 2026-10-13
+## Đích mặc định 2026-10-19
 
-Tất cả 8 skill nguồn và agents/openai.yaml dùng specs v2 và UI Matrix9; cả 8 skill được sync sang bản cài Codex để các liên kết chuyển giai đoạn hoạt động. Không fallback v1. Xem [quy tắc target chung](../skills/openmatrix9-workflow/references/spec-v2-target.md). Launcher/Box/Sphere và progress synchronization đã hợp nhất từ bản cài mới hơn, không làm mất nghiệp vụ đã duyệt.
+Tất cả 8 skill nguồn và agents/openai.yaml dùng milestone specs và UI Matrix9; cả 8 skill được sync sang bản cài Codex để các liên kết chuyển giai đoạn hoạt động. Không fallback v1. Xem [quy tắc target chung](../skills/openmatrix9-workflow/references/milestones-target.md). Launcher/Box/Sphere và progress synchronization đã hợp nhất từ bản cài mới hơn, không làm mất nghiệp vụ đã duyệt.

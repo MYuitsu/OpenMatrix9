@@ -1,0 +1,10 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-007",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-007-NEG",
+      "expected": "a line that misses the box returns zero hits, not an error"
+    }
+  ]
+}

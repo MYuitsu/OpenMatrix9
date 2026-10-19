@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-18T21:28:46.293685+00:00",
+  "module": "OM9-L2-01-07",
+  "scope": "nested occurrence subobject identities",
+  "checks": [
+    {
+      "name": "selection-regressions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "-j",
+        "2",
+        "--test",
+        "subobject_occurrences",
+        "--test",
+        "subobject_selection",
+        "--test",
+        "acceptance_viewport_selection",
+        "--test",
+        "selection_overlay",
+        "--test",
+        "pick_disambiguation",
+        "--test",
+        "gumball_interaction",
+        "--test",
+        "gumball_cold"
+      ],
+      "exit_code": 0,
+      "passed_tests": 37,
+      "seconds": 22.147,
+      "log": "build/standalone-validation/ui-artifacts/m02-occurrences-20261019-checks/selection-regressions.log",
+      "log_sha256": "448bda85164aaf24b60e0c5b285328d5416c2fefda6e19d93495dc330e93820c"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-app",
+        "-p",
+        "om9-scene",
+        "--features",
+        "om9-app/gpu-sphere",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 0.462,
+      "log": "build/standalone-validation/ui-artifacts/m02-occurrences-20261019-checks/clippy.log",
+      "log_sha256": "8b1fd2394f7b6f177ede882431154a419bd9f404f00add314c912e91a7fc0ec0"
+    },
+    {
+      "name": "python-compile",
+      "command": [
+        "python",
+        "-m",
+        "py_compile",
+        "tools/validate_m02_selection.py"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 0.07,
+      "log": "build/standalone-validation/ui-artifacts/m02-occurrences-20261019-checks/python-compile.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "public-source-audit",
+      "command": [
+        "python",
+        "tools/public_source_audit.py"
+      ],
+      "exit_code": 1,
+      "passed_tests": 0,
+      "seconds": 2.151,
+      "log": "build/standalone-validation/ui-artifacts/m02-occurrences-20261019-checks/public-source-audit.log",
+      "log_sha256": "012f9e22975f3ae1c3e9af65791e2512a287c951d3a0663975ae2a1d8b954146",
+      "existing_artifact_errors": 11735
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-001",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "point",
+      "call": "geometry_semantic_kind(Geometry::Point)",
+      "expect": {
+        "kind": "Point"
+      }
+    },
+    {
+      "id": "line",
+      "call": "geometry_semantic_kind(Geometry::Curve(Line))",
+      "expect": {
+        "kind": "Line",
+        "endpoints": "start/end"
+      }
+    },
+    {
+      "id": "polyline",
+      "call": "geometry_semantic_kind(curve_build::polyline(3 connected points))",
+      "expect": {
+        "kind": "Polyline"
+      }
+    },
+    {
+      "id": "polycurve",
+      "call": "two disconnected line segments",
+      "expect": {
+        "kind": "Polycurve"
+      }
+    }
+  ]
+}

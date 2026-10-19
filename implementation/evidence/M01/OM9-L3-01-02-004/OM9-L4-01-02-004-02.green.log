@@ -1,0 +1,22 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.03s
+     Running tests\command_context.rs (target\debug\deps\command_context-b6bef80407f77523.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... ok
+test c1_the_context_snapshot_names_document_view_selection_and_revisions ... ok
+test c2_switching_the_active_view_mid_command_refuses_and_cancels ... ok
+test c3_a_context_captured_before_the_switch_is_refused_afterwards ... ok
+test c4_a_command_keeps_the_context_it_started_against ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_state_machine.rs (target\debug\deps\command_state_machine-5e02fc0f22afb8a7.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... ok
+test n1_to_n6_out_of_order_input_cannot_commit_partial_geometry ... ok
+test m1_to_m4_the_command_walks_its_phases ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

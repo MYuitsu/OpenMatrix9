@@ -41,5 +41,7 @@
       "id": "OM9-M00-L3-07-03",
       "file": "M00 - Feasibility, Legal/L2-07 - Reproducible/L3-03 - Continuous verification and gate/l3.json"
     }
-  ]
+  ],
+  "gate_id": "G00-07",
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
 }

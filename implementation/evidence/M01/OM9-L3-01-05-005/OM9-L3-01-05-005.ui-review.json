@@ -1,0 +1,28 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-01-05-005",
+  "reviewer": {
+    "name": "cổng AUTO_ONLY (bằng chứng tự động)",
+    "role": "automated evidence gate",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T03:20:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "Face/wire/edge topology access: box 8/12/6/6; sphere one face and one wire; cylinder three faces and three wires; all valid. The L3 declares requires_manual_test=false, so its acceptance is the automated test face_wire_edge_topology_is_exact.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-005/OM9-L4-01-05-005-03.kernel-test.log",
+      "sha256": "56c204b0193e493fc4963c01f0827a393ba91e58cab50cc7d699ac873dac3b54"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-005/OM9-L4-01-05-005-05.acceptance.log",
+      "sha256": "422cb980482f56a6c4793e22d49044d117f7e90cd61493a92c02939915d97122"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-005/source_crosswalk.json",
+      "sha256": "ae1323eddc721b30cbcf1c3f4304a54556f42734a402e8223e01bd618a2f5bff"
+    }
+  ],
+  "note": "no human test is required for this L3; the record is the documented AUTO_ONLY path, not a human signature"
+}

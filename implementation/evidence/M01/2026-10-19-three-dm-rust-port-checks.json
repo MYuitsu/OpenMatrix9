@@ -1,0 +1,114 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "three-dm-rust-port-2026-10-19",
+  "date": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "target_dir": "L:/om9-target",
+  "parallel_jobs": 2,
+  "checks": [
+    {
+      "name": "core-all",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 393,
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-port-20261019/core-all.log",
+      "log_sha256": "18ab3c2e6c6cf7232b402d3a6a214b91d5ef8e846a932cede75bf1123f294a01",
+      "covers": [
+        "om9-core::three_dm command/scale policy"
+      ]
+    },
+    {
+      "name": "exchange-all",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-exchange",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 126,
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-port-20261019/exchange-all.log",
+      "log_sha256": "a6834b4c0d5e8d52ce12abc3e2b37233c994dab1c8888f33ec6cde28496b788f",
+      "covers": [
+        "archive/capability/identity",
+        "copy budget",
+        "overlay policy",
+        "dependency closure",
+        "export manifest schema 1/2",
+        "clipboard layer/geometry binding"
+      ]
+    },
+    {
+      "name": "clippy-core-exchange",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-core",
+        "-p",
+        "om9-exchange",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "test_count": 0,
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-port-20261019/clippy-core-exchange.log",
+      "log_sha256": "15f3601dd46ecd8e32cc4d4cbb7a2576329024566531c9f91ca816bf12d89945"
+    },
+    {
+      "name": "workspace-all",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--no-fail-fast",
+        "-j",
+        "2"
+      ],
+      "exit_code": 101,
+      "test_count": 1236,
+      "passed_suites": 173,
+      "failed_suites": 2,
+      "failed_targets": [
+        "om9-app --test mesh_fill",
+        "om9-app --test ui_events"
+      ],
+      "known_unrelated": "Both failures pre-date this port and expect the removed CPU painter; docs/openmatrix9-progress.json:12939 records them.",
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-port-20261019/workspace-all.log",
+      "log_sha256": "541d85b31bab944da3b2f013b1f29fb241bbcb9469d6edcfef839f95cb9616a4"
+    }
+  ],
+  "ported": {
+    "om9-core/src/three_dm.rs": "rust/src/core_3dm.rs",
+    "om9-exchange/src/three_dm.rs": "rust/src/core_3dm_archive.rs + rust/src/layer_state.rs",
+    "om9-exchange/src/three_dm_clipboard.rs": "rust/src/layer_clipboard.rs",
+    "tests": [
+      "rust/tests/core_3dm.rs",
+      "rust/tests/core_3dm_archive.rs",
+      "rust/tests/core_3dm_manifest.rs",
+      "rust/tests/core_3dm_schema2.rs",
+      "rust/tests/layer_clipboard.rs",
+      "rust/tests/native_merge_catalog.rs"
+    ]
+  },
+  "not_ported": [
+    "Phase2 #[unsafe(no_mangle)] FFI wrappers (standalone calls safe Rust)",
+    "FreeCAD/Qt/Python host adapters",
+    "native openNURBS writer and geometry-to-native export mapping (S3)",
+    "layer effective-state/mutation internals already owned by om9-core::layers"
+  ]
+}

@@ -116,7 +116,7 @@ def live_audit(binary: Path, model: Path, profile: Path, environment: dict[str, 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--binary", type=Path, default=ROOT / "standalone/target/release/om9.exe")
+    parser.add_argument("--binary", type=Path, default=ROOT / "target/release/om9.exe")
     parser.add_argument("--output", type=Path, default=ROOT / "docs/validation/2026-10-13-standalone-process.json")
     arguments = parser.parse_args()
     binary = arguments.binary.resolve(strict=True)

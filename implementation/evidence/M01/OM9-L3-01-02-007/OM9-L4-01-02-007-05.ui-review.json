@@ -1,0 +1,43 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-02-007-05",
+  "l3_id": "OM9-L3-01-02-007",
+  "title": "Undo Redo Journal",
+  "oracle": {
+    "positive": "Create object -> undo removes -> redo restores stable ID and layer",
+    "negative": "Undo after delete/reorder must not replay corrupted references"
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-16",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-02, so acceptance rests on the automated checks below; no human item is requested.",
+    "scope": "exercised through the controller API (session, coordinator), not through the window"
+  },
+  "checks_run": [
+    "RED: NO FAILING ASSERTION. The first run of tests/command_transactions.rs was green (5 passed; 0 failed): the behaviour these three items demand was already correct in the code. This is recorded as the honest result, not as missing evidence — the fixtures PIN the contract, and the cluster's real finding is that the plan's wording 'one transaction and one revision' does not match the code: context_revision is the document identity token and does not move per edit (the probe in the log), while the per-action counter is the journal/epoch. The api.md states that instead of pretending otherwise.",
+    "GREEN: cargo test -p om9-app --test command_transactions -> 5 passed; 0 failed (T1..T3, U1..U4, V1..V2, W1..W4, X1..X3, Y1..Y4)",
+    "cargo test -p om9-app --lib: 87 passed; cargo test -p om9-core: every group ok (the coordinator's all-or-nothing contract)",
+    "cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: tools/validate_m01_l3_003_panels.py -> 7/7 PASS"
+  ],
+  "code_change": [
+    "Khong doi code san pham.",
+    "Pinned: undo go entity va chuyen mot muc sang phia redo; redo tra lai CUNG id va CUNG layer; lenh moi sau undo XOA phia redo (redo_before=1 -> redo_after=0) nen tham chieu tien khong con dung bi bo di chu khong phat lai; undo/redo khi dang chay lenh la Busy."
+  ],
+  "artefacts": [
+    "OM9-L4-01-02-007-02.red.log",
+    "OM9-L4-01-02-007-02.green.log",
+    "OM9-L4-01-02-007-03.diffstat.txt",
+    "OM9-L4-01-02-007-03.target-test.log",
+    "OM9-L4-01-02-007-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_02_l3_007_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

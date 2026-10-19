@@ -1,0 +1,42 @@
+{
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "scope": "exercised through the controller API and the pure event log",
+    "role": "plan gate: this item requires no manual test",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-02, so acceptance rests on the automated checks below; no human item is requested.",
+    "date_utc": "2026-10-16"
+  },
+  "oracle": {
+    "negative": "Observer panic/exception handled without corrupting dispatch transaction",
+    "positive": "Commands emit started/progress/warn/finished typed events with monotonic ordering"
+  },
+  "implementer": "agent session (implementer never signs)",
+  "checks_run": [
+    "RED: there was no command-level event type at all, so the fixtures had nothing to read; the first run of tests/command_events_surface.rs was 4 passed; 1 failed (run_len('line') = 0: an event names the command by FEATURE ID, as the registry does, not by display name).",
+    "GREEN: cargo test -p om9-app --test command_events_surface -> 5 passed; 0 failed (Z1..Z4, AA1..AA4)",
+    "cargo test -p om9-app --lib: 90 passed (includes the 3 command_events unit tests, one of which proves a panicking observer is contained)",
+    "cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0"
+  ],
+  "schema": "om9.m01.ui-review.v1",
+  "artefacts": [
+    "OM9-L4-01-02-010-02.red.log",
+    "OM9-L4-01-02-010-02.green.log",
+    "OM9-L4-01-02-010-03.diffstat.txt",
+    "OM9-L4-01-02-010-03.target-test.log",
+    "OM9-L4-01-02-010-05.regression.log"
+  ],
+  "title": "Command Event And Observer API",
+  "gate": {
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false,
+    "m01_l2_01_02_l3_010_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE"
+  },
+  "l3_id": "OM9-L3-01-02-010",
+  "task_id": "OM9-L4-01-02-010-05",
+  "code_change": [
+    "command_events.rs (new, pure): EventKind { Started, Progress, Warn, Finished }, EventOutcome { Committed, Cancelled, Refused }, CommandEvent { sequence, kind, command, detail, outcome }, EventLog with a total sequence and MAX_EVENTS = 256, Observer, notify (catch_unwind, returns whether the observer survived) and notify_all (counts survivors).",
+    "session.rs: the Controller owns one EventLog and emits Started on dispatch, Progress on the first point of a two-point command, Finished(Committed|Cancelled|Refused) at the end, plus Controller::warn for a refusal inside a run."
+  ],
+  "manual_test_gate": "AUTO_ONLY"
+}

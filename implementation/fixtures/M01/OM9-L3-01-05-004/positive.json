@@ -1,0 +1,11 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-004",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-004-POS",
+      "test": "the_sphere_normal_is_the_unit_radial_direction",
+      "expected": "|P| = 5, |N| = 1, and N is parallel to P (the radial direction)"
+    }
+  ]
+}
