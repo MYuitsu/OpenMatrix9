@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-001",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "exact-zero-line",
+      "call": "Curve::Line start == end",
+      "expect": {
+        "error": "Invalid(degenerate line)"
+      }
+    },
+    {
+      "id": "below-tolerance-line",
+      "call": "classify_curve(0.0005 mm line, tolerance 0.001)",
+      "expect": {
+        "error": "Invalid(degenerate curve within tolerance)",
+        "not inferred as": [
+          "Point",
+          "Polygon"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+[workspace]
+members = ["crates/om9-core", "crates/om9-archive", "crates/om9-app", "crates/om9-scene", "crates/om9-native-owner", "crates/om9-exchange", "crates/om9-kernel", "crates/om9-render", "crates/om9-3dm"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "LGPL-2.1-or-later"
+rust-version = "1.88"
+
+[workspace.dependencies]
+serde = { version = "=1.0.228", features = ["derive", "rc"] }
+# `float_roundtrip` makes JSON float parsing correctly rounded, so a stored f64
+# (identity-adjacent geometry parameters) survives encode/decode with its exact
+# bits in every crate. Without it serde_json's fast path can return a
+# neighbouring double, which the archive's own save verification then refuses.
+serde_json = { version = "=1.0.150", features = ["float_roundtrip"] }
+sha2 = "=0.10.9"
+uuid = { version = "=1.23.3", features = ["v4", "serde"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1

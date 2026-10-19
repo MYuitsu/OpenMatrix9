@@ -1,0 +1,71 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-14",
+  "milestone": "AFTER",
+  "title": "14-febe-clayemboss-brush-stamp-sculpt",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "ClayEmboss brush/sculpt/stamp.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/14-febe-clayemboss-brush-stamp-sculpt/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-14",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/14-febe-clayemboss-brush-stamp-sculpt/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/14-febe-clayemboss-brush-stamp-sculpt/",
+    "scope": "ClayEmboss brush/sculpt/stamp.",
+    "exclude": "Toàn bộ hoãn; không chặn NURBS jewelry MVP.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          53,
+          77
+        ],
+        "pdf_pages_1based": [
+          59,
+          83
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 5,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/14-febe-clayemboss-brush-stamp-sculpt/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-14-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-14 - 14-febe-clayemboss-brush-stamp-sculpt/L3-001 - Clayemboss Stamp Brush/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-14-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-14 - 14-febe-clayemboss-brush-stamp-sculpt/L3-002 - Clayemboss Carbon Copy And Brush/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-14-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-14 - 14-febe-clayemboss-brush-stamp-sculpt/L3-003 - Clayemboss Brush Sculpt/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-14-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-14 - 14-febe-clayemboss-brush-stamp-sculpt/L3-004 - Clayemboss Smoothing Brush/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-14-005",
+      "file": "AFTER - Post-Release Extensions/L2-09-14 - 14-febe-clayemboss-brush-stamp-sculpt/L3-005 - Clayemboss Brush Settings And Preview/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

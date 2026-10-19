@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-007",
+  "l4": "OM9-L4-01-02-007-02",
+  "case": "undo-redo-journal-positive",
+  "positive_oracle": "Create object -> undo removes -> redo restores stable ID and layer",
+  "cases": [
+    {
+      "id": "V1-undo-then-redo-restores-the-same-object",
+      "expect": {
+        "after_undo": {
+          "entities": 0,
+          "undo_entries": 0,
+          "redo_entries": 1
+        },
+        "after_redo": {
+          "entities": 1,
+          "undo_entries": 1,
+          "redo_entries": 0,
+          "same_id": true,
+          "same_layer": true
+        }
+      }
+    },
+    {
+      "id": "V2-the-journal-walks-back-and-forward-through-several-commands",
+      "commands": 3,
+      "expect": {
+        "undo_three": 0,
+        "redo_three": 3
+      }
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "level": "L1",
+  "id": "OM9-M03",
+  "milestone": "M03",
+  "title": "Curve, Surface, Solid và trao đổi 3DM",
+  "planning_state": "NOT_STARTED",
+  "planning_only": true,
+  "module_count": 14,
+  "l3_count": 243,
+  "l4_count": 854,
+  "modules": [
+    {
+      "id": "OM9-L2-01-09",
+      "file": "M03 - Geometry 3DM/L2-01-09 - 01-be-occt-geometry/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-10",
+      "file": "M03 - Geometry 3DM/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-11",
+      "file": "M03 - Geometry 3DM/L2-01-11 - 03-be-occt/L2.json"
+    },
+    {
+      "id": "OM9-L2-01-13",
+      "file": "M03 - Geometry 3DM/L2-01-13 - 14-febe-import-rhino-3dm/L2.json"
+    },
+    {
+      "id": "OM9-L2-02-04",
+      "file": "M03 - Geometry 3DM/L2-02-04 - 04/L2.json"
+    },
+    {
+      "id": "OM9-L2-02-05",
+      "file": "M03 - Geometry 3DM/L2-02-05 - 05/L2.json"
+    },
+    {
+      "id": "OM9-L2-02-06",
+      "file": "M03 - Geometry 3DM/L2-02-06 - 06-febe-rhino/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-08",
+      "file": "M03 - Geometry 3DM/L2-03-08 - 07-febe-matrix-top11/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-16",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-17",
+      "file": "M03 - Geometry 3DM/L2-03-17 - 09-febe/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-18",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-19",
+      "file": "M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-20",
+      "file": "M03 - Geometry 3DM/L2-03-20 - 12-febe-matrix/L2.json"
+    },
+    {
+      "id": "OM9-L2-04-01",
+      "file": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L2.json"
+    }
+  ],
+  "implementation_targets_by_milestone": {
+    "M03": 220,
+    "M04": 1,
+    "M08": 22
+  },
+  "note": " Một số L3 có owner nằm tại milestone này nhưng được lên lịch thực hiện ở milestone khác; giữ ID và owner gốc.",
+  "m03_l4_scope": {
+    "l3_total_in_folder": 243,
+    "l3_owned_by_m03": 220,
+    "l3_deferred_to_m04_m08": 23,
+    "l4_planned_owned_by_m03": 854,
+    "stage_gate_counts_l4": {
+      "G03-A": 61,
+      "G03-B": 223,
+      "G03-C": 211,
+      "G03-D": 293,
+      "G03-E": 66
+    },
+    "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+    "source_revision_opennurbs_for_3dm": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "minigate_order": [
+      "G03-A",
+      "G03-B",
+      "G03-C",
+      "G03-D",
+      "G03-E"
+    ],
+    "previous_milestones_require_actual_acceptance": [
+      "M00",
+      "M01",
+      "M02"
+    ],
+    "no_implementation_executed": true,
+    "only_json_planning_files": true,
+    "single_l4_at_a_time": true,
+    "manual_or_binary_fixture_blockers_must_not_be_auto_passed": true,
+    "backend_ownership_for_ui_menus_must_be_confirmed": true,
+    "evidence_outputs_are_future_execution_paths_not_bundled_files": true,
+    "source_is_referenced_not_bundled_in_planning_zip": true
+  },
+  "m03_execution_hardening": {
+    "purpose": "Plan-only handoff: high-precision role acceptance, focused tests registration, independent oracles; not a claim of verified implementation",
+    "L4_total": 854,
+    "L3_owner_total": 220,
+    "L3_deferred_total": 23,
+    "risk_high_ui_receipts_are_proposed": true,
+    "pilot_L3_ids": [
+      "OM9-L3-01-09-001",
+      "OM9-L3-01-09-002",
+      "OM9-L3-01-09-006",
+      "OM9-L3-01-09-007",
+      "OM9-L3-01-10-001",
+      "OM9-L3-01-10-002",
+      "OM9-L3-01-10-003",
+      "OM9-L3-01-10-006",
+      "OM9-L3-01-11-001",
+      "OM9-L3-01-11-003",
+      "OM9-L3-01-13-001",
+      "OM9-L3-01-13-002",
+      "OM9-L3-01-13-003",
+      "OM9-L3-01-13-006",
+      "OM9-L3-01-13-007",
+      "OM9-L3-01-13-009",
+      "OM9-L3-01-13-012",
+      "OM9-L3-02-04-003",
+      "OM9-L3-02-04-008",
+      "OM9-L3-02-05-005",
+      "OM9-L3-02-05-007",
+      "OM9-L3-02-06-006",
+      "OM9-L3-03-17-016",
+      "OM9-L3-03-18-001"
+    ],
+    "test_handoff_in_each_L3": "m03_luna_execution_contract.focused_test_handoff",
+    "each_L4_handoff": "execution_handoff",
+    "role_acceptance_taxonomy": {
+      "SOURCE_MAP": {
+        "artifact_kind": "reviewed_upstream_symbol_map",
+        "feature_runtime_required": false
+      },
+      "CONTRACT_FIXTURE": {
+        "artifact_kind": "api_and_deterministic_fixture_spec",
+        "feature_runtime_required": false
+      },
+      "IMPLEMENT": {
+        "artifact_kind": "code_diff_with_compiling_focused_test",
+        "feature_runtime_required": true
+      },
+      "REGRESSION": {
+        "artifact_kind": "repeatable_regression_suite_results",
+        "feature_runtime_required": true
+      },
+      "INTEGRATION_STRESS": {
+        "artifact_kind": "stress_fixture_and_invariant_results",
+        "feature_runtime_required": true
+      },
+      "DISPATCH_CONTRACT": {
+        "artifact_kind": "command_to_backend_contract",
+        "feature_runtime_required": false
+      },
+      "WIRE_UI": {
+        "artifact_kind": "ui_dispatch_with_safe_disabled_fallback",
+        "feature_runtime_required": true
+      },
+      "ACCEPTANCE": {
+        "artifact_kind": "end_to_end_feature_acceptance",
+        "feature_runtime_required": true
+      }
+    },
+    "runtime_test_registration_policy": "Every planned test name must be added to real Rust code; proposed cargo command is not runnable until registered and verified; do not fabricate PASS",
+    "prerequisites": [
+      "M00",
+      "M01",
+      "M02"
+    ],
+    "minigate_sequence": [
+      "G03-A",
+      "G03-B",
+      "G03-C",
+      "G03-D",
+      "G03-E"
+    ],
+    "gate_decision_algorithm": [
+      "A candidate L4 may START only if previous milestone acceptance receipts valid, earlier mini-gates accepted and required_l4_verified_ids all have validated, independently recorded success.",
+      "DOCUMENT_REVIEW_ONLY roles complete when scoped artifact, source SHA/contract and review receipt exist; they do NOT grant L3 feature acceptance.",
+      "RUNTIME_RECEIPTS_REQUIRED roles require actual compiled code/fixture, focused positive and negative tests with exit_code 0 and observed_vs_expected oracle within tolerance.",
+      "If UI review/legal approval required then READY_FOR_REVIEW until human reviewer signs receipt; agent must never self-sign.",
+      "L3 accepted only after its ACCEPTANCE L4 is independently verified and all required runtime and document dependencies are satisfied.",
+      "Mini-gate accepted only when every owned L3 assigned to that gate is accepted, its test set is re-run in integration, and approval is recorded.",
+      "Never interpret planning_state, checklist text or mere existence of an evidence file as proof of PASS; validate command outputs, hashes and oracle on real checkout."
+    ],
+    "receipt_schema_contract_future_execution_only": {
+      "task_id": "immutable ID",
+      "source_sha": "git revision actually built",
+      "commands": [
+        "actual command, cwd, exit_code, log_sha256"
+      ],
+      "artifact_sha256": "computed from file",
+      "observed_vs_expected": [
+        "measured numbers, tolerances"
+      ],
+      "prerequisites": [
+        "validated success receipts"
+      ],
+      "human_approval_if_applicable": "independently signed",
+      "status_values": [
+        "NOT_STARTED",
+        "BLOCKED",
+        "READY_FOR_REVIEW",
+        "VERIFIED_PASS"
+      ]
+    },
+    "fixture_and_source_gap_policy": {
+      "three_dm_real_binaries_bundled": false,
+      "rust_tests_registered_in_checkout": false,
+      "source_anchors_confirmed_at_pinned_remote_but_not_local_checkout": true,
+      "on_gap": "BLOCKED_SOURCE/BLOCKED_ENV/BLOCKED_FIXTURE/BLOCKED_TEST/BLOCKED_APPROVAL as applicable"
+    },
+    "not_tested_builds": true,
+    "not_evaluated_model_completion": true
+  },
+  "hosted_l4_from": {
+    "M08": 44
+  },
+  "hosted_l4_note": "M08 keeps its canonical L3 ids and its L1 records l4_placed_by_milestone {M03: 44, M08: 177}; the 44 M08 L4 records are physically hosted in M03, so M03's physical L4 count is declared + 44.",
+  "depends_on_milestones": [
+    "M01"
+  ]
+}

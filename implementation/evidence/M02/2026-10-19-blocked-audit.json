@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-18T21:31:34.425910+00:00",
+  "module": "OM9-L2-01-07",
+  "status": "blocked",
+  "previous_goal_turn_classification": "progress: completed and verified nested/mirrored occurrence subselection",
+  "blocker_goal_turns": 3,
+  "blocker": "Required v2 architecture/backend/ownership policy unavailable before native BRep model/FFI decisions",
+  "rule_source": "AGENTS.md:71",
+  "rule": "Read OpenMatrix9_Codex_Spec_v2/AGENTS.md, RCORE-00, CODE_GUIDE, BACKEND_POLICY, MATRIX9_UI_CONTRACT and MIGRATION_LEDGER before architecture/FFI/build decisions, then exact feature only. Do not fallback to v1. Local normalized v2 specs are sufficient; resolve unknowns via bounded sources only. Preserve v1 and historical reports; update v2/catalog/lookup/status/manifest/README/live ledger with actual standalone evidence. Legacy FreeCAD builds use the shared SDK policy only for tasks expressly scoped to the old host.",
+  "verified": {
+    "canonical_v2_directory_exists": false,
+    "v2_index_paths": 0,
+    "v2_head_root": false,
+    "v2_in_reference_registry": false,
+    "brep_model_variant_exists": false,
+    "brep_tag_result": "Error::Unsupported(\"brep geometry\")",
+    "occurrence_path_subselection": "VALIDATED",
+    "m02_ui_human_approval": null
+  },
+  "completion": "NOT_ACHIEVED: native BRep picking/topology, downstream subentity acceptance and M02-UI external review remain",
+  "required_input": "Path to the actual OpenMatrix9_Codex_Spec_v2 package, or restoration of that package in this checkout",
+  "resume_action": "Read v2 AGENTS/RCORE-00/CODE_GUIDE/BACKEND_POLICY/MATRIX9_UI_CONTRACT/MIGRATION_LEDGER; then implement the native BRep owner and exact topology mapping under those contracts"
+}

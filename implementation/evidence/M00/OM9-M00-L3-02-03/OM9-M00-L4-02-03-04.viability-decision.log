@@ -1,0 +1,18 @@
+# L4-02-03-04 Quyet dinh viability cho kernel: tong hop tu 8 check + degenerate + mesh # utc: 2026-10-17
+# harness: native/occt-rust-proof (feasibility only; M00 has no product code)
+# pin: OCCT 8.0.1 (native/occt/pin.json, commit b8f597c677811d1f9f4d8a97f5ae2825c0353a42)
+# commands: cargo test / cargo run --bin numeric
+
+
+## JSON do duoc
+{"occt_version": "8.0.1", "checks": [{"name": "box_volume_mm3", "expected": 400.000000000000, "measured": 400.000000000000, "error": 1.137e-13, "tolerance": 1.0e-9, "pass": true}, {"name": "box_area_mm2", "expected": 360.000000000000, "measured": 360.000000000000, "error": 0.000e0, "tolerance": 1.0e-9, "pass": true}, {"name": "sphere_volume_mm3", "expected": 523.598775598299, "measured": 523.598775598299, "error": 1.137e-13, "tolerance": 1.0e-7, "pass": true}, {"name": "sphere_area_mm2", "expected": 314.159265358979, "measured": 314.159265358979, "error": 0.000e0, "tolerance": 1.0e-7, "pass": true}, {"name": "cylinder_volume_mm3", "expected": 50.265482457437, "measured": 50.265482457437, "error": 7.105e-15, "tolerance": 1.0e-9, "pass": true}, {"name": "cylinder_area_mm2", "expected": 75.398223686155, "measured": 75.398223686155, "error": 1.421e-14, "tolerance": 1.0e-7, "pass": true}, {"name": "fillet_volume_mm3", "expected": 399.141592653590, "measured": 399.141592653590, "error": 5.684e-14, "tolerance": 1.0e-6, "pass": true}, {"name": "offset_volume_mm3", "expected": 128.000000000000, "measured": 128.000000000000, "error": 2.842e-14, "tolerance": 1.0e-6, "pass": true}], "degenerate": [{"case": "cut_with_touching_box", "valid": true, "volume": 400.000000000000}, {"case": "offset_past_the_wall", "valid": false, "volume": 0.000000000000}, {"case": "box_at_kernel_resolution", "reported_error": "kernel failure: Standard_DomainError"}], "mesh": [{"tolerance": 0.01, "max_node_deviation": 8.882e-16, "triangles": 5008, "boundary_edges": 0, "non_manifold_edges": 2, "closed": true}, {"tolerance": 0.001, "max_node_deviation": 1.776e-15, "triangles": 50424, "boundary_edges": 0, "non_manifold_edges": 2, "closed": true}], "failures": 0, "decision": "VIABLE"}
+
+## cargo test
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.32s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

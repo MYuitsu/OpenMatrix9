@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-006",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "valid-project",
+      "expect": {
+        "ids/layers/faces": "restored",
+        "validate": "Ok"
+      }
+    },
+    {
+      "id": "explicit-v1-migration",
+      "expect": {
+        "to_version": 4,
+        "ids": "unchanged"
+      }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "level": "L2",
+  "id": "OM9-M00-L2-06",
+  "milestone": "M00",
+  "title": "License / redistribution compliance",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+  "definition": {
+    "module_id": "OM9-M00-L2-06",
+    "title": "License / redistribution compliance",
+    "gate_id": "G00-06",
+    "role": "FEASIBILITY_GATE_ONLY_NO_IMPLEMENTATION_OWNERSHIP",
+    "l3_items": [
+      {
+        "l3_id": "OM9-M00-L3-06-01",
+        "title": "Software license and reuse strategy",
+        "l4_count": 4
+      },
+      {
+        "l3_id": "OM9-M00-L3-06-02",
+        "title": "Assets, trademarks and release notices",
+        "l4_count": 4
+      }
+    ]
+  },
+  "children_l3": [
+    {
+      "id": "OM9-M00-L3-06-01",
+      "file": "M00 - Feasibility, Legal/L2-06 - License/L3-01 - Software license and reuse/l3.json"
+    },
+    {
+      "id": "OM9-M00-L3-06-02",
+      "file": "M00 - Feasibility, Legal/L2-06 - License/L3-02 - Assets, trademarks and release/l3.json"
+    }
+  ],
+  "gate_id": "G00-06",
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
+}

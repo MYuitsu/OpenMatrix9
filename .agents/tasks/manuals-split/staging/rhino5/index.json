@@ -1,0 +1,8040 @@
+{
+ "pdf": "h:\\OpenMatrix9\\manuals\\rhino5.pdf",
+ "pdfkey": "rhino5",
+ "page_count": 284,
+ "body_font_size": 9,
+ "ocr_available": false,
+ "toc": [
+  [
+   1,
+   "Section I: Working in 3-D",
+   9
+  ],
+  [
+   1,
+   "Introduction",
+   11
+  ],
+  [
+   2,
+   "The Rhino interface",
+   11
+  ],
+  [
+   2,
+   "Rhino commands",
+   12
+  ],
+  [
+   2,
+   "Start from the menu",
+   12
+  ],
+  [
+   2,
+   "Start from a toolbar icon",
+   14
+  ],
+  [
+   2,
+   "Start from the command line",
+   18
+  ],
+  [
+   2,
+   "Undo a mistake",
+   21
+  ],
+  [
+   2,
+   "The command window",
+   22
+  ],
+  [
+   2,
+   "Command options",
+   22
+  ],
+  [
+   2,
+   "Repeat the last command",
+   22
+  ],
+  [
+   2,
+   "Get help any time",
+   23
+  ],
+  [
+   1,
+   "Rhino Objects",
+   25
+  ],
+  [
+   2,
+   "Why NURBS modeling",
+   25
+  ],
+  [
+   2,
+   "Points",
+   25
+  ],
+  [
+   2,
+   "Curves",
+   26
+  ],
+  [
+   2,
+   "Surfaces",
+   26
+  ],
+  [
+   3,
+   "Closed and open surfaces",
+   27
+  ],
+  [
+   3,
+   "Trimmed and untrimmed surfaces",
+   27
+  ],
+  [
+   3,
+   "Surface isoparametric and edge curves",
+   29
+  ],
+  [
+   2,
+   "Polysurfaces",
+   30
+  ],
+  [
+   2,
+   "Solids",
+   30
+  ],
+  [
+   2,
+   "Light-weight extrusion objects",
+   31
+  ],
+  [
+   2,
+   "Polygon mesh objects",
+   31
+  ],
+  [
+   1,
+   "Selecting Objects",
+   33
+  ],
+  [
+   2,
+   "Select objects with windows",
+   34
+  ],
+  [
+   2,
+   "Other ways of selecting",
+   35
+  ],
+  [
+   2,
+   "Sub-object selection",
+   37
+  ],
+  [
+   1,
+   "Navigating Viewports",
+   39
+  ],
+  [
+   2,
+   "Viewport projection",
+   39
+  ],
+  [
+   2,
+   "Viewport navigation",
+   39
+  ],
+  [
+   3,
+   "Mouse navigation",
+   40
+  ],
+  [
+   2,
+   "Viewport display modes",
+   40
+  ],
+  [
+   3,
+   "Wireframe",
+   41
+  ],
+  [
+   3,
+   "Shaded",
+   41
+  ],
+  [
+   3,
+   "Other shaded modes",
+   42
+  ],
+  [
+   2,
+   "Viewport title",
+   43
+  ],
+  [
+   3,
+   "To activate the viewport title menu",
+   43
+  ],
+  [
+   1,
+   "Accurate Modeling",
+   45
+  ],
+  [
+   2,
+   "The Rhino cursor",
+   45
+  ],
+  [
+   2,
+   "Snap to the construction plane grid",
+   45
+  ],
+  [
+   2,
+   "Constrain the angle of movement",
+   45
+  ],
+  [
+   2,
+   "Snap to existing objects",
+   46
+  ],
+  [
+   3,
+   "Persistent object snaps",
+   46
+  ],
+  [
+   3,
+   "Special case object snaps",
+   47
+  ],
+  [
+   2,
+   "Cursor constraints",
+   47
+  ],
+  [
+   3,
+   "Distance constraint",
+   47
+  ],
+  [
+   3,
+   "Angle constraint",
+   47
+  ],
+  [
+   3,
+   "Distance and angle together",
+   48
+  ],
+  [
+   2,
+   "Elevator mode",
+   48
+  ],
+  [
+   2,
+   "SmartTrack™",
+   48
+  ],
+  [
+   2,
+   "Coordinate systems",
+   49
+  ],
+  [
+   3,
+   "Cartesian coordinates",
+   49
+  ],
+  [
+   3,
+   "Right-hand rule",
+   49
+  ],
+  [
+   3,
+   "World coordinates",
+   49
+  ],
+  [
+   3,
+   "Construction plane coordinates",
+   49
+  ],
+  [
+   3,
+   "Relative coordinates",
+   50
+  ],
+  [
+   1,
+   "Create Surfaces from Curves",
+   53
+  ],
+  [
+   2,
+   "Edge curves",
+   53
+  ],
+  [
+   2,
+   "Extrude curves",
+   54
+  ],
+  [
+   2,
+   "Loft curves",
+   56
+  ],
+  [
+   2,
+   "Revolve curves",
+   57
+  ],
+  [
+   2,
+   "Revolve curves with a rail",
+   60
+  ],
+  [
+   2,
+   "Sweep along one rail curve",
+   64
+  ],
+  [
+   2,
+   "Sweep along two rail curves",
+   66
+  ],
+  [
+   1,
+   "Edit Curves and Surfaces",
+   69
+  ],
+  [
+   2,
+   "Join",
+   69
+  ],
+  [
+   2,
+   "Explode",
+   69
+  ],
+  [
+   2,
+   "Trim and Split",
+   69
+  ],
+  [
+   2,
+   "Control-point editing",
+   69
+  ],
+  [
+   3,
+   "Control point visibility",
+   69
+  ],
+  [
+   3,
+   "Change control point locations",
+   70
+  ],
+  [
+   3,
+   "Add, delete, or redistribute control points",
+   70
+  ],
+  [
+   2,
+   "Curve and surface degree",
+   70
+  ],
+  [
+   1,
+   "Transforms - Move, Copy, Rotate, Scale",
+   73
+  ],
+  [
+   2,
+   "Move",
+   73
+  ],
+  [
+   3,
+   "Move objects using distance values",
+   73
+  ],
+  [
+   3,
+   "Move objects by dragging",
+   74
+  ],
+  [
+   3,
+   "Elevator mode",
+   75
+  ],
+  [
+   2,
+   "Copy",
+   77
+  ],
+  [
+   2,
+   "Rotate",
+   81
+  ],
+  [
+   2,
+   "Scale",
+   85
+  ],
+  [
+   2,
+   "Mirror",
+   88
+  ],
+  [
+   2,
+   "Array",
+   91
+  ],
+  [
+   2,
+   "Orient",
+   91
+  ],
+  [
+   1,
+   "Curve and Surface Analysis",
+   93
+  ],
+  [
+   2,
+   "Measure distance, angle, and radius",
+   93
+  ],
+  [
+   2,
+   "Curve and surface direction",
+   93
+  ],
+  [
+   2,
+   "Curvature",
+   94
+  ],
+  [
+   2,
+   "Visual surface analysis",
+   94
+  ],
+  [
+   3,
+   "Environment map",
+   94
+  ],
+  [
+   3,
+   "Curvature analysis",
+   95
+  ],
+  [
+   3,
+   "Draft angle analysis",
+   95
+  ],
+  [
+   2,
+   "Edge evaluation",
+   96
+  ],
+  [
+   2,
+   "Diagnostics",
+   96
+  ],
+  [
+   1,
+   "Organization and Annotation",
+   97
+  ],
+  [
+   2,
+   "Layers",
+   97
+  ],
+  [
+   2,
+   "Groups",
+   98
+  ],
+  [
+   2,
+   "Blocks",
+   98
+  ],
+  [
+   2,
+   "Worksessions",
+   98
+  ],
+  [
+   2,
+   "Dimensions",
+   98
+  ],
+  [
+   2,
+   "Text",
+   99
+  ],
+  [
+   2,
+   "Leaders",
+   99
+  ],
+  [
+   2,
+   "Dots",
+   100
+  ],
+  [
+   2,
+   "Hidden line removal",
+   100
+  ],
+  [
+   2,
+   "Notes",
+   100
+  ],
+  [
+   1,
+   "Render",
+   101
+  ],
+  [
+   2,
+   "Lights",
+   101
+  ],
+  [
+   2,
+   "Materials",
+   102
+  ],
+  [
+   2,
+   "Environment",
+   103
+  ],
+  [
+   2,
+   "Ground Plane",
+   103
+  ],
+  [
+   2,
+   "Render",
+   104
+  ],
+  [
+   1,
+   "Section II: Tutorials",
+   105
+  ],
+  [
+   1,
+   "Pull Toy - Solids and Transforms",
+   107
+  ],
+  [
+   2,
+   "Enter coordinates",
+   107
+  ],
+  [
+   2,
+   "Draw the pull toy body",
+   107
+  ],
+  [
+   2,
+   "Draw the axles and wheel hubs",
+   110
+  ],
+  [
+   2,
+   "Draw the lug nuts",
+   112
+  ],
+  [
+   2,
+   "Array the lug nuts",
+   113
+  ],
+  [
+   2,
+   "Draw the tires",
+   114
+  ],
+  [
+   2,
+   "Mirror the wheels",
+   115
+  ],
+  [
+   2,
+   "Draw the eyes",
+   117
+  ],
+  [
+   2,
+   "Make the pull cord",
+   122
+  ],
+  [
+   1,
+   "Flashlight - Revolve Curves",
+   133
+  ],
+  [
+   2,
+   "Set up the model",
+   133
+  ],
+  [
+   2,
+   "Draw a centerline",
+   135
+  ],
+  [
+   2,
+   "Draw the body profile curve",
+   136
+  ],
+  [
+   2,
+   "Draw the lens profile curve",
+   137
+  ],
+  [
+   2,
+   "Build the flashlight body",
+   138
+  ],
+  [
+   2,
+   "Create the lens",
+   141
+  ],
+  [
+   1,
+   "Headphone - Sweep, Loft, and Extrude",
+   143
+  ],
+  [
+   2,
+   "Create the speaker shell",
+   144
+  ],
+  [
+   2,
+   "Create the padding and cover",
+   148
+  ],
+  [
+   2,
+   "Create the mounting bracket",
+   150
+  ],
+  [
+   2,
+   "Create the headband",
+   154
+  ],
+  [
+   2,
+   "Round the headband ends",
+   159
+  ],
+  [
+   2,
+   "Create the speaker wire",
+   165
+  ],
+  [
+   2,
+   "Mirror the headphone parts",
+   169
+  ],
+  [
+   2,
+   "Learn more",
+   171
+  ],
+  [
+   1,
+   "Penguin - Point Editing and Blending",
+   173
+  ],
+  [
+   2,
+   "The body",
+   173
+  ],
+  [
+   2,
+   "The eyes",
+   181
+  ],
+  [
+   2,
+   "The beak",
+   187
+  ],
+  [
+   2,
+   "The feet",
+   194
+  ],
+  [
+   2,
+   "The tail",
+   204
+  ],
+  [
+   2,
+   "The wings",
+   207
+  ],
+  [
+   2,
+   "Finishing touches",
+   212
+  ],
+  [
+   2,
+   "Render",
+   214
+  ],
+  [
+   1,
+   "Boat Hull - Loft and Sweep",
+   215
+  ],
+  [
+   2,
+   "Lay out the hull curves",
+   216
+  ],
+  [
+   3,
+   "Check the curves for fairness",
+   217
+  ],
+  [
+   3,
+   "Fix the curvature",
+   217
+  ],
+  [
+   2,
+   "Create the 3-D curves",
+   218
+  ],
+  [
+   2,
+   "Revise the curves",
+   220
+  ],
+  [
+   2,
+   "Loft the hull surfaces",
+   223
+  ],
+  [
+   2,
+   "Trim the bow and bottom",
+   225
+  ],
+  [
+   2,
+   "Build the transom",
+   227
+  ],
+  [
+   2,
+   "Add the deck",
+   234
+  ],
+  [
+   1,
+   "Dragonfly - Trace Images",
+   241
+  ],
+  [
+   2,
+   "Draw the body",
+   241
+  ],
+  [
+   2,
+   "Draw the head",
+   247
+  ],
+  [
+   2,
+   "Blend the head and body",
+   255
+  ],
+  [
+   2,
+   "Draw the eyes",
+   257
+  ],
+  [
+   2,
+   "Shape the tail",
+   258
+  ],
+  [
+   2,
+   "Trace the wings",
+   259
+  ],
+  [
+   2,
+   "Draw the legs",
+   261
+  ],
+  [
+   2,
+   "Finishing touches",
+   262
+  ],
+  [
+   1,
+   "Wrap Text - Flow along surface",
+   263
+  ],
+  [
+   2,
+   "Make a surface",
+   263
+  ],
+  [
+   2,
+   "Create the objects to wrap",
+   264
+  ],
+  [
+   2,
+   "Control the object placement",
+   264
+  ],
+  [
+   1,
+   "Mechanical Part - Blocks",
+   269
+  ],
+  [
+   2,
+   "Create solid shapes",
+   269
+  ],
+  [
+   2,
+   "Drill the holes",
+   273
+  ],
+  [
+   2,
+   "Copy the holes",
+   275
+  ],
+  [
+   2,
+   "Make a 2-D drawing",
+   278
+  ],
+  [
+   2,
+   "Dimension the 2-D drawing",
+   278
+  ],
+  [
+   1,
+   "Mechanical Part - Layouts",
+   281
+  ],
+  [
+   2,
+   "Layout viewports",
+   282
+  ],
+  [
+   2,
+   "Insert a title block",
+   283
+  ],
+  [
+   1,
+   "Bookmarks",
+   -1
+  ],
+  [
+   2,
+   "Elevator",
+   48
+  ]
+ ],
+ "scanned_pages": [],
+ "repeated_headers_footers": [
+  "#"
+ ],
+ "removed_logo_hashes": [],
+ "command_name_candidates": [
+  "Accurate Modeling",
+  "Add the deck",
+  "Angle constraint",
+  "Array",
+  "Array the lug nuts",
+  "Blend the head and body",
+  "Blocks",
+  "Boat Hull - Loft and Sweep",
+  "Build the flashlight body",
+  "Build the transom",
+  "Cartesian coordinates",
+  "Change control point locations",
+  "Check the curves for fairness",
+  "Closed and open surfaces",
+  "Command options",
+  "Constrain the angle of movement",
+  "Construction plane coordinates",
+  "Control point visibility",
+  "Control the object placement",
+  "Control-point editing",
+  "Coordinate systems",
+  "Copy",
+  "Copy the holes",
+  "Create Surfaces from Curves",
+  "Create solid shapes",
+  "Create the 3-D curves",
+  "Create the headband",
+  "Create the lens",
+  "Create the mounting bracket",
+  "Create the objects to wrap",
+  "Create the padding and cover",
+  "Create the speaker shell",
+  "Create the speaker wire",
+  "Cursor constraints",
+  "Curvature",
+  "Curvature analysis",
+  "Curve and Surface Analysis",
+  "Curve and surface degree",
+  "Curve and surface direction",
+  "Curves",
+  "Diagnostics",
+  "Dimension the 2-D drawing",
+  "Dimensions",
+  "Distance and angle together",
+  "Distance constraint",
+  "Dots",
+  "Draft angle analysis",
+  "Dragonfly - Trace Images",
+  "Draw a centerline",
+  "Draw the axles and wheel hubs",
+  "Draw the body",
+  "Draw the body profile curve",
+  "Draw the eyes",
+  "Draw the head",
+  "Draw the legs",
+  "Draw the lens profile curve",
+  "Draw the lug nuts",
+  "Draw the pull toy body",
+  "Draw the tires",
+  "Drill the holes",
+  "Edge curves",
+  "Edge evaluation",
+  "Edit Curves and Surfaces",
+  "Elevator mode",
+  "Enter coordinates",
+  "Environment",
+  "Environment map",
+  "Explode",
+  "Extrude curves",
+  "Finishing touches",
+  "Flashlight - Revolve Curves",
+  "For Windows",
+  "Get help any time",
+  "Ground Plane",
+  "Groups",
+  "Hidden line removal",
+  "Insert a title block",
+  "Introduction",
+  "Join",
+  "Lay out the hull curves",
+  "Layers",
+  "Layout viewports",
+  "Leaders",
+  "Learn more",
+  "Light-weight extrusion objects",
+  "Lights",
+  "Loft curves",
+  "Loft the hull surfaces",
+  "Make a 2-D drawing",
+  "Make a surface",
+  "Make the pull cord",
+  "Materials",
+  "Mechanical Part - Blocks",
+  "Mechanical Part - Layouts",
+  "Mirror",
+  "Mirror the headphone parts",
+  "Mirror the wheels",
+  "Mouse navigation",
+  "Move",
+  "Move objects by dragging",
+  "Move objects using distance values",
+  "Navigating Viewports",
+  "Notes",
+  "Organization and Annotation",
+  "Orient",
+  "Other shaded modes",
+  "Other ways of selecting",
+  "Penguin - Point Editing and Blending",
+  "Persistent object snaps",
+  "Points",
+  "Polygon mesh objects",
+  "Polysurfaces",
+  "Pull Toy - Solids and Transforms",
+  "Relative coordinates",
+  "Render",
+  "Repeat the last command",
+  "Revise the curves",
+  "Revolve curves",
+  "Revolve curves with a rail",
+  "Rhino Objects",
+  "Rhino commands",
+  "Right-hand rule",
+  "Rotate",
+  "Round the headband ends",
+  "Scale",
+  "Select objects with windows",
+  "Selecting Objects",
+  "Set up the model",
+  "Shaded",
+  "Shape the tail",
+  "Snap to existing objects",
+  "Snap to the construction plane grid",
+  "Solids",
+  "Special case object snaps",
+  "Split",
+  "Start from a toolbar icon",
+  "Start from the command line",
+  "Start from the menu",
+  "Sub-object selection",
+  "Surface isoparametric and edge curves",
+  "Surfaces",
+  "Sweep along one rail curve",
+  "Sweep along two rail curves",
+  "Table of Contents",
+  "Text",
+  "The Rhino cursor",
+  "The Rhino interface",
+  "The beak",
+  "The body",
+  "The command window",
+  "The eyes",
+  "The feet",
+  "The tail",
+  "The wings",
+  "Trace the wings",
+  "Trim and",
+  "Trim the bow and bottom",
+  "Trimmed and untrimmed surfaces",
+  "Undo a mistake",
+  "Viewport display modes",
+  "Viewport navigation",
+  "Viewport projection",
+  "Viewport title",
+  "Visual surface analysis",
+  "Why NURBS modeling",
+  "Wireframe",
+  "Worksessions",
+  "World coordinates",
+  "Wrap Text - Flow along surface"
+ ],
+ "pages": [
+  {
+   "page": 1,
+   "text_file": "text/0001.md",
+   "chars": 87,
+   "images": [
+    {
+     "file": "rhino5_p1_img01.png",
+     "w": 380,
+     "h": 252,
+     "sha256": "68031272bfe39ee0dfa520821e94f83f73ad976350723dda1c42473230913df2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p1_img02.png",
+     "w": 380,
+     "h": 252,
+     "sha256": "284ebffdb69589e7b8632c33b8325ec6e6dbb4d84916a10a0fcb455efe8faaf9",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 1,
+     "text": "Rhinoceros 5"
+    },
+    {
+     "level": 2,
+     "text": "For Windows"
+    },
+    {
+     "level": 2,
+     "text": "User's Guide"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 2,
+   "text_file": "text/0002.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 3,
+   "text_file": "text/0003.md",
+   "chars": 988,
+   "images": [
+    {
+     "file": "rhino5_p3_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Table of Contents"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 4,
+   "text_file": "text/0004.md",
+   "chars": 1050,
+   "images": [
+    {
+     "file": "rhino5_p4_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 5,
+   "text_file": "text/0005.md",
+   "chars": 941,
+   "images": [
+    {
+     "file": "rhino5_p5_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 6,
+   "text_file": "text/0006.md",
+   "chars": 1074,
+   "images": [
+    {
+     "file": "rhino5_p6_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 7,
+   "text_file": "text/0007.md",
+   "chars": 97,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 8,
+   "text_file": "text/0008.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 9,
+   "text_file": "text/0009.md",
+   "chars": 57,
+   "images": [
+    {
+     "file": "rhino5_p1_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "rhino5_p1_img02.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Rhinoceros 5 User's Guide"
+    },
+    {
+     "level": 2,
+     "text": "Section I: Working in 3-D"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 10,
+   "text_file": "text/0010.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 11,
+   "text_file": "text/0011.md",
+   "chars": 1128,
+   "images": [
+    {
+     "file": "rhino5_p11_img01.png",
+     "w": 1217,
+     "h": 800,
+     "sha256": "9b5e71960f68b7ddaf03cbdae5abdf03e06e026512f22438d86136c47555d96b",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p11_img02.png",
+     "w": 1217,
+     "h": 800,
+     "sha256": "b817559c91c32362bc2d5c8eebf17d65dc054d22bd0897be7f9cb32506914910",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Introduction"
+    },
+    {
+     "level": 3,
+     "text": "The Rhino interface"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 12,
+   "text_file": "text/0012.md",
+   "chars": 1290,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Rhino commands"
+    },
+    {
+     "level": 3,
+     "text": "Start from the menu"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 13,
+   "text_file": "text/0013.md",
+   "chars": 248,
+   "images": [
+    {
+     "file": "rhino5_p13_img01.png",
+     "w": 463,
+     "h": 242,
+     "sha256": "8a4a84729243ab9e4a9a732766086969caba5a737effeaed744ae9c3fc1617fe",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p13_img02.png",
+     "w": 463,
+     "h": 242,
+     "sha256": "d6e555d2de4b4c92ef8aa325dd8723d1b23f6a60ae725609177c3e697a643964",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p13_img03.png",
+     "w": 546,
+     "h": 240,
+     "sha256": "51c3f013b5126489cdad6f4c5ffbe2fc40687ec7800558e9ba565da8bdbd6b56",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p13_img04.png",
+     "w": 546,
+     "h": 240,
+     "sha256": "ca13643a7777cb30409c836cc03c3dce56c85ae96e53204d69e597e3cf83b4f7",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 14,
+   "text_file": "text/0014.md",
+   "chars": 398,
+   "images": [
+    {
+     "file": "rhino5_p14_img01.png",
+     "w": 519,
+     "h": 240,
+     "sha256": "09144bef9c93b7ae15c580fc451ca60e8482819a85d7c3025cf60a6f34aa2e49",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p14_img02.png",
+     "w": 519,
+     "h": 240,
+     "sha256": "23a2dbbfabd27dddbc78d1e786f7075d1ce06b20189767f993d96a5cb2657f86",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p14_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d6fae4a92f410c0274970a9a003836409f1878c507f2115dab911369cf1e5038",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p14_img04.png",
+     "w": 272,
+     "h": 154,
+     "sha256": "32ba79ea1c163710a6ce511b6a14814e6440bbac4111ace0565fbafe6138f615",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p14_img05.png",
+     "w": 272,
+     "h": 154,
+     "sha256": "205b14f8969e804e0e09f930139d663216cd8de0d13c2dac118522458c020e1f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Start from a toolbar icon"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 15,
+   "text_file": "text/0015.md",
+   "chars": 138,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 16,
+   "text_file": "text/0016.md",
+   "chars": 27,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 17,
+   "text_file": "text/0017.md",
+   "chars": 456,
+   "images": [
+    {
+     "file": "rhino5_p17_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "cb5307ba322951058c28c7608ede8bc09534386b7744c2c059cf74656ca2a144",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p17_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "4ae7cbc8dcbb5206521c8b3e6076396792f782382443c4c84795443c77efbf9a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p17_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "da0eea7950cfa72632c79475e0ea8728697d228b28519afbf9b5d37c55243384",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 18,
+   "text_file": "text/0018.md",
+   "chars": 302,
+   "images": [
+    {
+     "file": "rhino5_p18_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "61381dbbf7476d426806537ff1bac056b220841e71945f9aee5000105fef806a",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Start from the command line"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 19,
+   "text_file": "text/0019.md",
+   "chars": 28,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 20,
+   "text_file": "text/0020.md",
+   "chars": 389,
+   "images": [
+    {
+     "file": "rhino5_p20_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "32f15b1c97f8c28995332c34c2f10a711ac3fe5737e05013cdcdd37e6233210c",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p20_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c7dd9875c479283f13e57b27ee829f12815e2bbb98ce550cc9e7170eb84d63b7",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p20_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "fde489316b931307ff25e6bd83ae75af128f67ca5b9f773a96fb9db6d7e60107",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 21,
+   "text_file": "text/0021.md",
+   "chars": 256,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Undo a mistake"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 22,
+   "text_file": "text/0022.md",
+   "chars": 2474,
+   "images": [
+    {
+     "file": "rhino5_p22_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "The command window"
+    },
+    {
+     "level": 3,
+     "text": "Command options"
+    },
+    {
+     "level": 3,
+     "text": "Repeat the last command"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 23,
+   "text_file": "text/0023.md",
+   "chars": 690,
+   "images": [
+    {
+     "file": "rhino5_p23_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Get help any time"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 24,
+   "text_file": "text/0024.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 25,
+   "text_file": "text/0025.md",
+   "chars": 1399,
+   "images": [
+    {
+     "file": "rhino5_p25_img01.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "f2659a8836bf6a929a694e18ad21070970d2b534f51b15028378a05cecf92318",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Rhino Objects"
+    },
+    {
+     "level": 3,
+     "text": "Why NURBS modeling"
+    },
+    {
+     "level": 3,
+     "text": "Points"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 26,
+   "text_file": "text/0026.md",
+   "chars": 1035,
+   "images": [
+    {
+     "file": "rhino5_p26_img01.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "5e1ad49721c8c1d35c216ddfc5a33a2053f6f08e460937b8834b07bd98310e35",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p26_img02.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "71a49d341d8928796d0bf1d507d6e159d0e828a99576dbfd221ceac03447d938",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Curves"
+    },
+    {
+     "level": 3,
+     "text": "Surfaces"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 27,
+   "text_file": "text/0027.md",
+   "chars": 910,
+   "images": [
+    {
+     "file": "rhino5_p27_img01.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "13627c120dd292ed27f207cf4175ce230af070e90e9f76f3c45dd1ad0f85ff10",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p27_img02.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "48996c93b51c4c87a732825d08db7d1319f46cd873d1d7fd2ae7db78efeeb763",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p27_img03.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "e668b76542f37475a450ca0729ad212f66fb8868023cbb707015d6847b1f2a9d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Closed and open surfaces"
+    },
+    {
+     "level": 3,
+     "text": "Trimmed and untrimmed surfaces"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 28,
+   "text_file": "text/0028.md",
+   "chars": 1086,
+   "images": [
+    {
+     "file": "rhino5_p28_img01.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "a1d52c7935415b00b4a32447427efd5a8401f774052af6ad9a866c6c4ac3e0f4",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p28_img02.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "25b641831b878f323301252b4905007ff890fce7b8f2ea3963f640c46c52334b",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p28_img03.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "dadc8f324c9638fb92c8c506b05161e882265e504c1d20c860e9d01000e3356b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 29,
+   "text_file": "text/0029.md",
+   "chars": 922,
+   "images": [
+    {
+     "file": "rhino5_p29_img01.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "f4bbea4b752ac588c54b155493fcff60704ad8e493b3edca33553e2373cec7b7",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p29_img02.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "fe977726c33452a66c20e0c29652223ddacf1f091810f4b99f08fc94575cebb2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p29_img03.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "bff1bb008af436c06df63719083535b1dec28c37f75635d531ccb61c13a679df",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Surface isoparametric and edge curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 30,
+   "text_file": "text/0030.md",
+   "chars": 806,
+   "images": [
+    {
+     "file": "rhino5_p30_img01.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "0e7707865bd1b20cb6f07ab92306593d56d276d380fc08f5434f39b91f378b1e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p30_img02.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "b8353b4c9a141fde0d6266e945a2ae2bab20b9fed6a32daf827d2bc2c57a8033",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p30_img03.png",
+     "w": 300,
+     "h": 197,
+     "sha256": "244761d8f2587bb553920914751a4307e9348b560dcf78dc681ba03a42b4121a",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Polysurfaces"
+    },
+    {
+     "level": 3,
+     "text": "Solids"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 31,
+   "text_file": "text/0031.md",
+   "chars": 1154,
+   "images": [
+    {
+     "file": "rhino5_p31_img01.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "3de46fa26df86d9f6b8a996410ca888ef0f454d3c4c75fb3e25bd6a0cf427a16",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p31_img02.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "fb2e504ead39283fbaa48065cb7c63597f9a54e4965dc7b536cec4ba725e0393",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p31_img03.png",
+     "w": 300,
+     "h": 200,
+     "sha256": "94e9c156c07a9f4d80ed391b600751564c7fc7de7f533ab88b4fb7cb85d7852e",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Light-weight extrusion objects"
+    },
+    {
+     "level": 3,
+     "text": "Polygon mesh objects"
+    },
+    {
+     "level": 3,
+     "text": "Note:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 32,
+   "text_file": "text/0032.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 33,
+   "text_file": "text/0033.md",
+   "chars": 657,
+   "images": [
+    {
+     "file": "rhino5_p33_img01.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "ade97f72fd151fbbf10076ab860a4b81af1bb52b9e5146d85a14b35beeab19d9",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Selecting Objects"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 34,
+   "text_file": "text/0034.md",
+   "chars": 981,
+   "images": [
+    {
+     "file": "rhino5_p34_img01.png",
+     "w": 200,
+     "h": 201,
+     "sha256": "2ab40562cce2fb0f5acc6237e319bc4cdea57505cd5b01993274565129792d98",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p34_img02.png",
+     "w": 200,
+     "h": 201,
+     "sha256": "d8c1b88e872e98d1504252f5b89f4cd137804e13bee079b2c7a7fd2ae388ad5e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p34_img03.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "8612d72c3864d5b51771135eee64abb93e3d74f153aafdf7c5f16fd0997d473b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Select objects with windows"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 35,
+   "text_file": "text/0035.md",
+   "chars": 676,
+   "images": [
+    {
+     "file": "rhino5_p35_img01.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "51dec1837b0d055c96cede9d2645b0dc2eec05911d6734d92dbb5b5e35ed0147",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p35_img02.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "904dd71beea9bfdda657ff4105f7850d7f9a590914ef60ce570415c656315bc9",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Other ways of selecting"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 36,
+   "text_file": "text/0036.md",
+   "chars": 151,
+   "images": [
+    {
+     "file": "rhino5_p36_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c04a05f9a886d69c567324bb552c79c33b5e810269d5b889e1af5e808050a66b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 37,
+   "text_file": "text/0037.md",
+   "chars": 814,
+   "images": [
+    {
+     "file": "rhino5_p37_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "80e2087f89818b848f9ba33f122a05b8657ee0b273705efedb9f22c90bd97002",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p37_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "e1f7bb3b9d28c3938fa267486bec733b6d8abda6ee2f6944aaa01db863042522",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Sub-object selection"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 38,
+   "text_file": "text/0038.md",
+   "chars": 228,
+   "images": [
+    {
+     "file": "rhino5_p38_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "2718c6f327828dbdf04a0dd24c2bc97e03b0a60f1be131bc2a1953c11085a2fa",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 39,
+   "text_file": "text/0039.md",
+   "chars": 1700,
+   "images": [
+    {
+     "file": "rhino5_p39_img01.png",
+     "w": 243,
+     "h": 143,
+     "sha256": "4ec656429d50fe0905e9e5cfef3a8a3ba03fed9c0a39b08914492ddcc0b50933",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p39_img02.png",
+     "w": 243,
+     "h": 122,
+     "sha256": "4fed098fafe0ed71c42ade8ee1b7179f5873765563d16803287ab32f4a7a1546",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Navigating Viewports"
+    },
+    {
+     "level": 3,
+     "text": "Viewport projection"
+    },
+    {
+     "level": 3,
+     "text": "Viewport navigation"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 40,
+   "text_file": "text/0040.md",
+   "chars": 2184,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Mouse navigation"
+    },
+    {
+     "level": 3,
+     "text": "Viewport display modes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 41,
+   "text_file": "text/0041.md",
+   "chars": 748,
+   "images": [
+    {
+     "file": "rhino5_p41_img01.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "c7e13b23c90688ee4e291059561ef2d639d0cafcc502906461821bdb165016c8",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p41_img02.png",
+     "w": 233,
+     "h": 173,
+     "sha256": "e23a4d60d4ab578d504b4218079c1a4baa55720266a4482f5f035540d5739db3",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p41_img03.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "05fe5889c920c75a6343fb760de5a757c122920250a7d7556a178e6127401e59",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Wireframe"
+    },
+    {
+     "level": 3,
+     "text": "Shaded"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 42,
+   "text_file": "text/0042.md",
+   "chars": 662,
+   "images": [
+    {
+     "file": "rhino5_p42_img01.png",
+     "w": 233,
+     "h": 173,
+     "sha256": "b8351214aa6d1cb120768233518474da21302ff63d4a11f8c008a321a2dc637b",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p42_img02.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "e35dc215c477b07fd13f02dd84cea3e55e17c8a1c38547c12c5b2af15c76c1e4",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p42_img03.png",
+     "w": 410,
+     "h": 200,
+     "sha256": "a32ca832b2657ae275b7a7123a85c916c8a059376d5506fd7a6dae1f45eeaae0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p42_img04.png",
+     "w": 410,
+     "h": 200,
+     "sha256": "175af42674b611d381829d6e51f23435302b185ae523a67b0aaed5955ecd6846",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Other shaded modes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 43,
+   "text_file": "text/0043.md",
+   "chars": 738,
+   "images": [
+    {
+     "file": "rhino5_p43_img01.png",
+     "w": 319,
+     "h": 222,
+     "sha256": "70dbaec0e42c6cc88e81e565e09d56ceaeac59b7ef81f9872ad5eb5726d4c1f0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p43_img02.png",
+     "w": 319,
+     "h": 222,
+     "sha256": "fac9982d610ab36123f36b211bea57bbcb2ccbf94fb4d1deaddc30c58c26f368",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Viewport title"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 44,
+   "text_file": "text/0044.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 45,
+   "text_file": "text/0045.md",
+   "chars": 1826,
+   "images": [
+    {
+     "file": "rhino5_p45_img01.png",
+     "w": 179,
+     "h": 121,
+     "sha256": "8b859239e52bcd16a128ee9ee7d0862af66928dd2478e8c78e4434390cfd7f16",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Accurate Modeling"
+    },
+    {
+     "level": 3,
+     "text": "The Rhino cursor"
+    },
+    {
+     "level": 3,
+     "text": "Snap to the construction plane grid"
+    },
+    {
+     "level": 3,
+     "text": "Constrain the angle of movement"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 46,
+   "text_file": "text/0046.md",
+   "chars": 2461,
+   "images": [
+    {
+     "file": "rhino5_p46_img01.png",
+     "w": 509,
+     "h": 146,
+     "sha256": "3f790cd83aaea0cad2e724771d0626ffac8708faf9e8e341631e1c965c212654",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p46_img02.png",
+     "w": 509,
+     "h": 146,
+     "sha256": "7a7dfbf44ef100f105f808ffe31e922763d51d3081e5ad6ef198dc6e04bec4a6",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Snap to existing objects"
+    },
+    {
+     "level": 3,
+     "text": "Persistent object snaps"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 47,
+   "text_file": "text/0047.md",
+   "chars": 1588,
+   "images": [
+    {
+     "file": "rhino5_p47_img01.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "f6618b0f1508f121ada4c462f8ddab6d988d6dd4f326e14392f7bb2e7a6405ce",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Special case object snaps"
+    },
+    {
+     "level": 3,
+     "text": "Cursor constraints"
+    },
+    {
+     "level": 3,
+     "text": "Distance constraint"
+    },
+    {
+     "level": 3,
+     "text": "Angle constraint"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 48,
+   "text_file": "text/0048.md",
+   "chars": 1584,
+   "images": [
+    {
+     "file": "rhino5_p48_img01.png",
+     "w": 250,
+     "h": 111,
+     "sha256": "66429464977dd26d1e6c9621ca1e51440479b08d449fb8ba164a21c1a49ec70a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p48_img02.png",
+     "w": 250,
+     "h": 119,
+     "sha256": "64aa06031df2c3e64c4349ac6f5d35ca318b3edec926896f7d543bef6908a725",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Distance and angle together"
+    },
+    {
+     "level": 3,
+     "text": "Elevator mode"
+    },
+    {
+     "level": 3,
+     "text": "SmartTrack™"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 49,
+   "text_file": "text/0049.md",
+   "chars": 1995,
+   "images": [
+    {
+     "file": "rhino5_p49_img01.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "0cc0246af31b476620e6e8a08a18a3b154b35e717b6e5e0059e124fd7a556885",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p49_img02.png",
+     "w": 119,
+     "h": 121,
+     "sha256": "8e3606ddaed9808cd7f58fd9aadac872ca9ed1271284eee233d34dee35209889",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Coordinate systems"
+    },
+    {
+     "level": 3,
+     "text": "Cartesian coordinates"
+    },
+    {
+     "level": 3,
+     "text": "Right-hand rule"
+    },
+    {
+     "level": 3,
+     "text": "World coordinates"
+    },
+    {
+     "level": 3,
+     "text": "Construction plane coordinates"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 50,
+   "text_file": "text/0050.md",
+   "chars": 2195,
+   "images": [
+    {
+     "file": "rhino5_p50_img01.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "bdff68d90de058dfebd070075c800ed43b17fdc3ca6bb6c002c52d3025acc5be",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Relative coordinates"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 51,
+   "text_file": "text/0051.md",
+   "chars": 184,
+   "images": [
+    {
+     "file": "rhino5_p51_img01.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "4932b8cb6aabaa90e48234416fe8b1556c9ef52e75ce81e1c035e06b676b482d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 52,
+   "text_file": "text/0052.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 53,
+   "text_file": "text/0053.md",
+   "chars": 683,
+   "images": [
+    {
+     "file": "rhino5_p53_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "9888b92ae200d6dc6c827278c1b191638ff85265dceef015ca10488ebb03b918",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p53_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6b18cdea01c44fe41eee159a65836c7168076827649d7a494808c081978c77d2",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Create Surfaces from Curves"
+    },
+    {
+     "level": 3,
+     "text": "Edge curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 54,
+   "text_file": "text/0054.md",
+   "chars": 370,
+   "images": [
+    {
+     "file": "rhino5_p54_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Extrude curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 55,
+   "text_file": "text/0055.md",
+   "chars": 132,
+   "images": [
+    {
+     "file": "rhino5_p55_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "b4e2caa9a610e4af4cbbf62cdf0732d19e66cc4b6085a123f3b676c46f8ddfe7",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p55_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "7f659b678a489543376673931aaf55828ef73c2564e2a3a030b73ae4712d41d3",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p55_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d54320a23ea0a117192dec7009b725e1a41155544eec06f7b79ed19034b8e008",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 56,
+   "text_file": "text/0056.md",
+   "chars": 719,
+   "images": [
+    {
+     "file": "rhino5_p56_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "645adf426e372bf0bf751179b006d00a77f00ae372018a3c30165abc6fa0053b",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p56_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "e0090aaccf15e2344b1e88a5c2754cd4b1d57ac06fe5a4a361c49dd165f0b510",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Loft curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 57,
+   "text_file": "text/0057.md",
+   "chars": 441,
+   "images": [
+    {
+     "file": "rhino5_p57_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Revolve curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 58,
+   "text_file": "text/0058.md",
+   "chars": 76,
+   "images": [
+    {
+     "file": "rhino5_p58_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f76f2505907beadc6fe8b4b3d9e4cfd9f83afad1dabd6b58bed14ba0c8f345d8",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 59,
+   "text_file": "text/0059.md",
+   "chars": 250,
+   "images": [
+    {
+     "file": "rhino5_p59_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d05b5d020e364b59ade52ac65f998428e19bec7f89f3c7c9b81367d88db245c1",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p59_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ab06786f4a36f9c654e45ac20753912e45ebbdbaa1b566328db4c164e02338db",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p59_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "cb3b5ad1d111fe597aec431d047b6bbf8642669177fc51c305f891e4b8a41df8",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 60,
+   "text_file": "text/0060.md",
+   "chars": 512,
+   "images": [
+    {
+     "file": "rhino5_p60_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Revolve curves with a rail"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 61,
+   "text_file": "text/0061.md",
+   "chars": 60,
+   "images": [
+    {
+     "file": "rhino5_p61_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "3023f1fa1f39d68df4f7ec45ee5f5480f4e8f8fe177e6453ba183b41e2c92d6d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 62,
+   "text_file": "text/0062.md",
+   "chars": 117,
+   "images": [
+    {
+     "file": "rhino5_p62_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "81dd06f378bae6ec09c79bd0355916afce58584e366f8da333703f9456b10734",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p62_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "931339a95e7571d3e53248efdc0af15fd7ed4abe950d3638df9d079ce3881918",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 63,
+   "text_file": "text/0063.md",
+   "chars": 199,
+   "images": [
+    {
+     "file": "rhino5_p63_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ca8fe0955a19abeae85eae2ac957d62ac768e086204221552aee8db25fe337ae",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p63_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5448ed6890e9560476b1261a3416754f8f464a86b3f9dac09df8773e6b8b6e22",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p63_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "9f4201cc7d0cfecd3e7469d2aad42f8bcc9fa8d81b3d8b91c8b84bccacdf82aa",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 64,
+   "text_file": "text/0064.md",
+   "chars": 395,
+   "images": [
+    {
+     "file": "rhino5_p64_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Sweep along one rail curve"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 65,
+   "text_file": "text/0065.md",
+   "chars": 213,
+   "images": [
+    {
+     "file": "rhino5_p65_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "3d43560e54ad0af294408ad36b5f9b0252d1c75022609891b8265744925495d5",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p65_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "19bc1424c8fec010eac8db49a3830cb295477f9cf54b1c19543633494a9f00a6",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p65_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "de4b4a98c9cd300225811c5cf315db133637bcacca7b1bbcd6d351055a00e81c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 66,
+   "text_file": "text/0066.md",
+   "chars": 581,
+   "images": [
+    {
+     "file": "rhino5_p66_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Sweep along two rail curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 67,
+   "text_file": "text/0067.md",
+   "chars": 267,
+   "images": [
+    {
+     "file": "rhino5_p67_img01.png",
+     "w": 351,
+     "h": 240,
+     "sha256": "4505317697926c42ef645b99db5232b09a984389e0ca408621ad5fa39c1ba470",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p67_img02.png",
+     "w": 353,
+     "h": 240,
+     "sha256": "3f01080c7cc11eb75514115d06882c3bcfeb8ea740f2384be7e2e6727ef149ab",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p67_img03.png",
+     "w": 353,
+     "h": 240,
+     "sha256": "454a1b61e06fb8da5516331177c47cabf1b0a5760c9461c842b552ae6b85f5db",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p67_img04.png",
+     "w": 351,
+     "h": 240,
+     "sha256": "19a4b74a572658e43cb350fc7df42fe068bb4a16dfbb9a49fa0ab6dc2df0913f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 68,
+   "text_file": "text/0068.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 69,
+   "text_file": "text/0069.md",
+   "chars": 2314,
+   "images": [
+    {
+     "file": "rhino5_p69_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Edit Curves and Surfaces"
+    },
+    {
+     "level": 3,
+     "text": "Join"
+    },
+    {
+     "level": 3,
+     "text": "Explode"
+    },
+    {
+     "level": 3,
+     "text": "Trim and"
+    },
+    {
+     "level": 3,
+     "text": "Split"
+    },
+    {
+     "level": 3,
+     "text": "Control-point editing"
+    },
+    {
+     "level": 3,
+     "text": "Control point visibility"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 70,
+   "text_file": "text/0070.md",
+   "chars": 1556,
+   "images": [
+    {
+     "file": "rhino5_p70_img01.png",
+     "w": 313,
+     "h": 194,
+     "sha256": "ea6eaabd6221dbb9242644a99d32fdfc3dbacc7e09c0a0e08ffd20ab22e411bf",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p70_img02.png",
+     "w": 313,
+     "h": 194,
+     "sha256": "9fa74d37377e7c57f0d6c9478df5803a034c1fc2860b145527ff65f8c9d7be60",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p70_img03.png",
+     "w": 195,
+     "h": 116,
+     "sha256": "19dafe824af93d88f5bbd6ba0acf17db103e07353b32dde814ee2ab55edd0a20",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p70_img04.png",
+     "w": 195,
+     "h": 116,
+     "sha256": "df055a25dd897e8f3fbb92b9fcdfa205c90c06da86799add63fb5f40434c0c19",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Change control point locations"
+    },
+    {
+     "level": 3,
+     "text": "Add, delete, or redistribute control points"
+    },
+    {
+     "level": 3,
+     "text": "Curve and surface degree"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 71,
+   "text_file": "text/0071.md",
+   "chars": 361,
+   "images": [
+    {
+     "file": "rhino5_p71_img01.png",
+     "w": 342,
+     "h": 199,
+     "sha256": "9698645b19dd9f6cfedd8e9c946d56086c5c50bd869ff7ddf8b2fe156690e544",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p71_img02.png",
+     "w": 342,
+     "h": 199,
+     "sha256": "617963acb011661095f949c3bd0066bb5929309b244b1b5ece15077263962f8c",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p71_img03.png",
+     "w": 295,
+     "h": 128,
+     "sha256": "76be4e6f2ddd0774ec9fd908c7062498b8d5ba5ac5f0420350538df281a768a1",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p71_img04.png",
+     "w": 295,
+     "h": 128,
+     "sha256": "6555c2f3164de7f2254ad010486b4d026e603076c9bc9db1e598213ae537f26c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 72,
+   "text_file": "text/0072.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 73,
+   "text_file": "text/0073.md",
+   "chars": 1014,
+   "images": [
+    {
+     "file": "rhino5_p73_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "850133612f35dd66ca63690de464f0f44db39e449c569b382f5dd2df842dfd36",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Transforms - Move, Copy, Rotate, Scale"
+    },
+    {
+     "level": 3,
+     "text": "Note: For all of the following exercises, the images were cap-"
+    },
+    {
+     "level": 3,
+     "text": "tured using Shaded mode display."
+    },
+    {
+     "level": 3,
+     "text": "Move"
+    },
+    {
+     "level": 3,
+     "text": "Move objects using distance values"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 74,
+   "text_file": "text/0074.md",
+   "chars": 740,
+   "images": [
+    {
+     "file": "rhino5_p74_img01.png",
+     "w": 320,
+     "h": 269,
+     "sha256": "997d27fe9180368d99888b8f2f5090c1e48a580d64efbc68dd7e9aa65f009ce0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p74_img02.png",
+     "w": 320,
+     "h": 269,
+     "sha256": "3b3abbc9f30e4d1ac69028463089e784adcd31a8e1dfbc7cfa75a524567a6e72",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p74_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a99014667fbbfa512bea58560724773289abdc42121514089e167540ba6a869b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Move objects by dragging"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 75,
+   "text_file": "text/0075.md",
+   "chars": 1039,
+   "images": [
+    {
+     "file": "rhino5_p75_img01.png",
+     "w": 386,
+     "h": 266,
+     "sha256": "413d98f59ff2be1590c890f7ccf61e733843167682fc137aea47c5da1d77687f",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p75_img02.png",
+     "w": 386,
+     "h": 266,
+     "sha256": "1abcaa30a525178693bdc4b6a0aa1904636a8e688ee4c9aecd5c8b19d9faf4a7",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p75_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "95ee12ce2512c9518a26903f77e4db9374d3d2c3e5c1f2a53ed0238b1a9e083d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Elevator mode"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 76,
+   "text_file": "text/0076.md",
+   "chars": 720,
+   "images": [
+    {
+     "file": "rhino5_p76_img01.png",
+     "w": 320,
+     "h": 255,
+     "sha256": "88bd24a23ca162e06b779e2508aa2501e7d843e19989e8c822a75a1cc67f4746",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p76_img02.png",
+     "w": 389,
+     "h": 276,
+     "sha256": "97feb7b3e4189757916221cecf5ead704abc3e502e99403264a6a23c16102e67",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p76_img03.png",
+     "w": 389,
+     "h": 276,
+     "sha256": "8966f0a93570a6df316db8e94d46cd2835a2cbac6d75ad221914b11f2c831a28",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 77,
+   "text_file": "text/0077.md",
+   "chars": 235,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Copy"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 78,
+   "text_file": "text/0078.md",
+   "chars": 63,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 79,
+   "text_file": "text/0079.md",
+   "chars": 340,
+   "images": [
+    {
+     "file": "rhino5_p79_img01.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "5514b6e89d90deee0e10c43898b255495c9b3719e70b0d70b24f5f60bb78aa4c",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p79_img02.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "0914f03973634c5ecd65481a7f986cd6572007f10c7ba7835c5641556a66c8e3",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p79_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d0527bfff69397eb69a727d718121f72f69ba4f6f262fe74181bc1953993c887",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 80,
+   "text_file": "text/0080.md",
+   "chars": 191,
+   "images": [
+    {
+     "file": "rhino5_p80_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "400111221cdfcc4ba69ae6738aa96af1c527e26d2e88b10418302fd7620089a4",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 81,
+   "text_file": "text/0081.md",
+   "chars": 279,
+   "images": [
+    {
+     "file": "rhino5_p81_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "029e6b138bcbb8c3419a915812a2b83bbdc4e56950e5f4679794bd7b440b0933",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Rotate"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 82,
+   "text_file": "text/0082.md",
+   "chars": 129,
+   "images": [
+    {
+     "file": "rhino5_p82_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "198770319e4f89be63ad288656ecb60038c76d6b2e69114500aada461d477183",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 83,
+   "text_file": "text/0083.md",
+   "chars": 440,
+   "images": [
+    {
+     "file": "rhino5_p83_img01.png",
+     "w": 388,
+     "h": 257,
+     "sha256": "64f8937c492de893c1661551ef8f6a0793229580108125c1700638b6631aa79d",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p83_img02.png",
+     "w": 388,
+     "h": 257,
+     "sha256": "28c1f1f6b86b1d6153c28591c3438dc7e2eaf739ed260280671a3b2cc2c93fe0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p83_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "029845d32d3b90bfbce6a8c542652539e568100a9a5a7a15339236f876410175",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 84,
+   "text_file": "text/0084.md",
+   "chars": 125,
+   "images": [
+    {
+     "file": "rhino5_p84_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "1609eca5d5495bca8898b84d438ea73c567d21f1693fcf95136ff7f64c42229d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 85,
+   "text_file": "text/0085.md",
+   "chars": 361,
+   "images": [
+    {
+     "file": "rhino5_p85_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a23c14bc6a7c56dc53d431d749a65f8cb2c2427eefd4921cc545f4d6629894b1",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Scale"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 86,
+   "text_file": "text/0086.md",
+   "chars": 517,
+   "images": [
+    {
+     "file": "rhino5_p86_img01.png",
+     "w": 406,
+     "h": 263,
+     "sha256": "e906f6002fb8d8a88dbbea416814e389636293783ee3fbb1d3041c03b255960a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p86_img02.png",
+     "w": 406,
+     "h": 263,
+     "sha256": "f2fe854c11aa737525863eefe8cae5398a72e3262efe3218dd45de98b2d9a821",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 87,
+   "text_file": "text/0087.md",
+   "chars": 734,
+   "images": [
+    {
+     "file": "rhino5_p87_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "48c5802d0381020e7f195c10ac63ebff920f7e11b69cb80e6d1d549cd860e703",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p87_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "56ddb9f38e3cd25b78f8951d8d413ff4e50403756e64ed4bef230616e1c21c03",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 88,
+   "text_file": "text/0088.md",
+   "chars": 428,
+   "images": [
+    {
+     "file": "rhino5_p88_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "16b4bf64d1b5cbe239d1803da11b81d7e1f8317f67a74766f2ee589a7401a54a",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Mirror"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 89,
+   "text_file": "text/0089.md",
+   "chars": 60,
+   "images": [
+    {
+     "file": "rhino5_p89_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8660c1ea5e21abdb5ce2f8ea8fbad7e4006b57095dff564ab309a9d08729be5a",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 90,
+   "text_file": "text/0090.md",
+   "chars": 300,
+   "images": [
+    {
+     "file": "rhino5_p90_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "1a5bfa7ec1d694579b7ef4d2be13610caa4c19ff74daf66779df576eebc246d0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p90_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "43b5bcd5a468deaac539a7e185affcd93ff4330e421dd6c65fd5bee490a770da",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p90_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a529e46187cc696485f1938ec558fab1aae64c9c7e8675fda1636155e70cda1d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 91,
+   "text_file": "text/0091.md",
+   "chars": 272,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Array"
+    },
+    {
+     "level": 3,
+     "text": "Orient"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 92,
+   "text_file": "text/0092.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 93,
+   "text_file": "text/0093.md",
+   "chars": 1491,
+   "images": [
+    {
+     "file": "rhino5_p93_img01.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "c4acf484f11b41f8d047925e01b53639e9f7e7110464383663594f35e450942b",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p93_img02.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "01d9887a34c2565f0e1013a966378b5d1ea290b2fe30dd4c0c30713ba451478e",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Curve and Surface Analysis"
+    },
+    {
+     "level": 3,
+     "text": "Measure distance, angle, and radius"
+    },
+    {
+     "level": 3,
+     "text": "Curve and surface direction"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 94,
+   "text_file": "text/0094.md",
+   "chars": 1210,
+   "images": [
+    {
+     "file": "rhino5_p94_img01.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "ea4e94261fbbf43840a7f062dcdd78b8cc05bac0a841e29bd30487b58d923039",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p94_img02.png",
+     "w": 227,
+     "h": 122,
+     "sha256": "e8739d93d49813c8e4c72ea582cda42223a21f28c5688912c011a63af9d9114d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Curvature"
+    },
+    {
+     "level": 3,
+     "text": "Visual surface analysis"
+    },
+    {
+     "level": 3,
+     "text": "Environment map"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 95,
+   "text_file": "text/0095.md",
+   "chars": 703,
+   "images": [
+    {
+     "file": "rhino5_p95_img01.png",
+     "w": 244,
+     "h": 144,
+     "sha256": "7e90c9b3e16cf06aa1372835f384756d3748c3b6bddf20f5d666e1c425701ee3",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p95_img02.png",
+     "w": 227,
+     "h": 122,
+     "sha256": "48536dd188c78bcbb2ff7e23f625171fa62417ddde9d8d8e050255fdde7a0e1e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p95_img03.png",
+     "w": 227,
+     "h": 122,
+     "sha256": "a4116b7063bd4513115bf0ebeaf375921d797bd74ed37720a8d8cad3154d9eb3",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Curvature analysis"
+    },
+    {
+     "level": 3,
+     "text": "Draft angle analysis"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 96,
+   "text_file": "text/0096.md",
+   "chars": 1690,
+   "images": [
+    {
+     "file": "rhino5_p96_img01.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "24d2682b779200ad5d7c767abd532e3d1a0f41b59f3f96f1ea24d6b48f0a5c57",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Edge evaluation"
+    },
+    {
+     "level": 3,
+     "text": "Diagnostics"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 97,
+   "text_file": "text/0097.md",
+   "chars": 2537,
+   "images": [],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Organization and Annotation"
+    },
+    {
+     "level": 3,
+     "text": "Layers"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 98,
+   "text_file": "text/0098.md",
+   "chars": 3397,
+   "images": [
+    {
+     "file": "rhino5_p98_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Groups"
+    },
+    {
+     "level": 3,
+     "text": "Blocks"
+    },
+    {
+     "level": 3,
+     "text": "Worksessions"
+    },
+    {
+     "level": 3,
+     "text": "Dimensions"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 99,
+   "text_file": "text/0099.md",
+   "chars": 409,
+   "images": [
+    {
+     "file": "rhino5_p99_img01.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "0985789d64d1abef81e588a455a36e48a5f31adc97a355e6d5a19880476c1c0e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p99_img02.png",
+     "w": 140,
+     "h": 132,
+     "sha256": "12f76bd8580ddc0fcc9098841b01e0a31f82c54b3f782978b3306e5099c2cfd2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p99_img03.png",
+     "w": 214,
+     "h": 114,
+     "sha256": "70905962207bdff5d50d9fac8ef578bcda5cbd142653a1b4e7d58a18ff9bb930",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Text"
+    },
+    {
+     "level": 3,
+     "text": "Leaders"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 100,
+   "text_file": "text/0100.md",
+   "chars": 940,
+   "images": [
+    {
+     "file": "rhino5_p100_img01.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "aa66a626186d25dd7adf09c6fef58e60a00170cc3f17eedc50f0e26a82884ef2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p100_img02.png",
+     "w": 250,
+     "h": 150,
+     "sha256": "eebfc6cf10db732ad865851a31933a9bd9c40b0be4f660098cb038485c891220",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Dots"
+    },
+    {
+     "level": 3,
+     "text": "Hidden line removal"
+    },
+    {
+     "level": 3,
+     "text": "Notes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 101,
+   "text_file": "text/0101.md",
+   "chars": 1002,
+   "images": [
+    {
+     "file": "rhino5_p101_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "9e3306ef83098aa5584b294e1b51a9be7641696c657692f970bd076b309e1004",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p101_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "7530ac6239457005c89177353143241a0f2cac315c2fc9d422254ee29eea125a",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Render"
+    },
+    {
+     "level": 3,
+     "text": "Lights"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 102,
+   "text_file": "text/0102.md",
+   "chars": 602,
+   "images": [
+    {
+     "file": "rhino5_p102_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "92b72e5c2c82568508da07316cd58ddd4a82711e88e97f3794950a695bb44c4f",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p102_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Materials"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 103,
+   "text_file": "text/0103.md",
+   "chars": 718,
+   "images": [
+    {
+     "file": "rhino5_p103_img01.png",
+     "w": 319,
+     "h": 240,
+     "sha256": "cf157e8e908f2537dee1a973b21955c785c91b1f7812d4fe5bcd646821cfb084",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p103_img02.png",
+     "w": 319,
+     "h": 240,
+     "sha256": "011f8db1e687f1b3668e625348f0a0a65627d108fea9a9ec2ea2b5f3a442ca98",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Environment"
+    },
+    {
+     "level": 3,
+     "text": "Ground Plane"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 104,
+   "text_file": "text/0104.md",
+   "chars": 164,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Render"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 105,
+   "text_file": "text/0105.md",
+   "chars": 53,
+   "images": [
+    {
+     "file": "rhino5_p1_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "rhino5_p1_img02.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Rhinoceros 5 User's Guide"
+    },
+    {
+     "level": 2,
+     "text": "Section II: Tutorials"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 106,
+   "text_file": "text/0106.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 107,
+   "text_file": "text/0107.md",
+   "chars": 1538,
+   "images": [
+    {
+     "file": "rhino5_p107_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "49214dc872710b6c4feb205b1fbeaab6d80804dcc340254fa3b2dda127b23e48",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Pull Toy - Solids and Transforms"
+    },
+    {
+     "level": 3,
+     "text": "Enter coordinates"
+    },
+    {
+     "level": 3,
+     "text": "Draw the pull toy body"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 108,
+   "text_file": "text/0108.md",
+   "chars": 658,
+   "images": [
+    {
+     "file": "rhino5_p108_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "611d9e0d96b33a6998a12ce40fef938321ea4acada535c90800d6ac4bdbc30ba",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 109,
+   "text_file": "text/0109.md",
+   "chars": 411,
+   "images": [
+    {
+     "file": "rhino5_p109_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "01a2e09f7f5af3617a607527ff38b91e4a56f3e31c484667a54dbd7257c8c5e1",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p109_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "996c5d897e99676451310ce735e6f6a8152b3345399b730ea7bb6e9da481c6db",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p109_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "bafd92cb8a3abeb826c40ef15f994bc27c571a703ee8a2e5be72a562e9cca209",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 110,
+   "text_file": "text/0110.md",
+   "chars": 703,
+   "images": [
+    {
+     "file": "rhino5_p110_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6f84d69ffe17bc14df867ccedb6a0f67eb2fc707c1ce7a644c048e1f8e045e96",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p110_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "86e252941b34dbf1211db3c17dfbdbb767896167309fdbbbf4d479d99b59b319",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the axles and wheel hubs"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 111,
+   "text_file": "text/0111.md",
+   "chars": 299,
+   "images": [
+    {
+     "file": "rhino5_p111_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "511bd374812f01aad7f08f0b84fe48804e4fbf48747431fda7bac69363fdf607",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p111_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "3dfababc4b20f1da06dfcdd9d44e7e65ef2baab5af96ed77f243d0bfeb91d36b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 112,
+   "text_file": "text/0112.md",
+   "chars": 1054,
+   "images": [
+    {
+     "file": "rhino5_p112_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0d7441a787bc8e3c87e4b86226f5fd6613a4619f85d9551a7fd5d24ac0b3dc7d",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p112_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the lug nuts"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 113,
+   "text_file": "text/0113.md",
+   "chars": 882,
+   "images": [
+    {
+     "file": "rhino5_p113_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6012cb0da3f5bf8f31833d37c5626f9d0287e0c8205dc9afa8db13f1a2a51b1a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p113_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c62efd874590c60abf1119c198b2517551516af720842ccc028c39fccea36534",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Array the lug nuts"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 114,
+   "text_file": "text/0114.md",
+   "chars": 547,
+   "images": [
+    {
+     "file": "rhino5_p114_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "39bb95a12efc36c70f0158973ae6f1e6040d213ac7e3ccc8a5b73df22d3bc804",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the tires"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 115,
+   "text_file": "text/0115.md",
+   "chars": 814,
+   "images": [
+    {
+     "file": "rhino5_p115_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "eb411f1fa3e1571b97c2c7e8b560ab664d45fdd0b1f643f2a09050066f333157",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p115_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "065e38f6fad18fddfe13a1d08a280104ae4398ea374ac4f25c77ed268952f6d8",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Mirror the wheels"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 116,
+   "text_file": "text/0116.md",
+   "chars": 376,
+   "images": [
+    {
+     "file": "rhino5_p116_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "876255a88d5281dc6c83abde4413d382e68a6e94b35349e144af4f89a013608e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p116_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "be63cc54d4a936c13c925928a7d14183d9af20d18df282080244c29edac4f3bb",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 117,
+   "text_file": "text/0117.md",
+   "chars": 308,
+   "images": [
+    {
+     "file": "rhino5_p117_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "dcf7568c7df1d803ca49d01ef6a666eb6d63f0a736a731d00e7d101abdba5a2c",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p117_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "187bbe732b4cad693b6b6770755d78c0256e6d5530f0142b02749523d4183622",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the eyes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 118,
+   "text_file": "text/0118.md",
+   "chars": 254,
+   "images": [
+    {
+     "file": "rhino5_p118_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "3bc7727809af502c367a696d55910d1ce42104d00488038cbab874b42a446736",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p118_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8b6ab281c8c52ee56d04798cfe121c47502c8142e33e4a19c8ab1c8f5ca0f33e",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 119,
+   "text_file": "text/0119.md",
+   "chars": 223,
+   "images": [
+    {
+     "file": "rhino5_p119_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "be9a3a39554eabce8e76b72e97a75035767491f135451b99b801177dc85bd5e5",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p119_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d12997e0811ab46ed5d16ceb3389e7868679ba13f7cfabea00f24f9b8ac628a5",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 120,
+   "text_file": "text/0120.md",
+   "chars": 262,
+   "images": [
+    {
+     "file": "rhino5_p120_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6ce056078853605b6fb35e5da64cf4c360f700ae125ece276850f03d1964f929",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 121,
+   "text_file": "text/0121.md",
+   "chars": 149,
+   "images": [
+    {
+     "file": "rhino5_p121_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f31de3fa22bb8ee4acef59f6f2046f68ee39e540713d4a4b52ae18e3b1618a0f",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p121_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "63bff9d95cfabdca489e5b1fa88304c06151938705e187426dfc18ac63c7f0fc",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 122,
+   "text_file": "text/0122.md",
+   "chars": 443,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Make the pull cord"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 123,
+   "text_file": "text/0123.md",
+   "chars": 77,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 124,
+   "text_file": "text/0124.md",
+   "chars": 88,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 125,
+   "text_file": "text/0125.md",
+   "chars": 183,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 126,
+   "text_file": "text/0126.md",
+   "chars": 132,
+   "images": [
+    {
+     "file": "rhino5_p126_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "7eed683f02e14b0cfe95f2755da31731cfbf0b92806a2c23a2184232a97f93a3",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 127,
+   "text_file": "text/0127.md",
+   "chars": 310,
+   "images": [
+    {
+     "file": "rhino5_p127_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "b9fc2a9ef30ea5e1746b69145f48dfeda255e37cfe3d54a9c004aad060d494fe",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 128,
+   "text_file": "text/0128.md",
+   "chars": 317,
+   "images": [
+    {
+     "file": "rhino5_p128_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "59625a1a606fddd5f05f031d95f147b68d8bfa9e0dffaf02c455f76229e80915",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p128_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "4a34376718d76f2ac4b4c80b964ec2dd63553165f7f1a1750973cf39339143c8",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p128_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "76eca12e676b7b48762dd195756c6474ab7baa8e01ffe3bd3cfca42f47f794b1",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 129,
+   "text_file": "text/0129.md",
+   "chars": 323,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 130,
+   "text_file": "text/0130.md",
+   "chars": 311,
+   "images": [
+    {
+     "file": "rhino5_p130_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "4e2d14012b95efb106c3a1d1f05649ce670dc61b5584e70fbb11eaaebf9913cc",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p130_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "65f23a8d30bed182d388b274c45ae27ca05081246634dab3b6034785f8ddbea4",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p130_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "7728f4b94fa175e303648795a449464d4f70e0f320accf9d069d5a0c6968254b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 131,
+   "text_file": "text/0131.md",
+   "chars": 383,
+   "images": [
+    {
+     "file": "rhino5_p131_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "e40d18ce7d232444c8a509326ff69626137c25e6bb36d7ea144acbc71b88ae44",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 132,
+   "text_file": "text/0132.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 133,
+   "text_file": "text/0133.md",
+   "chars": 1208,
+   "images": [
+    {
+     "file": "rhino5_p133_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5d11c3b6bf2844e2e75144348e7fbe8041350887b8584ede8f698a13127deaa7",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Flashlight - Revolve Curves"
+    },
+    {
+     "level": 3,
+     "text": "Set up the model"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 134,
+   "text_file": "text/0134.md",
+   "chars": 193,
+   "images": [
+    {
+     "file": "rhino5_p134_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "fc65fc9111c9291474eab2a828f3a7957441db9fc73016ef5550cd911b04ce0e",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 135,
+   "text_file": "text/0135.md",
+   "chars": 443,
+   "images": [
+    {
+     "file": "rhino5_p135_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a47324f5e6195657e90978816527d1a641bc04575c74b464d5877416e112c8b5",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw a centerline"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 136,
+   "text_file": "text/0136.md",
+   "chars": 1294,
+   "images": [
+    {
+     "file": "rhino5_p136_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "47b4aa43335ebdbac4a12fe966a9195a7b2be543791f46aade0ca77998522dc0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p136_img02.png",
+     "w": 575,
+     "h": 240,
+     "sha256": "4c8b8aae3920f94cd64ef140f9f948061c63bca8733a98e36a7d651ec1b17b21",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p136_img03.png",
+     "w": 575,
+     "h": 240,
+     "sha256": "ed869f8df4289e9f9326872b8638de3a597bb7943b60227dfad8d6390431cf11",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the body profile curve"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 137,
+   "text_file": "text/0137.md",
+   "chars": 685,
+   "images": [
+    {
+     "file": "rhino5_p137_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "830dd3beae7776d547903801cf82c2e32721e122b9362c20cc959887a4b57764",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p137_img02.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "2119852a5129a533d5e72faaa75bacb921d9f07f0551c1d6e20ce39c941991fe",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the lens profile curve"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 138,
+   "text_file": "text/0138.md",
+   "chars": 204,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Build the flashlight body"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 139,
+   "text_file": "text/0139.md",
+   "chars": 54,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 140,
+   "text_file": "text/0140.md",
+   "chars": 402,
+   "images": [
+    {
+     "file": "rhino5_p140_img01.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "8e5bb685c58ee0834a20352330fd8b059dea7f0b36bfcd561d209cdcbf42e06a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p140_img02.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "c0104552a20b46c1e920f8237fea493e7c7c252d3f341de48e1a2d6e4f8582e3",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p140_img03.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "4fd839162ea58cec97297a26157d70f58668df8e66dd312c14d744f7a1ec43d2",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 141,
+   "text_file": "text/0141.md",
+   "chars": 254,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create the lens"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 142,
+   "text_file": "text/0142.md",
+   "chars": 302,
+   "images": [
+    {
+     "file": "rhino5_p142_img01.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "ae77d9f37b73c6c5f917ce04f30b0f7f86b057ad00388e5aca21d8688963361d",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p142_img02.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "63103fea74f0b922d72ac7bc77040653b2e1981e63a71e27d5bff6b1f6113d8c",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p142_img03.png",
+     "w": 320,
+     "h": 241,
+     "sha256": "c7a1fdc4bdf26913f76944008f3d7ecdf15369dc1680fc0f396cd9c78ffeb123",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 143,
+   "text_file": "text/0143.md",
+   "chars": 580,
+   "images": [
+    {
+     "file": "rhino5_p143_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "1fd2ccd3c5599c93012bd0cb3027718b2833dd4ca0608f369345f218e5a11ee0",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Headphone - Sweep, Loft, and Extrude"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 144,
+   "text_file": "text/0144.md",
+   "chars": 813,
+   "images": [
+    {
+     "file": "rhino5_p144_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0f1cb1db2727a8fceba73c0e788271e2b6b3c5ee71119158c4d8288bc58a2633",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p144_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "11dd5d7e6ca1eb9fdf72edce777b3c84bad6f88b906afc8b36a6ba9668a5273c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create the speaker shell"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 145,
+   "text_file": "text/0145.md",
+   "chars": 999,
+   "images": [
+    {
+     "file": "rhino5_p145_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "285bd3ee77fc7ff1eab5b54f087374dda8c2298dd481aa8750eb39adbe7953f0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p145_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6d302d8f9e9662579d7940c0e5e4c42fc42231803c7e0bbc18d7b66b2c6e5355",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 146,
+   "text_file": "text/0146.md",
+   "chars": 273,
+   "images": [
+    {
+     "file": "rhino5_p146_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "171346048d72c3aae102455d3f53666bfa9a607e593841ea1992739a04afe6fe",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p146_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d9e999d9feb684dafa8b0f682f58a0e8e76a0ba4c685733b70fa5ab730c0afc0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p146_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "7c5eb9958ac244f215e9a68072f6baaf552e928b6657c1b473e42750256a6cc2",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 147,
+   "text_file": "text/0147.md",
+   "chars": 329,
+   "images": [
+    {
+     "file": "rhino5_p147_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "3b5c29a682c887b1b69c43ec1cf1851325ad1714aa2e6780bc89b68ae75537f1",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p147_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5747a7807ea24529e281e763a84ba07cc2686861b59549bfcca262952dc85821",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 148,
+   "text_file": "text/0148.md",
+   "chars": 855,
+   "images": [
+    {
+     "file": "rhino5_p148_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "47d55249607449bb81624a23915adb2738101bcb2ca41ccd6ea37ea1ab6217a4",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p148_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create the padding and cover"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 149,
+   "text_file": "text/0149.md",
+   "chars": 133,
+   "images": [
+    {
+     "file": "rhino5_p149_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d7e953c8d1aa31e2cff71ba5345e89d0cdb27e1d767da059a24b5164c5356468",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p149_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6d727d0187e0a7d24fba6e9c0d8e35549754bfe05e480e5c37f98dc892a6f9a2",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 150,
+   "text_file": "text/0150.md",
+   "chars": 927,
+   "images": [
+    {
+     "file": "rhino5_p150_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "15b2973aba320a0e2fde824f75973c0b54de4ace7fedbb6c9690de938f274533",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p150_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create the mounting bracket"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 151,
+   "text_file": "text/0151.md",
+   "chars": 512,
+   "images": [
+    {
+     "file": "rhino5_p151_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "573c3ca423c79236a4b4b59a099dcac474a96345c47f3646ea3eda3b23b30931",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p151_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "56a7741003c8cc3b4bcfb1861d7354e373a1b24e8ea628ffac782666a64c1b79",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 152,
+   "text_file": "text/0152.md",
+   "chars": 331,
+   "images": [
+    {
+     "file": "rhino5_p152_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "db517d7d59640b40c7751cae2f0474725cf441e1b4ce9dbbb443b945d322daac",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p152_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5f38c7ae809f4f848aa585fc3b870f6a9469b4399774b5c334e774058a726104",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p152_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "4018d0fdeb5af6db5a0849a4c008c105700f4b74b5b2bd16415263ac7e6e3523",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 153,
+   "text_file": "text/0153.md",
+   "chars": 609,
+   "images": [
+    {
+     "file": "rhino5_p153_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "85884aaff8a486e3f949adccdb7677442df70873cce8cbed1e9dc3d0e789029f",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p153_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ee73501a654d4a5872aa22b80ae1350c69a0576cd9ec7ecabf11c8c32c1a2091",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 154,
+   "text_file": "text/0154.md",
+   "chars": 572,
+   "images": [
+    {
+     "file": "rhino5_p154_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "53ba07cca6c4a2ee99a9e380e68af3a80277cf04b40cbb41157fd891b3d7dc9c",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p154_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create the headband"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 155,
+   "text_file": "text/0155.md",
+   "chars": 397,
+   "images": [
+    {
+     "file": "rhino5_p155_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "3877e857b11b568135a7f08ddedca8d36c2a8f69e4b5319057215ae356ee93d3",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p155_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ec3ec7f623f6bcd7ea4b8a4871f3de5cd961f6d7abfeeb0beb1f7d46cd665f79",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 156,
+   "text_file": "text/0156.md",
+   "chars": 373,
+   "images": [
+    {
+     "file": "rhino5_p156_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "56505ea92fb8502dc54d861bfb81732a75ddd2739153b685316555d8bc1088e0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p156_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "b1a10f1d1e2ff0909ce939b2c414fd4dcf148dd2cf6c8eea8db7a941bcdd4377",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 157,
+   "text_file": "text/0157.md",
+   "chars": 460,
+   "images": [
+    {
+     "file": "rhino5_p157_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ef3b8d97ee7c4ba65ab946f4458744baedc0c39006b9be405426f63e5ff89ae8",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p157_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "891e852883c0018cd062fc1c5c1c0ca2ef5e858662461e19c5ff23dd9f917416",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 158,
+   "text_file": "text/0158.md",
+   "chars": 117,
+   "images": [
+    {
+     "file": "rhino5_p158_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "918465d7344e3b8320b36f942c70ab6674dcc43104893b1e95dfcab6d1b69c22",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p158_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "89d546688204414e322fd9b8875b7852c8da43ca6b2dcf69e34888a70d7682cb",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 159,
+   "text_file": "text/0159.md",
+   "chars": 745,
+   "images": [
+    {
+     "file": "rhino5_p159_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d7d133e49e9099382c31a08e87222fe216eea86b3da7bb21bb9ae81ea817f1d9",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p159_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8ff86eba95e278218cb89d4c7c0d9d8de2adea227046ed7fbf841189085957b0",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Round the headband ends"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 160,
+   "text_file": "text/0160.md",
+   "chars": 326,
+   "images": [
+    {
+     "file": "rhino5_p160_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "be2cefadc573b9a1033e48bf1014e596207d3d5725702d68058946432e39f026",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p160_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "4d3d83954406ce9ff240d6847376691f9394c18d8de2c3a07f7d1302f5fc20c7",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p160_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "334b27d95f27a61f70e1cd4c1376ccb05c79dc7805922e833b2622cdbe06e26b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 161,
+   "text_file": "text/0161.md",
+   "chars": 142,
+   "images": [
+    {
+     "file": "rhino5_p161_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "48c4a6daafef10f524823d06e9e96a101286a10295f08620c7ba72754bc4f9ab",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 162,
+   "text_file": "text/0162.md",
+   "chars": 424,
+   "images": [
+    {
+     "file": "rhino5_p162_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "aa47aaa992f52fdf263a24215221f26deb0cbb819470ad19d813e2cf4264fcc7",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p162_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a14486cfc4f220b6413734e67d373357c2c40fe04d3b5207b3d996a1152c8269",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p162_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "647b4611dc6d76f8b256760c0d26cfd8333e8d4d7a2af1893f6a4c494d9a6d74",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 163,
+   "text_file": "text/0163.md",
+   "chars": 276,
+   "images": [
+    {
+     "file": "rhino5_p163_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "e085eadc144549106a39ced4ddf158adba46ca51237f538153ed299bfefc6783",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p163_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "330c1a546e23f62a04092d1be2bfb8c4e20c7c3e8518b7d8adcec456520db748",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 164,
+   "text_file": "text/0164.md",
+   "chars": 153,
+   "images": [
+    {
+     "file": "rhino5_p164_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "475ba71d9f9e854391bcda37e18464b79623509207925b1dc022c3714b4f5c2c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 165,
+   "text_file": "text/0165.md",
+   "chars": 676,
+   "images": [
+    {
+     "file": "rhino5_p165_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "7b83351a9a6749cb361671dc0dffea5923a4e1282661517989443814e18c072e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p165_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create the speaker wire"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 166,
+   "text_file": "text/0166.md",
+   "chars": 481,
+   "images": [
+    {
+     "file": "rhino5_p166_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "74f03c1532023218d5b87595976f34bdfda1d62ba353facba704ed0209b696c2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p166_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c3b3bdd6bae86e2c299689a58aa275948396a72e2a4f6f6d93d743adf4afba5e",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 167,
+   "text_file": "text/0167.md",
+   "chars": 273,
+   "images": [
+    {
+     "file": "rhino5_p167_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "aa8a79ccda444feea5db8a7d5ac0e1250cc4561440ce0a24701b2bf46bd74f70",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 168,
+   "text_file": "text/0168.md",
+   "chars": 252,
+   "images": [
+    {
+     "file": "rhino5_p168_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d91e40d9c1683ddf354181ac96d0a3936bcbf9641c712229d3c27ad9cf8bc0b4",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p168_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "1b21128d7b2c98d5411e94618531b73e2b43a9e833680c613bd03414112974da",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p168_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "68737367787c7e21313ca7b9e5dcc228d42ebc66e718e84a0c2790c955ae10a7",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 169,
+   "text_file": "text/0169.md",
+   "chars": 573,
+   "images": [
+    {
+     "file": "rhino5_p169_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5f6888ce771e1d06ccfd5308738aea58f6c85c42e5bbdde410665ff5395577a2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p169_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "e6172821dd297149e89d4e8d367e44c4f17c684d114f844dc049930b5c957679",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Mirror the headphone parts"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 170,
+   "text_file": "text/0170.md",
+   "chars": 742,
+   "images": [
+    {
+     "file": "rhino5_p170_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "da70310139e6f148325b8e6aadd07db90dc2f70cef724f7b5e45d7b60896019a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p170_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 171,
+   "text_file": "text/0171.md",
+   "chars": 395,
+   "images": [
+    {
+     "file": "rhino5_p171_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f20d878155a2e20fd99be767ddadad986a245b818200b2fc328802c4a6918cf8",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p143_img01.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Learn more"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 172,
+   "text_file": "text/0172.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 173,
+   "text_file": "text/0173.md",
+   "chars": 1014,
+   "images": [
+    {
+     "file": "rhino5_p173_img01.png",
+     "w": 250,
+     "h": 207,
+     "sha256": "678b801e4a1c29865e777685f4151d7fbb67a54c4e6f1a73d31f5778026e9a4f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Penguin - Point Editing and Blending"
+    },
+    {
+     "level": 3,
+     "text": "The body"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 174,
+   "text_file": "text/0174.md",
+   "chars": 390,
+   "images": [
+    {
+     "file": "rhino5_p174_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "95cfc0e57d3c2ced123d6fb69546f77355a0f3eb58c4df8ef2146faa94c0c4ad",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p174_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "148b698dcfeb0c17ed8bab39e977498bb770cde3fcf58805713a53d42faa457d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 175,
+   "text_file": "text/0175.md",
+   "chars": 324,
+   "images": [
+    {
+     "file": "rhino5_p175_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6085fbe0d5605d0c26cb6b395867047ef870117929aae57f95873a5f23517bdb",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 176,
+   "text_file": "text/0176.md",
+   "chars": 363,
+   "images": [
+    {
+     "file": "rhino5_p176_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ca16c221bc7d24424165449f1adbf386ae2fb3f3e40c5857f1e2942620d3b11d",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p176_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "4fdc58f71fde59121eb37e38ccbf311c144745fd770595b607f2747453468ce5",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 177,
+   "text_file": "text/0177.md",
+   "chars": 339,
+   "images": [
+    {
+     "file": "rhino5_p177_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0cc0ac9e9e3003790efec6b721f452b8511c074fb44e6a4bc88c1c952343664d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 178,
+   "text_file": "text/0178.md",
+   "chars": 195,
+   "images": [
+    {
+     "file": "rhino5_p178_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d4fd5e85c820708f4d661f36db3ef5446284bb8f71d1fc7d5800f41b93c91b11",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p178_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "df56ea86c73a684df5a5eea6f95163ee775363d1b74715e5f16454cde7345a85",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 179,
+   "text_file": "text/0179.md",
+   "chars": 254,
+   "images": [
+    {
+     "file": "rhino5_p179_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "09dc8f11fc2e8e7119d9e4f969dc8f85925ece3d94132078c6076a5c9728fc74",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p179_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5c48c48fc47bc7eeb5a78df68fe7b6c2f23fec44be1878482a5c55d9386a37fb",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 180,
+   "text_file": "text/0180.md",
+   "chars": 740,
+   "images": [
+    {
+     "file": "rhino5_p180_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "298e322a43f925bf83602cb8bc0c079c10a6eeb3000b6a3bfa92dfb4531ce789",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p180_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "e69ad3c9b6df4ca07b1bd55465b6f6d1808bc745e8d688bc1ae6b0238aed8bbb",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 181,
+   "text_file": "text/0181.md",
+   "chars": 235,
+   "images": [
+    {
+     "file": "rhino5_p181_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6a61c45a3e795e4137e60fa17fe99575f7fe8972aaf024557b905115e2075248",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "The eyes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 182,
+   "text_file": "text/0182.md",
+   "chars": 51,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 183,
+   "text_file": "text/0183.md",
+   "chars": 122,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 184,
+   "text_file": "text/0184.md",
+   "chars": 205,
+   "images": [
+    {
+     "file": "rhino5_p184_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "eabec39db17e1d5c69a7a18ce080d61379116ec682276d8d79e7ea25de197637",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 185,
+   "text_file": "text/0185.md",
+   "chars": 433,
+   "images": [
+    {
+     "file": "rhino5_p185_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f6be36ace6253e6db2eb78ad7167ba0aa4b1214a303a7f948e42e0e8d8433767",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p185_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5d173bcae979c0eddeb83c538cc9d805fe1ba87cb600121eca1f342ca26d5bb7",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 186,
+   "text_file": "text/0186.md",
+   "chars": 396,
+   "images": [
+    {
+     "file": "rhino5_p186_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5435af51f1ff9a52991a81a39eb51596d21d580b985386ae04bd2e7bb850b066",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p186_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "b5730dd78109ab9208f714339c0d0f33bd8b419363840f687e912f7f3cdf6739",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 187,
+   "text_file": "text/0187.md",
+   "chars": 331,
+   "images": [
+    {
+     "file": "rhino5_p187_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "aa9f5d34329b53ad173195a867e43e748bbfdbd9f549c6e570328b034e3f02ab",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p187_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a9f37cca6ad9c7f80fa3f4ee99e51a9411c3f001dbbe454bd220025288bd9185",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "The beak"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 188,
+   "text_file": "text/0188.md",
+   "chars": 64,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 189,
+   "text_file": "text/0189.md",
+   "chars": 122,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 190,
+   "text_file": "text/0190.md",
+   "chars": 205,
+   "images": [
+    {
+     "file": "rhino5_p190_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "e36a982a82f3a26f531c61f8aa5d90868484a9f30ec457216586e342bcc39a76",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 191,
+   "text_file": "text/0191.md",
+   "chars": 298,
+   "images": [
+    {
+     "file": "rhino5_p191_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0a6799100eb4590952193ccc0d0524f0635d6ef93fd7c78b14f9fbb2eda13943",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p191_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "da7e622907c76ec0943ead53a3d5c4448a6a3d4b7ce4b46dcacff1e399f57962",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 192,
+   "text_file": "text/0192.md",
+   "chars": 51,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 193,
+   "text_file": "text/0193.md",
+   "chars": 152,
+   "images": [
+    {
+     "file": "rhino5_p193_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ffdf774d486ad297e1da22e3ff30e6c71564b93db38cf2c4b9d657b3275f6111",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 194,
+   "text_file": "text/0194.md",
+   "chars": 356,
+   "images": [
+    {
+     "file": "rhino5_p194_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "19fb6b28c6087a526d14eb714eff61d4323ba17b3c156f5a48e9ced78e2514bf",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p194_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "7b258af36e252ffdc3f2f528febdd2d81c7b0071a33350bb3032d78eb5323d9c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "The feet"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 195,
+   "text_file": "text/0195.md",
+   "chars": 65,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 196,
+   "text_file": "text/0196.md",
+   "chars": 124,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 197,
+   "text_file": "text/0197.md",
+   "chars": 370,
+   "images": [
+    {
+     "file": "rhino5_p197_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "9dd3a3b9d34d11238e603b582cc8c0105ca65c9bb56d463cfcd3ab3de3b67c9e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p197_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5d0baae3afcf457852f2a0328fa08dee66b4085be9939438c0666e79fdd8d65b",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p197_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0eb7a1e8b85eb9e295cf2afdbed8507c213e00ea48aa4c2baa2cce6563b1123c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 198,
+   "text_file": "text/0198.md",
+   "chars": 465,
+   "images": [
+    {
+     "file": "rhino5_p198_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "289112b40cbbb2df1c054b30578313f1978df1cc8e07f832d25d33ef8c527cec",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p198_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8ca11d1952e160027444a1503c3b5a93753ba2bcedd69e153c6c758aa21ccd49",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 199,
+   "text_file": "text/0199.md",
+   "chars": 69,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 200,
+   "text_file": "text/0200.md",
+   "chars": 460,
+   "images": [
+    {
+     "file": "rhino5_p200_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a2754f94ed86698c0feefa493fb27ff8d500036ecbc3ea2d4d925b029c0453b2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p200_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d5991ea6b2f11b7830a2bb988da36415d2f64611b6cc79ece80180e380b6c11e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p200_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "128b4dd55f5decfa9a5a343fb2c0bbb27f105979fb522258ffe030603e61d4bf",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 201,
+   "text_file": "text/0201.md",
+   "chars": 274,
+   "images": [
+    {
+     "file": "rhino5_p201_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "cc66b56cc221de7b45d930e4e7ba6f1b74d7debde1e914e032b02204658c9046",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p201_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "90584ae5bb46e5c54055a10a4b3f42b984ff467efbc1813b836fdc965fe494d5",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 202,
+   "text_file": "text/0202.md",
+   "chars": 461,
+   "images": [
+    {
+     "file": "rhino5_p202_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "53c9cd36c5c076f64a59feab2d97fa2a1bda0abe2340324a3965df5d84f75c95",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p202_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "207cf5a05d0b7e564f17d7f28c6f302f0d930d2b5fa5b56cb27f3f3aba529291",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 203,
+   "text_file": "text/0203.md",
+   "chars": 74,
+   "images": [
+    {
+     "file": "rhino5_p203_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c6ef01b4cdd5da72564b144582c88a8f03647453696261341d32a17c8b1e0603",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 204,
+   "text_file": "text/0204.md",
+   "chars": 621,
+   "images": [
+    {
+     "file": "rhino5_p204_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "276e2cb9991cc79c2cff10d49628896fffc33e42ab0e30a7c3c00aa7ed4db02b",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p204_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "fa8081a85a7f7602af66647a70372244f86272ce281ccd8e4c7e013bbe32b8ac",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "The tail"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 205,
+   "text_file": "text/0205.md",
+   "chars": 297,
+   "images": [
+    {
+     "file": "rhino5_p205_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "9b5ccf2c8d2768850b54b1134992c334c143e6cb2e2e85752f43a8a29f6d21f9",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 206,
+   "text_file": "text/0206.md",
+   "chars": 605,
+   "images": [
+    {
+     "file": "rhino5_p206_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a6713f5413b4573706ad549eeeaec6c6be91588b66770f8df2e7ce762cfbf390",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p206_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c05dda8625aacc251d7cd0263dd67bdf50b29b4c06494c11edb7685f95b0699e",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 207,
+   "text_file": "text/0207.md",
+   "chars": 228,
+   "images": [
+    {
+     "file": "rhino5_p207_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "bb5ea2e4541931477b2db195493a22f24dc8f0b65d20d624c362192e414d5895",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p207_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "03818b5ff31983ad25c1c5c084541bf59dbc1a54919f48adaf8e8940ec8e1bea",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "The wings"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 208,
+   "text_file": "text/0208.md",
+   "chars": 171,
+   "images": [
+    {
+     "file": "rhino5_p208_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "aca9d375dcfc6d9205b632efa6c387a2319554839afa827dc45b42835ece8703",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 209,
+   "text_file": "text/0209.md",
+   "chars": 322,
+   "images": [
+    {
+     "file": "rhino5_p209_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d00674e56c554768c537ef9cb2e551f4f2e9c4536beb4f38b9a773f70a80b92d",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p209_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8b0225cd4373c0f30cc28b6b06f926aad189b08622a6f447940d9b369e06b228",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 210,
+   "text_file": "text/0210.md",
+   "chars": 474,
+   "images": [
+    {
+     "file": "rhino5_p210_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "e4d7bd1c694e10ef0555077c22aaf8bdc626111b8c8642ba5318245fe217f2f5",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p210_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "014b3c29fdaedd37c2ae2766c3e58b14e5972a8c57b1266185be6b1d7d9661a1",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 211,
+   "text_file": "text/0211.md",
+   "chars": 565,
+   "images": [
+    {
+     "file": "rhino5_p211_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ddd18b438da601c7a43550801c14c89c52135cd6e52c57797b342259976ff32c",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p211_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "70b99ec74d28bc1e8cb404f1d7264870b1769af6ac55ca825ee9cbe3c137aa52",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 212,
+   "text_file": "text/0212.md",
+   "chars": 480,
+   "images": [
+    {
+     "file": "rhino5_p212_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "91d3df8e11358fb507d8fbed067c04e204d84f9c8655cba167eabcf3676c5041",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p212_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "44cfe25b7ca3b3aa7607bb4e9cfee68790ec8c39ce6bd25022feb8c1799ca317",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Finishing touches"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 213,
+   "text_file": "text/0213.md",
+   "chars": 294,
+   "images": [
+    {
+     "file": "rhino5_p213_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "afd136c2cbce3eaf416f72e9c9e30e0f018a7f2cf3af43d5f950e7fa5ddebf25",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p213_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "2b3e97715b8aaea588abdfd548a9c7905f353a1e2d1e0ca4d118ce4257191b3d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 214,
+   "text_file": "text/0214.md",
+   "chars": 819,
+   "images": [
+    {
+     "file": "rhino5_p214_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "df5e7fdca40aa5513b55139ba72eb285c600f6cdbb7380c9f0c38da601b172db",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p214_img02.png",
+     "w": 150,
+     "h": 161,
+     "sha256": "2337523b298f4501296fc3461b3fd83c6afad21b37a4527a56733a23f6447d13",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p214_img03.png",
+     "w": 150,
+     "h": 161,
+     "sha256": "cc612a53a143927845e221a6c27d2219c62d9c82634120cce1a6abbb383da938",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Render"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 215,
+   "text_file": "text/0215.md",
+   "chars": 983,
+   "images": [
+    {
+     "file": "rhino5_p215_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "004118c00e5f01fef1921e5b14bb99bc56f1b8ef0f454414459c309405583eb2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p215_img02.png",
+     "w": 320,
+     "h": 209,
+     "sha256": "9f47cd2d4bb18aea3da490ce0cb4dcc4fb6b9fb409ec2ae10a7212cd3ce56824",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Boat Hull - Loft and Sweep"
+    },
+    {
+     "level": 3,
+     "text": "Note:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 216,
+   "text_file": "text/0216.md",
+   "chars": 1462,
+   "images": [
+    {
+     "file": "rhino5_p216_img01.png",
+     "w": 248,
+     "h": 107,
+     "sha256": "d89c9b443ef383f966492c6009bcf1ed56552ca3ee422c7e69f1b545c52a1699",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p216_img02.png",
+     "w": 320,
+     "h": 261,
+     "sha256": "ba4953f192dc424c1e9fe56b76d23821dd1462215d4cd63d5f3c429e869b1945",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p216_img03.png",
+     "w": 320,
+     "h": 261,
+     "sha256": "c55a0793b68ec181a81bd2fe3584c9a8b7d265c30dc07b558730b875ad199379",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Lay out the hull curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 217,
+   "text_file": "text/0217.md",
+   "chars": 1954,
+   "images": [
+    {
+     "file": "rhino5_p217_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "60b48c4ad7a99196f76d8c923cb14169fac2e5085e6707dff31680d5c9ff810b",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p217_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Check the curves for fairness"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 218,
+   "text_file": "text/0218.md",
+   "chars": 641,
+   "images": [
+    {
+     "file": "rhino5_p218_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "b23c624e059b01b135235d4f6c9e3327a140ac3f44c240033fadce23cf88fe96",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create the 3-D curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 219,
+   "text_file": "text/0219.md",
+   "chars": 376,
+   "images": [
+    {
+     "file": "rhino5_p219_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "35a759072868bd7b6bc69f9ab775b894776c8c145a2421bf88090be918afe391",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p219_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "502538a4d931d0256ef7a05e4030acdf461032107f1faf98a463ca57ce6968dc",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 220,
+   "text_file": "text/0220.md",
+   "chars": 740,
+   "images": [
+    {
+     "file": "rhino5_p220_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "51d804058704ab6f930c82cf972089b17cdaf25a6a042f3d51be9eba174f9c83",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p220_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "41889421e1a18ec8c1cf3e137f32a4f0cbd338cd43d4bd9bde90d71c9899ba68",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Revise the curves"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 221,
+   "text_file": "text/0221.md",
+   "chars": 464,
+   "images": [
+    {
+     "file": "rhino5_p221_img01.png",
+     "w": 320,
+     "h": 120,
+     "sha256": "3cf827ed8ad2dfb1460c88db39501fe8880108f5d68edc76018c40458fe3f015",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p221_img02.png",
+     "w": 320,
+     "h": 120,
+     "sha256": "4930b685c99949137aa74d55e56edce9fdd0cae4d667d78fa38e840c415c9114",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p221_img03.png",
+     "w": 320,
+     "h": 109,
+     "sha256": "76799edb4ca71849482d9297743f0ec0552faf38a22c2fa7a21e87ae5502c346",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 222,
+   "text_file": "text/0222.md",
+   "chars": 190,
+   "images": [
+    {
+     "file": "rhino5_p222_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5f92748962f3a20bb13c2dc46e2a251649d81ddd158d69933e21a877869e7d39",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p222_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "351c4408963d1d683386f590f2a9e168116b2bb9cd1a05532f04caccacf19095",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 223,
+   "text_file": "text/0223.md",
+   "chars": 767,
+   "images": [
+    {
+     "file": "rhino5_p223_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a7419a325fba28bfa0ce5649fcd5d7be57af3ea3a9bffcca76af2671080787ab",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p223_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "69cf67670225e3f731622e83c54de10afd3d19ced0f490ec51ff8e86e4218115",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Loft the hull surfaces"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 224,
+   "text_file": "text/0224.md",
+   "chars": 207,
+   "images": [
+    {
+     "file": "rhino5_p224_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "fb14ba38eba2fca682701dde6e2094474070218cdd3d916278e17c3518b7ce4b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 225,
+   "text_file": "text/0225.md",
+   "chars": 472,
+   "images": [
+    {
+     "file": "rhino5_p225_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "596eb7ba97c56baae302e0c946b306c5f1f5c9dc6cd8f69db9684656b6fda371",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Trim the bow and bottom"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 226,
+   "text_file": "text/0226.md",
+   "chars": 354,
+   "images": [
+    {
+     "file": "rhino5_p226_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "47a147af2b146914a8138e471e51ab97c3c2fea58592ea8e338cee701eea0471",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p226_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "16abeb7cb0901825994f4dda5789e9dcce6c8ae9ef398a55e08197d2d8af1a73",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 227,
+   "text_file": "text/0227.md",
+   "chars": 502,
+   "images": [
+    {
+     "file": "rhino5_p227_img01.png",
+     "w": 320,
+     "h": 140,
+     "sha256": "bf2dcba21b06f602999553307f8832ebf71a7d811706f0ad4a70838d26ede0c3",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p227_img02.png",
+     "w": 320,
+     "h": 106,
+     "sha256": "34ee215c7bd204b47d55b93ab32dae623ccd0104768ac6c8e4dc212bce6ee227",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p227_img03.png",
+     "w": 320,
+     "h": 120,
+     "sha256": "15fd8131a12ff26139ea5054a68334535f46f8cf1f3571cc8f03248a5658daad",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p227_img04.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0e3df61ea924edeeec27d927a4f011519b0d979a5ab6431dd5d867a5f833f72b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Build the transom"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 228,
+   "text_file": "text/0228.md",
+   "chars": 669,
+   "images": [
+    {
+     "file": "rhino5_p228_img01.png",
+     "w": 320,
+     "h": 120,
+     "sha256": "6c9044b1e7e2ba6a926ec3195893b9527c35004694e55f5ebb36db34e3cf342f",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p228_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "82ae1b05bb13af4d14703ad4cbcea659ef6140cd302940a3cdb3cddfea4d7a8c",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p228_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0df8f52450877f83c279e280f88c1bf3ef2ee2a6781cac9e2ec54f8ddb730bb6",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 229,
+   "text_file": "text/0229.md",
+   "chars": 649,
+   "images": [
+    {
+     "file": "rhino5_p229_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f2f48d3a1e61c6675fb29350c96a469fe164c91e363c77980850733eb4a59ec8",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p229_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c46009e1195bc5373aa67100307204769c4c7b037115fdd9b7f578c52a178fc3",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 230,
+   "text_file": "text/0230.md",
+   "chars": 130,
+   "images": [
+    {
+     "file": "rhino5_p230_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "2afd74fd16712bc76e058a07935b51fd65999bcdb6d12eeea8e04c78d7803ee8",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p230_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f7565d1568d2aba53eab7f9191594931d9ed9b0f3c74b8fa21f4bdcb4869d662",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 231,
+   "text_file": "text/0231.md",
+   "chars": 510,
+   "images": [
+    {
+     "file": "rhino5_p231_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0bd81df361386e1f4d1f783ac3588b71186438d78716f46d68b80401885621c3",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p231_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "29930bc0c7f6fa6fb4045ea565b9d9f2e1ed261dee1962fbb0994c43200e7485",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 232,
+   "text_file": "text/0232.md",
+   "chars": 384,
+   "images": [
+    {
+     "file": "rhino5_p232_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "1d82c41ad458ba42a808ad64a07e489d8e72544048baba24166ddb30b0eef856",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p232_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "da42f85356717cca55c6acf413d6c23787b0e7aa2740ea93a5f74b3224ca975f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 233,
+   "text_file": "text/0233.md",
+   "chars": 405,
+   "images": [
+    {
+     "file": "rhino5_p233_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "bbb88c4b2312a416c5633eb30e7b9f2d035a565f6110a3295ce8e47cf8f14dd7",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p233_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "3ff757c7e71367f5fe03b58580bbb62277ba951564df464dc4d10b0f1a6ca4c4",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p233_img03.png",
+     "w": 320,
+     "h": 150,
+     "sha256": "0f83e565e8199dd023898a46b56e3f64f9569b1501ccf3fa8b38435896a35209",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 234,
+   "text_file": "text/0234.md",
+   "chars": 1084,
+   "images": [
+    {
+     "file": "rhino5_p234_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a3fe45a73886922a52711135b2e8a8e449520900e615d49f4884d918ef195cad",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p234_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c6be98f751da09ca5942b3158117aa5aa957447913a3916788b0456ca9f0e888",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Add the deck"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 235,
+   "text_file": "text/0235.md",
+   "chars": 302,
+   "images": [
+    {
+     "file": "rhino5_p235_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f4c67db13800554e19fac7a7e1599002396a1ee6c7a3a7cc189b11fd809e1e2c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 236,
+   "text_file": "text/0236.md",
+   "chars": 512,
+   "images": [
+    {
+     "file": "rhino5_p236_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "dc2f8f8d9b59ec33f4ffd7ff08e3059665aab56ea3e3ade7d138c334260209f2",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p236_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "b125a10c6b3df4b06162a8fe938975e2fe8a958af83eb21cfc55628e67527b7c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 237,
+   "text_file": "text/0237.md",
+   "chars": 359,
+   "images": [
+    {
+     "file": "rhino5_p237_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "107ccc4fd6661766123cda4efd91b53ae41f3d74b1b6fa5f970d912c96ede77e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p237_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "5de2941018659e4a8987e9477e9935f2f118858149d7e4dcef2311c9c2fa68f9",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 238,
+   "text_file": "text/0238.md",
+   "chars": 405,
+   "images": [
+    {
+     "file": "rhino5_p238_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ce1a747dd0d4cc1119e6cb48223aa40bd97248eb61260af483d25cea455fa996",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p238_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "495abbb47d99daf6f568e357c5287e4880a0cdf933476eaa6a550b9cf0acb757",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 239,
+   "text_file": "text/0239.md",
+   "chars": 127,
+   "images": [
+    {
+     "file": "rhino5_p215_img01.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 240,
+   "text_file": "text/0240.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 241,
+   "text_file": "text/0241.md",
+   "chars": 1156,
+   "images": [
+    {
+     "file": "rhino5_p241_img01.png",
+     "w": 240,
+     "h": 314,
+     "sha256": "82a3be257a5fa8315b40ef54391585807edc78f7b739902b4d9fd6edc0cec9fb",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p241_img02.png",
+     "w": 320,
+     "h": 220,
+     "sha256": "60a65e98a8202ccb97e6895c8d4b4c48df178fc64afd83a0d0ef690b6c79b0ed",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p241_img03.png",
+     "w": 316,
+     "h": 215,
+     "sha256": "d366e8d0f4bc517ed94de89358af6475bbb17cd44e35a7d18453feaa5630afaf",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p241_img04.png",
+     "w": 316,
+     "h": 215,
+     "sha256": "27930ff3349bff9ef3c83a32723a5b5cc920f22ca3df795f418e634cb4b9f4cc",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Dragonfly - Trace Images"
+    },
+    {
+     "level": 3,
+     "text": "Note: The top and side views are actually of different spe-"
+    },
+    {
+     "level": 3,
+     "text": "cimens of this dragonfly. In the side view, the wings are folded"
+    },
+    {
+     "level": 3,
+     "text": "up. We will be using the side view image only to draw the side"
+    },
+    {
+     "level": 3,
+     "text": "view curves of the body."
+    },
+    {
+     "level": 3,
+     "text": "Draw the body"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 242,
+   "text_file": "text/0242.md",
+   "chars": 669,
+   "images": [
+    {
+     "file": "rhino5_p242_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "9de6d6a45188712abc6cffa5737dd36f958340efb0ffe3c57352ff6d1d7113db",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p242_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 243,
+   "text_file": "text/0243.md",
+   "chars": 444,
+   "images": [
+    {
+     "file": "rhino5_p243_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0eedefd9a2ed9eb3b37cbc748077a619923c84439f74eda56c4aa8690c008255",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p243_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "dbc60a796e893a6a2f32c02083b054b2d409580ba564212a96e8bc7e9d4ae67a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p243_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "62fe9a7ab82871bb1c05588f172e859db9366d154c8ef9bd2f806d0d40dd1461",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 244,
+   "text_file": "text/0244.md",
+   "chars": 699,
+   "images": [
+    {
+     "file": "rhino5_p244_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "1a1597459d32887e8c4d220be4915297519c1324587c82dea3656def834129a4",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p244_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ca61f4a2185f21aced6989c87d0c364996d1e6f4f0493b16797d89cad83b3a3d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 245,
+   "text_file": "text/0245.md",
+   "chars": 589,
+   "images": [
+    {
+     "file": "rhino5_p245_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6e335a63a2b6889fec63e96663b2e6b8d9093fdd9655e378bb6886ed3ced190a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p245_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ace567f256fd17104298116933a86e600be2522c7dcaa52e1a6d5564db4440fd",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 246,
+   "text_file": "text/0246.md",
+   "chars": 576,
+   "images": [
+    {
+     "file": "rhino5_p246_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "25b49a7469e894df28cec8653ce0259e8357ef672406c84f8502693dddf172ba",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p246_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "30f7001b10f43f942363d6e25f0a5f21e9decfc3d3503f35efd17c3550674969",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 247,
+   "text_file": "text/0247.md",
+   "chars": 188,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the head"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 248,
+   "text_file": "text/0248.md",
+   "chars": 38,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 249,
+   "text_file": "text/0249.md",
+   "chars": 124,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 250,
+   "text_file": "text/0250.md",
+   "chars": 194,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 251,
+   "text_file": "text/0251.md",
+   "chars": 123,
+   "images": [
+    {
+     "file": "rhino5_p251_img01.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "3c4da1bec981a81e330929e19153831df8420246381a1fea69e0c0b5fca16c07",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p251_img02.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "ecbf5096e7deeaa8dcb6b584882e1176d361c49ea4f741489c2d3f42dda02e0b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 252,
+   "text_file": "text/0252.md",
+   "chars": 132,
+   "images": [
+    {
+     "file": "rhino5_p252_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0d61d5e3c9b824f30eeeace53fc0dd3e8385959b3d14c608fa6c884ff7b87d80",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 253,
+   "text_file": "text/0253.md",
+   "chars": 461,
+   "images": [
+    {
+     "file": "rhino5_p253_img01.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "d30154c8c5260637e104118c90295500446ee6a0c09aa71fc6899ef9e296c662",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p253_img02.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "a0d621a8b8862ff0aa1eb1aa6b2256b51a3381332b0cc679792a0ecfab809100",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p253_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f995d71da411074987468674154f47b713a0d488a50e6dd4a7fb7c130ad6c692",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p253_img04.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "da8a39d457f964effa7cd7875cebe01b8ac7dda9fc5c488f1e3959ae5cd45590",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 254,
+   "text_file": "text/0254.md",
+   "chars": 189,
+   "images": [
+    {
+     "file": "rhino5_p254_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "2a6ab1c8de5ddf8627d23fe09e438c1c8360a341c5f02072dc24510992890158",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 255,
+   "text_file": "text/0255.md",
+   "chars": 473,
+   "images": [
+    {
+     "file": "rhino5_p255_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "639351eb102999868f90100ee8b5893ebef255083cd42fcd8ed983f96c5a51de",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p255_img02.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "bf99ea17bd0afce4f19c46352fee11c9283c170638674a906ae6079046f3af4f",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p255_img03.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "b31e760f7f79561d9ccbb8e906982623f54bea3f8f459969605623e51aac2bfa",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p255_img04.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "9de530b1a7f520b01f3c65a0cd79d9569f879bcf41bf5efbdf33de8523846cd9",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p255_img05.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "954cbfac95282eb24b8ce140dbe4785294d1ab8d0cf946aab4671e051d2de801",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Blend the head and body"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 256,
+   "text_file": "text/0256.md",
+   "chars": 341,
+   "images": [
+    {
+     "file": "rhino5_p255_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "rhino5_p256_img01.png",
+     "w": 650,
+     "h": 240,
+     "sha256": "bfbc41c3b79c5d25e43976a32fded367533030de3975c3fd8991f86017544da9",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p256_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "1abd34d6926bb738d4c490fab67d99869689bc1991b16a533c5610be56f4dde6",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 257,
+   "text_file": "text/0257.md",
+   "chars": 377,
+   "images": [
+    {
+     "file": "rhino5_p256_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "rhino5_p257_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ba95ab9e9945f21f464eceb0475b9aea2f9a33531fa902f5d9c39f68825c9bfa",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p257_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8c8ff341b4de4103cd43015851fc048347c5b298b8f33cf1daa83ca7f9322f56",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the eyes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 258,
+   "text_file": "text/0258.md",
+   "chars": 517,
+   "images": [
+    {
+     "file": "rhino5_p258_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "0e76a51950645ed2e2f4af00e9dd0aa180d4bb6550408261f81ec7df5117c4a4",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p258_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a5cf79fb8ca3a39150d97d3d5d7902c2734134d26ddf44a4e7c1cdea3e489527",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Shape the tail"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 259,
+   "text_file": "text/0259.md",
+   "chars": 494,
+   "images": [
+    {
+     "file": "rhino5_p259_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "3d26d56d552c4ef03e3a6fdefec7eac59b298bf891733ad97dad65b5897b1755",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p259_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "871384a3a2e97476aa96e8737b9fbdb92cdce07b7630b1b35a0762be6268647c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Trace the wings"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 260,
+   "text_file": "text/0260.md",
+   "chars": 306,
+   "images": [
+    {
+     "file": "rhino5_p260_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f9e86a7f3ae4cacaed9b42c3601fdde6164326dbd443844a1a98b7f78a36ea69",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p260_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "771c545ee6c87f6f8241e3688e66c849ae307f38a37801dab8268ff6a4257217",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 261,
+   "text_file": "text/0261.md",
+   "chars": 724,
+   "images": [
+    {
+     "file": "rhino5_p261_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "91b7a6d0fda73acc489d877a30f28a1d3956ce080d8b78b11d390a4fcb02e66a",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p261_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "f4b73480d58047857bca44f3384d2d5c39de8dccf90d939e00644a31de031d73",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Draw the legs"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 262,
+   "text_file": "text/0262.md",
+   "chars": 166,
+   "images": [
+    {
+     "file": "rhino5_p262_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8c032aa486a95b0b28e94063d92c10aa1db826f1af67cc7572f2f6f5912ec060",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Finishing touches"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 263,
+   "text_file": "text/0263.md",
+   "chars": 675,
+   "images": [
+    {
+     "file": "rhino5_p263_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ddebcc01308314f944321ce01115848dc7360d2b14f7a75fdf7149a4d7671263",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p263_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a26a0203366805969e90dfbb90b7baf0ad9305274c5e1db80e0a717d4a822459",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Wrap Text - Flow along surface"
+    },
+    {
+     "level": 3,
+     "text": "Make a surface"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 264,
+   "text_file": "text/0264.md",
+   "chars": 785,
+   "images": [
+    {
+     "file": "rhino5_p264_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "353ec9729b4c641e534c8cbcc2ca50bd046fc19fdbd86b5d585d6b6f652a3112",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create the objects to wrap"
+    },
+    {
+     "level": 3,
+     "text": "Control the object placement"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 265,
+   "text_file": "text/0265.md",
+   "chars": 858,
+   "images": [
+    {
+     "file": "rhino5_p265_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d0f48c34ff9b1770a9c30529c2b3aec7bf2035dc2e028b52c6515aabbc547d19",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p265_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "da5af9eaa7e046cd4df96a4c1f32fddf7bf7f8db1bb502da724c8f2f8da47d1d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 266,
+   "text_file": "text/0266.md",
+   "chars": 290,
+   "images": [
+    {
+     "file": "rhino5_p266_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "d2d04aa26a43bd0975ab9c4ec22b01ba626c65a37abb4962a3e81d8ef2e2e310",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 267,
+   "text_file": "text/0267.md",
+   "chars": 345,
+   "images": [
+    {
+     "file": "rhino5_p267_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "595af6be1ee7a9111e7ccbca28761cc3db5b9d5599beb1f5182a86cc1b6a98fc",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p267_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6424bafb4e802be7a22baad8769520b97d56f9437e2f4d5df2e40f256b05e575",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p263_img01.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 268,
+   "text_file": "text/0268.md",
+   "chars": 0,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 269,
+   "text_file": "text/0269.md",
+   "chars": 749,
+   "images": [
+    {
+     "file": "rhino5_p269_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "99c2b566041b5dff9243db1b2b191b4600ee5a5bf6b9914fe0356fffbadc09cb",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p269_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Mechanical Part - Blocks"
+    },
+    {
+     "level": 3,
+     "text": "Create solid shapes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 270,
+   "text_file": "text/0270.md",
+   "chars": 488,
+   "images": [
+    {
+     "file": "rhino5_p270_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "9b609a94028a4910b5edf78c17586b601b2856100070ffd86b37e7ab29f395f5",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p270_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "c67a811a1b4493ec536d29954f336014e85bc3f20b651b7239e7f767c473298c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 271,
+   "text_file": "text/0271.md",
+   "chars": 430,
+   "images": [
+    {
+     "file": "rhino5_p271_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "92a9443f7aaf46061ce340544648069b9853b5f5c57a73034df55912fde888c0",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p271_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "88f507e67a565b0c2ce560a67bf7b4fd207a077315721ab5e108743a756a04d8",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p271_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "88fb8f7514904209415e68192039321d490d55aa41b0e46dc8c59aed4b0027c6",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 272,
+   "text_file": "text/0272.md",
+   "chars": 579,
+   "images": [
+    {
+     "file": "rhino5_p272_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "278634d7b777ccf705d7cd796376edb96f90673cbc2ef67ede8063d699bcf7d1",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p272_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "698e669205569bf4baaf41f496e4bde16897058f7439de5c6ed5c0792afcfbb1",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p272_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "6db58aaa6198122e12a6a0f07f7843455e492ec8c0100af6355e4751ee0bd0ec",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 273,
+   "text_file": "text/0273.md",
+   "chars": 320,
+   "images": [
+    {
+     "file": "rhino5_p273_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8d8717aca0e71e0928ae433f44105e8e1b7e54142ab829644e6ae06f9777f708",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p273_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Drill the holes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 274,
+   "text_file": "text/0274.md",
+   "chars": 144,
+   "images": [
+    {
+     "file": "rhino5_p274_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ffc149a8ae7975e3c0567f59f6d819409a15bdc8d893cc908d66db5ec38daf7d",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p274_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "71c4c74a5d7b4677c168bc06c8691407a1667eb3a4de725eb00df24f53144dde",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p274_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "7d1086b63941f57db782e5cb3a445f6b703604ca1998036d6a58f50a440c1f62",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p274_img04.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "388bdd26361169c5c3cdb3ba89580bc083d04038c7707da612b98ddb216431fc",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 275,
+   "text_file": "text/0275.md",
+   "chars": 606,
+   "images": [
+    {
+     "file": "rhino5_p275_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "00b2e4783c2355c39bf6edb0c805a94a649cc517afe262748f3dc8503c64c8c7",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p275_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Copy the holes"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 276,
+   "text_file": "text/0276.md",
+   "chars": 575,
+   "images": [
+    {
+     "file": "rhino5_p276_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "a6c13e3c5f298f42431d921dc392c288412dac5ed5fdae1bacc765e3ce90646e",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p276_img02.png",
+     "w": 650,
+     "h": 236,
+     "sha256": "9dc4c177afefbdf7f55ce9967facc9dce237594fd70d07c62f8232c522b7ed93",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p276_img03.png",
+     "w": 650,
+     "h": 236,
+     "sha256": "8a238286859fd33020c90ea1e70232c75fa138e671b3744b1dd2ab6fb33a037f",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p276_img04.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "ffd651d44776635758c816d5a52e90efd33252b4cf7b05d659b634d43dff9205",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 277,
+   "text_file": "text/0277.md",
+   "chars": 818,
+   "images": [
+    {
+     "file": "rhino5_p277_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "211daa6f0409d3503f32b5fc8d8d9e274e6820d531764822633981fe8fb2ec12",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 278,
+   "text_file": "text/0278.md",
+   "chars": 1191,
+   "images": [
+    {
+     "file": "rhino5_p278_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "55b00894ea0c7148a09aea7743897e5ac8a833520ff36b86d27fda5d97773745",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p278_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Make a 2-D drawing"
+    },
+    {
+     "level": 3,
+     "text": "Dimension the 2-D drawing"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 279,
+   "text_file": "text/0279.md",
+   "chars": 708,
+   "images": [
+    {
+     "file": "rhino5_p279_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "dab5282d7ebf22145014025eb64fbf180abeadf87819909e37d22fa475573696",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p279_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "b2ee8f2dae92e897ae3db45d3932d17e6a480d99a355113172d2c9946d442fb7",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 280,
+   "text_file": "text/0280.md",
+   "chars": 435,
+   "images": [
+    {
+     "file": "rhino5_p280_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "86fab09ce1491fc41b94c1a2a21aec82f2e0eb9b5de162b41420999fcdfa57d8",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p280_img02.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "8a62c25a358caf6820d1697de12cad3f31d375bf5f3e5eb91d384f9bd22d3d84",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p280_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "42adfd3e1c2f2aad5b98dd31a0af3e0bc05672ab1b2e8dc83b42cd573a506168",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 281,
+   "text_file": "text/0281.md",
+   "chars": 286,
+   "images": [
+    {
+     "file": "rhino5_p269_img01.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 2,
+     "text": "Mechanical Part - Layouts"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 282,
+   "text_file": "text/0282.md",
+   "chars": 385,
+   "images": [
+    {
+     "file": "rhino5_p282_img01.png",
+     "w": 450,
+     "h": 266,
+     "sha256": "db32a38defd1da058421dd114188875ec32b309e04add0bf77a3de976396ed9f",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p282_img02.png",
+     "w": 450,
+     "h": 266,
+     "sha256": "e97f2d852e44a575139d796bd291be4ed6149efb3e4d2a26f022095fb7324eed",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p282_img03.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "25738c463fc8136537557a670006d5c333cd3b9411cb45397f317d2b60bdfa20",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p282_img04.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Layout viewports"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 283,
+   "text_file": "text/0283.md",
+   "chars": 1056,
+   "images": [
+    {
+     "file": "rhino5_p283_img01.png",
+     "w": 320,
+     "h": 240,
+     "sha256": "1d4f6cf0b4ab8f03f1a584bc01313636b3cbcd849cb210c86679f5b0c22ba742",
+     "type": "embedded"
+    },
+    {
+     "file": "rhino5_p283_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Insert a title block"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 284,
+   "text_file": "text/0284.md",
+   "chars": 356,
+   "images": [
+    {
+     "file": "rhino5_p284_img01.png",
+     "w": 570,
+     "h": 442,
+     "sha256": "d3f227022a118bd7768ad3e3abce9d4cd2e20d99b0b899901a468c8ffe1f4386",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  }
+ ]
+}

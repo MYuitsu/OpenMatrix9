@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-009",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "mesh-as-nurbs",
+      "call": "require_exact_nurbs(mesh)",
+      "expect": {
+        "error": "Unsupported(mesh is not exact NURBS)"
+      }
+    },
+    {
+      "id": "after-codec",
+      "call": "mesh entity save/open",
+      "expect": {
+        "kind still Mesh": true,
+        "exact": false
+      }
+    }
+  ]
+}

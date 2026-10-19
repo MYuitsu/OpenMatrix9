@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-004",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "feature-roundtrip",
+      "expect": {
+        "id": "stable",
+        "kind": "Semantic",
+        "outputs": "box"
+      }
+    },
+    {
+      "id": "recipe-roundtrip",
+      "expect": {
+        "command": "future-builder-v9",
+        "solver": "future-solver",
+        "state": "Clean"
+      }
+    },
+    {
+      "id": "restore-diagnostic",
+      "expect": {
+        "diagnostics.len": 1,
+        "state": "Unresolved"
+      }
+    }
+  ]
+}

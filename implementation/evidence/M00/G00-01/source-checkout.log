@@ -1,0 +1,47 @@
+# M00 L2-01 / L4-01-01-02 - pinned read-only QymCAD checkout
+# recorded_utc: 2026-10-15T23:37:29Z
+# host: Windows 11 AMD64
+# toolchain: git version 2.55.0.windows.3
+
+$ git clone --quiet https://github.com/QymIs-Tech/QymCAD vendor-research/QymCAD
+fatal: destination path 'vendor-research/QymCAD' already exists and is not an empty directory.
+[exit=128]
+
+$ git -C vendor-research/QymCAD checkout --detach 746a17f127897e921a57118b6caad08968602bf5
+HEAD is now at 746a17f perf(view-3d): the floor of the software raster is worked out row by row and kept while the view stands
+[exit=0]
+
+$ git -C vendor-research/QymCAD rev-parse HEAD
+746a17f127897e921a57118b6caad08968602bf5
+[exit=0]
+
+$ git -C vendor-research/QymCAD status --porcelain
+(no output)
+[exit=0]
+
+$ git -C vendor-research/QymCAD ls-files
+1698 tracked files
+[exit=0]
+
+$ git -C vendor-research/QymCAD config --get remote.origin.url
+https://github.com/QymIs-Tech/QymCAD
+[exit=0]
+
+$ git -C vendor-research/QymCAD show -s --format=%H%n%ci%n%s HEAD
+746a17f127897e921a57118b6caad08968602bf5
+2026-10-15 10:53:41 +0500
+perf(view-3d): the floor of the software raster is worked out row by row and kept while the view stands
+[exit=0]
+
+# Note: an earlier attempt used `git clone --no-checkout --filter=blob:none`; the
+# promisor fetch pulls blobs one at a time and was abandoned. A full clone (29 MB) plus
+# `checkout --detach` materialises the pin in one packfile. The commands below are the
+# ones actually run.
+
+$ git -C vendor-research/QymCAD checkout-index -a -f
+(no output)
+[exit=0]
+
+$ git -C vendor-research/QymCAD status --porcelain
+(clean - worktree matches the pinned revision)
+[exit=0]

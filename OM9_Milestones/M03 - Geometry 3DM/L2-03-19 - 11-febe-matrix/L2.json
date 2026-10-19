@@ -1,0 +1,90 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-19",
+  "milestone": "M03",
+  "title": "11-febe-matrix-utilities-and-mesh-health",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Check/ShowEdges/validity, mesh inspection, model health",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/11-febe-matrix-utilities-and-mesh-health/module.json",
+  "definition": {
+    "module_id": "OM9-L2-03-19",
+    "milestone_id": "M03",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/11-febe-matrix-utilities-and-mesh-health/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "legacy_v07_path": "specs/03-matrix8-book1/19-febe-matrix-utilities-and-mesh-health/",
+    "scope": "Check/ShowEdges/validity, mesh inspection, model health",
+    "exclude": "Advanced mesh repair/export supports nằm ở 10 After.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          95,
+          109
+        ],
+        "pdf_pages_1based": [
+          105,
+          119
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-10",
+      "OM9-L2-03-07"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "M03_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M03-UI",
+    "l3_count": 7,
+    "l3_catalog_path": "specs/03-ms03-curve-surface-solid-3dm/11-febe-matrix-utilities-and-mesh-health/l3-index.json",
+    "l3_deferred_count": 0,
+    "l3_m03_owner_count": 7,
+    "l4_count_planned_m03": 37
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-19-001",
+      "file": "M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-001 - Check Object Validity And Bad Objects/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-19-002",
+      "file": "M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-002 - Show And Classify Naked Edges/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-19-003",
+      "file": "M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-003 - Bounding Box And Center Object/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-19-004",
+      "file": "M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-004 - Group And Ungroup Selection/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-19-005",
+      "file": "M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-005 - Mesh From NURBS For Production/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-19-006",
+      "file": "M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-006 - Mesh Reduce Basic/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-19-007",
+      "file": "M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-007 - Object Health Report Panel/l3.json",
+      "target_implementation_milestone": "M03"
+    }
+  ],
+  "m03_l4_planned_count": 37,
+  "execution_state": "NOT_STARTED",
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+}

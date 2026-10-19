@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-008",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "open-profile",
+      "call": "open polyline profile",
+      "expect": {
+        "error": "Invalid(extrusion profile must be closed)"
+      }
+    },
+    {
+      "id": "zero-height",
+      "call": "height = 0",
+      "expect": {
+        "error": "Invalid(extrusion height)"
+      }
+    },
+    {
+      "id": "zero-direction",
+      "call": "direction = [0,0,0]",
+      "expect": {
+        "error": "Invalid(extrusion direction)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,639 @@
+# command: cargo test -p om9-core -j 2
+# exit: 0
+
+
+running 3 tests
+test retained::indexed_reconciliation_tests::aggregate_held_owners_refuse_reconciliation_scratch_before_changing_disposition ... ok
+test retained::indexed_reconciliation_tests::indexed_reconciliation_rejects_live_reparented_members_and_deleted_parent_aliases ... ok
+test retained::indexed_reconciliation_tests::indexed_reconciliation_keeps_original_member_baselines_and_marks_missing_members_deleted ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 16 tests
+test legacy_nil_session_is_format_data_until_explicit_runtime_restore ... ok
+test close_and_reopen_of_a_document_clone_cannot_restore_an_old_owner_stamp ... ok
+test revision_overflow_rejects_before_public_state_or_redo_changes ... ok
+test source_document_close_invalidates_job_without_resurrection ... ok
+test postacceptance_notification_failure_reports_committed_receipt ... ok
+test undo_of_new_insert_does_not_make_its_uuid_available_for_another_object ... ok
+test accepted_move_is_one_atomic_undo_and_redo ... ok
+test cross_document_prepare_failure_never_transfers_first_participant ... ok
+test cancellation_after_prepare_keeps_every_record_and_redo ... ok
+test intervening_commit_and_undo_do_not_resurrect_a_prepared_job ... ok
+test cross_document_move_undo_restores_both_document_owners ... ok
+test invalid_source_keeps_immediate_state_and_executable_prior_redo ... ok
+test no_op_commit_never_erases_redo_or_creates_empty_group ... ok
+test panicking_callback_is_rejected_and_barrier_is_released ... ok
+test preacceptance_callback_cannot_mutate_or_veto_with_partial_state ... ok
+test deleted_uuid_cannot_be_reallocated_to_resurrect_an_old_source_stamp ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 11 tests
+test a_body_over_the_object_budget_is_refused ... ok
+test a_handle_store_rejects_stale_and_double_dropped_handles ... ok
+test a_brep_body_refuses_broken_topology ... ok
+test every_kernel_error_maps_to_one_contract_error ... ok
+test a_valid_triangle_passes_brep_validation ... ok
+test the_kernel_policy_serializes_calls_and_transactions ... ok
+test a_handle_store_round_trips_many_objects_without_leaking ... ok
+test the_unlinked_backend_refuses_every_kernel_call_with_one_contract_error ... ok
+test tolerance_rules_are_exact_at_their_boundaries ... ok
+test the_adapter_contract_holds_against_a_fixture_backend ... ok
+test handle_and_validation_throughput_is_stated ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 3 tests
+test cancellation_union_deduplicates_shared_flags_and_bounds_distinct_owners ... ok
+test cancellation_union_is_transitive_and_own_cancel_remains_shared ... ok
+test cancellation_union_observes_both_original_owners ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test source_presence_never_enables_a_capability ... ok
+test commit_requires_actual_target_receipt_and_failed_or_legacy_receipt_is_insufficient ... ok
+test native_subset_needs_matching_native_abi_closure_and_runtime_receipts ... ok
+test matching_semantic_receipt_enables_only_declared_internal_rust_family ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test a7_to_a8_admit_reads_the_context_and_the_option_names_it_was_given ... ok
+test a1_to_a6_availability_follows_the_session_state ... ok
+test fixture_design_pair_is_present ... ok
+test b1_to_b7_a_command_that_cannot_run_is_never_offered ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test d2_a_declared_option_resolves_ignoring_case ... ok
+test d1_the_descriptor_declares_its_signature ... ok
+test d5_an_option_less_command_is_still_a_descriptor ... ok
+test fixture_design_pair_is_present ... ok
+test e1_to_e4_a_descriptor_that_cannot_be_honoured_is_refused ... ok
+test d3_to_d4_the_descriptor_is_serializable_and_deterministic ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test r1_to_r6_a_name_resolves_to_one_descriptor ... ok
+test r7_an_operation_round_trips_through_json_with_its_aliases ... ok
+test n1_to_n7_a_name_the_registry_cannot_give_one_answer_for_is_refused ... ok
+test fixture_design_pair_is_present ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test a_choice_option_completes_its_declared_values ... ok
+test a_schema_is_validated_before_any_value ... ok
+test apply_fills_defaults_under_the_supplied_values ... ok
+test apply_normalizes_the_spelling_of_a_supplied_name ... ok
+test completion_ranks_exact_then_prefix_then_substring ... ok
+test apply_refuses_unknown_and_missing_options ... ok
+test an_option_completion_lists_the_declared_names ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test l3_007_a_local_point_needs_a_frame ... ok
+test l3_007_a_parsed_local_point_becomes_world_only_through_the_frame ... ok
+test l3_007_a_world_point_resolves_without_a_frame_and_round_trips ... ok
+test l3_007_the_parser_keeps_the_session_grammar_and_error_labels ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test prepared_transaction_cannot_publish_into_an_equal_coordinator_sharing_the_world ... ok
+test aborting_a_caller_cannot_revive_a_prepared_global_transaction ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test externally_held_startup_is_rejected_before_new_authority_allocation ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 21 tests
+test a_circle_needs_three_distinct_non_collinear_points ... ok
+test a_fit_refuses_an_impossible_control_point_count ... ok
+test a_circle_through_three_points_has_the_circumscribed_centre_and_radius ... ok
+test a_clockwise_arc_is_mirrored_so_the_parameter_map_stays_increasing ... ok
+test a_rectangle_refuses_a_non_orthonormal_frame_or_bad_size ... ok
+test a_polyline_is_one_line_per_pair_and_refuses_repeats ... ok
+test a_fit_with_as_many_control_points_as_samples_passes_through_them ... ok
+test an_ellipse_refuses_a_bad_frame_or_radius ... ok
+test a_rebuild_refuses_too_few_points ... ok
+test interpolation_degree_and_point_count_are_refused_when_invalid ... ok
+test the_basis_is_a_partition_of_unity_inside_the_domain ... ok
+test an_arc_through_three_points_spans_the_directed_angles ... ok
+test an_ellipse_is_an_exact_rational_nurbs_satisfying_its_equation ... ok
+test a_rectangle_is_closed_and_keeps_its_frame ... ok
+test parameters_are_normalized_and_strictly_increasing ... ok
+test a_rebuilt_curve_stays_close_to_its_source ... ok
+test a_degenerate_arc_is_refused ... ok
+test interpolation_passes_through_every_input_point ... ok
+test elevating_the_degree_does_not_move_the_curve ... ok
+test a_fit_with_fewer_control_points_keeps_the_ends_and_stays_close ... ok
+test inserting_a_knot_does_not_move_the_curve ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 9 tests
+test analytic_circle_d0_d1_d2_d3_use_native_radians_and_world_frame ... ok
+test circle_native_parameter_mapping_preserves_phase_and_scales_every_derivative ... ok
+test captured_curve_evaluator_retains_admission_limits_and_uses_polynomial_oracle ... ok
+test endpoints_are_one_sided_and_parameters_outside_domain_reject ... ok
+test rational_quadratic_has_nonzero_third_derivative_from_quotient ... ok
+test mapped_circle_fraction_derivatives_do_not_overflow_canceling_native_scales ... ok
+test overflowing_native_parameter_span_never_produces_a_false_finite_line_value ... ok
+test reversed_fraction_derivatives_scale_each_order_without_translating_vectors ... ok
+test interior_discontinuity_cannot_claim_unqualified_derivative ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 8 tests
+test earlier_source_units_without_definition_context_remain_compatible ... ok
+test definition_resolution_requires_a_native_definition_in_its_source_namespace ... ok
+test definition_context_owned_name_capacity_is_admitted ... ok
+test nonfinite_declared_resolution_and_unresolved_bound_definitions_reject ... ok
+test explicit_definition_units_survive_owned_serialization_and_are_distinct_from_model_units ... ok
+test unresolved_definition_units_are_retained_without_fabricating_a_resolution ... ok
+test definition_unit_map_rejects_uuid_aliases_and_duplicate_keys_before_the_value ... ok
+test incomplete_conflicting_or_nonpositive_definition_resolutions_reject ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test a_diff_between_two_documents_is_refused ... ok
+test an_idle_document_produces_no_batch ... ok
+test an_extension_edit_is_reported_as_an_extension_change ... ok
+test deleting_an_entity_reports_removal_and_group_pruning ... ok
+test feature_and_group_lifecycle_changes_are_ordered_and_deterministic ... ok
+test adding_an_entity_and_a_group_is_one_ordered_batch_each_with_a_new_revision ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 30 tests
+test l3_002_unsupported_entity_kinds_are_reported_never_downgraded ... ok
+test l3_003_geometry_handle_and_display_attributes_are_queryable_separately ... ok
+test l3_003_a_stale_or_dangling_handle_is_never_a_live_object ... ok
+test l3_004_layer_order_must_list_every_layer_exactly_once ... ok
+test l3_004_layer_record_keeps_its_identity_when_renamed ... ok
+test l3_005_a_deleted_layer_never_leaves_dangling_membership ... ok
+test l3_006_a_hidden_layer_hides_and_a_locked_layer_denies_editing ... ok
+test l3_004_layer_with_an_unknown_parent_is_refused ... ok
+test l3_006_a_locked_layer_refuses_the_write_without_mutating_the_document ... ok
+test l3_008_nested_cycles_are_refused_by_document_validation ... ok
+test l3_001_a_feature_output_must_be_a_live_object ... ok
+test l3_009_a_malformed_extension_payload_is_refused ... ok
+test l3_002_every_typed_entity_record_keeps_its_kind_when_round_tripped ... ok
+test l3_007_unknown_or_duplicate_members_are_refused_atomically ... ok
+test l3_008_a_definition_insert_is_admitted_on_a_layerless_document ... ok
+test l3_007_a_group_can_reference_an_object_created_by_the_same_request ... ok
+test l3_009_an_unknown_slot_survives_a_json_round_trip ... ok
+test l3_005_reassigning_an_object_to_another_layer_keeps_its_entity_id ... ok
+test l3_008_a_self_referencing_definition_is_refused_without_a_partial_write ... ok
+test l3_009_a_bare_slot_name_is_not_a_slot ... ok
+test l3_009_a_locked_source_refuses_the_extension_write ... ok
+test l3_001_retired_feature_id_is_never_reallocated ... ok
+test l3_007_an_undone_group_id_is_never_reallocated ... ok
+test l3_001_two_entities_and_one_feature_receive_unique_stable_ids ... ok
+test l3_008_one_undo_removes_the_definition_and_all_of_its_occurrences ... ok
+test l3_007_deleting_the_last_member_removes_the_empty_group_and_keeps_the_rest ... ok
+test l3_007_grouping_and_ungrouping_never_changes_geometry_or_object_ids ... ok
+test l3_009_extension_slots_keep_object_identity_and_bump_attributes_only ... ok
+test l3_008_two_instances_share_one_definition_without_cloning_topology ... ok
+test l3_009_clearing_a_slot_removes_it_and_reports_it_as_unknown_when_replaced ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test l3_003_a_tolerance_names_the_field_it_refuses ... ok
+test l3_003_a_document_without_a_tolerance_reports_missing_not_a_default ... ok
+test l3_003_geometry_at_or_below_the_absolute_tolerance_is_refused ... ok
+test l3_003_a_new_document_states_the_template_policy_explicitly ... ok
+test l3_003_a_tolerance_document_survives_validation_and_json ... ok
+test l3_003_a_stale_tolerance_revision_is_refused_without_mutation ... ok
+test l3_003_the_tolerance_mutation_is_one_undo_entry_and_keeps_context_revision ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test resource_admission_counts_payload_copy_peak_and_rejects_bad_metadata ... ok
+test admitted_resource_owns_immutable_bytes_hash_and_typed_identity ... ok
+test descriptor_without_matching_payload_is_not_a_valid_live_document ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 15 tests
+test a_handle_refuses_the_wrong_kind_of_drag_input ... ok
+test a_rotated_frame_axis_drag_follows_its_axis ... ok
+test a_polar_array_spreads_occurrences_around_the_frame_axis ... ok
+test a_rectangular_array_places_every_occurrence_on_the_frame_grid ... ok
+test a_plane_handle_drops_the_normal_component ... ok
+test an_axis_handle_keeps_only_the_component_along_its_axis ... ok
+test a_session_composes_successive_drags_in_world_order ... ok
+test handle_codes_round_trip_like_the_legacy_wire ... ok
+test a_session_refuses_an_empty_duplicate_or_nil_target_set ... ok
+test rotation_about_a_point_keeps_that_point_fixed ... ok
+test arrays_refuse_impossible_counts_and_spacing ... ok
+test rotation_and_scale_refuse_bad_parameters ... ok
+test scaling_along_an_axis_keeps_the_other_axes_and_the_origin ... ok
+test a_copy_session_inserts_clones_with_fresh_identities ... ok
+test a_move_session_rewrites_placement_only_and_is_one_undo_step ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test prepared_receipt_reservation_checks_bound_cancellation ... ok
+test held_output_reservation_uses_the_same_counter_as_new_mutations ... ok
+test external_input_is_reserved_before_preparing_a_candidate_and_undo ... ok
+test prepared_receipt_reservation_cannot_cross_coordinator_or_caller_lifecycle ... ok
+test prepared_receipt_reservation_replaces_all_counters_instead_of_accumulating_old_metadata ... ok
+test extending_prepared_receipt_reserves_full_candidate_and_failure_keeps_old_reservation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test a_detached_recipe_is_never_stale_and_blocks_nothing ... ok
+test freezing_a_recipe_locks_its_outputs ... ok
+test a_changed_source_dirties_its_recipe_and_every_consumer ... ok
+test a_missing_source_is_unresolved_not_dirty ... ok
+test a_fresh_graph_reports_no_stale_recipe ... ok
+test mark_clean_advances_the_revision_and_clears_the_state ... ok
+test the_state_counts_match_the_recorded_states ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test mismatch_between_shape_snapshot_result_and_source_stamp_rejects_all_outputs ... ok
+test geometry_result_recipe_and_metadata_publish_in_one_undo_group ... ok
+test cycle_is_rejected_before_graph_or_shape_mutation ... ok
+test history_child_geometry_lock_does_not_block_reference_input_or_appearance ... ok
+test missing_parent_is_unresolved_without_rebinding_same_label ... ok
+test replay_preserves_child_identity_and_current_source_revision ... ok
+test source_change_marks_two_generations_dirty_and_old_results_stale ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 5 tests
+test worker_budget_uses_floor_sixty_percent_without_four_worker_ceiling ... ok
+test canceled_and_duplicate_late_replies_never_become_ready ... ok
+test immutable_worker_input_survives_close_and_reply_is_discarded ... ok
+test commit_then_undo_still_invalidates_job_even_when_source_stamp_matches_again ... ok
+test active_savepoints_share_aggregate_budget_with_next_private_clone ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 8 tests
+test a_display_unit_conversion_is_lossless_for_exact_values ... ok
+test angle_conversions_are_exact_at_the_quadrant_boundaries ... ok
+test a_tolerance_comparison_is_documented_and_boundary_exact ... ok
+test an_exact_ratio_is_more_accurate_than_a_rounded_decimal_factor ... ok
+test a_degree_radian_round_trip_stays_within_one_ulp ... ok
+test a_round_trip_through_any_unit_stays_within_one_ulp ... ok
+test unit_conversion_throughput_is_stated ... ok
+test the_admission_hot_path_does_not_allocate_per_value ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+
+running 10 tests
+test an_exchange_only_changes_membership ... ok
+test a_copy_of_an_unknown_layer_is_refused ... ok
+test a_paste_can_attach_the_subtree_under_an_existing_layer ... ok
+test a_copy_carries_the_layer_subtree_and_only_its_entities ... ok
+test a_paste_gives_every_record_a_fresh_identity ... ok
+test a_copy_of_an_empty_layer_is_an_empty_clipboard ... ok
+test the_wire_form_respects_the_byte_budget ... ok
+test the_wire_form_round_trips_and_refuses_a_foreign_schema ... ok
+test a_paste_requires_the_layers_to_exist_first ... ok
+test a_paste_plan_commits_as_one_undoable_step ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test hidden_masks_all_interaction_without_mutating_explicit_selectability ... ok
+test restored_custom_labels_cannot_collide_but_generic_import_names_can ... ok
+test preset_slot_is_durable_identity_not_label_and_duplicate_slots_refuse ... ok
+test basic_preset_palette_cannot_be_customized_on_creation_or_restore ... ok
+test two_proposed_advanced_renames_cannot_collide_in_one_batch ... ok
+test preset_updates_keep_slot_identity_and_reject_basic_customization_and_reserved_aliases ... ok
+test hiding_and_showing_do_not_restore_explicit_invisible_or_unselectable_state ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 12 tests
+test layer_revision_overflow_and_new_layer_node_budget_preserve_immediate_world ... ok
+test one_batch_cannot_lock_a_target_then_assign_using_its_old_permission ... ok
+test assign_changes_membership_and_color_atomically_without_changing_current_or_placement ... ok
+test foreign_coordinator_and_reopened_equal_counter_document_reject_layer_capture ... ok
+test current_noop_at_full_history_budget_succeeds_and_keeps_prior_redo ... ok
+test lazy_create_and_current_are_one_undo_and_retired_uuid_cannot_be_reused ... ok
+test cycle_locked_current_and_cancel_reject_before_any_publication ... ok
+test mixed_assignment_locked_source_refuses_whole_batch_and_preserves_redo ... ok
+test current_only_preserves_existing_entities_and_noop_keeps_executable_redo ... ok
+test oversized_assignment_capture_and_late_cancel_keep_world_and_old_redo ... ok
+test caller_savepoint_rollback_retires_created_layer_and_keeps_global_redo ... ok
+test visibility_lock_and_unlock_preserve_explicit_object_preferences ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test create_and_assign_new_preset_is_one_atomic_undo_in_either_request_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 13 tests
+test aggregate_budget_rejects_overflow_and_sum_of_admitted_items ... ok
+test bounds_distinguish_unknown_empty_and_invalid_range ... ok
+test mesh_and_cloud_have_distinct_master_types_and_ordered_channels ... ok
+test finite_and_nurbs_admission_rejects_before_entity_creation ... ok
+test surface_grid_dimensions_are_checked_without_overflow ... ok
+test reused_label_never_resolves_a_deleted_object_stamp ... ok
+test retained_unused_string_and_geometry_capacity_is_part_of_the_byte_budget ... ok
+test unit_conversion_changes_lengths_without_scaling_dimensionless_basis ... ok
+test permission_visibility_selection_edit_and_locked_reference_are_separate ... ok
+test nested_instances_compose_world_placement_once_and_preserve_definition ... ok
+test point_map_cannot_be_admitted_below_its_fixed_entity_storage_floor ... ok
+test coordinator_retention_includes_undo_label_capacity_and_both_document_snapshots ... ok
+test replacing_redo_branch_accounts_old_redo_and_new_undo_together_before_acceptance ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 5 tests
+test an_object_with_no_import_namespace_has_no_provenance ... ok
+test an_imported_object_reports_source_path_checksum_and_original_identity ... ok
+test a_source_without_a_matching_embedded_hash_has_no_provenance ... ok
+test a_natively_created_object_is_never_labelled_as_an_import ... ok
+test the_summary_is_a_single_pass_over_a_large_import ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+
+running 12 tests
+test a_resource_cannot_be_owned_by_two_documents ... ok
+test resource_and_object_identity_authority_are_tagged_independently ... ok
+test initial_resource_id_cannot_be_replaced_or_reallocated_after_deletion ... ok
+test resource_revisions_use_the_initial_batch_snapshot ... ok
+test resources_and_geometry_publish_privately_as_one_undo_entry ... ok
+test caller_rejected_resource_batch_keeps_pending_state_and_prior_redo ... ok
+test cancellation_after_prepare_does_not_publish_or_retire_the_resource_id ... ok
+test rejected_acceptance_guard_preserves_resource_authority_and_prior_redo ... ok
+test caller_resource_identity_stays_retired_after_savepoint_rollback_and_abort ... ok
+test resource_id_stays_retired_after_undo_and_after_delete ... ok
+test resource_insert_rejects_aggregate_retention_before_a_candidate_is_returned ... ok
+test invalid_resource_batches_preserve_the_snapshot_and_executable_redo ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 13 tests
+test entity_baseline_helper_rejects_wrong_kind_host_and_native_identity_alias ... ok
+test geometry_placement_attributes_and_label_edits_have_independent_hashes ... ok
+test field_fingerprints_ignore_entity_identity_and_revision_counters ... ok
+test legacy_bound_helper_never_invents_per_field_baselines ... ok
+test field_baseline_is_invalid_on_retained_only_or_layer_records ... ok
+test retained_only_records_do_not_collapse_preserve_geometry_or_unknown_policy ... ok
+test unknown_policy_and_incomplete_baseline_packets_reject ... ok
+test legacy_policy_and_field_baselines_stay_unknown_after_cold_serde ... ok
+test root_and_definition_member_helpers_capture_full_entity_and_independent_fields ... ok
+test field_baselines_remain_original_across_edit_and_delete_dispositions ... ok
+test unchanged_record_cannot_claim_forged_independent_baselines ... ok
+test policy_and_independent_baselines_survive_cold_serde_without_reinterpretation ... ok
+test spare_record_capacity_charges_inline_field_baselines_and_rejects_tight_limits ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 17 tests
+test aggregate_object_count_rejects_import_before_candidate_allocation ... ok
+test caller_rollback_preserves_retired_namespace_authority_and_prior_redo ... ok
+test retained_transfer_is_rejected_before_changing_either_document ... ok
+test retained_only_native_record_has_no_fabricated_entity_and_referenced_resource_cannot_be_deleted ... ok
+test deleted_member_aliases_cannot_claim_two_retired_owners_in_a_cold_document ... ok
+test direct_cold_metadata_tampering_cannot_claim_unchanged_or_resurrect_deleted_source ... ok
+test unresolved_units_require_an_explicit_owned_resolution_before_import ... ok
+test source_and_namespace_id_reuse_after_import_undo_is_rejected_but_redo_restores_them ... ok
+test invalid_import_has_no_partial_source_namespace_objects_or_undo ... ok
+test layers_assignment_refuses_retained_root_without_erasing_namespace_or_redo ... ok
+test two_imports_of_identical_source_use_separate_host_and_retained_namespaces ... ok
+test definition_member_binding_remains_local_to_its_shared_definition ... ok
+test import_requires_every_root_layer_definition_and_local_member_to_be_source_bound ... ok
+test edited_deleted_and_new_records_remain_distinct_and_undo_restores_original_binding ... ok
+test placement_attributes_and_prepared_replacement_all_update_the_retained_disposition ... ok
+test late_cancellation_stale_import_and_failed_acceptance_keep_prior_redo_and_unaccepted_ids ... ok
+test retained_validation_admits_record_scratch_with_all_owned_payload_and_document_storage ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+
+running 3 tests
+test held_reservations_cover_both_peer_orders_and_undo_snapshot_owners ... ok
+test mutation_input_remains_reserved_during_initial_coordinator_validation ... ok
+test validation_scratch_must_fit_alongside_other_retained_documents ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.39s
+
+
+running 7 tests
+test selecting_an_unknown_object_is_refused ... ok
+test a_selection_from_another_document_generation_is_stale ... ok
+test a_subshape_reference_must_name_a_live_object ... ok
+test a_stale_list_index_is_never_resolved_as_a_neighbour ... ok
+test selection_is_typed_identity_and_survives_a_stable_document ... ok
+test deleting_an_object_invalidates_its_selection_entry ... ok
+test the_selection_only_describes_a_document_that_validates ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 8 tests
+test owned_option_bytes_share_budget_with_source_snapshot ... ok
+test selected_point_peak_copy_is_part_of_aggregate_admission ... ok
+test whole_fit_points_is_not_replaced_by_a_prefix_or_subset ... ok
+test ordered_subset_preserves_original_native_indices_including_hidden_points ... ok
+test capture_owns_immutable_provenance_and_revalidation_detects_context_change ... ok
+test numeric_option_domain_and_dimension_are_explicit ... ok
+test unknown_role_option_wrong_kind_and_stale_generation_reject ... ok
+test duplicate_out_of_range_and_overlapping_subsets_are_rejected ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test current_none_preserves_default_curve_style_without_creating_a_group ... ok
+test new_document_has_no_current_layer_or_eager_groups ... ok
+test output_on_off_layer_is_admitted_invisible_and_locked_layer_rejects ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 21 tests
+test a_degenerate_surface_has_no_normal ... ok
+test a_cylinder_built_rational_curve_matches_the_curve_kernel_circle ... ok
+test a_refit_of_a_plane_reproduces_it ... ok
+test a_plane_evaluates_to_its_own_frame ... ok
+test a_loft_refuses_impossible_sections ... ok
+test a_refit_refuses_a_grid_that_cannot_hold_the_degree ... ok
+test path_frames_stay_orthonormal_and_perpendicular_to_the_tangent ... ok
+test a_sweep1_refuses_impossible_input ... ok
+test a_surface_parameter_outside_the_domain_is_refused ... ok
+test an_iso_curve_of_a_plane_is_an_exact_line ... ok
+test a_sweep1_carries_a_square_prism_rigidly ... ok
+test an_iso_curve_of_a_cylinder_is_the_exact_rational_circle ... ok
+test the_analytic_builders_refuse_a_bad_frame_or_size ... ok
+test arc_length_stations_are_equally_spaced_along_an_arc ... ok
+test a_refit_of_a_cylinder_stays_close_to_the_source ... ok
+test a_cylinder_stays_at_its_radius_and_normal ... ok
+test a_loft_between_identical_circles_is_a_cylinder ... ok
+test a_sweep1_along_a_straight_rail_reproduces_the_profile_at_every_station ... ok
+test sweep2_refuses_what_the_contract_forbids ... ok
+test sweep2_keeps_both_rails_in_contact ... ok
+test sweep2_matches_the_recorded_maintain_height_oracle ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+
+running 8 tests
+test booked_scope_failed_prepare_keeps_booking_and_prior_redo ... ok
+test scope_owned_by_another_thread_cannot_be_finished ... ok
+test wrong_transaction_identity_cannot_borrow_caller_scope ... ok
+test cancellation_keeps_active_nested_scope_and_old_redo_immediately ... ok
+test nonrecording_empty_scope_keeps_prior_stacks_and_success_creates_no_undo ... ok
+test active_scope_merge_retains_first_write_baseline_and_one_undo ... ok
+test nested_savepoint_abort_restores_parent_pending_state ... ok
+test rolled_back_caller_identity_is_retired_and_global_prior_redo_remains_executable ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 13 tests
+test l3_001_lengths_are_finite_millimetres ... ok
+test l3_001_unit_tokens_are_case_insensitive_and_round_trip_their_symbol ... ok
+test l3_001_length_text_accepts_a_bare_number_with_the_document_unit ... ok
+test l3_002_an_angle_beyond_the_numeric_bound_is_refused ... ok
+test l3_002_angle_text_parses_degrees_and_explicit_radians ... ok
+test l3_002_degrees_convert_to_radians_within_the_contract_tolerance ... ok
+test l3_004_typed_values_carry_their_dimension_and_read_back_typed ... ok
+test l3_006_a_stored_quantity_keeps_its_dimension_through_json ... ok
+test l3_005_a_malformed_domain_is_refused_before_any_value ... ok
+test l3_005_a_step_grid_is_enforced ... ok
+test l3_004_a_bare_number_is_not_a_length ... ok
+test l3_005_a_number_domain_admits_only_a_matching_typed_quantity ... ok
+test l3_006_wire_forms_are_unit_tagged_and_never_interchangeable ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 12 tests
+test a_cage_region_is_validated ... ok
+test a_cage_refuses_a_malformed_record ... ok
+test a_scaled_and_offset_cage_maps_its_parameter_cube ... ok
+test an_identity_cage_is_the_identity_map ... ok
+test an_incomplete_selection_only_refuses_unusable_inputs ... ok
+test measurements_refuse_degenerate_and_oversized_input ... ok
+test surface_options_follow_the_recorded_style_and_count_rules ... ok
+test the_capability_helpers_keep_their_wording_and_bounds ... ok
+test distance_uses_the_requested_display_unit ... ok
+test angle_between_two_directed_lines_matches_the_geometry ... ok
+test the_capability_policy_matches_the_legacy_rules ... ok
+test uniform_weights_normalise_away ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+warning: field `live` is never read
+   --> crates\om9-core\src\brep_kernel.rs:340:5
+    |
+335 | pub struct HandleStore<T> {
+    |            ----------- field in this struct
+...
+340 |     live: usize,
+    |     ^^^^
+    |
+    = note: `HandleStore` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-core` (lib) generated 1 warning
+warning: `om9-core` (lib test) generated 1 warning (1 duplicate)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)
+     Running tests\atomic_transactions.rs (L:\om9-target\debug\deps\atomic_transactions-5170427a18c6b716.exe)
+     Running tests\brep_kernel.rs (L:\om9-target\debug\deps\brep_kernel-e38391bb18f91301.exe)
+     Running tests\cancellation_links.rs (L:\om9-target\debug\deps\cancellation_links-6386d48d71f70502.exe)
+     Running tests\capability_gates.rs (L:\om9-target\debug\deps\capability_gates-abca6b1b61522415.exe)
+     Running tests\command_availability.rs (L:\om9-target\debug\deps\command_availability-4be5106acb1013e9.exe)
+     Running tests\command_descriptor.rs (L:\om9-target\debug\deps\command_descriptor-8a1d9bddaff701e3.exe)
+     Running tests\command_registry.rs (L:\om9-target\debug\deps\command_registry-afaa0ce0b3b26aa5.exe)
+     Running tests\command_schema.rs (L:\om9-target\debug\deps\command_schema-9ac0cce5d458977a.exe)
+     Running tests\coordinates.rs (L:\om9-target\debug\deps\coordinates-74d374396b42d5bc.exe)
+     Running tests\coordinator_authority.rs (L:\om9-target\debug\deps\coordinator_authority-643793c7513c0adf.exe)
+     Running tests\coordinator_held_startup.rs (L:\om9-target\debug\deps\coordinator_held_startup-92f9d35aa47991c4.exe)
+     Running tests\curve_build.rs (L:\om9-target\debug\deps\curve_build-53557c40a0cb65d0.exe)
+     Running tests\curve_oracles.rs (L:\om9-target\debug\deps\curve_oracles-b5fc3b526dcebb04.exe)
+     Running tests\definition_units.rs (L:\om9-target\debug\deps\definition_units-6ad5f06a420902f1.exe)
+     Running tests\document_changes.rs (L:\om9-target\debug\deps\document_changes-7deb1fc613c5a156.exe)
+     Running tests\document_graph.rs (L:\om9-target\debug\deps\document_graph-b1a683feb2892502.exe)
+     Running tests\document_tolerance.rs (L:\om9-target\debug\deps\document_tolerance-8112eb77148f0874.exe)
+     Running tests\embedded_resources.rs (L:\om9-target\debug\deps\embedded_resources-9380885598c3686f.exe)
+     Running tests\gumball.rs (L:\om9-target\debug\deps\gumball-31bd22809bbe8326.exe)
+     Running tests\held_preparation.rs (L:\om9-target\debug\deps\held_preparation-e8b017e930207441.exe)
+     Running tests\history_ops.rs (L:\om9-target\debug\deps\history_ops-b9a592636d65140a.exe)
+     Running tests\history_replay.rs (L:\om9-target\debug\deps\history_replay-494d76acd3f0242b.exe)
+     Running tests\job_lifecycle.rs (L:\om9-target\debug\deps\job_lifecycle-bd3deff05cdaac57.exe)
+     Running tests\l2_01_08_precision.rs (L:\om9-target\debug\deps\l2_01_08_precision-378796c843b37980.exe)
+     Running tests\layer_ops.rs (L:\om9-target\debug\deps\layer_ops-50dbd89200a917a9.exe)
+     Running tests\layer_state.rs (L:\om9-target\debug\deps\layer_state-4eded658f259dc0b.exe)
+     Running tests\layer_transactions.rs (L:\om9-target\debug\deps\layer_transactions-0fecc822c7eb7e96.exe)
+     Running tests\lazy_layer_assignment.rs (L:\om9-target\debug\deps\lazy_layer_assignment-0bc2c99bc7f682e3.exe)
+     Running tests\model_admission.rs (L:\om9-target\debug\deps\model_admission-0727b1fec776db28.exe)
+     Running tests\provenance.rs (L:\om9-target\debug\deps\provenance-c84f41d8daa39d4f.exe)
+     Running tests\resource_transactions.rs (L:\om9-target\debug\deps\resource_transactions-fb965e556e2cbc50.exe)
+     Running tests\retained_entity_baselines.rs (L:\om9-target\debug\deps\retained_entity_baselines-e0860d8aabd850db.exe)
+     Running tests\retained_imports.rs (L:\om9-target\debug\deps\retained_imports-0b292a9cda059b3b.exe)
+     Running tests\retained_peak_review.rs (L:\om9-target\debug\deps\retained_peak_review-4f9635ddac60e578.exe)
+     Running tests\selection_state.rs (L:\om9-target\debug\deps\selection_state-7d526e8cd8198c3e.exe)
+     Running tests\source_binding.rs (L:\om9-target\debug\deps\source_binding-4f835c8b22168df4.exe)
+     Running tests\startup_layers.rs (L:\om9-target\debug\deps\startup_layers-8b9a41d676a89ada.exe)
+     Running tests\surface_kernel.rs (L:\om9-target\debug\deps\surface_kernel-b911654f188e21dd.exe)
+     Running tests\transaction_scopes.rs (L:\om9-target\debug\deps\transaction_scopes-809678b12e593889.exe)
+     Running tests\units_parameters.rs (L:\om9-target\debug\deps\units_parameters-aa83b2f4cb824b64.exe)
+     Running tests\w8_w9_w10_kernels.rs (L:\om9-target\debug\deps\w8_w9_w10_kernels-3ee27f240e6f0d9a.exe)
+   Doc-tests om9_core
+

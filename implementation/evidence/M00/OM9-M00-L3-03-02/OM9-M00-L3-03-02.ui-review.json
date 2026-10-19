@@ -1,0 +1,57 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-M00-L3-03-02",
+  "reviewer": {
+    "name": "chủ dự án (OpenMatrix9)",
+    "role": "project owner",
+    "status": "SIGNED",
+    "signature": "signed in the working session: 'ký hết và tiếp tục chuyển đến phần code'"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T00:30:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "GPU evidence (4/4): OCCT mesh on the GPU (2542 vertices / 5008 triangles, 0.755 ms frame), camera/DPI sweep matches geometry, device loss recovers in 0.337 s and a software adapter is the fallback",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-02/device-loss.json",
+      "sha256": "5e90a435198253fba328e70ff733a051dd24cde9f660420217cb3e4c062b68fe",
+      "bytes": 365
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-02/gpu-bench.json",
+      "sha256": "1c4fdf3f5b575c4e60bef9dd376b55ad3ed89059291cd6cee690bc2bb97befa0",
+      "bytes": 417
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-02/gpu-mesh.json",
+      "sha256": "0f399440923e33c5b0d1f99942b23bebadc214eceb8c29d80b2bbf6eaa63f1a2",
+      "bytes": 1880
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-02/OM9-M00-L4-03-02-01.mesh-to-gpu.log",
+      "sha256": "ac79b014125f9532f885aeea842c25da4c526f9ede28093e75d284d72a31a828",
+      "bytes": 1835
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-02/OM9-M00-L4-03-02-02.camera-dpi.log",
+      "sha256": "b121af1286038162c3b4f4a00742caf207a8936fe4742c2909ff590371f38e62",
+      "bytes": 1884
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-02/OM9-M00-L4-03-02-03.gpu-bench.log",
+      "sha256": "76f44ea86a186ca4024d81fc2cb8f28ab5c36fdf131f5fd2c644167d5b320618",
+      "bytes": 879
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-02/OM9-M00-L4-03-02-04.device-loss-fallback.log",
+      "sha256": "24bae5d10f82e492db66f3640c0e06af6ba4df543ad04dd5253df96312d1889a",
+      "bytes": 692
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-02/source_crosswalk.json",
+      "sha256": "2b6ac227fa0f7e1a9cd966076408600949fa3a354fade503954334bb024b97aa",
+      "bytes": 2317
+    }
+  ],
+  "note": "recorded by the assistant from the owner's instruction; the assistant did not approve its own work"
+}

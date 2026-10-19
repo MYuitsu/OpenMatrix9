@@ -1,0 +1,168 @@
+{
+  "schema": "om9.m01.module_crosswalk.v1",
+  "l2_id": "OM9-L2-02-01",
+  "l2_title": "Be Rhino Nurbs Object Semantics",
+  "milestone": "M01",
+  "target": "standalone Rust OM9",
+  "audited_utc": "2026-10-19",
+  "workspace": "H:/OpenMatrix9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "spec_package": "OpenMatrix9_Codex_Spec_v2/ is ABSENT; the local OM9_Milestones/M01/M02 records and the 2026-10-19 user direction are the specification source.",
+  "m00_scope": "No QymCAD code is reused. The pinned qymcad-io/core/kernel paths were audited as architecture references; the semantic layer is authored Rust over the existing OM9 geometry records. OCCT is used only through the existing om9-kernel adapter.",
+  "status_vocabulary": {
+    "DONE_WITH_EVIDENCE": "owner code exists AND positive and negative oracles are proven by named automated tests that ran in this audit",
+    "PARTIAL": "owner code exists but a named oracle is not covered",
+    "MISSING": "no owner code for the capability"
+  },
+  "counts": { "DONE_WITH_EVIDENCE": 10, "PARTIAL": 0, "MISSING": 0 },
+  "owner_crates": [
+    "om9-core::rhino_semantics (new semantic owner)",
+    "om9-core::geometry / curve_build / surface_kernel / brep_kernel (reused geometry records)",
+    "om9-core::model (trim/extrusion extension slots and document validation hook)",
+    "om9-archive (persistence proof for trim/extrusion semantics)"
+  ],
+  "implementation_note": "The semantic layer was added in this execution: crates/om9-core/src/rhino_semantics.rs. It does not duplicate OCCT evaluation and does not introduce a second geometry record; it classifies and validates the existing owned records.",
+  "l3": [
+    {
+      "id": "OM9-L3-02-01-001",
+      "title": "Point And Polyline Semantic Types",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Distinct Point/Line/Circle/Polyline/Polycurve kinds with endpoints and degenerate-line refusal.",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:33-48 SemanticKind",
+        "crates/om9-core/src/rhino_semantics.rs:50-75 geometry/curve classification",
+        "crates/om9-core/src/rhino_semantics.rs:118-225 CurveSemantics + classify_curve",
+        "crates/om9-core/src/geometry.rs:340-430 existing Curve record validation (exact zero-length line)",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:83 point_line_polyline_and_polycurve_have_distinct_kinds",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:134 a_degenerate_line_is_refused_and_never_becomes_a_point_or_polygon"
+      ],
+      "gaps": [],
+      "reuse": "EXTEND existing geometry; ADD authored classification"
+    },
+    {
+      "id": "OM9-L3-02-01-002",
+      "title": "NURBS Curve Control Points Knots Weights",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Degree/pole/weight/knot cardinality and rationality, refused before any kernel conversion.",
+      "evidence": [
+        "crates/om9-core/src/geometry.rs:187-292 NurbsCurve + validate (count + degree + 1, positive weights, multiplicity)",
+        "crates/om9-core/src/rhino_semantics.rs:230-273 NurbsCurveSemantics + inspect_nurbs_curve",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:156 cubic_nurbs_curve_reports_degree_knots_weights_and_rationality"
+      ],
+      "gaps": [],
+      "reuse": "REUSE existing NurbsCurve validation; ADD authored inspection"
+    },
+    {
+      "id": "OM9-L3-02-01-003",
+      "title": "Open Closed And Planar Curve Rules",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Closed/planar classification under an explicit tolerance policy, never raw equality.",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:118-225 CurveSemantics + endpoints/planarity",
+        "crates/om9-core/src/rhino_semantics.rs:199-225 endpoint distance <= tolerance policy",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:191 closed_and_planar_rules_use_the_stated_tolerance_not_raw_equality"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored policy over surface_kernel sampling"
+    },
+    {
+      "id": "OM9-L3-02-01-004",
+      "title": "Surface UV Domain And Seam Rules",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "U/V domains, periodic flags, seam parameters and V orientation with explicit refusal of swapped/missing periodicity.",
+      "evidence": [
+        "crates/om9-core/src/geometry.rs:294-338 NurbsSurface record",
+        "crates/om9-core/src/rhino_semantics.rs:276-382 SurfaceExpectation/SurfaceSemantics/classify_surface/require_orientation",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:242 surface_domains_seams_periodicity_and_orientation_are_explicit"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored seam/orientation rules"
+    },
+    {
+      "id": "OM9-L3-02-01-005",
+      "title": "Trimmed Vs Underlying Surface Model",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Underlying surface retained with outer/inner UV trim loops; never promoted to an untrimmed visible surface; persisted via a validated extension slot.",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:449-532 TrimmedSurface, loops, extension helpers",
+        "crates/om9-core/src/model.rs:100-111 known slots and :716 document validation hook",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:328 trimmed_surface_keeps_the_underlying_surface_and_never_promotes_it",
+        "TEST crates/om9-archive/tests/rhino_semantics_persistence.rs:62 trimmed_surface_semantics_survive_save_and_reopen_without_becoming_untrimmed",
+        "TEST crates/om9-archive/tests/rhino_semantics_persistence.rs:139 a_damaged_trim_payload_is_refused_before_publication"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored trim record; REUSE entity extension persistence"
+    },
+    {
+      "id": "OM9-L3-02-01-006",
+      "title": "Surface Edge And Isocurve Semantics",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Boundary edges are pickable topology; exact isocurves are display-only and cannot become persistent geometry.",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:537-615 DisplayIsocurve + BoundaryEdge",
+        "crates/om9-core/src/surface_kernel.rs:196-259 exact rational isocurve",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:391 isocurves_are_display_only_and_boundary_edges_are_pickable_topology"
+      ],
+      "gaps": [],
+      "reuse": "REUSE surface_kernel::isocurve; ADD authored display/pickable distinction"
+    },
+    {
+      "id": "OM9-L3-02-01-007",
+      "title": "Polysurface And Closed Solid Semantics",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Closed shell = Solid; open one-face shell = Surface; open multi-face = Polysurface; open/self-overlapping bodies cannot claim solid.",
+      "evidence": [
+        "crates/om9-core/src/brep_kernel.rs:91-152 ShapeKind/Vertices/Edges/Wires/Faces/Shells",
+        "crates/om9-core/src/rhino_semantics.rs:619-680 ShapeClass + classify_shell",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:523 closed_shell_is_a_solid_while_open_shells_are_surface_or_polysurface"
+      ],
+      "gaps": [],
+      "reuse": "REUSE BrepBody topology; ADD authored solid classification"
+    },
+    {
+      "id": "OM9-L3-02-01-008",
+      "title": "Extrusion Vs Full B-Rep Representations",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Lightweight closed planar profile + direction/height persisted as a primitive, converted on demand to a closed portable B-Rep body with provenance.",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:683-933 Extrusion/ExtrusionConversion/to_brep_body/extension helpers",
+        "crates/om9-core/src/model.rs:102-111 slot registry",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:611 extrusion_stays_lightweight_and_converts_to_a_closed_brep_with_provenance",
+        "TEST crates/om9-archive/tests/rhino_semantics_persistence.rs:101 extrusion_semantics_survive_save_and_reopen_and_still_convert"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored primitive/conversion boundary; REUSE brep_kernel::BrepBody"
+    },
+    {
+      "id": "OM9-L3-02-01-009",
+      "title": "Mesh Vs NURBS Object Type Rules",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Mesh and exact box keep different semantic kinds; no implicit mesh-to-NURBS or false NURBS status.",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:936-959 is_exact_geometry + require_exact_nurbs",
+        "crates/om9-core/src/geometry.rs:455-499 GeometryKind/Geometry",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:756 a_mesh_and_an_exact_box_never_share_a_semantic_kind",
+        "TEST crates/om9-archive/tests/rhino_semantics_persistence.rs:165 mesh_and_brep_keep_distinct_kinds_across_the_codec"
+      ],
+      "gaps": [],
+      "reuse": "ADD authored refusal; no conversion exists by design"
+    },
+    {
+      "id": "OM9-L3-02-01-010",
+      "title": "Instance And Block Semantic Type",
+      "status": "DONE_WITH_EVIDENCE",
+      "scope": "Two occurrences share one definition but keep distinct IDs and transforms; changing one transform never mutates the definition.",
+      "evidence": [
+        "crates/om9-core/src/rhino_semantics.rs:961-1018 InstanceSemantic/block_instances/set_instance_transform",
+        "crates/om9-core/src/model.rs:632-650 instance creation",
+        "TEST crates/om9-core/tests/rhino_semantics.rs:774 block_instances_share_a_definition_but_not_identity_or_transform"
+      ],
+      "gaps": [],
+      "reuse": "REUSE Definition/Instance model; ADD authored semantics"
+    }
+  ],
+  "manual_review_remaining": [
+    "Every L3 is AUTO_ONLY (manual_test_gate=AUTO_ONLY); no human test is required by the plan.",
+    "An external reviewer has not signed this record; status is AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING."
+  ]
+}

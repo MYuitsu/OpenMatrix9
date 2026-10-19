@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-009",
+  "l4": "OM9-L4-01-02-009-02",
+  "case": "command-repeat-and-dispatch-negative",
+  "negative_oracle": "Nonrepeatable/file destructive commands cannot be silently repeated",
+  "cases": [
+    {
+      "id": "S1-a-destructive-command-is-refused-as-a-repeat",
+      "attempt": "set the repeat slot to a file feature and press Enter",
+      "expect": { "refused": true, "detail": "the slot only ever holds a repeatable feature" }
+    },
+    {
+      "id": "S2-a-second-command-cannot-run-while-one-runs",
+      "sequence": ["dispatch LINE", "Enter \"\""],
+      "expect": { "error": "Busy" }
+    },
+    {
+      "id": "S3-a-stale-session-cannot-be-repeated",
+      "sequence": ["dispatch LINE", "switch the active view", "Enter \"\""],
+      "expect": { "is_running": false, "phase": "Idle" }
+    }
+  ]
+}

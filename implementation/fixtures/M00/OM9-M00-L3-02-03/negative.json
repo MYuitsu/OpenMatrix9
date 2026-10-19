@@ -1,0 +1,47 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-02-03",
+  "cases": [
+    {
+      "id": "M00-FX-02-03-NEG-01",
+      "call": "degenerate",
+      "input": {
+        "kind": 1
+      },
+      "expected": {
+        "valid": false
+      }
+    },
+    {
+      "id": "M00-FX-02-03-NEG-02",
+      "call": "degenerate",
+      "input": {
+        "kind": 2
+      },
+      "expected": {
+        "error": "Failure",
+        "message_contains": "DomainError"
+      }
+    },
+    {
+      "id": "M00-FX-02-03-NEG-03",
+      "call": "sphere_measures",
+      "input": {
+        "radius": -1
+      },
+      "expected": {
+        "error": "InvalidInput"
+      }
+    },
+    {
+      "id": "M00-FX-02-03-NEG-04",
+      "call": "offset_volume",
+      "input": {
+        "distance": -10
+      },
+      "expected": {
+        "error": "Failure"
+      }
+    }
+  ]
+}

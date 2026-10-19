@@ -1,0 +1,13 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.32s
+     Running tests\command_transactions.rs (target\debug\deps\command_transactions-e7580d4be9e522e5.exe)
+
+running 5 tests
+test fixture_design_pairs_are_present ... ok
+test u1_to_u4_a_failure_writes_nothing ... ok
+test x1_to_x3_and_y1_to_y4_a_cancel_leaves_no_orphan ... ok
+test t1_to_t3_one_action_is_one_journal_entry ... ok
+test v1_to_v2_and_w1_to_w4_the_journal_walks_back_and_forward ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

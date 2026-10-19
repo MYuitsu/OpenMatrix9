@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-003",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "full-circle",
+      "call": "classify_curve(circle, 1e-9)",
+      "expect": {
+        "closed": true,
+        "planar": true
+      }
+    },
+    {
+      "id": "open-spline",
+      "call": "classify_curve(non-planar cubic)",
+      "expect": {
+        "closed": false,
+        "planar": false
+      }
+    },
+    {
+      "id": "near-closed-inside",
+      "call": "0.0005 gap, tolerance 0.001",
+      "expect": {
+        "closed": true
+      }
+    }
+  ]
+}

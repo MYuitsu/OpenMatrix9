@@ -1,0 +1,35 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-05-007",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-05-007-01",
+      "capability": "Geom intersection query adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-007/",
+      "test": "a_line_through_the_box_hits_two_faces"
+    },
+    {
+      "l4": "OM9-L4-01-05-007-02",
+      "capability": "Geom intersection query adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-007/",
+      "test": "a_line_through_the_box_hits_two_faces"
+    },
+    {
+      "l4": "OM9-L4-01-05-007-03",
+      "capability": "Geom intersection query adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-007/",
+      "test": "a_line_through_the_box_hits_two_faces"
+    },
+    {
+      "l4": "OM9-L4-01-05-007-05",
+      "capability": "Geom intersection query adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-007/",
+      "test": "a_line_through_the_box_hits_two_faces"
+    }
+  ],
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  }
+}

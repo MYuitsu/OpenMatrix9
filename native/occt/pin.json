@@ -1,0 +1,104 @@
+{
+  "schema": "om9.occt.pin.v1",
+  "kernel": "occt",
+  "version": "8.0.1",
+  "tag": "V8_0_1",
+  "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
+  "upstream": "https://github.com/Open-Cascade-SAS/OCCT",
+  "release_date_utc": "2026-07-30",
+  "license": "LGPL-2.1-or-later with Open CASCADE exception",
+  "license_files": [
+    "LICENSE_LGPL_21.txt",
+    "OCCT_LGPL_EXCEPTION.txt"
+  ],
+  "decision": "OCCT 8.0.1 is the project kernel pin. It supersedes the 7.8.1 that FreeCAD bundles: the official release ships headers, import libraries, DLLs and CMake config, the baseline is C++17, and 8.0.1 contains the modelling/meshing/healing fixes the gate needs. The cost is API churn: QymCAD's 7.x reference bridge does not compile against it, so the OM9 bridge is authored for the 8.0 API.",
+  "sources": {
+    "source_archive": {
+      "url": "https://codeload.github.com/Open-Cascade-SAS/OCCT/zip/refs/tags/V8_0_1",
+      "bytes": 64815440,
+      "sha256": "7c033d917ee8f040c0512d289dcc5f02c148889d5bac17c3e25639accb44f0da",
+      "used_for": "the accuracy patch build (TKG3d) and the license notices"
+    },
+    "windows_release": {
+      "url": "https://github.com/Open-Cascade-SAS/OCCT/releases/download/V8.0.1/opencascade-release-no-pch.zip",
+      "bytes": 54234931,
+      "sha256": "307f694f1d4a280c7f58ee2ddb69a7f7e2b78d82749339efd40ce8b8b116d76c",
+      "contents": "7478 headers (inc/), 74 import libraries and 74 DLLs (win64/vc14/{lib,bin}), CMake config",
+      "used_for": "the gate probe and day-to-day linking"
+    },
+    "windows_3rdparty": {
+      "url": "https://github.com/Open-Cascade-SAS/OCCT/releases/download/V8.0.1/3rdparty-vc14-64.zip",
+      "bytes": 188827053,
+      "sha256": "12d04f688c583b8e896758f65cd7012458fee921cedb792ec6caaf469b372598",
+      "required_runtimes": [
+        "tbb-2021.13.0-x64/bin/tbb12.dll",
+        "jemalloc-vc14-64/bin/jemalloc.dll"
+      ],
+      "reason": "the 8.0.1 DNUs link TBB and jemalloc; without them the process exits with STATUS_DLL_NOT_FOUND"
+    }
+  },
+  "accuracy_patch": {
+    "path": "tools/patches/occt-8.0.1-offset-d3.patch",
+    "sha256": "807c376a1a30656f80b3532a03785f4355fb5cb93065de0846cbe954a8c86e3b",
+    "upstream_file": "src/ModelingData/TKG3d/Geom/Geom_OffsetCurveUtils.pxx",
+    "scope": "TKG3d only; both the R7-branch and the normal branch are corrected; every other toolkit keeps the release binary",
+    "defect": "The 3D offset helper normalises the offset normal by R = |p' x V| and then expands the quotient rule by hand. In 8.0.1 the D2 line applies the Ndir correction with Subtract while its own comment states Add, and the D3 expansion carries a spurious 6*Dr^2/R^4 term, uses 6 instead of 9 on the Dr*D2r/R^4 term, and scales D3r without the 1/R^2 factor. The correct expressions (derived by differentiating in R' = Dr/R, R'' = (D2r - Dr^2/R^2)/R, R''' = (D3r - 3R'R'')/R) are Ndir*(3Dr^2/R^4 - D2r/R^2) for D2 and DNdir*(9Dr^2/R^4 - 3D2r/R^2) + Ndir*(9Dr*D2r/R^4 - 15Dr^3/R^6 - D3r/R^2) for D3.",
+    "build_script": "tools/build_occt_offset_d3.py",
+    "build_receipt": "build/standalone-deps/occt-8.0.1-offset-d3/build-receipt.json (generated on this machine, gitignored)",
+    "status": "patch verified and rebuilt on this machine: build-receipt.json records configure/build exit 0, 108 SDK headers byte-equal to the source archive, and every untouched shared output hash unchanged; the rebuilt TKG3d.dll is 1236992 bytes sha256 40cd47e72bf1c1980a0a5dfa1cc53962885ffbdc579ac40dbef64589a98f5632",
+    "rebuilt_artifact": {
+      "path": "build/standalone-deps/occt-8.0.1-offset-d3/bin/TKG3d.dll",
+      "bytes": 1236992,
+      "sha256": "40cd47e72bf1c1980a0a5dfa1cc53962885ffbdc579ac40dbef64589a98f5632",
+      "receipt": "build/standalone-deps/occt-8.0.1-offset-d3/build-receipt.json"
+    },
+    "prior_acceptance": "docs/validation/2026-10-12-rhino-core-acceptance-offset-d3.md (45 D3 queries against the independent 70-digit definition, GREEN 12/12) and tests/native/occt_offset_d3_probe.cpp",
+    "upstream_status": "Checked 2026-10-17 against OCCT master: the D2 expression is already corrected there (Ndir.Multiplied(3Dr^2/R^4 - D2r/R^2) with Add), so the patch only backports that fix to 8.0.1; the D3 expression is still the old one in master, so the D3 part of the patch fixes a bug that is unfixed upstream at that commit.",
+    "removal_gate": {
+      "probe": "native/occt_conformance.cpp",
+      "tool": "implementation/tools/occt_upgrade_gate.py",
+      "rule": "run it against every new OCCT SDK; PATCH_REQUIRED keeps the patched TKG3d, PATCH_NOT_NEEDED drops it and the pin is updated",
+      "evidence": "implementation/evidence/M00/OM9-L2-02/OCCT-CONFORMANCE-8.0.1-{stock,patched}.json",
+      "measured_8_0_1": "stock fails ellipse D2 4.166e-01 / D3 9.996e-01 and spline D2 7.180e-01 / D3 1.001e+00; patched passes at 4.5e-09 / 3.4e-08 / 9.6e-09 / 1.6e-05"
+    },
+    "performance": "The patch changes coefficients only (one term removed, one 1/R^2 factor added); no measurable performance cost. The real cost is maintenance and the LGPL obligation to publish the modified TKG3d source (patch + build script), which is why the removal gate exists."
+  },
+  "sdk_layout": {
+    "include": "include/opencascade",
+    "lib": "lib",
+    "bin": "bin",
+    "note": "tools/build_occt_offset_d3.py reads this layout, so implementation/tools/fetch_occt.py materialises exactly this structure from the release archive"
+  },
+  "toolchain": {
+    "compiler": "MSVC 14.44.35207 (vc14 x64)",
+    "generator": "Visual Studio 17 2022 for probes; Ninja for the patched TKG3d rebuild",
+    "cmake": "4.x",
+    "cxx_standard": "C++17"
+  },
+  "evidence": {
+    "gate_probe": "implementation/evidence/M00/OM9-L4-02-01-03/occt-probe.json",
+    "gate_probe_log": "implementation/evidence/M00/OM9-L4-02-01-03/occt-probe.log",
+    "qymcad_bridge_incompatibility": "implementation/evidence/M00/OM9-L4-02-01-02/qymcad-kernel-build-against-occt-8.0.1.log",
+    "gate_record": "implementation/design/M00/OM9-L2-02/GATE-L3-01-PROOF.md"
+  },
+  "performance": {
+    "vendor_reported_8_0_1": [
+      "BRepCheck_Face ClassifyWires ~8x on a 2000-hole face (9.21 s -> 1.11 s)",
+      "curve-on-surface fast path: boolean ~17-20% faster with unchanged geometry",
+      "fillet reconstruction state is thread_local, making parallel reconstruction safe",
+      "periodic-seam meshing and STEP-export fixes"
+    ],
+    "om9_measured": "The conformance probe measures accuracy only (stock offset D2/D3 error 41% / ~100%; patched <= 1.6e-05 relative). Throughput 7.x vs 8.0.1 is still unmeasured: no official 7.x Windows package exists on GitHub (V7.8.1 / V7.9.3 release lookups return 404)."
+  },
+  "limitations": [
+    "The OM9 Rust bridge (crates/om9-kernel) does not exist yet; M00-L4-02-01-04 and L3-02/L3-03 remain open.",
+    "8.0.x is new (8.0.0 May 2026, 8.0.1 July 2026): fewer field-tested patches than the 7.8/7.9 line, and most third-party samples still target 7.x.",
+    "The performance numbers above are Open Cascade's, not ours."
+  ],
+  "build_environment": {
+    "msvc_env": "vcvars64.bat required; Ninja needs cl.exe, INCLUDE and LIB on the child environment",
+    "path_pitfall": "cmd expands %PATH% at parse time, so `call vcvars && set PATH=...;%PATH%` drops the MSVC directories; set PATH in the parent process instead",
+    "rtk_wrapper": "tools/build_occt_offset_d3.py no longer wraps cmake/git in the rtk proxy by default: the proxy does not carry the MSVC environment (--rtk opts back in)",
+    "ninja": "ninja 1.13.2 (pip --user) used for the patched TKG3d rebuild"
+  }
+}

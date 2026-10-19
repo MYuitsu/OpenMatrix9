@@ -1,0 +1,110 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "title": "Be Document Scene Entities",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Document, EntityID, FeatureID, layers, blocks/instances, metadata đá và tham chiếu đối tượng.",
+  "definition": {
+    "module_id": "OM9-L2-01-03",
+    "milestone_id": "M01",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "scope": "Document, EntityID, FeatureID, layers, blocks/instances, metadata đá và tham chiếu đối tượng.",
+    "exclude": "Không tạo UI quản lý Layers tại đây.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          22,
+          34
+        ],
+        "pdf_pages_1based": [
+          32,
+          44
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          44,
+          56
+        ],
+        "pdf_pages_1based": [
+          54,
+          66
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-08"
+    ],
+    "downstream_contracts": [
+      "document-entity-layer"
+    ],
+    "early_slices": [
+      "M01: EntityId, LayerId, instance ref, per-entity data, object visibility/lock and snapshot.",
+      "M04/M05: attach FeatureRef and gem/setting semantic metadata without changing stable IDs."
+    ],
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 13
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-03-001",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-001 - Document Entity IDs/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-002",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-002 - Typed Scene Entity Records/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-003",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-003 - Geometry Handle And Attributes/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-004",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-004 - Layer Domain Records/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-005",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-005 - Entity To Layer Membership/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-006",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-006 - Layer Selection Visibility Rules/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-007",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-007 - Group Membership Model/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-008",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-008 - Block Definition And Instance Graph/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-009",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-009 - Jewelry Semantic Extension Record/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-010",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-010 - Selection State Document Contract/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-011",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-011 - Document Change Notification/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-012",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-012 - Document Snapshot And Restore/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-03-013",
+      "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-013 - Import Source Provenance Metadata/l3.json"
+    }
+  ]
+}

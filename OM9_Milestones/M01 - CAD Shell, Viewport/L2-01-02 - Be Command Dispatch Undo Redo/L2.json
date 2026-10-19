@@ -1,0 +1,97 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "title": "Be Command Dispatch Undo Redo",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Registry lệnh, state-machine nhận điểm/đối tượng, transaction, Undo/Redo/Cancel thống nhất.",
+  "definition": {
+    "module_id": "OM9-L2-01-02",
+    "milestone_id": "M01",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "scope": "Registry lệnh, state-machine nhận điểm/đối tượng, transaction, Undo/Redo/Cancel thống nhất.",
+    "exclude": "Không viết hai command engine giữa Rhino/Matrix.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          1,
+          11
+        ],
+        "pdf_pages_1based": [
+          11,
+          21
+        ]
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          3,
+          15
+        ],
+        "pdf_pages_1based": [
+          11,
+          23
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [
+      "command-dispatch"
+    ],
+    "early_slices": [],
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 11
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-02-001",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-001 - Command IDs And Alias Registry/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-002",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-002 - Typed Command Descriptor/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-003",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-003 - Command Context And Active Document/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-004",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-004 - Interactive Command State Machine/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-005",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-005 - Command Option Parser/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-006",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-006 - Atomic Command Transactions/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-007",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-007 - Undo Redo Journal/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-008",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-008 - Command Cancel Rollback/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-009",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-009 - Command Repeat And Dispatch/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-010",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-010 - Command Event And Observer API/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-02-011",
+      "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-011 - Command Availability Preconditions/l3.json"
+    }
+  ]
+}

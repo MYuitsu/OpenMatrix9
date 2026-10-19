@@ -1,0 +1,56 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-M00-L3-03-01",
+  "kind": "source evaluation of the existing checkout (no product code is created in M00)",
+  "entries": [
+    {
+      "l4": "OM9-M00-L4-03-01-01",
+      "capability": "egui + eframe + wgpu/glow evaluation",
+      "upstream_sources": [
+        "crates/om9-app/Cargo.toml",
+        "crates/om9-app/src/ui.rs",
+        "crates/om9-app/src/startup.rs"
+      ],
+      "occt_symbols": [],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-01/OM9-M00-L4-03-01-01.egui-eframe-wgpu.log",
+      "finding": "eframe =0.36.2 with the wgpu feature and eframe::Renderer::Wgpu (ui.rs:2170); the wgpu render state is read at ui.rs:2184; no custom wgpu pipeline/mesh/shader exists anywhere in om9-app or om9-scene (0 grep hits), and glow is not compiled in, so glow is not an available fallback today"
+    },
+    {
+      "l4": "OM9-M00-L4-03-01-02",
+      "capability": "four viewports and scene reuse",
+      "upstream_sources": [
+        "crates/om9-app/src/dock_layout.rs",
+        "crates/om9-app/src/ui.rs",
+        "crates/om9-scene/src/camera.rs",
+        "crates/om9-scene/src/scene.rs",
+        "crates/om9-app/src/viewport_audit.rs"
+      ],
+      "occt_symbols": [],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-01/OM9-M00-L4-03-01-02.four-viewport-scene.log",
+      "finding": "the dock layout defines four viewports as (W-602)/2 with 300 pt rails and a 2 pt gap (dock_layout.rs:91-93); each view keeps its own ViewState keyed by ViewId (ui.rs:326); one Scene is shared and captured/revalidated/picked through Scene::capture/revalidate/pick (scene.rs:112,727,805) with Camera/Viewport/Projection in camera.rs"
+    },
+    {
+      "l4": "OM9-M00-L4-03-01-03",
+      "capability": "docking and command-driven UI evaluation",
+      "upstream_sources": [
+        "crates/om9-app/src/dock_layout.rs",
+        "crates/om9-app/src/workbench_regions.rs",
+        "crates/om9-app/src/panel_ops.rs",
+        "crates/om9-app/src/command_events.rs",
+        "crates/om9-app/src/option_parser.rs",
+        "crates/om9-app/src/icons.rs"
+      ],
+      "occt_symbols": [],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-01/OM9-M00-L4-03-01-03.docking-command-ui.log",
+      "finding": "the dock layout is authored in-tree (DockLayout/PanelId/Regions/SectionId) with dedicated workbench_regions and panel_ops modules; command events are pure and egui-free (command_events.rs:8) and options go through option_parser + om9-core command_schema; icons are SVG textures cached by egui"
+    }
+  ],
+  "verdict": {
+    "direction": "VIABLE",
+    "gaps_for_M01": [
+      "no custom wgpu 3D pipeline, vertex/index buffers or WGSL shader exist yet: the viewport paints through the egui painter",
+      "glow is not compiled in, so the fallback must be a wgpu software adapter (or the glow feature must be enabled deliberately)"
+    ],
+    "not_owned_here": "the GPU viewport implementation belongs to M01-L2-01-06"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-007",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "open-claims-solid",
+      "call": "kind Solid with shell.closed = false",
+      "expect": {
+        "error": "Invalid(open shell is not a solid)"
+      }
+    },
+    {
+      "id": "self-overlap",
+      "call": "two distinct-index faces over the same four corners",
+      "expect": {
+        "error": "Invalid(self-overlapping shell)"
+      }
+    }
+  ]
+}

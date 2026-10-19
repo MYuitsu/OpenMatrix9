@@ -1,0 +1,605 @@
+{
+  "schema_version": 1,
+  "status": "validated_owned_layers_controller_widgets_scene_slice",
+  "measured_at": "2026-10-14T00:46:32+00:00",
+  "goal_complete": false,
+  "full_layers_acceptance": false,
+  "runs": [
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "passed": 0,
+      "ignored": 0,
+      "suites": 0,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-0.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "passed": 0,
+      "ignored": 0,
+      "suites": 0,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-1.log",
+        "sha256": "bc8e8fe0c2cd25fd6055fa9d80cc21ff4d41c2946ce328691fbdcece3a520a48"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "-p",
+        "om9-core",
+        "--test",
+        "lazy_layer_assignment",
+        "--",
+        "--nocapture"
+      ],
+      "passed": 1,
+      "ignored": 0,
+      "suites": 1,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-2.log",
+        "sha256": "d6f4442381feb907c6a4bb2c805452c0890ef844d77c579657897407b9f41082"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "-p",
+        "om9-app",
+        "--test",
+        "layer_controller",
+        "--",
+        "--nocapture"
+      ],
+      "passed": 9,
+      "ignored": 0,
+      "suites": 1,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-3.log",
+        "sha256": "7da132a09790a3a533bad13936f3965a91b67eb932595c176aa71088da541eb4"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "-p",
+        "om9-app",
+        "--test",
+        "layer_widgets",
+        "--",
+        "--nocapture"
+      ],
+      "passed": 6,
+      "ignored": 0,
+      "suites": 1,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-4.log",
+        "sha256": "d41bb6a3992dc50c674d7ae9a1bf76905c5f755b6bf899a250e43513149bb78d"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "-p",
+        "om9-scene",
+        "--test",
+        "metadata_cache",
+        "--",
+        "--nocapture"
+      ],
+      "passed": 2,
+      "ignored": 0,
+      "suites": 1,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-5.log",
+        "sha256": "8387932701e542ed3def16ccfa1d2da95c9e02c576215fe338f37702001194a1"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "-p",
+        "om9-scene",
+        "--test",
+        "instance_admission",
+        "--",
+        "--nocapture"
+      ],
+      "passed": 1,
+      "ignored": 0,
+      "suites": 1,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-6.log",
+        "sha256": "e64481f4438f34ff4efbaaac6f82aef9ae2cc89d2396aa811003fc88e43c0bb5"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "-p",
+        "om9-app",
+        "--test",
+        "scene_allocation_peak",
+        "--",
+        "--nocapture"
+      ],
+      "passed": 1,
+      "ignored": 0,
+      "suites": 1,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-7.log",
+        "sha256": "b970772556d4d908aa06805e2e84d41a39bb1d21571b37667d9d2b745f7e9bd6"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "-p",
+        "om9-app",
+        "--test",
+        "viewport_title_menu",
+        "--",
+        "--nocapture"
+      ],
+      "passed": 17,
+      "ignored": 0,
+      "suites": 1,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-8.log",
+        "sha256": "fae748b7b945f277c7e995190245a68c26d0e1cdeb509c400b82c92d5a507572"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "--workspace",
+        "--",
+        "--nocapture"
+      ],
+      "passed": 414,
+      "ignored": 24,
+      "suites": 81,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-9.log",
+        "sha256": "f929a2b678d2411f07cc9093cb487ed894e2c599dea3e705af20e29d813493df"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--manifest-path",
+        "standalone/Cargo.toml",
+        "-p",
+        "om9-app",
+        "--bin",
+        "om9"
+      ],
+      "passed": 0,
+      "ignored": 0,
+      "suites": 0,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-10.log",
+        "sha256": "8c0744067caa037846b2ec0183b09df2585c221242d27fad6fb58d3263ae8c9d"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "python",
+        "tools/validate_standalone_ui.py",
+        "--layers",
+        "--output",
+        "docs/validation/2026-10-14-owned-layers-ui"
+      ],
+      "passed": 0,
+      "ignored": 0,
+      "suites": 0,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-11.log",
+        "sha256": "4bc0bab228f093347e109917f1d3b6d47538daeacabe97c24b6f79126df4a129"
+      }
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "python",
+        "tools/validate_standalone_ui.py",
+        "--viewport-menu",
+        "--output",
+        "docs/validation/2026-10-14-owned-layers-viewport-regression"
+      ],
+      "passed": 0,
+      "ignored": 0,
+      "suites": 0,
+      "log": {
+        "path": "build/standalone-validation/owned-layers-ui-12.log",
+        "sha256": "c8a67ab2c6391754376925dd4c142ad3e0bd2e1eae4a69a52db4370c991129b4"
+      }
+    }
+  ],
+  "workspace_passed": 414,
+  "workspace_ignored": 24,
+  "focused_tests": 37,
+  "focused_checks_are_workspace_subset": true,
+  "scene_allocation_peaks": [
+    {
+      "run": 7,
+      "nested_leaves": 4096,
+      "nested_peak": 2190638,
+      "nested_limit": 2500000,
+      "cloud_points": 65537,
+      "cloud_peak": 3417751,
+      "cloud_limit": 5000000,
+      "allocator": "test_only_forced_moving_System_realloc"
+    },
+    {
+      "run": 9,
+      "nested_leaves": 4096,
+      "nested_peak": 2190638,
+      "nested_limit": 2500000,
+      "cloud_points": 65537,
+      "cloud_peak": 3417751,
+      "cloud_limit": 5000000,
+      "allocator": "test_only_forced_moving_System_realloc"
+    }
+  ],
+  "cold_fixtures": [
+    {
+      "active_processes": 0,
+      "archive_schema": 4,
+      "binary": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\standalone\\target\\debug\\om9.exe",
+      "binary_sha256": "6b55e8eb67955fa4ebad8169bdf5be2a644cffaefabe0240ad2b0e2f6ab21fbe",
+      "case": "cold_schema3_cli_migration",
+      "exited": true,
+      "full_layers_acceptance": false,
+      "peak_committed_bytes": 1949696,
+      "pid": 70228
+    },
+    {
+      "active_processes": 0,
+      "archive_schema": 4,
+      "binary": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\standalone\\target\\debug\\om9.exe",
+      "binary_sha256": "6b55e8eb67955fa4ebad8169bdf5be2a644cffaefabe0240ad2b0e2f6ab21fbe",
+      "case": "cold_preset_hidden_metadata",
+      "exited": true,
+      "full_layers_acceptance": false,
+      "peak_committed_bytes": 1925120,
+      "pid": 17228
+    },
+    {
+      "active_processes": 0,
+      "archive_sha256": "fa70230e93b7950e0c2137f03cdca8a125879e53498660c42a88522ef48ec44d",
+      "attributes": {
+        "color": null,
+        "layer": "e4b82859-c41c-48a0-a2a0-e840131af1f8",
+        "locked": false,
+        "selectable": false,
+        "visible": false
+      },
+      "binary": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\standalone\\target\\debug\\om9.exe",
+      "binary_sha256": "6b55e8eb67955fa4ebad8169bdf5be2a644cffaefabe0240ad2b0e2f6ab21fbe",
+      "case": "cold_layer_metadata",
+      "current": "e4b82859-c41c-48a0-a2a0-e840131af1f8",
+      "exited": true,
+      "full_layers_acceptance": false,
+      "layer_id": "e4b82859-c41c-48a0-a2a0-e840131af1f8",
+      "layers": {
+        "e4b82859-c41c-48a0-a2a0-e840131af1f8": {
+          "color": [
+            4,
+            5,
+            6,
+            255
+          ],
+          "id": "e4b82859-c41c-48a0-a2a0-e840131af1f8",
+          "locked": true,
+          "name": "Saved user label",
+          "parent": null,
+          "revision": 2,
+          "selectable": true,
+          "visible": false
+        }
+      },
+      "peak_committed_bytes": 1925120,
+      "pid": 13756
+    },
+    {
+      "active_processes": 0,
+      "archive_schema": 4,
+      "binary": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\standalone\\target\\debug\\om9.exe",
+      "binary_sha256": "6b55e8eb67955fa4ebad8169bdf5be2a644cffaefabe0240ad2b0e2f6ab21fbe",
+      "case": "cold_schema4_cli_reopen",
+      "exited": true,
+      "full_layers_acceptance": false,
+      "peak_committed_bytes": 1912832,
+      "pid": 77928
+    }
+  ],
+  "cold_om9_processes": 4,
+  "native_ui": [
+    {
+      "path": "docs/validation/2026-10-14-owned-layers-ui/ui-receipt.json",
+      "sha256": "a9cb1e9d2285fd9a0444a26b65709ab0f62cd3dcc7d2a1b7c619b7b947dba4a9",
+      "checks": 13,
+      "binary": {
+        "path": "standalone/target/release/om9.exe",
+        "sha256": "8ff9ed31555ba0211618030cb0451be48445a579a3696466152c7fb5874e8b7e"
+      },
+      "screenshot": {
+        "path": "build/standalone-validation/ui-layers.png",
+        "sha256": "44909c249eff282c42af2d958ecb566f20b788a5a50fc06437f974af4a13aa92",
+        "size": [
+          1600,
+          1000
+        ]
+      },
+      "loaded_modules": 85,
+      "children": []
+    },
+    {
+      "path": "docs/validation/2026-10-14-owned-layers-viewport-regression/ui-receipt.json",
+      "sha256": "53e7683455f9e55537d752e09d1755319b9e8e298d1d6f622d1fabd3fd1a4b2f",
+      "checks": 6,
+      "binary": {
+        "path": "standalone/target/release/om9.exe",
+        "sha256": "8ff9ed31555ba0211618030cb0451be48445a579a3696466152c7fb5874e8b7e"
+      },
+      "screenshot": {
+        "path": "build/standalone-validation/ui-viewport-menu.png",
+        "sha256": "75cedd0261e115a253a120bb65111104d727fd8029688faaa5fb840c67c5ab6f",
+        "size": [
+          1600,
+          1000
+        ]
+      },
+      "loaded_modules": 85,
+      "children": []
+    }
+  ],
+  "source_sha256": {
+    "rust/src/layers.rs": "7db2b8a6e978bfd527eee291d24e6b42dc6f74cc2af4ae00197e9a6ff7d4a753",
+    "standalone/Cargo.lock": "2e657929d75ed5ae238a39462b6932123cd98bad9aa4a2836e31d06d01e03f00",
+    "standalone/Cargo.toml": "69e82c072979124b990977020403421b1b3395b33425f8bdf6c988489cc550c0",
+    "standalone/crates/om9-app/assets/features.json": "87fba3e1ca2ed36f797c9477145230e759f96cf5416e91e3175d155042e0be44",
+    "standalone/crates/om9-app/Cargo.toml": "576343b1a24d97a5ae5697fa7ff1e51cfe593358d49b5a4526b95f75a187a977",
+    "standalone/crates/om9-app/src/icons.rs": "8ebacde541007928be37c618ab579535b8ae592a662e763e83e61b330c32466a",
+    "standalone/crates/om9-app/src/layer_command.rs": "0c4315edaa5ef76e12c0b36d9d78c5f7d7fb0da0a1c01ec85856cc27d5cf378a",
+    "standalone/crates/om9-app/src/lib.rs": "e1843946ef9b4b437a2d7f3e3c40c3b276629c15a8070179c9a88204f7d0d7fc",
+    "standalone/crates/om9-app/src/main.rs": "14c53dfa3317c398376c52186f887f5e31a9cf3a5ecb4f3694238aa912ea15e7",
+    "standalone/crates/om9-app/src/report.rs": "70f9b25aefc4eb9cbb2056a3a357446e8e41010746ac0bf0246a2e46ee760dd5",
+    "standalone/crates/om9-app/src/session/layers.rs": "0793f7ad68c8937b82a0f0f774b59bbcd54bf90d9f5a8175de47742fb2badf8d",
+    "standalone/crates/om9-app/src/session.rs": "30296f4a9a2de2c95e73727689feba8edebf95305b5a261b15814aae1f5df706",
+    "standalone/crates/om9-app/src/transcript.rs": "000de98ce3f3324ec42c9ccb0d212174316c05f8e0f937f03f3032ec3a7cd7c4",
+    "standalone/crates/om9-app/src/ui/chrome.rs": "de3bc814297147736da504e3c13f54cc49834328372d3df5eea459672c0b8378",
+    "standalone/crates/om9-app/src/ui/command.rs": "a68ea475fda958b4ce2dfd67e1ce81ae3178285a6ebc39ef1f69e928e7db62d2",
+    "standalone/crates/om9-app/src/ui/layer_audit.rs": "99bcf7ac9c220769e80a752f049e6568870dc1d041e60595c61e58394a8d0e76",
+    "standalone/crates/om9-app/src/ui/layers.rs": "f7a1be1225d7a3fd723abc93f65d74f7ca5d543df234d659cbd100523a00ac46",
+    "standalone/crates/om9-app/src/ui/viewport_audit.rs": "475ea933ec6908e79346942b110d38da60fdda52e29bfb67be0bc58b7b6ca551",
+    "standalone/crates/om9-app/src/ui/viewport_menu.rs": "debc0548d6f96e2dbc0ad8c681e1f65ee8345d9e9a0a856e3ab8d747b2b5de20",
+    "standalone/crates/om9-app/src/ui.rs": "bf853f876a990b742c7d4c02c65072b1a6cbcb546adcda9b08d2c36d3341085c",
+    "standalone/crates/om9-app/src/viewport_menu.rs": "fa206837c53a97991b15991a0ec9be70169e52625fd353889efd44fccbbbbcb3",
+    "standalone/crates/om9-app/tests/chrome_actions.rs": "194f32421dfbdab2e6d3b4c6034417c6788e76e9af229e96ca65d27e4ac9b901",
+    "standalone/crates/om9-app/tests/cold_layers.rs": "3ac9d67c84bbc80961387beb4005c642a28298798a6a554b8c5d47c4469b579b",
+    "standalone/crates/om9-app/tests/cold_reopen.rs": "67b9287af14122cd49556a20ea0fbd1f786f355faed946ddb0e4c87c3acb2f40",
+    "standalone/crates/om9-app/tests/command_sessions.rs": "0ec6ea6e39fbf8c499ef135cab1388d849ea437ca1b39c53270d1f0c75eef04c",
+    "standalone/crates/om9-app/tests/command_transcript.rs": "261d3a9e6fcbca924666ef0b767f53d24e9786a59f482dbc6f3a89e6049e1e2b",
+    "standalone/crates/om9-app/tests/layer_controller.rs": "5bfb99691cc1ea1945daba898d6bc3c0e99a2fd2949132d546d48ebb03b6d8d2",
+    "standalone/crates/om9-app/tests/layer_widgets.rs": "ad5113d3a7f87e569c5460c2bd5db9c82373a1e5804825d98323959599930324",
+    "standalone/crates/om9-app/tests/pinned_command.rs": "adc4847f93f6331fa8c7eeb31bfc2184ed51f24ea96ae06381eddbff2bb6ba5c",
+    "standalone/crates/om9-app/tests/scene_allocation_peak.rs": "5fe8bb3b6c61f8c16419737380898c7802376e145eb77e1259c6f599abfa47bf",
+    "standalone/crates/om9-app/tests/ui_events.rs": "e8d8966514c214583e1bba846a0e8ad89c420d09de2131d35cd68cc354afd3fe",
+    "standalone/crates/om9-app/tests/viewport_title_menu.rs": "5146694d3e44096ce6b24242ce2de232cbf5852cd5a3488cea6a3376dd9a5a00",
+    "standalone/crates/om9-archive/Cargo.toml": "7c93ab59ad64ccf9c6c8ab65354c8821efc8787324a76a80f8f1d7b6828d7498",
+    "standalone/crates/om9-archive/src/atomic_file.rs": "77a7020592fca5ce3b2ead9fef4634d4fa81d464fd1f30f37652cc877ab2b89b",
+    "standalone/crates/om9-archive/src/container.rs": "6bb2719370df625dbb03077693bc1fab7d7bd6c9900f3b52635c23aee67c2c25",
+    "standalone/crates/om9-archive/src/json_admission.rs": "986be2450138b7279ac0f81e2d6e845e42c7cc8906eae830ee34abcb48d2e3dd",
+    "standalone/crates/om9-archive/src/lib.rs": "303066cf970d2353ac84ab14b1de9ac963c072c41e5c0f5f371fdb582d4658d8",
+    "standalone/crates/om9-archive/src/restore.rs": "1af17f63cf002d35951e59cd9ba965712bd9447e78ae95e9ba1c15ba1c45f6f7",
+    "standalone/crates/om9-archive/tests/atomic_save.rs": "6ba9b9c4c3a6554bd773daa4c2e3ae3981a85876a4b96975931dda7963a0d605",
+    "standalone/crates/om9-archive/tests/container_admission.rs": "9c69dbb0655092ef7483a72d3e363e4b4100120a6f3adca6f9d401ad96cd6c92",
+    "standalone/crates/om9-archive/tests/definition_units.rs": "745319f262926759afb0fc47dbd84aa4def422f6c477541a88f21533abb65b2a",
+    "standalone/crates/om9-archive/tests/layer_schema.rs": "e1db9532379d47fee309c366f89b47f1a584a2dd235511282264407d0217582e",
+    "standalone/crates/om9-archive/tests/resource_chunks.rs": "4885591ddd016c5c4ef3e9e457eed1e10958929ef57e364507815a24776506de",
+    "standalone/crates/om9-archive/tests/restore_modules.rs": "5ed0b4baa9c79e83541258a9218fb40401de3909ddc6d442aba0cf36340e83e7",
+    "standalone/crates/om9-core/Cargo.toml": "1f100a097c871ab5dddf4894eb351c148974972aebbe21a8248cf10cc6685f74",
+    "standalone/crates/om9-core/src/budget.rs": "165bfd4a3003b09b0d9551e78829fcd4480daecfb9cd937a47d547f9383c4345",
+    "standalone/crates/om9-core/src/capability.rs": "6d0eb7d274ee013b90d2c25f37baa65dea3cc567789c357979893473b0178945",
+    "standalone/crates/om9-core/src/error.rs": "98e23a702a615a0be7e6eee18eac826c44d11ab79596570c878d3b97fad79941",
+    "standalone/crates/om9-core/src/evaluation.rs": "6087beb4a748228fe5409f5af1148c80db9df494989ddeeac6bc208e82c92a0d",
+    "standalone/crates/om9-core/src/geometry.rs": "f2111ebcd606a0898ec815abb124e3ad89afa09a92099030982ce07c1bfa43d6",
+    "standalone/crates/om9-core/src/history.rs": "3db1969a1afbe329db7e3629299570c725303b1fa39bf45fe666ff69bd544ffb",
+    "standalone/crates/om9-core/src/identity.rs": "c6b908be1335168b56715b0f5584c4a32c2f02bce8a5036736f5d0d96c126663",
+    "standalone/crates/om9-core/src/jobs.rs": "aec15fd4cabea567348d07752ab07815cf6b93860c0852611524f17ec5823078",
+    "standalone/crates/om9-core/src/layers/preset.rs": "24f59ba507efe96c21fc3741cddf1063c299de16cb6c8b6908d982ece0af5930",
+    "standalone/crates/om9-core/src/layers.rs": "99ba2c6c5c680c3327931b76c448b846d2d9bbc7b6c990235075e87030eba1e8",
+    "standalone/crates/om9-core/src/lib.rs": "4cded3e9c0a6369605b5b3b25d19ed736c369dc3a66e79d149446ac952fe148b",
+    "standalone/crates/om9-core/src/model.rs": "3ea4f86fd216679c74f30b763beaf98c067618ad19c3a7f9b5b65544a4c31e5a",
+    "standalone/crates/om9-core/src/request.rs": "809c168efd9380cdd6eda0983a224d8d9094bf4f2d419274790bf5d3880728f7",
+    "standalone/crates/om9-core/src/resource.rs": "c094512acf7e18d1c56e3bc5c02c4675cbe12307b3028624817d07b84958d98a",
+    "standalone/crates/om9-core/src/result.rs": "30d9fb17059de833e864ec918ecc4eafe8e4d16cab8bf1b01cbcd51af9fc7d24",
+    "standalone/crates/om9-core/src/retained.rs": "1e2cc724dd1eb03bd2bfd284aea8a0702643c390c43b48d857d1808fee2a69b2",
+    "standalone/crates/om9-core/src/scope.rs": "50e332e91690b56157ed30453356b1f5a0db30f3a95c362e4a6aa5d2cfa866ab",
+    "standalone/crates/om9-core/src/transaction.rs": "15a7d34e71ddc7c38a70c374a1c85f590d0c532f4c0948425b4fffe180232263",
+    "standalone/crates/om9-core/tests/atomic_transactions.rs": "ae43ba8d9dd7cc00e3c83a9e62f1fcc2909107db77e3bd8bf53d4b73e0e8bca4",
+    "standalone/crates/om9-core/tests/cancellation_links.rs": "d4b198dc2744caaae16c0fdde6f2eebdec0d2dbe9acc25e5eb3075e13e779a0f",
+    "standalone/crates/om9-core/tests/capability_gates.rs": "044a03e7a1046b0810a13a99f6fa3ea7da2b5b38e95eed79d2e3d8b77abcd9ed",
+    "standalone/crates/om9-core/tests/coordinator_authority.rs": "420021c3f4298c1169f687c6947de4bd5c187040533ea8f703248446bc54f6b2",
+    "standalone/crates/om9-core/tests/curve_oracles.rs": "ca458b9f6cfa61ab1f5b892623ad70c5346276ccda27fcae3a883b2e234b8226",
+    "standalone/crates/om9-core/tests/definition_units.rs": "1f056e8ec3bc4ddd8e21140de99a02d9f1971922adf0a88671765077b94eb361",
+    "standalone/crates/om9-core/tests/embedded_resources.rs": "b0040b82d4e15b2b35e8abc602259687706d9214a276b6566b356cade3f31c24",
+    "standalone/crates/om9-core/tests/held_preparation.rs": "6f55fad33d8f5483bf7c5cfd6cdfb5e89cced5d13b1b2789cf1fa7279186eca5",
+    "standalone/crates/om9-core/tests/history_replay.rs": "62699ea49074b1834851cb11050650485581863e482a6dc063dca80a816ab01c",
+    "standalone/crates/om9-core/tests/job_lifecycle.rs": "aebc25bc07956ab5f8293bbec06cc2bb7dfcb677a3f4cb20c01879b89df07020",
+    "standalone/crates/om9-core/tests/layer_state.rs": "0ab85f56d17960eab21b921383932d38f125e80967e6a9817d52411865a67e5c",
+    "standalone/crates/om9-core/tests/layer_transactions.rs": "e58f7492da7c39f0441e98c52763ac50eb1f9f81f6e7c78d206cd325c90b1ef4",
+    "standalone/crates/om9-core/tests/lazy_layer_assignment.rs": "3125ad613a1d84650ee39f1530375f51364867151e15c6b3f8d29a3e6d262bb1",
+    "standalone/crates/om9-core/tests/model_admission.rs": "5e885449505a005dfc35c40fbdff7ea44442c04bcbe686acb3de837d30b631cd",
+    "standalone/crates/om9-core/tests/resource_transactions.rs": "849a322eefeed6848b3451f8063758d47c2ab9e5a200e005f1f0d87333c7a580",
+    "standalone/crates/om9-core/tests/retained_entity_baselines.rs": "ec7014b4748c7abe345399cee6dda5e72f2a73319ae34f1b111241ef280fd2fa",
+    "standalone/crates/om9-core/tests/retained_imports.rs": "8fa804cb3690e53047bfa13cab067940cc7902ad056f2b8c8c733de307c509d6",
+    "standalone/crates/om9-core/tests/retained_peak_review.rs": "cbcb4e2fab403a6dd9b06cf88b966d42bf098acdf40d9074e715d7195a6d0216",
+    "standalone/crates/om9-core/tests/source_binding.rs": "6e11032fae4f00d686d2243d82e71a1031f7b8c2c83b45bbbe36e71f6b140cd9",
+    "standalone/crates/om9-core/tests/startup_layers.rs": "132fbd34207d495080fcfb29780230aac5c84180e65de4ace523f7f0c38edeb4",
+    "standalone/crates/om9-core/tests/transaction_scopes.rs": "0fbf232e67235b26fb563a5267338350a18aa684eb58eed665c38522a354cd8d",
+    "standalone/crates/om9-exchange/Cargo.toml": "9c8f4334bc6e541b15c868631dfe220f07f00ba832fdd72ccbaa4579a7e9480b",
+    "standalone/crates/om9-exchange/src/current_overlay.rs": "ddf2b8398138a7ee683a5b8e7cd7a088f3b8e2c15be2d5eba196327ef376e2cf",
+    "standalone/crates/om9-exchange/src/dependency_cache.rs": "3e032e55f255c127da5c65bd5cf4598ebd57cf02c03936baa6b77439d6b334d8",
+    "standalone/crates/om9-exchange/src/export_document.rs": "ce51e910e22f7f3ace21f882696b7104589111e8e6dc46819d1b1021fdc8e09c",
+    "standalone/crates/om9-exchange/src/import_capture.rs": "92f38622da55023877c5b648374c2773e949d9103d876fcf49a9864d7b0b0c59",
+    "standalone/crates/om9-exchange/src/import_dto.rs": "cd6af3b9f9017246fc538b569bba8b8d5084c8812753c0c7d8b6387abe5a7085",
+    "standalone/crates/om9-exchange/src/import_graph.rs": "d532aa7f99ffa3524fff470cae6078f42aebf7476a8f7a5cbba88ed9975c214b",
+    "standalone/crates/om9-exchange/src/imported.rs": "fbbbebcb0144b05036ab958f043c80758b3bacd490e3e0364ca87a5fc75f0be8",
+    "standalone/crates/om9-exchange/src/inspection.rs": "6ec2c55d137056f3886930afc42a80261f88a187640563f13faa9e26533b9598",
+    "standalone/crates/om9-exchange/src/lib.rs": "b447b3c98553d71250c062557c0a976e44ab92f985fdc6dd3677e811a205ac78",
+    "standalone/crates/om9-exchange/src/merge_inputs.rs": "7d5a1a394d5f7cfee3b6223693648f00a03e195e0fc88de94718217e51f11924",
+    "standalone/crates/om9-exchange/src/output_identity.rs": "8538489a8ec0190a9375950ad9e2445cd95359ccf511929ecb5cabe91e5ba5c2",
+    "standalone/crates/om9-exchange/src/retained_cold.rs": "fae28c8a00adbe654da48c02bfbcd959837ef03b90c66e91bac977e5c06502e5",
+    "standalone/crates/om9-exchange/src/retained_packet.rs": "52dc55801c95204f1d6af14168b89c13b6292307270bb2d60c7a877fd1101794",
+    "standalone/crates/om9-exchange/src/retained_stage.rs": "6958ae9bb6207794bcb8c199caa5030a1d55a64266ba0b3b63389b28df3ab996",
+    "standalone/crates/om9-exchange/src/retained_write.rs": "2276d6fa9aa1ba2c8829ebad3c78272e6af5dc1d85345d5b38ef972ada33ea9b",
+    "standalone/crates/om9-exchange/src/source_preparation.rs": "6afe7892979d88237966ca65fb48b08099963cc6c7a972063b06d6ce0d25eb95",
+    "standalone/crates/om9-exchange/src/staged.rs": "67a80a3b447971d9c6b5a3ac7fd8ff824f72c83717c0e88ca8ef707615844afb",
+    "standalone/crates/om9-exchange/src/wire_output.rs": "75e477dc3afe4995a6cc04ba8e58b77a05799976c5b9540938ea93f89a7c3552",
+    "standalone/crates/om9-exchange/tests/current_overlay.rs": "99eeaeb9cb1403dba2bcaecbec7991406aed122df411819599ed4433e502de7c",
+    "standalone/crates/om9-exchange/tests/current_overlay_review.rs": "bfa033df2fcbfe1e8e1a8fa2962790216fc06a8968d548c526b1e1667861de7a",
+    "standalone/crates/om9-exchange/tests/export_authority.rs": "fd956d211748c7a128e008c6dfbf2e930d0a2a882e1f2669575acbdf79eb4d29",
+    "standalone/crates/om9-exchange/tests/import_capture.rs": "585ff1daaa156d639c38baff6759ed2bc3caa74c5670d7db42921de03c674a16",
+    "standalone/crates/om9-exchange/tests/layer_wire.rs": "ea054a2a8af71594836ae0a2be7314bcc5bdba8da11055e709f34b457e01e6f0",
+    "standalone/crates/om9-exchange/tests/retained_cold_review.rs": "f8ef9e082fecfb8b3d7b99929aacf3835860127e0105abbb3793a5b11e05d746",
+    "standalone/crates/om9-exchange/tests/retained_native_import.rs": "07a74e37f6f38db2fbba2fffde84dafb8d92e0c8a7f381d7da10a4f020535d63",
+    "standalone/crates/om9-exchange/tests/retained_native_inputs.rs": "326c9f767f2049a00b03b4936e945b63e827a1afb7d14347ad7fe33a17f8b50f",
+    "standalone/crates/om9-exchange/tests/retained_native_write.rs": "4cef57f9929644ea29c32cfa61fb42e4c7d99f2f18079ba44ad9a016414bd2c8",
+    "standalone/crates/om9-exchange/tests/retained_packet.rs": "9a627716740ca695c7c2ed2c3359e83c8c53d7cd66c86412077c35fa001ae861",
+    "standalone/crates/om9-exchange/tests/retained_packet_review.rs": "b14edc826e6e865d7e4e466a486cc1cb05a24458d1df3ed641361a7f4acf1066",
+    "standalone/crates/om9-exchange/tests/retained_stage.rs": "34029c7ab7e3c90ce523597002781af8bc43ec245a8db1a160ec6b412572c2e5",
+    "standalone/crates/om9-exchange/tests/retained_stage_review.rs": "e6c1a09a686505ba8c55576c0189fc136a7d068b0b339caa902860b4d9ffd262",
+    "standalone/crates/om9-exchange/tests/source_preparation.rs": "9e5ca3e4c923b82939fbda3057cfde2a46f07f76522cea02084eeb1963df0faf",
+    "standalone/crates/om9-exchange/tests/source_preparation_review.rs": "9139a415205b78cf068b80c97ba36696b51014fc09418ef77beca1fd72b4e689",
+    "standalone/crates/om9-exchange/tests/staged_export.rs": "a571c685ec08e2832f10459dc7e72b1cea1f82fc0ab6bdf3b02bd62c5ae7f371",
+    "standalone/crates/om9-exchange/tests/wire_capture.rs": "99437151171b39a319456f61b131fac931248ae92f27936bef274bbda20b0582",
+    "standalone/crates/om9-exchange/tests/wire_output_review.rs": "fa7616d58fc49e28e2e29d7ea079a0f34e71379d986ea69b86aac9eea6302f41",
+    "standalone/crates/om9-native-owner/Cargo.toml": "8bf82882e5a6063f500a5a9d629c0a67c28aa8d4bd55f55b0102d66af8ee3eff",
+    "standalone/crates/om9-native-owner/src/bin/native_runner.rs": "4c8892e951aa323a154507d180c1039d671658d541202e86cf807a71aea9b838",
+    "standalone/crates/om9-native-owner/src/bin/process_fixture.rs": "b4b78ca9a73627d39cd43db4613361e48a3b4e48ebb809cb145a2d2071d8c9e9",
+    "standalone/crates/om9-native-owner/src/lib.rs": "a6536e9e9ce77c99963cb941c7c9a7566b57bc145d0740283bb71e180edb7906",
+    "standalone/crates/om9-native-owner/src/verified_file.rs": "80cfcda63211ca8897272e73babfd9097a3a43050a8f215952ca9f14a7923799",
+    "standalone/crates/om9-native-owner/src/windows.rs": "d0b5be38d6418617e7c20fadad094a5d9703105344bf76192ed80f8dff9e16c9",
+    "standalone/crates/om9-native-owner/tests/process_owner.rs": "605062d78f0a4e9d814b0b2553c5b2b69766f1b84fd24e6168a00cb00b00dba9",
+    "standalone/crates/om9-native-owner/tests/teardown.rs": "ef61b002482f5ea4d619b176daf3ca90b99c5a71da0da853a1b00e62f59ef86a",
+    "standalone/crates/om9-native-owner/tests/verified_file.rs": "d9dbcd2edcca3f4004addf36cd5de86ec512ecf3559378a69f6ebb55844e4f66",
+    "standalone/crates/om9-scene/Cargo.toml": "8de3c442d11278d033a719197e3495c0fc04a66a0b5e812a43ffcfb394cf189d",
+    "standalone/crates/om9-scene/src/affine.rs": "8e2d720f8e1fcdcaab8658bbc6834b794d2597391a01aa19afb013c7727aa660",
+    "standalone/crates/om9-scene/src/camera.rs": "39322474e9527456c5fa4eeba251e28288a63087c1c54e2b39c6381950a461a3",
+    "standalone/crates/om9-scene/src/grid.rs": "19ff0db7e01d399e439b20421a6dc1ee4e513f768909c7add0cc5d44b5b47ccf",
+    "standalone/crates/om9-scene/src/lib.rs": "4404c21a98722ff59d8a0b36c613d9915b4721df5b9142e8c1b87de41fefd0d0",
+    "standalone/crates/om9-scene/src/picking.rs": "1aec15fb4c01c96ac5a11a92cc470839738bbbd85f89e52daa07b8febba1f9b5",
+    "standalone/crates/om9-scene/src/scene/admission.rs": "91440e1ee37fd2d80f77ce682e22c9de44afd71a9bfc911a526855353af3e2d8",
+    "standalone/crates/om9-scene/src/scene.rs": "b0f4167f7e19f9df1336a3a103d9e414e93f63544b8c5b968668658b6ce3df11",
+    "standalone/crates/om9-scene/src/workspace.rs": "b19496d6c6605944f8c439198fab43b01d0588352950e538f66fff605558eeed",
+    "standalone/crates/om9-scene/tests/affine_gesture.rs": "aae21024632b72ce7eccb5a6dccddc657652cb0d0e44fb78cac27f501d754e87",
+    "standalone/crates/om9-scene/tests/camera_grid.rs": "5954928e0bd2d6b082e1a56c67cd8f7c8d4b3d1e21f2a20c056dbd7575254310",
+    "standalone/crates/om9-scene/tests/instance_admission.rs": "88d282cb9d6728491df6f234a9df9e49f75b25893598448fd517b2295e0635b8",
+    "standalone/crates/om9-scene/tests/layer_colors.rs": "e94b146f01772a6992f86f52b7874d93725237597b19c19f59d42437c2ad7baa",
+    "standalone/crates/om9-scene/tests/metadata_cache.rs": "8de7c197ac0b764fafc2632d42765f628d30efef54cdb067520a8c763137c2f2",
+    "standalone/crates/om9-scene/tests/reference_workspace.rs": "92c843d8959997149df16244ef7165bf5aa807c01b465ea05098b1f6102d5dec",
+    "standalone/crates/om9-scene/tests/world_picking.rs": "77dd71b406aa2441115ce4b51e5553249fbddaf7101403d172fc440ca49594bb",
+    "standalone/native/CMakeLists.txt": "a0ccf4caef12c0ae127ab80dcdbb9779e828a75d380db8409234737a509dda4e",
+    "standalone/native/native_exchange.cpp": "c527dbb0f1644f0f8ab4fabea990ca2415f51b5bee7fdb36a3741e35a961c59b",
+    "standalone/native/opennurbs_probe.cpp": "4c717186f0a5705634b2e5e5ec1d37901fe6090f0214fb908c4059754d5cd238",
+    "standalone/native/retained_current_fixture.cpp": "57b8e698365d6cdd790b6ba46603e9cd7c55279815a9553d8e71440df83afc4f",
+    "standalone/native/retained_merge.hpp": "0cb564af07eee577ad89b9b409287b24f1593472811c492607638acdfa803d00",
+    "standalone/native/retained_source_fixture.cpp": "38fb766ec2666f06cada1cfc8878a3ac498995811f4caafcce9a945d2154f0b5",
+    "standalone/native/source_inventory_fixture.cpp": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+    "standalone/provenance.json": "6a92b74b220508caa108da757658aa197851ca43c4580b78a38d7b3bc70677fa",
+    "tools/validate_owned_layers_ui.py": "20a7b6f15c005becec67b70adbd0cdc62b4a1de9447011b74227787110bfe30f",
+    "tools/validate_standalone_foundation.py": "597dcec9b524c4460bbd15c111c6d6669f0e041657a445a2e936ecacbcac1e4c",
+    "tools/validate_standalone_ui.py": "7f31f6d974fd0e1ec7b0caccadf004cd6b0d1d2c146a7b367ddf6c6349a623ff"
+  },
+  "limitations": [
+    "Advanced rename/color and selective-Show delayed dialogs are visible but unavailable; their cancellation/stale lifecycle remains open.",
+    "Current-layer output acceptance covers foundation Point/Line only; other command families remain unaccepted.",
+    "Cold archive tests cover owned metadata/schema migration, not a completed interactive save/reopen workflow.",
+    "Older SDK/native receipts retain their historical source checkpoints; no fresh combined SDK count is claimed.",
+    "Full DPI/IME, large-scene latency, GPU/global cross-job memory, complete Layers/M9IMG/RCORE gates remain open."
+  ]
+}

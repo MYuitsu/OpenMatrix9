@@ -1,0 +1,43 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-M00-L3-03-03",
+  "entries": [
+    {
+      "l4": "OM9-M00-L4-03-03-01",
+      "capability": "hit test object, face, edge and vertex",
+      "upstream_sources": [
+        "native/pick-probe/src/main.rs",
+        "native/occt-rust-proof/src/bin/export_mesh.rs"
+      ],
+      "occt_symbols": [
+        "BRepMesh_IncrementalMesh (mesh source)"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-03/OM9-M00-L4-03-03-01.hit-test.log",
+      "finding": "7/7 checks pass on the OCCT mesh: the centre ray hits the bounding sphere (perpendicular 0.0024 vs radius 5.0024) and triangle 4861 at t = 9.147 against the analytic 9.0; the corner ray misses both; a vertex pick lands at distance 0.0 and an edge pick at 1e-6 with a 0.0207 world tolerance from 2 px; a ray 20 px off misses (0.212 > 0.0207)"
+    },
+    {
+      "l4": "OM9-M00-L4-03-03-02",
+      "capability": "gumball drag and its undo/cancel semantics",
+      "upstream_sources": [
+        "crates/om9-core/src/gumball.rs",
+        "crates/om9-scene/src/affine.rs"
+      ],
+      "occt_symbols": [],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-03/OM9-M00-L4-03-03-02.gumball-undo-cancel.log",
+      "finding": "evaluated, not re-implemented: 15 gumball tests and 5 affine-gesture tests pass, including one-undo-step move, copy with fresh ids, cancel that keeps geometry and undo, commit as one undo/redo, stale rejection and the unchanged no-write case"
+    },
+    {
+      "l4": "OM9-M00-L4-03-03-03",
+      "capability": "viewport architecture decision for E02/E03",
+      "upstream_sources": [
+        "crates/om9-app/src/dock_layout.rs",
+        "crates/om9-scene/src/camera.rs",
+        "crates/om9-scene/src/picking.rs"
+      ],
+      "occt_symbols": [],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-03/OM9-M00-L4-03-03-03.viewport-architecture.md",
+      "finding": "ADOPT: four views over one scene, per-view camera; object->face->edge/vertex picking with a pixel tolerance converted at depth; gumball sessions commit as one undo step; DPI keeps the framing (fraction invariant) and only scales pixels; software adapter is the fallback, not glow"
+    }
+  ],
+  "decision": "VIABLE"
+}

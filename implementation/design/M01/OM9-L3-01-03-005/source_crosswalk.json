@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-005-01",
+  "l3_id": "OM9-L3-01-03-005",
+  "l3_title": "Entity To Layer Membership",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "attach object to current or specified layer",
+  "positive_oracle": "Đổi layer giữ nguyên EntityId, chỉ tăng attributes_revision.",
+  "negative_oracle": "Xoá layer không để lại membership treo; không tự remap.",
+  "reuse_decision": "REUSE",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "symbols": [
+        "Attributes",
+        "Document::validate_entity layer check",
+        "Document::permissions_for_entity"
+      ],
+      "decision": "REUSE"
+    },
+    {
+      "path": "crates/om9-core/src/transaction.rs",
+      "symbols": [
+        "Mutation::Attributes"
+      ],
+      "decision": "REUSE"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/model.rs, transaction.rs (Mutation::Attributes)",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_005 -> 2 passed"
+  ],
+  "notes": "REUSE Attributes.layer + the existing atomic Attributes mutation"
+}

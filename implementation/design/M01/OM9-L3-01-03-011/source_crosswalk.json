@@ -1,0 +1,54 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-011-01",
+  "l3_id": "OM9-L3-01-03-011",
+  "l3_title": "Document Change Notification",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "observable scene/layer/object modification events",
+  "positive_oracle": "Mỗi publish sinh tối đa một batch đúng thứ tự, revision tăng; tài liệu không đổi thì không có batch.",
+  "negative_oracle": "Observer panic/lỗi bị gỡ sau một diagnostic; observer không thể mutation tái nhập.",
+  "reuse_decision": "ADD",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/changes.rs",
+      "symbols": [
+        "Change",
+        "ChangeBatch",
+        "ChangeCause",
+        "diff",
+        "entity_changed (field-wise, no clone)"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-app/src/session/contract.rs",
+      "symbols": [
+        "DocumentObserver",
+        "sync_published",
+        "adopt_contract_state",
+        "Arc baseline",
+        "observer detach policy"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-app/src/session.rs",
+      "symbols": [
+        "Controller.published/changes/observers fields",
+        "sync_published on Insert, Undo, Redo"
+      ],
+      "decision": "EXTEND"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/changes.rs, crates/om9-app/src/session/contract.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_changes -> 6 passed",
+    "cargo test -p om9-app --test document_contract l3_011 -> 4 passed"
+  ],
+  "notes": "ADD the pure diff and the observer host; publish from the existing commit sites"
+}

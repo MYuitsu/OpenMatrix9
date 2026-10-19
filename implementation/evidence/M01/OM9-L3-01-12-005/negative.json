@@ -1,0 +1,36 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-005",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "cancel",
+      "expect": {
+        "error": "Canceled",
+        "destination": "unchanged"
+      }
+    },
+    {
+      "id": "readonly",
+      "expect": {
+        "error": "Permission(save destination)"
+      }
+    },
+    {
+      "id": "invalid-document",
+      "expect": {
+        "error": "Invalid/Budget",
+        "destination": "unchanged"
+      }
+    },
+    {
+      "id": "budget",
+      "expect": {
+        "error": "Budget",
+        "file": "not created"
+      }
+    }
+  ]
+}

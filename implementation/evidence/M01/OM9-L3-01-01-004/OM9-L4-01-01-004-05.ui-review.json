@@ -1,0 +1,82 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-01-004-05",
+  "l3_id": "OM9-L3-01-01-004",
+  "title": "Docking Layout Default Restore",
+  "oracle": {
+    "positive": "Reset custom layout recreates Matrix-oriented baseline positions",
+    "negative": "Unknown layout version does not crash, resets to default"
+  },
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) running the app on Windows",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-app --test dock_layout_default -> 4 passed; 3 failed (N2 named no version, N9 had no home repair, one fixture expectation was wrong)",
+    "GREEN: cargo test -p om9-app --test dock_layout_default -> 7 passed; 0 failed",
+    "cargo test -p om9-app --lib: 83 passed; cargo test --workspace: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: tools/validate_m01_l3_002_ui_matrix.py --mode all -> 14/14 PASS; tools/validate_m01_l3_003_panels.py -> 7/7 PASS (no regression from the layout parse change)"
+  ],
+  "code_change": [
+    "dock_layout.rs::from_json now reads the declared schema_version from the raw document before the typed parse, so a document from another version is refused by name ('layout version N is not supported; restored the Matrix default') instead of being reported as an unreadable document. Found by fixture N2.",
+    "dock_layout.rs::normalize now repairs a stored home that cannot exist in its column (index past the end) to the documented position with a diagnostic. Found by fixture N9.",
+    "dock_layout.rs::from_bytes(bytes) added: the same parse with the built-in limits, so tests and tools reach the version gate without owning a path."
+  ],
+  "artefacts": [
+    "OM9-L4-01-01-004-02.red.log",
+    "OM9-L4-01-01-004-02.green.log",
+    "OM9-L4-01-01-004-03.diffstat.txt",
+    "OM9-L4-01-01-004-03.target-test.log",
+    "OM9-L4-01-01-004-05.regression.log"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "Machine proof covers the model and the load path; only the owner can confirm the live commands and messages in a real window.",
+    "items": [
+      {
+        "id": "R1",
+        "step": "Move, collapse, dock and float a few menus any way you like, then run View ▸ Matrix Menus ▸ Reset Menus.",
+        "machine_proven": "reset_to_default is the documented baseline byte for byte, from every customisation kind (D1, D2); an active drag is cancelled.",
+        "human_must_verify": "Every menu is back in the documented order and size, nothing floats, the right column is hidden again, and the status line reads 'Menus reset to the Matrix default'.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "R2",
+        "step": "Drag the left rail wider (about 420), then Reset Menus.",
+        "machine_proven": "the baseline size of every panel is the documented number and reset restores it (D1).",
+        "human_must_verify": "The rail returns to its documented width and the icons go back to their documented edge.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "R3",
+        "step": "Arrange the menus, run Set as Default, change the arrangement again, then Reload Menus. Repeat in a session that has never run Set as Default.",
+        "machine_proven": "reload without a store is the factory default (D4) with the status 'Menus reloaded from the factory default'; a kept configuration reloads without a schema diagnostic.",
+        "human_must_verify": "Reload brings back the configuration you kept, and a session without one says it used the factory default.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "R4",
+        "step": "Put a layout file with schema_version 1 at the layout path and start the app (see the OM9-L3-01-01-005 item for the exact path once it is recorded).",
+        "machine_proven": "N1/N2/N3/N6: any other version returns the baseline, names the version in the diagnostic, and never half-applies the document.",
+        "human_must_verify": "The app starts with the Matrix default, the status/history names the refused version, and nothing from the old file leaks in.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "R5",
+        "step": "Put a layout file with broken bytes, and one with an impossible stored home, at the layout path and start the app.",
+        "machine_proven": "N4/N5/N7: unreadable, empty or oversized bytes are refused; N9: an impossible home is repaired to the documented position with a diagnostic.",
+        "human_must_verify": "The app starts with the baseline, reports the ignored layout or the repaired home, and never crashes or hangs.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_ui_l3_004_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

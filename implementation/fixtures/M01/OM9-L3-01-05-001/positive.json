@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-05-001",
+  "title": "OCCT FFI Safe Handle Lifecycle",
+  "case": "om9-l3-01-05-001-positive",
+  "positive_oracle": "HandleStore cấp phát slot + generation; get/remove O(1); slot được tái dùng với generation mới.",
+  "runtime_tests": [
+    "cargo test -p om9-core --test brep_kernel"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-03-01",
+  "cases": [
+    {
+      "id": "M00-FX-03-01-NEG-01",
+      "check": "viewport_validate",
+      "input": {
+        "size": [
+          0.0,
+          100.0
+        ]
+      },
+      "expected": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "M00-FX-03-01-NEG-02",
+      "check": "custom_wgpu_pipeline",
+      "expected": {
+        "present": false,
+        "note": "the gap recorded for M01"
+      }
+    },
+    {
+      "id": "M00-FX-03-01-NEG-03",
+      "check": "glow_fallback",
+      "expected": {
+        "compiled_in": false
+      }
+    }
+  ]
+}

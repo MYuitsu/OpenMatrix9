@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-05-002",
+  "title": "B-Rep Shape Type And Validation",
+  "case": "om9-l3-01-05-002-positive",
+  "positive_oracle": "Tam giác hợp lệ qua validate; shape kind đọc được; tolerance biên đúng.",
+  "runtime_tests": [
+    "cargo test -p om9-core --test brep_kernel"
+  ]
+}

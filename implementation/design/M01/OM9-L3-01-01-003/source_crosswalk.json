@@ -1,0 +1,214 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-01-003-01",
+  "l3_id": "OM9-L3-01-01-003",
+  "l3_title": "Reorder Collapse And Float Panels",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "workspace_copy_note": "The workspace copy QymCAD/ (AGENTS.md code-reference location) is a path inside the OM9 git repository and resolves HEAD to the OM9 commit b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a, not to the QymCAD pin. It is therefore NOT the audited source; the pinned checkout vendor-research/QymCAD is. Neither tree was modified.",
+  "method": "git -C vendor-research/QymCAD rev-parse HEAD (== pin) and git status --porcelain (0 lines), git rev-parse <pin>:<path> for blob SHAs, Get-Content line counts, then bounded Select-String over the four named anchors only (patterns: drag|collaps|float|Window::new|move_to|fn reset|fn restore|clamp|constrain|show_viewport|ViewportBuilder|ViewportId|persist|rollup|reorder|Area::new|CollapsingHeader|open() and reads of the matching ranges. Line numbers are 1-based on the working tree, which equals the pinned blob. No upstream code is copied; all decisions are OM9-owned.",
+  "purpose": "draggable/collapsible/floatable panels",
+  "positive_oracle": "Move, collapse, float permitted dock panel; restore without losing state",
+  "negative_oracle": "Dragging panel outside screen can be recovered/reset",
+  "user_decisions_file": ".agents/tasks/m01-l3-003-panels/user-decisions.md",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "blob_sha": "8f6ab517f24792f7feeda644163182754db493a3",
+      "present": true,
+      "lines": 2546,
+      "observed_symbols": [
+        "gui.rs:1284 pub(crate) fn shell(set: &Settings) -> qymcad_shell::Shell  (registers places every frame)",
+        "gui.rs:1301 s.restore(set.layout.clone())  (the person's moves are laid over the registration)",
+        "gui.rs:1393-1395 fn save(storage) -> eframe::set_value(storage, \"settings\", ..)  (layout persisted through eframe storage: L3-005 territory, NOT adopted here)",
+        "gui.rs:1476-1528 shell.run_slot(Menu/Top/Bottom/Left/Right/Centre)",
+        "gui.rs:407 TreeAsk::Drop { dragged, target, how } -> tree_apply_drop  (drag-and-drop of model-tree rows: a typed drop request applied after the frame)",
+        "gui.rs:1855-1867 move_feature(from, to) -> bool  (comment: 'logic inside a button is out of reach of a check, and the hand would use a different door from the person's' - one door for menu and mouse)",
+        "gui.rs:841, 1599, 1947 ctx.send_viewport_cmd(ViewportCommand::Close/Title/CancelClose)  (single main OS viewport only)"
+      ],
+      "searched_without_hit": [
+        "egui::Window::new: no floating panel window in this file",
+        "show_viewport_immediate / show_viewport_deferred / ViewportBuilder: no second OS viewport (no multi-monitor float precedent)",
+        "collapse / roll-up of a docked panel: not found",
+        "off-screen clamp / constrain of a panel: not found"
+      ],
+      "implemented_api": "Per-frame shell construction with a saved-moves overlay; typed drop requests (TreeAsk::Drop) applied outside the widget; one reorder door (move_feature) shared by menu and mouse.",
+      "missing_behavior": "No floating panels, no title-bar roll-up, no panel drag between docks, no drag preview for panels, no off-screen recovery.",
+      "reuse_status": "ADAPT (pattern only): typed drop request resolved and applied once after the frame; one door for menu, mouse and API.",
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/panel_ops.rs (PanelOp, DropTarget, resolve_drop) + standalone/crates/om9-app/src/ui.rs (MatrixApp::apply_panel_op)"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "blob_sha": "8678740cabd136c5dde0fe672b29f199028fa09a",
+      "present": true,
+      "lines": 73,
+      "observed_symbols": [
+        "Cargo.toml:2 name = \"qymcad\"",
+        "Cargo.toml:24 eframe = { version = \"0.35\", features = [\"persistence\", \"wgpu\"] }",
+        "Cargo.toml:25 egui = \"0.35\"",
+        "Cargo.toml:27 qymcad-shell = { path = \"../qymcad-shell\" }",
+        "Cargo.toml:31 qymcad-ui-state = { path = \"../qymcad-ui-state\" }"
+      ],
+      "implemented_api": "Dependency set of the upstream desktop app.",
+      "missing_behavior": "Not applicable: a manifest carries no panel logic.",
+      "reuse_status": "NOT_REUSED. OM9 keeps eframe/egui =0.36.2. The two upstream path dependencies must NOT be copied: OM9 never build-depends on QymCAD. This task adds no dependency at all.",
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml (unchanged)"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "blob_sha": "abc0524d03d2d8949eb65eec87259a010131be9b",
+      "present": true,
+      "lines": 283,
+      "observed_symbols": [
+        "lib.rs:20-21 #[derive(.., Serialize, Deserialize)] pub enum Slot { Menu, Top, Left, Right, Bottom, Centre }  (no Floating slot)",
+        "lib.rs:104-109 pub struct Shell { places, moved: BTreeMap<String, Slot> }  (doc: the person's changes are kept apart from the registration so 'put it back' is a deletion)",
+        "lib.rs:131-136 pub fn move_to(&mut self, key, slot)  (unknown key silently ignored)",
+        "lib.rs:139-141 pub fn reset()  (clear the moves: Reset belongs to L3-004 in OM9)",
+        "lib.rs:145-152 pub fn saved() / restore()  (persistence: L3-005 in OM9)",
+        "lib.rs:155-161 pub fn run_slot(..) with .expect(\"the key came from the same list\")  (panics by design: NOT adopted)",
+        "lib.rs:198-213 #[test] the_shell_names_no_workbench  (source-scan test over include_str!(\"lib.rs\"))",
+        "lib.rs:230-241 #[test] moving_and_putting_back  (moving one place must not disturb another)"
+      ],
+      "searched_without_hit": [
+        "collapse / roll-up: not found",
+        "float / Window / Area: not found (Slot has no floating kind)",
+        "drag: not found (move_to is called from a settings editor, not a pointer drag)",
+        "clamp / constrain / off-screen: not found"
+      ],
+      "implemented_api": "Slot-level move of whole panels with a moves overlay, reset, save/restore; host trait seam.",
+      "missing_behavior": "No order within a slot, no floating, no collapse, no pointer drag, no preview, no off-screen recovery, no typed error (an unknown key is silently ignored, which OM9 forbids: never silently do nothing).",
+      "reuse_status": "ADAPT (ideas): (1) remembering where a panel came from apart from where it is now -> OM9 SectionState.home for 'restore without losing state'; (2) 'moving one place must not disturb another' as a test oracle; (3) a source-scan test (include_str!) that pins a structural rule -> OM9 test that chrome.rs/ui.rs mutate sections only through apply_panel_op. Silent ignore of unknown keys and expect() are NOT adopted.",
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs (SectionState.home, primitives) + standalone/crates/om9-app/src/panel_ops.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "blob_sha": "fca9e7e16b23679a7ad00029cfca4c3c9ef5ae58",
+      "present": true,
+      "lines": 1047,
+      "observed_symbols": [
+        "lib.rs:80-83 macro scene_drag_of! -> SceneDrag { body_giz, comp_giz, joint, part_pull }  (scene/gizmo drag state, not panel drag)",
+        "lib.rs:572 pub fn ring_drag_sign(axis_depth: f64) -> f64  (gizmo rotation sign)",
+        "lib.rs:996-1012 mod selection/jobs/settings/records/scene/floor/contexts/painting/tree (re-exported)"
+      ],
+      "searched_without_hit": [
+        "panel / dock / float / collapse / roll-up / layout / clamp of a window: no panel-state symbol in this file"
+      ],
+      "implemented_api": "Per-workbench GUI state records and scene/gizmo drag helpers.",
+      "missing_behavior": "Everything this task needs: it carries tool and scene drag state, not panel placement.",
+      "reuse_status": "NOT_APPLICABLE for L3-003 -> ADD in OM9",
+      "decision": "ADD",
+      "om9_owner": "standalone/crates/om9-app/src/panel_ops.rs"
+    }
+  ],
+  "om9_reuse_in_place": [
+    {
+      "path": "standalone/crates/om9-app/src/dock_layout.rs",
+      "line_note": "Line numbers observed 2026-10-16 ~13:20 on a working tree that carries uncommitted L3-002 close-out edits made concurrently (NARROW_WINDOW_WIDTH 900 -> 1200). Symbol names are authoritative; re-read before editing.",
+      "evidence": [
+        "dock_layout.rs:60-62 FLOAT_MIN_WIDTH 180, FLOAT_MIN_HEIGHT 120, FLOAT_MARGIN 8",
+        "dock_layout.rs:143 enum SectionId (7 documented menus + BuilderSlot); :219 is_reserved()",
+        "dock_layout.rs:239 struct FloatRect; :293 struct SectionState { visible, collapsed, dock, order, height, float }",
+        "dock_layout.rs:398 toggle_section; :415 move_section(id, delta) -> om9_core::Result<(SectionId, usize)> (Error::Invalid(\"floating menu order\"))",
+        "dock_layout.rs:439 dock_section(id, side) -> om9_core::Result<()> (Error::Invalid(\"menu dock side\")); :448 state.collapsed = false and append at the end (gap G4)",
+        "dock_layout.rs:454 float_section(id, rect) -> () (non-finite rect silently becomes the default rect: gap G2/FR-11)",
+        "dock_layout.rs:503 normalize; :577 reset_to_default (L3-004); :583 clamp_floats(window) -> Vec<String> (whole window minus 8 px margin)",
+        "dock_layout.rs:884, :913, :1133 unit tests reorder_moves_only_the_requested_menu_and_keeps_other_state, dock_right_mirrors_the_left_column_and_float_needs_a_rectangle, clamp_floats_recovers_menus_dragged_outside_the_window"
+      ],
+      "decision": "EXTEND: keep the model and the primitives; add SectionState.home (serde default, schema 2 unchanged), keep collapsed on dock, insert at the remembered index, re-implement clamp_floats on the shared WorkArea clamp."
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui.rs",
+      "evidence": [
+        "ui.rs:135 section_drag: Option<SectionId>",
+        "ui.rs:457 move_menu_section -> bool; :475 dock_menu_section -> bool; :496 float_menu_section -> bool (returns false with no message when already floating: gap G2)",
+        "ui.rs:569 note_dock_diagnostics (status warning + CMD history)",
+        "ui.rs:674 sync_dock_window (clamp_floats only on a window-size change); :871 called only while region_error is None",
+        "ui.rs:833 Escape consumed for CMD cancel (no drag cancel: gap G6)",
+        "ui.rs:1070 float_menu_windows; :1073 settle_section_drag on release",
+        "ui.rs:1411 receipt[\"dock\"]; :1625 raw_input_hook audit replay; :1854 OM9_UI_AUDIT_RIGHT_DOCK"
+      ],
+      "decision": "EXTEND: one MatrixApp::apply_panel_op boundary; the three bool wrappers stay (existing identifiers and tests) as one-line delegations."
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/chrome.rs",
+      "evidence": [
+        "chrome.rs:242 fn section (title bar, Sense::click_and_drag; click = toggle; drag_started = begin drag)",
+        "chrome.rs:292 section_bar_controls (Snaps/Layers closed-bar controls)",
+        "chrome.rs:313 settle_section_drag (viewport -> float, right dock -> dock right, left title bar -> reorder; every other release does nothing silently: gap G2/G7)",
+        "chrome.rs:366 float_section_at (x,y clamped only at max(0): gap G5)",
+        "chrome.rs:862 right_dock_ui (▲ ▼ ◀ ⧉; title is a click-only selectable_label at :882, so right-column menus cannot be dragged)",
+        "chrome.rs:932 float_menu_windows (egui::Window at :944 with default_pos only at :946; closing at :985 re-docks left)"
+      ],
+      "decision": "EXTEND: route every mutation through apply_panel_op; add preview, cancel, constrain_to, resync."
+    }
+  ],
+  "gaps_confirmed": [
+    {"id": "G1", "status": "CONFIRMED", "note": "no drop indicator/preview anywhere in chrome.rs or ui.rs"},
+    {"id": "G2", "status": "CONFIRMED", "note": "settle_section_drag returns without a message outside every target; float_menu_section returns false silently; float_section replaces a non-finite rect silently"},
+    {"id": "G3", "status": "CONFIRMED", "note": "errors are om9_core::Error::Invalid(&'static str) strings"},
+    {"id": "G4", "status": "CONFIRMED", "note": "dock_section sets collapsed=false and appends; tests/shell_docking.rs comment 'Re-docking appends the menu'"},
+    {"id": "G5", "status": "CONFIRMED_IN_MODEL", "note": "float_section_at clamps only at 0; egui 0.36.2 Area::constrain defaults to true against ctx.content_rect() (area.rs:140, :439, :563), so the drawn window is pulled inside the whole window (including over the menu bar and status bar) while the stored FloatRect may stay outside until the next resize. Runtime appearance not verified."},
+    {"id": "G6", "status": "CONFIRMED", "note": "Escape branch has no drag case"},
+    {"id": "G7", "status": "CONFIRMED", "note": "BuilderSlot can be toggled, dragged, docked and floated"},
+    {"id": "G8", "status": "CONFIRMED", "note": "only builder_area_stays_reserved_and_non_interactive checks entity/undo counts"}
+  ],
+  "missing_in_upstream_added_by_om9": [
+    {"item": "typed panel operation, outcome, note and error enum", "om9_owner": "standalone/crates/om9-app/src/panel_ops.rs"},
+    {"item": "drop-target resolver and live drop preview", "om9_owner": "panel_ops.rs (resolve_drop) + ui/chrome.rs (painting)"},
+    {"item": "work-area clamp/snap-back on drop, float readback and window resize", "om9_owner": "panel_ops.rs (WorkArea) + dock_layout.rs (clamp_floats)"},
+    {"item": "remembered home position for restore without losing state", "om9_owner": "dock_layout.rs (SectionState.home)"},
+    {"item": "drag cancel (release over no target, Escape)", "om9_owner": "ui.rs + ui/chrome.rs"}
+  ],
+  "adapted_code": {
+    "copied_snippets": false,
+    "notice_header_required": false,
+    "note": "Only ideas were read (moves overlay / home, one door, typed drop request, source-scan test). No upstream text is copied. If a snippet is ever copied, the file must first carry the QymCAD/LICENSE (AGPL-3.0-or-later) and QymCAD/THIRD-PARTY-NOTICES.md notices."
+  },
+  "dependencies_check": {
+    "om9_build_depends_on_qymcad": false,
+    "command": "Select-String -Pattern qymcad over standalone/Cargo.toml and standalone/crates/*/Cargo.toml; cargo tree --workspace | Select-String qymcad",
+    "note": "result to be recorded in OM9-L4-01-01-003-03.diffstat.txt"
+  },
+  "license": {
+    "upstream": "AGPL-3.0-or-later (QymCAD LICENSE); THIRD-PARTY-NOTICES.md present in checkout",
+    "legal_reuse_status": "HUMAN_APPROVED_2026-10-16 (user: \"M00 duyệt\")",
+    "approval_source": ".agents/tasks/m01-l3-003-panels/user-decisions.md",
+    "approved_by": "user (human decision quoted; no agent approved anything)",
+    "approval_scope": "QymCAD reuse/legal decision only, until the user answers whether it covers all of M00",
+    "copied_code": false,
+    "basis": "reads and pattern adaptation only; OM9 files are authored independently. Notices stay mandatory if code is ever copied; no build-time QymCAD dependency."
+  },
+  "gate_state": {
+    "m00_gate": "QYMCAD_REUSE_APPROVED_SCOPE_OF_REST_PENDING",
+    "m00_note": "The user approved M00 ('M00 duyệt', 2026-10-16); whether that covers OCCT/UI/3DM/Associative/License/Reproducible is still being asked. No OM9_Milestones/M00* file is edited.",
+    "dependencies": "OM9-L2-01-02 and OM9-L2-01-03 stay BLOCKED_DEPENDENCY (unimplemented modules, not approval gates); L4-03 implements against the existing seams",
+    "m01_ui_gate": "OPEN",
+    "note": "no planning_state in OM9_Milestones/ was changed"
+  },
+  "tools_absent": [
+    "tools/validate_m01_spec.py",
+    "tools/validate_m00_execution.py",
+    "tools/next_m01_task.py",
+    "tools/m01_capture.py",
+    "tools/m01_init_evidence.py",
+    "tools/validate_m01_execution.py"
+  ],
+  "result": {
+    "decision": "ADAPT",
+    "verified": true,
+    "summary": "Upstream has whole-panel moves between slots with a separate 'moved' overlay, one-door reorder and typed drop requests (ADAPT as ideas). It has no floating panels, no roll-up, no panel drag, no preview and no off-screen recovery (ADD in OM9). OM9 already owns most behaviour in dock_layout.rs/ui.rs/chrome.rs (REUSE_IN_PLACE + EXTEND); the eight gaps G1-G8 are confirmed by reading.",
+    "unverified": [
+      "no upstream build or test run was performed (read-only research checkout)",
+      "egui window constraining at runtime on a real window (G5) is read from egui 0.36.2 source, not observed",
+      "oracle schema om9.m01.oracle.v1.5 has no local definition"
+    ]
+  }
+}

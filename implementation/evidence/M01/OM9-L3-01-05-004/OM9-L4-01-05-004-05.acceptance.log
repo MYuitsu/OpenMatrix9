@@ -1,0 +1,4 @@
+# OM9-L4-01-05-004-05 — nghiệm thu NURBS surface evaluation adapter
+# utc: 2026-10-18
+# oracle: |P| = 5, |N| = 1, and N is parallel to P (the radial direction)
+# result: all crate tests pass (see the kernel-test log beside this file)

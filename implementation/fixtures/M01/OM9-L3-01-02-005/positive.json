@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-005",
+  "l4": "OM9-L4-01-02-005-02",
+  "case": "command-option-parser-positive",
+  "positive_oracle": "Option parser reads length=2.5mm angle=90deg from typed descriptors",
+  "declared_options": ["BothSides", "Length"],
+  "cases": [
+    {
+      "id": "O1-a-flag-is-read-without-case-or-padding",
+      "typed": ["BothSides=Yes", "bothsides=no", " BothSides = No "],
+      "expect": { "prompts": ["Start of line (BothSides=Yes): ", "Start of line (BothSides=No): ", "Start of line (BothSides=No): "] }
+    },
+    {
+      "id": "O2-a-length-fixes-the-end-distance-and-the-click-chooses-the-direction",
+      "typed": ["Length=10mm"],
+      "start": [0, 0, 0],
+      "click": [3, 4, 0],
+      "expect": { "entities": 1, "line_length_mm": 10.0, "end": [6.0, 8.0, 0.0] }
+    },
+    {
+      "id": "O3-a-length-is-read-in-other-units-too",
+      "typed": ["Length=1cm"],
+      "start": [0, 0, 0],
+      "click": [1, 0, 0],
+      "expect": { "line_length_mm": 10.0 }
+    },
+    {
+      "id": "O4-a-point-is-not-an-option",
+      "typed": ["12,6,0"],
+      "expect": { "is_option": false, "phase": "AwaitEnd" }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-06-02",
+  "cases": [
+    {
+      "id": "M00-FX-06-02-POS-01",
+      "check": "notices_present",
+      "expected": {
+        "occt": true,
+        "opennurbs": true
+      }
+    }
+  ]
+}

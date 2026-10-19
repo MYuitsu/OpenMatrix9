@@ -1,0 +1,200 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-01-002-01",
+  "l3_id": "OM9-L3-01-01-002",
+  "l3_title": "Workbench Docking Regions",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git -C vendor-research/QymCAD rev-parse HEAD (== pin) and git status --porcelain (empty), then bounded Select-String over the four named anchors and reads of the matching ranges only; line numbers are 1-based on the working tree, which equals the pinned blob. No upstream code is copied; decisions are OM9-owned.",
+  "purpose": "left dock, center viewports and optional right dock",
+  "positive_oracle": "Show left rail, four viewport center region and optional right properties dock",
+  "negative_oracle": "Narrow window does not overlap/lose critical command input panel",
+  "line_count_note": "lines = every line of the file (Get-Content count on the working tree); non_blank_lines = git show HEAD:<path> | Measure-Object -Line, which is what the L3-001 crosswalk recorded as 'lines'. Blob SHAs were read with git rev-parse <pin>:<path>.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "blob_sha": "8f6ab517f24792f7feeda644163182754db493a3",
+      "present": true,
+      "lines": 2546,
+      "non_blank_lines": 2419,
+      "observed_symbols": [
+        "gui.rs:1284 pub(crate) fn shell(set: &Settings) -> qymcad_shell::Shell  (registers the places)",
+        "gui.rs:1287 Place::new(\"menubar\", Slot::Menu)",
+        "gui.rs:1288 Place::new(\"toolbar\", Slot::Top)",
+        "gui.rs:1291 Place::new(\"feat_cmd_bar\", Slot::Top).framed()  (command bar, only live while a command runs)",
+        "gui.rs:1296 Place::new(\"status\", Slot::Bottom)",
+        "gui.rs:1297 Place::new(\"wbtools\", Slot::Left).sized(108.0, false).bare()",
+        "gui.rs:1298 Place::new(\"tree\", Slot::Left).sized(260.0, true)",
+        "gui.rs:1299 Place::new(\"props\", Slot::Right).sized(290.0, true)",
+        "gui.rs:1300 Place::new(\"viewport\", Slot::Centre)",
+        "gui.rs:1305 impl qymcad_shell::Fills for App; 1309 fn live(); 1334 fn fill(); 1386 fn bar_frame()",
+        "gui.rs:1410 pub(crate) fn draw_frame(&mut self, ui)",
+        "gui.rs:1475-1528 run_slot(Menu) then Top, Bottom, Left, Right, and Centre last",
+        "gui.rs:1990 pub(crate) fn viewport(&mut self, ui)  (one viewport, drawn into the Centre place)"
+      ],
+      "searched_without_hit": [
+        "SidePanel (not present anywhere in the four anchors; qymcad-shell uses egui::Panel::left/right at lib.rs:171-172)",
+        "TopBottomPanel",
+        "CentralPanel (only in qymcad-shell/src/lib.rs:165)",
+        "narrow / min_width / available_rect: no narrow-window rule found",
+        "four-viewport 2x2 tiling: not found, Centre holds a single viewport"
+      ],
+      "implemented_api": "Place registry with six slot kinds, per-place size/resizable/framed/separator, a live() question per frame, fixed order with Centre last.",
+      "missing_behavior": "No four-viewport center tiling; no narrow-window rule; no command-input panel that must stay visible; no typed error for degenerate windows; sizes are egui hints, not a testable region model.",
+      "reuse_status": "ADAPT (pattern only)",
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/workbench_regions.rs (new, pure region model) + standalone/crates/om9-app/src/ui.rs (MatrixApp::show panels)"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "blob_sha": "8678740cabd136c5dde0fe672b29f199028fa09a",
+      "present": true,
+      "lines": 73,
+      "non_blank_lines": 67,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:12 name = \"qymcad\"",
+        "qymcad/Cargo.toml:15-16 [[bin]] name = \"qymcad\"",
+        "qymcad/Cargo.toml:24 eframe = { version = \"0.35\", features = [\"persistence\", \"wgpu\"] }",
+        "qymcad/Cargo.toml:25 egui = \"0.35\"",
+        "qymcad/Cargo.toml:27 qymcad-shell = { path = \"../qymcad-shell\" }",
+        "qymcad/Cargo.toml:31 qymcad-ui-state = { path = \"../qymcad-ui-state\" }"
+      ],
+      "implemented_api": "Dependency set of the upstream desktop app (egui/eframe 0.35, wgpu, qymcad-shell and qymcad-ui-state as path crates).",
+      "missing_behavior": "Not applicable: a manifest carries no region logic.",
+      "reuse_status": "NOT_REUSED. OM9 keeps its own eframe =0.36.2 pin. The two upstream path dependencies must NOT be copied: OM9 never build-depends on QymCAD.",
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml (unchanged by this task; no new dependency)"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "blob_sha": "abc0524d03d2d8949eb65eec87259a010131be9b",
+      "present": true,
+      "lines": 283,
+      "non_blank_lines": 258,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { Menu, Top, Left, Right, Bottom, Centre }",
+        "qymcad-shell/src/lib.rs:51 pub const ORDER: [Slot; 6]  (Centre last, egui's rule)",
+        "qymcad-shell/src/lib.rs:59 pub struct Place { key, slot, size, resizable, framed, separator }",
+        "qymcad-shell/src/lib.rs:92 pub trait Fills { live, fill, bar_frame }  (the host seam)",
+        "qymcad-shell/src/lib.rs:104 pub struct Shell { places, moved }",
+        "qymcad-shell/src/lib.rs:132 pub fn move_to / 139 reset / 150 restore  (reorder/persistence: OUT OF SCOPE for L3-002)",
+        "qymcad-shell/src/lib.rs:155 pub fn run_slot  (opens egui panels per kind)",
+        "qymcad-shell/src/lib.rs:161 .expect(\"the key came from the same list\")  (panics by design; NOT adopted)",
+        "qymcad-shell/src/lib.rs:165 egui::CentralPanel::default().show",
+        "qymcad-shell/src/lib.rs:169-172 egui::Panel::top/bottom/left/right(key)"
+      ],
+      "implemented_api": "Kinds of place (left, right, top, bottom, centre) plus a Fills host trait that keeps panel content out of the container.",
+      "missing_behavior": "No geometry model (rectangles), no overlap/narrow checks, no errors, no four-view tiling. Uses expect() on a lookup, which OM9 forbids on input-derived values.",
+      "reuse_status": "ADAPT (ideas: region kinds, Centre-last ordering, host seam that keeps business logic outside the container; the container owns no business logic).",
+      "decision": "ADAPT",
+      "om9_owner": "standalone/crates/om9-app/src/workbench_regions.rs (RegionKind, CommandInputHost/ViewportSceneHost seams); OM9 keeps its own dock model in dock_layout.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "blob_sha": "fca9e7e16b23679a7ad00029cfca4c3c9ef5ae58",
+      "present": true,
+      "lines": 1047,
+      "non_blank_lines": 988,
+      "observed_symbols": [
+        "qymcad-ui-state/src/lib.rs:22 pub struct ClipV",
+        "qymcad-ui-state/src/lib.rs:27 pub struct ClipTris",
+        "qymcad-ui-state/src/lib.rs:4-7 module docs: per-workbench contexts (PartCtx, SketchCtx, JointCtx) built from shared records"
+      ],
+      "searched_without_hit": [
+        "dock / SidePanel / Panel:: / region / layout / narrow: no region or window-geometry symbol found"
+      ],
+      "implemented_api": "Per-workbench GUI state contexts and tool-bar frame helpers; clip/view helpers.",
+      "missing_behavior": "Everything this task needs: it carries workbench tool state, not docking regions.",
+      "reuse_status": "NOT_APPLICABLE for L3-002 -> ADD in OM9",
+      "decision": "ADD",
+      "om9_owner": "standalone/crates/om9-app/src/workbench_regions.rs"
+    }
+  ],
+  "om9_reuse_in_place": [
+    {
+      "path": "standalone/crates/om9-app/src/dock_layout.rs",
+      "evidence": [
+        "dock_layout.rs:32-48 constants LEFT_RAIL_MIN/MAX/DEFAULT 240/420/300, RIGHT_DOCK 200/420/300, COMMAND_MIN/MAX/DEFAULT 58/400/90, TOOLBAR_HEIGHT 67, STATUS_BAR_HEIGHT 20, CANVAS_MIN_WIDTH 320, CANVAS_MIN_HEIGHT 120, NARROW_WINDOW_WIDTH 900",
+        "dock_layout.rs:71 enum PanelId { LeftRail, CommandLine, Toolbar, RightDock, CommandSearch }",
+        "dock_layout.rs:304 struct DockLayout (Serialize/Deserialize, schema 2)",
+        "dock_layout.rs:628 pub fn resolve(&self, window: [f32; 2]) -> Regions  (total but silent: negative/non-finite windows clamp to 0, no error)",
+        "dock_layout.rs:811 pub struct Regions { left_rail, right_dock, command_line, toolbar, status_bar, canvas, right_dock_visible, builder_slot }"
+      ],
+      "decision": "REUSE_IN_PLACE: single source of constants and widths; this task does not change persistence, reorder/float, reset or the builder slot."
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui.rs",
+      "evidence": [
+        "ui.rs:725 self.regions = self.dock.resolve([viewport.x, viewport.y])",
+        "ui.rs:730-731 egui::Panel::top(\"menu\").exact_size(21.)",
+        "ui.rs:743 egui::Panel::left(\"matrix-sidebar\")",
+        "ui.rs:761 egui::Panel::top(\"command\")",
+        "ui.rs:776 egui::Panel::top(\"matrix-toolbars\").exact_size(67.)",
+        "ui.rs:792-793 if regions.right_dock_visible { egui::Panel::right(\"matrix-right-dock\") }",
+        "ui.rs:815 egui::Panel::bottom(\"matrix-status\")",
+        "ui.rs:826-848 CentralPanel with the inline 2x2 four-viewport tiling (2 px gap) over controller.workspace.visible_views()"
+      ],
+      "decision": "EXTEND: the inline tiling moves into the pure workbench_regions module (same pixel results) and the frame validates a RegionPlan each pass."
+    }
+  ],
+  "missing_in_upstream_added_by_om9": [
+    {
+      "item": "typed, egui-free region plan (left rail, center, four view slots, optional right dock, command input, toolbar, status) with explicit errors",
+      "om9_owner": "standalone/crates/om9-app/src/workbench_regions.rs"
+    },
+    {
+      "item": "four-viewport center tiling (2x2, 2 px gap) and single maximized view",
+      "om9_owner": "standalone/crates/om9-app/src/workbench_regions.rs (tile_views)"
+    },
+    {
+      "item": "narrow-window rule: right dock yields with a visible note, command input is never hidden or overlapped",
+      "om9_owner": "standalone/crates/om9-app/src/workbench_regions.rs (compute_regions)"
+    }
+  ],
+  "adapted_code": {
+    "copied_snippets": false,
+    "notice_header_required": false,
+    "note": "Only the idea of kinds-of-place and a host seam was read; no upstream text was copied. If a snippet is ever copied, the file must carry the QymCAD/THIRD-PARTY-NOTICES.md and QymCAD/LICENSE (AGPL-3.0-or-later) notices before merge."
+  },
+  "dependencies_check": {
+    "om9_build_depends_on_qymcad": false,
+    "command": "Select-String -Pattern qymcad over standalone/Cargo.toml and standalone/crates/*/Cargo.toml",
+    "note": "result recorded in OM9-L4-01-01-002-03.diffstat.txt"
+  },
+  "license": {
+    "upstream": "AGPL-3.0-or-later (QymCAD LICENSE); THIRD-PARTY-NOTICES.md present in checkout",
+    "legal_reuse_status": "PENDING_HUMAN_M00_APPROVAL",
+    "copied_code": false,
+    "basis": "reads and pattern adaptation only; OM9 files are authored independently",
+    "approval_state": "G00-06 human approval still pending - copying upstream code remains BLOCKED_APPROVAL"
+  },
+  "gate_state": {
+    "m00_gate": "NOT_PASS",
+    "m00_signed": false,
+    "plan_coding_gate": "BLOCKED_M00",
+    "l4_preconditions_declared_true_but_not_met": ["m00_pass", "owner_legal_approved", "dependencies_pass"],
+    "note": "work proceeds as local standalone implementation under the user's explicit instruction; no planning_state in OM9_Milestones/ was changed"
+  },
+  "tools_absent": [
+    "tools/validate_m01_spec.py",
+    "tools/validate_m00_execution.py",
+    "tools/next_m01_task.py",
+    "tools/m01_capture.py",
+    "tools/m01_init_evidence.py",
+    "tools/validate_m01_execution.py"
+  ],
+  "result": {
+    "decision": "ADAPT",
+    "verified": true,
+    "summary": "Upstream supplies the left/right/centre/top/bottom place vocabulary and a host seam (ADAPT as ideas). It has no four-viewport tiling, narrow-window rule or command-input guarantee (ADD in OM9). OM9 already owns the constants and dock model (REUSE_IN_PLACE).",
+    "unverified": [
+      "no upstream build or test run was performed (read-only checkout; M00 approval absent)",
+      "oracle schema om9.m01.oracle.v1.5 has no local definition"
+    ]
+  }
+}

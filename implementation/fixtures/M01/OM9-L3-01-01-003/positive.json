@@ -1,0 +1,175 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "oracle_schema": "om9.m01.oracle.v1.5",
+  "oracle_schema_note": "no local definition of om9.m01.oracle.v1.5 exists in this repository; the string is carried as a field only",
+  "l3": "OM9-L3-01-01-003",
+  "l4": "OM9-L4-01-01-003-02",
+  "case": "reorder-collapse-float-panels-positive",
+  "contract": "implementation/design/M01/OM9-L3-01-01-003/api.md",
+  "user_decisions": ".agents/tasks/m01-l3-003-panels/user-decisions.md",
+  "source": "authored for the OM9 standalone shell; every number is hand-computed from the documented constants (menu bar 21, command line 90, toolbar 67, status bar 20, left rail 300, view gap 2, FLOAT_MARGIN 8, FLOAT_MIN 180x120, float drop size 300x240 grabbed at 150,7, right drop strip 48) and NOT copied from program output",
+  "status": "RUNTIME_DRIVEN_BY_TEST",
+  "positive_oracle": "Move, collapse, float permitted dock panel; restore without losing state",
+  "rect_format": "[x, y, width, height] in logical window points, origin top-left",
+  "documented_left_order": ["icon-history", "main-menu", "display", "snaps", "info-settings", "layers", "projects", "builder-slot"],
+  "window": [1600, 1000],
+  "derived_geometry_1600x1000_no_right_dock": {
+    "work_area": [8, 29, 1584, 943],
+    "center": [300, 178, 1300, 802],
+    "views": {
+      "LookingDown": [300, 178, 649, 400],
+      "Perspective": [951, 178, 649, 400],
+      "ThroughFinger": [300, 580, 649, 400],
+      "SideView": [951, 580, 649, 400]
+    },
+    "toolbar": [300, 111, 1300, 67],
+    "right_drop_strip": [1552, 178, 48, 802],
+    "note": "a frame test first asserts each pointer below lies in the named live rect (precondition guard), so a constant change fails loudly instead of silently testing something else"
+  },
+  "section_state_default": {
+    "projects": { "visible": true, "collapsed": false, "dock": "left", "order": 6, "height": 120, "float": null, "home": null },
+    "snaps": { "visible": true, "collapsed": false, "dock": "left", "order": 3, "height": 120, "float": null, "home": null },
+    "display": { "visible": true, "collapsed": false, "dock": "left", "order": 2, "height": 120, "float": null, "home": null },
+    "layers": { "visible": true, "collapsed": false, "dock": "left", "order": 5, "height": 120, "float": null, "home": null }
+  },
+  "cases": [
+    {
+      "id": "P1-collapse-then-expand-restores-the-exact-state",
+      "path": "mouse: click the PROJECTS title bar twice (real frames)",
+      "ops": [{ "op": "ToggleCollapsed", "section": "projects" }, { "op": "ToggleCollapsed", "section": "projects" }],
+      "expect": {
+        "after_first": { "projects.collapsed": true, "left_order": "documented_left_order", "status": "Projects rolled up" },
+        "after_second": { "projects": "section_state_default.projects", "status": "Projects expanded" },
+        "other_sections_unchanged": true
+      }
+    },
+    {
+      "id": "P2-collapsed-snaps-and-layers-keep-closed-bar-controls",
+      "ops": [{ "op": "ToggleCollapsed", "section": "snaps" }, { "op": "ToggleCollapsed", "section": "layers" }],
+      "expect": { "closed_bar_controls_contains": ["snaps", "layers"], "left_order": "documented_left_order" }
+    },
+    {
+      "id": "P3-drag-projects-onto-the-upper-half-of-the-display-bar",
+      "path": "mouse: press on the PROJECTS bar centre, move 10 px, move to (display_bar.center.x, display_bar.min.y + 3), release",
+      "expect": {
+        "preview_while_pressed": { "target": { "Place": { "side": "left", "index": 2 } }, "indicator_is_3px_line_at_display_bar_top": true },
+        "left_order": ["icon-history", "main-menu", "projects", "display", "snaps", "info-settings", "layers", "builder-slot"],
+        "projects.order": 2,
+        "every_other_section_state_equal_except_order": true,
+        "status": "Projects moved to menu position 3",
+        "drop_preview_after_release": null,
+        "section_drag_after_release": null
+      }
+    },
+    {
+      "id": "P4-drag-main-menu-onto-the-lower-half-of-the-snaps-bar",
+      "path": "mouse: drag MAIN MENU to (snaps_bar.center.x, snaps_bar.max.y - 2)",
+      "expect": {
+        "target": { "Place": { "side": "left", "index": 3 } },
+        "left_order": ["icon-history", "display", "snaps", "main-menu", "info-settings", "layers", "projects", "builder-slot"]
+      }
+    },
+    {
+      "id": "P5-move-up-by-api-and-by-button-is-the-same-operation",
+      "paths": ["api: move_menu_section(projects, -1)", "right column ▲ after docking right (same PanelOp::Move)"],
+      "ops": [{ "op": "Move", "section": "projects", "delta": -1 }],
+      "expect": {
+        "left_order": ["icon-history", "main-menu", "display", "snaps", "info-settings", "projects", "layers", "builder-slot"],
+        "outcome": { "Moved": { "section": "projects", "side": "left", "index": 5 } },
+        "saturation": { "op": { "op": "Move", "section": "projects", "delta": -99 }, "index": 0 }
+      }
+    },
+    {
+      "id": "P6-dock-right-by-drag-then-dock-left-restores-home-and-roll-up",
+      "setup": [{ "op": "ToggleCollapsed", "section": "snaps" }],
+      "path": "mouse: drag SNAPS to pointer (1580, 500) inside the right drop strip; then click ◀ in the right column",
+      "expect": {
+        "after_drag": {
+          "target": { "Place": { "side": "right", "index": 0 } },
+          "right_order": ["snaps"],
+          "left_order": ["icon-history", "main-menu", "display", "info-settings", "layers", "projects", "builder-slot"],
+          "snaps": { "dock": "right", "order": 0, "collapsed": true, "height": 120, "visible": true, "home": { "side": "left", "index": 3 } },
+          "status": "Snaps docked to the right menu column"
+        },
+        "after_dock_left": {
+          "left_order": "documented_left_order",
+          "snaps": { "visible": true, "collapsed": true, "dock": "left", "order": 3, "height": 120, "float": null, "home": null },
+          "outcome": { "Docked": { "section": "snaps", "side": "left", "index": 3, "restored_home": true } },
+          "status": "Snaps docked in the left menu column"
+        }
+      }
+    },
+    {
+      "id": "P7-float-by-drag-then-close-returns-home",
+      "path": "mouse: drag DISPLAY to pointer (700, 400) inside LookingDown; then close the floating window (X)",
+      "expect": {
+        "preview_while_pressed": { "target": { "Float": { "pointer": [700, 400] } }, "indicator": [550, 393, 300, 240] },
+        "after_drop_before_next_frame": {
+          "display": { "dock": "floating", "float": [550, 393, 300, 240], "collapsed": false, "home": { "side": "left", "index": 2 } },
+          "notes": [],
+          "status": "Display floated over the model"
+        },
+        "after_two_frames": { "float_xy_tolerance": 1, "float_size_tolerance": 24, "reason": "stored rect is the egui outer window rect (title bar + frame)" },
+        "after_close": {
+          "left_order": "documented_left_order",
+          "display": { "visible": true, "collapsed": false, "dock": "left", "order": 2, "height": 120, "home": null },
+          "float_rect_kept_as_last_position": true
+        }
+      }
+    },
+    {
+      "id": "P8-floating-window-moved-by-the-user-is-readback-not-recovery",
+      "setup": [{ "op": "Float", "section": "display", "rect": [550, 393, 300, 240], "origin": "Api" }],
+      "action": "egui window response rect changes to [1000, 600, 300, 240] (user drag inside the work area)",
+      "expect": { "op": "SetFloatRect", "display.float": [1000, 600, 300, 240], "notes": [], "status_unchanged": true }
+    },
+    {
+      "id": "P9-menu-mouse-and-api-paths-give-identical-layouts",
+      "compare": ["drag P3", "api Place { projects, left, 2 }"],
+      "expect": { "to_json_equal": true }
+    },
+    {
+      "id": "P10-layers-default-is-left-directly-below-info-and-settings",
+      "decision": "D6 L1",
+      "expect": { "layers": "section_state_default.layers", "info_settings.order": 4, "layers.order": 5 }
+    },
+    {
+      "id": "P11-layers-placement-holds-at-every-supported-size",
+      "decision": "D6 L2",
+      "sweep": {
+        "widths": [800, 1024, 1280, 1366, 1600, 1920, 2560],
+        "heights": [400, 432, 480, 600, 720, 768, 900, 1080, 1440],
+        "zoom": [1.0],
+        "simulated_zoom_1_5": [[1280, 800], [1600, 1000], [1920, 1080]],
+        "only_sizes_with_an_ok_region_plan": true
+      },
+      "expect_each_frame": {
+        "layers.dock": "left",
+        "layers_index_equals_info_settings_index_plus_1": true,
+        "no_title_bar_between_info_settings_and_layers": true,
+        "layers_bar_inside_sidebar_rect_at_scroll_0": true,
+        "layers_bar_top_ge_info_settings_block_bottom": true
+      },
+      "real_window_matrix": {
+        "cases": "the real-window cases of tools/validate_m01_l3_002_ui_matrix.py at run time + normal-1920x1080 + qhd-2560x1440 + SIMULATED dpi150-1920x1080",
+        "env": { "OM9_UI_AUDIT_RIGHT_DOCK": "unset", "OM9_UI_LAYOUT": "fresh temp path" },
+        "receipt": "panels.layers_placement.{side == left, directly_below == true, layers_bar_visible == true}",
+        "screenshot": "opened and the observation written down"
+      }
+    },
+    {
+      "id": "P12-layers-docked-back-without-home-lands-below-info-and-settings",
+      "decision": "D6 L3 / D3 documented position",
+      "setup": "layout loaded from JSON with layers { dock: floating, float: [400, 300, 300, 240] } and no home",
+      "ops": [{ "op": "DockHome", "section": "layers" }],
+      "expect": { "left_order": "documented_left_order", "outcome": { "Docked": { "section": "layers", "side": "left", "index": 5, "restored_home": false } } }
+    },
+    {
+      "id": "P13-operations-touch-ui-state-only",
+      "applies_to": "every case above",
+      "expect_unchanged": ["document entity count", "entity ids", "current layer", "undo_len", "redo_len", "command draft", "controller.is_running()", "controller.workspace views/active/maximized"],
+      "expect_no_file_written": "a temp set_dock_layout_path stays absent (Set as Default is the only writer)",
+      "expect_dock_dirty": true
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-01-05-006",
+  "reviewer": {
+    "name": "cổng AUTO_ONLY (bằng chứng tự động)",
+    "role": "automated evidence gate",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T03:20:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "Transform matrix service: translation moves z to 5..9 without changing the 400 volume; a 90 degree turn keeps the symmetric bounds and the volume; a 2x scale cubes the volume to 3200. The L3 declares requires_manual_test=false, so its acceptance is the automated test a_transform_moves_the_box_and_keeps_its_volume.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-006/OM9-L4-01-05-006-03.kernel-test.log",
+      "sha256": "593ffb6808f8db436e6a22a4f1e53df5491aebcfef18686027475f2eeb452832"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-006/OM9-L4-01-05-006-05.acceptance.log",
+      "sha256": "c3be5af7872d8b112a4d6f29c512c6edf260768850ab2d904baf197fc1cc8cca"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-006/source_crosswalk.json",
+      "sha256": "478e416570a31c5192125bdfcad78290ee656982bcada53e72ba9095c97eac7c"
+    }
+  ],
+  "note": "no human test is required for this L3; the record is the documented AUTO_ONLY path, not a human signature"
+}

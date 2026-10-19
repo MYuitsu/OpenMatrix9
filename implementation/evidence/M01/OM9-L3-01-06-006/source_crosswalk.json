@@ -1,0 +1,31 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-06-006",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-06-006-01",
+      "capability": "Depth clipping and grid overlays",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-006/"
+    },
+    {
+      "l4": "OM9-L4-01-06-006-02",
+      "capability": "Depth clipping and grid overlays",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-006/"
+    },
+    {
+      "l4": "OM9-L4-01-06-006-03",
+      "capability": "Depth clipping and grid overlays",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-006/"
+    },
+    {
+      "l4": "OM9-L4-01-06-006-04",
+      "capability": "Depth clipping and grid overlays",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-006/"
+    },
+    {
+      "l4": "OM9-L4-01-06-006-05",
+      "capability": "Depth clipping and grid overlays",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-006/"
+    }
+  ]
+}

@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-CURVE-003](../../OpenMatrix9_Codex_Spec_v2/specs/02-curve/om9-curve-003-interp-curve.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-CURVE-003 — Interp Curve
 
 <!-- rhino-core-extended-input:start -->

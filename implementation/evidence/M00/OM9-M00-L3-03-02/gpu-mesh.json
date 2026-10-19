@@ -1,0 +1,81 @@
+{
+  "adapter": {
+    "name": "NVIDIA GeForce RTX 3060",
+    "backend": "Vulkan",
+    "device_type": "DiscreteGpu"
+  },
+  "device_seconds": 0.0433,
+  "mesh": {
+    "path": "H:/OpenMatrix9/build/standalone-deps/gpu-mesh.txt",
+    "vertices": 2542,
+    "triangles": 5008,
+    "bytes": 90600
+  },
+  "base": {
+    "frames": 60,
+    "mean_frame_seconds": 0.001051,
+    "p99_frame_seconds": 0.001175,
+    "fps": 951.6,
+    "painted_pixels": 338328,
+    "total_pixels": 921600
+  },
+  "cases": [
+    {
+      "name": "orbit_y_plus_30",
+      "width": 1280,
+      "height": 720,
+      "frame_seconds": 0.000599,
+      "painted_pixels": 338394,
+      "painted_fraction": 0.36718
+    },
+    {
+      "name": "orbit_y_minus_30",
+      "width": 1280,
+      "height": 720,
+      "frame_seconds": 0.000767,
+      "painted_pixels": 338385,
+      "painted_fraction": 0.36717
+    },
+    {
+      "name": "pan_x_plus_2",
+      "width": 1280,
+      "height": 720,
+      "frame_seconds": 0.000593,
+      "painted_pixels": 330799,
+      "painted_fraction": 0.35894
+    },
+    {
+      "name": "zoom_2x",
+      "width": 1280,
+      "height": 720,
+      "frame_seconds": 0.000609,
+      "painted_pixels": 921600,
+      "painted_fraction": 1.0
+    },
+    {
+      "name": "zoom_0_5x",
+      "width": 1280,
+      "height": 720,
+      "frame_seconds": 0.000584,
+      "painted_pixels": 77606,
+      "painted_fraction": 0.08421
+    },
+    {
+      "name": "dpi_1_5x",
+      "width": 1920,
+      "height": 1080,
+      "frame_seconds": 0.000984,
+      "painted_pixels": 761225,
+      "painted_fraction": 0.3671
+    },
+    {
+      "name": "dpi_2x",
+      "width": 2560,
+      "height": 1440,
+      "frame_seconds": 0.001607,
+      "painted_pixels": 1353297,
+      "painted_fraction": 0.36711
+    }
+  ],
+  "gpu_bytes_estimate": 5620200
+}

@@ -1,0 +1,96 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-011",
+  "l4": "OM9-L4-01-02-011-02",
+  "case": "command-availability-preconditions-negative",
+  "negative_oracle": "Hidden implementation missing must not appear clickable or mutate doc",
+  "cases": [
+    {
+      "id": "B1-an-id-with-no-implementation-is-disabled-and-says-why",
+      "id_lookup": "hidden-command",
+      "expect": {
+        "enabled": false,
+        "reason": "Operation has no standalone implementation"
+      }
+    },
+    {
+      "id": "B2-missing-evidence-disables-it-even-in-a-ready-session",
+      "operation": {
+        "receipt": "none"
+      },
+      "context": "ready",
+      "expect": {
+        "enabled": false,
+        "reason": "Rust semantic receipt is missing"
+      }
+    },
+    {
+      "id": "B3-admit-refuses-a-command-whose-preconditions-are-not-claimed",
+      "operation": {
+        "receipt": "complete",
+        "preconditions": {
+          "needs_document": true
+        }
+      },
+      "admit_without_context": true,
+      "expect": {
+        "admitted": false,
+        "message_contains": [
+          "unsupported"
+        ]
+      }
+    },
+    {
+      "id": "B4-admit-refuses-an-undeclared-option",
+      "options": [
+        "Angle"
+      ],
+      "context": "ready",
+      "expect": {
+        "admitted": false,
+        "message_contains": [
+          "unsupported"
+        ]
+      }
+    },
+    {
+      "id": "B5-admit-refuses-a-phase-the-command-does-not-declare",
+      "phase": "Preview",
+      "operation": {
+        "receipt": "complete",
+        "preview": false
+      },
+      "context": "ready",
+      "expect": {
+        "admitted": false,
+        "message_contains": [
+          "unsupported"
+        ]
+      }
+    },
+    {
+      "id": "B6-admit-refuses-an-input-kind-the-command-does-not-declare",
+      "kind": "Mesh",
+      "context": "ready",
+      "expect": {
+        "admitted": false,
+        "message_contains": [
+          "unsupported"
+        ]
+      }
+    },
+    {
+      "id": "B7-a-disabled-command-does-not-touch-the-document",
+      "operation": {
+        "receipt": "none"
+      },
+      "context": "ready",
+      "expect": {
+        "enabled": false,
+        "reason": "Rust semantic receipt is missing",
+        "document_unchanged": true,
+        "undo_entries_added": 0
+      }
+    }
+  ]
+}

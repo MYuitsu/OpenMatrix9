@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-03-007-05",
+  "l3_id": "OM9-L3-01-03-007",
+  "title": "Group Membership Model",
+  "oracle": {
+    "positive": "Group rồi ungroup không đổi hình học và ID; xoá thành viên cuối thì group tự mất.",
+    "negative": "Thành viên không tồn tại/lặp/rỗng bị từ chối; GroupId đã nghỉ không được cấp lại."
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-17",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-03 (L2.json: acceptance_gate=AUTO, manual_test_required=false), so acceptance rests on the automated checks below and no human test item is requested. A human owner may replace this file with reviewer.status=SIGNED.",
+    "scope": "the document model and the controller API, never the window"
+  },
+  "checks_run": [
+    "single-command pass: python tools/verify_m01_l2_01_03.py -> 22/22 groups ok, 0 failed, 0 evidence gaps",
+    "focused: cargo test -p om9-core --test document_graph l3_007 -> 5 passed",
+    "cargo test --workspace --no-fail-fast: every crate ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0"
+  ],
+  "artefacts": [
+    "OM9-L4-01-03-007-03.target-test.log",
+    "OM9-L4-01-03-007-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_03_l3_007_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

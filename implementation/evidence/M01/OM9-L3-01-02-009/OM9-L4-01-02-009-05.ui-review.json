@@ -1,0 +1,46 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-02-009-05",
+  "l3_id": "OM9-L3-01-02-009",
+  "title": "Command Repeat And Dispatch",
+  "oracle": {
+    "positive": "Repeat last repeatable action invokes same registered command ID with new context",
+    "negative": "Nonrepeatable/file destructive commands cannot be silently repeated"
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-16",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-02, so acceptance rests on the automated checks below; no human item is requested.",
+    "scope": "exercised through the controller API and the pure parser, not through the window"
+  },
+  "checks_run": [
+    "RED (API level, and stated as such): there was no way to ask whether a command may be repeated — the rule lived implicitly in the fact that only the geometry commands reach the commit path — so the fixtures could not be asserted at all. The first run then failed on is_repeatable('Line'): the rule matched only the stable feature ids while a command is also named by its id and aliases (the registry rule of OM9-L3-01-02-001).",
+    "GREEN: cargo test -p om9-app --test command_options_and_repeat -> 5 passed; 0 failed (009: 3 positive cases, 4 negative cases in the same file)",
+    "cargo test -p om9-app --lib: 87 passed (includes the 4 option_parser unit tests)",
+    "cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: tools/validate_m01_l3_003_panels.py -> 7/7 PASS",
+    "CORRECTION (same day): the view rule was corrected after the pre-existing tests/chrome_actions.rs cases showed that a view-TAB switch must keep a running command (it was losing it). validate_context now refuses on a changed document identity, a view that is gone, or a moved revision/epoch. All affected fixtures and tests were corrected; chrome_actions 5/5, command_context 5/5, command_state_machine 3/3, command_transactions 5/5, command_options_and_repeat 5/5.",
+    "REAL WINDOW: the roll-up scenario of tools/validate_m01_l3_003_panels.py failed after the frame-timing changes and is fixed: the audit script now takes focus with a neutral click on the status row before the two real clicks, and its state reader uses the live collapse flag instead of the one captured when the frame began. The harness is 7/7 PASS."
+  ],
+  "code_change": [
+    "session.rs: repeatable_last() (the checked slot), is_repeatable(feature) (the rule) and repeat_slot() (the raw slot for the audit).",
+    "session.rs: is_repeatable answers to every name of the command — id 'line', feature id, aliases Line/Ln, and 'point'/POINT — case-insensitively, the way the registry resolves names.",
+    "session.rs: the empty-Enter path runs repeatable_last() instead of reading the raw slot, so a slot that somehow held a non-repeatable feature is refused instead of silently re-run."
+  ],
+  "artefacts": [
+    "OM9-L4-01-02-009-02.red.log",
+    "OM9-L4-01-02-009-02.green.log",
+    "OM9-L4-01-02-009-03.diffstat.txt",
+    "OM9-L4-01-02-009-03.target-test.log",
+    "OM9-L4-01-02-009-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_02_l3_009_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

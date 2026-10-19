@@ -1,0 +1,88 @@
+# M00-L4-02-01-02 - compile qymcad-kernel at its pinned revision against OCCT 8.0.1
+# utc: 2026-10-17
+# qymcad pin: 746a17f127897e921a57118b6caad08968602bf5
+# OCCT_INCLUDE_DIR=H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc
+# OCCT_LIB_DIR=H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\win64\vc14\lib
+# command: cargo build -p qymcad-kernel -j 2
+# expectation: the gate asks whether the reference bridge builds against the pinned OCCT
+
+   Compiling qymcad-core v0.1.0 (H:\OpenMatrix9\QymCAD\crates\qymcad-core)
+   Compiling qymcad-kernel v0.1.0 (H:\OpenMatrix9\QymCAD\crates\qymcad-kernel)
+error: failed to run custom build command for `qymcad-kernel v0.1.0 (H:\OpenMatrix9\QymCAD\crates\qymcad-kernel)`
+
+Caused by:
+  process didn't exit successfully: `L:\om9-target-qymcad\debug\build\qymcad-kernel-63f648ba8fd24af7\build-script-build` (exit code: 1)
+  --- stdout
+  cargo:rerun-if-env-changed=CC_FORCE_DISABLE
+  CC_FORCE_DISABLE = None
+  cargo:rerun-if-env-changed=VCINSTALLDIR
+  VCINSTALLDIR = None
+  cargo:rerun-if-env-changed=VSTEL_MSBuildProjectFullPath
+  VSTEL_MSBuildProjectFullPath = None
+  cargo:rerun-if-env-changed=VCToolsVersion
+  VCToolsVersion = None
+  cargo:rerun-if-env-changed=VSCMD_ARG_VCVARS_SPECTRE
+  VSCMD_ARG_VCVARS_SPECTRE = None
+  cargo:rerun-if-env-changed=WindowsSdkDir
+  WindowsSdkDir = None
+  cargo:rerun-if-env-changed=WindowsSDKVersion
+  WindowsSDKVersion = None
+  cargo:rerun-if-env-changed=LIB
+  LIB = None
+  PATH = Some(L:\om9-target-qymcad\debug;L:\om9-target-qymcad\debug\deps;C:\Users\nguye\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib;C:\Program Files\PowerShell\7;C:\Program Files\jdk/bin;C:\Program Files\PowerShell\7;C:\Program Files\coreutils\bin;C:\Program Files\jdk/bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0\bin\x64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files\Neovim\bin;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Users\nguye\.krew\bin;C:\Users\nguye\AppData\Local\nvm;C:\nvm4w\nodejs;C:\Program Files\NVIDIA Corporation\Nsight Compute 2025.3.1\;C:\Program Files (x86)\cloudflared\;C:\Users\nguye\AppData\Local\UniGetUI\Chocolatey\lib\maven\apache-maven-3.9.11\bin;C:\Program Files\OpenJDK\jdk-25\bin;C:\Users\nguye\.pyenv\pyenv-win\bin;C:\Users\nguye;C:\Program Files\Git\cmd;C:\Program Files\Tailscale\;C:\Program Files\PowerShell\7\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\Cloudflare\Cloudflare WARP\;C:\Users\nguye\.pixi\bin;C:\Users\nguye\.local\bin;c:\Users\nguye\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\nguye\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli;C:\Users\nguye\.krew\bin;C:\Users\nguye\AppData\Local\nvm;C:\nvm4w\nodejs;C:\Users\nguye\AppData\Local\UniGetUI\Chocolatey\lib\maven\apache-maven-3.9.11\bin;C:\Users\nguye\.pyenv\pyenv-win\bin;C:\Users\nguye\.pyenv\pyenv-win\shims;C:\Users\nguye\.grok\bin;C:\Program Files\MySQL\MySQL Shell 8.4\bin\;C:\Users\nguye\.cargo\bin;C:\Users\nguye\AppData\Local\UniGetUI\Chocolatey\bin;C:\Users\nguye\AppData\Local\Microsoft\WindowsApps;C:\Users\nguye\AppData\Local\JetBrains\Toolbox\scripts;C:\Users\nguye\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\nguye\AppData\Local\Microsoft\WinGet\Links;C:\Users\nguye\.dotnet\tools;C:\Users\nguye\.deno\bin;C:\Users\nguye\AppData\Local\Programs\mongosh\;C:\Users\nguye\AppData\Local\Programs\Lens\resources\cli\bin;C:\Users\nguye\AppData\Local\PowerToys\DSCModules\;C:\Users\nguye\AppData\Local\Programs\Zed\bin;C:\Users\nguye\AppData\Local\Programs\Kiro\bin;C:\Users\nguye\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin)
+  cargo:rerun-if-env-changed=INCLUDE
+  INCLUDE = None
+  cargo:rerun-if-env-changed=VCToolsVersion
+  VCToolsVersion = None
+  cargo:rerun-if-env-changed=VSCMD_ARG_VCVARS_SPECTRE
+  VSCMD_ARG_VCVARS_SPECTRE = None
+  cargo:rerun-if-env-changed=WindowsSdkDir
+  WindowsSdkDir = None
+  cargo:rerun-if-env-changed=WindowsSDKVersion
+  WindowsSDKVersion = None
+  cargo:rerun-if-env-changed=LIB
+  LIB = None
+  PATH = Some(L:\om9-target-qymcad\debug;L:\om9-target-qymcad\debug\deps;C:\Users\nguye\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib;C:\Program Files\PowerShell\7;C:\Program Files\jdk/bin;C:\Program Files\PowerShell\7;C:\Program Files\coreutils\bin;C:\Program Files\jdk/bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0\bin\x64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files\Neovim\bin;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Users\nguye\.krew\bin;C:\Users\nguye\AppData\Local\nvm;C:\nvm4w\nodejs;C:\Program Files\NVIDIA Corporation\Nsight Compute 2025.3.1\;C:\Program Files (x86)\cloudflared\;C:\Users\nguye\AppData\Local\UniGetUI\Chocolatey\lib\maven\apache-maven-3.9.11\bin;C:\Program Files\OpenJDK\jdk-25\bin;C:\Users\nguye\.pyenv\pyenv-win\bin;C:\Users\nguye;C:\Program Files\Git\cmd;C:\Program Files\Tailscale\;C:\Program Files\PowerShell\7\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\Cloudflare\Cloudflare WARP\;C:\Users\nguye\.pixi\bin;C:\Users\nguye\.local\bin;c:\Users\nguye\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\nguye\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli;C:\Users\nguye\.krew\bin;C:\Users\nguye\AppData\Local\nvm;C:\nvm4w\nodejs;C:\Users\nguye\AppData\Local\UniGetUI\Chocolatey\lib\maven\apache-maven-3.9.11\bin;C:\Users\nguye\.pyenv\pyenv-win\bin;C:\Users\nguye\.pyenv\pyenv-win\shims;C:\Users\nguye\.grok\bin;C:\Program Files\MySQL\MySQL Shell 8.4\bin\;C:\Users\nguye\.cargo\bin;C:\Users\nguye\AppData\Local\UniGetUI\Chocolatey\bin;C:\Users\nguye\AppData\Local\Microsoft\WindowsApps;C:\Users\nguye\AppData\Local\JetBrains\Toolbox\scripts;C:\Users\nguye\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\nguye\AppData\Local\Microsoft\WinGet\Links;C:\Users\nguye\.dotnet\tools;C:\Users\nguye\.deno\bin;C:\Users\nguye\AppData\Local\Programs\mongosh\;C:\Users\nguye\AppData\Local\Programs\Lens\resources\cli\bin;C:\Users\nguye\AppData\Local\PowerToys\DSCModules\;C:\Users\nguye\AppData\Local\Programs\Zed\bin;C:\Users\nguye\AppData\Local\Programs\Kiro\bin;C:\Users\nguye\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin)
+  cargo:rerun-if-env-changed=INCLUDE
+  INCLUDE = None
+  cargo:rerun-if-env-changed=CXX_x86_64-pc-windows-msvc
+  CXX_x86_64-pc-windows-msvc = None
+  cargo:rerun-if-env-changed=CXX_x86_64_pc_windows_msvc
+  CXX_x86_64_pc_windows_msvc = None
+  cargo:rerun-if-env-changed=HOST_CXX
+  HOST_CXX = None
+  cargo:rerun-if-env-changed=CXX
+  CXX = None
+  cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+  CRATE_CC_NO_DEFAULTS = None
+  cargo:rerun-if-env-changed=CXXFLAGS
+  CXXFLAGS = None
+  cargo:rerun-if-env-changed=HOST_CXXFLAGS
+  HOST_CXXFLAGS = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+  CXXFLAGS_x86_64_pc_windows_msvc = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+  CXXFLAGS_x86_64-pc-windows-msvc = None
+  cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+  occt_bridge.cpp
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TDF_LabelSequence.hxx(27): warning: TDF_LabelSequence.hxx is deprecated since OCCT 8.0.0. Use NCollection_Sequence<TDF_Label> directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TColgp_Array2OfPnt.hxx(27): warning: TColgp_Array2OfPnt.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array2<gp_Pnt> directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TopTools_ListOfShape.hxx(27): warning: TopTools_ListOfShape.hxx is deprecated since OCCT 8.0.0. Use NCollection types directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TopTools_IndexedDataMapOfShapeListOfShape.hxx(31): warning: TopTools_IndexedDataMapOfShapeListOfShape.hxx is deprecated since OCCT 8.0.0. Use NCollection_IndexedDataMap<TopoDS_Shape, TopTools_ListOfShape, TopTools_ShapeMapHasher> directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TColStd_Array1OfReal.hxx(26): warning: TColStd_Array1OfReal.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<double> directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TopTools_MapOfShape.hxx(28): warning: TopTools_MapOfShape.hxx is deprecated since OCCT 8.0.0. Use NCollection types directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TopTools_SequenceOfShape.hxx(27): warning: TopTools_SequenceOfShape.hxx is deprecated since OCCT 8.0.0. Use NCollection_Sequence<TopoDS_Shape> directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TopTools_HSequenceOfShape.hxx(28): warning: TopTools_HSequenceOfShape.hxx is deprecated since OCCT 8.0.0. Use NCollection_HSequence<TopoDS_Shape> directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\BRepCheck_ListOfStatus.hxx(28): warning: BRepCheck_ListOfStatus.hxx is deprecated since OCCT 8.0.0. Use NCollection types directly.
+  H:\OpenMatrix9\build\standalone-deps\occt-8.0.1\opencascade-8.0.1-vc14-64\opencascade-8.0.1-vc14-64\inc\TColgp_Array1OfPnt2d.hxx(27): warning: TColgp_Array1OfPnt2d.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<gp_Pnt2d> directly.
+  H:\OpenMatrix9\QymCAD\crates\qymcad-kernel\src\occt_common.hpp(169): fatal error C1083: Cannot open include file: 'TopTools_ListIteratorOfListOfShape.hxx': No such file or directory
+
+  --- stderr
+
+
+  error occurred in cc-rs: command did not execute successfully (status code exit code: 2): "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-Z7" "-Brepro" "-std:c++17" "-I" "H:\\OpenMatrix9\\build\\standalone-deps\\occt-8.0.1\\opencascade-8.0.1-vc14-64\\opencascade-8.0.1-vc14-64\\inc" "-W0" "/EHa" "-D_USE_MATH_DEFINES" "-DNOMINMAX" "-DWIN32_LEAN_AND_MEAN" "-FoL:\\om9-target-qymcad\\debug\\build\\qymcad-kernel-afc9d71d4980cc37\\out\\0602fb52cb66f316-occt_bridge.o" "-c" "src/occt_bridge.cpp"
+
+
+warning: build failed, waiting for other jobs to finish...
+
+cargo exit=101

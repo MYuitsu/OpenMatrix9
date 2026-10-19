@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-004",
+  "l4": "OM9-L4-01-02-004-02",
+  "case": "interactive-command-state-machine",
+  "positive_oracle": "Two-click point command progresses Start->AwaitPoint->AwaitPoint->Commit, Escape aborts",
+  "negative_oracle": "Extra click/out-of-order Enter cannot commit partial geometry",
+  "cases": [
+    {
+      "id": "M1-the-line-command-walks-its-phases",
+      "sequence": ["dispatch LINE", "point 0,0,0", "point 10,0,0"],
+      "expect": {
+        "phases": ["AwaitPoint", "AwaitEnd", "Idle"],
+        "prompts": ["Start of line (BothSides=No): ", "End of line (BothSides=No): ", "Command: "],
+        "entities": 1,
+        "undo_entries": 1
+      }
+    },
+    {
+      "id": "M2-the-point-command-commits-on-its-first-phase",
+      "sequence": ["dispatch POINT", "point 1,2,3"],
+      "expect": { "phases": ["AwaitPoint", "Idle"], "entities": 1 }
+    },
+    {
+      "id": "M3-escape-aborts-in-every-phase",
+      "sequence": ["dispatch LINE", "point 0,0,0", "Escape", "point 5,5,5"],
+      "expect": {
+        "phase_after_escape": "Idle",
+        "prompt_after_escape": "Command: ",
+        "entities": 0,
+        "undo_entries": 0,
+        "extra_point_error": "Missing"
+      }
+    },
+    {
+      "id": "M4-bothsides-is-an-option-of-the-running-command",
+      "sequence": ["dispatch LINE", "BothSides=Yes"],
+      "expect": { "phase": "AwaitPoint", "prompt": "Start of line (BothSides=Yes): " }
+    }
+  ]
+}

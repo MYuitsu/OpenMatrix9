@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-003-01",
+  "l3_id": "OM9-L3-01-03-003",
+  "l3_title": "Geometry Handle And Attributes",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "geometry reference plus display and metadata attributes",
+  "positive_oracle": "Handle và display attributes truy vấn được riêng, không sửa bản ghi.",
+  "negative_oracle": "Handle cũ/treo là Stale, không bao giờ trỏ vào đối tượng đang sống.",
+  "reuse_decision": "ADD",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "symbols": [
+        "GeometryHandle",
+        "DisplayAttributes",
+        "Entity::geometry_handle",
+        "Document::{geometry_handle,resolve_handle,display_attributes,geometry_kind}"
+      ],
+      "decision": "ADD"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/model.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_003 -> 2 passed"
+  ],
+  "notes": "ADD GeometryHandle/DisplayAttributes queries over the existing Entity record"
+}

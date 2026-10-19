@@ -1,0 +1,19 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-08-003",
+  "l4": "OM9-L4-01-08-003-02",
+  "title": "Document Absolute Relative Tolerances",
+  "case": "om9-l3-01-08-003-negative",
+  "negative_oracle": "Giá trị sai bị từ chối theo tên trường; tài liệu không khai báo policy trả Missing, không bịa mặc định.",
+  "refusals": [
+    "Invalid(\"absolute tolerance\") / Invalid(\"relative tolerance\") / Invalid(\"angular tolerance\")",
+    "Invalid(\"feature at or below document absolute tolerance\")",
+    "Missing(\"document tolerance\") — no default is invented",
+    "Stale(\"document tolerance revision\")"
+  ],
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_tolerance",
+    "cargo test -p om9-archive --test document_identity_round_trip a_document_tolerance",
+    "cargo test -p om9-core --test l2_01_08_precision"
+  ]
+}

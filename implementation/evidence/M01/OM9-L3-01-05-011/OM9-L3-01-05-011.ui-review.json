@@ -1,0 +1,28 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-01-05-011",
+  "reviewer": {
+    "name": "cổng AUTO_ONLY (bằng chứng tự động)",
+    "role": "automated evidence gate",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T03:20:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "Reference shape fixture evaluation: box 400 mm3 / 360 mm2, sphere 523.598775598299 / 314.159265358979, cylinder 50.265482457437 / 75.398223686155. The L3 declares requires_manual_test=false, so its acceptance is the automated test the_reference_fixtures_match_their_analytic_values.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-011/OM9-L4-01-05-011-03.kernel-test.log",
+      "sha256": "ce4a1e040b7892a613f881485e5d57e4495638a63193f41129642c49d39731d2"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-011/OM9-L4-01-05-011-05.acceptance.log",
+      "sha256": "a2f52ea8655c4ad51032fed9ac3160172e992e138ad35e485048421218330b73"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-011/source_crosswalk.json",
+      "sha256": "49237ef57300f4058e9ea3761b6e6bd85eb3d61579eb9ca5e3b337258afecc0a"
+    }
+  ],
+  "note": "no human test is required for this L3; the record is the documented AUTO_ONLY path, not a human signature"
+}

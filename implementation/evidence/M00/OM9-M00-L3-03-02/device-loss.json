@@ -1,0 +1,1 @@
+{"primary": {"painted_before_loss": 38016}, "loss": {"device_lost_callbacks": 1, "poll_ok_after_destroy": true, "draw_after_destroy": null, "recovered": true, "recovered_painted": 38016, "recovery_seconds": 0.3370}, "fallback": {"name": "Microsoft Basic Render Driver", "backend": "Dx12", "device_type": "Cpu", "frame_seconds": 0.006943, "painted_pixels": 38016}}

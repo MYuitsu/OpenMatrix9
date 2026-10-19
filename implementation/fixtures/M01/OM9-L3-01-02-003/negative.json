@@ -1,0 +1,44 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-003",
+  "l4": "OM9-L4-01-02-003-02",
+  "case": "command-context-and-active-document-negative",
+  "negative_oracle": "Close active doc during command must cancel/refuse without mutation",
+  "cases": [
+    {
+      "id": "K1-the-document-changing-cancels-the-command-without-mutation",
+      "action": "dispatch LINE, then replace the document identity the snapshot holds",
+      "expect": {
+        "is_running": false,
+        "phase": "Idle",
+        "cancel_if_stale": true,
+        "accept_point_error": "Missing",
+        "mutation": false
+      }
+    },
+    {
+      "id": "K2-a-snapshot-from-a-view-that-is-gone-is-stale",
+      "expect": {
+        "error": "Stale",
+        "a-view-tab-switch-keeps-the-command": true
+      }
+    },
+    {
+      "id": "K3-a-later-document-identity-invalidates-the-snapshot",
+      "action": "capture, then change the document revision",
+      "expect": {
+        "error": "Stale",
+        "mutation": false
+      }
+    },
+    {
+      "id": "K4-a-stale-session-is-never-reported-as-running",
+      "expect": {
+        "is_running": false,
+        "phase": "Idle",
+        "prompt": "Command: "
+      }
+    }
+  ],
+  "note": "K1/K2 were corrected after the existing chrome_actions tests showed the stronger rule was wrong: switching the active view must NOT kill a running command (the command keeps the view and plane it captured). A command dies when its document identity changes, when the view it started in is gone, or when the revision moved."
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-08-002",
+  "l4": "OM9-L4-01-08-002-02",
+  "title": "Angle Conversion And Degrees",
+  "case": "om9-l3-01-08-002-negative",
+  "negative_oracle": "|deg| vượt MAX_ABS_DEGREES bị OutOfRange; radian không đọc lại được thành độ.",
+  "refusals": [
+    "UnitError::OutOfRange { dimension: Angle, .. } -> Invalid(\"numeric value range\")",
+    "UnitError::NonFinite { dimension: Angle }      -> Invalid(\"finite numeric value\")"
+  ],
+  "runtime_tests": [
+    "cargo test -p om9-core --test units_parameters l3_002",
+    "cargo test -p om9-core --test l2_01_08_precision"
+  ]
+}

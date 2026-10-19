@@ -1,0 +1,87 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-01-005-01",
+  "l3_id": "OM9-L3-01-01-005",
+  "l3_title": "Docking Layout Persistence",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "goal": "restore user panel position between sessions",
+  "positive_oracle": "Persist dock positions and reopen same named panel IDs",
+  "negative_oracle": "Removed/unrecognized panel ID ignored with warning not crash",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "checkout_note": "See OM9-L3-01-01-004/source_crosswalk.json: the pinned revision is verified in vendor-research/QymCAD; the QymCAD/ directory named by AGENTS.md is not a git checkout in this workspace and its gui.rs differs from the pinned blob.",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "lines": 130,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:39 pub fn key(self) -> &'static str — every place has a stable catalogue key",
+        "qymcad-shell/src/lib.rs:59 pub struct Place { key, slot, size, resizable, framed, separator }",
+        "qymcad-shell/src/lib.rs:76 pub fn sized(mut self, w: f32, resizable: bool) — the container owns the size",
+        "qymcad-shell/src/lib.rs:113 pub fn put(&mut self, p: Place)", "qymcad-shell/src/lib.rs:119 pub fn keys(&self) -> Vec<&'static str>"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A stable key per place and a size that belongs to the container: exactly what has to survive a session. QymCAD keeps them in memory only — there is no store, no schema and no repair path.",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs (SectionState/PanelState, to_json/from_json/load/save, normalize)"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "lines": 2419,
+      "observed_symbols": [
+        "gui.rs:21 impl Default for OnDisk", "gui.rs:1393 fn save(&mut self, storage: &mut dyn eframe::Storage)",
+        "gui.rs:654 impl Default for App"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "eframe storage with a default state. It persists document and IO state; the panel arrangement is not part of it and there is no version gate or diagnostic for a file that cannot be honoured.",
+      "om9_owner": "standalone/crates/om9-app/src/ui.rs (set_dock_layout_path, save_dock_layout, load_dock_layout) + dock_layout.rs (the store itself)"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "lines": 67,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe = { version = \"0.35\", features = [\"persistence\", \"wgpu\"] }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "OM9 does not use eframe persistence for the layout: it writes its own bounded JSON file, so the schema gate and the diagnostics are OM9's.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml + dock_layout.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "lines": 1913,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:22 pub struct ClipV", "ui-state/src/lib.rs:87 pub fn cmd_val",
+        "ui-state/src/lib.rs:206 pub fn set_measure"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Geometry, clipping and tool state only; no interface placement and no store.",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "dock_layout.rs:746 pub fn to_json(&self)",
+    "dock_layout.rs:753 pub fn from_json(bytes, limits) — version gate on the raw document, then the typed parse and normalize",
+    "dock_layout.rs:772 pub fn load(path, limits) — total load, never panics",
+    "dock_layout.rs:814 pub fn save(&self, path)",
+    "ui.rs:483 pub fn set_dock_layout_path(&mut self, path)", "ui.rs:486 pub fn dock_layout_path(&self)",
+    "ui.rs:527 pub fn save_dock_layout(&mut self)", "ui.rs:508 pub fn load_dock_layout(&mut self)"
+  ],
+  "gap_found_by_this_task": [
+    "normalize() repaired five kinds of damage silently: a non-finite panel size, a panel size outside its bounds, a non-finite or missing floating rectangle, a floating rectangle below the minimum, and non-dense menu orders. Its own contract says 'Diagnostics are user-visible warnings, never silent data loss', and the L3 negative oracle asks for an ignored panel id to be reported with a warning.",
+    "The item therefore adds one diagnostic line per repair, with the same wording style as the existing unknown-key lines."
+  ],
+  "reuse_decision": "ADAPT the stable-key/container-size idea from qymcad-shell and the store idea from gui.rs; ADD the OM9 layout file, its schema gate and its repair diagnostics.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-01-005/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-01-005/negative.json",
+    "standalone/crates/om9-app/tests/dock_layout_persistence.rs"
+  ]
+}

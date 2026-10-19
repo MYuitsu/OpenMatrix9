@@ -1,0 +1,5661 @@
+{
+ "pdf": "h:\\OpenMatrix9\\manuals\\matrix9.0_addendum.pdf",
+ "pdfkey": "m9addendum",
+ "page_count": 94,
+ "body_font_size": 10,
+ "ocr_available": false,
+ "toc": [
+  [
+   1,
+   "CHAPTER 1 SubD",
+   7
+  ],
+  [
+   2,
+   "Clay Edit",
+   8
+  ],
+  [
+   2,
+   "Gumball Modes",
+   8
+  ],
+  [
+   2,
+   "Selection Mode",
+   10
+  ],
+  [
+   2,
+   "Hot Keys",
+   11
+  ],
+  [
+   2,
+   "Points On Surface",
+   12
+  ],
+  [
+   2,
+   "Visualization Mode",
+   13
+  ],
+  [
+   2,
+   "Clayoo Divide",
+   13
+  ],
+  [
+   2,
+   "Split Sides",
+   14
+  ],
+  [
+   2,
+   "Inset",
+   14
+  ],
+  [
+   2,
+   "Clayoo Knife",
+   15
+  ],
+  [
+   2,
+   "Clayoo Extrude",
+   15
+  ],
+  [
+   2,
+   "Clayoo Offset",
+   17
+  ],
+  [
+   2,
+   "Clayoo Bridge",
+   17
+  ],
+  [
+   2,
+   "Append Face",
+   18
+  ],
+  [
+   2,
+   "Clayoo Pipe",
+   19
+  ],
+  [
+   2,
+   "Clayoo Bezel",
+   20
+  ],
+  [
+   2,
+   "Clayoo Ring",
+   22
+  ],
+  [
+   2,
+   "Clayoo Signet Ring",
+   24
+  ],
+  [
+   2,
+   "Crease Edges",
+   27
+  ],
+  [
+   2,
+   "Uncrease Edges",
+   27
+  ],
+  [
+   2,
+   "Clayoo Project to Plane",
+   27
+  ],
+  [
+   2,
+   "Collapse",
+   28
+  ],
+  [
+   2,
+   "Match",
+   28
+  ],
+  [
+   2,
+   "Weld",
+   30
+  ],
+  [
+   2,
+   "Clayoo Symmetry",
+   30
+  ],
+  [
+   2,
+   "Clayoo Box",
+   31
+  ],
+  [
+   2,
+   "Clayoo Sphere",
+   32
+  ],
+  [
+   2,
+   "Clayoo Cylinder",
+   33
+  ],
+  [
+   2,
+   "Clayoo Cone",
+   35
+  ],
+  [
+   2,
+   "Clayoo Plane",
+   37
+  ],
+  [
+   2,
+   "Clayoo Sweep 1",
+   38
+  ],
+  [
+   2,
+   "Clayoo Sweep 2",
+   39
+  ],
+  [
+   2,
+   "Clayoo Loft",
+   40
+  ],
+  [
+   2,
+   "Clayoo Wrap",
+   41
+  ],
+  [
+   2,
+   "Clayoo Revolve",
+   42
+  ],
+  [
+   2,
+   "Create By Curve",
+   44
+  ],
+  [
+   2,
+   "Create By Two Curves",
+   45
+  ],
+  [
+   2,
+   "Clayoo Fill",
+   47
+  ],
+  [
+   2,
+   "Clayoo Shell",
+   47
+  ],
+  [
+   2,
+   "Clayoo Extract",
+   47
+  ],
+  [
+   2,
+   "Clayoo Flip Normals",
+   48
+  ],
+  [
+   2,
+   "Convert Surfaces",
+   48
+  ],
+  [
+   2,
+   "Convert TSpline",
+   49
+  ],
+  [
+   2,
+   "Create By Mesh",
+   49
+  ],
+  [
+   2,
+   "Convert to Nurbs",
+   49
+  ],
+  [
+   2,
+   "Clayoo Sets",
+   50
+  ],
+  [
+   2,
+   "Clayoo Ring Selection",
+   51
+  ],
+  [
+   2,
+   "Clayoo Loop Selection",
+   51
+  ],
+  [
+   2,
+   "Select U",
+   51
+  ],
+  [
+   2,
+   "Select V",
+   51
+  ],
+  [
+   2,
+   "Clayoo Select All",
+   52
+  ],
+  [
+   2,
+   "Clayoo Select None",
+   52
+  ],
+  [
+   2,
+   "Clayoo Paint Selection",
+   52
+  ],
+  [
+   2,
+   "Clayoo Selection Grow",
+   53
+  ],
+  [
+   2,
+   "Clayoo Selection Shrink",
+   53
+  ],
+  [
+   2,
+   "Clayoo Invert",
+   53
+  ],
+  [
+   2,
+   "Clayoo Select Crease Edges",
+   54
+  ],
+  [
+   2,
+   "Clayoo Select Uncrease Edges",
+   55
+  ],
+  [
+   2,
+   "Clayoo Select Naked Edges",
+   55
+  ],
+  [
+   2,
+   "Select Coplanar",
+   56
+  ],
+  [
+   2,
+   "Subdivision Level",
+   56
+  ],
+  [
+   2,
+   "Clayoo Library",
+   56
+  ],
+  [
+   1,
+   "CHAPTER 2 Emboss",
+   58
+  ],
+  [
+   2,
+   "Emboss",
+   59
+  ],
+  [
+   2,
+   "By Profile",
+   63
+  ],
+  [
+   2,
+   "Extrude",
+   66
+  ],
+  [
+   2,
+   "Base On Geometry",
+   67
+  ],
+  [
+   2,
+   "Revolve",
+   69
+  ],
+  [
+   2,
+   "Texture",
+   70
+  ],
+  [
+   2,
+   "Stamp",
+   72
+  ],
+  [
+   2,
+   "Carbon Copy",
+   73
+  ],
+  [
+   2,
+   "Carbon Copy By Brush",
+   75
+  ],
+  [
+   2,
+   "Brush",
+   77
+  ],
+  [
+   2,
+   "Smooth",
+   78
+  ],
+  [
+   2,
+   "Sculpting",
+   79
+  ],
+  [
+   2,
+   "Heightfield Image",
+   81
+  ],
+  [
+   2,
+   "Clay Emboss Resources",
+   82
+  ],
+  [
+   2,
+   "Decimator",
+   83
+  ],
+  [
+   1,
+   "CHAPTER 3 Matrix Tools",
+   85
+  ],
+  [
+   2,
+   "Smart Pattern",
+   86
+  ],
+  [
+   2,
+   "Texture Builder",
+   87
+  ],
+  [
+   2,
+   "Rope",
+   88
+  ],
+  [
+   2,
+   "Text On Curve",
+   88
+  ],
+  [
+   2,
+   "Styles",
+   91
+  ],
+  [
+   2,
+   "User Libraries",
+   91
+  ],
+  [
+   2,
+   "Blueprint",
+   92
+  ],
+  [
+   2,
+   "View Manager",
+   92
+  ]
+ ],
+ "scanned_pages": [],
+ "repeated_headers_footers": [
+  "- # -"
+ ],
+ "removed_logo_hashes": [],
+ "command_name_candidates": [
+  "Append Face",
+  "Base On Geometry",
+  "Blueprint",
+  "Brush",
+  "By Profile",
+  "CHAPTER 1 SubD",
+  "CHAPTER 2 Emboss",
+  "CHAPTER 3 Matrix Tools",
+  "Carbon Copy",
+  "Carbon Copy By Brush",
+  "Clay Edit",
+  "Clay Emboss Resources",
+  "Clayoo Bezel",
+  "Clayoo Box",
+  "Clayoo Bridge",
+  "Clayoo Cone",
+  "Clayoo Cylinder",
+  "Clayoo Divide",
+  "Clayoo Extract",
+  "Clayoo Extrude",
+  "Clayoo Fill",
+  "Clayoo Flip Normals",
+  "Clayoo Invert",
+  "Clayoo Knife",
+  "Clayoo Library",
+  "Clayoo Loft",
+  "Clayoo Loop Selection",
+  "Clayoo Offset",
+  "Clayoo Paint Selection",
+  "Clayoo Pipe",
+  "Clayoo Plane",
+  "Clayoo Project to Plane",
+  "Clayoo Revolve",
+  "Clayoo Ring",
+  "Clayoo Ring Selection",
+  "Clayoo Select All",
+  "Clayoo Select Crease Edges",
+  "Clayoo Select Naked Edges",
+  "Clayoo Select None",
+  "Clayoo Select Uncrease Edges",
+  "Clayoo Selection Grow",
+  "Clayoo Selection Shrink",
+  "Clayoo Sets",
+  "Clayoo Shell",
+  "Clayoo Signet Ring",
+  "Clayoo Sphere",
+  "Clayoo Sweep 1",
+  "Clayoo Sweep 2",
+  "Clayoo Symmetry",
+  "Clayoo Wrap",
+  "Collapse",
+  "Convert Surfaces",
+  "Convert TSpline",
+  "Convert to Nurbs",
+  "Crease Edges",
+  "Create By Curve",
+  "Create By Mesh",
+  "Create By Two Curves",
+  "Decimator",
+  "Emboss",
+  "Extrude",
+  "Gumball Modes",
+  "Heightfield Image",
+  "Hot Keys",
+  "Inset",
+  "Match",
+  "Points On Surface",
+  "Revolve",
+  "Rope",
+  "Sculpting",
+  "Select Coplanar",
+  "Select U",
+  "Select V",
+  "Selection Mode",
+  "Smart Pattern",
+  "Smooth",
+  "Split Sides",
+  "Stamp",
+  "Styles",
+  "Subdivision Level",
+  "Text On Curve",
+  "Texture",
+  "Texture Builder",
+  "Uncrease Edges",
+  "User Libraries",
+  "View Manager",
+  "Visualization Mode",
+  "Weld"
+ ],
+ "pages": [
+  {
+   "page": 1,
+   "text_file": "text/0001.md",
+   "chars": 24,
+   "images": [
+    {
+     "file": "m9addendum_p1_img01.png",
+     "w": 2559,
+     "h": 3309,
+     "sha256": "af233149fd70db3a55c58335cd0e9f83fb5b1f249697f498807ab7250b195c8b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 1,
+     "text": "USER MANUAL"
+    },
+    {
+     "level": 1,
+     "text": "ADDENDUM"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 2,
+   "text_file": "text/0002.md",
+   "chars": 725,
+   "images": [],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 3,
+   "text_file": "text/0003.md",
+   "chars": 569,
+   "images": [
+    {
+     "file": "m9addendum_p3_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "CHAPTER 1 SubD"
+    },
+    {
+     "level": 1,
+     "text": "CONTENTS"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 4,
+   "text_file": "text/0004.md",
+   "chars": 827,
+   "images": [
+    {
+     "file": "m9addendum_p4_img01.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "CHAPTER 2 Emboss"
+    },
+    {
+     "level": 1,
+     "text": "iv"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 5,
+   "text_file": "text/0005.md",
+   "chars": 167,
+   "images": [],
+   "headings": [
+    {
+     "level": 3,
+     "text": "CHAPTER 3 Matrix Tools"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 6,
+   "text_file": "text/0006.md",
+   "chars": 90,
+   "images": [],
+   "headings": [
+    {
+     "level": 1,
+     "text": "vi"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 7,
+   "text_file": "text/0007.md",
+   "chars": 864,
+   "images": [
+    {
+     "file": "m9addendum_p7_img01.png",
+     "w": 2550,
+     "h": 3000,
+     "sha256": "48b205c66385c8e1a1c44a0936ac22a2ff94a99d05d45e459cf7bb911020d3d6",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p7_img02.png",
+     "w": 341,
+     "h": 138,
+     "sha256": "de397fa8995323f9f296570cef7d1932c551beee6f6b3d2c91422331e2b74d2c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p7_img03.png",
+     "w": 341,
+     "h": 138,
+     "sha256": "bfe46f4926ee62f683ed6a925199da2cf0e8599e861db858b95e90b096087c28",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 1,
+     "text": "SubD"
+    },
+    {
+     "level": 1,
+     "text": "CHAPTER 1"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 8,
+   "text_file": "text/0008.md",
+   "chars": 1830,
+   "images": [
+    {
+     "file": "m9addendum_p8_img01.png",
+     "w": 455,
+     "h": 418,
+     "sha256": "10b245311171d5499a50c4cdd630d604fee3e44c44aa3619cb0bcfd36f479b19",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p8_img02.png",
+     "w": 455,
+     "h": 418,
+     "sha256": "71d6e6bccd15fee5a14da0a6e774b1f7641b1f878e00d9613809428f04f91533",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clay Edit"
+    },
+    {
+     "level": 3,
+     "text": "Gumball Modes"
+    },
+    {
+     "level": 3,
+     "text": "Hot keys:"
+    },
+    {
+     "level": 3,
+     "text": "Gumball Modes:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 9,
+   "text_file": "text/0009.md",
+   "chars": 1513,
+   "images": [
+    {
+     "file": "m9addendum_p9_img01.png",
+     "w": 586,
+     "h": 420,
+     "sha256": "a49bdddab4af6cb76efe8c957a83d6a32b8fb276dc38131e00bc4543aab1cb3a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p9_img02.png",
+     "w": 586,
+     "h": 420,
+     "sha256": "0b14c7c4ecf12f05b9b1a91013d82c9ca33bebe14428abd2a71cc6f5d181e757",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p9_img03.png",
+     "w": 546,
+     "h": 454,
+     "sha256": "eef77ab399f9cdd111719c8a998061654c413ac1885c340e643ecad7b91ddaa4",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p9_img04.png",
+     "w": 546,
+     "h": 454,
+     "sha256": "9dc6cce1e1ef7a844ce6479db91df8c6bf72da6ff73f5337fd2dccafabf7fb42",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p9_img05.png",
+     "w": 488,
+     "h": 253,
+     "sha256": "640c910463deb92b0c959de9e785f481bd7c55acaa7e9434105acbfa5ceb81c3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p9_img06.png",
+     "w": 488,
+     "h": 253,
+     "sha256": "71f2889e47fe03cbb519f1f40db6cb743765a149ed9f859800b2031ef30824d9",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p9_img07.png",
+     "w": 551,
+     "h": 557,
+     "sha256": "d91a5c2dacfaaf39d1fb70eed022f473bb8574b7bd9fc436bbf32964c80c2aa5",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p9_img08.png",
+     "w": 551,
+     "h": 557,
+     "sha256": "82608b94869412a2811e019be1659010d31cb84aead87e025ac6577e23e1719f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 10,
+   "text_file": "text/0010.md",
+   "chars": 1766,
+   "images": [
+    {
+     "file": "m9addendum_p10_img01.png",
+     "w": 551,
+     "h": 557,
+     "sha256": "0cb2314d2648e38438b71a48d16f15e02f20d3798860e54e875becbfd5ebc870",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p10_img02.png",
+     "w": 551,
+     "h": 557,
+     "sha256": "83d258ab83e3d60ddbf54c89530a84c28c1ba2e215af3d1ae7417d35bc6a557a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p10_img03.png",
+     "w": 551,
+     "h": 557,
+     "sha256": "27c1d5bfbca120ddefc024b37ebf0225e3b254fefa06f0a6dd88275b77857f58",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p10_img04.png",
+     "w": 551,
+     "h": 557,
+     "sha256": "d09dd9957f150b34fbdd19df10ae3505c0c919340dbad97a997f5ef62af0a51d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p10_img05.png",
+     "w": 551,
+     "h": 557,
+     "sha256": "9a9fff2c3824d3de4db804159715f0acc9165f3a10591b2865d03723379b8d1b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Selection Mode"
+    },
+    {
+     "level": 3,
+     "text": "Hot Keys:"
+    },
+    {
+     "level": 3,
+     "text": "Selection Modes:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 11,
+   "text_file": "text/0011.md",
+   "chars": 1224,
+   "images": [
+    {
+     "file": "m9addendum_p11_img01.png",
+     "w": 551,
+     "h": 557,
+     "sha256": "6207eba78b24803afb829107750ebe10726438af2516facad0429ca95f9e42fe",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p11_img02.png",
+     "w": 371,
+     "h": 400,
+     "sha256": "b5ff7a2e208c5066d4bec2fca004c098752270f74d059c2430f0dd5bdcdc949c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Hot Keys:"
+    },
+    {
+     "level": 3,
+     "text": "Hot Keys"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 12,
+   "text_file": "text/0012.md",
+   "chars": 336,
+   "images": [
+    {
+     "file": "m9addendum_p12_img01.png",
+     "w": 615,
+     "h": 534,
+     "sha256": "467704fdb5393866a743c9d3c4190104b9e85a33cc72222fa4e42a789f4f665d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p12_img02.png",
+     "w": 457,
+     "h": 548,
+     "sha256": "55d353aa14ebf19f8686d927abed4acfc4c6724d0d62d73bdc10f97cf6efe95e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p12_img03.png",
+     "w": 471,
+     "h": 563,
+     "sha256": "26ad28e3381df04b8a233d3af2d4e37484fd5b09541004801bec865fb1434c3f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Points On Surface"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 13,
+   "text_file": "text/0013.md",
+   "chars": 1692,
+   "images": [
+    {
+     "file": "m9addendum_p13_img01.png",
+     "w": 457,
+     "h": 481,
+     "sha256": "37c8f1e764b12dedc1402cf6236055366c6bd60d6ff3f904a2c92975b4e852da",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p13_img02.png",
+     "w": 457,
+     "h": 481,
+     "sha256": "23583e58be6957fb1825e5968ed12fe629c16bf6012eb9dfe6214027f65b3b11",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p13_img03.png",
+     "w": 569,
+     "h": 651,
+     "sha256": "bccb432fcf3df8658a701e12eda596f0997498a073405c42ce08b37bf73bceaf",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p13_img04.png",
+     "w": 586,
+     "h": 641,
+     "sha256": "ac29949f737a088f7554498ff28dd94fbc70ce02a803f6be6c8791a61847c05d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p13_img05.png",
+     "w": 586,
+     "h": 641,
+     "sha256": "61b96f69262415969fb2f74e19572fefd5158dcab99303fd9658e780535d1712",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p13_img06.png",
+     "w": 586,
+     "h": 641,
+     "sha256": "0468ed9f7c6dd93800a30beb30adece24d2473885ca248ddf8409defdf818146",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p13_img07.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Visualization Mode"
+    },
+    {
+     "level": 3,
+     "text": "Hot Key:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Divide"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 14,
+   "text_file": "text/0014.md",
+   "chars": 1077,
+   "images": [
+    {
+     "file": "m9addendum_p14_img01.png",
+     "w": 586,
+     "h": 641,
+     "sha256": "4d9fd5ea30e550dbea2605d87a46168f601ac0d68aade2e6f414f5667988292e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p14_img02.png",
+     "w": 586,
+     "h": 641,
+     "sha256": "162f31b5f3a6803d001a91f12c1f276099618a003f0ad455fde2de19b12ed76b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p14_img03.png",
+     "w": 586,
+     "h": 641,
+     "sha256": "e59e4ca8466003c78aead74faad20b6d3eed9b9111c0be49d3408210899ed6e0",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p14_img04.png",
+     "w": 586,
+     "h": 641,
+     "sha256": "ca87d6c0a52c3a01e19fe09c17d5299c9f406c9ea488fe96cf43e46b4130f3de",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p14_img05.png",
+     "w": 465,
+     "h": 671,
+     "sha256": "763858f3cbf64504a9df05933f0f7946fb4523b3226963b284ca8aca9121b90e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p14_img06.png",
+     "w": 518,
+     "h": 674,
+     "sha256": "f1a3784edaaca9c9909832d71376f5ba369b2edc0397b5caf25865dbac8022cf",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p14_img07.png",
+     "w": 518,
+     "h": 674,
+     "sha256": "500f85ac3e656f5ae71aebcd11aa40738a37aa1256f2eedaff3cf21b18b07c3a",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Split Sides"
+    },
+    {
+     "level": 3,
+     "text": "Inset"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 15,
+   "text_file": "text/0015.md",
+   "chars": 1637,
+   "images": [
+    {
+     "file": "m9addendum_p15_img01.png",
+     "w": 628,
+     "h": 575,
+     "sha256": "dca877d57a2c67aaff83e97a94f0d6e2412aefcb829ac06e7c986d158592959a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p15_img02.png",
+     "w": 628,
+     "h": 575,
+     "sha256": "92d621acd207ce9d814b83b3439bf60f5c2a16a75f522d2b1d7be017f47e1e3d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p15_img03.png",
+     "w": 628,
+     "h": 575,
+     "sha256": "0571e75b668137f161a35b2b440cd3c415f1a33561728cd8bf3c8dfa28736040",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p15_img04.png",
+     "w": 499,
+     "h": 441,
+     "sha256": "8a4bce13e659822943d4e0ad279e69b581aa3d38a8cffb58f533c1b111c3d9ac",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p15_img05.png",
+     "w": 491,
+     "h": 533,
+     "sha256": "9d89d560d645a5b5e58ad85f995694d4a4bdb4293cc676a7fe44d38454c9b586",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Inset Mode:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Extrude"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Knife"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 16,
+   "text_file": "text/0016.md",
+   "chars": 1525,
+   "images": [
+    {
+     "file": "m9addendum_p16_img01.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "6aeb5306c32a5ca9b51430484af8aa1257431cf2deafdf02c18b284f84442d93",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p16_img02.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "03f73382d8a5646abb54cebe5d7c4a3ed5477deebb2a5cdb403cbfe3db0f3437",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p16_img03.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "219b1007dddc7a8abd0a566ee70bd287a548df55d9b1ee8132a94fbee704cbb0",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p16_img04.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "4ae8d10e01f784dea0eb27c9e085442a785a95f3b856243e1ea73c848c99b21f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p16_img05.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "a880ea53dc9a21bd2cc6ccb243a7bbc566ac01c82c76fc5c19e38ae756ecff1b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p16_img06.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "4580fb2fbdebae7def97dd88b3a98648fb835f0617259f4e2afae405a1d9bb4c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p16_img07.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "5a6ca8c432cd9531f14377b0c577926ac85b5f74a5ecaee52d98398b3e2502b3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p16_img08.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "cc6e4f3aa651f235bffa9a851ef563e766339cb1967cec08146e39407f7be5bc",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p16_img09.png",
+     "w": 407,
+     "h": 471,
+     "sha256": "f3a7a8c5893c3f9471796148946a0dc61627920a60b77d76fcc1c8ff48cba249",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 17,
+   "text_file": "text/0017.md",
+   "chars": 1684,
+   "images": [
+    {
+     "file": "m9addendum_p17_img01.png",
+     "w": 805,
+     "h": 471,
+     "sha256": "6a74d013568283989e80d5fc09c82943182ff2feb106e47d1c135d361439201d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p17_img02.png",
+     "w": 805,
+     "h": 471,
+     "sha256": "169c7ebd97ac359db5061a5a99fa4c1848744a9f612459e4573aeed3d3341c16",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p17_img03.png",
+     "w": 805,
+     "h": 471,
+     "sha256": "259b6c971e3f968450d8521a798723bef6bcaf04b9a6689fd8c781f14ae3cd8d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p17_img04.png",
+     "w": 547,
+     "h": 527,
+     "sha256": "98d4569796f76aa0ed23b6dfcc17ce6634ca03dcecd28a89de2e0c14805f46f3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p17_img05.png",
+     "w": 540,
+     "h": 515,
+     "sha256": "1d6eed44bb91bd963afc4a5650b75d278483d87048113ffd5818612f36959bcb",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p17_img06.png",
+     "w": 661,
+     "h": 269,
+     "sha256": "0c4af671e5f4dc4c1424aade979ca99a3b3858a3ff6607dd545d14e92c6094bb",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p17_img07.png",
+     "w": 657,
+     "h": 303,
+     "sha256": "24f69c33b4a61af233f5ea11baf296152af07cb108f6ee6853d32785f8f3c082",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p17_img08.png",
+     "w": 533,
+     "h": 522,
+     "sha256": "ed5812b443fb3f3abc07d30fa7c1a6dc40ad5da96df27ad48fc6e86ef2e9346e",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Offset"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Bridge"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 18,
+   "text_file": "text/0018.md",
+   "chars": 2107,
+   "images": [
+    {
+     "file": "m9addendum_p18_img01.png",
+     "w": 660,
+     "h": 276,
+     "sha256": "1c26bf1cf2f34aef99dc64e59d9caafc484b8073c5948e8546363cdfa0e899f5",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p18_img02.png",
+     "w": 286,
+     "h": 245,
+     "sha256": "5e566feab5bd6da2091b73796e3dab9eccc81b9218fb2ee1c65c8c05137853ad",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p18_img03.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Append Face"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 19,
+   "text_file": "text/0019.md",
+   "chars": 2114,
+   "images": [
+    {
+     "file": "m9addendum_p19_img01.png",
+     "w": 340,
+     "h": 522,
+     "sha256": "621f9cf67a93beb803de2c396df371d5a579bf5e52771533dfb561ff81781e13",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p19_img02.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "c3bf6a556a9782690c38e9e18391a845347000b79c87423fbd6095dc6e486fdc",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p19_img03.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "74091daa5947ad59419e8822e97e5d952ca6a43fbc9ceb8e2a782d0204a3da9d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p19_img04.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "7cade979365dc30c301fd1da833056021d376ce51c693f63e17f523a806f811c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p19_img05.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "04157d0b259ed5b2b695fbd26587909d2bb82057fb7a1789699164f613fce92d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p19_img06.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "a61137f1be037913f8cc739d2850da966c037a5835b7d7ae509ec2cb256601f6",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p19_img07.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "b4fdae47f5340d2d9aa72ff1f8f6e40e86019b39cddf479b55f3098d3cbd4c32",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Pipe"
+    },
+    {
+     "level": 3,
+     "text": "Multiple Pipe Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 20,
+   "text_file": "text/0020.md",
+   "chars": 2142,
+   "images": [
+    {
+     "file": "m9addendum_p20_img01.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "e217456b7ee0134dae24d2ee55a29113bf8e56b87f3d09ca4a6c809d0ed6068f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p20_img02.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "5795ae1446e6bb7c491db4b30150021b94c5884e61c9ed3e0eadb61bb7a00424",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p20_img03.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "40902908c5f7ba57dffa2210668fda5fcb4d0c9a113020a7077885f6d2c55918",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p20_img04.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "6171d4ca2567b335492bd3b9e6d14d24a53b86abf3ba81963021f488e416afb9",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p20_img05.png",
+     "w": 512,
+     "h": 561,
+     "sha256": "c8c98789def0b0de56635dad51bb8b3338e16f3a3eabaff6bfca3bd63339bbb9",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Command Line Options:"
+    },
+    {
+     "level": 3,
+     "text": "Joint Options:"
+    },
+    {
+     "level": 3,
+     "text": "Global Options:"
+    },
+    {
+     "level": 3,
+     "text": "EndCurve/StartCurve Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Bezel"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 21,
+   "text_file": "text/0021.md",
+   "chars": 2268,
+   "images": [
+    {
+     "file": "m9addendum_p21_img01.png",
+     "w": 338,
+     "h": 387,
+     "sha256": "3eeec7a063935c5b8b4ff4eef331b3b20fda07b647ce6f020370e00e9349d6ec",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p21_img02.png",
+     "w": 338,
+     "h": 387,
+     "sha256": "5bcc689ba350b03fe7d90e16b57ec8f325dae367f310bf5c492f059dbc28d531",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p21_img03.png",
+     "w": 412,
+     "h": 424,
+     "sha256": "4a2a4f395676011af75fa40fdd6fcfec31330abf57388a08812c3ab2de30a651",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p21_img04.png",
+     "w": 448,
+     "h": 453,
+     "sha256": "648c621e2bee7d0a15d15fc9e0fcd8adcdc0a9aa336443bd8341d9e734c66368",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p21_img05.png",
+     "w": 430,
+     "h": 438,
+     "sha256": "0f7f609d1ca3170c93b894edab97bbba3e9822738fdad71266bfa62c7a75511a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p21_img06.png",
+     "w": 469,
+     "h": 406,
+     "sha256": "85beb5c605dba7a1b1f88273c34f99483bbd61308e134ba81c175f6624b41132",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p21_img07.png",
+     "w": 306,
+     "h": 353,
+     "sha256": "af7904912b16462320fee72ee1a8088bbf613564fdf9eb082b82a4e4d97e4f2f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Editing Parameters:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 22,
+   "text_file": "text/0022.md",
+   "chars": 1847,
+   "images": [
+    {
+     "file": "m9addendum_p21_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p22_img01.png",
+     "w": 443,
+     "h": 426,
+     "sha256": "8d6e1679e75e692fb4459100148e850388e34b2848b83f8931ea488440f85d6b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p22_img02.png",
+     "w": 364,
+     "h": 289,
+     "sha256": "7f7fd2c0ebb6334183b5d9238afb78a09ac303242ae167f1f04f14a8664c53ea",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p22_img03.png",
+     "w": 373,
+     "h": 379,
+     "sha256": "e262a42d3024ba9c549d53c7183832919c6b75284de7bfc0fbd33780cda29aed",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p22_img04.png",
+     "w": 373,
+     "h": 379,
+     "sha256": "5fc0937c3aaa34de96a20f584ef216bdf2acb27427d6aac63605bb3161d24b34",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p22_img05.png",
+     "w": 357,
+     "h": 287,
+     "sha256": "9e845b9c07e76c8d98bceabd8e4d39180e51549c2f4a087730f9c8a7ba8a317d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p22_img06.png",
+     "w": 440,
+     "h": 431,
+     "sha256": "0eb16865da11c22b0abba74f920c75b2ce78151c142d01e242b1c5acf8ed9db3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p22_img07.png",
+     "w": 457,
+     "h": 437,
+     "sha256": "6bbcef4dd21002b5cfb94dce659a27c644778664066278ecc5e977b2a804b4ed",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p22_img08.png",
+     "w": 417,
+     "h": 456,
+     "sha256": "237d471accf7028009a8b0caf809132f657993a6a76e29c5ab3caa975d9c6fc0",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Ring"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 23,
+   "text_file": "text/0023.md",
+   "chars": 2103,
+   "images": [
+    {
+     "file": "m9addendum_p23_img01.png",
+     "w": 475,
+     "h": 500,
+     "sha256": "9ef5259b32e6f5bf3f64498474175904690f6df32e8d40ad484290da86abd32d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img02.png",
+     "w": 475,
+     "h": 500,
+     "sha256": "aab2c80f39dae45fad9918d1db5aabcdd9e5f771537c82418431c0b620892117",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img03.png",
+     "w": 475,
+     "h": 653,
+     "sha256": "396541e2f3c8a54f3ea77357b9bae113e11e18dda0dcd46c39fdb7b91fed2009",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img04.png",
+     "w": 475,
+     "h": 653,
+     "sha256": "b8ecae9347807269d84c546e6652d96ff8fab1512f8931039b55d1b0e8ec5f86",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img05.png",
+     "w": 475,
+     "h": 488,
+     "sha256": "45e56c05d506a7b82ae114ef9199e715176e82e2db090a1fa46eea29378e69ba",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img06.png",
+     "w": 475,
+     "h": 488,
+     "sha256": "cb16ff79047d818210ab7d9b9bb1bcc4b93e62623def450b3b5da62a95c8f037",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img07.png",
+     "w": 475,
+     "h": 488,
+     "sha256": "80514fa48dfde65778e2474a83fb578030391b73c12a75edff57583b172d1bb5",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img08.png",
+     "w": 475,
+     "h": 488,
+     "sha256": "6f7e8e159e239c6ceabc1e2e55d1e9373c0e6844b4f8ed6903305d10ff1e8a15",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img09.png",
+     "w": 426,
+     "h": 414,
+     "sha256": "4c03708d6be6bef0934e5a531285442e83a859edb314ac32fecdcab32af15020",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p23_img10.png",
+     "w": 426,
+     "h": 414,
+     "sha256": "0a03fda41db7873677c3c89c866bedddd1b1cc95fd14ab8898c6cc5c91a27cc0",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 24,
+   "text_file": "text/0024.md",
+   "chars": 2013,
+   "images": [
+    {
+     "file": "m9addendum_p24_img01.png",
+     "w": 519,
+     "h": 551,
+     "sha256": "c400118689636832943b61ceec1f9a074fae21f8fef43e11e202dd03f2f6729a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p24_img02.png",
+     "w": 519,
+     "h": 595,
+     "sha256": "8c5cf97ba4a8c8b7be4ecea0e542bf5f316d78923f3869e7af4b458a44a01705",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p24_img03.png",
+     "w": 334,
+     "h": 561,
+     "sha256": "307bb03db30828705e6514f3a7e5e1ea86a6b1ca7fad0d999238c21e7a43ab68",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p24_img04.png",
+     "w": 334,
+     "h": 561,
+     "sha256": "e68ab03d7832df5751ead8496e1ac8550a2114749142ffd76c687216bf0159c7",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p24_img05.png",
+     "w": 571,
+     "h": 556,
+     "sha256": "baa8218280edc005204d8bebeefb4879d3ee7e68965cea6d375d88911582a442",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p24_img06.png",
+     "w": 358,
+     "h": 556,
+     "sha256": "2a47598624d636db831a238d8f983520808ecea3754c19220e9bc4b29b179a6f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p24_img07.png",
+     "w": 526,
+     "h": 564,
+     "sha256": "19bdcc438621dbcf511129d1e0f68d2e9ba3414436b2f7bef72e6f71659f902d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Signet Ring"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 25,
+   "text_file": "text/0025.md",
+   "chars": 2195,
+   "images": [
+    {
+     "file": "m9addendum_p25_img01.png",
+     "w": 686,
+     "h": 589,
+     "sha256": "469a4196779aed12ac63a9de6ad73da1bf8945c091386e6b7bbcf06776a8303a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p25_img02.png",
+     "w": 686,
+     "h": 589,
+     "sha256": "b3e03d2705efe4965e979c24d668d3b2ddd14125899dad714028e20ffef08caf",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p25_img03.png",
+     "w": 686,
+     "h": 589,
+     "sha256": "9d89f129f4dc13f2b9abdcab9d8de8f3da7812e0988ce8cda834765ae46f2277",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p25_img04.png",
+     "w": 648,
+     "h": 589,
+     "sha256": "3a5bb04524016513c253f1bd6b8c2386fc51a40da95b6517d4d137d6d87a6588",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p25_img05.png",
+     "w": 648,
+     "h": 589,
+     "sha256": "54caaa56e4202a128ad54f957d9800c58764b30dfe6d4710dd7805875bd286ee",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p25_img06.png",
+     "w": 648,
+     "h": 598,
+     "sha256": "489bff6213e94acc3e63c49b629af449ab13f456635439f6ec6413acd85a937a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p25_img07.png",
+     "w": 648,
+     "h": 598,
+     "sha256": "7c5d1e62ec62fcb4315f0ae29eef9e03dfe17f9a4b02a5c62cee1b1345ad7337",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p25_img08.png",
+     "w": 432,
+     "h": 604,
+     "sha256": "7e95f6f39e3211e9a4f647538e866005490d0fd3af9a61e7d98015e3e8dbea93",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p25_img09.png",
+     "w": 432,
+     "h": 604,
+     "sha256": "be58bb68fddd074456d49370d5196edf86a6cfba9223958093b9bd1fa71ee922",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 26,
+   "text_file": "text/0026.md",
+   "chars": 1936,
+   "images": [
+    {
+     "file": "m9addendum_p26_img01.png",
+     "w": 432,
+     "h": 616,
+     "sha256": "0593f47e15e79b298847af85c4bdb24fe5d0a1d65134f07496e01ee25801bdd8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img02.png",
+     "w": 432,
+     "h": 616,
+     "sha256": "89acd4a9ef020d14704d379aeb9bca06a97e8c6bf14367928c19cc179a2d6b8c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img03.png",
+     "w": 432,
+     "h": 632,
+     "sha256": "35fe7d083b3e9db04b64185618bb43b2ee2a008203adf8943694ecaf1010af34",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img04.png",
+     "w": 432,
+     "h": 632,
+     "sha256": "7fbb639683b3136e0fd5eaa4ecd47509c6a66491da71c431a05b954c71f2cedd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img05.png",
+     "w": 432,
+     "h": 632,
+     "sha256": "8e898dd7721c838a74d64014780b473476b1b03ec22190be0cfc2c1f4774f40d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img06.png",
+     "w": 554,
+     "h": 614,
+     "sha256": "69cb8a94b968cdfa0575cfc214d788f2d06db35277694fdbc306215d0defcfbc",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img07.png",
+     "w": 554,
+     "h": 614,
+     "sha256": "aef5dc5cd13690857b21d98b32e4a2ede0575b3bca522d85808ed2c8709922ba",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img08.png",
+     "w": 412,
+     "h": 614,
+     "sha256": "e4bb9dcc2e3770b79a36aa3b7e59d3f57ca767a1cb468a2f8183b5a1c3f5d7b9",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img09.png",
+     "w": 412,
+     "h": 614,
+     "sha256": "bda446a8485543ed1ea3424b02c93a1e5ca05d44c667fa26a9a953a6d6ee54b7",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img10.png",
+     "w": 541,
+     "h": 614,
+     "sha256": "728256f5e331e08f1a00e478fc22c2d5074dd2f8932a2dd783093944671bd17e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img11.png",
+     "w": 561,
+     "h": 614,
+     "sha256": "6582470350e66bfdba410728026fa0db1394c5cf8d95b150c4b839e0f26bf6dc",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 27,
+   "text_file": "text/0027.md",
+   "chars": 1691,
+   "images": [
+    {
+     "file": "m9addendum_p27_img01.png",
+     "w": 495,
+     "h": 713,
+     "sha256": "d685fdf56defcea5d1ddf5788d8e45827c8ae5f39783b387d522110c6cddd7dd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p27_img02.png",
+     "w": 495,
+     "h": 713,
+     "sha256": "fe1b39ca7bc0f15944f20c8b8c5b5dc791a1e3272326f046aef3b57f3e4ddbae",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p26_img11.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p27_img03.png",
+     "w": 561,
+     "h": 614,
+     "sha256": "8fdf766526bb77af0c4cbc8593a3411bd82068501bc1f16ecbf3121e39923511",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p27_img04.png",
+     "w": 690,
+     "h": 554,
+     "sha256": "6a1dce1e1430baff7f29009e758916152ac3e629c39e0069587d6f633e016b8f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p27_img05.png",
+     "w": 690,
+     "h": 554,
+     "sha256": "5ae03b4a37528b3071cf38b1bc07a471dc8260d0a8f4c5e2abd37d015f454416",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Uncrease Edges"
+    },
+    {
+     "level": 3,
+     "text": "Crease Edges"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Project to Plane"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 28,
+   "text_file": "text/0028.md",
+   "chars": 1971,
+   "images": [
+    {
+     "file": "m9addendum_p28_img01.png",
+     "w": 575,
+     "h": 560,
+     "sha256": "29d7796bf5b9ca7e8521501e408b9944d401220cd79dd88697ccc81729965e63",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p28_img02.png",
+     "w": 384,
+     "h": 604,
+     "sha256": "537581fd30b6efad800f7c0a603d295eaac93ccb429826fe198e99c74b6f3251",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p28_img03.png",
+     "w": 396,
+     "h": 477,
+     "sha256": "59d06c1a25460f043a92e13a6cbe022fbf0a805ddae4692b19844daf4a555406",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p28_img04.png",
+     "w": 611,
+     "h": 517,
+     "sha256": "bdb4542b31d5e52777f8a691896d38609d70f17c1dcda3272010ec3cd3a40c7e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p28_img05.png",
+     "w": 611,
+     "h": 517,
+     "sha256": "3dd10774875da16fa9f412f8f1f852039235d75323b4ebe99b7e5e95cadd4d6c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Collapse"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Match"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 29,
+   "text_file": "text/0029.md",
+   "chars": 2058,
+   "images": [
+    {
+     "file": "m9addendum_p29_img01.png",
+     "w": 430,
+     "h": 328,
+     "sha256": "da05f1b6acc70fd9834b3199ae5ea2ddd869d3c5f2fac3f728fef154607f6245",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p29_img02.png",
+     "w": 430,
+     "h": 328,
+     "sha256": "f74745b9427fd121502d9ae2e36d9b28fd6d090c3993fedb82264d47df5d1e9e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p29_img03.png",
+     "w": 430,
+     "h": 328,
+     "sha256": "267a57648fbf1740cbf6c665a2ae3289f5782f9509e98c47514e3ab134c4e547",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p29_img04.png",
+     "w": 430,
+     "h": 328,
+     "sha256": "66abc16f6c97aebff85f2b08a02b682fe233c2c87dd152ee96c1466381595fbf",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p29_img05.png",
+     "w": 430,
+     "h": 328,
+     "sha256": "00ebc97764ddad0853e3349b72495dded4498dd693e1d072191ca53489713b38",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p29_img06.png",
+     "w": 430,
+     "h": 328,
+     "sha256": "ad4dcf0cdf3c0d7e29a5e4682a285932162b921d647b796a23ce4048fbd1eb8a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p29_img07.png",
+     "w": 510,
+     "h": 428,
+     "sha256": "aaa816ceb7a5faefa4ccf0746c8b2e0b45b43af13c3da48bbf80736c71cfa18c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p29_img08.png",
+     "w": 510,
+     "h": 428,
+     "sha256": "5a1500cff109059e1bc05e1bda9599005e10c5a720a6696d8a7eac55f8f1f068",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Match to Curve Options:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 30,
+   "text_file": "text/0030.md",
+   "chars": 1730,
+   "images": [
+    {
+     "file": "m9addendum_p30_img01.png",
+     "w": 510,
+     "h": 428,
+     "sha256": "6dd2eec37f9198d343156bb99bed358e25f119e1d95eeae0c2dd24f745513519",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p29_img08.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p30_img02.png",
+     "w": 378,
+     "h": 319,
+     "sha256": "9b23b75838a4d8135a13510f541a1609ebf8ec61f8f789bf3947fafe9684860a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p30_img03.png",
+     "w": 378,
+     "h": 319,
+     "sha256": "950b30888d47e0e87388f5478a48debc726fdb216cf87e83062eb5fb4d447c5b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p30_img04.png",
+     "w": 378,
+     "h": 319,
+     "sha256": "1f99416e9b4ddc8677357e8b1a55116f73272633545f2467694dfa877c0f6099",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p30_img05.png",
+     "w": 378,
+     "h": 319,
+     "sha256": "746c8efda7c3c379876bd88c7178ddda6628f1ef97cf0b607b90ac4c57e659f1",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Weld"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Symmetry"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 31,
+   "text_file": "text/0031.md",
+   "chars": 2087,
+   "images": [
+    {
+     "file": "m9addendum_p31_img01.png",
+     "w": 169,
+     "h": 305,
+     "sha256": "f3978b35c3595cb5c6d03c5ba9a78e42a55d48979bae0279a72de959f4aab7a3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p31_img02.png",
+     "w": 268,
+     "h": 299,
+     "sha256": "07de20f03c14cbb21d2eba9ebddd1f3fe14b95473c1121ee40570cf98c58f9a9",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p31_img03.png",
+     "w": 401,
+     "h": 424,
+     "sha256": "764a4df9a6de27d8f435408586914823c142ef46f45dd3096dcbe2381dc92782",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p31_img04.png",
+     "w": 381,
+     "h": 412,
+     "sha256": "0d179c6d13c4e8717bdb46ea045b077abf88870579a756e13a2c46cc361192cf",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p31_img05.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "fb0bb27f922f8561486550a011620ade6e52a4e7f42e73ff579306513149239e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p31_img06.png",
+     "w": 228,
+     "h": 202,
+     "sha256": "e1393b160dd07c535bdd4a71d4a99872ce403e2d4fa4174355712842edc77ac2",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p31_img07.png",
+     "w": 228,
+     "h": 202,
+     "sha256": "6e06841e70ced69967896e9be3afcdb2b50f4e712d64fa78b27a2d588f12b402",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Box"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 32,
+   "text_file": "text/0032.md",
+   "chars": 1832,
+   "images": [
+    {
+     "file": "m9addendum_p31_img05.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p32_img01.png",
+     "w": 239,
+     "h": 200,
+     "sha256": "9e06bcf1d9d923d405b4997e181f7895e55cfaadf8ff45e8b0bd26040ccce26f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p32_img02.png",
+     "w": 239,
+     "h": 200,
+     "sha256": "5c76a965a92342f747e63c1e1ba9cd8d903caf90d235109e3f6947258afd8c8e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p32_img03.png",
+     "w": 206,
+     "h": 245,
+     "sha256": "9a422bc136870a2849b69d2fd2dea188f84b373d81c7ea1b3352928da787bc75",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p32_img04.png",
+     "w": 206,
+     "h": 245,
+     "sha256": "a4e10c48d5b647496e83802af762f041df0c3a7c81baa41e91e7a600faa90bd4",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p32_img05.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "7cd0dc416f9f2263d57c8d2abb16851b48b1e2d0a9c24c5b875195ba3dbba2d6",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p32_img06.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "fa9225adeb13862d14f727157da0a7d63cc62d1fd25efced0f6396e4f1cb5794",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p32_img07.png",
+     "w": 200,
+     "h": 200,
+     "sha256": "f544b0d589eaeeabf8ef63f5eaeedcf14ef0d14652588c8c143d83138d8405e7",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p32_img08.png",
+     "w": 307,
+     "h": 200,
+     "sha256": "d554eeb27985ceb474fa15bf9e2a75eb3a0aeec6e8283c94f6d309c941dfec17",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p32_img09.png",
+     "w": 307,
+     "h": 200,
+     "sha256": "1f2909f4b1b75cbe9a1438328101dbdfb922cab0a46768da1f828629c866e799",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Sphere"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 33,
+   "text_file": "text/0033.md",
+   "chars": 1936,
+   "images": [
+    {
+     "file": "m9addendum_p33_img01.png",
+     "w": 230,
+     "h": 230,
+     "sha256": "8f42dde6d7aef64ef90a821f09fdcf893c9285c957d9865475b4e69582cdbaa8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p33_img02.png",
+     "w": 230,
+     "h": 230,
+     "sha256": "a924e25779ce99a4374cd5e22173b74dacf01392ce295253d1f5285f7f79e9e6",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p33_img03.png",
+     "w": 301,
+     "h": 221,
+     "sha256": "b752b134677928ad3ef4b3724d937dd64ae87a44124cbc9482e0aa779a90a494",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p33_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p33_img04.png",
+     "w": 372,
+     "h": 213,
+     "sha256": "3cca2c2fb2dccc21cb87033c036ac9b394391f1143f582130de652c2c82cc8d3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p33_img05.png",
+     "w": 372,
+     "h": 213,
+     "sha256": "0976dd055dfd6e54c9c280e636b76d39061b0c90e6c26331eff87abe899a8316",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Cylinder"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 34,
+   "text_file": "text/0034.md",
+   "chars": 1950,
+   "images": [
+    {
+     "file": "m9addendum_p34_img01.png",
+     "w": 229,
+     "h": 264,
+     "sha256": "d4ab54266b53e71493ee9bfd18669a1895fff7876595c33f8c2c68ee988ceec6",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p34_img02.png",
+     "w": 258,
+     "h": 299,
+     "sha256": "21b62999329c30bc222749767f905e52a60fe85ef3032fc6aadaacf22ccdbd49",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p34_img03.png",
+     "w": 258,
+     "h": 299,
+     "sha256": "3fb338d56748f88796b3ff1d036ae9fddc9e08e4a32af7c1bf9f16bf78ddb3cd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p34_img04.png",
+     "w": 229,
+     "h": 354,
+     "sha256": "2f542379c5eb808e00646579f8dd723b0203a92c123efbf9b61b25dd1c8b38a0",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p34_img05.png",
+     "w": 229,
+     "h": 354,
+     "sha256": "c555a703995ad62e36ec2839969246035422ef568df511707c030157f33b1a83",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p34_img06.png",
+     "w": 229,
+     "h": 271,
+     "sha256": "0b29847f0ccd104bbf640cb3ba9d0943cb6832258688fd631d9764dbba3ebcd0",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p34_img07.png",
+     "w": 229,
+     "h": 271,
+     "sha256": "eec0dcf11480f926f3768c69389a381ae07f2cedf439107327bbd2ac127283b0",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 35,
+   "text_file": "text/0035.md",
+   "chars": 2393,
+   "images": [
+    {
+     "file": "m9addendum_p35_img01.png",
+     "w": 229,
+     "h": 264,
+     "sha256": "e7036de09b506dfcddd4a11ec719a89a4bfb557e1e24c7a54220ee4a835bdb6d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img02.png",
+     "w": 229,
+     "h": 264,
+     "sha256": "57e5e97659ad45ad79c494d8bb798cd44b6e52c7a190bc3931c204e058332b9d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img03.png",
+     "w": 229,
+     "h": 264,
+     "sha256": "8eec65eb18887b5907613967137ec117ce763988960bea1a4ab3902830d96c48",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img04.png",
+     "w": 229,
+     "h": 230,
+     "sha256": "6018cfaa7e705c6ba356820c7fcdfe4c880dae43400a11f5313ec68ec7500453",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img05.png",
+     "w": 229,
+     "h": 230,
+     "sha256": "f1fc421f06cee57cc334a5a3f3a8a44f3e857bb59b76a76d9c3869654c65dcd3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img06.png",
+     "w": 229,
+     "h": 230,
+     "sha256": "aa099a02d0e2e7a019c9f079460e8fec2fe0e80c64354cf1597f6d52ddca3f37",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img07.png",
+     "w": 555,
+     "h": 371,
+     "sha256": "bacc0f9243e89f08e777cae41a8c3eadf250256acfd6cd7e3de64e40af2a3b58",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img08.png",
+     "w": 555,
+     "h": 371,
+     "sha256": "8fe4c68cab6d08d5a64d81bf497f5dd5de355f76aa7e62a30bec33ccbc2be937",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img09.png",
+     "w": 306,
+     "h": 257,
+     "sha256": "d213268fa61a476db2e15f59c53bafaa95a31bba4652f106bc9d9c48c1af5d49",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p35_img10.png",
+     "w": 306,
+     "h": 257,
+     "sha256": "a7fc9c0660c99f972db9a5e563018325b65426669fd34cc8cd496ecaf9e1dc84",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Cone"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 36,
+   "text_file": "text/0036.md",
+   "chars": 1992,
+   "images": [
+    {
+     "file": "m9addendum_p35_img09.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p36_img01.png",
+     "w": 341,
+     "h": 313,
+     "sha256": "e7a86407d900fcc65d2c8e08a7a0236e1633318b21587b72bf5d277209685a6c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img02.png",
+     "w": 389,
+     "h": 329,
+     "sha256": "5ca0d0b3dc1ef0f5e2e6be4527d5ac857c14bc04ac656d74b6b655f38653102c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img03.png",
+     "w": 389,
+     "h": 329,
+     "sha256": "75e667f43c2bdc814339cbc0b3787150e4d2d906ee52f2611c7950b0c4a8e344",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img04.png",
+     "w": 306,
+     "h": 376,
+     "sha256": "c0a19f28292dad75901e65749403534dc3cfbe58d8f99d536b95b56c7d76ed4c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img05.png",
+     "w": 306,
+     "h": 376,
+     "sha256": "fd98a3ba87e76bdc9b311bf05396a316a070cef362b54f9d9053956c04c525c0",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img06.png",
+     "w": 306,
+     "h": 315,
+     "sha256": "41945c36178e4d82f6812c779b6a2f6e7fca78de70c4f016d9b36beb476ad353",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img07.png",
+     "w": 253,
+     "h": 297,
+     "sha256": "f6f9513cbea995839519bedd76dc09d563a1be45f6db3e2c42fa12b2fb2b9321",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img08.png",
+     "w": 253,
+     "h": 297,
+     "sha256": "f61176f50a71f3c021c155414afdff078cbbadd8cdcd36dccbba77c2c5c54f82",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img09.png",
+     "w": 306,
+     "h": 257,
+     "sha256": "4c17d24c1f1701b853023348f4ee9ed84b6871c92f6fcb94ae3d6590c74c2f77",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img10.png",
+     "w": 306,
+     "h": 257,
+     "sha256": "1e0b1d3a58b073273c096378c247ed674e0398c804d41f946f8dce92482cb708",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img11.png",
+     "w": 306,
+     "h": 257,
+     "sha256": "bcdd2b699c443542e5a75795b2d03463646e65dc7fe0a77b506a08f9ca71ca51",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img12.png",
+     "w": 306,
+     "h": 257,
+     "sha256": "5b9c5ea6a1260f9e3929df910f3f6e8d80f1cd2a463b6a85a759179975f954fd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p36_img13.png",
+     "w": 306,
+     "h": 257,
+     "sha256": "2e903db07253b2f241df043b0995da1ea57570378f2bb42fb5bb1f525ac92422",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 37,
+   "text_file": "text/0037.md",
+   "chars": 2412,
+   "images": [
+    {
+     "file": "m9addendum_p37_img01.png",
+     "w": 519,
+     "h": 297,
+     "sha256": "35def4be97dfe6ec47f58de133b2e34cd66369b2a26c578d0969a1dedd51d5e2",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p37_img02.png",
+     "w": 519,
+     "h": 297,
+     "sha256": "6de1e424b1fdd17a1a15062da82269bc6a04c967267ea75ee4f1cf0f3cb8704f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p37_img03.png",
+     "w": 240,
+     "h": 175,
+     "sha256": "4c779b24753c5aecf62b42763ce93f0c41929e9c77893d67f7fbfbd09915471e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p37_img04.png",
+     "w": 281,
+     "h": 196,
+     "sha256": "110c4af9479ea21cac1a537ff07b5fcf16718a02ac025257dcbe7ec8602fab6a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p37_img05.png",
+     "w": 281,
+     "h": 196,
+     "sha256": "6d153c0fbd06bdcfba69d30ac2cbe806d38fd93e86bc29e397dca7629e491227",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p37_img06.png",
+     "w": 288,
+     "h": 187,
+     "sha256": "c7ac7eec88fa2f54ba0a6a1e7a0b95779248ec74919d1c562048a92825256135",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p37_img07.png",
+     "w": 288,
+     "h": 187,
+     "sha256": "cb7a679b881b915a3434e82e9265b98c9a715cd2b84c10d777c305aee363c5ee",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p37_img08.png",
+     "w": 266,
+     "h": 175,
+     "sha256": "ffd61be1798bef1289c6085a2c55d3a7fc76f718f0422021c4ec6c5f8ee1a509",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p37_img09.png",
+     "w": 266,
+     "h": 175,
+     "sha256": "ae2283fe17be307090f5718a7d2714e7124794b71c96315aa2b55da076fbd85f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Plane"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 38,
+   "text_file": "text/0038.md",
+   "chars": 2061,
+   "images": [
+    {
+     "file": "m9addendum_p38_img01.png",
+     "w": 410,
+     "h": 175,
+     "sha256": "c55831b720770053c25873718cae7c53eb5d14642b24c0e3c6c3d56bb18d08e6",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p38_img02.png",
+     "w": 584,
+     "h": 684,
+     "sha256": "933505ccd2fe61b34a4521c81f9f423c6b5ad176104e39d8170694477edb179b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p38_img03.png",
+     "w": 584,
+     "h": 684,
+     "sha256": "40a9a1385265d1cd7b427aae41b2d7c31d3cea249d2c24010bb568d0c817687a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p38_img04.png",
+     "w": 694,
+     "h": 684,
+     "sha256": "5a6bee81f96d0e98d61b537830a9a362da14418d87ef0374c7e6770dc98d4d1e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p38_img05.png",
+     "w": 694,
+     "h": 684,
+     "sha256": "faaf0b6d964d624ddad3132c83e32c8aeda20ef4de1b8210f1f59177e67f3b3f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p38_img06.png",
+     "w": 493,
+     "h": 706,
+     "sha256": "ef4b41cd7e4a8e5168dd83636fcb53da272dce569fcf8017a326afa2f42838f0",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p38_img07.png",
+     "w": 493,
+     "h": 706,
+     "sha256": "39290eae96c1284b27646bdbc87cc960e8da47b0d2d9e4ba2612c669095f7d14",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Sweep 1"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 39,
+   "text_file": "text/0039.md",
+   "chars": 1759,
+   "images": [
+    {
+     "file": "m9addendum_p38_img06.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p39_img01.png",
+     "w": 508,
+     "h": 706,
+     "sha256": "b31e10baaad03343f4d8068d2d223f426070ffddce603d8138a50b91bb6e1aa5",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p39_img02.png",
+     "w": 508,
+     "h": 706,
+     "sha256": "0dff1f5171c5814ae6852b31cf4b3de59a4f2415eb960668b849da599164d504",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p39_img03.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "d241140ad2351a373aee23df80fe4a608f5db3dd6e3de3d3ca8e373d540e1518",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p39_img04.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "639a73531596cbb6c8cb53e6f5db30f64fe19794794a800276bf0b0952d72af1",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p39_img05.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "7bb3a865ec2a1d33792f3145d255303d93a96a41073192cde58d590eeb69485c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p39_img06.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "66b3f136ca17ee224fb89dec8630cd35d4e8ad973967c9d669217072f87b5b11",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p39_img07.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "94c6a8d7c2ae65af090efe7531b411712267f0030cc204a0d0c72be86cab55bd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p39_img08.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "54b861eeff18c7c47a022b67b1bbbceabd8cb2980cf389f9b9326be63a62535f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Sweep 2"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 40,
+   "text_file": "text/0040.md",
+   "chars": 1767,
+   "images": [
+    {
+     "file": "m9addendum_p40_img01.png",
+     "w": 347,
+     "h": 477,
+     "sha256": "b987fd82ba4cda4a869d93363b3b2defe7164fb03b9cc4b91b275cf8ec739623",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p40_img02.png",
+     "w": 347,
+     "h": 477,
+     "sha256": "067895096669efae9a7ac7d92e1aa755e1e807abc59eea081fb958b5e14b21df",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p40_img03.png",
+     "w": 347,
+     "h": 477,
+     "sha256": "269df8c6642678b603c433c8a7e1bfe64c8ae6b6f113d9829bfce08c67bb497b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p40_img04.png",
+     "w": 454,
+     "h": 509,
+     "sha256": "a38e02442592afe975275ee07a0344cc2bfd0cd4ba4456eb74d7d16ffdc52309",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p40_img05.png",
+     "w": 454,
+     "h": 509,
+     "sha256": "d4e227aa669b0bf4841ba4927febb53f4165ed445e97fe29d4ac6b499261c30f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p40_img06.png",
+     "w": 454,
+     "h": 509,
+     "sha256": "0fe8276daa7bef20d1b23594e5c8c2297f1808f1d3c3d993ad04556a26c275ee",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p40_img07.png",
+     "w": 454,
+     "h": 509,
+     "sha256": "a63f205ded71f7ab85663b0c790acb33599be352e2f2e886fbd8bc39c400c73a",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Loft"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 41,
+   "text_file": "text/0041.md",
+   "chars": 1916,
+   "images": [
+    {
+     "file": "m9addendum_p41_img01.png",
+     "w": 644,
+     "h": 719,
+     "sha256": "4a5d21dfa7cd8758e98f2e0df4a700674d5eeff2c08d065c2f1d313985c7528b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img02.png",
+     "w": 644,
+     "h": 719,
+     "sha256": "25ac132f49b88062b317904523582f6afec2f37be7b414c9df2f7caa0aa72532",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img03.png",
+     "w": 644,
+     "h": 719,
+     "sha256": "ae5c6a6b971f1d671800361abdd973b6ed20f599816ddc064d5cf0fdbf4ea9be",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img04.png",
+     "w": 644,
+     "h": 574,
+     "sha256": "019fc0d7d8dbe40f846d7f317d6a3a091c0d09f4995661fcaecaa8452b3cff46",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img05.png",
+     "w": 644,
+     "h": 574,
+     "sha256": "1ab9365401b792a566f4a80fb6b89fa80f1b24da40541d180014bc6ce99f25d1",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img06.png",
+     "w": 644,
+     "h": 574,
+     "sha256": "550520eaf648b403ecc9436545c7cba4ea8ca431b41193c84996ced13ea8f527",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img07.png",
+     "w": 582,
+     "h": 602,
+     "sha256": "3d2129ac6035e4380836359a92660d8de565aa6861567d96866b813d97ec8377",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img08.png",
+     "w": 582,
+     "h": 602,
+     "sha256": "eb2399860a20f27a1d04c2a40f3c7c239d109ab44acda2a1dd42dc800825fc4c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img09.png",
+     "w": 121,
+     "h": 79,
+     "sha256": "33ff06c53e36d0e358976131fb6c3990a79dd7ad9053f2e4238b1f6eccbc9915",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p41_img10.png",
+     "w": 584,
+     "h": 662,
+     "sha256": "36735233774bafb28ce40d47032d5eceba0b15a97f1b719da27338c0f528fc37",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Cap Start Modes:"
+    },
+    {
+     "level": 3,
+     "text": "Cap End Modes:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Wrap"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 42,
+   "text_file": "text/0042.md",
+   "chars": 1746,
+   "images": [
+    {
+     "file": "m9addendum_p42_img01.png",
+     "w": 296,
+     "h": 458,
+     "sha256": "51c6893eed1ec0ef2b14b36be2ad8188cee0a7b2cf5d01ed745dabc30e53a1d5",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p42_img02.png",
+     "w": 296,
+     "h": 458,
+     "sha256": "24bbd086b97f7a3d94975735ba898d6715b970a0320eb63dc43dcac5705b0e49",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p42_img03.png",
+     "w": 296,
+     "h": 458,
+     "sha256": "71f1dd97714420d6204fc3b3fdfc3965e9807f0cff358032826fec6d7dcf2772",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p42_img04.png",
+     "w": 296,
+     "h": 458,
+     "sha256": "830dd2b9f8ebd06c4e4db38ce75ab646af6955007e01a9b59d1ef4b18b49bee7",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p42_img05.png",
+     "w": 167,
+     "h": 434,
+     "sha256": "f24f8c82af06aadae339430877d85b4d8a79ae07f1c324c232c08372f798de97",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p42_img06.png",
+     "w": 175,
+     "h": 434,
+     "sha256": "983576b263cbd26602c5ef62eefcd85723abb837039e3189b5cf24eec2136c46",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Revolve"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 43,
+   "text_file": "text/0043.md",
+   "chars": 1566,
+   "images": [
+    {
+     "file": "m9addendum_p42_img06.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p43_img01.png",
+     "w": 175,
+     "h": 434,
+     "sha256": "80d208af9e980a84ea870888634a299387d8a905034bbf8a08cbd0e542ba250a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p43_img02.png",
+     "w": 412,
+     "h": 434,
+     "sha256": "7bf92e1f7ccb238c279ad0372e2cf0130d6ca250a4539c2c2359a9411079f5cc",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p43_img03.png",
+     "w": 205,
+     "h": 434,
+     "sha256": "902391275d968494e586bb42359cc3f2500b5814718d6b1d627a15347558c4ad",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p43_img04.png",
+     "w": 205,
+     "h": 434,
+     "sha256": "1d149de0a10ef07670e03a9ca4f7153e2493fdad8860e3c2842f2f11accfa398",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p43_img05.png",
+     "w": 205,
+     "h": 434,
+     "sha256": "0c2ae7bf4bc50744f97d7f695cf292cfcd8c35a17f2d01e8669532619f492614",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p43_img06.png",
+     "w": 205,
+     "h": 434,
+     "sha256": "07eda53f4f3744ee6a2369ce1e6050d7a391f80e3a4a71c01cbcbd210224f698",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p43_img07.png",
+     "w": 205,
+     "h": 434,
+     "sha256": "2f958b14c43911515d75bcc1515f3b53e02be2eb94e78487ecb563c08c8a43f2",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Cap Start Modes:"
+    },
+    {
+     "level": 3,
+     "text": "Cap End Modes:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 44,
+   "text_file": "text/0044.md",
+   "chars": 1851,
+   "images": [
+    {
+     "file": "m9addendum_p44_img01.png",
+     "w": 205,
+     "h": 322,
+     "sha256": "19ac2eb5631a3b614541218b0d58d17e41b8bd8020ac827059cfcea02db7b8e3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p44_img02.png",
+     "w": 205,
+     "h": 322,
+     "sha256": "e7896f140db60a33658ce1bb613f1193d99e3b8a95e4916de7b4e9df1b54bb09",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p44_img03.png",
+     "w": 205,
+     "h": 322,
+     "sha256": "d7822ca52c809103c2368de3a58cf93f691680df742d1c11c8cc7fbe9a52d860",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p44_img04.png",
+     "w": 370,
+     "h": 306,
+     "sha256": "77dedb54df7a4ec7c35bcece94d1777d3189811724102451a2edaf5abc726900",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p44_img05.png",
+     "w": 389,
+     "h": 312,
+     "sha256": "ae81cbe35db7395cd81594ad4eda8d1c601e3ccccff43c06be18caf5a2e1e357",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p44_img06.png",
+     "w": 389,
+     "h": 312,
+     "sha256": "a6c98c3062bf58c81e718f5db68a9389615bb5110e015fc7759e4e10d90bfa6d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p44_img07.png",
+     "w": 370,
+     "h": 312,
+     "sha256": "2f438e70dfd98412726fa3a8860778776b294453851aae2c25f567c7a7b77d9b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p44_img08.png",
+     "w": 370,
+     "h": 312,
+     "sha256": "9e223a9427b2baca47dcf73a58e9cb00a82aa28593c79211febd8fcea979c3fa",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p44_img09.png",
+     "w": 370,
+     "h": 360,
+     "sha256": "f9c27bf11ee83b6eb87ac021aa0a5ae6dab98ce5a5be2c7aeacc1ef203814514",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Create By Curve"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 45,
+   "text_file": "text/0045.md",
+   "chars": 1471,
+   "images": [
+    {
+     "file": "m9addendum_p45_img01.png",
+     "w": 370,
+     "h": 360,
+     "sha256": "8d3a15bd587f9475ed61b6934dee23262b45cecfd526ce8cc6ee2c0547828668",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p45_img02.png",
+     "w": 370,
+     "h": 360,
+     "sha256": "6ad11c6addf0c022017018531e8bf85e7f02783aa30e8058a034b92dfd93c6a9",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p45_img03.png",
+     "w": 370,
+     "h": 360,
+     "sha256": "501a9fb039917d42a2b7697d0cba4e6db7a5fe8d23b1739002fee23a54703596",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p45_img04.png",
+     "w": 370,
+     "h": 360,
+     "sha256": "03709cbbb607432885b9ccc19e6cf5da9fffb5accd92bd5ed09c7c777939f4b9",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p45_img05.png",
+     "w": 370,
+     "h": 360,
+     "sha256": "b592f0ea8f4c930d2b43468edabd8e697dd6902a212908e0457430cc94b6b121",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p45_img06.png",
+     "w": 370,
+     "h": 360,
+     "sha256": "5e5ae8ab4705c24f053edc4f4e5d66969f5b404fa0862d076727ef987b3600fe",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Cap Start Modes:"
+    },
+    {
+     "level": 3,
+     "text": "Create By Two Curves"
+    },
+    {
+     "level": 3,
+     "text": "Cap End Modes:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 46,
+   "text_file": "text/0046.md",
+   "chars": 1740,
+   "images": [
+    {
+     "file": "m9addendum_p46_img01.png",
+     "w": 454,
+     "h": 346,
+     "sha256": "d1013d5fe4bcdbfd5c0f310f8352f6729a9134f773e47e30be2a83dfc41a2b47",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img02.png",
+     "w": 486,
+     "h": 346,
+     "sha256": "f4dae051cbc7be2d0bd124c11ab90d651d0499b4594a3392452d44bb28261004",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img03.png",
+     "w": 454,
+     "h": 346,
+     "sha256": "91aff4e1093a5f8c111d82b49d00eee1286ed26b53bf3cc5632228735edc6ef1",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img04.png",
+     "w": 454,
+     "h": 346,
+     "sha256": "25c1abae8e029f0d290ff74c5d024bb78965de9f5121890db4e49ab85ed7fb24",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img05.png",
+     "w": 388,
+     "h": 346,
+     "sha256": "e3baaf539e042a0ca4e1f3514c2c725ad068427ed501ff892f861fd812746d4d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img06.png",
+     "w": 388,
+     "h": 365,
+     "sha256": "f6b17e3a068039ea4c41260da505776763a41135406df76e60b996952e8fef0c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img07.png",
+     "w": 233,
+     "h": 249,
+     "sha256": "e9ed8511f814a3e3f5748b1c27fd101c0eb8654fc30101fc836c61d69716bef9",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img08.png",
+     "w": 233,
+     "h": 249,
+     "sha256": "4a8878ffb1784d723abdc50a73ac64f555c1bb9dfd13e55c58f0344250c77fd4",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img09.png",
+     "w": 475,
+     "h": 458,
+     "sha256": "72be4207cb331898e67fea9a0d951b599190cb5fe0097a6abefb665555167777",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p46_img10.png",
+     "w": 475,
+     "h": 458,
+     "sha256": "09d85b0e8a079de79d60ae8b52f0936886afaf1ef9110bd8846ae3efb1f8847b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Cap Start Modes:"
+    },
+    {
+     "level": 3,
+     "text": "Cap End Modes:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 47,
+   "text_file": "text/0047.md",
+   "chars": 1419,
+   "images": [
+    {
+     "file": "m9addendum_p47_img01.png",
+     "w": 475,
+     "h": 458,
+     "sha256": "6088e819f73e39acd0349cf4477d455c18af5f66237d3827bc1fd3497cb3947d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p47_img02.png",
+     "w": 475,
+     "h": 458,
+     "sha256": "b7d669ecc080bb8378eeb5fc949e0a6704e78843db059e17d351a5cd75a59aa3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p47_img03.png",
+     "w": 509,
+     "h": 552,
+     "sha256": "9913f33e8bd192e6b066d610723d9acf42bb3cd01a0e24366f3b6347dd7a380c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p47_img04.png",
+     "w": 509,
+     "h": 552,
+     "sha256": "b1bb6c8d4aee161c0e1fbb0ddcfe5860ef962f367b9993c34762c162842f3086",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p47_img05.png",
+     "w": 509,
+     "h": 552,
+     "sha256": "2a116f636a79471a84509a8c49a5510a1bed68c4118204c3eae481e08ac84e1e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p47_img06.png",
+     "w": 509,
+     "h": 552,
+     "sha256": "fb4864c1a5309f2680b734326efc85eff8316c78565e1b9114229e474638573e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p47_img07.png",
+     "w": 519,
+     "h": 437,
+     "sha256": "bb26185b28842e0c11905383cba53fa6f283641c703551b87fe3eafc09472b59",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p47_img08.png",
+     "w": 537,
+     "h": 437,
+     "sha256": "a03db704851d1391e3aad206b56c9ad867c41c202183a2c0d69699fe1b0db1f0",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Shell"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Fill"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Extract"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 48,
+   "text_file": "text/0048.md",
+   "chars": 1758,
+   "images": [
+    {
+     "file": "m9addendum_p48_img01.png",
+     "w": 518,
+     "h": 560,
+     "sha256": "29a3b0dd642713d2d6ad2fb1b2f01f010974b431c390b681968a014b96172276",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p48_img02.png",
+     "w": 518,
+     "h": 560,
+     "sha256": "7861a3e448ad6c1388dfa3976e772d43718a1b8c77ced41c05afed88a50651dd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p48_img03.png",
+     "w": 485,
+     "h": 542,
+     "sha256": "e67216989cbc46be232057f2afedf4129eeffa640ee955ecedca92567be99b1e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p48_img04.png",
+     "w": 485,
+     "h": 542,
+     "sha256": "4cd585c1fbc00719e3c6b47a2dc5e68b4d1f27b0d59b8f56f68afcf12983624d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p48_img05.png",
+     "w": 485,
+     "h": 542,
+     "sha256": "e89ed925b7e795a7266848f2daaed41bd145ca83f5a3dee3c719a0e987382792",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Flip Normals"
+    },
+    {
+     "level": 3,
+     "text": "Convert Surfaces"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 49,
+   "text_file": "text/0049.md",
+   "chars": 1910,
+   "images": [
+    {
+     "file": "m9addendum_p49_img01.png",
+     "w": 363,
+     "h": 424,
+     "sha256": "552d1e799bc9823e51e751d27fef9fcb85a6bd4ceb51dcc02ae8f54ffb7a8688",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p49_img02.png",
+     "w": 363,
+     "h": 424,
+     "sha256": "dad2bab2122f980cda12aa5fd69afee28ed62153241d004b58aa216422911b3b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p49_img03.png",
+     "w": 363,
+     "h": 424,
+     "sha256": "0e73901e7563ac79fe1c1fab8683cee275006f11cf3ebb6d1a0bf83ca6ab4524",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p49_img04.png",
+     "w": 618,
+     "h": 746,
+     "sha256": "6f31d8f5c0c6d2abd6eeaec71a3cab681a1cab7e3578eaeeea1d6b62ca103f5e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p49_img05.png",
+     "w": 618,
+     "h": 724,
+     "sha256": "06de28b647be79dd5f05c707b09269cf74cc3864b6dc45e8407b82144a06bbea",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p49_img06.png",
+     "w": 537,
+     "h": 453,
+     "sha256": "72ae9205fb82eafd7bda7d0337c5768f364e0784a114ec9ba322f8bb9ea84358",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p49_img07.png",
+     "w": 537,
+     "h": 453,
+     "sha256": "a6cf45b81c6016ebde99a6b81d3e0d35c96d0b199e9212a84d68c94363f882f2",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p49_img08.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Create By Mesh"
+    },
+    {
+     "level": 3,
+     "text": "Convert TSpline"
+    },
+    {
+     "level": 3,
+     "text": "Convert to Nurbs"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 50,
+   "text_file": "text/0050.md",
+   "chars": 1514,
+   "images": [
+    {
+     "file": "m9addendum_p50_img01.png",
+     "w": 559,
+     "h": 616,
+     "sha256": "8b814335d627032a3b1b05ccb2543734ee1f034238517dc9944ab7178074f8c8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p50_img02.png",
+     "w": 559,
+     "h": 616,
+     "sha256": "b3e8fa57d4a3bd01edbfc78e0217a0e1c6f3686e6a6f2c18a7eae147f6557055",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p50_img03.png",
+     "w": 542,
+     "h": 614,
+     "sha256": "3cf9aba2a8b21379ee12143bf74d7e7838e255e9602e76b140c98d8084908825",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p50_img04.png",
+     "w": 542,
+     "h": 614,
+     "sha256": "75d3278eb2350b39917e3bfb9047c1428099b0399b1070dd0ea2eb8a5f51ae51",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p50_img05.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Sets"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 51,
+   "text_file": "text/0051.md",
+   "chars": 1478,
+   "images": [
+    {
+     "file": "m9addendum_p51_img01.png",
+     "w": 426,
+     "h": 415,
+     "sha256": "5c5636a446e44f48501fc5be50ff027a6b6b223b2f49c8e303227a5fc91753ec",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p51_img02.png",
+     "w": 426,
+     "h": 415,
+     "sha256": "4b8d99396d0432d4573c199aafc4d8a7d7f1e72624e16965384a420e1c56b263",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p51_img03.png",
+     "w": 551,
+     "h": 667,
+     "sha256": "3514a8287f928ca7c97aed711cf61de396bc99e8ac121782f047bb95ddc33598",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p51_img04.png",
+     "w": 557,
+     "h": 652,
+     "sha256": "becda3fcbbd199dfb9b8f14cfc70d869c67f35344da4f32a5cb23cbd0939a60e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p51_img05.png",
+     "w": 485,
+     "h": 493,
+     "sha256": "bd620bb0289e621acefd233080db44648c410794578b241ec2d944048d5f62cf",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p51_img06.png",
+     "w": 485,
+     "h": 493,
+     "sha256": "e14f1363996c8070c47be3917320e9b7db70798e443a9d2210580af63989553e",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Ring Selection"
+    },
+    {
+     "level": 3,
+     "text": "Select U"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Loop Selection"
+    },
+    {
+     "level": 3,
+     "text": "Select V"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 52,
+   "text_file": "text/0052.md",
+   "chars": 1092,
+   "images": [
+    {
+     "file": "m9addendum_p52_img01.png",
+     "w": 485,
+     "h": 493,
+     "sha256": "469e4bbcea8b45809921c6749057555e88f47490bc2a57cea5667469cc8af6d4",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p52_img02.png",
+     "w": 485,
+     "h": 493,
+     "sha256": "a8406103817df7e9fbbebbd0230f2f3594a17a5f885899f8c8d19d72120f366f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p52_img03.png",
+     "w": 537,
+     "h": 603,
+     "sha256": "cab58cabbec3f055d2164c466940bc13e1ea908a4d853cf5be5e62493ae3c977",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p52_img04.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "e9b25f5b02c952a4126ecc7558486f8d8985f9554749eae1969c928b0dbe084e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p52_img05.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "516a1ef1d93410aaf522970259d3d600b986af97121fb46950564cc1f6f79088",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p52_img06.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "dc11dd19d9df2a8e7c8fd79198897a314a1d4488fea92f8e8d04b0ea79845220",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p52_img07.png",
+     "w": 481,
+     "h": 540,
+     "sha256": "9ef76466be6065c48c902e3df9ae2ce8d3b74684ef88903e4ca55caa9a286b47",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Select All"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Select None"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Paint Selection"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 53,
+   "text_file": "text/0053.md",
+   "chars": 1541,
+   "images": [
+    {
+     "file": "m9addendum_p53_img01.png",
+     "w": 495,
+     "h": 553,
+     "sha256": "f3df14131fe2d9d4f6911e48aca56a8216cdf3a00a31a29679c29bc2b72ac492",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p53_img02.png",
+     "w": 495,
+     "h": 553,
+     "sha256": "e58497bcf23a2ae4e558ffa7d2e7552f18929877f2cc5844dce1ff949808a3c6",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p53_img03.png",
+     "w": 495,
+     "h": 553,
+     "sha256": "34f3859f4ede615a3b33b93280be22015e7ca2af9ae87a313f984762f2360c4b",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Selection Shrink"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Selection Grow"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Invert"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 54,
+   "text_file": "text/0054.md",
+   "chars": 1288,
+   "images": [
+    {
+     "file": "m9addendum_p54_img01.png",
+     "w": 646,
+     "h": 264,
+     "sha256": "e139a3de3285746ac2384f7cc00ea98837cb78089d2941f1e3b260edd4de3e37",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p54_img02.png",
+     "w": 646,
+     "h": 264,
+     "sha256": "4d446c800be4af4958e7443242422f28b97c1c8f4afa737dab65f071f8cac767",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p54_img03.png",
+     "w": 553,
+     "h": 594,
+     "sha256": "19c56f7eeeb24f9838f68b6f1e3f7214511829c35bcc8af998c286e93d58a81a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p54_img04.png",
+     "w": 553,
+     "h": 594,
+     "sha256": "7ea88561f8336c0808b4d62f01370f1ab33df89c79a6ada24974f75f2d7ca9bd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p54_img05.png",
+     "w": 553,
+     "h": 594,
+     "sha256": "1e2939252db1f0915706539a2749f54f7d458f8fde468d718c29e549646c587c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p54_img06.png",
+     "w": 553,
+     "h": 594,
+     "sha256": "40e19ca2a39645e3945ad2549ddfacd331c16093df894260d2446799d441c53b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p54_img07.png",
+     "w": 553,
+     "h": 594,
+     "sha256": "cd27c2d23050b49b78e707afa25c6fb728affe6ceb218635395d3b13a758485e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p54_img08.png",
+     "w": 553,
+     "h": 594,
+     "sha256": "ceb295a28d7b6664d83c22c95b587d4bac445a27b8fbad704b5e0c7571d811d9",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Select Crease Edges"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 55,
+   "text_file": "text/0055.md",
+   "chars": 1317,
+   "images": [
+    {
+     "file": "m9addendum_p55_img01.png",
+     "w": 478,
+     "h": 522,
+     "sha256": "3fadf6de7b7e37b3746ff8208788520caacc9dd6a644376fc13bc5c28141b875",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p55_img02.png",
+     "w": 478,
+     "h": 522,
+     "sha256": "9e041ee66ec8d6146f01f2515967a869f849429fa57d3612210233e985284a2e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p55_img03.png",
+     "w": 523,
+     "h": 595,
+     "sha256": "5cbf240518cf02b01266de2f5d74fa25e925c4168d33614aacf2490414f13dcd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p55_img04.png",
+     "w": 523,
+     "h": 595,
+     "sha256": "11b5b276412d0b9cd30111a9e3b6e59f6b2b0768ba8ebf23176fdd84e94b49d7",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p55_img05.png",
+     "w": 523,
+     "h": 595,
+     "sha256": "65a7f6510946aa0816ca51dc3d0a0116b0bf91bb4d337e53f8acc7d517ef902d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p55_img06.png",
+     "w": 356,
+     "h": 569,
+     "sha256": "6c27f8fc2808277392fbb0d8e8c87e8ee7967d8b16970afc03dbeaffcb76fd3f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p55_img07.png",
+     "w": 356,
+     "h": 569,
+     "sha256": "53571cca5689b22c99ca3dd7ba780871336446358469c55e40fa4ba65596492f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p55_img08.png",
+     "w": 356,
+     "h": 569,
+     "sha256": "11ddc4805f708867f8c8ce04a1e8c50e984bd818c00c289cc0da2d1e9d4f6f1a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p55_img09.png",
+     "w": 356,
+     "h": 569,
+     "sha256": "a97bf7e8bc7f8ac6545f52e33ab41ba6191514d528bf768e5e649c3751684391",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clayoo Select Naked Edges"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Select Uncrease Edges"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 56,
+   "text_file": "text/0056.md",
+   "chars": 1851,
+   "images": [
+    {
+     "file": "m9addendum_p56_img01.png",
+     "w": 495,
+     "h": 606,
+     "sha256": "1ce76c85bd31fcede397038cf56944410b05491919a461068ada2ef81f6a126d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p56_img02.png",
+     "w": 495,
+     "h": 606,
+     "sha256": "3dba985fa480713e8a8625a9cc484d0e26d5875445db14eae19321247dbb1682",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p56_img03.png",
+     "w": 617,
+     "h": 537,
+     "sha256": "b6aab81c21b66a79e11b1934e1e565b924b7c04e6820bfaafd1800328f0fedc4",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Select Coplanar"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Subdivision Level"
+    },
+    {
+     "level": 3,
+     "text": "Clayoo Library"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 57,
+   "text_file": "text/0057.md",
+   "chars": 604,
+   "images": [
+    {
+     "file": "m9addendum_p57_img01.png",
+     "w": 1167,
+     "h": 679,
+     "sha256": "6e0dd7bbb669cc0a08b65df5f71e11117edb0c9f2d951d387a5612058bfc0a8d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 58,
+   "text_file": "text/0058.md",
+   "chars": 1453,
+   "images": [
+    {
+     "file": "m9addendum_p7_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p7_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p7_img03.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 1,
+     "text": "Emboss"
+    },
+    {
+     "level": 1,
+     "text": "CHAPTER 2"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 59,
+   "text_file": "text/0059.md",
+   "chars": 1817,
+   "images": [
+    {
+     "file": "m9addendum_p59_img01.png",
+     "w": 489,
+     "h": 418,
+     "sha256": "24e900910e2c977ee90317606965e12b8c1f0e46bb6b596238c11f79a8197570",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p59_img02.png",
+     "w": 678,
+     "h": 644,
+     "sha256": "dedc07c8775389ae05edf6ca6a312004fa2942df7d63ac13a9454e07fabcb5e0",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p59_img03.png",
+     "w": 680,
+     "h": 672,
+     "sha256": "58573af33407dfc4105002928dcd8361f997c570d74ab53e8adbd0a4108a8cc3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p59_img04.png",
+     "w": 471,
+     "h": 137,
+     "sha256": "0cee0a0d2e516697d307b7c76eb433f4e304733e6d71a4549601d8e64031eeb2",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Emboss"
+    },
+    {
+     "level": 3,
+     "text": "Project Settings:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 60,
+   "text_file": "text/0060.md",
+   "chars": 1241,
+   "images": [
+    {
+     "file": "m9addendum_p60_img01.png",
+     "w": 597,
+     "h": 599,
+     "sha256": "20c8a94bae9f707e2444bae6c6f9b14f08228af00b05ef155a6df04b7b0930aa",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p60_img02.png",
+     "w": 665,
+     "h": 666,
+     "sha256": "12e94e9d4ea65568804360ac899c005a610ed58cd032fe2ceb6f18274ccee5db",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p60_img03.png",
+     "w": 651,
+     "h": 652,
+     "sha256": "e5a96e98e11f5a2a2f700a48e58539f5e01cfa0fcf471aaf3b1aee1c98221c99",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p60_img04.png",
+     "w": 653,
+     "h": 655,
+     "sha256": "e779233cbe98db5d2f3caea6de76878986dd1ddce190f30a8cbb5af34c7efd98",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p60_img05.png",
+     "w": 730,
+     "h": 745,
+     "sha256": "c996d364d94aedab2b6eb8045a5c7020cd8e61437c465c4d89b076f5430f2576",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p60_img06.png",
+     "w": 1045,
+     "h": 359,
+     "sha256": "c10c81ea3cd10a08aa721735a4ae7f3c851e8378cfb4c6eeb6601ab13a7068e2",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 61,
+   "text_file": "text/0061.md",
+   "chars": 1814,
+   "images": [
+    {
+     "file": "m9addendum_p61_img01.png",
+     "w": 344,
+     "h": 249,
+     "sha256": "32cb00117662e7a7cddd79e1c1c75877eb66ed4194468cb1165658b586651848",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p61_img02.png",
+     "w": 591,
+     "h": 601,
+     "sha256": "a4ffa7b5288afcd32415788acde29b0eac950849f3caf20fc785d72d46ffb7a1",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Emboss:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Operation Controls:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 62,
+   "text_file": "text/0062.md",
+   "chars": 2118,
+   "images": [
+    {
+     "file": "m9addendum_p62_img01.png",
+     "w": 195,
+     "h": 205,
+     "sha256": "ab55cb785d76717ef797d0e0c0e6d98e96c1421ce9ed86efad2be6fa5986f1a2",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p62_img02.png",
+     "w": 606,
+     "h": 601,
+     "sha256": "0532601b361dd47029d56b562690ad8dc1b0bf47335956e65135f7238cd94f9c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p62_img03.png",
+     "w": 694,
+     "h": 708,
+     "sha256": "0d1809a94a088e5575a059e463f1ac4fcb6553b50349c343e41ba09dfd2c6fd8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p62_img04.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 63,
+   "text_file": "text/0063.md",
+   "chars": 1376,
+   "images": [
+    {
+     "file": "m9addendum_p63_img01.png",
+     "w": 516,
+     "h": 266,
+     "sha256": "88acad3205151c332d04139ef76200047e4fa991e3660f88efcadec3efda5692",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p63_img02.png",
+     "w": 529,
+     "h": 437,
+     "sha256": "afa45651d3f1895b56eca76d41f1cabf8a9046fa3ef28f2dccdf230d88b3c2bd",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p63_img03.png",
+     "w": 264,
+     "h": 346,
+     "sha256": "5efe9477d3d13dafd48b9f98352fd3b8a7c463bc240196cff9b021e65764fcc4",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "By Profile"
+    },
+    {
+     "level": 3,
+     "text": "Operation Settings:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 64,
+   "text_file": "text/0064.md",
+   "chars": 2451,
+   "images": [
+    {
+     "file": "m9addendum_p63_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p64_img01.png",
+     "w": 264,
+     "h": 346,
+     "sha256": "53bb6c9853b8e73a1ebfc1b2b45dbf67cb42407bf7f137ab648e37bdafbf0eb3",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "By Profile Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 65,
+   "text_file": "text/0065.md",
+   "chars": 1306,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "w": 917,
+     "h": 619,
+     "sha256": "67b6131a9ba9166e61ff2ba3ba82e4384978be733fea561300aa78eaac274f1a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p65_img02.png",
+     "w": 923,
+     "h": 581,
+     "sha256": "989f9efcbd1124f349a908ae61d7cb6af1f7285f156ae83281b6f1a61f664ed5",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "w": 869,
+     "h": 585,
+     "sha256": "a8432ade85ed2a80436608825356c62ff544e853f54b8812c1617c3daf115e9e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p65_img04.png",
+     "w": 895,
+     "h": 583,
+     "sha256": "16dd5b720e0638745691f424c6d246336a519e7aa3d10745cac6b2369d8c2221",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p65_img05.png",
+     "w": 913,
+     "h": 590,
+     "sha256": "dc14bd7382a1be9099a444d3ca383e5869a79972e6c7a55f0b278a22e0473a80",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 66,
+   "text_file": "text/0066.md",
+   "chars": 1749,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p66_img01.png",
+     "w": 793,
+     "h": 272,
+     "sha256": "0da67609c187628c1ffec091dcc5c7b790b8e7df03814922a197ec9d3c1a6a3a",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p66_img02.png",
+     "w": 859,
+     "h": 372,
+     "sha256": "01fc504635d888bd089916f94739f7905eca2da7b260e75c3abcc4eb35fda647",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p66_img03.png",
+     "w": 484,
+     "h": 281,
+     "sha256": "3c6e267981ddb60538e6691923f97ba19b73c769f179c1ac029a05c4cc121cf9",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p66_img04.png",
+     "w": 483,
+     "h": 324,
+     "sha256": "b5a7cf61a49453ebda3c5dfbbaa4a0d2a1b689466c8ea6de8ba47e3a1e6c114e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p66_img05.png",
+     "w": 298,
+     "h": 124,
+     "sha256": "3f84be1a1cd103d56680ee312043e8a25756c244bce40f61630389713148de22",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Extrude"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 67,
+   "text_file": "text/0067.md",
+   "chars": 1473,
+   "images": [
+    {
+     "file": "m9addendum_p65_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img05.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Base On Geometry"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 68,
+   "text_file": "text/0068.md",
+   "chars": 1245,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p68_img01.png",
+     "w": 490,
+     "h": 287,
+     "sha256": "a39b3425a2f76be4a1f8a70c938db91aac732a5f62f3f77d0ee693c26275f40c",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p68_img02.png",
+     "w": 654,
+     "h": 399,
+     "sha256": "7828acac62f4ca68a89c76d826a670ce6cf7cd583dd8ea872212b20680b133ce",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p68_img03.png",
+     "w": 683,
+     "h": 402,
+     "sha256": "358099671e1b554fe3eb4d8665f0408cebda95d4718c4b5b2a0f535bdfbdb781",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p68_img04.png",
+     "w": 860,
+     "h": 454,
+     "sha256": "fffbd7ef8db9eee77d46d2eec9fbb52a925f09de529909e5ba7aedc18600b33b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p68_img05.png",
+     "w": 725,
+     "h": 395,
+     "sha256": "346fbc320570e7ef7b940d902c8652dc9c0841c8aa1fb90fc38d143b55af5773",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 69,
+   "text_file": "text/0069.md",
+   "chars": 1361,
+   "images": [
+    {
+     "file": "m9addendum_p65_img05.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p69_img01.png",
+     "w": 610,
+     "h": 386,
+     "sha256": "b20c727e9c5012715f7a03eb747af40eeed34c1f056a52d11b9564f72bce87c7",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p69_img02.png",
+     "w": 608,
+     "h": 415,
+     "sha256": "28018665ea8c0ff8a6f21fec165de6a22a045c8b2295c018416d6b17454a4dc2",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p69_img03.png",
+     "w": 448,
+     "h": 195,
+     "sha256": "9cc201ec8375420d03a8212e64b8d17835d1e462862ab721c465248aea236162",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p69_img04.png",
+     "w": 502,
+     "h": 183,
+     "sha256": "102a9b43017c188f4ceb6184cbc08134a6d0c0bb794fb8c7b9ed43b8b87c5c3f",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Revolve"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 70,
+   "text_file": "text/0070.md",
+   "chars": 1164,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img05.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Texture"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 71,
+   "text_file": "text/0071.md",
+   "chars": 1629,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p71_img01.png",
+     "w": 649,
+     "h": 569,
+     "sha256": "e0e4d20bddf25ef4f9c61b649b1b6b7fdad71afe662993788f4ec23e4d18e847",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 72,
+   "text_file": "text/0072.md",
+   "chars": 1652,
+   "images": [
+    {
+     "file": "m9addendum_p65_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img05.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p72_img01.png",
+     "w": 506,
+     "h": 505,
+     "sha256": "a85779db4c710d6e92740eeb4d89f015c94c88f4c308362aa37a56dec70bbe55",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p72_img02.png",
+     "w": 495,
+     "h": 490,
+     "sha256": "f6985916da574791ad52066dfc7a08cbdf3e3a6c0508e60eb36e78cdf516cd78",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p72_img03.png",
+     "w": 313,
+     "h": 166,
+     "sha256": "1093c17f513fbf69ed2af6bf6ff236e730a02385dab371c65cec3d89f8fa5cd2",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Operation Settings:"
+    },
+    {
+     "level": 3,
+     "text": "Stamp"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 73,
+   "text_file": "text/0073.md",
+   "chars": 1284,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img05.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Carbon Copy"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 74,
+   "text_file": "text/0074.md",
+   "chars": 1581,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p74_img01.png",
+     "w": 868,
+     "h": 481,
+     "sha256": "77593d99eab18d26088c860383d124be63b2667914da92c5ff945dd524405adf",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Operation Settings:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 75,
+   "text_file": "text/0075.md",
+   "chars": 1636,
+   "images": [
+    {
+     "file": "m9addendum_p65_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img05.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p75_img01.png",
+     "w": 501,
+     "h": 477,
+     "sha256": "467b68f98c2c7870f237f3729a337f26c5c76194d610a2fcc6004d063392880a",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Operation Settings:"
+    },
+    {
+     "level": 3,
+     "text": "Carbon Copy By Brush"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 76,
+   "text_file": "text/0076.md",
+   "chars": 1132,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img05.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 77,
+   "text_file": "text/0077.md",
+   "chars": 1800,
+   "images": [
+    {
+     "file": "m9addendum_p65_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p77_img01.png",
+     "w": 572,
+     "h": 564,
+     "sha256": "1d36f9195d49b98463b7433a90533077bcc0a48f8b2db3a4cc9da52fc2eba414",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p77_img02.png",
+     "w": 312,
+     "h": 168,
+     "sha256": "0fd0845c9152b9d7d773c95cf7f9aa45e5f53a05c13c67ae484b7c41052f6348",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Operation Settings:"
+    },
+    {
+     "level": 3,
+     "text": "Brush"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 78,
+   "text_file": "text/0078.md",
+   "chars": 1483,
+   "images": [
+    {
+     "file": "m9addendum_p65_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img03.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p65_img05.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Smooth"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 79,
+   "text_file": "text/0079.md",
+   "chars": 1790,
+   "images": [
+    {
+     "file": "m9addendum_p79_img01.png",
+     "w": 553,
+     "h": 551,
+     "sha256": "c5edc975ad8cb6b827b5950ec54cf7cb649a6719a4e171d39e1e91a29d7116d8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p79_img02.png",
+     "w": 681,
+     "h": 684,
+     "sha256": "4280fb4218a8c3807c223f59dca857f77a52804a6612555b691aef96164fcb50",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p79_img03.png",
+     "w": 354,
+     "h": 376,
+     "sha256": "fbeada1cfc5b170d0a659edbbe5d7dade2bbbf366e0fa8a758ad41dd0bd77c19",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Operation Settings:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Sculpting"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 80,
+   "text_file": "text/0080.md",
+   "chars": 742,
+   "images": [
+    {
+     "file": "m9addendum_p80_img01.png",
+     "w": 546,
+     "h": 535,
+     "sha256": "88a179a45a5042dccabdfa6d52a87a367795eda6d8737fe2d97185cd078cf6e3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p80_img02.png",
+     "w": 580,
+     "h": 539,
+     "sha256": "4d90985dcf0e613adb898baee279d9346733250c7fe60183e9b28c109f80f353",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p80_img03.png",
+     "w": 553,
+     "h": 545,
+     "sha256": "0d94d5ba2221ea4501d09ead8294791e4051aea2109ba4b28dcd98807250b785",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p80_img04.png",
+     "w": 548,
+     "h": 530,
+     "sha256": "a06ae5cd761cfb1e95a9576c01fea9bb7c88b4ef78eb08d32aee22b47425e4b2",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p80_img05.png",
+     "w": 551,
+     "h": 528,
+     "sha256": "1b868d9a82d3b36084debc945d19cbe6313fa6de9dc170698a7c5e28d014eca8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p80_img06.png",
+     "w": 516,
+     "h": 529,
+     "sha256": "43c57844eda5d5f6497109f8a143a02cbda39d49f26b6a8887d0225430a59627",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p80_img07.png",
+     "w": 600,
+     "h": 542,
+     "sha256": "42ce44e8476fb96e4622eeb3bbf86713cf22f779d397dd7d187b06f6870cc09d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p80_img08.png",
+     "w": 498,
+     "h": 516,
+     "sha256": "4dd9483c196beb4b8cbbe815eca91487060b2c13541c2cc683a3b089df34e415",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 81,
+   "text_file": "text/0081.md",
+   "chars": 1279,
+   "images": [
+    {
+     "file": "m9addendum_p81_img01.png",
+     "w": 644,
+     "h": 591,
+     "sha256": "6a8c7519fdc1d92f603bd27687c8f2a4c02823da302f26b22a4c051b43d72f70",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p81_img02.png",
+     "w": 372,
+     "h": 273,
+     "sha256": "cbe4f86a70840b0854a024a8fd8b5c0bcfdd5393f4cc78a88e1be0c41a8f04b8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p81_img03.png",
+     "w": 351,
+     "h": 331,
+     "sha256": "4c3a984396ac29d41221bc40cddca3cd1c434eb606c0b8622481fdb06ff4363c",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Heightfield Image"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 82,
+   "text_file": "text/0082.md",
+   "chars": 1384,
+   "images": [
+    {
+     "file": "m9addendum_p82_img01.png",
+     "w": 637,
+     "h": 638,
+     "sha256": "16ba5bcb1f19d6cc4058b052abfb3a82576c94014eae5bdce8e8d82611708879",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p82_img02.png",
+     "w": 342,
+     "h": 193,
+     "sha256": "dc733107c7a66248a45bf453c614115edf053d8336e2b1fb9feabcb8fce8c4ec",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p82_img03.png",
+     "w": 321,
+     "h": 149,
+     "sha256": "758bf0083d07570f76905c3e8fa6a18c574f43dafe96b6b807695bacb4b4c476",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p82_img04.png",
+     "w": 949,
+     "h": 511,
+     "sha256": "540cdac333c7f75df557e98ffcd01273eadf1590d049dd134f9c8d5d7f1c6ce9",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Clay Emboss Resources"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 83,
+   "text_file": "text/0083.md",
+   "chars": 1529,
+   "images": [
+    {
+     "file": "m9addendum_p83_img01.png",
+     "w": 1263,
+     "h": 649,
+     "sha256": "82ab91159424bbaac941bc1d9ca16e0b49092f4fff3f7a583d5dbdb5790613a7",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p83_img02.png",
+     "w": 749,
+     "h": 85,
+     "sha256": "d1d2fdcc793dd0c8836e5f6a3ecf7b90e0609b25273044e020705825ea710de2",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p83_img03.png",
+     "w": 271,
+     "h": 85,
+     "sha256": "00bb4cc83d620b0aad01e4aeca5f1713ed8dccef080f8402d2216d274715d438",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p83_img04.png",
+     "w": 362,
+     "h": 301,
+     "sha256": "44e45b78873f19adbba8386f6c7851e859469975a95f18690910e744cf479635",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p83_img05.png",
+     "w": 362,
+     "h": 301,
+     "sha256": "d4c86cede4618981fe170279454a82698fbe396e37fdfd67fa0753a198ad7ad3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p83_img06.png",
+     "w": 362,
+     "h": 301,
+     "sha256": "1aa5deeac1211506cbcde3bb0c210f49a1e1f4569b89592254e6fe08cecd735e",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p83_img07.png",
+     "w": 362,
+     "h": 301,
+     "sha256": "14973ddc4f520b8885c2d4274d3f1d6e577ff8c241114ce1733edc1b7b11c1d0",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Decimator"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 84,
+   "text_file": "text/0084.md",
+   "chars": 471,
+   "images": [
+    {
+     "file": "m9addendum_p84_img01.png",
+     "w": 362,
+     "h": 301,
+     "sha256": "31afde1b2ec07dc59ab01c0f282dc8e6bf4ffcc07956ba60025939838e7f4993",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p83_img04.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p84_img02.png",
+     "w": 367,
+     "h": 301,
+     "sha256": "7c26c37127137c2d80c615c5dce4acb293f2f8e4bb5318883af436c9d6351ded",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 85,
+   "text_file": "text/0085.md",
+   "chars": 26,
+   "images": [
+    {
+     "file": "m9addendum_p7_img01.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p7_img02.png",
+     "duplicate": true
+    },
+    {
+     "file": "m9addendum_p7_img03.png",
+     "duplicate": true
+    }
+   ],
+   "headings": [
+    {
+     "level": 1,
+     "text": "Matrix Tools"
+    },
+    {
+     "level": 1,
+     "text": "CHAPTER 3"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 86,
+   "text_file": "text/0086.md",
+   "chars": 2316,
+   "images": [
+    {
+     "file": "m9addendum_p86_img01.png",
+     "w": 518,
+     "h": 426,
+     "sha256": "8c1d9c175abde355dd0657d7d658de2c7919dcc91513d5f93de13936bbeded6b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p86_img02.png",
+     "w": 1167,
+     "h": 679,
+     "sha256": "0954d41b6267219e1e53f8473359814f96c4bff766482a9a3ece569c37bee766",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Smart Pattern"
+    },
+    {
+     "level": 3,
+     "text": "Parameters:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 87,
+   "text_file": "text/0087.md",
+   "chars": 2481,
+   "images": [
+    {
+     "file": "m9addendum_p87_img01.png",
+     "w": 296,
+     "h": 305,
+     "sha256": "96a64f49eabc7da760c205b3db920e4844037be92dbf33797abe512c60dc1f1b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p87_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Texture Builder"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 88,
+   "text_file": "text/0088.md",
+   "chars": 2291,
+   "images": [
+    {
+     "file": "m9addendum_p88_img01.png",
+     "w": 790,
+     "h": 583,
+     "sha256": "f80520cafb4500bea4807ffca27008cbc8a10c1f5ede9228b84553c545ee9cf3",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p88_img02.png",
+     "type": "page_render_vector",
+     "dpi": 150
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Parameters:"
+    },
+    {
+     "level": 3,
+     "text": "Cap Options:"
+    },
+    {
+     "level": 3,
+     "text": "Parameters:"
+    },
+    {
+     "level": 3,
+     "text": "Rope"
+    },
+    {
+     "level": 3,
+     "text": "Text On Curve"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 89,
+   "text_file": "text/0089.md",
+   "chars": 1120,
+   "images": [
+    {
+     "file": "m9addendum_p89_img01.png",
+     "w": 356,
+     "h": 414,
+     "sha256": "35c052d6cb16c181263386c9efc5f184babbaeb15483425a074082f7aeda1a07",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p89_img02.png",
+     "w": 356,
+     "h": 78,
+     "sha256": "b3b8263e3e4fc835c4360796959b72f9db3c10263c63c6d06efdff38259f2f8f",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p89_img03.png",
+     "w": 328,
+     "h": 115,
+     "sha256": "d9d19c39f5595f2e10469bf60b8aad7eb8f793abb032ec5945b53a8ae586af22",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p89_img04.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "ae4db2c3da9b5adaeac7a269117f85ddffcf4b7ed0e471cbb716a3901b1f010d",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p89_img05.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "f23c87cdf237e24a09a6cb345c54a9fbfb61b21d2b9ac43e1d8f2444558f8b11",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p89_img06.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "109e7491ee9087f56f06a231536e1dfc8d041f102da36c036d188b473b0229fe",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p89_img07.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "ab7234839102c064c72165335f9e89ea72f96e1c4b075949ce25603a60d7ebfa",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 90,
+   "text_file": "text/0090.md",
+   "chars": 1462,
+   "images": [
+    {
+     "file": "m9addendum_p90_img01.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "d8f8e1c8bfa500823ba8f55da0f1b29f06ec5bb058204ff7ec97639c87715dcb",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img02.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "604107709fc5473deced3880c7228f3cc412f24dcc7eec22c994706b73be8eb8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img03.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "42ff423bc791ba3c97d5565f4d575c3f38ecff2213493b371d4d6677c7979b5b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img04.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "21efb8d37c62ccf3f8a0a8c81f800e5446bdcac18c11846b9d6fcc86c376cdf8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img05.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "285f380b72f3cd340c9b5a969509665339f6933b20d4e27d7e3cd6c99f4d0c20",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img06.png",
+     "w": 1008,
+     "h": 361,
+     "sha256": "5efcd733bcfd64daf8962fd1569821a05597cb10dfde2e34760a773184ef6400",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img07.png",
+     "w": 1003,
+     "h": 379,
+     "sha256": "d07c444c920d0545f978f0e46e2eb339607718de9359e9aaafeca9663802f87b",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img08.png",
+     "w": 1003,
+     "h": 379,
+     "sha256": "705a3720872432d96f801b56b6012bc9d3a9498969883a5b513d8f5bb5b20d07",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img09.png",
+     "w": 1003,
+     "h": 379,
+     "sha256": "72987c10473cd78b8709f34902e7c78a62843465440380b5e6008a2c44907726",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img10.png",
+     "w": 1003,
+     "h": 379,
+     "sha256": "70a13d9c4579b7d873a0b7c33d9a30839f6b91f5e34d45dfce740eec696119f8",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img11.png",
+     "w": 622,
+     "h": 328,
+     "sha256": "f6c395362d5a784efaad60934e33d8952de49463ef2d8f3cee10bbf35391b547",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p90_img12.png",
+     "w": 622,
+     "h": 328,
+     "sha256": "1b7c9f845eef07b5ac67ec7d7667af85dfa6d9e56757c0d2e97f3345ec4d1461",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Viewport Controls:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 91,
+   "text_file": "text/0091.md",
+   "chars": 1532,
+   "images": [
+    {
+     "file": "m9addendum_p91_img01.png",
+     "w": 1167,
+     "h": 679,
+     "sha256": "7c1b502617c90bc31f1d8fbb8f0c1acd84215d04a8a50097dc0c8c6458e39089",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p91_img02.png",
+     "w": 324,
+     "h": 685,
+     "sha256": "745143f919d20005340f419f6342c7c2ea64994075bc6b41d19788c1ae7ba78d",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Styles"
+    },
+    {
+     "level": 3,
+     "text": "User Libraries"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 92,
+   "text_file": "text/0092.md",
+   "chars": 1493,
+   "images": [
+    {
+     "file": "m9addendum_p92_img01.png",
+     "w": 1167,
+     "h": 679,
+     "sha256": "7c7b03f141690d38e2aacfc406123cb333fd5779fea40361924232a7afa2e4c4",
+     "type": "embedded"
+    },
+    {
+     "file": "m9addendum_p92_img02.png",
+     "w": 570,
+     "h": 535,
+     "sha256": "a9eed7127e1a0fc32cf8c1333bde1991888cfad5287f8c6378e2dfc6c49952be",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Options:"
+    },
+    {
+     "level": 3,
+     "text": "Blueprint"
+    },
+    {
+     "level": 3,
+     "text": "View Manager"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 93,
+   "text_file": "text/0093.md",
+   "chars": 354,
+   "images": [
+    {
+     "file": "m9addendum_p93_img01.png",
+     "w": 232,
+     "h": 304,
+     "sha256": "5f43c504a94ac98b80f3cb86f96b4b31f1e183348d22da65f3923726f8364ff0",
+     "type": "embedded"
+    }
+   ],
+   "headings": [
+    {
+     "level": 3,
+     "text": "Options:"
+    }
+   ],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  },
+  {
+   "page": 94,
+   "text_file": "text/0094.md",
+   "chars": 63,
+   "images": [
+    {
+     "file": "m9addendum_p94_img01.png",
+     "w": 2559,
+     "h": 3309,
+     "sha256": "f326e019f0cc966959016cb8f1c8c492f62f12b0517355885ea655af4ecc7ec7",
+     "type": "embedded"
+    }
+   ],
+   "headings": [],
+   "scanned_no_text": false,
+   "needs_ocr": false
+  }
+ ]
+}

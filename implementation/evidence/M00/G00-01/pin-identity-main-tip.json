@@ -1,0 +1,208 @@
+{
+  "schema": "om9.m00.l2_01.pin_identity.v1",
+  "pin_sha": "a171295aff9315ce5306ec2f3a25f4703f486781",
+  "timestamp_utc": "2026-10-15T18:58:01Z",
+  "method": "git ls-tree blob sha (pinned revision) vs git hash-object (local working tree)",
+  "counts": {
+    "pin_files": 1705,
+    "local_files": 1698,
+    "common": 1698,
+    "matched": 1662,
+    "content_drift": 36,
+    "local_only": 0,
+    "pin_only": 7
+  },
+  "identical": false,
+  "content_drift": [
+    {
+      "path": "crates/qymcad-core/src/model/keys.rs",
+      "pin": "41181596687532e9f93519d4cf6c184c3fd7f15f",
+      "local": "989649c4b1c61be77e99791c5ef3bd2b136f7349"
+    },
+    {
+      "path": "crates/qymcad-core/src/model/params.rs",
+      "pin": "1ef5d2bb80da4e67967d69e04edc196aebd2d31c",
+      "local": "3fdb04d1c86654b4a2071889203f4743f78fbe45"
+    },
+    {
+      "path": "crates/qymcad-core/src/model/regen/run.rs",
+      "pin": "f853751d8097210d3380a61fc32d088aec696ecb",
+      "local": "a64f8cf0c64f8b469e9629e1c9d2e375fbccba89"
+    },
+    {
+      "path": "crates/qymcad-core/src/model/timeline/order.rs",
+      "pin": "906eee67cb5ca6c98f2a9b4e953d48110793e511",
+      "local": "1a0abde65ff4d945ae7be6ebdb9a922f6bca9881"
+    },
+    {
+      "path": "crates/qymcad-core/src/model/timeline/state.rs",
+      "pin": "09da41d20020a65dfba8d23d879be1022cd0cc1c",
+      "local": "5c54e646432f4485696ca7a42923d11cbba81041"
+    },
+    {
+      "path": "crates/qymcad-core/tests/feature/plans.rs",
+      "pin": "e34d93572bb01c3f918d1106f3f1e71773eedacd",
+      "local": "207587d6951d2d1ba2e3064c3fe9ac853f75f7d9"
+    },
+    {
+      "path": "crates/qymcad-render/src/cards.rs",
+      "pin": "21dd962597e212d2e28825c21d79a4c741376402",
+      "local": "6b35472aae59c9da7cf70abe2cb999f6dd7d9e61"
+    },
+    {
+      "path": "crates/qymcad-render/src/dim_text.rs",
+      "pin": "cb43316b4cd56646687809f0b26723600de85dfe",
+      "local": "62578aba614fe11e15f642fb37ad03b5938ffb1b"
+    },
+    {
+      "path": "crates/qymcad-sketch/src/popups.rs",
+      "pin": "318f8f53b3bd062b8001c0489703296dcad12ea2",
+      "local": "d2008c964382c20c9bae81e781527871d66aae1d"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/contexts.rs",
+      "pin": "7bd1c9ecca4a14be04e746ca2de1f8ca4d1213b0",
+      "local": "8f879b9cae9d570c578f6f5c8a1b7ccfd8e78e7b"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/jobs.rs",
+      "pin": "5e05b6b45ca78c206498d0f83d0829b18d7e76e8",
+      "local": "45ecda278d7be612838281b8c664920304cfd6ee"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/joints.rs",
+      "pin": "8815564f54eedc33d09f6b64e6d2c7e36c177322",
+      "local": "876df8b924879baac6afb2fbc756c237bda2ba26"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "pin": "1c2b651d91cca3ebdb2dc0817032a3785280b3fc",
+      "local": "fca9e7e16b23679a7ad00029cfca4c3c9ef5ae58"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/painting.rs",
+      "pin": "b6078bf9e2355310fedd727b23b2c02400075d05",
+      "local": "28f286a83bc35aaee46b3dd99391f6a47bebd2c2"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/rebuild.rs",
+      "pin": "edd9556e7b3eca56f32d4e3694265a7aa6d626ac",
+      "local": "009fa275327122787a3ba6f95ef68bf7c898ee37"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/records/commands.rs",
+      "pin": "f6a5e69bafce934e27f2d22ba102e50a815e647c",
+      "local": "19900b87f1d690fa155a391645a5213a8f953f20"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/records/scene.rs",
+      "pin": "07199f0c5179bc0a2e0359975c935ab647774471",
+      "local": "83192c19076a08695851886eb6490a273ef926e7"
+    },
+    {
+      "path": "crates/qymcad-ui-state/tests/a_parameter_edit_marks_what_counts_from_it.rs",
+      "pin": "4970433345ea624d79caeee578bb3c315217e2e5",
+      "local": "b0feb5606ebbf04eb64fd30d2fdd6f1027ab7d9a"
+    },
+    {
+      "path": "crates/qymcad/src/file_size_ratchet.rs",
+      "pin": "4caf82f924dfdcc868c2b501efba564d4233f100",
+      "local": "ee335b04d4443c08ff9168fdc4e5f75481418bdc"
+    },
+    {
+      "path": "crates/qymcad/src/god_object_ratchet.rs",
+      "pin": "6f0b22bb27a032451bb08cb2ec462e694c4be9c9",
+      "local": "3ad5f3457e063f9d01aedd4a07a5dddc214a992c"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "pin": "e200cf6563171847fb755d26d37ea46dfaee82c0",
+      "local": "8f6ab517f24792f7feeda644163182754db493a3"
+    },
+    {
+      "path": "crates/qymcad/src/gui/a_projection_follows_the_parameters.rs",
+      "pin": "4a320a38ba6861434bc781cc818dc6a7b93441ac",
+      "local": "f9788ba54a88efb1217e075d865ddc6eefec8d1f"
+    },
+    {
+      "path": "crates/qymcad/src/gui/dim_popup_gesture.rs",
+      "pin": "c11047d58d7bfa48ef3021962bf6c89af61593e8",
+      "local": "9a9bb2ad860024b782c135a7d6f0205cc8e24e77"
+    },
+    {
+      "path": "crates/qymcad/src/gui/hand.rs",
+      "pin": "2eb05c28ec86bf8c7c7935a847f927ea719b0333",
+      "local": "6ae47bdc978f0651ad151d45970983cf6def1f2e"
+    },
+    {
+      "path": "crates/qymcad/src/gui/io_jobs.rs",
+      "pin": "2b3f4a9c88f3fbca46c34ba1a81cbde9ae47d2c8",
+      "local": "5c0d085e7af0c19202d05120204574d2a3c51e5b"
+    },
+    {
+      "path": "crates/qymcad/src/gui/panels_tree.rs",
+      "pin": "6d87be90cf7f1f81687dc0623e05e147d34904a1",
+      "local": "d9f8d7829a94ed91c78d30319c4b1eebfe4924ae"
+    },
+    {
+      "path": "crates/qymcad/src/gui/panels_tree/build.rs",
+      "pin": "8ef2cb6b4068aaec33cd5c8fa01ff5ba22ad6f79",
+      "local": "4c0bacebaf0d01586bfa7a695ef3b51bf2099e42"
+    },
+    {
+      "path": "crates/qymcad/src/gui/panels_windows/params.rs",
+      "pin": "d3ac27f3a83c9493e4f403010d082dafcbd84130",
+      "local": "f9ff1ad7394fd3cac0e7f555488b0323cccc7608"
+    },
+    {
+      "path": "crates/qymcad/src/gui/recognise_then_delete.rs",
+      "pin": "d7393a25eab7e503f9a8a89b17a20722345ac7d2",
+      "local": "ef0af205e50735b78e5e7234451975257e96c0ad"
+    },
+    {
+      "path": "crates/qymcad/src/gui/regen_cancel.rs",
+      "pin": "b0af95450978ec9002d23445da2e0491efc16826",
+      "local": "ca5d5b5c4ef03455d8c35bb3b326ceb73e8e2933"
+    },
+    {
+      "path": "crates/qymcad/src/gui/regen_live_view.rs",
+      "pin": "bfb17ac8cce48411edfe70e78dd40e6faa2bf848",
+      "local": "873f1dafed1caacc670e27bc329a5c4a3ef2fd68"
+    },
+    {
+      "path": "crates/qymcad/src/gui/render_source.rs",
+      "pin": "9178be7dedd253ce25d09c9941084a54f386117a",
+      "local": "ae768d8cd8513a93b864d070ede5443907842ff5"
+    },
+    {
+      "path": "crates/qymcad/src/gui/sketch_reopen.rs",
+      "pin": "c5678c9ea92b5f227b13e29d770c85d8a75f8475",
+      "local": "ecd52404baabee22c26fb591111941fe29cc48c7"
+    },
+    {
+      "path": "crates/qymcad/src/gui/tests.rs",
+      "pin": "c3d85b2a477c3d406af80c3f64b87120bede62b1",
+      "local": "5459b5fb08e4d5368eb964dea5abcbb119fe4f5a"
+    },
+    {
+      "path": "crates/qymcad/src/gui/the_card_holds_its_words.rs",
+      "pin": "442700140808d1092cbb3b03da8b4d5a1629d1cc",
+      "local": "1b18dac4519ee9b4fa99c64edb47f7db8fb40b93"
+    },
+    {
+      "path": "crates/qymcad/src/named_groups_marks.txt",
+      "pin": "ca0372e2334affb9c76650ff98355146f16ea58c",
+      "local": "3f731e12a33f0ce2320435948a93552df232a652"
+    }
+  ],
+  "local_only": [],
+  "pin_only": [
+    "crates/qymcad-testkit/tests/a_moved_bar_rebuilds_only_below_it.rs",
+    "crates/qymcad-ui-state/tests/a_quick_rebuild_paints_no_sign.rs",
+    "crates/qymcad/src/gui/panels_tree/a_moved_bar_rebuilds_only_below_it.rs",
+    "crates/qymcad/src/gui/rebuild_sign.rs",
+    "crates/qymcad/src/gui/tests/a_hinge_follows_its_parameter.rs",
+    "crates/qymcad/src/gui/tests/a_quick_rebuild_does_not_blink.rs",
+    "crates/qymcad/src/gui/tests/nothing_changed_rebuilds_nothing.rs"
+  ]
+}

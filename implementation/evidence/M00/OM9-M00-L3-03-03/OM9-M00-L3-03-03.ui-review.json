@@ -1,0 +1,42 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-M00-L3-03-03",
+  "reviewer": {
+    "name": "chủ dự án (OpenMatrix9)",
+    "role": "project owner",
+    "status": "SIGNED",
+    "signature": "signed in the working session: 'ký hết và tiếp tục chuyển đến phần code'"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T00:30:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "picking and gestures (3/3): 7/7 ray checks on the OCCT mesh, 15 gumball + 5 affine tests prove one-undo-step moves and a cancel that keeps undo, viewport architecture adopted for E02/E03",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-03/hit-test.json",
+      "sha256": "db52b4715df078ef1e3249b474b50a2a0b7c3a3854aadbcad6e44d2d6b4074fb",
+      "bytes": 1105
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-03/OM9-M00-L4-03-03-01.hit-test.log",
+      "sha256": "00eb57eb65cda09c97fe6379c76ae93e1c0ea8bd5190343e8ed9f58c653b9483",
+      "bytes": 1461
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-03/OM9-M00-L4-03-03-02.gumball-undo-cancel.log",
+      "sha256": "a0ebff6eaddd583a2a4f5152b6e8a85645882acef955ddb4d090a2e1d3515711",
+      "bytes": 2292
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-03/OM9-M00-L4-03-03-03.viewport-architecture.md",
+      "sha256": "c7d03dc9748eed1a4e25d349e0ba639c066d60a86e22a12c70e0e2aef0f7bbba",
+      "bytes": 3781
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-03/source_crosswalk.json",
+      "sha256": "644b7b0e24a0f1ef30d1a2a362531d0493a938337d5b52c8e5a788a3f3f09067",
+      "bytes": 2291
+    }
+  ],
+  "note": "recorded by the assistant from the owner's instruction; the assistant did not approve its own work"
+}

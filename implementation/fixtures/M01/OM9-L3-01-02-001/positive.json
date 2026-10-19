@@ -1,0 +1,112 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-001",
+  "l4": "OM9-L4-01-02-001-02",
+  "case": "command-ids-and-alias-registry-positive",
+  "positive_oracle": "Registry maps stable command ID from menu/name/alias to one descriptor",
+  "operations": [
+    {
+      "id": "curve-evaluate",
+      "feature": "RCORE-00",
+      "aliases": [
+        "CurveEval",
+        "EvaluateCurve"
+      ],
+      "inputs": [
+        "Curve"
+      ],
+      "options": [
+        "native_parameter"
+      ]
+    },
+    {
+      "id": "line",
+      "feature": "OM9-FEAT-001",
+      "aliases": [
+        "Line",
+        "Ln"
+      ],
+      "inputs": [
+        "Point",
+        "Point"
+      ],
+      "options": [
+        "BothSides"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "R1-resolve-by-id",
+      "name": "curve-evaluate",
+      "expect": {
+        "id": "curve-evaluate"
+      }
+    },
+    {
+      "id": "R2-resolve-by-the-built-in-name-ignoring-case",
+      "name": "EvaluateCurve",
+      "expect": {
+        "id": "curve-evaluate"
+      }
+    },
+    {
+      "id": "R3-resolve-by-alias-ignoring-case",
+      "name": "curveeval",
+      "expect": {
+        "id": "curve-evaluate"
+      }
+    },
+    {
+      "id": "R4-resolve-by-another-operations-alias",
+      "name": "LN",
+      "expect": {
+        "id": "line"
+      }
+    },
+    {
+      "id": "R5-resolution-is-deterministic",
+      "name": "EvaluateCurve",
+      "repeat": 3,
+      "expect": {
+        "ids": [
+          "curve-evaluate",
+          "curve-evaluate",
+          "curve-evaluate"
+        ]
+      }
+    },
+    {
+      "id": "R6-two-operations-keep-their-own-descriptors",
+      "names": [
+        "line",
+        "curve-evaluate"
+      ],
+      "expect": {
+        "ids": [
+          "line",
+          "curve-evaluate"
+        ],
+        "aliases_kept": true
+      }
+    },
+    {
+      "id": "R7-a-registered-operation-round-trips-through-json",
+      "id_to_round_trip": "line",
+      "expect": {
+        "aliases_after_round_trip": [
+          "Line",
+          "Ln"
+        ],
+        "feature_after_round_trip": "OM9-FEAT-001"
+      }
+    },
+    {
+      "id": "R8-one-command-may-spell-its-own-name-twice",
+      "name": "LINE",
+      "expect": {
+        "id": "line"
+      }
+    }
+  ]
+}

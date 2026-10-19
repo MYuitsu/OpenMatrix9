@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-12-006",
+  "title": "Project Load Validation And Compatibility",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "Validate magic/schema/chunk table/checksums/JSON admission/typed invariants/legacy ownership before publishing a document.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-archive/src/container.rs:168-326",
+      "what": "validation pipeline"
+    },
+    {
+      "path_line": "crates/om9-archive/src/json_admission.rs",
+      "what": "duplicate keys, depth and allocation preflight"
+    },
+    {
+      "path_line": "crates/om9-archive/src/lib.rs:174-207",
+      "what": "save/open/restore entry points"
+    }
+  ],
+  "reuse_decision": "ADD authored admission; no ZIP reader, so there is no decompression or external-path surface.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-01-12/crosswalk.json"
+}

@@ -1,0 +1,54 @@
+# OM9-L4-01-01-002-03 diffstat
+# date: 2026-10-16 09:59:43 +07:00
+# open blockers: BLOCKED_M00 (G00-01 not PASS), BLOCKED_APPROVAL (legal reuse PENDING_HUMAN_M00_APPROVAL), BLOCKED_DEPENDENCY (OM9-L2-01-02/03 SPEC_ONLY_NOT_IMPLEMENTED; L4 -001-05/-02-001-05/-03-001-05 not PASS), M01-UI manual gate OPEN
+# Rust only, safe code, no native exception. No git commit/stage/push was made.
+# NOTE: ui.rs, ui/chrome.rs, lib.rs, main.rs were already modified (uncommitted) by the earlier L2-01-01 pass, and dock_layout.rs/status_surface.rs/startup.rs are untracked from that pass, so 'git diff --stat' mixes both passes. The L3-002 delta is listed separately below.
+
+## git diff --stat -- standalone/crates/om9-app (tracked files, cumulative vs HEAD)
+ standalone/crates/om9-app/src/lib.rs       |   5 +
+ standalone/crates/om9-app/src/main.rs      | 154 +++---
+ standalone/crates/om9-app/src/ui.rs        | 711 ++++++++++++++++++++++--
+ standalone/crates/om9-app/src/ui/chrome.rs | 839 +++++++++++++++++++++--------
+ 4 files changed, 1357 insertions(+), 352 deletions(-)
+
+## git status --porcelain -- L3-002 paths
+ M standalone/crates/om9-app/src/lib.rs
+ M standalone/crates/om9-app/src/main.rs
+ M standalone/crates/om9-app/src/ui.rs
+ M standalone/crates/om9-app/src/ui/chrome.rs
+?? implementation/design/M01/OM9-L3-01-01-002/
+?? implementation/evidence/M01/OM9-L3-01-01-002/
+?? implementation/fixtures/M01/OM9-L3-01-01-002/
+?? standalone/crates/om9-app/src/dock_layout.rs
+?? standalone/crates/om9-app/src/startup.rs
+?? standalone/crates/om9-app/src/status_surface.rs
+?? standalone/crates/om9-app/src/window_identity_guard.rs
+?? standalone/crates/om9-app/src/workbench_regions.rs
+?? standalone/crates/om9-app/tests/shell_docking.rs
+?? standalone/crates/om9-app/tests/startup_contract.rs
+?? standalone/crates/om9-app/tests/workbench_regions.rs
+
+## L3-002 delta (this task)
+NEW   standalone/crates/om9-app/src/workbench_regions.rs  (1090 lines incl. 21 unit tests)
+NEW   standalone/crates/om9-app/tests/workbench_regions.rs  (529 lines, 8 tests)
+EDIT  standalone/crates/om9-app/src/lib.rs        + pub mod workbench_regions;
+EDIT  standalone/crates/om9-app/src/ui.rs         + RegionPlan/RegionError/region_status fields, refresh_region_plan/announce_regions, AttachedCmdFrame adapter, central panel uses tile_views, receipt 'regions' block, audit-only OM9_UI_AUDIT_WINDOW / OM9_UI_AUDIT_RIGHT_DOCK, parse_window_size + 1 test
+EDIT  standalone/crates/om9-app/src/ui/chrome.rs  sync_panel_size returns early while region_error is set
+NEW   implementation/design/M01/OM9-L3-01-01-002/{source_crosswalk.json,api.md}
+NEW   implementation/fixtures/M01/OM9-L3-01-01-002/{positive.json,negative.json}
+NEW   implementation/evidence/M01/OM9-L3-01-01-002/*
+
+## dock_layout.rs unchanged by this task
+LastWriteTime 2026-10-16 09:20:05 (before this task's plan.md was written at 09:41, so not written by this task; cargo fmt rewrote no other file); persistence, reorder/float, reset and builder-slot functions untouched
+sha256 C494EDAC7891017A8591A782561DADCB6EF83CFC54E722E1E2BD9F78BBE9CE4F
+
+## no QymCAD build dependency
+command: Select-String -Pattern qymcad -Path standalone/Cargo.toml, standalone/crates/*/Cargo.toml
+no matches (exit: none found)
+
+## vendor-research/QymCAD unchanged
+HEAD 746a17f127897e921a57118b6caad08968602bf5
+status --porcelain lines: 0
+
+## unsafe / native check
+unsafe/extern matches in workbench_regions.rs: 0 (crate has #![forbid(unsafe_code)])

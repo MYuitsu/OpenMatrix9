@@ -1,0 +1,4 @@
+# OM9-L4-01-05-007-05 — nghiệm thu Geom intersection query adapter
+# utc: 2026-10-18
+# oracle: two hits, the first at (5, 5, 0)
+# result: all crate tests pass (see the kernel-test log beside this file)

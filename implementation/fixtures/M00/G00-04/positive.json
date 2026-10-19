@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-04-02",
+  "cases": [
+    {
+      "id": "M00-FX-04-02-POS-01",
+      "check": "roundtrip",
+      "input": {
+        "fixture": "g00-04-fixture.3dm"
+      },
+      "expected": {
+        "archive_version": 50,
+        "objects": [
+          "Point",
+          "Line",
+          "NurbsCurve",
+          "Mesh",
+          "Cloud"
+        ]
+      }
+    }
+  ]
+}

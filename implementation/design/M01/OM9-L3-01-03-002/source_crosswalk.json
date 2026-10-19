@@ -1,0 +1,42 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-002-01",
+  "l3_id": "OM9-L3-01-03-002",
+  "l3_title": "Typed Scene Entity Records",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "Point/Curve/Surface/BRep/Mesh/Instance entity envelope",
+  "positive_oracle": "Sáu loại entity giữ nguyên kind qua serde và qua archive.",
+  "negative_oracle": "Kind không dựng được phải là Unsupported, không bao giờ hạ cấp âm thầm.",
+  "reuse_decision": "EXTEND",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/geometry.rs",
+      "symbols": [
+        "GeometryKind",
+        "GeometryKind::tag",
+        "GeometryKind::from_tag",
+        "Geometry::kind"
+      ],
+      "decision": "EXTEND"
+    },
+    {
+      "path": "crates/om9-archive/src/container.rs",
+      "symbols": [
+        "unknown_variant",
+        "decode error mapping"
+      ],
+      "decision": "EXTEND"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/geometry.rs, crates/om9-archive/src/container.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_002 -> 2 passed",
+    "cargo test -p om9-archive --test document_identity_round_trip -> 4 passed"
+  ],
+  "notes": "EXTEND the existing GeometryKind with tag/from_tag; EXTEND the container decode error mapping"
+}

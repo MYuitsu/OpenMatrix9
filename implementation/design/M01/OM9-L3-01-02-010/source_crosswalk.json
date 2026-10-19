@@ -1,0 +1,79 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-010-01",
+  "l3_id": "OM9-L3-01-02-010",
+  "l3_title": "Command Event And Observer API",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "report progress, warnings and command completion",
+  "positive_oracle": "Commands emit started/progress/warn/finished typed events with monotonic ordering",
+  "negative_oracle": "Observer panic/exception handled without corrupting dispatch transaction",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:731 self.status = crate::i18n::tr(\"g-import-empty\")",
+        "gui.rs:741 self.status = crate::i18n::tr1(\"g-import-place\", \"n\", &n.to_string())",
+        "gui.rs:34 report: crate::gui::report_problem::ReportDraft::default()"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "QymCAD does report progress and trouble — through one status STRING and a problem report — which is the idea OM9 keeps: the run tells the program what happened. What is missing is structure and safety: there are no typed events, no order, no observer seam, and a listener that fails has no defined consequence for the run it is watching.",
+      "om9_owner": "standalone/crates/om9-app/src/command_events.rs + session.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { Menu, Top, Left, Right, Bottom, Centre }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No event or notification surface at all.",
+      "om9_owner": "standalone/crates/om9-app/src/command_events.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:95 pub fn set_thread_params(cmd: &mut FeatCommand, thread: ThreadParams)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Parameter state, not run events.",
+      "om9_owner": "standalone/crates/om9-app/src/command_events.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only; the log and the seam are pure Rust.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "status_surface.rs owned the user-visible line and its bounded tail (OM9-L3-01-01-007), and transcript.rs owned the typed history",
+    "session.rs reported nothing structured: a run's steps were visible only through prompt() and the document",
+    "om9-core/src/transaction.rs has an internal observer concept for the coordinator, but nothing at the command level"
+  ],
+  "gap_found_by_this_task": [
+    "There was no typed event at all: no Started/Progress/Warn/Finished, no ordering, and no way for a listener to watch a run.",
+    "A failing listener had no defined consequence. notify() now contains a panicking observer with catch_unwind and returns whether the observer survived, so a broken listener cannot abort a dispatch or leave a transaction half-applied; notify_all() counts the survivors.",
+    "Added: command_events.rs (EventKind, EventOutcome, CommandEvent, EventLog with a total sequence and a bound of 256, Observer, notify, notify_all) and the session wiring that emits Started on dispatch, Progress on the first point of a two-point command, Finished(Committed|Cancelled|Refused) at the end, plus Controller::warn for a refusal inside a run."
+  ],
+  "reuse_decision": "ADAPT the 'the run reports what happened' habit of gui.rs; ADD typed events, the total order and the contained observer seam.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-010/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-010/negative.json",
+    "standalone/crates/om9-app/tests/command_events_surface.rs"
+  ]
+}

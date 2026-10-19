@@ -1,0 +1,3 @@
+PASS [user-docked-right] udr-1280x720 exit=0 
+matrix-summary: H:\OpenMatrix9\build\standalone-validation\ui-artifacts\2026-10-16-m01-l3-002-left-dock\green-matrix\matrix-summary.json
+GREEN EXIT=0

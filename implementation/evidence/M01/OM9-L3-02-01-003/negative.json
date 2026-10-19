@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-003",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "near-closed-outside",
+      "call": "0.0005 gap, tolerance 0.0001",
+      "expect": {
+        "closed": false
+      }
+    }
+  ]
+}

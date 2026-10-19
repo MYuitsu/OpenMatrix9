@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-02-004-05",
+  "l3_id": "OM9-L3-01-02-004",
+  "title": "Interactive Command State Machine",
+  "oracle": {
+    "positive": "Two-click point command progresses Start->AwaitPoint->AwaitPoint->Commit, Escape aborts",
+    "negative": "Extra click/out-of-order Enter cannot commit partial geometry"
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-16",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-02, so acceptance rests on the automated checks below; no human item is requested.",
+    "scope": "the behaviour is exercised through the controller API, not through the window"
+  },
+  "checks_run": [
+    "RED: 1 passed; 2 failed. The product defect the fixture caught (N5): prompt() still asked 'Start of line (BothSides=No): ' while is_running() already reported the command gone — the phase machine and the prompt disagreed.",
+    "GREEN: cargo test -p om9-app --test command_state_machine -> 3 passed; 0 failed (4 positive cases, 6 negative cases)",
+    "cargo test -p om9-app --lib: 83 passed",
+    "cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: tools/validate_m01_l3_003_panels.py -> 7/7 PASS; tools/validate_m01_l3_002_ui_matrix.py --mode all -> 14/14 PASS",
+    "CORRECTION (same day): the view rule was corrected after the pre-existing tests/chrome_actions.rs cases showed that a view-TAB switch must keep a running command (it was losing it). validate_context now refuses on a changed document identity, a view that is gone, or a moved revision/epoch. All affected fixtures and tests were corrected; chrome_actions 5/5, command_context 5/5, command_state_machine 3/3, command_transactions 5/5, command_options_and_repeat 5/5.",
+    "REAL WINDOW: the roll-up scenario of tools/validate_m01_l3_003_panels.py failed after the frame-timing changes and is fixed: the audit script now takes focus with a neutral click on the status row before the two real clicks, and its state reader uses the live collapse flag instead of the one captured when the frame began. The harness is 7/7 PASS."
+  ],
+  "code_change": [
+    "session.rs: pub enum CmdPhase { Idle, AwaitPoint, AwaitEnd } and Controller::phase(), derived from the one session state so the prompt, the refusals and the audit cannot disagree.",
+    "session.rs: prompt() returns 'Command: ' whenever the session is not running."
+  ],
+  "artefacts": [
+    "OM9-L4-01-02-004-02.red.log",
+    "OM9-L4-01-02-004-02.green.log",
+    "OM9-L4-01-02-004-03.diffstat.txt",
+    "OM9-L4-01-02-004-03.target-test.log",
+    "OM9-L4-01-02-004-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_02_l3_004_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

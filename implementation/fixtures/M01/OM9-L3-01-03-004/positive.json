@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-004",
+  "l4": "OM9-L4-01-03-004-02",
+  "title": "Layer Domain Records",
+  "case": "om9-l3-01-03-004-positive",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_004_layer_record_keeps_its_identity_when_renamed|l3_004_layer_with_an_unknown_parent_is_refused|l3_004_layer_order_must_list_every_layer_exactly_once",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "id": "rename-keeps-id",
+      "expect": {
+        "layer_id_unchanged": true,
+        "color_unchanged": true,
+        "validates": true
+      },
+      "steps": [
+        "Layer Metals color [34,153,135,255]",
+        "rename Metals 02, visible=false, locked=true"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-08-003-01",
+  "l3_id": "OM9-L3-01-08-003",
+  "l3_title": "Document Absolute Relative Tolerances",
+  "owner_module_id": "OM9-L2-01-08",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "tolerance policy for small jewelry geometry",
+  "positive_oracle": "Tài liệu có một policy tuyệt đối/tương đối/góc lưu kèm tài liệu (admitted ở schema 4); tài liệu mới dùng policy template tường minh; mutation là một Undo, không đổi context_revision.",
+  "negative_oracle": "Giá trị sai bị từ chối theo tên trường; tài liệu không khai báo policy trả Missing, không bịa mặc định.",
+  "legacy_source": [
+    "rust/src/tolerances.rs",
+    "rust/src/units.rs (Context.absolute_mm/relative_ratio)"
+  ],
+  "reuse_decision": "ADAPT",
+  "decision_note": "Legacy keeps tolerance inside the unit Context; OM9 makes it a document-level policy with its own mutation so it is auditable and undoable.",
+  "method": "Read the legacy `rust/` module named above and the target crate; the portable behaviour is re-implemented in safe Rust (AGENTS.md rust-first) without the legacy C ABI. No legacy code is copied verbatim.",
+  "verified_utc": "2026-10-17",
+  "om9_owner": "crates/om9-core/src/history.rs, model.rs, transaction.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_tolerance",
+    "cargo test -p om9-archive --test document_identity_round_trip a_document_tolerance",
+    "cargo test -p om9-core --test l2_01_08_precision"
+  ]
+}

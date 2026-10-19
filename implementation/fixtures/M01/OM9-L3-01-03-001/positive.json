@@ -1,0 +1,20 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-001",
+  "l4": "OM9-L4-01-03-001-02",
+  "title": "Document Entity IDs",
+  "case": "om9-l3-01-03-001-positive",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_001_two_entities_and_one_feature_receive_unique_stable_ids|l3_001_retired_feature_id_is_never_reallocated|l3_001_a_feature_output_must_be_a_live_object; om9-archive/tests/document_identity_round_trip.rs",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "id": "two-entities-one-feature",
+      "expect": {
+        "undo_redo_keeps_ids": true,
+        "reopen_keeps_ids": true,
+        "feature_output": "[A]",
+        "ids_unique": true
+      }
+    }
+  ]
+}

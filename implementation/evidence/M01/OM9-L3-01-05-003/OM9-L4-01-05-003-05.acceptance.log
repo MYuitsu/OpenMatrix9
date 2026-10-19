@@ -1,0 +1,4 @@
+# OM9-L4-01-05-003-05 — nghiệm thu NURBS curve evaluation adapter
+# utc: 2026-10-18
+# oracle: at u=0.5 the point is (5/sqrt2, 5/sqrt2, 0) with |P| = 5, and the derivative magnitude is positive
+# result: all crate tests pass (see the kernel-test log beside this file)

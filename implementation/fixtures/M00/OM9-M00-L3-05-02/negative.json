@@ -1,0 +1,14 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-05-02",
+  "cases": [
+    {
+      "id": "M00-FX-05-02-NEG-01",
+      "check": "failed_recipe_keeps_last_geometry",
+      "expected": {
+        "state": "Failed",
+        "data_lost": false
+      }
+    }
+  ]
+}

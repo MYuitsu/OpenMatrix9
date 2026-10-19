@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-010",
+  "l4": "OM9-L4-01-03-010-02",
+  "title": "Selection State Document Contract",
+  "case": "om9-l3-01-03-010-positive",
+  "runtime_tests": "om9-app/tests/document_contract.rs::l3_010_selection_is_pruned_after_undo_and_redo_restores_the_object|l3_010_a_selection_from_another_document_generation_is_stale|l3_010_a_stale_list_index_is_detected_instead_of_mapped_to_a_neighbour; om9-core/tests/selection_state.rs",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "id": "stable-id-selection",
+      "expect": {
+        "ordered_by_typed_id": true,
+        "selection_state_objects": [
+          "A"
+        ]
+      },
+      "steps": [
+        "Point A",
+        "select_root(Some(A))"
+      ]
+    }
+  ]
+}

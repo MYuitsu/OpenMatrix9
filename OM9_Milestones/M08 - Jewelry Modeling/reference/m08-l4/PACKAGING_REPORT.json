@@ -1,0 +1,23 @@
+{
+  "status": "PLANNING_ONLY",
+  "l3_count": 73,
+  "l4_count": 221,
+  "module_l4_counts": {
+    "OM9-L2-04-01": 44,
+    "OM9-L2-04-04": 16,
+    "OM9-L2-04-05": 32,
+    "OM9-L2-04-06": 19,
+    "OM9-L2-04-07": 30,
+    "OM9-L2-04-08": 27,
+    "OM9-L2-05-01": 18,
+    "OM9-L2-05-02": 18,
+    "OM9-L2-05-03": 17
+  },
+  "waves": 8,
+  "critical_4phase_count": 24,
+  "adapter_l3_count": 22,
+  "stages_changed": [
+    "E13 L3: L4 status only"
+  ],
+  "implementation_pass": 0
+}

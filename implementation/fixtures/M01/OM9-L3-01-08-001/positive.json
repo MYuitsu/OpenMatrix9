@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-08-001",
+  "l4": "OM9-L4-01-08-001-02",
+  "title": "Millimeter World Unit Model",
+  "case": "om9-l3-01-08-001-positive",
+  "positive_oracle": "Độ dài có kiểu trong milimét; số trần trong lệnh dùng đơn vị tài liệu, hậu tố tường minh thắng; token đơn vị không phân biệt hoa thường và chỉ có một bảng đơn vị.",
+  "runtime_tests": [
+    "cargo test -p om9-core --test units_parameters l3_001",
+    "cargo test -p om9-app --test command_options_and_repeat a_bare_option_number",
+    "cargo test -p om9-core --test l2_01_08_precision"
+  ]
+}

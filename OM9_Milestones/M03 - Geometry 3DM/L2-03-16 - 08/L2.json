@@ -1,0 +1,345 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-03-16",
+  "milestone": "M03",
+  "title": "08-febe-matrix-curve-menu-workflows",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Curve menu và lệnh chỉnh curve của Matrix8 Book1",
+  "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/08-febe-matrix-curve-menu-workflows/module.json",
+  "definition": {
+    "module_id": "OM9-L2-03-16",
+    "milestone_id": "M03",
+    "module_path": "specs/03-ms03-curve-surface-solid-3dm/08-febe-matrix-curve-menu-workflows/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "03-matrix8-book1",
+    "legacy_v07_path": "specs/03-matrix8-book1/16-febe-matrix-curve-menu-workflows/",
+    "scope": "Curve menu và lệnh chỉnh curve của Matrix8 Book1",
+    "exclude": "Toán học curve dùng Rhino5 / OCCT.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          120,
+          165
+        ],
+        "pdf_pages_1based": [
+          130,
+          175
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-02-04",
+      "OM9-L2-03-07"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "M03_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M03-UI",
+    "l3_count": 58,
+    "l3_catalog_path": "specs/03-ms03-curve-surface-solid-3dm/08-febe-matrix-curve-menu-workflows/l3-index.json",
+    "l3_deferred_count": 0,
+    "l3_m03_owner_count": 58,
+    "l4_count_planned_m03": 174
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-03-16-001",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-001 - Curve · PolyLine - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-002",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-002 - Curve · Line - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-003",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-003 - Curve · Interp Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-004",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-004 - Curve · Rectangle - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-005",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-005 - Curve · Circle - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-006",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-006 - Curve · Ellipse - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-007",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-007 - Curve · Arc - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-008",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-008 - Curve · Arc Direction - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-009",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-009 - Curve · Rebuild - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-010",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-010 - Curve · Refit to Tolerance - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-011",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-011 - Curve · Quick Curve Blend - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-012",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-012 - Curve · Adjustable Curve Blend - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-013",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-013 - Curve · Curve from 2 Views - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-014",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-014 - Curve · Curve 2 Views with History - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-015",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-015 - Curve · Pullback - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-016",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-016 - Curve · Project - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-017",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-017 - Curve · Intersection - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-018",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-018 - Curve · Offset Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-019",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-019 - Curve · Offset Curve on Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-020",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-020 - Curve · Extract Isocurve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-021",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-021 - Curve · Fillet Curves - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-022",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-022 - Curve · Fillet Corners - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-023",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-023 - Curve · Chamfer Curves - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-024",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-024 - Curve · Create UV Curves - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-025",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-025 - Curve · Apply UV Curves - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-026",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-026 - Curve · Through Points - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-027",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-027 - Curve · Extend Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-028",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-028 - Curve · Polygon - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-029",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-029 - Curve · Spiral - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-030",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-030 - Curve · Helix - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-031",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-031 - Curve · Point - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-032",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-032 - Curve · Mark Curve Start - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-033",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-033 - Curve · Mark Curve End - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-034",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-034 - Curve · Adjust Closed Curve Seam - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-035",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-035 - Curve · Continue Interpolated Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-036",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-036 - Curve · Divide Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-037",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-037 - Curve · Curve Boolean - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-038",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-038 - Curve · Tween Curves - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-039",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-039 - Curve · Duplicate Edge - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-040",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-040 - Curve · Duplicate Border - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-041",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-041 - Curve · Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-042",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-042 - Curve · Continue Control Point Curve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-043",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-043 - Curve · Extract Angle Isocurve - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-044",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-044 - Curve · Cross Section Profiles - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-045",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-045 - Curve · Sketch - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-046",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-046 - Curve · Sketch on Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-047",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-047 - Curve · Sketch on Mesh - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-048",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-048 - Curve · Polyline on Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-049",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-049 - Curve · Interp Curve on Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-050",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-050 - Curve · Curve to Lines - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-051",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-051 - Curve · Section - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-052",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-052 - Curve · Match - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-053",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-053 - Curve · Silhouette - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-054",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-054 - Curve · Extract Wire Frame - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-055",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-055 - Curve · Soft Edit - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-056",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-056 - Curve · Offset Normal to Surface - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-057",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-057 - Curve · Arc Blend - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    },
+    {
+      "id": "OM9-L3-03-16-058",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-058 - Curve · Intersect Two Sets - menu binding/l3.json",
+      "target_implementation_milestone": "M03"
+    }
+  ],
+  "m03_l4_planned_count": 174,
+  "execution_state": "NOT_STARTED",
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+}

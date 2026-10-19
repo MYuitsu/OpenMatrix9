@@ -1,0 +1,215 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "oracle_schema": "om9.m01.oracle.v1.5",
+  "oracle_schema_note": "No local definition of om9.m01.oracle.v1.5 exists in this checkout; the string is carried as a compatibility field only.",
+  "l2": "OM9-L2-01-12",
+  "target": "standalone Rust OM9",
+  "source": "Expected values are authored from the OM9 container contract, the box 10x20x30 geometry and the OCCT box oracle already used by OM9-L3-01-05; no expected value was copied from this run's output.",
+  "status": "RUNTIME_DRIVEN_BY_TEST",
+  "l3": {
+    "OM9-L3-01-12-001": {
+      "positive": [
+        { "id": "container-header", "call": "Archive::encode(2-layer document)", "expect": { "magic": "OM9\\0\\r\\n\\x1a\\n", "schema": 4, "chunks": 2 } },
+        { "id": "manifest-document-id", "call": "decode metadata JSON", "expect": { "id": "<document UUID>", "page_unit": "Millimeter", "layers": 2, "layer_order": 2 } },
+        { "id": "brep-payload-in-manifest", "call": "decode metadata JSON", "expect": { "entities[box].geometry.Brep.source": "contains CASCADE Topology", "resource name": "jobbag.reference" } },
+        { "id": "deterministic", "call": "encode(decode(bytes))", "expect": { "equals": "bytes" } }
+      ],
+      "negative": [
+        { "id": "unknown-version", "call": "decode(version=5)", "expect": { "error": "Unsupported", "document_published": false } },
+        { "id": "truncated", "call": "decode(bytes[..len-1])", "expect": { "error": "Invalid", "document_published": false } },
+        { "id": "trailing-bytes", "call": "decode(bytes + 0x00)", "expect": { "error": "Invalid", "document_published": false } },
+        { "id": "bad-flags", "call": "decode(chunk flags=1)", "expect": { "error": "Unsupported" } },
+        { "id": "bad-checksum", "call": "mutate a payload byte", "expect": { "error": "Invalid(\"chunk checksum\")" } }
+      ],
+      "proven_by": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:317",
+        "crates/om9-archive/tests/container_admission.rs:66",
+        "crates/om9-archive/tests/container_admission.rs:74",
+        "crates/om9-archive/tests/container_admission.rs:91",
+        "crates/om9-archive/tests/container_admission.rs:104"
+      ]
+    },
+    "OM9-L3-01-12-002": {
+      "positive": [
+        { "id": "two-layers", "call": "save/open", "expect": { "layers.len": 2, "layer[detail].parent": "root", "current_layer": "detail" } },
+        { "id": "visibility-lock", "call": "save/open", "expect": { "layer[detail].locked": true, "box.attributes.visible": true, "instance.attributes.hidden": true, "permissions(box).editable": false, "permissions(instance).visible": false } },
+        { "id": "preset-permissions", "call": "schema4 layer roundtrip", "expect": { "preset_slot kept": true, "hidden kept": true, "selectable/locked kept": true, "UUID kept": true } }
+      ],
+      "negative": [
+        { "id": "missing-layer", "call": "decode metadata with a referenced layer removed", "expect": { "error": "Invalid(\"layer order\")" } },
+        { "id": "broken-preset-slot", "call": "decode metadata with an invalid preset/label/palette", "expect": { "error": "Invalid" } },
+        { "id": "migration-invents-slot", "call": "migrate_from_v3 with a label only", "expect": { "error": "Invalid", "no inferred slot": true } }
+      ],
+      "proven_by": [
+        "crates/om9-archive/tests/layer_schema.rs:24",
+        "crates/om9-archive/tests/layer_schema.rs:44",
+        "crates/om9-archive/tests/layer_schema.rs:107",
+        "crates/om9-archive/tests/project_codec_acceptance.rs:358",
+        "crates/om9-app/tests/cold_layers.rs:15"
+      ]
+    },
+    "OM9-L3-01-12-003": {
+      "positive": [
+        { "id": "brep-roundtrip", "call": "save/open box B-Rep", "expect": { "geometry variant": "Brep", "source": "exact", "display.faces": "same UUIDs", "display volume mm3": 6000 } },
+        { "id": "real-occt-box", "call": "om9-kernel box_brep([10,20,30]) -> Archive::save -> fresh process --inspect", "expect": { "object id": "unchanged", "source_volume": 6000, "not downgraded": true } },
+        { "id": "instance-link", "call": "save/open definition + occurrence", "expect": { "geometry": "Instance(definition_id)", "definition members": "preserved", "placement": "preserved" } }
+      ],
+      "negative": [
+        { "id": "missing-source", "call": "decode metadata with Brep.source removed", "expect": { "error": "Invalid(\"typed document metadata/schema\")" } },
+        { "id": "tampered-source", "call": "decode metadata with a changed source but old source_sha256", "expect": { "error": "Invalid(\"BRep source/cache binding\")" } },
+        { "id": "corrupt-display", "call": "Brep display point/face UUID mutated", "expect": { "error": "Invalid", "no mesh substitution": true } },
+        { "id": "instance-without-definition", "call": "document validation", "expect": { "error": "Missing(\"instance definition\")" } }
+      ],
+      "proven_by": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:398",
+        "crates/om9-archive/tests/project_codec_acceptance.rs:511",
+        "crates/om9-app/tests/brep_selection.rs:103",
+        "crates/om9-app/tests/brep_selection.rs:157",
+        "crates/om9-core/tests/document_graph.rs:613"
+      ]
+    },
+    "OM9-L3-01-12-004": {
+      "positive": [
+        { "id": "feature-roundtrip", "call": "save/open FeatureKind::Semantic", "expect": { "id": "stable", "label": "jobbag marker", "outputs": "box id" } },
+        { "id": "recipe-roundtrip", "call": "save/open unknown solver/command", "expect": { "command": "future-builder-v9", "solver": "future-solver", "command_version": 9, "state": "Clean on plain decode" } },
+        { "id": "restore-diagnostic", "call": "Archive::restore with empty replay registry", "expect": { "diagnostics.len": 1, "recipe.state": "Unresolved(diagnostic)", "geometry kept": true } }
+      ],
+      "negative": [
+        { "id": "unknown-feature-kind", "call": "decode metadata with kind \"future-semantic\"", "expect": { "error": "Unsupported(\"document variant\")" } },
+        { "id": "missing-module-not-clean", "call": "restore", "expect": { "recipe.state != Clean": true, "outputs stale where present": true } }
+      ],
+      "proven_by": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:435",
+        "crates/om9-archive/tests/document_identity_round_trip.rs:99",
+        "crates/om9-archive/tests/document_snapshot.rs:48",
+        "crates/om9-archive/tests/restore_modules.rs:126",
+        "crates/om9-app/tests/file_lifecycle.rs:481",
+        "crates/om9-app/tests/cold_reopen.rs:259"
+      ]
+    },
+    "OM9-L3-01-12-005": {
+      "positive": [
+        { "id": "atomic-replace", "call": "Archive::save twice to the same path", "expect": { "reopen equals current document": true, "no staging files remain": true } },
+        { "id": "sync-and-verify", "call": "save", "expect": { "decode(encode) equality before file creation": true, "staged re-read equality": true, "sync_all called": true } }
+      ],
+      "negative": [
+        { "id": "cancel-before-publish", "call": "save with canceled Cancellation", "expect": { "error": "Canceled", "destination unchanged": true, "staging removed": true } },
+        { "id": "readonly-destination", "call": "save to readonly file", "expect": { "error": "Permission(\"save destination\")", "existing bytes unchanged": true } },
+        { "id": "invalid-document", "call": "save a document failing validation", "expect": { "error": "Invalid/Budget", "destination unchanged": true } },
+        { "id": "budget-exhausted", "call": "save with max_bytes below document+encoding", "expect": { "error": "Budget", "no file created": true } }
+      ],
+      "proven_by": [
+        "crates/om9-archive/tests/atomic_save.rs:24",
+        "crates/om9-archive/tests/atomic_save.rs:35",
+        "crates/om9-archive/tests/atomic_save.rs:56",
+        "crates/om9-archive/tests/atomic_save.rs:79",
+        "crates/om9-app/tests/file_lifecycle.rs:197",
+        "crates/om9-app/tests/file_lifecycle.rs:644"
+      ]
+    },
+    "OM9-L3-01-12-006": {
+      "positive": [
+        { "id": "valid-project", "call": "decode valid schema-4 bytes", "expect": { "document id/layers/B-Rep face UUIDs restored": true, "final validate": "Ok" } },
+        { "id": "explicit-v1-migration", "call": "migrate_from_v1", "expect": { "durable IDs unchanged": true, "resources empty": true, "to_version": 4 } }
+      ],
+      "negative": [
+        { "id": "bad-magic", "call": "decode", "expect": { "error": "Invalid(\"OM9 magic\")" } },
+        { "id": "unsupported-schema", "call": "decode version 5", "expect": { "error": "Unsupported(\"OM9 schema version; no implicit migration\")" } },
+        { "id": "offset-overflow", "call": "decode start/length > bytes", "expect": { "error": "Invalid/Overflow", "no allocation": true } },
+        { "id": "overlap-gap-trailing", "call": "decode edited entry ranges", "expect": { "error": "Invalid" } },
+        { "id": "duplicate-json-key", "call": "decode metadata with duplicate UUID keys", "expect": { "error": "Invalid" } },
+        { "id": "orphan-resource", "call": "decode with an unreferenced/missing resource chunk", "expect": { "error": "Invalid" } },
+        { "id": "legacy-field-invention", "call": "decode schema-3 metadata with new fields", "expect": { "error": "Invalid", "no implicit migration": true } }
+      ],
+      "note": "The container is a binary chunk format, not ZIP. There is no decompression and no external path resolution, so ZIP-bomb and ZIP path-traversal cases do not apply; the equivalent bounded-allocation and no-external-path oracles are covered by json_admission and resource_chunks.",
+      "proven_by": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:472",
+        "crates/om9-archive/tests/container_admission.rs:74",
+        "crates/om9-archive/tests/container_admission.rs:91",
+        "crates/om9-archive/tests/container_admission.rs:104",
+        "crates/om9-archive/tests/container_admission.rs:124",
+        "crates/om9-archive/tests/container_admission.rs:140",
+        "crates/om9-archive/tests/resource_chunks.rs:70",
+        "crates/om9-app/tests/file_lifecycle.rs:320"
+      ]
+    },
+    "OM9-L3-01-12-007": {
+      "positive": [
+        { "id": "reopen-identity", "call": "open saved project", "expect": { "document/layer/object/definition IDs": "stable", "geometry": "exact", "mass properties": "same source" } },
+        { "id": "fresh-owner-session", "call": "two restores of the same bytes", "expect": { "distinct session generations": true, "distinct owner sessions": true } },
+        { "id": "registered-replay", "call": "restore with matching ReplayKey", "expect": { "verified current stamps rebound only": true } }
+      ],
+      "negative": [
+        { "id": "failed-read-keeps-current", "call": "open invalid candidate while a document is open", "expect": { "error": "Invalid/Budget", "current document/scene/command/redo unchanged": true } },
+        { "id": "solver-version-mismatch", "call": "restore with a similar but different version", "expect": { "recipe stays unresolved": true } },
+        { "id": "foreign-snapshot", "call": "DocumentSnapshot::restore into another document", "expect": { "error": "Invalid(\"snapshot document\")", "atomic": true } },
+        { "id": "unknown-snapshot-version", "call": "DocumentSnapshot::from_json unknown version", "expect": { "error": "Unsupported", "no migration": true } }
+      ],
+      "proven_by": [
+        "crates/om9-archive/tests/restore_modules.rs:75",
+        "crates/om9-archive/tests/restore_modules.rs:126",
+        "crates/om9-archive/tests/restore_modules.rs:150",
+        "crates/om9-archive/tests/restore_modules.rs:175",
+        "crates/om9-archive/tests/document_snapshot.rs:48",
+        "crates/om9-archive/tests/document_snapshot.rs:84",
+        "crates/om9-archive/tests/document_snapshot.rs:146",
+        "crates/om9-app/tests/cold_reopen.rs:34",
+        "crates/om9-app/tests/file_lifecycle.rs:320",
+        "crates/om9-app/tests/file_lifecycle.rs:425"
+      ]
+    },
+    "OM9-L3-01-12-008": {
+      "status": "DEFERRED_TO_M07",
+      "note": "No L4 records exist in M01. The STL writer policy is covered under OM9-L3-01-12-009; document tessellation and the export command are M07 scope.",
+      "proven_by": []
+    },
+    "OM9-L3-01-12-009": {
+      "positive": [
+        { "id": "binary-layout", "call": "write_binary_stl(closed cube)", "expect": { "bytes": "84 + 12*50", "count": 12, "normals unit": true } },
+        { "id": "mm-scale-header", "call": "StlOptions::default()", "expect": { "header contains \"scale 1 mm-per-unit\"": true, "coordinates in mm": true } },
+        { "id": "inch-scale", "call": "scale = 1/25.4", "expect": { "coordinate": "-5 mm -> -0.19685 in" } },
+        { "id": "outward-normal", "call": "closed cube", "expect": { "+Z face normal.z > 0.99": true, "open_edges": 0 } },
+        { "id": "flip-winding", "call": "flip_winding=true", "expect": { "normal": "negated" } }
+      ],
+      "negative": [
+        { "id": "open-surface", "call": "strict export of 10 triangles", "expect": { "error": "StlError::OpenSurface { open_edges: 4 }", "no bytes": true } },
+        { "id": "bad-scale", "call": "scale = NaN/0", "expect": { "error": "StlError::BadScale" } },
+        { "id": "nonfinite", "call": "position = infinity", "expect": { "error": "StlError::NonFinite { vertex: 0 }" } },
+        { "id": "degenerate", "call": "three collinear points", "expect": { "error": "StlError::Degenerate" } },
+        { "id": "empty", "call": "no triangles", "expect": { "error": "StlError::Empty" } }
+      ],
+      "proven_by": [
+        "crates/om9-exchange/src/stl.rs:258",
+        "crates/om9-exchange/src/stl.rs:273",
+        "crates/om9-exchange/src/stl.rs:285",
+        "crates/om9-exchange/src/stl.rs:296",
+        "crates/om9-exchange/src/stl.rs:306",
+        "crates/om9-exchange/src/stl.rs:318",
+        "crates/om9-exchange/src/stl.rs:329",
+        "crates/om9-exchange/tests/stl_export_policy.rs:62",
+        "crates/om9-exchange/tests/stl_export_policy.rs:93",
+        "crates/om9-exchange/tests/stl_export_policy.rs:128"
+      ]
+    },
+    "OM9-L3-01-12-010": {
+      "positive": [
+        { "id": "golden-fixture", "call": "Archive::save -> Archive::open", "expect": { "document equality": true, "layers": 2, "box volume mm3": 6000, "instance definition": "same id", "group members": "box + instance", "jobbag reference bytes": "jobbag/A-102.om9" } },
+        { "id": "real-occt-golden", "call": "real OCCT box cold archive and fresh process", "expect": { "volume": 6000, "IDs": "matching", "source": "same" } },
+        { "id": "ids", "call": "entity/feature/group identity roundtrip", "expect": { "all IDs stable": true } }
+      ],
+      "negative": [
+        { "id": "corrupted-bundle", "call": "flip a saved byte", "expect": { "error": "Invalid", "original still encodes/decodes": true } },
+        { "id": "duplicate-identity", "call": "decode metadata with a duplicated entity id in a definition", "expect": { "error": "Invalid(\"entity identity/revision\")" } },
+        { "id": "real-process-corrupt", "call": "om9 --inspect corrupt file", "expect": { "non-zero exit": true, "no success JSON": true } }
+      ],
+      "proven_by": [
+        "crates/om9-archive/tests/project_codec_acceptance.rs:511",
+        "crates/om9-app/tests/brep_selection.rs:103",
+        "crates/om9-archive/tests/document_identity_round_trip.rs:99",
+        "crates/om9-app/tests/cold_reopen.rs:67",
+        "crates/om9-app/tests/cold_reopen.rs:432",
+        "crates/om9-app/tests/cold_layers.rs:15"
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-006",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-006-POS",
+      "test": "a_transform_moves_the_box_and_keeps_its_volume",
+      "expected": "translation moves z to 5..9 without changing the 400 volume; a 90 degree turn keeps the symmetric bounds and the volume; a 2x scale cubes the volume to 3200"
+    }
+  ]
+}

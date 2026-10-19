@@ -1,0 +1,67 @@
+task: OM9-L4-01-01-005-05 (acceptance) regression
+utc: 2026-10-16T13:12:07Z
+
+== cargo test --workspace ==
+error: crate `moxcms` required to be available in rlib format, but was not found in this form
+memory allocation of 2097152 bytes failed
+error: could not compile `om9-app` (test "layer_dialogs") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+memory allocation of 2097152 bytes failed
+error[E0463]: can't find crate for `om9_app`
+error[E0786]: found invalid metadata files for crate `test`
+    = note: failed to mmap rmeta metadata: 'C:\Users\nguye\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib\libtest-b612a6b84a3b28c3.rmeta'
+    = note: failed to mmap file 'C:\Users\nguye\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib\libtest-b612a6b84a3b28c3.rlib': The paging file is too small for this operation to complete. (os error 1455)
+error: linking with `link.exe` failed: exit code: 1102
+error[E0463]: can't find crate for `om9_app`
+error: could not compile `om9-app` (test "command_sessions") due to 1 previous error
+error: could not compile `om9-app` (test "command_transcript") due to 1 previous error
+error[E0463]: can't find crate for `eframe`
+error[E0463]: can't find crate for `om9_app`
+error[E0463]: can't find crate for `eframe`
+error[E0463]: can't find crate for `om9_app`
+error: could not compile `om9-app` (test "pinned_command") due to 2 previous errors
+error[E0463]: can't find crate for `eframe`
+error[E0463]: can't find crate for `om9_app`
+error[E0463]: can't find crate for `eframe`
+error[E0463]: can't find crate for `eframe`
+error[E0463]: can't find crate for `om9_app`
+error[E0463]: can't find crate for `om9_app`
+error: could not compile `om9-app` (test "dock_layout_default") due to 1 previous error
+error: could not compile `om9-app` (test "workbench_regions") due to 2 previous errors
+error: could not compile `om9-app` (test "file_widgets") due to 2 previous errors
+error: could not compile `om9-app` (test "panel_door") due to 2 previous errors
+error: could not compile `om9-app` (test "workbench_regions_sizes") due to 2 previous errors
+error[E0463]: can't find crate for `eframe`
+error[E0463]: can't find crate for `om9_app`
+error: could not compile `om9-app` (test "cold_layers") due to 1 previous error
+error: could not compile `om9-app` (test "viewport_title_menu") due to 2 previous errors
+error: crate `clipboard_win` required to be available in rlib format, but was not found in this form
+error: crate `om9_native_owner` required to be available in rlib format, but was not found in this form
+error: crate `om9_scene` required to be available in rlib format, but was not found in this form
+error: crate `png` required to be available in rlib format, but was not found in this form
+error: crate `usvg` required to be available in rlib format, but was not found in this form
+error: crate `svgtypes` required to be available in rlib format, but was not found in this form
+error: crate `windows` required to be available in rlib format, but was not found in this form
+error: could not compile `om9-app` (test "scene_allocation_peak") due to 3 previous errors
+error: could not compile `om9-app` (test "left_stack_layers") due to 3 previous errors
+error: crate `harfrust` required to be available in rlib format, but was not found in this form
+error: crate `accesskit` required to be available in rlib format, but was not found in this form
+error: could not compile `om9-app` (test "panel_ops") due to 2 previous errors
+error: could not compile `om9-app` (test "status_bar_overlap")
+error: could not compile `om9-app` (test "layer_widgets") due to 1 previous error
+error: could not compile `om9-app` (test "file_lifecycle") due to 2 previous errors
+error: could not compile `om9-app` (test "window_minimum")
+== cargo check --workspace --all-targets ==
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.08s
+== real-window regression: L3-002 size matrix ==
+PASS [default] unsupported-1000x600-startup-refused exit=1 
+matrix-summary: H:\OpenMatrix9\build\standalone-validation\ui-artifacts\2026-10-16-m01-l3-005-verify\matrix-summary.json
+== real-window regression: L3-003 panel scenarios ==
+PASS [reorder] drag PROJECTS onto the upper half of the DISPLAY bar
+PASS [float] drag DISPLAY into a viewport and float it
+PASS [dock-right] drag DISPLAY into the 48 px strip at the right edge
+PASS [escape] press DISPLAY, drag into a viewport and press Escape
+PASS [roll-up] click the PROJECTS title bar, then click it again
+PASS [float-drop] drag DISPLAY into a viewport: it floats and keeps its home
+PASS [readback-recover] float DISPLAY, then let the real window report a rectangle that cannot fit
+panels-summary: H:\OpenMatrix9\build\standalone-validation\ui-artifacts\2026-10-16-m01-l3-005-panels\panels-summary.json

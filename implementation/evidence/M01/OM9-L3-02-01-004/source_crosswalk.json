@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-02-01-004",
+  "title": "Surface UV Domain And Seam Rules",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "U/V domains, periodicity, seam parameters and V orientation.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-core/src/geometry.rs:294-338",
+      "what": "NurbsSurface record"
+    },
+    {
+      "path_line": "crates/om9-core/src/rhino_semantics.rs:276-382",
+      "what": "SurfaceSemantics/classify_surface/require_orientation"
+    }
+  ],
+  "reuse_decision": "ADD authored seam/orientation rules.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-02-01/crosswalk.json"
+}

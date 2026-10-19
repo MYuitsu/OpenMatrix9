@@ -1,0 +1,47 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-M00-L3-02-03",
+  "reviewer": {
+    "name": "chủ dự án (OpenMatrix9)",
+    "role": "project owner",
+    "status": "SIGNED",
+    "signature": "signed in the working session on 2026-10-17; instruction: 'tôi ký và chuyển sang tiếp theo'"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-17T16:40:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "Numeric invariants measured against analytic values (errors <= 1.1e-13), fillet and inward offset exact, three degenerate cases reported without a crash, sphere mesh closed with two recorded non-manifold pole edges; the kernel viability decision is VIABLE.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L4-02-03-01.unit-fixtures.log",
+      "sha256": "44447218c72f96c7805bda0fde3f8d507ceb40d6425ab4cbe9d0326ec038e9da",
+      "bytes": 2926
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L4-02-03-02.boolean-fillet-offset-degenerate.log",
+      "sha256": "e702057f7afe00fa260eb22bbffdb92fc6aa102d7a621c341a45b7a20f5998de",
+      "bytes": 2905
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L4-02-03-03.tessellation-vs-brep.log",
+      "sha256": "0f7f4aff41c2ab22a561cf223fbbaa487cdf4d92db6b5944306a518a9d0438f9",
+      "bytes": 2916
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L4-02-03-04.viability-decision.log",
+      "sha256": "f007bc1aee7f4a5936e2fd526dd8158909c285bd9eb3f01104b15395cdf214fe",
+      "bytes": 2900
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-03/numeric.json",
+      "sha256": "63a6fce1c4479b65357ab513ba235c7035a5529a4c7db39da56a010b65f2f18a",
+      "bytes": 1776
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-02-03/source_crosswalk.json",
+      "sha256": "728325ffafe424b2948075083ea1326bb461c848fe6b813b1b665bf56d7d9e23",
+      "bytes": 3477
+    }
+  ],
+  "note": "The reviewer signed in the session; the assistant recorded the record and did not self-approve. No manual test is required: every acceptance value above is an automated measurement."
+}

@@ -1,0 +1,39 @@
+# MUTATION RED (temporary): RIGHT_DOCK_FIXTURE = SectionId::Layers; 2026-10-16
+# command: cargo test -p om9-app --test left_stack_layers -j 1
+# exit code: 101
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.33s
+     Running tests\left_stack_layers.rs (target\debug\deps\left_stack_layers-2ded317dd025465a.exe)
+
+running 8 tests
+test rail_outer_width_is_300_and_inner_is_chrome_less ... ok
+test layers_title_bar_is_visible_without_scrolling_at_1280x720 ... ok
+test icon_edge_follows_the_rail_width ... ok
+test layers_stays_in_the_left_column_after_a_save_and_reload_round_trip ... FAILED
+test max_rail_keeps_the_canvas_minimum ... FAILED
+test default_frame_has_no_right_dock ... ok
+test layers_sits_between_info_and_projects_at_supported_frames ... ok
+test layers_stays_in_the_left_column_after_reset_menus_from_a_perturbed_layout ... ok
+
+failures:
+
+---- layers_stays_in_the_left_column_after_a_save_and_reload_round_trip stdout ----
+
+thread 'layers_stays_in_the_left_column_after_a_save_and_reload_round_trip' (42528) panicked at crates\om9-app\tests\common\mod.rs:63:5:
+fixture-right: Layers [[983.0 173.0] - [1034.7 190.0]] is not below Info & Settings [[2.0 278.0] - [297.0 292.0]]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- max_rail_keeps_the_canvas_minimum stdout ----
+
+thread 'max_rail_keeps_the_canvas_minimum' (52012) panicked at crates\om9-app\tests\common\mod.rs:59:28:
+1199 fixture right: layers title bar missing
+
+
+failures:
+    layers_stays_in_the_left_column_after_a_save_and_reload_round_trip
+    max_rail_keeps_the_canvas_minimum
+
+test result: FAILED. 6 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.33s
+
+error: test failed, to rerun pass `-p om9-app --test left_stack_layers`
+

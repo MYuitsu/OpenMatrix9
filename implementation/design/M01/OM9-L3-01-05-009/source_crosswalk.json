@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-05-009-01",
+  "l3_id": "OM9-L3-01-05-009",
+  "l3_title": "Geometry Operation Error Contract",
+  "owner_module_id": "OM9-L2-01-05",
+  "milestone": "M01",
+  "goal": "every native failure maps to exactly one document error",
+  "positive_oracle": "9 KernelError map sang đúng Error và giữ thông điệp người dùng.",
+  "negative_oracle": "Không có biến thể nào map mơ hồ; Unavailable là Unsupported (capability), NativeFault là Invalid (defect).",
+  "legacy_source": [
+    "rust/src/phase3_modeling.rs (Reason)",
+    "rust/src/solid_result.rs"
+  ],
+  "reuse_decision": "ADAPT",
+  "decision_note": "Thông điệp giữ nguyên văn để command line hiển thị; contract này là nửa Rust của L3-009.",
+  "method": "Read the legacy OCCT adapter shells and the target crates. The portable adapter half (records, validation, handle lifetime, error contract, policy) is re-implemented in safe Rust; the native kernel boundary is not ported and is refused by name.",
+  "verified_utc": "2026-10-17",
+  "om9_owner": "crates/om9-core/src/brep_kernel.rs (KernelError)",
+  "runtime_tests": [
+    "cargo test -p om9-core --test brep_kernel"
+  ]
+}

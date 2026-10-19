@@ -1,0 +1,26 @@
+# A TAKEN ISSUE THAT HAS GONE QUIET IS FREED - see `tools/stale_claims.py` for the rule: a warning after 12 quiet days,
+# the assignment lifted after 14, never while a pull request refers to the issue. Once a day; by hand too.
+name: stale claims
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  free-stale-claims:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: The rule decides its cases right
+        run: python3 tools/stale_claims.py --self-test
+      - name: Warn and free
+        run: python3 tools/stale_claims.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}

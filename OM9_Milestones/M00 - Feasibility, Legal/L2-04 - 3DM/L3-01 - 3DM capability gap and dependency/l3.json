@@ -1,0 +1,67 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-04-01",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-04",
+  "title": "3DM capability gap and dependency candidate",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-04-01",
+    "module_id": "OM9-M00-L2-04",
+    "gate_id": "G00-04",
+    "title": "3DM capability gap and dependency candidate",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-04-01-01",
+        "title": "Chứng minh QymCAD không có 3DM trong supported format enum tại SHA",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/L4-01 - Chứng minh QymCAD không có 3DM trong/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-04-01-02",
+        "title": "Khảo sát mcneel/opennurbs làm decoder",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/L4-02 - Khảo sát mcneel - opennurbs làm decoder/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-04-01-03",
+        "title": "So sánh 3DM reader options thực tế",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/L4-03 - So sánh 3DM reader options thực tế/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-04-01-04",
+        "title": "Khoanh interface import .3dm trong OpenMatrix9",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/L4-04 - Khoanh interface import .3dm trong/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-04-01-01",
+    "OM9-M00-L4-04-01-02",
+    "OM9-M00-L4-04-01-03",
+    "OM9-M00-L4-04-01-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-04-01-01",
+      "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/L4-01 - Chứng minh QymCAD không có 3DM trong/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-04-01-02",
+      "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/L4-02 - Khảo sát mcneel - opennurbs làm decoder/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-04-01-03",
+      "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/L4-03 - So sánh 3DM reader options thực tế/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-04-01-04",
+      "file": "M00 - Feasibility, Legal/L2-04 - 3DM/L3-01 - 3DM capability gap and dependency/L4-04 - Khoanh interface import .3dm trong/l4.json"
+    }
+  ]
+}

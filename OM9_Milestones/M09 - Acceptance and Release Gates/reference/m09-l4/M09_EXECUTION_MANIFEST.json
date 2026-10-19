@@ -1,0 +1,683 @@
+{
+  "schema_version": "om9.m09.release_plan.v1",
+  "milestone_id": "M09",
+  "owner_type": "RELEASE_GATE_ONLY",
+  "release_gate_ids": [
+    "G-MVP",
+    "G-FULL"
+  ],
+  "canonical_l2_added": 0,
+  "canonical_l3_added": 0,
+  "release_l4_count": 30,
+  "status": "PLANNED_NOT_EXECUTED",
+  "source_revision": null,
+  "app_source_in_zip": false,
+  "gate_dependency_graph": {
+    "G-MVP": [
+      "G00",
+      "E01",
+      "E02",
+      "E03",
+      "E04",
+      "E05",
+      "E06",
+      "E07",
+      "E08",
+      "E09",
+      "E10",
+      "E11",
+      "E12"
+    ],
+    "G-FULL": [
+      "G-MVP",
+      "E13"
+    ]
+  },
+  "canonical_main_manifest": "planning/EXECUTION_MANIFEST.json",
+  "items": [
+    {
+      "task_id": "OM9-M09-L4-GMVP-001",
+      "title": "Đối chiếu tiền điều kiện G00 đến E12",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "GOVERNANCE",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-05-001",
+        "OM9-L3-01-12-001"
+      ],
+      "depends_on_task_ids": [],
+      "path": "reference/m09-l4/g-mvp/01/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/01/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-001/prerequisite-audit.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-002",
+      "title": "Tạo ma trận truy vết MVP",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "GOVERNANCE",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-03-01-001",
+        "OM9-L3-01-13-001",
+        "OM9-L3-04-02-001",
+        "OM9-L3-04-09-003",
+        "OM9-L3-04-14-001",
+        "OM9-L3-04-16-001",
+        "OM9-L3-01-12-008"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-001"
+      ],
+      "path": "reference/m09-l4/g-mvp/02/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/02/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-002/mvp-traceability.csv",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-003",
+      "title": "Audit giấy phép, nguồn và SBOM",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "COMPLIANCE",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-05-001",
+        "OM9-L3-01-13-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-001",
+        "OM9-M09-L4-GMVP-002"
+      ],
+      "path": "reference/m09-l4/g-mvp/03/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/03/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-003/license-sbom-review.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-004",
+      "title": "Build sạch và nhất quán trên môi trường đích",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "BUILD_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-05-001",
+        "OM9-L3-01-06-001",
+        "OM9-L3-01-01-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-001"
+      ],
+      "path": "reference/m09-l4/g-mvp/04/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/04/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-004/clean-build-matrix.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-005",
+      "title": "Workbench 4 viewport, command và điều khiển",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "UI_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-03-01-001",
+        "OM9-L3-03-01-003",
+        "OM9-L3-03-09-001",
+        "OM9-L3-03-07-002",
+        "OM9-L3-03-02-001",
+        "OM9-L3-03-03-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-002",
+        "OM9-M09-L4-GMVP-004"
+      ],
+      "path": "reference/m09-l4/g-mvp/05/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/05/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-005/workbench-manual-matrix.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-006",
+      "title": "Kernel OCCT: BRep, NURBS, trim, boolean",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "GEOMETRY_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-05-002",
+        "OM9-L3-01-05-003",
+        "OM9-L3-01-10-001",
+        "OM9-L3-01-10-002",
+        "OM9-L3-02-05-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-001",
+        "OM9-M09-L4-GMVP-004"
+      ],
+      "path": "reference/m09-l4/g-mvp/06/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/06/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-006/kernel-geometry-validation.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-007",
+      "title": "Undo, Redo, Cancel và selection state",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "TRANSACTION_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-03-001",
+        "OM9-L3-01-04-001",
+        "OM9-L3-03-13-001",
+        "OM9-L3-01-07-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-005",
+        "OM9-M09-L4-GMVP-006"
+      ],
+      "path": "reference/m09-l4/g-mvp/07/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/07/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-007/transaction-rollback-matrix.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-008",
+      "title": "Lưu/mở, migration và bảo vệ tệp",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "PERSISTENCE_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-12-001",
+        "OM9-L3-01-12-002",
+        "OM9-L3-01-12-003",
+        "OM9-L3-01-04-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-007",
+        "OM9-M09-L4-GMVP-004"
+      ],
+      "path": "reference/m09-l4/g-mvp/08/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/08/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-008/save-open-migration.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-009",
+      "title": "Đối chiếu phạm vi nhập 3DM",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "INTEROP_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-13-001",
+        "OM9-L3-01-13-002",
+        "OM9-L3-01-13-003"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-006",
+        "OM9-M09-L4-GMVP-008"
+      ],
+      "path": "reference/m09-l4/g-mvp/09/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/09/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-009/3dm-import-scope.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-010",
+      "title": "Luồng thiết kế nhẫn từ rail tới setting",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "E2E_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-02-001",
+        "OM9-L3-04-02-003",
+        "OM9-L3-04-09-003",
+        "OM9-L3-04-10-001",
+        "OM9-L3-04-14-001",
+        "OM9-L3-04-15-001",
+        "OM9-L3-04-16-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-005",
+        "OM9-M09-L4-GMVP-006",
+        "OM9-M09-L4-GMVP-007"
+      ],
+      "path": "reference/m09-l4/g-mvp/10/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/10/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-010/jewelry-e2e-mvp.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-011",
+      "title": "Recompute nhẫn và đá, conflict minh bạch",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "HISTORY_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-04-003",
+        "OM9-L3-04-02-001",
+        "OM9-L3-04-13-002",
+        "OM9-L3-03-13-003",
+        "OM9-L3-04-15-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-007",
+        "OM9-M09-L4-GMVP-010"
+      ],
+      "path": "reference/m09-l4/g-mvp/11/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/11/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-011/recompute-dependency-check.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-012",
+      "title": "Cutter và an toàn hình học sản xuất",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "CUTTER_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-16-001",
+        "OM9-L3-04-17-001",
+        "OM9-L3-04-18-001",
+        "OM9-L3-01-10-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-006",
+        "OM9-M09-L4-GMVP-010"
+      ],
+      "path": "reference/m09-l4/g-mvp/12/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/12/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-012/cutter-safety.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-013",
+      "title": "STL: đơn vị, winding và external viewer",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "EXPORT_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-12-008",
+        "OM9-L3-04-16-001",
+        "OM9-L3-01-05-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-006",
+        "OM9-M09-L4-GMVP-010",
+        "OM9-M09-L4-GMVP-012"
+      ],
+      "path": "reference/m09-l4/g-mvp/13/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/13/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-013/stl-external-audit.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-014",
+      "title": "Kiểm đầu vào lỗi, recovery và hiệu năng",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "ROBUSTNESS_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-06-001",
+        "OM9-L3-01-05-001",
+        "OM9-L3-01-12-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-004",
+        "OM9-M09-L4-GMVP-006",
+        "OM9-M09-L4-GMVP-008",
+        "OM9-M09-L4-GMVP-009"
+      ],
+      "path": "reference/m09-l4/g-mvp/14/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/14/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-014/robustness-performance.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-015",
+      "title": "Kiểm thử thao tác người dùng theo OS/GPU",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "MANUAL_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-03-01-001",
+        "OM9-L3-03-09-001",
+        "OM9-L3-03-15-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-005",
+        "OM9-M09-L4-GMVP-009",
+        "OM9-M09-L4-GMVP-010",
+        "OM9-M09-L4-GMVP-013",
+        "OM9-M09-L4-GMVP-014"
+      ],
+      "path": "reference/m09-l4/g-mvp/15/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/15/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-015/human-acceptance-matrix.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-016",
+      "title": "Đóng gói, cài đặt, rollback và kênh phân phối",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "DISTRIBUTION",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-01-001",
+        "OM9-L3-01-12-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-003",
+        "OM9-M09-L4-GMVP-004",
+        "OM9-M09-L4-GMVP-008",
+        "OM9-M09-L4-GMVP-014",
+        "OM9-M09-L4-GMVP-015"
+      ],
+      "path": "reference/m09-l4/g-mvp/16/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/16/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-016/packaging-install-rollback.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-017",
+      "title": "Triage lỗi và kiểm toán bằng chứng",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "GOVERNANCE",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-05-002",
+        "OM9-L3-01-12-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-002",
+        "OM9-M09-L4-GMVP-003",
+        "OM9-M09-L4-GMVP-004",
+        "OM9-M09-L4-GMVP-005",
+        "OM9-M09-L4-GMVP-006",
+        "OM9-M09-L4-GMVP-007",
+        "OM9-M09-L4-GMVP-008",
+        "OM9-M09-L4-GMVP-009",
+        "OM9-M09-L4-GMVP-010",
+        "OM9-M09-L4-GMVP-011",
+        "OM9-M09-L4-GMVP-012",
+        "OM9-M09-L4-GMVP-013",
+        "OM9-M09-L4-GMVP-014",
+        "OM9-M09-L4-GMVP-015",
+        "OM9-M09-L4-GMVP-016"
+      ],
+      "path": "reference/m09-l4/g-mvp/17/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/17/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-017/release-evidence-audit.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GMVP-018",
+      "title": "Quyết định ký G-MVP GO/NO-GO",
+      "parent_gate_id": "G-MVP",
+      "task_kind": "SIGNOFF",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-12-008",
+        "OM9-L3-01-13-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GMVP-001",
+        "OM9-M09-L4-GMVP-017"
+      ],
+      "path": "reference/m09-l4/g-mvp/18/l4.json",
+      "task_path": "reference/m09-l4/g-mvp/18/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-MVP/OM9-M09-L4-GMVP-018/g-mvp-decision.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-001",
+      "title": "Khóa G-MVP signed và E13 PASS",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "GOVERNANCE",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-05-001",
+        "OM9-L3-05-01-001"
+      ],
+      "depends_on_task_ids": [],
+      "path": "reference/m09-l4/g-full/01/l4.json",
+      "task_path": "reference/m09-l4/g-full/01/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-001/full-prerequisite-baseline.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-002",
+      "title": "Ma trận truy vết nâng cao E13",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "GOVERNANCE",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-05-001",
+        "OM9-L3-04-06-001",
+        "OM9-L3-04-08-001",
+        "OM9-L3-05-01-001",
+        "OM9-L3-05-02-001",
+        "OM9-L3-05-03-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-001"
+      ],
+      "path": "reference/m09-l4/g-full/02/l4.json",
+      "task_path": "reference/m09-l4/g-full/02/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-002/full-traceability.csv",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-003",
+      "title": "SmartFlow UV, normal và bám bề mặt",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "GEOMETRY_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-05-001",
+        "OM9-L3-04-05-002",
+        "OM9-L3-04-05-006"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-002"
+      ],
+      "path": "reference/m09-l4/g-full/03/l4.json",
+      "task_path": "reference/m09-l4/g-full/03/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-003/smartflow-uv-normal.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-004",
+      "title": "SmartFlow Rigid giữ hình đá/setting",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "HISTORY_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-05-003",
+        "OM9-L3-04-05-002",
+        "OM9-L3-04-09-003"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-003"
+      ],
+      "path": "reference/m09-l4/g-full/04/l4.json",
+      "task_path": "reference/m09-l4/g-full/04/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-004/smartflow-rigid-history.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-005",
+      "title": "Bend, Twist, Taper và Cage topology",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "GEOMETRY_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-08-001",
+        "OM9-L3-04-08-002",
+        "OM9-L3-04-08-003",
+        "OM9-L3-04-01-008"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-002"
+      ],
+      "path": "reference/m09-l4/g-full/05/l4.json",
+      "task_path": "reference/m09-l4/g-full/05/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-005/advanced-deformation.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-006",
+      "title": "Orient/Array, Knot và ornament builder",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "E2E_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-07-001",
+        "OM9-L3-04-07-002",
+        "OM9-L3-04-06-001",
+        "OM9-L3-04-06-003"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-002",
+        "OM9-M09-L4-GFULL-005"
+      ],
+      "path": "reference/m09-l4/g-full/06/l4.json",
+      "task_path": "reference/m09-l4/g-full/06/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-006/orient-ornament-arrays.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-007",
+      "title": "Smart Pattern và Rope Builder",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "E2E_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-05-01-001",
+        "OM9-L3-05-01-002",
+        "OM9-L3-05-02-001",
+        "OM9-L3-05-02-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-002",
+        "OM9-M09-L4-GFULL-005"
+      ],
+      "path": "reference/m09-l4/g-full/07/l4.json",
+      "task_path": "reference/m09-l4/g-full/07/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-007/smartpattern-rope.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-008",
+      "title": "User library: asset, metadata và roundtrip",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "PERSISTENCE_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-05-03-001",
+        "OM9-L3-05-03-002",
+        "OM9-L3-05-03-003"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-002"
+      ],
+      "path": "reference/m09-l4/g-full/08/l4.json",
+      "task_path": "reference/m09-l4/g-full/08/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-008/user-library-roundtrip.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-009",
+      "title": "Cross-feature history, Cancel và Save/Open nâng cao",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "TRANSACTION_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-05-002",
+        "OM9-L3-05-01-002",
+        "OM9-L3-05-02-003",
+        "OM9-L3-01-04-003"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-003",
+        "OM9-M09-L4-GFULL-004",
+        "OM9-M09-L4-GFULL-006",
+        "OM9-M09-L4-GFULL-007",
+        "OM9-M09-L4-GFULL-008"
+      ],
+      "path": "reference/m09-l4/g-full/09/l4.json",
+      "task_path": "reference/m09-l4/g-full/09/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-009/advanced-crossworkflow-history.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-010",
+      "title": "Giữ nguyên MVP và đo hiệu năng nâng cao",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "REGRESSION_QA",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-01-12-008",
+        "OM9-L3-01-13-002",
+        "OM9-L3-04-05-002"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-001",
+        "OM9-M09-L4-GFULL-004",
+        "OM9-M09-L4-GFULL-005",
+        "OM9-M09-L4-GFULL-006",
+        "OM9-M09-L4-GFULL-007",
+        "OM9-M09-L4-GFULL-008",
+        "OM9-M09-L4-GFULL-009"
+      ],
+      "path": "reference/m09-l4/g-full/10/l4.json",
+      "task_path": "reference/m09-l4/g-full/10/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-010/full-mvp-regression.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-011",
+      "title": "Đóng gói FULL, license delta và known gaps",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "DISTRIBUTION",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-05-03-001",
+        "OM9-L3-01-12-001"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-008",
+        "OM9-M09-L4-GFULL-010"
+      ],
+      "path": "reference/m09-l4/g-full/11/l4.json",
+      "task_path": "reference/m09-l4/g-full/11/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-011/full-release-packaging.json",
+      "source_revision": null
+    },
+    {
+      "task_id": "OM9-M09-L4-GFULL-012",
+      "title": "Quyết định ký G-FULL GO/NO-GO",
+      "parent_gate_id": "G-FULL",
+      "task_kind": "SIGNOFF",
+      "status": "PLANNED_NOT_EXECUTED",
+      "l3_refs": [
+        "OM9-L3-04-05-002",
+        "OM9-L3-05-03-003"
+      ],
+      "depends_on_task_ids": [
+        "OM9-M09-L4-GFULL-001",
+        "OM9-M09-L4-GFULL-002",
+        "OM9-M09-L4-GFULL-003",
+        "OM9-M09-L4-GFULL-004",
+        "OM9-M09-L4-GFULL-005",
+        "OM9-M09-L4-GFULL-006",
+        "OM9-M09-L4-GFULL-007",
+        "OM9-M09-L4-GFULL-008",
+        "OM9-M09-L4-GFULL-009",
+        "OM9-M09-L4-GFULL-010",
+        "OM9-M09-L4-GFULL-011"
+      ],
+      "path": "reference/m09-l4/g-full/12/l4.json",
+      "task_path": "reference/m09-l4/g-full/12/TASK.md",
+      "evidence_target": "implementation/evidence/M09/G-FULL/OM9-M09-L4-GFULL-012/g-full-decision.json",
+      "source_revision": null
+    }
+  ]
+}

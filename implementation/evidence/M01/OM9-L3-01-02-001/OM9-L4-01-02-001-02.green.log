@@ -1,0 +1,12 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running tests\command_registry.rs (target\debug\deps\command_registry-8075b2d9c092d10d.exe)
+
+running 4 tests
+test r1_to_r6_a_name_resolves_to_one_descriptor ... ok
+test fixture_design_pair_is_present ... ok
+test n1_to_n7_a_name_the_registry_cannot_give_one_answer_for_is_refused ... ok
+test r7_an_operation_round_trips_through_json_with_its_aliases ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

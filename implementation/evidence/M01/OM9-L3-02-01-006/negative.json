@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-006",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "isocurve-as-geometry",
+      "call": "to_geometry()",
+      "expect": {
+        "error": "Unsupported(isocurve is display-only)"
+      }
+    },
+    {
+      "id": "nil-edge",
+      "call": "BoundaryEdge::new with nil UUID",
+      "expect": {
+        "error": "Invalid(boundary edge identity)"
+      }
+    }
+  ]
+}

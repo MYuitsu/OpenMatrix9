@@ -1,0 +1,58 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-001",
+  "l4": "OM9-L4-01-01-001-02",
+  "case": "startup-failure-diagnostic",
+  "source": "authored for the OM9 standalone shell; every case must be observable without a live reviewer",
+  "status": "RUNTIME_DRIVEN_BY_TEST",
+  "cases": [
+    {
+      "id": "missing-document",
+      "kind": "negative",
+      "stage": "document",
+      "detail": "I/O: The system cannot find the file specified. (os error 2)",
+      "expect": {
+        "stage": "document",
+        "receipt_schema": "om9.startup.failure.v1",
+        "receipt_stage": "document",
+        "line_contains": "could not start (document)",
+        "document_unchanged": true,
+        "exit_code": 1
+      }
+    },
+    {
+      "id": "window-smaller-than-the-minimum",
+      "kind": "negative",
+      "stage": "renderer",
+      "config": {
+        "window": [200, 200],
+        "min_window": [720, 480]
+      },
+      "expect": {
+        "stage": "renderer",
+        "detail_contains": "below the minimum window size",
+        "window_created": false
+      }
+    },
+    {
+      "id": "no-hardware-adapter",
+      "kind": "negative",
+      "stage": "renderer",
+      "adapter": null,
+      "expect": {
+        "diagnostic_contains": "hardware GPU adapter required",
+        "document_unchanged": true
+      }
+    },
+    {
+      "id": "silent-exit-forbidden",
+      "kind": "negative",
+      "expect": {
+        "receipt_file": "startup-failure.json",
+        "dialog_env": "OM9_STARTUP_DIALOG",
+        "dialog_suppressed_for": ["0", "false"],
+        "dialog_kept_for": [null, "1", "true"]
+      }
+    }
+  ]
+}

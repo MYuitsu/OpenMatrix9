@@ -1,0 +1,307 @@
+# OM9-L4-01-01-002-02 RED log
+# date: 2026-10-16 09:52:20 +07:00
+# state: skeleton compute_regions/tile_views return a deliberately wrong placeholder Err; tests must fail on assertions, not on build errors
+# blockers still open: BLOCKED_M00 (G00-01 not PASS), BLOCKED_APPROVAL (legal reuse PENDING_HUMAN_M00_APPROVAL), BLOCKED_DEPENDENCY (L2-01-02/03 not implemented)
+# Rust only, no native exception
+
+## command: cargo check -p om9-app --all-targets  (cwd h:\OpenMatrix9\standalone)
+warning: unused imports: `CANVAS_MIN_HEIGHT`, `CANVAS_MIN_WIDTH`, `COMMAND_DEFAULT`, `COMMAND_MAX`, `LEFT_RAIL_DEFAULT`, `LEFT_RAIL_MAX`, `LEFT_RAIL_MIN`, `NARROW_WINDOW_WIDTH`, `PanelId`, `STATUS_BAR_HEIGHT`, and `TOOLBAR_HEIGHT`
+  --> crates\om9-app\src\workbench_regions.rs:27:5
+   |
+27 |     CANVAS_MIN_HEIGHT, CANVAS_MIN_WIDTH, COMMAND_DEFAULT, COMMAND_MAX, COMMAND_MIN, DockLayout,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^  ^^^^^^^^^^^
+28 |     LEFT_RAIL_DEFAULT, LEFT_RAIL_MAX, LEFT_RAIL_MIN, NARROW_WINDOW_WIDTH, PanelId,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^
+29 |     STATUS_BAR_HEIGHT, TOOLBAR_HEIGHT,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `region_status` is never read
+   --> crates\om9-app\src\ui.rs:144:5
+    |
+ 75 | pub struct MatrixApp {
+    |            --------- field in this struct
+...
+144 |     region_status: Option<String>,
+    |     ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `CANVAS_MIN_HEIGHT`, `CANVAS_MIN_WIDTH`, `COMMAND_DEFAULT`, `COMMAND_MAX`, `LEFT_RAIL_DEFAULT`, `LEFT_RAIL_MAX`, `LEFT_RAIL_MIN`, `NARROW_WINDOW_WIDTH`, `STATUS_BAR_HEIGHT`, and `TOOLBAR_HEIGHT`
+  --> crates\om9-app\src\workbench_regions.rs:27:5
+   |
+27 |     CANVAS_MIN_HEIGHT, CANVAS_MIN_WIDTH, COMMAND_DEFAULT, COMMAND_MAX, COMMAND_MIN, DockLayout,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^  ^^^^^^^^^^^
+28 |     LEFT_RAIL_DEFAULT, LEFT_RAIL_MAX, LEFT_RAIL_MIN, NARROW_WINDOW_WIDTH, PanelId,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^
+29 |     STATUS_BAR_HEIGHT, TOOLBAR_HEIGHT,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-app` (lib) generated 2 warnings (run `cargo fix --lib -p om9-app` to apply 1 suggestion)
+warning: `om9-app` (lib test) generated 2 warnings (1 duplicate) (run `cargo fix --lib -p om9-app --tests` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+## exit code: 0
+
+## command: cargo test -p om9-app --lib workbench_regions  (cwd h:\OpenMatrix9\standalone)
+warning: unused imports: `CANVAS_MIN_HEIGHT`, `CANVAS_MIN_WIDTH`, `COMMAND_DEFAULT`, `COMMAND_MAX`, `LEFT_RAIL_DEFAULT`, `LEFT_RAIL_MAX`, `LEFT_RAIL_MIN`, `NARROW_WINDOW_WIDTH`, `STATUS_BAR_HEIGHT`, and `TOOLBAR_HEIGHT`
+  --> crates\om9-app\src\workbench_regions.rs:27:5
+   |
+27 |     CANVAS_MIN_HEIGHT, CANVAS_MIN_WIDTH, COMMAND_DEFAULT, COMMAND_MAX, COMMAND_MIN, DockLayout,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^  ^^^^^^^^^^^
+28 |     LEFT_RAIL_DEFAULT, LEFT_RAIL_MAX, LEFT_RAIL_MIN, NARROW_WINDOW_WIDTH, PanelId,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^
+29 |     STATUS_BAR_HEIGHT, TOOLBAR_HEIGHT,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `region_status` is never read
+   --> crates\om9-app\src\ui.rs:144:5
+    |
+ 75 | pub struct MatrixApp {
+    |            --------- field in this struct
+...
+144 |     region_status: Option<String>,
+    |     ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-app` (lib test) generated 2 warnings (run `cargo fix --lib -p om9-app --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running unittests src\lib.rs (target\debug\deps\om9_app-3a2356c5e25e2c74.exe)
+
+running 21 tests
+test workbench_regions::tests::errors_are_visible_text_and_convert_to_the_core_error ... ok
+test workbench_regions::tests::tile_views_rejects_a_degenerate_center ... FAILED
+test workbench_regions::tests::one_maximized_view_fills_the_center ... FAILED
+test workbench_regions::tests::hidden_right_dock_is_a_defined_state ... FAILED
+test workbench_regions::tests::hidden_left_rail_lowers_the_minimum_width ... FAILED
+test workbench_regions::tests::valid_layout_exposes_left_center_four_views_and_optional_right_dock ... FAILED
+test workbench_regions::tests::without_a_docked_menu_the_right_dock_is_absent ... FAILED
+test workbench_regions::tests::hidden_command_line_is_kept_with_note ... FAILED
+test workbench_regions::tests::plans_for_normal_sizes_never_overlap_and_tile_the_center ... FAILED
+test workbench_regions::tests::smallest_usable_window_keeps_every_minimum ... FAILED
+test workbench_regions::tests::compute_regions_changes_nothing_but_its_return_value ... ok
+test workbench_regions::tests::hosts_are_asked_only_what_the_contract_documents ... FAILED
+test workbench_regions::tests::plan_is_serde_ready ... FAILED
+test workbench_regions::tests::narrow_window_yields_right_dock_with_note ... FAILED
+test workbench_regions::tests::narrow_window_never_overlaps_or_hides_command_input ... FAILED
+test workbench_regions::tests::nonfinite_stored_size_is_an_explicit_error ... FAILED
+test workbench_regions::tests::view_set_must_be_one_to_four_distinct_views ... FAILED
+test workbench_regions::tests::window_below_the_minimum_returns_window_too_small ... FAILED
+test workbench_regions::tests::real_workspace_feeds_the_scene_seam ... ok
+test workbench_regions::tests::zero_negative_nonfinite_and_huge_windows_are_invalid ... FAILED
+test workbench_regions::tests::validate_detects_overlap_and_a_short_command_input ... FAILED
+
+failures:
+
+---- workbench_regions::tests::tile_views_rejects_a_degenerate_center stdout ----
+
+thread 'workbench_regions::tests::tile_views_rejects_a_degenerate_center' (58952) panicked at crates\om9-app\src\workbench_regions.rs:782:65:
+called `Result::unwrap()` on an `Err` value: CenterTooSmall { width: 1.0, height: 100.0 }
+
+---- workbench_regions::tests::one_maximized_view_fills_the_center stdout ----
+
+thread 'workbench_regions::tests::one_maximized_view_fills_the_center' (52032) panicked at crates\om9-app\src\workbench_regions.rs:557:10:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1280.0, height: 900.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::hidden_right_dock_is_a_defined_state stdout ----
+
+thread 'workbench_regions::tests::hidden_right_dock_is_a_defined_state' (29488) panicked at crates\om9-app\src\workbench_regions.rs:715:79:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1600.0, height: 1000.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::hidden_left_rail_lowers_the_minimum_width stdout ----
+
+thread 'workbench_regions::tests::hidden_left_rail_lowers_the_minimum_width' (53920) panicked at crates\om9-app\src\workbench_regions.rs:673:9:
+assertion failed: matches!(error, RegionError::WindowTooSmall
+    { min_width: 320., min_height: 286., .. })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- workbench_regions::tests::valid_layout_exposes_left_center_four_views_and_optional_right_dock stdout ----
+
+thread 'workbench_regions::tests::valid_layout_exposes_left_center_four_views_and_optional_right_dock' (34564) panicked at crates\om9-app\src\workbench_regions.rs:504:79:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1600.0, height: 1000.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::without_a_docked_menu_the_right_dock_is_absent stdout ----
+
+thread 'workbench_regions::tests::without_a_docked_menu_the_right_dock_is_absent' (41220) panicked at crates\om9-app\src\workbench_regions.rs:541:10:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1280.0, height: 900.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::hidden_command_line_is_kept_with_note stdout ----
+
+thread 'workbench_regions::tests::hidden_command_line_is_kept_with_note' (53632) panicked at crates\om9-app\src\workbench_regions.rs:730:78:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1280.0, height: 900.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::plans_for_normal_sizes_never_overlap_and_tile_the_center stdout ----
+
+thread 'workbench_regions::tests::plans_for_normal_sizes_never_overlap_and_tile_the_center' (2884) panicked at crates\om9-app\src\workbench_regions.rs:595:89:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1920.0, height: 1080.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::smallest_usable_window_keeps_every_minimum stdout ----
+
+thread 'workbench_regions::tests::smallest_usable_window_keeps_every_minimum' (37300) panicked at crates\om9-app\src\workbench_regions.rs:571:10:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 560.0, height: 286.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::hosts_are_asked_only_what_the_contract_documents stdout ----
+
+thread 'workbench_regions::tests::hosts_are_asked_only_what_the_contract_documents' (48860) panicked at crates\om9-app\src\workbench_regions.rs:919:88:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1280.0, height: 900.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::plan_is_serde_ready stdout ----
+
+thread 'workbench_regions::tests::plan_is_serde_ready' (44304) panicked at crates\om9-app\src\workbench_regions.rs:617:79:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1600.0, height: 1000.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::narrow_window_yields_right_dock_with_note stdout ----
+
+thread 'workbench_regions::tests::narrow_window_yields_right_dock_with_note' (57992) panicked at crates\om9-app\src\workbench_regions.rs:690:77:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 800.0, height: 600.0, min_width: 0.0, min_height: 0.0 }
+
+---- workbench_regions::tests::narrow_window_never_overlaps_or_hides_command_input stdout ----
+
+thread 'workbench_regions::tests::narrow_window_never_overlaps_or_hides_command_input' (42520) panicked at crates\om9-app\src\workbench_regions.rs:885:29:
+assertion failed: size.width < 560. || size.height < 286.
+
+---- workbench_regions::tests::nonfinite_stored_size_is_an_explicit_error stdout ----
+
+thread 'workbench_regions::tests::nonfinite_stored_size_is_an_explicit_error' (45496) panicked at crates\om9-app\src\workbench_regions.rs:762:9:
+assertion `left == right` failed
+  left: WindowTooSmall { width: 1280.0, height: 900.0, min_width: 0.0, min_height: 0.0 }
+ right: NonFinite { kind: LeftRail }
+
+---- workbench_regions::tests::view_set_must_be_one_to_four_distinct_views stdout ----
+
+thread 'workbench_regions::tests::view_set_must_be_one_to_four_distinct_views' (34360) panicked at crates\om9-app\src\workbench_regions.rs:750:13:
+assertion `left == right` failed
+  left: WindowTooSmall { width: 1280.0, height: 900.0, min_width: 0.0, min_height: 0.0 }
+ right: ViewSetInvalid { count: 0 }
+
+---- workbench_regions::tests::window_below_the_minimum_returns_window_too_small stdout ----
+
+thread 'workbench_regions::tests::window_below_the_minimum_returns_window_too_small' (26392) panicked at crates\om9-app\src\workbench_regions.rs:654:13:
+assertion `left == right` failed
+  left: WindowTooSmall { width: 300.0, height: 150.0, min_width: 0.0, min_height: 0.0 }
+ right: WindowTooSmall { width: 300.0, height: 150.0, min_width: 560.0, min_height: 286.0 }
+
+---- workbench_regions::tests::zero_negative_nonfinite_and_huge_windows_are_invalid stdout ----
+
+thread 'workbench_regions::tests::zero_negative_nonfinite_and_huge_windows_are_invalid' (43664) panicked at crates\om9-app\src\workbench_regions.rs:640:13:
+0x0: window 0x0 is below the minimum 0x0; layout kept
+
+---- workbench_regions::tests::validate_detects_overlap_and_a_short_command_input stdout ----
+
+thread 'workbench_regions::tests::validate_detects_overlap_and_a_short_command_input' (43624) panicked at crates\om9-app\src\workbench_regions.rs:789:79:
+called `Result::unwrap()` on an `Err` value: WindowTooSmall { width: 1600.0, height: 1000.0, min_width: 0.0, min_height: 0.0 }
+
+
+failures:
+    workbench_regions::tests::hidden_command_line_is_kept_with_note
+    workbench_regions::tests::hidden_left_rail_lowers_the_minimum_width
+    workbench_regions::tests::hidden_right_dock_is_a_defined_state
+    workbench_regions::tests::hosts_are_asked_only_what_the_contract_documents
+    workbench_regions::tests::narrow_window_never_overlaps_or_hides_command_input
+    workbench_regions::tests::narrow_window_yields_right_dock_with_note
+    workbench_regions::tests::nonfinite_stored_size_is_an_explicit_error
+    workbench_regions::tests::one_maximized_view_fills_the_center
+    workbench_regions::tests::plan_is_serde_ready
+    workbench_regions::tests::plans_for_normal_sizes_never_overlap_and_tile_the_center
+    workbench_regions::tests::smallest_usable_window_keeps_every_minimum
+    workbench_regions::tests::tile_views_rejects_a_degenerate_center
+    workbench_regions::tests::valid_layout_exposes_left_center_four_views_and_optional_right_dock
+    workbench_regions::tests::validate_detects_overlap_and_a_short_command_input
+    workbench_regions::tests::view_set_must_be_one_to_four_distinct_views
+    workbench_regions::tests::window_below_the_minimum_returns_window_too_small
+    workbench_regions::tests::without_a_docked_menu_the_right_dock_is_absent
+    workbench_regions::tests::zero_negative_nonfinite_and_huge_windows_are_invalid
+
+test result: FAILED. 3 passed; 18 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-app --lib`
+## exit code: 101
+
+## command: cargo test -p om9-app --test workbench_regions  (cwd h:\OpenMatrix9\standalone)
+warning: unused imports: `CANVAS_MIN_HEIGHT`, `CANVAS_MIN_WIDTH`, `COMMAND_DEFAULT`, `COMMAND_MAX`, `LEFT_RAIL_DEFAULT`, `LEFT_RAIL_MAX`, `LEFT_RAIL_MIN`, `NARROW_WINDOW_WIDTH`, `PanelId`, `STATUS_BAR_HEIGHT`, and `TOOLBAR_HEIGHT`
+  --> crates\om9-app\src\workbench_regions.rs:27:5
+   |
+27 |     CANVAS_MIN_HEIGHT, CANVAS_MIN_WIDTH, COMMAND_DEFAULT, COMMAND_MAX, COMMAND_MIN, DockLayout,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^  ^^^^^^^^^^^
+28 |     LEFT_RAIL_DEFAULT, LEFT_RAIL_MAX, LEFT_RAIL_MIN, NARROW_WINDOW_WIDTH, PanelId,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^
+29 |     STATUS_BAR_HEIGHT, TOOLBAR_HEIGHT,
+   |     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `region_status` is never read
+   --> crates\om9-app\src\ui.rs:144:5
+    |
+ 75 | pub struct MatrixApp {
+    |            --------- field in this struct
+...
+144 |     region_status: Option<String>,
+    |     ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-app` (lib) generated 2 warnings (run `cargo fix --lib -p om9-app` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running tests\workbench_regions.rs (target\debug\deps\workbench_regions-e2c1e545441806ff.exe)
+
+running 7 tests
+test positive_fixture_cases_match_the_hand_computed_regions ... FAILED
+test negative_fixture_cases_are_explicit_and_leave_the_layout_unchanged ... FAILED
+test negative_fixture_sweep_never_overlaps_or_hides_the_command_input ... FAILED
+test too_small_window_reports_visibly_and_changes_nothing_else ... FAILED
+test an_unrelated_failure_is_not_cleared_by_the_region_check ... ok
+test normal_window_shows_left_rail_four_viewports_and_the_right_dock ... FAILED
+test narrow_window_yields_the_right_dock_and_keeps_the_command_input ... FAILED
+
+failures:
+
+---- positive_fixture_cases_match_the_hand_computed_regions stdout ----
+
+thread 'positive_fixture_cases_match_the_hand_computed_regions' (4024) panicked at crates\om9-app\tests\workbench_regions.rs:178:37:
+left-rail-four-views-right-dock-1600x1000: window 1600x1000 is below the minimum 0x0; layout kept
+
+---- negative_fixture_cases_are_explicit_and_leave_the_layout_unchanged stdout ----
+
+thread 'negative_fixture_cases_are_explicit_and_leave_the_layout_unchanged' (20528) panicked at crates\om9-app\tests\workbench_regions.rs:216:58:
+narrow-800x600-with-right-dock-yields-and-keeps-command-input: window 800x600 is below the minimum 0x0; layout kept
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- negative_fixture_sweep_never_overlaps_or_hides_the_command_input stdout ----
+
+thread 'negative_fixture_sweep_never_overlaps_or_hides_the_command_input' (18436) panicked at crates\om9-app\tests\workbench_regions.rs:332:5:
+assertion failed: ok_plans > 0 && errors > 0
+
+---- too_small_window_reports_visibly_and_changes_nothing_else stdout ----
+
+thread 'too_small_window_reports_visibly_and_changes_nothing_else' (57692) panicked at crates\om9-app\tests\workbench_regions.rs:436:45:
+good plan
+
+---- normal_window_shows_left_rail_four_viewports_and_the_right_dock stdout ----
+
+thread 'normal_window_shows_left_rail_four_viewports_and_the_right_dock' (22244) panicked at crates\om9-app\tests\workbench_regions.rs:386:41:
+a validated plan
+
+---- narrow_window_yields_the_right_dock_and_keeps_the_command_input stdout ----
+
+thread 'narrow_window_yields_the_right_dock_and_keeps_the_command_input' (50704) panicked at crates\om9-app\tests\workbench_regions.rs:403:41:
+plan
+
+
+failures:
+    narrow_window_yields_the_right_dock_and_keeps_the_command_input
+    negative_fixture_cases_are_explicit_and_leave_the_layout_unchanged
+    negative_fixture_sweep_never_overlaps_or_hides_the_command_input
+    normal_window_shows_left_rail_four_viewports_and_the_right_dock
+    positive_fixture_cases_match_the_hand_computed_regions
+    too_small_window_reports_visibly_and_changes_nothing_else
+
+test result: FAILED. 1 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+
+error: test failed, to rerun pass `-p om9-app --test workbench_regions`
+## exit code: 101

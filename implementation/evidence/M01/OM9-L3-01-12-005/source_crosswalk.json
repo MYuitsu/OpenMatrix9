@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-12-005",
+  "title": "Atomic Save And Write Failure Recovery",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "Encode/verify, unique staging file, fsync, re-read verification and atomic publication; every failure keeps the last good file.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-archive/src/atomic_file.rs:26-57",
+      "what": "bounded read"
+    },
+    {
+      "path_line": "crates/om9-archive/src/atomic_file.rs:58-141",
+      "what": "save pipeline"
+    },
+    {
+      "path_line": "crates/om9-native-owner/src/verified_file.rs:13-52",
+      "what": "Windows VerifiedFile open/publish"
+    }
+  ],
+  "reuse_decision": "ADD authored atomic save; reuse om9-native-owner VerifiedFile on Windows.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-01-12/crosswalk.json"
+}

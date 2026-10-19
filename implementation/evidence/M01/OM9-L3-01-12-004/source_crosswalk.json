@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-12-004",
+  "title": "Builder History Stub Persistence",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "Feature and recipe placeholders persist; unknown modules are reported as Unresolved at runtime restoration, never invented.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-core/src/model.rs:199-245",
+      "what": "Feature/FeatureKind and stable FeatureId"
+    },
+    {
+      "path_line": "crates/om9-core/src/history.rs:110-149",
+      "what": "Recipe record"
+    },
+    {
+      "path_line": "crates/om9-core/src/history.rs:350-364",
+      "what": "history validation and execution order"
+    },
+    {
+      "path_line": "crates/om9-archive/src/restore.rs:147-198",
+      "what": "runtime unresolved diagnostics"
+    }
+  ],
+  "reuse_decision": "EXTEND existing Feature/Recipe; no second history schema.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-01-12/crosswalk.json"
+}

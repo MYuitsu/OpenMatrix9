@@ -1,0 +1,103 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-02-01",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-02",
+  "title": "Toolchain and C ABI bridge proof",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-02-01",
+    "module_id": "OM9-M00-L2-02",
+    "gate_id": "G00-02",
+    "title": "Toolchain and C ABI bridge proof",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-02-01-01",
+        "title": "Audit OCCT build.rs và ABI C++",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/L4-01 - Audit OCCT build.rs và ABI C++/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-01-02",
+        "title": "Thử compile qymcad-kernel tại revision pin",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/L4-02 - Thử compile qymcad-kernel tại revision pin/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-01-03",
+        "title": "Xác nhận C ABI ownership và ngoại lệ",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/L4-03 - Xác nhận C ABI ownership và ngoại lệ/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-01-04",
+        "title": "Proof gọi OCCT từ ứng dụng Rust tối giản",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/L4-04 - Proof gọi OCCT từ ứng dụng Rust tối giản/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-02-01-01",
+    "OM9-M00-L4-02-01-02",
+    "OM9-M00-L4-02-01-03",
+    "OM9-M00-L4-02-01-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-02-01-01",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/L4-01 - Audit OCCT build.rs và ABI C++/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-01-02",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/L4-02 - Thử compile qymcad-kernel tại revision pin/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-01-03",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/L4-03 - Xác nhận C ABI ownership và ngoại lệ/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-01-04",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-01 - Toolchain and C ABI bridge proof/L4-04 - Proof gọi OCCT từ ứng dụng Rust tối giản/l4.json"
+    }
+  ],
+  "kernel_pin": {
+    "version": "8.0.1",
+    "tag": "V8_0_1",
+    "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
+    "pin_file": "native/occt/pin.json"
+  },
+  "execution_evidence": {
+    "l4_done": [
+      "OM9-M00-L4-02-01-01",
+      "OM9-M00-L4-02-01-02",
+      "OM9-M00-L4-02-01-03",
+      "OM9-M00-L4-02-01-04"
+    ],
+    "l4_open": [],
+    "evidence_root": "implementation/evidence/M00/OM9-M00-L3-02-01",
+    "design": "implementation/design/M00/OM9-M00-L3-02-01/api.md",
+    "fixtures": "implementation/fixtures/M00/OM9-M00-L3-02-01/{positive,negative}.json",
+    "sign_off": {
+      "status": "SIGNED",
+      "reviewer": "chủ dự án (project owner)",
+      "signed_at_utc": "2026-10-17T16:40:00Z",
+      "record": "implementation/evidence/M00/OM9-M00-L3-02-01/OM9-M00-L3-02-01.ui-review.json",
+      "manual_test_gate": "AUTO_ONLY"
+    },
+    "next": "gate G00-02 closed; next is G00-03 (UI/Viewport/GPU feasibility)",
+    "harness": "native/occt-rust-proof (standalone workspace; feasibility only)",
+    "product_crate": "none: crates/om9-kernel is created in M01-L2-01-05, not in the M00 gate"
+  },
+  "version_history": [
+    {
+      "date": "2026-10-17",
+      "change": "OCCT 8.0.1 pinned; 7.8.1 (FreeCAD bundle) and 7.9.3 (workflow CI) references are historical",
+      "reason": "official release ships headers, import libraries, DLLs and CMake config; C++17 baseline; 8.0.1 carries the modelling/meshing/healing fixes the gate needs",
+      "pin": "native/occt/pin.json"
+    }
+  ]
+}

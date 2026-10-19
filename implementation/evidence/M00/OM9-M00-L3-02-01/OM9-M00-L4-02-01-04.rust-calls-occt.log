@@ -1,0 +1,39 @@
+# M00-L4-02-01-04 - proof: a minimal Rust application calls the pinned OCCT kernel
+# utc: 2026-10-17
+# harness: native/occt-rust-proof (standalone workspace under native/, NOT a product crate: M00 is a gate)
+# pin: native/occt/pin.json (OCCT 8.0.1, tag V8_0_1, commit b8f597c677811d1f9f4d8a97f5ae2825c0353a42)
+# product bridge: created in M01-L2-01-05 from this proof; crates/om9-kernel intentionally does not exist yet
+# command: cargo test --manifest-path native/occt-rust-proof/Cargo.toml -j 2
+# command: cargo run  --manifest-path native/occt-rust-proof/Cargo.toml --quiet
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src\lib.rs (L:\om9-target-proof\debug\deps\om9_occt_rust_proof-8625dc3abcfd9cb0.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (L:\om9-target-proof\debug\deps\om9_occt_rust_proof-a9ad3965413f5320.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\proof.rs (L:\om9-target-proof\debug\deps\proof-41a48b13cff03f8b.exe)
+
+running 4 tests
+test the_linked_kernel_is_the_pinned_version ... ok
+test invalid_input_is_reported_not_fatal ... ok
+test a_box_volume_is_exact_from_rust ... ok
+test a_boolean_drilled_volume_matches_the_analytic_value_from_rust ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests om9_occt_rust_proof
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+{"occt_version": "8.0.1", "box_volume": 399.99999999999988631, "drilled_volume": 349.73451754256325330, "expected_drilled": 349.73451754256331014, "invalid_input": "kernel failure: Standard_ConstructionError"}

@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-005",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "promote-untrimmed",
+      "call": "to_untrimmed()",
+      "expect": {
+        "error": "Unsupported(trimmed surface cannot be promoted to an untrimmed surface)"
+      }
+    },
+    {
+      "id": "loop-outside-domain",
+      "call": "outer U = 2.0",
+      "expect": {
+        "error": "Invalid(trim loop outside surface domain)"
+      }
+    },
+    {
+      "id": "inner-outside-outer",
+      "call": "inner at (0.05,0.05) with outer [0.2,0.8]",
+      "expect": {
+        "error": "Invalid(trim inner loop outside outer loop)"
+      }
+    },
+    {
+      "id": "damaged-payload",
+      "call": "archive metadata with 2-point outer loop",
+      "expect": {
+        "error": "Invalid(trim outer loop)",
+        "publication": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-001",
+  "l4": "OM9-L4-01-02-001-02",
+  "case": "command-ids-and-alias-registry-negative",
+  "negative_oracle": "Duplicate alias ambiguous or unknown ID refused with explicit diagnostic",
+  "cases": [
+    {
+      "id": "N1-an-unknown-name-is-refused-by-name",
+      "register": [
+        {
+          "id": "line",
+          "feature": "OM9-FEAT-001",
+          "aliases": [
+            "Ln"
+          ],
+          "inputs": [
+            "Point"
+          ]
+        }
+      ],
+      "resolve": "NotACommand",
+      "expect": {
+        "error": "UnknownName",
+        "message": "unknown command 'NotACommand'"
+      }
+    },
+    {
+      "id": "N2-a-duplicate-alias-across-operations-is-ambiguous",
+      "register": [
+        {
+          "id": "line",
+          "feature": "OM9-FEAT-001",
+          "aliases": [
+            "Ln"
+          ],
+          "inputs": [
+            "Point"
+          ]
+        },
+        {
+          "id": "polyline",
+          "feature": "OM9-FEAT-002",
+          "aliases": [
+            "ln"
+          ],
+          "inputs": [
+            "Point"
+          ]
+        }
+      ],
+      "expect": {
+        "error": "DuplicateName",
+        "message_contains": [
+          "'ln' is ambiguous",
+          "line",
+          "polyline"
+        ],
+        "first_registration_survives": true
+      }
+    },
+    {
+      "id": "N3-an-alias-that-is-another-operations-id-is-ambiguous",
+      "register": [
+        {
+          "id": "line",
+          "feature": "OM9-FEAT-001",
+          "aliases": [],
+          "inputs": [
+            "Point"
+          ]
+        },
+        {
+          "id": "polyline",
+          "feature": "OM9-FEAT-002",
+          "aliases": [
+            "line"
+          ],
+          "inputs": [
+            "Point"
+          ]
+        }
+      ],
+      "expect": {
+        "error": "DuplicateName",
+        "message_contains": [
+          "'line' is ambiguous"
+        ]
+      }
+    },
+    {
+      "id": "N4-an-empty-alias-is-refused",
+      "register": [
+        {
+          "id": "line",
+          "feature": "OM9-FEAT-001",
+          "aliases": [
+            "  "
+          ],
+          "inputs": [
+            "Point"
+          ]
+        }
+      ],
+      "expect": {
+        "error": "EmptyName",
+        "message_contains": [
+          "'line' has an empty name"
+        ]
+      }
+    },
+    {
+      "id": "N5-an-empty-id-is-refused",
+      "register": [
+        {
+          "id": "   ",
+          "feature": "OM9-FEAT-001",
+          "aliases": [],
+          "inputs": [
+            "Point"
+          ]
+        }
+      ],
+      "expect": {
+        "error": "InvalidOperation",
+        "message_contains": [
+          "the id is empty"
+        ]
+      }
+    },
+    {
+      "id": "N6-a-duplicate-id-is-refused",
+      "register": [
+        {
+          "id": "line",
+          "feature": "OM9-FEAT-001",
+          "aliases": [
+            "Ln"
+          ],
+          "inputs": [
+            "Point"
+          ]
+        },
+        {
+          "id": "line",
+          "feature": "OM9-FEAT-002",
+          "aliases": [],
+          "inputs": [
+            "Point"
+          ]
+        }
+      ],
+      "expect": {
+        "error": "DuplicateId",
+        "message_contains": [
+          "'line' is already registered"
+        ]
+      }
+    },
+    {
+      "id": "N7-the-total-register-entry-point-still-refuses-a-duplicate-id",
+      "register": [
+        {
+          "id": "line",
+          "feature": "OM9-FEAT-001",
+          "aliases": [
+            "Ln"
+          ],
+          "inputs": [
+            "Point"
+          ]
+        },
+        {
+          "id": "line",
+          "feature": "OM9-FEAT-002",
+          "aliases": [],
+          "inputs": [
+            "Point"
+          ]
+        }
+      ],
+      "use_total_api": true,
+      "expect": {
+        "error": "Invalid",
+        "message_contains": [
+          "invalid operation registration"
+        ]
+      }
+    }
+  ],
+  "note": "An operation may spell its own name twice under different case (the built-in menu name beside the stable id): that is R8 in positive.json, not a failure. Ambiguity only exists BETWEEN two commands."
+}

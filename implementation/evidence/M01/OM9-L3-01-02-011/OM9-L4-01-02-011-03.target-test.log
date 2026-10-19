@@ -1,0 +1,55 @@
+task: OM9-L4-01-02-011-03 (implementation) Command Availability Preconditions
+utc: 2026-10-16T15:08:40Z
+cwd: H:\OpenMatrix9\standalone
+
+== RED ==
+xem OM9-L4-01-02-011-02.red.log: 2 passed; 2 failed. Loi san pham: cong admit() bo qua ngu canh phien duoc dua (A7 that bai khi precondition DA thoa) va so sanh ten option phan biet hoa/thuong (A8).
+== GREEN: cargo test -p om9-core --test command_availability ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\command_availability.rs (target\debug\deps\command_availability-af0ef476aa1032b9.exe)
+
+running 4 tests
+test a7_to_a8_admit_reads_the_context_and_the_option_names_it_was_given ... ok
+test a1_to_a6_availability_follows_the_session_state ... ok
+test fixture_design_pair_is_present ... ok
+test b1_to_b7_a_command_that_cannot_run_is_never_offered ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+exit=0
+== cargo test -p om9-core ==
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test commit_requires_actual_target_receipt_and_failed_or_legacy_receipt_is_insufficient ... ok
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test late_cancellation_stale_import_and_failed_acceptance_keep_prior_redo_and_unaccepted_ids ... ok
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.35s
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test booked_scope_failed_prepare_keeps_booking_and_prior_redo ... ok
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 101
+error: this `if` statement can be collapsed
+error: could not compile `om9-core` (test "command_registry") due to 1 previous error

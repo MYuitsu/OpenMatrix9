@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-007",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "closed-cube",
+      "call": "classify_shell(cube, all shells closed, kind Solid)",
+      "expect": {
+        "class": "Solid"
+      }
+    },
+    {
+      "id": "open-polysurface",
+      "call": "5-face open shell",
+      "expect": {
+        "class": "Polysurface"
+      }
+    },
+    {
+      "id": "single-face",
+      "call": "one-face open shell",
+      "expect": {
+        "class": "Surface"
+      }
+    }
+  ]
+}

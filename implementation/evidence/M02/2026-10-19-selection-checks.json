@@ -1,0 +1,274 @@
+{
+  "date": "2026-10-18T21:14:06.793830+00:00",
+  "target_dir": "L:/om9-target",
+  "parallel_jobs": 2,
+  "checks": [
+    {
+      "name": "core-gumball",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "gumball",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 15,
+      "seconds": 0.993,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/core-gumball.log",
+      "log_sha256": "e6fbce1d927d824eb2e0e755904e52bf35ebdb7e190abbf9e0907fac953dd795"
+    },
+    {
+      "name": "scene",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-scene",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 69,
+      "seconds": 6.051,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/scene.log",
+      "log_sha256": "5af7dccd52e88953a4e8085c878438d6b90800bf14078f7ea1a1483a594dfcee"
+    },
+    {
+      "name": "app-selection",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "-j",
+        "2",
+        "--test",
+        "acceptance_selection_set",
+        "--test",
+        "acceptance_viewport_selection",
+        "--test",
+        "subobject_selection",
+        "--test",
+        "selection_overlay",
+        "--test",
+        "rubber_band",
+        "--test",
+        "gumball_viewport",
+        "--test",
+        "gumball_interaction",
+        "--test",
+        "gumball_placement",
+        "--test",
+        "gumball_numeric",
+        "--test",
+        "clip_behaviours",
+        "--test",
+        "preview_drag",
+        "--test",
+        "gesture_regressions",
+        "--test",
+        "pick_disambiguation"
+      ],
+      "exit_code": 0,
+      "test_count": 61,
+      "seconds": 43.983,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/app-selection.log",
+      "log_sha256": "f133532f15051f9b7d3f1b37d77c9fd360aa498b4719d6bd304e60fcc308535e"
+    },
+    {
+      "name": "gpu-library",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "--lib",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 96,
+      "seconds": 14.535,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/gpu-library.log",
+      "log_sha256": "037f0515baee18e4a53859dbc4e97cbe78b539eef877dd518d9573bd955c3e44"
+    },
+    {
+      "name": "render-overlay",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-render",
+        "--lib",
+        "overlay::tests",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 2,
+      "seconds": 4.576,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/render-overlay.log",
+      "log_sha256": "e81f7ca175a1a7eb01cfab41255562fc0f1c1f24e9f3f953348bb9dbceca9b1c"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-app",
+        "-p",
+        "om9-scene",
+        "-p",
+        "om9-render",
+        "--features",
+        "om9-app/gpu-sphere",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 101,
+      "test_count": 0,
+      "seconds": 5.803,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/clippy.log",
+      "log_sha256": "60a9da560fed940807505d2db53b9feff9c83e3c0b7829003075f49aeffd74d4"
+    },
+    {
+      "name": "python-compile",
+      "command": [
+        "python",
+        "-m",
+        "py_compile",
+        "tools/validate_m02_selection.py"
+      ],
+      "exit_code": 0,
+      "test_count": 0,
+      "seconds": 0.07,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/python-compile.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "public-source-audit",
+      "command": [
+        "python",
+        "tools/public_source_audit.py"
+      ],
+      "exit_code": 1,
+      "test_count": 0,
+      "seconds": 2.399,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/public-source-audit.log",
+      "log_sha256": "1b807d11ccb4f67875804146f51065248dc104344eb64bd4b9741938364ffee4"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-app",
+        "-p",
+        "om9-scene",
+        "-p",
+        "om9-render",
+        "--features",
+        "om9-app/gpu-sphere",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "test_count": 0,
+      "seconds": 0.46,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/clippy-final.log",
+      "log_sha256": "8b1fd2394f7b6f177ede882431154a419bd9f404f00add314c912e91a7fc0ec0",
+      "attempt": 2
+    },
+    {
+      "name": "gumball-cold",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gumball_cold",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 1,
+      "seconds": 0.417,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/gumball-cold-final.log",
+      "log_sha256": "82e77e58250c697cc173f3a7ecf36324503f036d8be1ed22c7f215d73e61805a",
+      "attempt": 1
+    }
+  ],
+  "latest_results": {
+    "core-gumball": {
+      "exit_code": 0,
+      "test_count": 15,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/core-gumball.log"
+    },
+    "scene": {
+      "exit_code": 0,
+      "test_count": 69,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/scene.log"
+    },
+    "app-selection": {
+      "exit_code": 0,
+      "test_count": 61,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/app-selection.log"
+    },
+    "gpu-library": {
+      "exit_code": 0,
+      "test_count": 96,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/gpu-library.log"
+    },
+    "render-overlay": {
+      "exit_code": 0,
+      "test_count": 2,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/render-overlay.log"
+    },
+    "clippy": {
+      "exit_code": 0,
+      "test_count": 0,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/clippy-final.log"
+    },
+    "python-compile": {
+      "exit_code": 0,
+      "test_count": 0,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/python-compile.log"
+    },
+    "public-source-audit": {
+      "exit_code": 1,
+      "test_count": 0,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/public-source-audit.log"
+    },
+    "gumball-cold": {
+      "exit_code": 0,
+      "test_count": 1,
+      "log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/gumball-cold-final.log"
+    }
+  },
+  "rust_passed_tests": 244,
+  "public_source_audit": {
+    "exit_code": 1,
+    "error_count": 11735,
+    "task_outputs_in_errors": 0,
+    "scope": "existing reference/manual/raster paths; not a release pass",
+    "final_log": "build/standalone-validation/ui-artifacts/m02-selection-20261019-checks/public-source-audit-final.log",
+    "final_log_sha256": "757af34b924386ce3251b319edfbf9e55ba41f52145599694cdf92f4eee76268"
+  }
+}

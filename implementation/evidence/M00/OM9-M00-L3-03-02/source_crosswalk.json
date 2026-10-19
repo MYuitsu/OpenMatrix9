@@ -1,0 +1,45 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-M00-L3-03-02",
+  "entries": [
+    {
+      "l4": "OM9-M00-L4-03-02-01",
+      "capability": "B-Rep tessellation reaches the GPU",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bridge.cpp#om9_occt_sphere_mesh_dump",
+        "native/occt-rust-proof/src/bin/export_mesh.rs",
+        "native/gpu-probe/src/main.rs"
+      ],
+      "occt_symbols": [
+        "BRepMesh_IncrementalMesh",
+        "Poly_Triangulation",
+        "Poly_Triangle"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-02/OM9-M00-L4-03-02-01.mesh-to-gpu.log",
+      "finding": "the kernel mesh (2542 vertices, 5008 triangles, 90 600 bytes) is written by the OCCT harness, parsed by the probe and uploaded to a vertex/index buffer; a scene frame takes 0.755 ms mean, 1.278 ms p99, painted 338 328 of 921 600 pixels"
+    },
+    {
+      "l4": "OM9-M00-L4-03-02-02",
+      "capability": "pan, zoom, orbit and DPI move the mesh as expected",
+      "upstream_sources": [
+        "native/gpu-probe/src/main.rs (perspective/look_at/multiply, camera sweep)"
+      ],
+      "occt_symbols": [],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-02/OM9-M00-L4-03-02-02.camera-dpi.log",
+      "finding": "orbit +-30 deg leaves the covered fraction at 0.3671 (a sphere is rotationally symmetric, so this is the expected invariance); pan shifts it to 0.3589; zoom 2x fills the frame (1.0) and zoom 0.5x shrinks to 0.0842 (about 1/4 of the base, matching a 1/zoom^2 area law); DPI 1.5x and 2x keep the fraction at 0.3671 while frame time grows with pixel count (0.98 ms, 1.54 ms)"
+    },
+    {
+      "l4": "OM9-M00-L4-03-02-03",
+      "capability": "bench of first frame, frame time and GPU memory",
+      "upstream_sources": [
+        "native/gpu-probe/src/main.rs"
+      ],
+      "occt_symbols": [],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-03-02/OM9-M00-L4-03-02-03.gpu-bench.log",
+      "finding": "minimal 1280x720 loop: device 0.044 s, first frame 29.4 ms, 0.24 ms/frame, 7.4 MB; adapter is an NVIDIA RTX 3060 through Vulkan. The fps figure is a loop measurement, not viewport FPS"
+    }
+  ],
+  "pending": {
+    "OM9-M00-L4-03-02-04": "device loss and fallback renderer: not measured yet"
+  }
+}

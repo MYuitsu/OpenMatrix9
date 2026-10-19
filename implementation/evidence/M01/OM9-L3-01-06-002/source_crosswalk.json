@@ -1,0 +1,31 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-06-002",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-06-002-01",
+      "capability": "Shared scene graphics resources",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-002/"
+    },
+    {
+      "l4": "OM9-L4-01-06-002-02",
+      "capability": "Shared scene graphics resources",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-002/"
+    },
+    {
+      "l4": "OM9-L4-01-06-002-03",
+      "capability": "Shared scene graphics resources",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-002/"
+    },
+    {
+      "l4": "OM9-L4-01-06-002-04",
+      "capability": "Shared scene graphics resources",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-002/"
+    },
+    {
+      "l4": "OM9-L4-01-06-002-05",
+      "capability": "Shared scene graphics resources",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-002/"
+    }
+  ]
+}

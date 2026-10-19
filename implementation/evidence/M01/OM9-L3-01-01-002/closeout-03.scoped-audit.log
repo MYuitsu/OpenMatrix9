@@ -1,0 +1,42 @@
+closeout-03 public source audit record, 2026-10-16
+Evidence only. The FULL audit did NOT pass. The scoped mirror run covers only the mirrored files. tools/public_source_audit.py was not edited.
+
+== Run 1: full audit (repo root)
+command: python tools\public_source_audit.py
+exit code: 1
+source_files: 23807; errors: 11721
+errors grouped by first path segment:
+  OM9_Milestones	5877
+  ref	5611
+  vendor-research	114
+  QymCAD	114
+  manuals	4
+  om9-window.png	1
+errors outside ref/, manuals/, OM9_Milestones/, QymCAD/, vendor-research/, om9-window.png: 0
+result: NOT PASSED (exit 1). Not fixed: AGENTS.md forbids touching private references.
+
+== Mirror build (copy only, nothing moved; no PNG from the touched set; nothing from private trees)
+helper: build\scoped-audit-mirror.tmp.ps1 (temporary, in build\)
+mirror=h:\OpenMatrix9\build\scoped-audit\2026-10-16-l3-002 copied_files=557
+
+== Run 2: scoped mirror
+command: python tools\public_source_audit.py --project-root build\scoped-audit\2026-10-16-l3-002
+exit code: 0
+{"source_files": 557, "icon_bindings": 511, "svg_files": 510, "errors": []}
+
+== Run 3: control (control.exe and control.png added to the mirror only)
+command: python tools\public_source_audit.py --project-root build\scoped-audit\2026-10-16-l3-002
+exit code: 1
+{"source_files": 559, "icon_bindings": 511, "svg_files": 510, "errors": ["Private/binary artifact: control.exe", "Unreviewed raster artifact: control.png"]}
+control files deleted: exe=True png=True
+
+== Run 4: re-run after deleting the control files
+exit code: 0
+{"source_files": 557, "icon_bindings": 511, "svg_files": 510, "errors": []}
+
+== Guard: tools/public_source_audit.py unchanged
+git status --short tools/public_source_audit.py: []
+
+== Proposal for the user (NOT implemented)
+Add --paths FILE... (or --only-tracked via git ls-files) and an optional --exclude list (ref, manuals, OM9_Milestones, QymCAD, vendor-research, root screenshots). Default behaviour unchanged so strict mode stays fail-closed.
+Trade-off: an exclude list used by default weakens fail-closed behaviour; --paths does not. Decision belongs to the user.

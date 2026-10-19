@@ -1,0 +1,774 @@
+{
+  "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+  "checks": [
+    "CMD line accepted once",
+    "actual CMD Undo",
+    "actual CMD Redo",
+    "Esc canceled draft without publication"
+  ],
+  "cmd": "Command: Line\nStart of line (BothSides=No): 0,0,0\nEnd of line (BothSides=No): 12,6,0\nCommand: Undo\nCommand: Redo\nCommand: Line\nStart of line (BothSides=No): 2,2,0\nCommand: ",
+  "document": {
+    "context_revision": 1,
+    "current_layer": null,
+    "definitions": {},
+    "entities": {
+      "391bf267-f81e-41fb-ace5-c7ff6d8e9667": {
+        "attributes": {
+          "color": [
+            0,
+            130,
+            85,
+            255
+          ],
+          "layer": null,
+          "locked": false,
+          "selectable": true,
+          "visible": true
+        },
+        "attributes_revision": 1,
+        "generation": 1,
+        "geometry": {
+          "Curve": {
+            "Line": {
+              "domain": [
+                0.0,
+                13.416407864998739
+              ],
+              "end": [
+                12.0,
+                6.0,
+                0.0
+              ],
+              "start": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "geometry_revision": 1,
+        "id": "391bf267-f81e-41fb-ace5-c7ff6d8e9667",
+        "label": "Line",
+        "placement": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "epoch": 1,
+    "history": {
+      "recipes": {}
+    },
+    "id": "d8017f46-5072-4beb-b233-776f45dc6007",
+    "layer_order": [],
+    "layers": {},
+    "name": "Untitled",
+    "owner_session": "869fcd8e-ce9f-433f-b350-11407eee9523",
+    "page_unit": "Millimeter",
+    "results": {},
+    "revision": 2,
+    "session_generation": 1
+  },
+  "limitations": [
+    "full Matrix9 UI acceptance pending",
+    "CAD native adapters pending",
+    "GPU geometry caching and performance acceptance pending",
+    "DPI/multi-monitor acceptance pending"
+  ],
+  "objects": 1,
+  "passes": 21,
+  "scope": "initial_standalone_ui_slice",
+  "screenshot": {
+    "path": "build/standalone-validation/ui-workspace.png",
+    "sha256": "96e2b7a554461051953bdea9318f5100ca867427296d5e3c7e580f1a7b5c847d",
+    "size": [
+      1600,
+      1000
+    ]
+  },
+  "screenshot_saved": true,
+  "undo": 1,
+  "view_rects": {
+    "Looking Down": [
+      300.0,
+      178.0,
+      649.0,
+      410.0
+    ],
+    "Perspective": [
+      951.0,
+      178.0,
+      649.0,
+      410.0
+    ],
+    "Side View": [
+      951.0,
+      590.0,
+      649.0,
+      410.0
+    ],
+    "Through Finger": [
+      300.0,
+      590.0,
+      649.0,
+      410.0
+    ]
+  },
+  "schema_version": 1,
+  "target": "OM9Standalone",
+  "status": "validated_supported_ui_slice",
+  "goal_complete": false,
+  "harness": {
+    "path": "tools/validate_standalone_ui.py",
+    "sha256": "4ba9a12d148a57f07fef6ec7c628cdee61dfa04c334c88c08fff1e8362f14c6b"
+  },
+  "timestamp": "2026-10-14T05:51:25+07:00",
+  "binary": {
+    "path": "standalone/target/release/om9.exe",
+    "sha256": "e3690cf45a191744e2dab3d48339d55e7b05e439d0d0fcc59a3b35e603439f69"
+  },
+  "pe_imports": [
+    "KERNEL32.dll",
+    "USER32.dll",
+    "VCRUNTIME140.dll",
+    "advapi32.dll",
+    "api-ms-win-core-synch-l1-2-0.dll",
+    "api-ms-win-crt-heap-l1-1-0.dll",
+    "api-ms-win-crt-locale-l1-1-0.dll",
+    "api-ms-win-crt-math-l1-1-0.dll",
+    "api-ms-win-crt-runtime-l1-1-0.dll",
+    "api-ms-win-crt-stdio-l1-1-0.dll",
+    "api-ms-win-crt-string-l1-1-0.dll",
+    "bcryptprimitives.dll",
+    "dwmapi.dll",
+    "dxgi.dll",
+    "gdi32.dll",
+    "imm32.dll",
+    "kernel32.dll",
+    "ntdll.dll",
+    "ole32.dll",
+    "oleaut32.dll",
+    "opengl32.dll",
+    "setupapi.dll",
+    "shell32.dll",
+    "user32.dll",
+    "uxtheme.dll"
+  ],
+  "loaded_modules": [
+    "om9.exe",
+    "ntdll.dll",
+    "KERNEL32.DLL",
+    "KERNELBASE.dll",
+    "advapi32.dll",
+    "msvcrt.dll",
+    "sechost.dll",
+    "RPCRT4.dll",
+    "gdi32.dll",
+    "win32u.dll",
+    "gdi32full.dll",
+    "msvcp_win.dll",
+    "ucrtbase.dll",
+    "USER32.dll",
+    "setupapi.dll",
+    "oleaut32.dll",
+    "opengl32.dll",
+    "dxgi.dll",
+    "combase.dll",
+    "ole32.dll",
+    "GLU32.dll",
+    "powrprof.dll",
+    "shell32.dll",
+    "bcryptprimitives.dll",
+    "dxcore.dll",
+    "imm32.dll",
+    "dwmapi.dll",
+    "VCRUNTIME140.dll",
+    "uxtheme.dll",
+    "UMPDC.dll",
+    "MSCTF.dll",
+    "shcore.dll",
+    "kernel.appcore.dll",
+    "clbcatq.dll",
+    "dataexchange.dll",
+    "twinapi.appcore.dll",
+    "explorerframe.dll",
+    "SHLWAPI.dll",
+    "vulkan-1.dll",
+    "CFGMGR32.dll",
+    "windows.staterepositorycore.dll",
+    "directxdatabasehelper.dll",
+    "nvoglv64.dll",
+    "WTSAPI32.dll",
+    "VERSION.dll",
+    "CRYPT32.dll",
+    "SspiCli.dll",
+    "msasn1.dll",
+    "cryptnet.dll",
+    "cryptbase.dll",
+    "wldp.dll",
+    "drvstore.dll",
+    "devobj.dll",
+    "ntmarta.dll",
+    "WINTRUST.dll",
+    "imagehlp.dll",
+    "CRYPTSP.dll",
+    "rsaenh.dll",
+    "bcrypt.dll",
+    "nvgpucomp64.dll",
+    "WinTypes.dll",
+    "rometadata.dll",
+    "windows.storage.dll",
+    "profapi.dll",
+    "nvspcap64.dll",
+    "d3d12.dll",
+    "d3dcompiler_47.dll",
+    "WINSTA.dll",
+    "nvrtum64.dll",
+    "D3D12Core.dll",
+    "nvldumdx.dll",
+    "NvMemMapStoragex.dll",
+    "WINMM.dll",
+    "nvwgf2umx.dll",
+    "nvppex.dll",
+    "D3DSCache.dll",
+    "USERENV.dll",
+    "d3d10warp.dll",
+    "DispBroker.dll",
+    "nvapi64.dll",
+    "nvapi64_impl.dll",
+    "dcomp.dll",
+    "Microsoft.Internal.WarpPal.dll",
+    "textinputframework.dll"
+  ],
+  "children": [],
+  "native_window_observed": true,
+  "sources": [
+    {
+      "path": "standalone/Cargo.lock",
+      "sha256": "4123dee0d2009cb9c727878598ebf95107c531c870d154e3949bb3a928f620c8"
+    },
+    {
+      "path": "standalone/Cargo.toml",
+      "sha256": "69e82c072979124b990977020403421b1b3395b33425f8bdf6c988489cc550c0"
+    },
+    {
+      "path": "standalone/crates/om9-app/assets/features.json",
+      "sha256": "87fba3e1ca2ed36f797c9477145230e759f96cf5416e91e3175d155042e0be44"
+    },
+    {
+      "path": "standalone/crates/om9-app/Cargo.toml",
+      "sha256": "dfc35cf589e618c586f9845af44985ef1f2a64dc49bc44378e24b6cab79191e9"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/icons.rs",
+      "sha256": "8ebacde541007928be37c618ab579535b8ae592a662e763e83e61b330c32466a"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/lib.rs",
+      "sha256": "7449c08da9575f2a953d323ca67f6fd923069dc0c031841c6fbdc135f3a1fc32"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/main.rs",
+      "sha256": "7ecd838d56550a0a62b93ecac29f0943da441f7994b5efe1711d3900f0e2b63d"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/report.rs",
+      "sha256": "59d67534f0df73656c8adadefef12b56f67107a3a355f0e8bf0f9f9d1a8506d1"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/session.rs",
+      "sha256": "62300cc8bc630ffbfa045eb17b8d6b0012846445e0dfd2a53e0b6e83443833aa"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/transcript.rs",
+      "sha256": "000de98ce3f3324ec42c9ccb0d212174316c05f8e0f937f03f3032ec3a7cd7c4"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/chrome.rs",
+      "sha256": "798e004c2e95a3b283a80eedd0464f3f0ef4466b7df1317d45d9a1b342e2c869"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/command.rs",
+      "sha256": "a68ea475fda958b4ce2dfd67e1ce81ae3178285a6ebc39ef1f69e928e7db62d2"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/viewport_audit.rs",
+      "sha256": "5304bf339eb9707163b0e721f870b630171bfcd90c762ac96fc2acc5f26d4ddb"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui/viewport_menu.rs",
+      "sha256": "6f91feacdc6b85a0c589ba94c415c5411e9777589c6ac8cb44a9e2420fb94691"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/ui.rs",
+      "sha256": "fbbd302771745ff697260521680a44f9f8ac614693225e998100ae5e1a60419e"
+    },
+    {
+      "path": "standalone/crates/om9-app/src/viewport_menu.rs",
+      "sha256": "fa206837c53a97991b15991a0ec9be70169e52625fd353889efd44fccbbbbcb3"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/chrome_actions.rs",
+      "sha256": "194f32421dfbdab2e6d3b4c6034417c6788e76e9af229e96ca65d27e4ac9b901"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/cold_reopen.rs",
+      "sha256": "3d1d31f056c2bc756d8df5166bfdbd1b111880af2385c421b927482ae5dfed7b"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/command_sessions.rs",
+      "sha256": "0ec6ea6e39fbf8c499ef135cab1388d849ea437ca1b39c53270d1f0c75eef04c"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/command_transcript.rs",
+      "sha256": "261d3a9e6fcbca924666ef0b767f53d24e9786a59f482dbc6f3a89e6049e1e2b"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/pinned_command.rs",
+      "sha256": "adc4847f93f6331fa8c7eeb31bfc2184ed51f24ea96ae06381eddbff2bb6ba5c"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/ui_events.rs",
+      "sha256": "e8d8966514c214583e1bba846a0e8ad89c420d09de2131d35cd68cc354afd3fe"
+    },
+    {
+      "path": "standalone/crates/om9-app/tests/viewport_title_menu.rs",
+      "sha256": "ad6f810a3d21c347e42424d55270a1d0d1d91a16ad5e5a2f62180067f82e2e9e"
+    },
+    {
+      "path": "standalone/crates/om9-archive/Cargo.toml",
+      "sha256": "7c93ab59ad64ccf9c6c8ab65354c8821efc8787324a76a80f8f1d7b6828d7498"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/atomic_file.rs",
+      "sha256": "77a7020592fca5ce3b2ead9fef4634d4fa81d464fd1f30f37652cc877ab2b89b"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/container.rs",
+      "sha256": "c0d698bd07c3395aa2510b399d26cd38e624bcdecf7543e918d0c752b247dd54"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/json_admission.rs",
+      "sha256": "527f7a9a65c0b9232a3c2e412f32e930d5841b6d99bbb733cc5c404e3ccc2dce"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/lib.rs",
+      "sha256": "f9240cd5fbe9ff45c329a5701b04635eb00a6fb8c85301e6725dbf1d591a622d"
+    },
+    {
+      "path": "standalone/crates/om9-archive/src/restore.rs",
+      "sha256": "1af17f63cf002d35951e59cd9ba965712bd9447e78ae95e9ba1c15ba1c45f6f7"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/atomic_save.rs",
+      "sha256": "6ba9b9c4c3a6554bd773daa4c2e3ae3981a85876a4b96975931dda7963a0d605"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/container_admission.rs",
+      "sha256": "14d9617179a3a3a16ba43ac81383e60e50375ce847abcb3b4b00bf7d2cba4135"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/definition_units.rs",
+      "sha256": "3693ea6d0d5c13370836951b090201f9f51d4dee4dd9ef7b089e128e65c80fa2"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/resource_chunks.rs",
+      "sha256": "c01a6202b04085506e3fb4cc4a84417e39707df72779e3cc4ebb07397d2c0551"
+    },
+    {
+      "path": "standalone/crates/om9-archive/tests/restore_modules.rs",
+      "sha256": "5ed0b4baa9c79e83541258a9218fb40401de3909ddc6d442aba0cf36340e83e7"
+    },
+    {
+      "path": "standalone/crates/om9-core/Cargo.toml",
+      "sha256": "1f100a097c871ab5dddf4894eb351c148974972aebbe21a8248cf10cc6685f74"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/budget.rs",
+      "sha256": "165bfd4a3003b09b0d9551e78829fcd4480daecfb9cd937a47d547f9383c4345"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/capability.rs",
+      "sha256": "6d0eb7d274ee013b90d2c25f37baa65dea3cc567789c357979893473b0178945"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/error.rs",
+      "sha256": "98e23a702a615a0be7e6eee18eac826c44d11ab79596570c878d3b97fad79941"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/evaluation.rs",
+      "sha256": "6087beb4a748228fe5409f5af1148c80db9df494989ddeeac6bc208e82c92a0d"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/geometry.rs",
+      "sha256": "f2111ebcd606a0898ec815abb124e3ad89afa09a92099030982ce07c1bfa43d6"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/history.rs",
+      "sha256": "3db1969a1afbe329db7e3629299570c725303b1fa39bf45fe666ff69bd544ffb"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/identity.rs",
+      "sha256": "c6b908be1335168b56715b0f5584c4a32c2f02bce8a5036736f5d0d96c126663"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/jobs.rs",
+      "sha256": "aec15fd4cabea567348d07752ab07815cf6b93860c0852611524f17ec5823078"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/lib.rs",
+      "sha256": "93d4a1873d9223d7aa18fe0b08ca97dd4b862f9f31cf7970df206299ab21cd34"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/model.rs",
+      "sha256": "9fe5a74aab39d469af0f0e89b05183ea81aa6bb4080ab12813c9086ffa8c3ec7"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/request.rs",
+      "sha256": "809c168efd9380cdd6eda0983a224d8d9094bf4f2d419274790bf5d3880728f7"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/resource.rs",
+      "sha256": "c094512acf7e18d1c56e3bc5c02c4675cbe12307b3028624817d07b84958d98a"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/result.rs",
+      "sha256": "30d9fb17059de833e864ec918ecc4eafe8e4d16cab8bf1b01cbcd51af9fc7d24"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/retained.rs",
+      "sha256": "1e2cc724dd1eb03bd2bfd284aea8a0702643c390c43b48d857d1808fee2a69b2"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/scope.rs",
+      "sha256": "50e332e91690b56157ed30453356b1f5a0db30f3a95c362e4a6aa5d2cfa866ab"
+    },
+    {
+      "path": "standalone/crates/om9-core/src/transaction.rs",
+      "sha256": "145cd657f63fce3dce84e7dc3ddf17763163ab8eea67d49181cf1e29ba4db176"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/atomic_transactions.rs",
+      "sha256": "ae43ba8d9dd7cc00e3c83a9e62f1fcc2909107db77e3bd8bf53d4b73e0e8bca4"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/cancellation_links.rs",
+      "sha256": "d4b198dc2744caaae16c0fdde6f2eebdec0d2dbe9acc25e5eb3075e13e779a0f"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/capability_gates.rs",
+      "sha256": "044a03e7a1046b0810a13a99f6fa3ea7da2b5b38e95eed79d2e3d8b77abcd9ed"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/coordinator_authority.rs",
+      "sha256": "420021c3f4298c1169f687c6947de4bd5c187040533ea8f703248446bc54f6b2"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/curve_oracles.rs",
+      "sha256": "ca458b9f6cfa61ab1f5b892623ad70c5346276ccda27fcae3a883b2e234b8226"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/definition_units.rs",
+      "sha256": "1f056e8ec3bc4ddd8e21140de99a02d9f1971922adf0a88671765077b94eb361"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/embedded_resources.rs",
+      "sha256": "b0040b82d4e15b2b35e8abc602259687706d9214a276b6566b356cade3f31c24"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/held_preparation.rs",
+      "sha256": "6f55fad33d8f5483bf7c5cfd6cdfb5e89cced5d13b1b2789cf1fa7279186eca5"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/history_replay.rs",
+      "sha256": "62699ea49074b1834851cb11050650485581863e482a6dc063dca80a816ab01c"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/job_lifecycle.rs",
+      "sha256": "aebc25bc07956ab5f8293bbec06cc2bb7dfcb677a3f4cb20c01879b89df07020"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/model_admission.rs",
+      "sha256": "5e885449505a005dfc35c40fbdff7ea44442c04bcbe686acb3de837d30b631cd"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/resource_transactions.rs",
+      "sha256": "849a322eefeed6848b3451f8063758d47c2ab9e5a200e005f1f0d87333c7a580"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/retained_entity_baselines.rs",
+      "sha256": "ec7014b4748c7abe345399cee6dda5e72f2a73319ae34f1b111241ef280fd2fa"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/retained_imports.rs",
+      "sha256": "89162f4e00dc68b58698c53b4d020a52dc29ad1f93aa2d1833b80700804ba17c"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/retained_peak_review.rs",
+      "sha256": "cbcb4e2fab403a6dd9b06cf88b966d42bf098acdf40d9074e715d7195a6d0216"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/source_binding.rs",
+      "sha256": "6e11032fae4f00d686d2243d82e71a1031f7b8c2c83b45bbbe36e71f6b140cd9"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/startup_layers.rs",
+      "sha256": "132fbd34207d495080fcfb29780230aac5c84180e65de4ace523f7f0c38edeb4"
+    },
+    {
+      "path": "standalone/crates/om9-core/tests/transaction_scopes.rs",
+      "sha256": "0fbf232e67235b26fb563a5267338350a18aa684eb58eed665c38522a354cd8d"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/Cargo.toml",
+      "sha256": "9c8f4334bc6e541b15c868631dfe220f07f00ba832fdd72ccbaa4579a7e9480b"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/current_overlay.rs",
+      "sha256": "ddf2b8398138a7ee683a5b8e7cd7a088f3b8e2c15be2d5eba196327ef376e2cf"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/dependency_cache.rs",
+      "sha256": "3e032e55f255c127da5c65bd5cf4598ebd57cf02c03936baa6b77439d6b334d8"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/import_capture.rs",
+      "sha256": "92f38622da55023877c5b648374c2773e949d9103d876fcf49a9864d7b0b0c59"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/import_dto.rs",
+      "sha256": "cd6af3b9f9017246fc538b569bba8b8d5084c8812753c0c7d8b6387abe5a7085"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/import_graph.rs",
+      "sha256": "d532aa7f99ffa3524fff470cae6078f42aebf7476a8f7a5cbba88ed9975c214b"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/imported.rs",
+      "sha256": "fbbbebcb0144b05036ab958f043c80758b3bacd490e3e0364ca87a5fc75f0be8"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/inspection.rs",
+      "sha256": "2c84382b1ff182aae7c7a08b8d6f80b4cddff324a9a47749e59fb5ee7841c56c"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/lib.rs",
+      "sha256": "6b1c6618bf075e3cc9c9273283b11944638ba374148ea844c0c755e6ab499acb"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/merge_inputs.rs",
+      "sha256": "7d5a1a394d5f7cfee3b6223693648f00a03e195e0fc88de94718217e51f11924"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/output_identity.rs",
+      "sha256": "8538489a8ec0190a9375950ad9e2445cd95359ccf511929ecb5cabe91e5ba5c2"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/retained_cold.rs",
+      "sha256": "bac7026556b86cc212614e1ba46384c4fe21537d54c07df45cd201a1741d0ce7"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/retained_packet.rs",
+      "sha256": "1342e2a427eb17c8ed9dacf2c9419f03db5d162039ff34f5b879ef70ae736f7c"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/retained_stage.rs",
+      "sha256": "6958ae9bb6207794bcb8c199caa5030a1d55a64266ba0b3b63389b28df3ab996"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/retained_write.rs",
+      "sha256": "2276d6fa9aa1ba2c8829ebad3c78272e6af5dc1d85345d5b38ef972ada33ea9b"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/source_preparation.rs",
+      "sha256": "6afe7892979d88237966ca65fb48b08099963cc6c7a972063b06d6ce0d25eb95"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/staged.rs",
+      "sha256": "4197ad9c54d7e92d728e02915dfb3135c6b4e621b7aa9d562b73b4f14e7a0209"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/src/wire_output.rs",
+      "sha256": "75e477dc3afe4995a6cc04ba8e58b77a05799976c5b9540938ea93f89a7c3552"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/current_overlay.rs",
+      "sha256": "99eeaeb9cb1403dba2bcaecbec7991406aed122df411819599ed4433e502de7c"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/current_overlay_review.rs",
+      "sha256": "bfa033df2fcbfe1e8e1a8fa2962790216fc06a8968d548c526b1e1667861de7a"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/export_authority.rs",
+      "sha256": "fd956d211748c7a128e008c6dfbf2e930d0a2a882e1f2669575acbdf79eb4d29"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/import_capture.rs",
+      "sha256": "585ff1daaa156d639c38baff6759ed2bc3caa74c5670d7db42921de03c674a16"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_cold_review.rs",
+      "sha256": "f8ef9e082fecfb8b3d7b99929aacf3835860127e0105abbb3793a5b11e05d746"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_native_import.rs",
+      "sha256": "07a74e37f6f38db2fbba2fffde84dafb8d92e0c8a7f381d7da10a4f020535d63"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_native_inputs.rs",
+      "sha256": "326c9f767f2049a00b03b4936e945b63e827a1afb7d14347ad7fe33a17f8b50f"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_native_write.rs",
+      "sha256": "4cef57f9929644ea29c32cfa61fb42e4c7d99f2f18079ba44ad9a016414bd2c8"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_packet.rs",
+      "sha256": "9a627716740ca695c7c2ed2c3359e83c8c53d7cd66c86412077c35fa001ae861"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_packet_review.rs",
+      "sha256": "b14edc826e6e865d7e4e466a486cc1cb05a24458d1df3ed641361a7f4acf1066"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_stage.rs",
+      "sha256": "34029c7ab7e3c90ce523597002781af8bc43ec245a8db1a160ec6b412572c2e5"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/retained_stage_review.rs",
+      "sha256": "e6c1a09a686505ba8c55576c0189fc136a7d068b0b339caa902860b4d9ffd262"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/source_preparation.rs",
+      "sha256": "9e5ca3e4c923b82939fbda3057cfde2a46f07f76522cea02084eeb1963df0faf"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/source_preparation_review.rs",
+      "sha256": "9139a415205b78cf068b80c97ba36696b51014fc09418ef77beca1fd72b4e689"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/staged_export.rs",
+      "sha256": "330ad49f27ae3456233f4dfd4d6c468d5053c01bdeffa46845a3113a14f5d28d"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/wire_capture.rs",
+      "sha256": "99437151171b39a319456f61b131fac931248ae92f27936bef274bbda20b0582"
+    },
+    {
+      "path": "standalone/crates/om9-exchange/tests/wire_output_review.rs",
+      "sha256": "fa7616d58fc49e28e2e29d7ea079a0f34e71379d986ea69b86aac9eea6302f41"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/Cargo.toml",
+      "sha256": "8bf82882e5a6063f500a5a9d629c0a67c28aa8d4bd55f55b0102d66af8ee3eff"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/bin/native_runner.rs",
+      "sha256": "4c8892e951aa323a154507d180c1039d671658d541202e86cf807a71aea9b838"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/bin/process_fixture.rs",
+      "sha256": "b4b78ca9a73627d39cd43db4613361e48a3b4e48ebb809cb145a2d2071d8c9e9"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/lib.rs",
+      "sha256": "a6536e9e9ce77c99963cb941c7c9a7566b57bc145d0740283bb71e180edb7906"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/verified_file.rs",
+      "sha256": "80cfcda63211ca8897272e73babfd9097a3a43050a8f215952ca9f14a7923799"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/src/windows.rs",
+      "sha256": "d0b5be38d6418617e7c20fadad094a5d9703105344bf76192ed80f8dff9e16c9"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/tests/process_owner.rs",
+      "sha256": "605062d78f0a4e9d814b0b2553c5b2b69766f1b84fd24e6168a00cb00b00dba9"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/tests/teardown.rs",
+      "sha256": "ef61b002482f5ea4d619b176daf3ca90b99c5a71da0da853a1b00e62f59ef86a"
+    },
+    {
+      "path": "standalone/crates/om9-native-owner/tests/verified_file.rs",
+      "sha256": "d9dbcd2edcca3f4004addf36cd5de86ec512ecf3559378a69f6ebb55844e4f66"
+    },
+    {
+      "path": "standalone/crates/om9-scene/Cargo.toml",
+      "sha256": "8de3c442d11278d033a719197e3495c0fc04a66a0b5e812a43ffcfb394cf189d"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/affine.rs",
+      "sha256": "8e2d720f8e1fcdcaab8658bbc6834b794d2597391a01aa19afb013c7727aa660"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/camera.rs",
+      "sha256": "39322474e9527456c5fa4eeba251e28288a63087c1c54e2b39c6381950a461a3"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/grid.rs",
+      "sha256": "19ff0db7e01d399e439b20421a6dc1ee4e513f768909c7add0cc5d44b5b47ccf"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/lib.rs",
+      "sha256": "4404c21a98722ff59d8a0b36c613d9915b4721df5b9142e8c1b87de41fefd0d0"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/picking.rs",
+      "sha256": "1aec15fb4c01c96ac5a11a92cc470839738bbbd85f89e52daa07b8febba1f9b5"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/scene.rs",
+      "sha256": "1fb222cc968ee55aab688867d0d6671d28e946b47be309983ec9a6fe108ebe5f"
+    },
+    {
+      "path": "standalone/crates/om9-scene/src/workspace.rs",
+      "sha256": "b19496d6c6605944f8c439198fab43b01d0588352950e538f66fff605558eeed"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/affine_gesture.rs",
+      "sha256": "aae21024632b72ce7eccb5a6dccddc657652cb0d0e44fb78cac27f501d754e87"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/camera_grid.rs",
+      "sha256": "5954928e0bd2d6b082e1a56c67cd8f7c8d4b3d1e21f2a20c056dbd7575254310"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/reference_workspace.rs",
+      "sha256": "92c843d8959997149df16244ef7165bf5aa807c01b465ea05098b1f6102d5dec"
+    },
+    {
+      "path": "standalone/crates/om9-scene/tests/world_picking.rs",
+      "sha256": "77dd71b406aa2441115ce4b51e5553249fbddaf7101403d172fc440ca49594bb"
+    },
+    {
+      "path": "standalone/provenance.json",
+      "sha256": "68c2d1ba163ec5f024f52068faf761f3d0a4cd08e3cd7df3d0a85c1f86d58d39"
+    }
+  ]
+}

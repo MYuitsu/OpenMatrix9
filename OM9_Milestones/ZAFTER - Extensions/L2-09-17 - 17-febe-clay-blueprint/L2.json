@@ -1,0 +1,66 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-17",
+  "milestone": "AFTER",
+  "title": "17-febe-clay-blueprint",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Blueprint tham chiếu ảnh 3D theo các mặt, command gốc ClayBluePrint.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/17-febe-clay-blueprint/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-17",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/17-febe-clay-blueprint/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/17-febe-clay-blueprint/",
+    "scope": "Blueprint tham chiếu ảnh 3D theo các mặt, command gốc ClayBluePrint.",
+    "exclude": "Picture Frame 2D cơ bản vẫn ở 03/06.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          86,
+          86
+        ],
+        "pdf_pages_1based": [
+          92,
+          92
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 4,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/17-febe-clay-blueprint/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-17-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-17 - 17-febe-clay-blueprint/L3-001 - Clay Blueprint Multiview Image Placement/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-17-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-17 - 17-febe-clay-blueprint/L3-002 - Clay Blueprint Image Alignment/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-17-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-17 - 17-febe-clay-blueprint/L3-003 - Clay Blueprint Transparent Overlays/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-17-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-17 - 17-febe-clay-blueprint/L3-004 - Clay Blueprint Preset Save Load/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

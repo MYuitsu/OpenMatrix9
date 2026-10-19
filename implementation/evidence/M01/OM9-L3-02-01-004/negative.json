@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-004",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "periodic-flag-missing",
+      "call": "unclamped knots + periodic false",
+      "expect": {
+        "error": "Invalid(surface periodic flag missing)"
+      }
+    },
+    {
+      "id": "periodic-flag-mismatch",
+      "call": "clamped knots + periodic true",
+      "expect": {
+        "error": "Invalid(surface periodic flag mismatch)"
+      }
+    },
+    {
+      "id": "u-v-swapped",
+      "call": "require_orientation expected [false,true]",
+      "expect": {
+        "error": "Invalid(surface U/V orientation)"
+      }
+    }
+  ]
+}

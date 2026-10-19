@@ -1,0 +1,39 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.88s
+     Running tests\command_registry.rs (target\debug\deps\command_registry-8075b2d9c092d10d.exe)
+
+running 4 tests
+test r7_an_operation_round_trips_through_json_with_its_aliases ... ok
+test fixture_design_pair_is_present ... FAILED
+test r1_to_r6_a_name_resolves_to_one_descriptor ... FAILED
+test n1_to_n8_a_name_the_registry_cannot_give_one_answer_for_is_refused ... FAILED
+
+failures:
+
+---- fixture_design_pair_is_present stdout ----
+
+thread 'fixture_design_pair_is_present' (53812) panicked at crates\om9-core\tests\command_registry.rs:201:5:
+H:\OpenMatrix9\standalone\crates\om9-core\../../../implementation/design/M01/OM9-L3-01-02-001/api.md
+
+---- r1_to_r6_a_name_resolves_to_one_descriptor stdout ----
+
+thread 'r1_to_r6_a_name_resolves_to_one_descriptor' (30856) panicked at crates\om9-core\tests\command_registry.rs:75:74:
+R3-resolve-by-alias-ignoring-case: unknown command 'curveeval'
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- n1_to_n8_a_name_the_registry_cannot_give_one_answer_for_is_refused stdout ----
+
+thread 'n1_to_n8_a_name_the_registry_cannot_give_one_answer_for_is_refused' (42004) panicked at crates\om9-core\tests\command_registry.rs:186:9:
+assertion `left == right` failed: N2-a-duplicate-alias-across-operations-is-ambiguous
+  left: None
+ right: Some("DuplicateName")
+
+
+failures:
+    fixture_design_pair_is_present
+    n1_to_n8_a_name_the_registry_cannot_give_one_answer_for_is_refused
+    r1_to_r6_a_name_resolves_to_one_descriptor
+
+test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-core --test command_registry`

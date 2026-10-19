@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-004-01",
+  "l3_id": "OM9-L3-01-03-004",
+  "l3_title": "Layer Domain Records",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "stable layer ID, label, color, visibility and lock state",
+  "positive_oracle": "Đổi tên/màu/cờ giữ nguyên LayerId; layer record hợp lệ.",
+  "negative_oracle": "Layer trùng/thứ tự sai/parent không tồn tại bị từ chối.",
+  "reuse_decision": "REUSE",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "symbols": [
+        "Layer",
+        "Layer::new",
+        "Document::validate layer order/preset rules",
+        "Document::layer_permissions"
+      ],
+      "decision": "REUSE"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/model.rs (Layer + Document::validate)",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_004 -> 3 passed"
+  ],
+  "notes": "REUSE the existing Layer record and its validation; add the explicit refusals as tests"
+}

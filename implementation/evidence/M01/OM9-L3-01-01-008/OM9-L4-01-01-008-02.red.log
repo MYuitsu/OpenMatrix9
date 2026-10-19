@@ -1,0 +1,36 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.97s
+     Running tests\builder_slot.rs (target\debug\deps\builder_slot-2b1af694614623fc.exe)
+
+running 9 tests
+test fixture_design_pair_is_present ... ok
+test b5_the_placeholder_is_noninteractive ... FAILED
+test b1_the_slot_is_reserved_directly_below_projects ... ok
+test b6_to_y4_a_layout_file_cannot_break_the_reservation ... FAILED
+test b2_every_placement_is_refused_and_changes_nothing ... ok
+test y2_y3_y5_the_slot_is_a_placeholder_and_never_a_menu ... ok
+test b3_the_slot_owns_no_model ... ok
+test b4_the_bar_carries_no_close_box_and_starts_no_drag ... ok
+test y1_a_click_on_the_bar_is_refused ... ok
+
+failures:
+
+---- b5_the_placeholder_is_noninteractive stdout ----
+
+thread 'b5_the_placeholder_is_noninteractive' (45628) panicked at crates\om9-app\tests\builder_slot.rs:251:13:
+line 34 of builder_slot_ui enables a widget:                 egui::Slider::new(&mut 0.5f32, 0.0..=1.0).show_value(false),
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- b6_to_y4_a_layout_file_cannot_break_the_reservation stdout ----
+
+thread 'b6_to_y4_a_layout_file_cannot_break_the_reservation' (10956) panicked at crates\om9-app\tests\builder_slot.rs:285:9:
+B6-a-layout-file-cannot-break-the-reservation: [] lacks "Builders is reserved"
+
+
+failures:
+    b5_the_placeholder_is_noninteractive
+    b6_to_y4_a_layout_file_cannot_break_the_reservation
+
+test result: FAILED. 7 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+
+error: test failed, to rerun pass `-p om9-app --test builder_slot`

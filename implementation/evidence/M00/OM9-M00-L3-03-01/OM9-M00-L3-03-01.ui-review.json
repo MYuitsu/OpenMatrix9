@@ -1,0 +1,42 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-M00-L3-03-01",
+  "reviewer": {
+    "name": "chủ dự án (OpenMatrix9)",
+    "role": "project owner",
+    "status": "SIGNED",
+    "signature": "signed in the working session: 'ký hết và tiếp tục chuyển đến phần code'"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T00:30:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "source architecture evaluation (3/3): eframe+wgpu present, four viewports, shared scene, command-driven UI; the missing 3D pipeline and glow fallback are recorded for M01-L2-01-06",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-01/OM9-M00-L4-03-01-01.egui-eframe-wgpu.log",
+      "sha256": "8842dfd86790877a04a73e073433a23b066ebae1ef6ecdaac16fd4ef4da9cbd5",
+      "bytes": 1680
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-01/OM9-M00-L4-03-01-02.four-viewport-scene.log",
+      "sha256": "de86a52f7c6aaee4925bd783375053e412c368043dc6f742b2ce0d854e5294aa",
+      "bytes": 1215
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-01/OM9-M00-L4-03-01-03.docking-command-ui.log",
+      "sha256": "9d625908efc7a2a2c49a33fbd547667556c3b22c3175c0303ad24d3c5b900a6c",
+      "bytes": 1694
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-01/OM9-M00-L4-03-01.source-evaluation.md",
+      "sha256": "a53833147a5a7d910d4b47921fd6a0bb8548edb08d2ff1ef29a44f211e8e12c6",
+      "bytes": 4313
+    },
+    {
+      "path": "implementation/evidence/M00/OM9-M00-L3-03-01/source_crosswalk.json",
+      "sha256": "97a975f3df67db150afc67c42d8aaf142afb1138e04d76ca2b83425b3da0b35e",
+      "bytes": 3057
+    }
+  ],
+  "note": "recorded by the assistant from the owner's instruction; the assistant did not approve its own work"
+}

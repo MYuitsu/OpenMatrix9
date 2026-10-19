@@ -1,3 +1,21 @@
+Current owned-layer primitive measurement: **375 workspace tests**, with **15 focused tests included** and **one bounded cold OM9 child**. Twenty-three SDK tests are ignored by this batch; no new SDK/Rhino acceptance or combined current-source native total is claimed. [Evidence](2026-10-14-owned-layer-primitives.md). Preset/Hidden/schema/UI work follows; packages2–8 and full RCORE gates remain open, and total future batches remain unknown. Earlier checkpoints below retain historical scope.
+
+Historical standalone checkpoint: **313 workspace tests/61 suites +18 separately executed native Rust tests = 331 distinct tests**. Resource62 and six cold-process cases are subsets. Release and actual native-window Matrix9 replay passed on H. Fresh current-runner compatibility passed inventory68/17, projection82/32 and conversion50/40; those three refreshed batches are distinct from the preceding native preparation checkpoint.
+
+Standalone retained-source preparation — 2026-10-14: infrastructure52/14 expected rejections, inventory68/17, projection82/32, current conversion50/40 and source preparation65/20: **317 native executions/123 expected rejections**, on the same final native binary. Infrastructure covers four authored candidate outputs and one accepted sparse source; inventory has five positive views, projection eleven, conversion one fixture plus forty negative variants, and preparation eleven valid source views plus the same-held-FILE oracle. These are separate named batches. [Measured scope](2026-10-14-standalone-retained-infrastructure.json).
+
+Rust original-wire input batch: **3 tests/13 authored files/10 source scenarios/32 owned native executions**, including nine preparations; units, sparse Layer/Group/Light indices and original copy-count-zero attachments match the persisted namespace. The Windows sharing regression first failed two of three tests and passed after a read-only source guard replaced the publication guard. [Current input evidence](2026-10-14-standalone-retained-inputs.json), [failed attempt](2026-10-14-standalone-retained-inputs-red-sharing.json).
+
+Full retained merge writing, remapping, native bounds refresh and Rhino5 acceptance remain pending. Broader packages2–8 and all12 full RCORE-00 gates stay open; prepared standalone merge batches are being designed, and the total future batch count is unknown. Next: allocate actual wire/reference output identities, then serialize current edit/delete/new actions and cold-check complete geometry, payloads and bounds.
+
+<!-- standalone-retained-preparation-checkpoint -->
+
+Standalone RCORE-00 import checkpoint — 2026-10-13: **260 workspace Rust +7 native export +8 native import = 275 distinct tests**; 54 workspace suites/15 native tests explicitly ignored in portable run and executed separately. Import batch: **15 authored sources/8 passed cases/0 failed**, actual source namespaces, mixed/explicit definition units, Preserve/Geometry loss policy, ownership/Cancel/budgets and fresh-process .om9 after external source removal. Producer batch: **82 native runs/32 expected rejections**, compatibility inventory68 and current conversion50. [Import evidence](2026-10-13-standalone-import.json), [projection](2026-10-13-standalone-native-source-projection.json).
+
+Current standalone prepared pending batches: **0**; historical application queue below remains separate. Broad openNURBS packages2–8 stay open; all12 complete RCORE-00 gates stay unchecked and total future batches remain unknown. Next: current-state retained merge/remapping/edit/delete/new, then full resource/clipboard/application matrices. These counts do not promote legacy application proofs or complete feature statuses.
+
+<!-- standalone-import-checkpoint -->
+
 Layer session curve-lifecycle candidate — 2026-10-10: **native curve/Rebuild nhận current layer qua Rust** đạt2 small fixtures,8 FreeCAD reports/179 checks, Rust232/47 groups, native8/8 và Qt13 slots. One Undo/Redo/Cancel/FCStd/foreign transaction, observed legacy own lock/hidden/ByObject được kiểm chứng; all creation routes/complete provenance/guards/whole receive/actual Matrix acceptance còn mở. Full exchange vẫn false. [Bằng chứng](layer-session/lifecycle-slice.json).
 
 Layer session live-panel candidate — 2026-10-10: **Rust-owned32 default palette/live layer UI** đạt2 small fixtures (32/36 layers),5 FreeCAD reports/139 checks,11 Qt behavior tests (+init/cleanup), Rust225/46 groups và focused native8/8. Exact fullpath/custom màu/assign/CMD/lazy Undo được kiểm chứng; lifecycle/guards/whole receive/actual Matrix9/heavy acceptance còn mở. Full exchange vẫn false. [Bằng chứng](layer-session/panel-controller-slice.json).
@@ -178,3 +196,31 @@ Native matrix-rust-palette-native-gate-20261010 accepted for user-approved OM9-o
 ## Stock FreeCAD 1.1.4 compatibility — 2026-10-10
 
 10 native runtime reports, 217 checks passed, including eight BRep fixtures. No fresh Rhino/Matrix cases. Full exchange remains incomplete; seven packages remain open/in progress, and the total future batch count remains unknown. Release packaging and user-folder discovery are the next verification steps. See [evidence](2026-10-10-stock-freecad-1.1.4.md).
+
+Owned layer state schema4 checkpoint: 394 workspace tests/34 focused subsets; four bounded OM9 cold children; 8 separate SDK export tests/18 jobs. [Measured scope](2026-10-14-owned-layer-state.md). Actual Layers panel/CMD/current-output/modal/selection and full RCORE acceptance remain open. Older receipts below retain historical source checkpoints.
+
+Owned Layers widget checkpoint: 414 workspace tests/37 focused subsets;13 actual native Layers checks and6 viewport-menu regressions, four bounded cold OM9 children. [Measured scope](2026-10-14-owned-layers-ui.md). Advanced dialogs, other command families and full Layers/M9IMG/RCORE gates remain open; earlier SDK/UI receipts retain historical checkpoints. This is a UI/portable batch, with zero new SDK jobs; existing native package gaps and the unknown total future batch count remain unchanged.
+
+## Owned Layers modal checkpoint — 2026-10-14
+
+Owned Advanced Rename/Color and selective Show now have [measured modal evidence](2026-10-14-owned-layer-modals.md): 439 workspace tests/61 focused subsets;10 native dialog checks plus13 Layers and6 viewport regressions;five bounded cold OM9 children. The earlier unavailable-dialog limitation is historical for this owned-root slice. Token/session/stale guards, Cancel/no-op/Undo/Redo, bounded RGB and snapshot storage, fixed single-line rows and reusable UI owners are verified. Full Layer output families, interactive Save/Open, OS IME/DPI, async capture/global budgets and complete Layers/M9IMG/RCORE gates remain open.
+
+## Owned File lifecycle service — 2026-10-14
+
+[Controller/I/O evidence](2026-10-14-owned-file-service.md): 458 workspace tests/80 focused subset;17 File service checks and two new bounded cold OM9 children. New/Open/Save/SaveAs ownership, dirty fingerprints, per-response tokens and atomic archive I/O are implemented as Task1 prerequisites. File menu/CMD/native chooser remain disabled/unaccepted; .3dm and full view/material persistence remain required. Existing native Layers/viewport regressions are separate from File UI evidence. Full feature/M01–M12 gates and catalog statuses remain open. No new SDK jobs; unclosed packages and unknown total future batch count are unchanged.
+
+## Owned File UI and native cancellation — 2026-10-14
+
+[Current scoped evidence](2026-10-14-owned-file-ui.md): 475 workspace tests/96 focused subset;16 File widgets;8 native File checks and3 real Windows picker cancellations, distinct from scripted path delivery. Native `.om9` menu/CMD/F6/Standard routes and owned prompts are connected.10+13+6 Layers/viewport regressions and7 cold children are separate. OS successful selection/save/open, native backend diagnostics/single overwrite UX, UI/native peak ownership, native startup, close/async/full persistence/.3dm remain required. All full feature/RCORE/M9IMG gates and catalog statuses remain open. No new SDK geometry jobs; remaining total batches unknown and all unclosed packages retained.
+
+## Selected Win32 File adapter and replay guards — 2026-10-14
+
+[Current scoped evidence](2026-10-14-owned-file-win32.md): 483 workspace/104 focused subsets; selected authored Win32 adapter exposes HRESULT errors and disables OS overwrite prompt for the existing owned confirmation.4 audit+3 native+1 UI-error checks;8 native File checks/3 real Windows cancels;10+13+6 regressions/7 cold children. Readiness guards prevent missing-modal events from editing CMD; original missed-click cause remains unknown. OS selection/save/open/overwrite/native startup, full budgets/close/async/persistence/.3dm and all full feature/RCORE/Matrix9 gates remain required. No fresh geometry SDK jobs; total future batch count unknown; all unclosed packages retained.
+
+## Owned window close — 2026-10-14
+
+[Scoped close evidence](2026-10-14-owned-file-close.md): 494 workspace/115 focused subset. Owned Save/Discard/Cancel controls window closing in normal UI and minimized logic; stale consent/save failure/chooser Cancel cannot approve shutdown. Native replay11 checks includes2 root WM_CLOSE requests and4 real picker cancels; original File8 and Layers10+13/viewport6 are separate overlapping regressions;7 cold children exit. Successful OS selection/save/open/overwrite/startup, native Save-success/Discard-button shutdown, complete teardown/budgets/async/persistence/.3dm and full gates remain required. No new geometry SDK jobs; future batch count unknown.
+
+## Native File selection and startup — 2026-10-14
+
+[Scoped native File evidence](2026-10-14-owned-file-selection.md): 498 workspace/119 focused subset;3 real Windows Show/GetResult selections, alternate SaveAs/owned Replace adopts path only after acceptance with original/seed SHA256 preservation. Native actual --ui path clean startup3checks and cold report match. Success5/close11/File8/Layers10+13/viewport6 are separate overlapping replays;7 Job-owned cold children plus2 bounded CLI inspections. Missing-module native startup, native success/Discard shutdown, complete persistence/.3dm/async/budgets/disposal and all full gates remain open. No new geometry SDK jobs; remaining total batch count unknown.

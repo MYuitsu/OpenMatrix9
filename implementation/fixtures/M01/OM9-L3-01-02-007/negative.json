@@ -1,0 +1,35 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-007",
+  "l4": "OM9-L4-01-02-007-02",
+  "case": "undo-redo-journal-negative",
+  "negative_oracle": "Undo after delete/reorder must not replay corrupted references",
+  "cases": [
+    {
+      "id": "W1-a-new-command-after-an-undo-clears-redo",
+      "expect": {
+        "redo_before": 1,
+        "redo_after": 0,
+        "detail": "stale forward references are dropped, never replayed"
+      }
+    },
+    {
+      "id": "W2-redo-with-nothing-to-redo-is-refused",
+      "expect": {
+        "refused": true
+      }
+    },
+    {
+      "id": "W3-undo-with-nothing-to-undo-is-refused",
+      "expect": {
+        "refused": true
+      }
+    },
+    {
+      "id": "W4-undo-is-refused-while-a-command-runs",
+      "expect": {
+        "error": "Busy"
+      }
+    }
+  ]
+}

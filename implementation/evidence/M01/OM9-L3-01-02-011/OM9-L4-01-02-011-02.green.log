@@ -1,0 +1,11 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\command_availability.rs (target\debug\deps\command_availability-af0ef476aa1032b9.exe)
+
+running 4 tests
+test a7_to_a8_admit_reads_the_context_and_the_option_names_it_was_given ... ok
+test a1_to_a6_availability_follows_the_session_state ... ok
+test fixture_design_pair_is_present ... ok
+test b1_to_b7_a_command_that_cannot_run_is_never_offered ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,67 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-006",
+  "l4": "OM9-L4-01-01-006-02",
+  "case": "active-document-window-state-positive",
+  "positive_oracle": "Switch active document changes title and unsaved indicator without stale UI refs",
+  "title": {
+    "prefix": "OpenMatrix9 — ",
+    "dirty_marker": " *",
+    "name_cap_bytes": 480
+  },
+  "cases": [
+    {
+      "id": "W1-a-new-session-is-named-and-clean",
+      "expect": {
+        "title": "OpenMatrix9 — Untitled",
+        "dirty": false,
+        "has_marker": false
+      }
+    },
+    {
+      "id": "W2-a-changed-document-is-marked",
+      "change": "draw a line through the command box",
+      "expect": { "dirty": true, "has_marker": true }
+    },
+    {
+      "id": "W3-saving-removes-the-marker-and-names-the-file",
+      "save_as": "first.om9",
+      "expect": {
+        "dirty": false,
+        "has_marker": false,
+        "title_suffix": "first.om9",
+        "file_written": true
+      }
+    },
+    {
+      "id": "W4-a-change-after-saving-marks-it-again",
+      "save_as": "first.om9",
+      "change": "draw a second line after saving",
+      "expect": { "dirty": true, "has_marker": true, "title_suffix": "first.om9" }
+    },
+    {
+      "id": "W5-switching-documents-changes-the-name-and-clears-the-state",
+      "save_as": "first.om9",
+      "open": "second.om9",
+      "expect": {
+        "dirty": false,
+        "has_marker": false,
+        "title_suffix": "second.om9",
+        "entities": 1,
+        "undo_len": 0,
+        "document_name_suffix": "second.om9"
+      }
+    },
+    {
+      "id": "W6-only-menus-moved-leaves-the-document-clean",
+      "panel_op": ["ToggleCollapsed", "projects"],
+      "expect": { "dirty": false, "has_marker": false }
+    },
+    {
+      "id": "W7-a-long-name-is-cut-on-a-character-boundary",
+      "document_name": "ệ",
+      "document_name_repeat": 600,
+      "expect": { "title_name_bytes_at_most": 480, "no_replacement_character": true }
+    }
+  ]
+}

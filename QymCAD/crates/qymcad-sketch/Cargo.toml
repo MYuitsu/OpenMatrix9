@@ -1,0 +1,28 @@
+[package]
+name = "qymcad-sketch"
+version = "0.1.0"
+edition = "2021"
+license.workspace = true
+
+# THE SKETCH WORKBENCH. Drawing entities, constraints and dimensions, dragging points, trimming, patterns,
+# text and notes, the diagnostics of degrees of freedom. It works over `SketchCtx` and asks nothing of the
+# application.
+#
+# It does not depend on the Part nor on the Assembly: what the three have in common lives in the modules
+# below them (the records, the picking, the drawing).
+[dependencies]
+egui = "0.35"
+egui-phosphor = "0.13"
+qymcad-core = { path = "../qymcad-core" }
+qymcad-ui-state = { path = "../qymcad-ui-state" }
+qymcad-pick = { path = "../qymcad-pick" }
+qymcad-render = { path = "../qymcad-render" }
+qymcad-i18n = { path = "../qymcad-i18n" }
+
+[dev-dependencies]
+# The colours a preview is drawn in are named by the scheme, and the test that watches a corner preview painted
+# says which scheme in hand a colour came from.
+qymcad-scheme = { path = "../qymcad-scheme" }
+
+[lints]
+workspace = true

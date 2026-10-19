@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-008",
+  "l4": "OM9-L4-01-03-008-02",
+  "title": "Block Definition And Instance Graph",
+  "case": "om9-l3-01-03-008-negative",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_008_two_instances_share_one_definition_without_cloning_topology|l3_008_one_undo_removes_the_definition_and_all_of_its_occurrences|l3_008_a_self_referencing_definition_is_refused_without_a_partial_write|l3_008_nested_cycles_are_refused_by_document_validation|l3_008_a_definition_insert_is_admitted_on_a_layerless_document; om9-scene/tests/shared_instances.rs",
+  "negative_oracle": "see cases",
+  "cases": [
+    {
+      "id": "self-cycle",
+      "expect": {
+        "snapshot_unchanged": true,
+        "error": "Invalid(\"definition cycle\")"
+      }
+    },
+    {
+      "call": "Document::validate",
+      "id": "nested-cycle",
+      "expect": {
+        "error": "Invalid(\"definition cycle\")"
+      }
+    },
+    {
+      "call": "document.instance(random, identity, None)",
+      "id": "missing-definition",
+      "expect": {
+        "error": "Missing(\"instance definition\")"
+      }
+    }
+  ]
+}

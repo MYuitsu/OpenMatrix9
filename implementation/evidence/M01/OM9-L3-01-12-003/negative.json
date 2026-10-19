@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-003",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "missing-source",
+      "expect": {
+        "error": "Invalid(typed document metadata/schema)"
+      }
+    },
+    {
+      "id": "tampered-source",
+      "expect": {
+        "error": "Invalid(BRep source/cache binding)"
+      }
+    },
+    {
+      "id": "corrupt-display",
+      "expect": {
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "instance-without-definition",
+      "expect": {
+        "error": "Missing(instance definition)"
+      }
+    }
+  ]
+}

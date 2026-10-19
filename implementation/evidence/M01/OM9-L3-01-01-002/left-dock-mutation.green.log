@@ -1,0 +1,20 @@
+# MUTATION GREEN (restored): RIGHT_DOCK_FIXTURE = SectionId::Snaps; dock_layout.rs SHA-256 5E15FD510342133145BDF8D87DF40A9DFC0EA044A68854A67E02C32476E5D510 identical to the pre-mutation file (mtime refreshed so cargo rebuilds); 2026-10-16
+# command: cargo test -p om9-app --test left_stack_layers -j 1
+# exit code: 0
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.96s
+     Running tests\left_stack_layers.rs (target\debug\deps\left_stack_layers-2ded317dd025465a.exe)
+
+running 8 tests
+test rail_outer_width_is_300_and_inner_is_chrome_less ... ok
+test layers_title_bar_is_visible_without_scrolling_at_1280x720 ... ok
+test icon_edge_follows_the_rail_width ... ok
+test layers_stays_in_the_left_column_after_a_save_and_reload_round_trip ... ok
+test max_rail_keeps_the_canvas_minimum ... ok
+test layers_sits_between_info_and_projects_at_supported_frames ... ok
+test default_frame_has_no_right_dock ... ok
+test layers_stays_in_the_left_column_after_reset_menus_from_a_perturbed_layout ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.32s
+
+

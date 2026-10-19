@@ -1,0 +1,57 @@
+# OM9-L2-01-08 focused verification
+# utc: 2026-10-17
+
+# command: cargo test -p om9-core --test document_tolerance
+# exit: 0
+
+
+running 7 tests
+test l3_003_a_document_without_a_tolerance_reports_missing_not_a_default ... ok
+test l3_003_a_tolerance_names_the_field_it_refuses ... ok
+test l3_003_geometry_at_or_below_the_absolute_tolerance_is_refused ... ok
+test l3_003_a_new_document_states_the_template_policy_explicitly ... ok
+test l3_003_a_tolerance_document_survives_validation_and_json ... ok
+test l3_003_a_stale_tolerance_revision_is_refused_without_mutation ... ok
+test l3_003_the_tolerance_mutation_is_one_undo_entry_and_keeps_context_revision ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\document_tolerance.rs (L:\om9-target\debug\deps\document_tolerance-8112eb77148f0874.exe)
+
+
+# command: cargo test -p om9-archive --test document_identity_round_trip a_document_tolerance
+# exit: 0
+
+
+running 1 test
+test a_document_tolerance_is_persisted_admitted_and_refused_in_a_legacy_payload ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.01s
+
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+   Compiling om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.12s
+     Running tests\document_identity_round_trip.rs (L:\om9-target\debug\deps\document_identity_round_trip-aa938d2dd9cbc7b7.exe)
+
+
+# command: cargo test -p om9-core --test l2_01_08_precision
+# exit: 0
+
+
+running 8 tests
+test a_tolerance_comparison_is_documented_and_boundary_exact ... ok
+test a_display_unit_conversion_is_lossless_for_exact_values ... ok
+test an_exact_ratio_is_more_accurate_than_a_rounded_decimal_factor ... ok
+test angle_conversions_are_exact_at_the_quadrant_boundaries ... ok
+test a_degree_radian_round_trip_stays_within_one_ulp ... ok
+test a_round_trip_through_any_unit_stays_within_one_ulp ... ok
+test unit_conversion_throughput_is_stated ... ok
+test the_admission_hot_path_does_not_allocate_per_value ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\l2_01_08_precision.rs (L:\om9-target\debug\deps\l2_01_08_precision-378796c843b37980.exe)
+

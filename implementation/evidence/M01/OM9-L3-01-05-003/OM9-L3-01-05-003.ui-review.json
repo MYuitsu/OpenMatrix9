@@ -1,0 +1,28 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-01-05-003",
+  "reviewer": {
+    "name": "cổng AUTO_ONLY (bằng chứng tự động)",
+    "role": "automated evidence gate",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T03:20:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "NURBS curve evaluation adapter: at u=0.5 the point is (5/sqrt2, 5/sqrt2, 0) with |P| = 5, and the derivative magnitude is positive. The L3 declares requires_manual_test=false, so its acceptance is the automated test the_rational_nurbs_quarter_circle_evaluates_exactly.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-003/OM9-L4-01-05-003-03.kernel-test.log",
+      "sha256": "25a5b739fc070bb7ba05da849e5f4259d1b15393fd23ce0894a03a6a94ed2ce1"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-003/OM9-L4-01-05-003-05.acceptance.log",
+      "sha256": "551b4edc9ad14088672bcc86782b33c12d0804357c705e84d4d2c03f409c8324"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-003/source_crosswalk.json",
+      "sha256": "8f8925b54346c43372930bab3521f0b5dafa571f1bc46e3b2edcf12d9a2bf942"
+    }
+  ],
+  "note": "no human test is required for this L3; the record is the documented AUTO_ONLY path, not a human signature"
+}

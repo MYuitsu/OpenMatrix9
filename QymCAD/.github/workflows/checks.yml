@@ -1,0 +1,180 @@
+# The checks of every pull request and of every push to `main`.
+#
+# THE SAME LEVEL A DEVELOPER RUNS, NOT A COPY OF IT. The steps are `tools/gate.py fast` - the build with no
+# warning, the rules of the code, the words of the interface, the help, the acceptance probes without heavy
+# geometry - and one step of the full level, every crate's own checks. A step added to the gate is run here
+# by itself; a list of commands written out in this file would drift away from it.
+#
+# THE ACCEPTANCE PROBES ARE SPLIT OVER EIGHT MACHINES (`gate.py --shard K/8`). On one machine of the developer
+# the fast level took 1627 s, 1493 of them the acceptance probes; a runner has four cores, and the whole run on
+# one would wait well over an hour on every push to a pull request. Over four machines a share took 35 - 40 min and
+# held the whole run that long; the runners of a public repository cost nothing.
+#
+# Linux only. The kernel is the same OCCT 7.9.3 the release builds, compiled from source once and taken from
+# the cache afterwards; the other two systems are built by `release.yml`, by the button.
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push to the same pull request makes the run in progress worthless: it is cancelled rather than left
+# to finish. Pushes to `main` are each run to the end - every commit there is checked.
+concurrency:
+  group: checks-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: never
+  # THE DEBUG INFORMATION IS OFF HERE. Locally the target directory of this workspace takes tens of gigabytes,
+  # most of it debug information of some 130 test programs; a runner has a fraction of that disk, and nobody
+  # attaches a debugger to a run in CI.
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  OCCT_INCLUDE_DIR: /home/runner/occt/include/opencascade
+  OCCT_LIB_DIR: /home/runner/occt/lib
+  LD_LIBRARY_PATH: /home/runner/occt/lib
+
+jobs:
+  # NOTHING PERSONAL GOES IN, and the kernel is in the cache before the jobs below start: the jobs missing it
+  # together would build it as many times. The general shapes only - a home path, a mail address, a reference to a
+  # closed document; a personal list of words is not available to a run of somebody else's pull request.
+  kernel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      # The whole history, for the search of the commit messages.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # The layout is rustfmt's (rustfmt.toml); cheap, so it runs before anything is built.
+      - name: The layout is rustfmt's
+        run: cargo fmt --all --check
+      - name: The search for anything personal catches what it is for
+        run: python3 tools/frisk.py --self-test
+      - name: The rule that frees a quiet claim decides its cases right
+        run: python3 tools/stale_claims.py --self-test
+      - name: The gate picks its threads and reads its times right
+        run: python3 tools/gate.py --self-test
+      - name: Nothing personal in the files and in the messages of the commits
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            range="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          else
+            range="${{ github.event.before }}..${{ github.sha }}"
+          fi
+          echo "commits: $range"
+          python3 tools/frisk.py --commits "$range"
+      - name: Restore the kernel build
+        id: occt
+        uses: actions/cache/restore@v6
+        with:
+          path: /home/runner/occt
+          key: occt-7.9.3-ubuntu-24.04-v2
+          lookup-only: true
+      - name: Build the kernel when the cache missed
+        if: steps.occt.outputs.cache-hit != 'true'
+        uses: ./.github/actions/setup
+        with:
+          cargo: "false"
+
+  # The fast level but its acceptance probes.
+  rules:
+    needs: kernel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+        with:
+          save-cargo: "true"
+      - name: The fast level, the acceptance probes left to the shares
+        run: python3 tools/gate.py fast --except "the acceptance"
+      # The gate prints the names of the red checks; what each of them said is in its log, kept for a fortnight.
+      - name: The words of the gate
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gate-logs-rules
+          path: target/gate-*.log
+          retention-days: 14
+      - name: Disk left
+        if: always()
+        run: df -h / && du -sh target || true
+
+  # EVERY CRATE'S OWN CHECKS, OVER TWO MACHINES. On one, after the fast level, the job took 15.7 min - 5.4 the fast
+  # level, 9.1 every crate; apart and split, each machine builds the test programs and runs half of the checks.
+  crates:
+    needs: kernel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        share: [1, 2]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # THE TIMES OF THE CHECKS OF THE RUN BEFORE: without them every check runs as a process of its own and the
+      # slowest do not start first (`gate.py`, `CHECK_TIMES`); the newest saved is taken back.
+      - name: The times of the checks of the run before
+        uses: actions/cache@v6
+        with:
+          path: target/gate-check-times.tsv
+          key: check-times-${{ matrix.share }}-${{ github.run_id }}
+          restore-keys: |
+            check-times-${{ matrix.share }}-
+            check-times-
+      - name: Every crate's own checks, share ${{ matrix.share }} of 2
+        run: python3 tools/gate.py full --step "every crate" --shard ${{ matrix.share }}/2
+      - name: The words of the gate
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gate-logs-crates-${{ matrix.share }}
+          path: target/gate-*.log
+          retention-days: 14
+      - name: Disk left
+        if: always()
+        run: df -h / && du -sh target || true
+
+  acceptance:
+    needs: kernel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      # one red share does not stop the others: every red probe is reported in one run
+      fail-fast: false
+      matrix:
+        share: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # SIX PROBES SIDE BY SIDE ON FOUR CORES, as the shares have always run: the budgets of the probes were set against
+      # that load. The gate would pick four here (`pick_threads`: a runner has four threads).
+      - name: The acceptance probes without heavy geometry, share ${{ matrix.share }} of 8
+        env:
+          QYMCAD_TEST_THREADS: 6
+        run: python3 tools/gate.py fast --step "the acceptance" --skip-probe size_and_time --shard ${{ matrix.share }}/8
+      # THE PROBES OF TIME, ALONE AND AT TWICE THE BUDGET. Among five other probes on four cores a sample project of 3 MB
+      # rebuilt in 39.4 s against 30; alone, with the budget doubled, a program twice as slow as it should be still
+      # goes red. In the first share, which finished first.
+      - name: The probes of time, one at a time
+        if: matrix.share == 1 && (success() || failure())
+        env:
+          QYMCAD_TIME_SCALE: 2
+        run: python3 tools/gate.py time
+      - name: The words of the gate
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gate-logs-acceptance-${{ matrix.share }}
+          path: target/gate-*.log
+          retention-days: 14
+      - name: Disk left
+        if: always()
+        run: df -h / && du -sh target || true

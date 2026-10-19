@@ -1,0 +1,137 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-02-01",
+  "milestone": "M01",
+  "title": "Be Rhino Nurbs Object Semantics",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Định nghĩa Rhino-like Curve/Surface/TrimmedSurface/Polysurface/solid/block và seam, UV/normal.",
+  "definition": {
+    "module_id": "OM9-L2-02-01",
+    "milestone_id": "M01",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "02-rhino5",
+    "scope": "Định nghĩa Rhino-like Curve/Surface/TrimmedSurface/Polysurface/solid/block và seam, UV/normal.",
+    "exclude": "Không triển khai lại phép tính OCCT trong Rhino adapter.",
+    "manual_references": [
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          17,
+          23
+        ],
+        "pdf_pages_1based": [
+          25,
+          31
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          120,
+          234
+        ],
+        "pdf_pages_1based": [
+          130,
+          244
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-05"
+    ],
+    "downstream_contracts": [
+      "nurbs-and-trimmed-brep-semantics"
+    ],
+    "early_slices": [],
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 10
+  },
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Rhino-like semantic layer: curve kinds/closed/planar, NURBS cardinality, surface UV/seam/periodicity, trimmed surface, isocurve vs boundary edge, solid/polysurface, extrusion primitive and conversion, mesh-vs-NURBS rules, block instances.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-02-01/crosswalk.json",
+      "implementation/design/M01/OM9-L2-02-01/l4-matrix.json",
+      "implementation/design/M01/OM9-L2-02-01/oracles.json",
+      "implementation/design/M01/OM9-L2-02-01/api.md",
+      "implementation/design/M01/OM9-L2-02-01/EXECUTION.md",
+      "implementation/evidence/M01/2026-10-19-l2-02-01-checks.json",
+      "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/core-all.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/archive-all.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/exchange-all.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/app-project-codec.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/clippy-core-archive.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/workspace-all-final.log"
+    ],
+    "l3_done_with_evidence": 10,
+    "l4_verified": 50,
+    "technical_scope_complete": true,
+    "full_l2_complete": false,
+    "human_approval": null,
+    "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
+    "validation_summary": {
+      "core": 385,
+      "archive": 56,
+      "exchange": 97,
+      "app_project_codec": 38,
+      "clippy": "exit 0 with -D warnings",
+      "rustfmt_touched_files": "exit 0",
+      "workspace": "cargo test --workspace --no-fail-fast -j 2: exit 101, 1199 passed / 170 suites, two known unrelated app failures (mesh_fill, ui_events); see workspace-all-final.log",
+      "m00_gate": "NOT READY (pre-existing missing M00 records; no QymCAD code imported)"
+    },
+    "remaining": [
+      "External reviewer sign-off is not recorded (human_approval null).",
+      "Portable solid classification refuses open/coincident topology but geometric face-face self-intersection requires OCCT.",
+      "Extrusion conversion supports closed planar polyline profiles only; NURBS-profile extrusion needs a kernel-backed path.",
+      "Global M00 execution gate is NOT READY (pre-existing); this work imported no QymCAD code or new upstream source."
+    ]
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-02-01-001",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-001 - Point And Polyline Semantic Types/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-002",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-002 - NURBS Curve Control Points Knots Weights/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-003",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-003 - Open Closed And Planar Curve Rules/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-004",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-004 - Surface UV Domain And Seam Rules/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-005",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-005 - Trimmed Vs Underlying Surface Model/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-006",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-006 - Surface Edge And Isocurve Semantics/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-007",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-007 - Polysurface And Closed Solid Semantics/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-008",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-008 - Extrusion Vs Full B-Rep Representations/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-009",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-009 - Mesh Vs NURBS Object Type Rules/l3.json"
+    },
+    {
+      "id": "OM9-L3-02-01-010",
+      "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-010 - Instance And Block Semantic Type/l3.json"
+    }
+  ]
+}

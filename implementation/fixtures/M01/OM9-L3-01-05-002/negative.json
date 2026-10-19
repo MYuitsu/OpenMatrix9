@@ -1,0 +1,17 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-05-002",
+  "title": "B-Rep Shape Type And Validation",
+  "case": "om9-l3-01-05-002-negative",
+  "negative_oracle": "Index thiếu, wire không nối, cạnh trùng, wire hở, face/shell sai, cạnh dài 0, cặp đỉnh gần hơn dung sai, vượt budget đều bị từ chối.",
+  "refusals": [
+    "Invalid(\"brep tolerance\") / Invalid(\"brep vertex tolerance\") / Invalid(\"brep edge tolerance\") / Invalid(\"brep face tolerance\")",
+    "Missing(\"brep vertex\"|\"brep edge\"|\"brep wire\"|\"brep face\")",
+    "Invalid(\"brep edge endpoints\"|\"brep edge closure\"|\"brep wire chain\"|\"brep wire duplicate edge\"|\"brep wire closure\"|\"brep face wires\"|\"brep shell faces\"|\"brep shell duplicate face\")",
+    "Invalid(\"geometry below kernel tolerance\") — hình học ≤ dung sai kernel",
+    "Budget(\"brep body\")"
+  ],
+  "runtime_tests": [
+    "cargo test -p om9-core --test brep_kernel"
+  ]
+}

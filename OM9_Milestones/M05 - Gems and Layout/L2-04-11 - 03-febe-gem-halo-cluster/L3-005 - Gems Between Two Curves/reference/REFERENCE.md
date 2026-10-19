@@ -1,0 +1,9 @@
+# Reference: L3-005 - Gems Between Two Curves
+
+Target: OM9-L3-04-11-005 (L3). Milestone M05.
+
+| Source | Pages | Section | Confidence | Text | Images | Placement |
+|---|---|---|---|---|---|---|
+| m8book2 | 219-220 | Gems Between 2 Curves | high | text/m8book2__p219-220__gems-between-2-curves.md | 6 | local |
+
+Usage: these manual extracts (Matrix 8/9 and Rhino 5 reference text, with page images in reference/images) are background for implementing Gems Between Two Curves. Read the text files for the original command behavior, options and workflow, and check the images for expected UI and result appearance before coding or writing tests. Treat them as private reference only: do not copy manual wording or bitmaps into public source, docs or release artifacts (see AGENTS.md and docs/private-reference-policy.md). Rows marked linked from L2 point to the shared copy in the parent L2 reference folder.

@@ -1,0 +1,41 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-05-005",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-05-005-01",
+      "capability": "Face/wire/edge topology access",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-005/",
+      "test": "face_wire_edge_topology_is_exact"
+    },
+    {
+      "l4": "OM9-L4-01-05-005-02",
+      "capability": "Face/wire/edge topology access",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-005/",
+      "test": "face_wire_edge_topology_is_exact"
+    },
+    {
+      "l4": "OM9-L4-01-05-005-03",
+      "capability": "Face/wire/edge topology access",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-005/",
+      "test": "face_wire_edge_topology_is_exact"
+    },
+    {
+      "l4": "OM9-L4-01-05-005-04",
+      "capability": "Face/wire/edge topology access",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-005/",
+      "test": "face_wire_edge_topology_is_exact"
+    },
+    {
+      "l4": "OM9-L4-01-05-005-05",
+      "capability": "Face/wire/edge topology access",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-005/",
+      "test": "face_wire_edge_topology_is_exact"
+    }
+  ],
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  }
+}

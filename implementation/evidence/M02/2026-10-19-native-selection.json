@@ -1,0 +1,1817 @@
+{
+  "date": "2026-10-19",
+  "module": "OM9-L2-01-07",
+  "passed": true,
+  "runs": [
+    {
+      "artifact": "build/standalone-validation/ui-artifacts/m02-selection-20261019-verified-100/m02-report.json",
+      "artifact_sha256": "9d870eb537071e871b8b20afced690fc956cc643f0930be77c94b949bf2a3d97",
+      "binary_sha256": "a2f5bb27b52b78de05597259075266b044340ad12d5cd3dd36efcff820b31ccd",
+      "source_fingerprint": "633df537418c1d68946ffc50cf8c2e7995a420a9cbca3a07efe83f21a73fc9ed",
+      "zoom": 1.0,
+      "gpu_requested": true,
+      "gpu_scene_views": [
+        "Looking Down",
+        "Perspective",
+        "Side View",
+        "Through Finger"
+      ],
+      "elapsed_seconds": 8.15,
+      "exit_code": 0,
+      "checks": [
+        {
+          "actual": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "name": "click selects the curve and exposes a pivot",
+          "pass": true
+        },
+        {
+          "actual": {
+            "curve_samples": [
+              {
+                "screen": [
+                  702.5487804878048,
+                  360.4390243902439
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "screen": [
+                  1352.5588376307699,
+                  406.146697145643
+                ],
+                "view": "Perspective"
+              }
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "views": 4
+          },
+          "name": "first drag sample previews +5 mm without document or history writes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "release commits +5 mm as exactly one Undo entry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Undo restores original geometry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Redo restores +5 mm",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.9999996609157988,
+              0.0,
+              0.0,
+              5.000003051757814
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "scale square doubles X about current pivot",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "rotation arc makes 90 degree Z turn",
+          "pass": true
+        },
+        {
+          "actual": {
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "Escape discards preview and retains old Redo",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "old Redo remains usable after cancelled drag",
+          "pass": true
+        },
+        {
+          "actual": [
+            "07559082-443c-4f60-8dd9-93aefe5b5caf"
+          ],
+          "name": "GPU and painter paths select the polygon mesh",
+          "pass": true
+        },
+        {
+          "actual": {
+            "mesh_probe": [
+              565.9634146341464,
+              285.3170731707317
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                2.0000012207031252
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "mesh preview uses selected mesh indices after selection changes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              2.0000012207031252
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "mesh release commits one additional transaction",
+          "pass": true
+        }
+      ],
+      "visible_geometry_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            703,
+            360
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1353,
+            406
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Looking Down mesh",
+          "pixel": [
+            566,
+            285
+          ],
+          "selected_color_visible": true
+        }
+      ],
+      "screenshot_sha256": "1f432a5e55da2a38bea9a53753c283dbb9d43928e92b9ba2b0d7a73de0caf22b",
+      "preview_screenshots": {
+        "m02-mesh.png": "2dccf7290278c337a6cdea6cd6820853da3431255ffe90f47b3d6c85f113639e",
+        "m02-move.png": "029e35d327bd68f8558a8577f5559868296c771d1bbab3c01762764a73a058fc",
+        "m02-rotate.png": "1e1839e2aa67d2de9a39644ce84cdb458fceb99ea91f50d093be22714a187cbf",
+        "m02-scale.png": "898e4665e86b79e4b310ba5613295461767c0739bf398db94efaf458a5176abb"
+      },
+      "limitations": [
+        "Native BRep topology is not represented by this mesh/curve fixture.",
+        "Pointer, keyboard and focus are synthetic events through actual widgets; OS foreground focus is not proved."
+      ]
+    },
+    {
+      "artifact": "build/standalone-validation/ui-artifacts/m02-selection-20261019-verified-125/m02-report.json",
+      "artifact_sha256": "0cb88eeb7178c9ade744e7be31897eb5399a5076d01d34c36ddffb6b0e5315ce",
+      "binary_sha256": "a2f5bb27b52b78de05597259075266b044340ad12d5cd3dd36efcff820b31ccd",
+      "source_fingerprint": "633df537418c1d68946ffc50cf8c2e7995a420a9cbca3a07efe83f21a73fc9ed",
+      "zoom": 1.25,
+      "gpu_requested": true,
+      "gpu_scene_views": [
+        "Looking Down",
+        "Perspective",
+        "Side View",
+        "Through Finger"
+      ],
+      "elapsed_seconds": 8.024,
+      "exit_code": 0,
+      "checks": [
+        {
+          "actual": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "name": "click selects the curve and exposes a pivot",
+          "pass": true
+        },
+        {
+          "actual": {
+            "curve_samples": [
+              {
+                "screen": [
+                  633.0365853658536,
+                  314.8292682926829
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "screen": [
+                  1183.2941282230775,
+                  349.11002285923223
+                ],
+                "view": "Perspective"
+              }
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "views": 4
+          },
+          "name": "first drag sample previews +5 mm without document or history writes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "release commits +5 mm as exactly one Undo entry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Undo restores original geometry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Redo restores +5 mm",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.9999996609157984,
+              0.0,
+              0.0,
+              5.000003051757814
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "scale square doubles X about current pivot",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "rotation arc makes 90 degree Z turn",
+          "pass": true
+        },
+        {
+          "actual": {
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "Escape discards preview and retains old Redo",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "old Redo remains usable after cancelled drag",
+          "pass": true
+        },
+        {
+          "actual": [
+            "2a92c1bd-9e1d-4f75-8c06-c99556bb512b"
+          ],
+          "name": "GPU and painter paths select the polygon mesh",
+          "pass": true
+        },
+        {
+          "actual": {
+            "mesh_probe": [
+              530.5975609756098,
+              258.4878048780488
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                2.0000012207031244
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "mesh preview uses selected mesh indices after selection changes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              2.0000012207031244
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "mesh release commits one additional transaction",
+          "pass": true
+        }
+      ],
+      "visible_geometry_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            791,
+            394
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1479,
+            436
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Looking Down mesh",
+          "pixel": [
+            663,
+            323
+          ],
+          "selected_color_visible": true
+        }
+      ],
+      "screenshot_sha256": "2f98506e9450b366dcaf47b4fde14d3e606546d8bf10d58ec8c68991d1d6a042",
+      "preview_screenshots": {
+        "m02-mesh.png": "9b5b0b1ea9ffa8808f1dafaf7152d3d5df41ecc7a8a0373bd19f496b572bd126",
+        "m02-move.png": "26264ec2ebfc7414bbf875c02fce056d8b42725b67224e3baaf031a77782542c",
+        "m02-rotate.png": "77eaa459e3c704960d308d1f371bb3136470ddbd5e17adc6a0c92e253f9adde5",
+        "m02-scale.png": "76e369a975fd01fc6b123f58439eeff6258389db5be09e18e5b24f64dc0ca373"
+      },
+      "limitations": [
+        "Native BRep topology is not represented by this mesh/curve fixture.",
+        "Pointer, keyboard and focus are synthetic events through actual widgets; OS foreground focus is not proved."
+      ]
+    },
+    {
+      "artifact": "build/standalone-validation/ui-artifacts/m02-selection-20261019-verified-150/m02-report.json",
+      "artifact_sha256": "3b73ef83606e0a7f8ce905a7ac00d088b4303cecaefb19fe81dea1bb6da965fd",
+      "binary_sha256": "a2f5bb27b52b78de05597259075266b044340ad12d5cd3dd36efcff820b31ccd",
+      "source_fingerprint": "633df537418c1d68946ffc50cf8c2e7995a420a9cbca3a07efe83f21a73fc9ed",
+      "zoom": 1.5,
+      "gpu_requested": true,
+      "gpu_scene_views": [
+        "Looking Down",
+        "Perspective",
+        "Side View",
+        "Through Finger"
+      ],
+      "elapsed_seconds": 10.32,
+      "exit_code": 0,
+      "checks": [
+        {
+          "actual": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "name": "click selects the curve and exposes a pivot",
+          "pass": true
+        },
+        {
+          "actual": {
+            "curve_samples": [
+              {
+                "screen": [
+                  633.3178353658536,
+                  314.8292682926829
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "screen": [
+                  1183.3878782230775,
+                  349.11002285923223
+                ],
+                "view": "Perspective"
+              }
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "views": 4
+          },
+          "name": "first drag sample previews +5 mm without document or history writes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "release commits +5 mm as exactly one Undo entry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Undo restores original geometry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Redo restores +5 mm",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.9999996609157984,
+              0.0,
+              0.0,
+              5.000003051757814
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "scale square doubles X about current pivot",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "rotation arc makes 90 degree Z turn",
+          "pass": true
+        },
+        {
+          "actual": {
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "Escape discards preview and retains old Redo",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "old Redo remains usable after cancelled drag",
+          "pass": true
+        },
+        {
+          "actual": [
+            "8ccca0fb-fd43-448a-94c2-a151da519387"
+          ],
+          "name": "GPU and painter paths select the polygon mesh",
+          "pass": true
+        },
+        {
+          "actual": {
+            "mesh_probe": [
+              530.8788109756098,
+              258.4878048780488
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                2.0000012207031244
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "mesh preview uses selected mesh indices after selection changes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              2.0000012207031244
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "mesh release commits one additional transaction",
+          "pass": true
+        }
+      ],
+      "visible_geometry_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            950,
+            472
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1775,
+            524
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Looking Down mesh",
+          "pixel": [
+            796,
+            388
+          ],
+          "selected_color_visible": true
+        }
+      ],
+      "screenshot_sha256": "7ebcb43e52ad7a88a51f405c8052907f80e610b563ea625ef783ceac7ca796bf",
+      "preview_screenshots": {
+        "m02-mesh.png": "b3fe793bd7e72c4a26e23575c7e06ce4ce31f29e370cb73dcaefa3f0e4a10564",
+        "m02-move.png": "1b60a6a4061b2c8f19cae60b40d029cc5d226058daaf560bc683eebf80411eca",
+        "m02-rotate.png": "3be1a797860180a922a98fe9f48c7a76c08327dcb8f025f2ebc3471011b1d70b",
+        "m02-scale.png": "de3ae6209a04f5fe9189a803f8cc81e27488f54e7651ac81d14c920a4237365f"
+      },
+      "limitations": [
+        "Native BRep topology is not represented by this mesh/curve fixture.",
+        "Pointer, keyboard and focus are synthetic events through actual widgets; OS foreground focus is not proved."
+      ]
+    },
+    {
+      "artifact": "build/standalone-validation/ui-artifacts/m02-selection-20261019-verified-cpu/m02-report.json",
+      "artifact_sha256": "98c21897343081efa2b467fbf22e81aa1797e0f7c84dde28e40af4428c7e56da",
+      "binary_sha256": "1c2938b0ef37456717ae1baa0281c720ef3ee9dc7d2ee85ff1ed3a26ba15e84e",
+      "source_fingerprint": "633df537418c1d68946ffc50cf8c2e7995a420a9cbca3a07efe83f21a73fc9ed",
+      "zoom": 1.0,
+      "gpu_requested": false,
+      "gpu_scene_views": [],
+      "elapsed_seconds": 8.261,
+      "exit_code": 0,
+      "checks": [
+        {
+          "actual": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "name": "click selects the curve and exposes a pivot",
+          "pass": true
+        },
+        {
+          "actual": {
+            "curve_samples": [
+              {
+                "screen": [
+                  702.5487804878048,
+                  360.4390243902439
+                ],
+                "view": "Looking Down"
+              },
+              {
+                "screen": [
+                  1352.5588376307699,
+                  406.146697145643
+                ],
+                "view": "Perspective"
+              }
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "views": 4
+          },
+          "name": "first drag sample previews +5 mm without document or history writes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "release commits +5 mm as exactly one Undo entry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Undo restores original geometry",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.000003051757813
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "CMD Redo restores +5 mm",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.9999996609157988,
+              0.0,
+              0.0,
+              5.000003051757814
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "scale square doubles X about current pivot",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "rotation arc makes 90 degree Z turn",
+          "pass": true
+        },
+        {
+          "actual": {
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "stored": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                5.000003051757813
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "Escape discards preview and retains old Redo",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              7.992295426085555e-07,
+              -0.9999999999996806,
+              0.0,
+              5.000003051757812
+            ],
+            [
+              0.9999999999996806,
+              7.992295426085555e-07,
+              0.0,
+              8.881784197001252e-16
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "old Redo remains usable after cancelled drag",
+          "pass": true
+        },
+        {
+          "actual": [
+            "5333b185-0bee-4d35-9086-351ca7e2fa8f"
+          ],
+          "name": "GPU and painter paths select the polygon mesh",
+          "pass": true
+        },
+        {
+          "actual": {
+            "mesh_probe": [
+              565.9634146341464,
+              285.3170731707317
+            ],
+            "shown": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                2.0000012207031252
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "name": "mesh preview uses selected mesh indices after selection changes",
+          "pass": true
+        },
+        {
+          "actual": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              2.0000012207031252
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "mesh release commits one additional transaction",
+          "pass": true
+        }
+      ],
+      "visible_geometry_probes": [
+        {
+          "view": "Looking Down",
+          "pixel": [
+            703,
+            360
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Perspective",
+          "pixel": [
+            1353,
+            406
+          ],
+          "selected_color_visible": true
+        },
+        {
+          "view": "Looking Down mesh",
+          "pixel": [
+            566,
+            285
+          ],
+          "selected_color_visible": true
+        }
+      ],
+      "screenshot_sha256": "b713dcc04246d455d027c710ffd4db07456b4a24d2c61b834a00297078f6d5c3",
+      "preview_screenshots": {
+        "m02-mesh.png": "74828d461a8d8931845d9efa7196738c542a7962898e506b7b5292ab8c633bf6",
+        "m02-move.png": "921830b67275b66ab3bd5bf74afe19716e5c81d730acac610a38317382cbc9ac",
+        "m02-rotate.png": "97d428b51aef85ecdf291a91a65d5dddeb97af88e7057754bb988e885f7a5abf",
+        "m02-scale.png": "7392e40b00548a52996be4ecd756432cdd9c20cfff8f6b349dc00f9d0836532b"
+      },
+      "limitations": [
+        "Native BRep topology is not represented by this mesh/curve fixture.",
+        "Pointer, keyboard and focus are synthetic events through actual widgets; OS foreground focus is not proved."
+      ]
+    }
+  ],
+  "fixture_types": [
+    "curve",
+    "polygon mesh"
+  ],
+  "state_checks_per_run": 12,
+  "visual_probes_per_run": 3,
+  "actual_desktop_input": false,
+  "synthetic_focus": true,
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Native BRep topology and source owner",
+    "M02-UI external review",
+    "v2 policy package missing"
+  ]
+}

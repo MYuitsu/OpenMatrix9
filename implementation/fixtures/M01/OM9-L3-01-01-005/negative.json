@@ -1,0 +1,137 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-005",
+  "l4": "OM9-L4-01-01-005-02",
+  "case": "docking-layout-persistence-negative",
+  "negative_oracle": "Removed/unrecognized panel ID ignored with warning not crash",
+  "bytes_format": "the exact layout document bytes handed to DockLayout::from_bytes",
+  "cases": [
+    {
+      "id": "M1-a-removed-panel-id-is-ignored-with-a-warning",
+      "bytes": "{\"schema_version\": 2, \"panels\": {\"right-dock.project-manager\": {\"visible\": true, \"collapsed\": false, \"size\": 260.0}, \"left-rail\": {\"visible\": true, \"collapsed\": false, \"size\": 300.0}}}",
+      "expect": {
+        "diagnostic_contains": "layout panel 'right-dock.project-manager' is not recognized; removed",
+        "kept_panel": "left-rail",
+        "kept_size": 300.0,
+        "panics": false
+      }
+    },
+    {
+      "id": "M2-a-removed-menu-id-is-ignored-with-a-warning",
+      "bytes": "{\"schema_version\": 2, \"sections\": {\"old-project-manager\": {\"visible\": true, \"collapsed\": false, \"dock\": \"left\", \"order\": 0, \"height\": 120.0}}}",
+      "expect": {
+        "diagnostic_contains": "menu section 'old-project-manager' is not recognized; removed",
+        "left_order_is_documented": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "M3-a-panel-size-below-its-minimum-is-repaired-with-a-warning",
+      "bytes": "{\"schema_version\": 2, \"panels\": {\"left-rail\": {\"visible\": true, \"collapsed\": false, \"size\": 0.5}}}",
+      "expect": {
+        "diagnostic_contains": "panel 'left-rail' size",
+        "left_rail_size": 240.0,
+        "panics": false
+      },
+      "why": "JSON has no literal for NaN, so the non-finite branches are defensive only; the reachable repairs are the bounds. 0.5 is below LEFT_RAIL_MIN."
+    },
+    {
+      "id": "M4-a-panel-size-outside-its-bounds-is-repaired-with-a-warning",
+      "bytes": "{\"schema_version\": 2, \"panels\": {\"left-rail\": {\"visible\": true, \"collapsed\": false, \"size\": 5000.0}}}",
+      "expect": {
+        "diagnostic_contains": "panel 'left-rail' size",
+        "left_rail_size": 460.0,
+        "panics": false
+      }
+    },
+    {
+      "id": "M5-a-zero-sized-floating-rectangle-is-raised-with-a-warning",
+      "bytes": "{\"schema_version\": 2, \"sections\": {\"display\": {\"visible\": true, \"collapsed\": false, \"dock\": \"floating\", \"order\": 0, \"height\": 120.0, \"float\": {\"x\": 10.0, \"y\": 10.0, \"width\": 0.0, \"height\": 0.0}}}}",
+      "expect": {
+        "diagnostic_contains": "Display floating rectangle 0x0 is smaller than the minimum; raised to 180x120",
+        "display_float": [
+          10.0,
+          10.0,
+          180.0,
+          120.0
+        ],
+        "panics": false
+      },
+      "why": "A zero-sized rectangle is what a truncated document looks like. JSON has no literal for NaN or infinity, so the non-finite branches of the repair are defensive only."
+    },
+    {
+      "id": "M6-a-floating-rectangle-below-the-minimum-is-raised-with-a-warning",
+      "bytes": "{\"schema_version\": 2, \"sections\": {\"display\": {\"visible\": true, \"collapsed\": false, \"dock\": \"floating\", \"order\": 0, \"height\": 120.0, \"float\": {\"x\": 10.0, \"y\": 10.0, \"width\": 10.0, \"height\": 10.0}}}}",
+      "expect": {
+        "diagnostic_contains": "Display floating rectangle 10x10 is smaller than the minimum; raised to 180x120",
+        "display_float": [
+          10.0,
+          10.0,
+          180.0,
+          120.0
+        ],
+        "panics": false
+      }
+    },
+    {
+      "id": "M7-a-floating-menu-without-a-rectangle-is-placed-at-the-default-position",
+      "bytes": "{\"schema_version\": 2, \"sections\": {\"snaps\": {\"visible\": true, \"collapsed\": false, \"dock\": \"floating\", \"order\": 0, \"height\": 120.0}}}",
+      "expect": {
+        "diagnostic_contains": "Snaps was floating without a rectangle; placed at the default position",
+        "snaps_float_is_some": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "M8-orders-that-are-not-dense-are-renumbered-with-a-warning",
+      "bytes": "{\"schema_version\": 2, \"sections\": {\"display\": {\"visible\": true, \"collapsed\": false, \"dock\": \"left\", \"order\": 5, \"height\": 120.0}, \"snaps\": {\"visible\": true, \"collapsed\": false, \"dock\": \"left\", \"order\": 5, \"height\": 120.0}}}",
+      "expect": {
+        "diagnostic_contains": "menu orders were not dense; the documented order was restored",
+        "orders_are_dense": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "M9-a-missing-name-is-restored-from-its-documented-default",
+      "bytes": "{\"schema_version\": 2, \"panels\": {}, \"sections\": {}}",
+      "expect": {
+        "diagnostics": [],
+        "equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    },
+    {
+      "id": "M10-a-file-that-is-not-a-layout-is-ignored-with-a-warning",
+      "bytes": "this is not json",
+      "expect": {
+        "error": "Invalid",
+        "panics": false
+      }
+    },
+    {
+      "id": "M11-an-empty-file-is-ignored-with-a-warning",
+      "bytes": "",
+      "expect": {
+        "error": "Invalid",
+        "panics": false
+      }
+    },
+    {
+      "id": "M12-a-file-over-the-byte-budget-is-ignored-with-a-warning",
+      "bytes_padding": 200000,
+      "expect": {
+        "error": "Budget",
+        "panics": false
+      }
+    },
+    {
+      "id": "M13-a-future-schema-is-refused-by-name",
+      "bytes": "{\"schema_version\": 3, \"panels\": {}}",
+      "expect": {
+        "diagnostic_contains": "layout version 3 is not supported; restored the Matrix default",
+        "equals_matrix_default_bytes": true,
+        "panics": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-05-008",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-05-008-01",
+      "capability": "Shape tessellation interface",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-008/",
+      "test": "the_tessellation_stays_on_the_exact_sphere"
+    },
+    {
+      "l4": "OM9-L4-01-05-008-02",
+      "capability": "Shape tessellation interface",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-008/",
+      "test": "the_tessellation_stays_on_the_exact_sphere"
+    },
+    {
+      "l4": "OM9-L4-01-05-008-03",
+      "capability": "Shape tessellation interface",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-008/",
+      "test": "the_tessellation_stays_on_the_exact_sphere"
+    },
+    {
+      "l4": "OM9-L4-01-05-008-04",
+      "capability": "Shape tessellation interface",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-008/",
+      "test": "the_tessellation_stays_on_the_exact_sphere"
+    },
+    {
+      "l4": "OM9-L4-01-05-008-05",
+      "capability": "Shape tessellation interface",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-008/",
+      "test": "the_tessellation_stays_on_the_exact_sphere"
+    }
+  ],
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  }
+}

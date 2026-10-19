@@ -1,0 +1,39 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+     Running tests\dock_layout_default.rs (target\debug\deps\dock_layout_default-c9ade85cedb91a3a.exe)
+
+running 7 tests
+test fixture_bytes_are_the_specification ... ok
+test n9_an_impossible_stored_home_is_repaired_with_a_diagnostic ... FAILED
+test d3_reset_returns_the_baseline_and_the_caller_decides_what_to_publish ... ok
+test n1_to_n8_a_layout_that_cannot_be_honoured_resets_to_the_baseline ... FAILED
+test d2_reset_is_idempotent ... ok
+test d1_reset_after_every_placement_kind_recreates_the_baseline ... FAILED
+test d4_reload_without_a_store_is_the_factory_default ... ok
+
+failures:
+
+---- n9_an_impossible_stored_home_is_repaired_with_a_diagnostic stdout ----
+
+thread 'n9_an_impossible_stored_home_is_repaired_with_a_diagnostic' (42172) panicked at crates\om9-app\tests\dock_layout_default.rs:298:5:
+[] lacks "Projects home"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- n1_to_n8_a_layout_that_cannot_be_honoured_resets_to_the_baseline stdout ----
+
+thread 'n1_to_n8_a_layout_that_cannot_be_honoured_resets_to_the_baseline' (43428) panicked at crates\om9-app\tests\dock_layout_default.rs:236:52:
+N2-a-future-schema-is-not-supported: Invalid("layout document")
+
+---- d1_reset_after_every_placement_kind_recreates_the_baseline stdout ----
+
+thread 'd1_reset_after_every_placement_kind_recreates_the_baseline' (34660) panicked at crates\om9-app\tests\dock_layout_default.rs:153:47:
+called `Option::unwrap()` on a `None` value
+
+
+failures:
+    d1_reset_after_every_placement_kind_recreates_the_baseline
+    n1_to_n8_a_layout_that_cannot_be_honoured_resets_to_the_baseline
+    n9_an_impossible_stored_home_is_repaired_with_a_diagnostic
+
+test result: FAILED. 4 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-app --test dock_layout_default`

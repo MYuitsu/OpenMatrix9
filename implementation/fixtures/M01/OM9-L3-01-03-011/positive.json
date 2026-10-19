@@ -1,0 +1,36 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-011",
+  "l4": "OM9-L4-01-03-011-02",
+  "title": "Document Change Notification",
+  "case": "om9-l3-01-03-011-positive",
+  "runtime_tests": "om9-app/tests/document_contract.rs::l3_011_one_edit_publishes_one_ordered_batch_with_a_new_revision|l3_011_undo_and_redo_are_published_with_their_own_cause|l3_011_a_panicking_observer_is_recorded_and_the_others_still_run|l3_011_an_observer_cannot_change_the_document_it_is_told_about; om9-core/tests/document_changes.rs",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "order": [
+        "CurrentLayer",
+        "LayerOrder",
+        "Layers",
+        "Entities",
+        "Groups",
+        "Features"
+      ],
+      "id": "one-ordered-batch",
+      "expect": {
+        "batches": 1,
+        "revision_delta_positive": true,
+        "deterministic": true
+      }
+    },
+    {
+      "id": "undo-batch",
+      "expect": {
+        "last_changes": [
+          "EntityRemoved"
+        ],
+        "last_cause": "Undo"
+      }
+    }
+  ]
+}

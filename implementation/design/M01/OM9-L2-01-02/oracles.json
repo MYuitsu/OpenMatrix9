@@ -1,0 +1,125 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "oracle_schema": "om9.m01.oracle.v1.5",
+  "oracle_schema_note": "no local definition of om9.m01.oracle.v1.5 exists in this repository; the string is carried as a field only",
+  "l2": "OM9-L2-01-02",
+  "source": "authored from the l3.json oracles and the existing Controller behavior (session.rs); geometry values are hand-computed (hypot(3,4)=5), NOT copied from program output",
+  "status": "RUNTIME_DRIVEN_BY_TEST",
+  "l3": {
+    "OM9-L3-01-02-001": {
+      "positive": [
+        { "id": "one-descriptor-three-routes", "calls": ["registry.by_id(\"OM9-CURVE-002\")", "registry.resolve_name(\"Line\")", "registry.resolve_name(\"LINE\")"], "expect": { "same_descriptor": true, "id": "OM9-CURVE-002", "implemented": true } },
+        { "id": "save-as-alias", "calls": ["resolve_name(\"Save As\")", "resolve_name(\"saveas\")"], "expect": { "id": "OM9-FILE-006" } },
+        { "id": "undo-redo-ids", "calls": ["resolve_name(\"Undo\")", "resolve_name(\"redo\")"], "expect": { "ids": ["OM9-EDIT-UNDO", "OM9-EDIT-REDO"], "repeatable": false } },
+        { "id": "real-catalog", "call": "CommandRegistry::matrix9()", "expect": { "ok": true, "descriptor_count": 609, "note": "607 catalog IDs + OM9-EDIT-UNDO + OM9-EDIT-REDO" } },
+        { "id": "menu-and-cmd-same-session", "calls": ["c1.dispatch(LINE, Menu); c1.accept_world_point([0,0,0]); c1.accept_world_point([3,4,0])", "c2.submit(\"line\"); c2.submit(\"0,0,0\"); c2.submit(\"3,4,0\")"], "expect": { "geometry_equal": true, "domain": [0, 5], "undo_len": 1 } }
+      ],
+      "negative": [
+        { "id": "duplicate-implemented-alias", "call": "CommandRegistry::build(catalog, [Line{aliases:[\"Ln\"]}, Point{aliases:[\"ln\"]}])", "expect": { "error": "RegistryError::DuplicateAlias" } },
+        { "id": "ambiguous-implemented-name", "call": "build(synthetic catalog with two implemented entries named \"Dim\") then resolve_name(\"Dim\")", "expect": { "error": "RegistryError::Ambiguous", "candidates": 2 } },
+        { "id": "unknown-id", "call": "registry.by_id(\"OM9-NOPE-999\")", "expect": { "error": "RegistryError::Unknown" } },
+        { "id": "malformed-id", "call": "CommandId::parse(\"line\")", "expect": { "error": "RegistryError::InvalidId" } },
+        { "id": "unknown-typed-name-text", "call": "controller.submit(\"Frobnicate\")", "expect": { "error_text": "unsupported unknown/unavailable command", "snapshot_unchanged": true } },
+        { "id": "catalog-only-typed", "call": "controller.submit(\"Polyline\")", "expect": { "error_text": "unsupported unknown/unavailable command", "snapshot_unchanged": true } }
+      ]
+    },
+    "OM9-L3-01-02-002": {
+      "positive": [
+        { "id": "line-descriptor", "call": "registry.by_id(LINE)", "expect": { "inputs": [{ "Points": { "count": 2 } }], "options": [{ "name": "BothSides", "initial": "B", "domain": "Boolean", "phase": "AnyStep" }], "output": "Curve", "repeatable": true } },
+        { "id": "deterministic-json", "call": "registry.to_json() twice", "expect": { "byte_equal": true, "ids_ascending": true } }
+      ],
+      "negative": [
+        { "id": "missing-mandatory-input", "call": "Line: dispatch then submit(\"\") with 0 points", "expect": { "error": "Invalid(\"point required\")", "entities": 0, "running": true } },
+        { "id": "unregistered-option", "call": "Line: submit(\"Invented=Yes\")", "expect": { "error": "Unsupported(\"command option\")", "snapshot_unchanged": true } },
+        { "id": "option-on-point", "call": "Point: submit(\"BothSides=Yes\")", "expect": { "error": "Unsupported(\"command option\")" } }
+      ]
+    },
+    "OM9-L3-01-02-003": {
+      "positive": [
+        { "id": "context-captured", "setup": "select one Point root, set active view Perspective, dispatch Line", "expect": { "command_context.document": "active document id", "command_context.view": "Perspective", "command_context.selection": ["selected ObjectId"], "command_context.unit": "Millimeter" } },
+        { "id": "context-cleared", "call": "after commit or cancel", "expect": { "command_context": null } }
+      ],
+      "negative": [
+        { "id": "replace-document-mid-command", "setup": "Line with first point; begin New; decide_unsaved(Discard)", "expect": { "old_document_entities_unchanged": true, "running": false, "command_context": null, "new_document_entities": 0 } },
+        { "id": "stale-after-external-commit", "setup": "session::hosts unit test: Line with first point, then a raw self.coordinator commit (Mutation::Insert of a Point) bumps the publication epoch without refreshing the session", "expect": { "error": "Stale(\"command document/context\")", "entities_unchanged": true } }
+      ]
+    },
+    "OM9-L3-01-02-004": {
+      "positive": [
+        { "id": "two-click-progression", "steps": ["dispatch(LINE)", "point [1,2,3]", "point [4,6,3]"], "expect": { "phases": ["Running AwaitPoint{0,2}", "Running AwaitPoint{1,2}", "Idle"], "undo_len": [0, 0, 1] } },
+        { "id": "escape-aborts", "steps": ["dispatch(LINE)", "point", "cancel()"], "expect": { "phase": "Idle", "undo_len": 0, "entities": 0 } }
+      ],
+      "negative": [
+        { "id": "extra-click-after-commit", "steps": ["Line committed", "accept_world_point([9,9,9])"], "expect": { "error": "Missing(\"active command\")", "snapshot_unchanged": true } },
+        { "id": "early-enter", "steps": ["dispatch(LINE)", "submit(\"\")"], "expect": { "error": "Invalid(\"point required\")", "entities": 0 } },
+        { "id": "degenerate-second-point", "steps": ["dispatch(LINE)", "point [1,1,1]", "point [1,1,1]"], "expect": { "error": "Invalid(\"nonzero finite line length\")", "running": true, "entities": 0 } }
+      ]
+    },
+    "OM9-L3-01-02-005": {
+      "positive": [
+        { "id": "initial-forms", "inputs": ["B", "b=y", "B=N", "BothSides=Yes", "bothsides=no"], "start": "BothSides=No", "expect": { "both_sides_after_each": [true, true, false, true, false] } },
+        { "id": "typed-numeric", "descriptor": "synthetic: Length option 'Length' (L), Angle option 'Angle' (A)", "inputs": ["length=2.5mm", "angle=90deg", "L=0.1in", "A=3.141592653589793rad"], "expect": { "values": [{ "Length_mm": 2.5 }, { "Angle_deg": 90 }, { "Length_mm_near": 2.54, "abs_tol": 1e-12 }, { "Angle_deg_near": 180, "abs_tol": 1e-12 }] } },
+        { "id": "not-an-option", "input": "1,2,3", "expect": { "parse_option": "Ok(None)" } }
+      ],
+      "negative": [
+        { "id": "unknown-option", "input": "X=1", "expect": { "error": "Unsupported(\"command option\")" } },
+        { "id": "malformed-number", "input": "length=abc", "expect": { "error": "Invalid(spec.invalid_value)" } },
+        { "id": "nan", "input": "length=NaN", "expect": { "error": "Invalid(spec.invalid_value)" } },
+        { "id": "infinity", "input": "length=inf", "expect": { "error": "Invalid(spec.invalid_value)" } },
+        { "id": "unsupported-unit", "input": "length=2.5yd", "expect": { "error": "Unsupported(\"unit\")" } },
+        { "id": "bad-boolean", "input": "BothSides=Maybe", "expect": { "error_text": "invalid BothSides Yes/No", "both_sides_unchanged": true } }
+      ]
+    },
+    "OM9-L3-01-02-006": {
+      "status": "DONE_WITH_EVIDENCE",
+      "positive": [ { "id": "composite-one-frame", "evidence": "om9-core/tests/resource_transactions.rs:93", "expect": { "undo_len": 1, "revision_delta": 1, "mutations": 2 } } ],
+      "negative": [ { "id": "mid-failure-rollback", "evidence": "om9-core/tests/resource_transactions.rs:140, atomic_transactions.rs:239", "expect": { "snapshot_unchanged": true, "redo_executable": true } } ]
+    },
+    "OM9-L3-01-02-007": {
+      "status": "DONE_WITH_EVIDENCE",
+      "positive": [ { "id": "create-undo-redo-identity", "evidence": "om9-core/tests/atomic_transactions.rs:166, :269; layer_transactions.rs:146; om9-app/tests/command_sessions.rs:13", "expect": { "same_object_id_after_redo": true, "same_layer_id": true } } ],
+      "negative": [ { "id": "no-resurrection", "evidence": "om9-core/tests/atomic_transactions.rs:51, :98, :197", "expect": { "reallocation_refused": true, "stale_participant_refused": true } } ]
+    },
+    "OM9-L3-01-02-008": {
+      "status": "DONE_WITH_EVIDENCE",
+      "positive": [ { "id": "escape-no-undo", "evidence": "om9-app/tests/ui_events.rs:34", "expect": { "undo_len_unchanged": true } } ],
+      "negative": [ { "id": "partial-invalid-then-cancel", "evidence": "om9-app/tests/command_sessions.rs:44", "expect": { "coordinator_snapshot_equal": true, "redo_executable": true } } ]
+    },
+    "OM9-L3-01-02-009": {
+      "positive": [
+        { "id": "repeat-last", "steps": ["Line 0,0,0 3,4,0", "submit(\"\")"], "expect": { "running": "OM9-CURVE-002", "prompt": "Start of line (BothSides=No): " } }
+      ],
+      "negative": [
+        { "id": "undo-not-repeated", "steps": ["Line committed", "submit(\"Undo\")", "submit(\"\")"], "expect": { "running": "OM9-CURVE-002", "redo_len": 1 } },
+        { "id": "save-not-repeated", "steps": ["Line committed", "begin SaveAs + accept path", "submit(\"\")"], "expect": { "file_operation": null, "running": "OM9-CURVE-002" } },
+        { "id": "nothing-to-repeat", "steps": ["fresh controller", "submit(\"\")"], "expect": { "error": "Missing(\"previous command\")" } }
+      ]
+    },
+    "OM9-L3-01-02-010": {
+      "positive": [
+        { "id": "ordered-events", "steps": ["dispatch(LINE, Menu)", "point", "point"], "expect": { "kinds": ["Started", "Prompt", "Progress 1/2", "Prompt", "Progress 2/2", "Finished Committed"], "sequence_strictly_increasing": true } },
+        { "id": "cancel-event", "steps": ["dispatch(POINT)", "cancel()"], "expect": { "last": "Finished Canceled" } },
+        { "id": "warning-event", "steps": ["dispatch(LINE)", "submit(\"a,b\")"], "expect": { "last": "Warning", "running": true } }
+      ],
+      "negative": [
+        { "id": "panicking-observer", "setup": "observer panics on Finished", "steps": ["Line 0,0,0 3,4,0"], "expect": { "undo_len": 1, "entities": 1, "observer_diagnostics": 1, "observer_removed": true, "next_dispatch_events_delivered_to_other_observers": true } },
+        { "id": "observer-limit", "call": "add 17 observers", "expect": { "error": "Budget(\"command observers\")" } }
+      ]
+    },
+    "OM9-L3-01-02-011": {
+      "positive": [
+        { "id": "undo-state", "steps": ["fresh: command_availability(UNDO)", "after Line"], "expect": ["Err(NothingToUndo)", "Ok"] },
+        { "id": "implemented", "call": "command_availability(LINE) idle", "expect": "Ok" }
+      ],
+      "negative": [
+        { "id": "not-implemented", "call": "command_availability(\"OM9-SOLID-012\"); dispatch it", "expect": { "availability": "Err(NotImplemented)", "dispatch_error": "Unsupported(\"command has no accepted standalone operation\")", "snapshot_unchanged": true } },
+        { "id": "modal-owner", "steps": ["begin_file_operation(SaveAs) -> Pending", "dispatch(LINE, Menu)"], "expect": { "availability": "Err(ModalOwner(FileOperation))", "dispatch_error": "Busy", "running": false } },
+        { "id": "static-availability-unchanged", "call": "Controller::availability for LINE, POINT, OM9-FILE-002..006, OM9-SOLID-012", "expect": "same Ok/Err as before the change" }
+      ]
+    },
+    "seam-OM9-L3-01-01-002": {
+      "positive": [ { "id": "ready", "call": "fresh Controller: command_input_ready()", "expect": true } ],
+      "negative": [ { "id": "not-ready", "setup": "controller.scene = None (session::hosts unit test)", "call": "compute_regions_for(&DockLayout::matrix_default(), WindowSize{width:1280., height:900.}, &controller.workspace, &controller)", "expect": { "error": "RegionError::CommandInputUnavailable" } } ]
+    }
+  }
+}

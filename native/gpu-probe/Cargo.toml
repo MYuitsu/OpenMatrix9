@@ -1,0 +1,13 @@
+# G00-03 feasibility harness: wgpu adapter/device/offscreen render. Standalone workspace under
+# native/ — M00 is a gate, so this is a probe, not a product crate.
+[package]
+name = "om9-gpu-probe"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+wgpu = "=30.0.1"
+pollster = "0.4"

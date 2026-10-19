@@ -1,0 +1,110 @@
+{
+  "level": "L3",
+  "id": "OM9-M00-L3-02-03",
+  "milestone": "M00",
+  "parent_l2_id": "OM9-M00-L2-02",
+  "title": "Geometry numeric invariants",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "specification": {
+    "l3_id": "OM9-M00-L3-02-03",
+    "module_id": "OM9-M00-L2-02",
+    "gate_id": "G00-02",
+    "title": "Geometry numeric invariants",
+    "l4_count": 4,
+    "tasks": [
+      {
+        "task_id": "OM9-M00-L4-02-03-01",
+        "title": "Tạo fixture cơ bản được chốt đơn vị",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/L4-01 - Tạo fixture cơ bản được chốt đơn vị/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-03-02",
+        "title": "Kiểm thử Boolean/fillet/offset và lỗi degenerate",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/L4-02 - Kiểm thử Boolean - fillet - offset và lỗi degenerate/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-03-03",
+        "title": "Đo tessellation vs BRep exactness",
+        "kind": "PROBE",
+        "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/L4-03 - Đo tessellation vs BRep exactness/l4.json"
+      },
+      {
+        "task_id": "OM9-M00-L4-02-03-04",
+        "title": "Tổng hợp viability decision cho kernel",
+        "kind": "AUDIT",
+        "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/L4-04 - Tổng hợp viability decision cho kernel/l4.json"
+      }
+    ],
+    "release_evidence_status": "NOT_VERIFIED"
+  },
+  "execution_design": null,
+  "task_ids": [
+    "OM9-M00-L4-02-03-01",
+    "OM9-M00-L4-02-03-02",
+    "OM9-M00-L4-02-03-03",
+    "OM9-M00-L4-02-03-04"
+  ],
+  "children_l4": [
+    {
+      "id": "OM9-M00-L4-02-03-01",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/L4-01 - Tạo fixture cơ bản được chốt đơn vị/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-03-02",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/L4-02 - Kiểm thử Boolean - fillet - offset và lỗi degenerate/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-03-03",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/L4-03 - Đo tessellation vs BRep exactness/l4.json"
+    },
+    {
+      "id": "OM9-M00-L4-02-03-04",
+      "file": "M00 - Feasibility, Legal/L2-02 - OCCT/L3-03 - Geometry numeric invariants/L4-04 - Tổng hợp viability decision cho kernel/l4.json"
+    }
+  ],
+  "kernel_pin": {
+    "version": "8.0.1",
+    "tag": "V8_0_1",
+    "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
+    "pin_file": "native/occt/pin.json"
+  },
+  "execution_evidence": {
+    "l4_done": [
+      "OM9-M00-L4-02-03-01",
+      "OM9-M00-L4-02-03-02",
+      "OM9-M00-L4-02-03-03",
+      "OM9-M00-L4-02-03-04"
+    ],
+    "l4_open": [],
+    "harness": "native/occt-rust-proof (src/bin/numeric.rs + tests/numeric.rs)",
+    "evidence_root": "implementation/evidence/M00/OM9-M00-L3-02-03",
+    "design": "implementation/design/M00/OM9-M00-L3-02-03/api.md",
+    "fixtures": "implementation/fixtures/M00/OM9-M00-L3-02-03/{positive,negative}.json",
+    "measured": {
+      "primitives": "box 400/360 (1.1e-13/0), sphere 523.598775598299/314.159265358979, cylinder 50.265482457437/75.398223686155",
+      "fillet": "399.141592653590 (5.7e-14 vs 400 - (1 - pi/4)*4)",
+      "offset": "128.0 (2.8e-14)",
+      "degenerate": "touching cut stays valid at 400; offset past the wall reports invalid; 1e-12 box returns Standard_DomainError",
+      "mesh": "nodes on the exact sphere (8.9e-16 / 1.8e-15); 5 008 and 50 424 triangles; 0 boundary edges; 2 non-manifold pole edges",
+      "decision": "VIABLE"
+    },
+    "sign_off": {
+      "status": "SIGNED",
+      "reviewer": "chủ dự án (project owner)",
+      "signed_at_utc": "2026-10-17T16:40:00Z",
+      "record": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L3-02-03.ui-review.json",
+      "manual_test_gate": "AUTO_ONLY"
+    },
+    "next": "gate G00-02 closed; next is G00-03 (UI/Viewport/GPU feasibility)"
+  },
+  "version_history": [
+    {
+      "date": "2026-10-17",
+      "change": "OCCT 8.0.1 pinned; 7.8.1 (FreeCAD bundle) and 7.9.3 (workflow CI) references are historical",
+      "reason": "official release ships headers, import libraries, DLLs and CMake config; C++17 baseline; 8.0.1 carries the modelling/meshing/healing fixes the gate needs",
+      "pin": "native/occt/pin.json"
+    }
+  ]
+}

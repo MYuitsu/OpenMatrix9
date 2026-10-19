@@ -1,0 +1,93 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-09",
+  "milestone": "M05",
+  "title": "01-febe-gem-asset-shapes-and-loader",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Gem shapes/cuts, size, loader/instances",
+  "source_original_path": "specs/05-ms05-gems-and-layout/01-febe-gem-asset-shapes-and-loader/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-09",
+    "milestone_id": "M05",
+    "module_path": "specs/05-ms05-gems-and-layout/01-febe-gem-asset-shapes-and-loader/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/09-febe-gem-asset-shapes-and-loader/",
+    "scope": "Gem shapes/cuts, size, loader/instances",
+    "exclude": "Không dùng chung hardcode render gems.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          400,
+          406
+        ],
+        "pdf_pages_1based": [
+          174,
+          180
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-03",
+      "OM9-L2-03-11"
+    ],
+    "downstream_contracts": [
+      "gem-assets-and-instances"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M05-UI",
+    "l3_count": 8,
+    "l3_catalog_path": "specs/05-ms05-gems-and-layout/01-febe-gem-asset-shapes-and-loader/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-09-001",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-001 - Gem Shape Cut Dimension Schema/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-09-002",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-002 - Gem Reference Mesh And B-Rep Assets/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-09-003",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-003 - Gem Loader Shape Cut Size Picker/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-09-004",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-004 - Gem Custom Shape From Profile/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-09-005",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-005 - Gem Emerald And Baguette Builders/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-09-006",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-006 - Gem Instance Create Rotate And Position/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-09-007",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-007 - Gem Asset Properties And Layer Defaults/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-09-008",
+      "file": "M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-008 - Gem Facet Outline Girdle Reference API/l3.json",
+      "target_implementation_milestone": "M05"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m05": 21
+}

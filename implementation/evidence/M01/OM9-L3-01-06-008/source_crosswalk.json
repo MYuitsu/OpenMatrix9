@@ -1,0 +1,31 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-06-008",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-06-008-01",
+      "capability": "Viewport invalidation and redraw",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-008/"
+    },
+    {
+      "l4": "OM9-L4-01-06-008-02",
+      "capability": "Viewport invalidation and redraw",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-008/"
+    },
+    {
+      "l4": "OM9-L4-01-06-008-03",
+      "capability": "Viewport invalidation and redraw",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-008/"
+    },
+    {
+      "l4": "OM9-L4-01-06-008-04",
+      "capability": "Viewport invalidation and redraw",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-008/"
+    },
+    {
+      "l4": "OM9-L4-01-06-008-05",
+      "capability": "Viewport invalidation and redraw",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-06-008/"
+    }
+  ]
+}

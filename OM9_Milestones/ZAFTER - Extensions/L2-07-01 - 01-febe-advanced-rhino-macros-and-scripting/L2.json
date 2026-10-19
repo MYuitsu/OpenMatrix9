@@ -1,0 +1,53 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-07-01",
+  "milestone": "AFTER",
+  "title": "01-febe-advanced-rhino-macros-and-scripting",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Scripting/macro nâng cao để tự động hóa modeling sau.",
+  "source_original_path": "specs/90-after/02-rhino5-after/01-febe-advanced-rhino-macros-and-scripting/module.json",
+  "definition": {
+    "module_id": "OM9-L2-07-01",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/02-rhino5-after/01-febe-advanced-rhino-macros-and-scripting/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "07-rhino5-after",
+    "legacy_v07_path": "specs/07-rhino5-after/01-febe-advanced-rhino-macros-and-scripting/",
+    "scope": "Scripting/macro nâng cao để tự động hóa modeling sau.",
+    "exclude": "Command dispatch tối thiểu ở core.",
+    "manual_references": [],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 4,
+    "l3_catalog_path": "specs/90-after/02-rhino5-after/01-febe-advanced-rhino-macros-and-scripting/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-07-01-001",
+      "file": "AFTER - Post-Release Extensions/L2-07-01 - 01-febe-advanced-rhino-macros-and-scripting/L3-001 - Rhino Command Alias Script Editor/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-01-002",
+      "file": "AFTER - Post-Release Extensions/L2-07-01 - 01-febe-advanced-rhino-macros-and-scripting/L3-002 - Macro Recording And Replay/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-01-003",
+      "file": "AFTER - Post-Release Extensions/L2-07-01 - 01-febe-advanced-rhino-macros-and-scripting/L3-003 - Macro Permission And Reentrancy Boundary/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-07-01-004",
+      "file": "AFTER - Post-Release Extensions/L2-07-01 - 01-febe-advanced-rhino-macros-and-scripting/L3-004 - Custom Menu To Macro Binding/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

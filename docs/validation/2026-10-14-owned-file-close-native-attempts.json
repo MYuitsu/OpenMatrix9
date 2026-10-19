@@ -1,0 +1,890 @@
+{
+  "goal_complete": false,
+  "attempts": [
+    {
+      "result": "failed_audit_timing",
+      "reason": "Step61 evaluated before UI pass had serviced first close SavePath picker; actual receipt later contains four completed cancellations. Fix wait for owned chooser completion before checkpoint.",
+      "receipt": {
+        "active_file_path": null,
+        "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+        "checks": [
+          "native New toolbar opens owned prompt preserves Line",
+          "native prompt Escape retains old document and draft",
+          "real Windows Save chooser Cancel preserves pending Line",
+          "native File menu Open Cancel preserves pending Line",
+          "native F6 New uses same owned prompt",
+          "native Discard replaces session only after button",
+          "real Windows Open chooser Cancel keeps fresh document",
+          "native CMD SaveAs uses real Windows chooser Cancel",
+          "real WM_CLOSE opens owned dirty prompt",
+          "native close Cancel keeps unsaved document and window"
+        ],
+        "cmd": "Command: Line\nStart of line (BothSides=No): 0,0,0\nEnd of line (BothSides=No): 12,6,0\nCommand: Line\nStart of line (BothSides=No): 0,0,0\nCommand: Point\nLocation of point: 1,2,3\nCommand: SaveAs\nCommand: ",
+        "document": {
+          "context_revision": 1,
+          "current_layer": null,
+          "definitions": {},
+          "entities": {
+            "d7cb2611-43a1-4303-ac43-c865569370d8": {
+              "attributes": {
+                "color": null,
+                "layer": null,
+                "locked": false,
+                "selectable": true,
+                "visible": true
+              },
+              "attributes_revision": 1,
+              "generation": 1,
+              "geometry": {
+                "Point": [
+                  1.0,
+                  2.0,
+                  3.0
+                ]
+              },
+              "geometry_revision": 1,
+              "id": "d7cb2611-43a1-4303-ac43-c865569370d8",
+              "label": "Point",
+              "placement": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "epoch": 1,
+          "history": {
+            "recipes": {}
+          },
+          "id": "9501eff5-12d0-470c-ad19-8f29f270b675",
+          "layer_order": [],
+          "layers": {},
+          "name": "Untitled",
+          "owner_session": "aadb074d-bf57-49ef-9693-1307517b5dfa",
+          "page_unit": "Millimeter",
+          "results": {},
+          "revision": 2,
+          "session_generation": 1
+        },
+        "draft": "",
+        "file_operation_open": false,
+        "file_picker_receipts": [
+          {
+            "boundary": "same process/thread, direct owner, #32770 and exact title; WM_CLOSE; joined probe",
+            "close_posted": true,
+            "destroyed": true,
+            "elapsed_ms": 991,
+            "observed": true,
+            "phase": "SavePath",
+            "pid": 25500,
+            "returned_cancel": true,
+            "ui_thread": 83748
+          },
+          {
+            "boundary": "same process/thread, direct owner, #32770 and exact title; WM_CLOSE; joined probe",
+            "close_posted": true,
+            "destroyed": true,
+            "elapsed_ms": 670,
+            "observed": true,
+            "phase": "OpenPath",
+            "pid": 25500,
+            "returned_cancel": true,
+            "ui_thread": 83748
+          },
+          {
+            "boundary": "same process/thread, direct owner, #32770 and exact title; WM_CLOSE; joined probe",
+            "close_posted": true,
+            "destroyed": true,
+            "elapsed_ms": 800,
+            "observed": true,
+            "phase": "SavePath",
+            "pid": 25500,
+            "returned_cancel": true,
+            "ui_thread": 83748
+          },
+          {
+            "boundary": "same process/thread, direct owner, #32770 and exact title; WM_CLOSE; joined probe",
+            "close_posted": true,
+            "destroyed": true,
+            "elapsed_ms": 770,
+            "observed": true,
+            "phase": "SavePath",
+            "pid": 25500,
+            "returned_cancel": true,
+            "ui_thread": 83748
+          }
+        ],
+        "file_replay": [
+          {
+            "pointer_down": true,
+            "rect": [
+              301.0,
+              131.0,
+              323.0,
+              153.0
+            ],
+            "step": 11
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              301.0,
+              131.0,
+              323.0,
+              153.0
+            ],
+            "step": 12
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              349.0,
+              131.0,
+              371.0,
+              153.0
+            ],
+            "step": 16
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              349.0,
+              131.0,
+              371.0,
+              153.0
+            ],
+            "step": 17
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              2.0,
+              2.0,
+              23.15625,
+              19.0
+            ],
+            "step": 20
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              2.0,
+              2.0,
+              23.15625,
+              19.0
+            ],
+            "step": 21
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              9.0,
+              45.0,
+              60.96875,
+              62.0
+            ],
+            "step": 23
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              9.0,
+              45.0,
+              60.96875,
+              62.0
+            ],
+            "step": 24
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              694.8125,
+              519.0,
+              733.25,
+              536.0
+            ],
+            "step": 26
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              694.8125,
+              519.0,
+              733.25,
+              536.0
+            ],
+            "step": 27
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              23.0,
+              114.0,
+              51.34375,
+              131.0
+            ],
+            "step": 31
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              23.0,
+              114.0,
+              51.34375,
+              131.0
+            ],
+            "step": 32
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              650.59375,
+              519.0,
+              692.8125,
+              536.0
+            ],
+            "step": 34
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              650.59375,
+              519.0,
+              692.8125,
+              536.0
+            ],
+            "step": 35
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              2.0,
+              2.0,
+              23.15625,
+              19.0
+            ],
+            "step": 37
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              2.0,
+              2.0,
+              23.15625,
+              19.0
+            ],
+            "step": 38
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              9.0,
+              45.0,
+              60.96875,
+              62.0
+            ],
+            "step": 40
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              9.0,
+              45.0,
+              60.96875,
+              62.0
+            ],
+            "step": 41
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              694.8125,
+              519.0,
+              733.25,
+              536.0
+            ],
+            "step": 54
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              694.8125,
+              519.0,
+              733.25,
+              536.0
+            ],
+            "step": 55
+          },
+          {
+            "pointer_down": true,
+            "rect": [
+              620.0,
+              519.0,
+              648.59375,
+              536.0
+            ],
+            "step": 59
+          },
+          {
+            "pointer_down": false,
+            "rect": [
+              620.0,
+              519.0,
+              648.59375,
+              536.0
+            ],
+            "step": 60
+          }
+        ],
+        "limitations": [
+          "full Matrix9 UI acceptance pending",
+          "CAD native adapters pending",
+          "GPU geometry caching and performance acceptance pending",
+          "DPI/multi-monitor acceptance pending"
+        ],
+        "native_close_events": 2,
+        "objects": 1,
+        "passes": 71,
+        "scope": "owned_file_native_close_cancel_slice",
+        "screenshot": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\standalone-validation\\om9-ui-profile-qt663y80\\workspace.png",
+        "screenshot_saved": true,
+        "undo": 1,
+        "view_rects": {
+          "Looking Down": [
+            300.0,
+            178.0,
+            649.0,
+            410.0
+          ],
+          "Perspective": [
+            951.0,
+            178.0,
+            649.0,
+            410.0
+          ],
+          "Side View": [
+            951.0,
+            590.0,
+            649.0,
+            410.0
+          ],
+          "Through Finger": [
+            300.0,
+            590.0,
+            649.0,
+            410.0
+          ]
+        }
+      }
+    },
+    {
+      "result": "failed_native_focus_guard",
+      "reason": "Full close verifier reached Layers modal regression; replay stopped at step5 because actual raw native focus was lost. No assumption about cause; no input continued into CMD. Close11/native File8 had passed in same run.",
+      "receipt": {
+        "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+        "checks": [
+          "FAILED step 5: native window lost focus"
+        ],
+        "cmd": "Command: Line\nStart of line (BothSides=No): 0,0,0\nEnd of line (BothSides=No): 12,6,",
+        "dialog_capture_metrics": [],
+        "dialog_clicks": [
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": null,
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 0,
+            "time": 9.06e-05,
+            "top_layer": "None"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": null,
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 0,
+            "time": 0.0403954,
+            "top_layer": "None"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": null,
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 0,
+            "time": 0.053098,
+            "top_layer": "None"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 1,
+            "time": 0.0754429,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 2,
+            "time": 0.0816481,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 3,
+            "time": 0.0919732,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 4,
+            "time": 0.0957111,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 5,
+            "time": 0.1069523,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 5,
+            "time": 0.127878,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 5,
+            "time": 0.1399822,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 5,
+            "time": 0.1574315,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          },
+          {
+            "clicked": false,
+            "control": "Advanced",
+            "down": false,
+            "enabled": true,
+            "hover": false,
+            "position": [
+              1297.0,
+              647.0
+            ],
+            "pressed": false,
+            "rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "released": false,
+            "sizing_pass": false,
+            "step_after_injection": 5,
+            "time": 0.1768569,
+            "top_layer": "Some(LayerId { Background id_5A3E })"
+          }
+        ],
+        "dialog_replay": [
+          {
+            "advanced": false,
+            "advanced_rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "cancel": null,
+            "checks": 0,
+            "draft": "",
+            "focused": "Some(id_551A)",
+            "modal": null,
+            "name": null,
+            "native_events": [
+              {
+                "window_focused": true
+              },
+              {
+                "pointer_moved": [
+                  1297.0,
+                  647.0
+                ]
+              }
+            ],
+            "ok": null,
+            "passes": 3,
+            "raw_focused": true,
+            "raw_time": 0.0754429,
+            "running": false,
+            "step": 0,
+            "undo": 0
+          },
+          {
+            "advanced": false,
+            "advanced_rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "cancel": null,
+            "checks": 0,
+            "draft": "Line",
+            "focused": "Some(id_551A)",
+            "modal": null,
+            "name": null,
+            "native_events": [],
+            "ok": null,
+            "passes": 4,
+            "raw_focused": true,
+            "raw_time": 0.0816481,
+            "running": false,
+            "step": 1,
+            "undo": 0
+          },
+          {
+            "advanced": false,
+            "advanced_rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "cancel": null,
+            "checks": 0,
+            "draft": "",
+            "focused": "Some(id_551A)",
+            "modal": null,
+            "name": null,
+            "native_events": [],
+            "ok": null,
+            "passes": 5,
+            "raw_focused": true,
+            "raw_time": 0.0919732,
+            "running": true,
+            "step": 2,
+            "undo": 0
+          },
+          {
+            "advanced": false,
+            "advanced_rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "cancel": null,
+            "checks": 0,
+            "draft": "0,0,0",
+            "focused": "Some(id_551A)",
+            "modal": null,
+            "name": null,
+            "native_events": [],
+            "ok": null,
+            "passes": 6,
+            "raw_focused": true,
+            "raw_time": 0.0957111,
+            "running": true,
+            "step": 3,
+            "undo": 0
+          },
+          {
+            "advanced": false,
+            "advanced_rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "cancel": null,
+            "checks": 0,
+            "draft": "",
+            "focused": "Some(id_551A)",
+            "modal": null,
+            "name": null,
+            "native_events": [
+              {
+                "key": "O",
+                "pressed": false,
+                "repeat": false
+              }
+            ],
+            "ok": null,
+            "passes": 7,
+            "raw_focused": true,
+            "raw_time": 0.1069523,
+            "running": true,
+            "step": 4,
+            "undo": 0
+          },
+          {
+            "advanced": false,
+            "advanced_rect": [
+              2.0,
+              508.0,
+              297.0,
+              525.0
+            ],
+            "failed": "native window lost focus",
+            "focused": "Some(id_551A)",
+            "modal": null,
+            "passes": 8,
+            "raw_focused": false,
+            "raw_time": 0.127878,
+            "step": 5
+          }
+        ],
+        "document": {
+          "context_revision": 1,
+          "current_layer": null,
+          "definitions": {},
+          "entities": {},
+          "epoch": 1,
+          "history": {
+            "recipes": {}
+          },
+          "id": "bbca1f4c-c714-4af0-9117-b5689a0d3bf2",
+          "layer_order": [],
+          "layers": {},
+          "name": "Untitled",
+          "owner_session": "205b30a7-485b-44bc-9c92-453aadb1db01",
+          "page_unit": "Millimeter",
+          "results": {},
+          "revision": 1,
+          "session_generation": 1
+        },
+        "limitations": [
+          "full Matrix9 UI acceptance pending",
+          "CAD native adapters pending",
+          "GPU geometry caching and performance acceptance pending",
+          "DPI/multi-monitor acceptance pending"
+        ],
+        "modal_open": false,
+        "objects": 0,
+        "passes": 12,
+        "scope": "owned_layer_dialogs_slice",
+        "screenshot": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\standalone-validation\\om9-ui-profile-h9dpsyxt\\workspace.png",
+        "screenshot_saved": true,
+        "undo": 0,
+        "view_rects": {
+          "Looking Down": [
+            300.0,
+            178.0,
+            649.0,
+            410.0
+          ],
+          "Perspective": [
+            951.0,
+            178.0,
+            649.0,
+            410.0
+          ],
+          "Side View": [
+            951.0,
+            590.0,
+            649.0,
+            410.0
+          ],
+          "Through Finger": [
+            300.0,
+            590.0,
+            649.0,
+            410.0
+          ]
+        }
+      }
+    }
+  ]
+}

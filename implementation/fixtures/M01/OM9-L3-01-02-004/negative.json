@@ -1,0 +1,90 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-004",
+  "l4": "OM9-L4-01-02-004-02",
+  "case": "interactive-command-state-machine-negative",
+  "negative_oracle": "Extra click/out-of-order Enter cannot commit partial geometry",
+  "cases": [
+    {
+      "id": "N1-enter-while-a-point-is-awaited-cannot-commit",
+      "sequence": [
+        "dispatch LINE",
+        "point 0,0,0",
+        "Enter \"\""
+      ],
+      "expect": {
+        "error": "Invalid",
+        "phase": "AwaitEnd",
+        "entities": 0,
+        "undo_entries": 0
+      }
+    },
+    {
+      "id": "N2-an-extra-click-after-the-commit-adds-nothing",
+      "sequence": [
+        "dispatch LINE",
+        "point 0,0,0",
+        "point 10,0,0",
+        "point 20,0,0"
+      ],
+      "expect": {
+        "entities": 1,
+        "undo_entries": 1,
+        "error": "Missing",
+        "phase": "Idle"
+      }
+    },
+    {
+      "id": "N3-a-second-command-cannot-start-while-one-runs",
+      "sequence": [
+        "dispatch LINE",
+        "dispatch POINT"
+      ],
+      "expect": {
+        "error": "Busy",
+        "phase": "AwaitPoint",
+        "entities": 0
+      }
+    },
+    {
+      "id": "N4-a-zero-length-line-is-refused-and-the-command-stays-open",
+      "sequence": [
+        "dispatch LINE",
+        "point 0,0,0",
+        "point 0,0,0"
+      ],
+      "expect": {
+        "error": "Invalid",
+        "phase": "AwaitEnd",
+        "entities": 0,
+        "detail": "a degenerate line is not a committed line"
+      }
+    },
+    {
+      "id": "N5-a-stale-session-is-neither-running-nor-asking",
+      "sequence": [
+        "dispatch LINE",
+        "the view the run started in is taken away"
+      ],
+      "expect": {
+        "phase": "Idle",
+        "is_running": false,
+        "prompt": "Command: ",
+        "detail": "the phase machine and the prompt must not disagree; a view-TAB switch keeps the command (chrome_actions), a LOST view does not"
+      }
+    },
+    {
+      "id": "N6-a-command-name-typed-while-running-is-not-a-point",
+      "sequence": [
+        "dispatch LINE",
+        "point 0,0,0",
+        "Enter \"line\""
+      ],
+      "expect": {
+        "error": "Invalid",
+        "entities": 0,
+        "phase": "AwaitEnd"
+      }
+    }
+  ]
+}

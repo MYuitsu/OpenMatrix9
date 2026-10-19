@@ -1,0 +1,71 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-01-007",
+  "l4": "OM9-L4-01-01-007-02",
+  "case": "global-status-and-error-surface-positive",
+  "positive_oracle": "Invalid command/OCCT diagnostic visible in status, not lost in console",
+  "limits": { "max_message_bytes": 512, "max_tail": 8 },
+  "cases": [
+    {
+      "id": "G1-an-invalid-command-is-visible-and-retrievable",
+      "command": "NotACommand",
+      "expect": {
+        "kind": "Error",
+        "message_contains": "NotACommand",
+        "line_prefix": "Error: ",
+        "history_contains": "NotACommand",
+        "tail_last_contains": "NotACommand",
+        "command_not_running": true
+      }
+    },
+    {
+      "id": "G2-a-failure-survives-a-later-success",
+      "after": "run a command that succeeds",
+      "expect": { "kind_after_success": "Error", "complete_success_returns": false }
+    },
+    {
+      "id": "G3-only-dismiss-clears-a-failure",
+      "expect": { "kind_after_dismiss": "Ready", "line_after_dismiss": "Ready: Ready" }
+    },
+    {
+      "id": "G4-a-panel-message-never-hides-a-failure",
+      "panel_op": ["ToggleCollapsed", "projects"],
+      "expect": { "kind": "Error", "message_unchanged": true, "history_contains": "rolled up" }
+    },
+    {
+      "id": "G5-a-warning-is-visible-without-becoming-a-failure",
+      "report": ["Warning", "Display was moved back inside the window"],
+      "expect": { "kind": "Warning", "is_failure": false, "line_prefix": "Warning: " }
+    },
+    {
+      "id": "G6-the-same-message-twice-does-not-move-the-revision",
+      "report": ["Info", "Line accepted", "Info", "Line accepted"],
+      "expect": { "revision_delta": 1 }
+    },
+    {
+      "id": "G7-a-long-diagnostic-is-bounded-on-a-character-boundary",
+      "message_unit": "ẩ",
+      "message_repeat": 1000,
+      "expect": { "message_bytes_at_most": 512, "all_characters_intact": true }
+    },
+    {
+      "id": "G8-a-blank-message-reads-ready",
+      "message": "   ",
+      "expect": { "message": "Ready" }
+    },
+    {
+      "id": "G9-the-tail-keeps-the-most-recent-messages-oldest-first",
+      "messages": 13,
+      "expect": { "tail_len": 8, "tail_first": "message 5", "tail_last": "message 12" }
+    },
+    {
+      "id": "G10-a-second-failure-keeps-the-first-in-the-tail",
+      "errors": ["first failure", "second failure"],
+      "expect": {
+        "kind": "Error",
+        "message": "second failure",
+        "tail_contains": ["first failure", "second failure"]
+      }
+    }
+  ]
+}

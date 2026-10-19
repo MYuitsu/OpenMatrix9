@@ -1,0 +1,110 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "l2_id": "OM9-L2-02-01",
+  "date": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "target_dir": "L:/om9-target",
+  "parallel_jobs": 2,
+  "checks": [
+    {
+      "name": "core-all",
+      "command": ["cargo", "test", "-p", "om9-core", "-j", "2"],
+      "exit_code": 0,
+      "test_count": 385,
+      "log": "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/core-all.log",
+      "log_sha256": "156d0528da7d53aa839c431cfe0010cb973de0909480a32959c35f975e699cce",
+      "covers": ["OM9-L3-02-01-001", "OM9-L3-02-01-002", "OM9-L3-02-01-003", "OM9-L3-02-01-004", "OM9-L3-02-01-005", "OM9-L3-02-01-006", "OM9-L3-02-01-007", "OM9-L3-02-01-008", "OM9-L3-02-01-009", "OM9-L3-02-01-010"]
+    },
+    {
+      "name": "archive-all",
+      "command": ["cargo", "test", "-p", "om9-archive", "-j", "2"],
+      "exit_code": 0,
+      "test_count": 56,
+      "log": "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/archive-all.log",
+      "log_sha256": "54e6c26e42af6d61f819168f1a301f4094be1bda4d32929480ba0839084d01f2",
+      "covers": ["trim/extrusion semantics persistence", "damaged trim payload refusal", "mesh vs B-Rep across codec"]
+    },
+    {
+      "name": "exchange-all",
+      "command": ["cargo", "test", "-p", "om9-exchange", "-j", "2"],
+      "exit_code": 0,
+      "test_count": 97,
+      "log": "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/exchange-all.log",
+      "log_sha256": "d89695dc68de196488066fda6590f1a2f0f337035c21a02a21318e69c3a34092"
+    },
+    {
+      "name": "app-project-codec",
+      "command": ["cargo", "test", "-p", "om9-app", "--features", "gpu-sphere", "--test", "file_lifecycle", "--test", "cold_reopen", "--test", "cold_layers", "--test", "brep_selection", "-j", "2"],
+      "exit_code": 0,
+      "test_count": 38,
+      "detail": {"file_lifecycle": 20, "cold_reopen": 9, "cold_layers": 4, "brep_selection": 5},
+      "log": "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/app-project-codec.log",
+      "log_sha256": "b99312c4dba4d372cfb31bf8bd9aef1f829f9839f245af4884465d9feaeed281"
+    },
+    {
+      "name": "clippy-core-archive",
+      "command": ["cargo", "clippy", "-p", "om9-core", "-p", "om9-archive", "--all-targets", "-j", "2", "--", "-D", "warnings"],
+      "exit_code": 0,
+      "test_count": 0,
+      "log": "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/clippy-core-archive.log",
+      "log_sha256": "7f487e4469b34561c19a755a3add5116dd0b6aa890511e6bd28266b209c9729f"
+    },
+    {
+      "name": "rustfmt-touched-files",
+      "command": ["rustfmt", "--check", "--edition", "2024", "crates/om9-core/src/rhino_semantics.rs", "crates/om9-core/tests/rhino_semantics.rs", "crates/om9-archive/tests/rhino_semantics_persistence.rs"],
+      "exit_code": 0,
+      "test_count": 0
+    },
+    {
+      "name": "workspace-all",
+      "command": ["cargo", "test", "--workspace", "--no-fail-fast", "-j", "2"],
+      "exit_code": 101,
+      "test_count": 1199,
+      "passed_suites": 170,
+      "failed_suites": 2,
+      "failed_targets": ["om9-app --test mesh_fill", "om9-app --test ui_events"],
+      "known_unrelated": "Both failures pre-date this work and expect the removed CPU painter; the live ledger records them at docs/openmatrix9-progress.json:12939. No project-codec or semantic file is involved.",
+      "log": "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/workspace-all-final.log",
+      "log_sha256": "cd14103ad94141d3d91674fb370d70854ab14217ae69970fd5e7f7285a972263"
+    },
+    {
+      "name": "m00-execution-gate",
+      "command": ["python", "tools/validate_m00_execution.py", "--require-ready"],
+      "exit_code": 1,
+      "result": "NOT READY",
+      "note": "Pre-existing missing M00 records; this execution imported no QymCAD code or new upstream source.",
+      "log": "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/m00-gate.log",
+      "log_sha256": "5199679e6f7ca037b46a95359a1fa70f0b3c9dfae05f0801746af7c23bffe2cd"
+    },
+    {
+      "name": "public-source-audit",
+      "command": ["python", "tools/public_source_audit.py"],
+      "exit_code": 1,
+      "result": "pre-existing repo-wide findings",
+      "unreviewed_raster_artifacts": 6136,
+      "private_or_binary_artifacts": 292,
+      "log": "build/standalone-validation/ui-artifacts/m01-l2-02-01-20261019/public-source-audit.log",
+      "log_sha256": "443cbbb43f63ca7f0334cba83ccf0b9630eb94268f717e62d65c359c80c4ad0d",
+      "note": "This change adds no external source or asset."
+    }
+  ],
+  "latest_results": {
+    "core-all": {"exit_code": 0, "test_count": 385},
+    "archive-all": {"exit_code": 0, "test_count": 56},
+    "exchange-all": {"exit_code": 0, "test_count": 97},
+    "app-project-codec": {"exit_code": 0, "test_count": 38},
+    "clippy-core-archive": {"exit_code": 0},
+    "rustfmt-touched-files": {"exit_code": 0},
+    "workspace-all": {"exit_code": 101, "test_count": 1199, "failed_suites": 2, "known_unrelated": true},
+    "m00-execution-gate": {"exit_code": 1, "result": "NOT READY"},
+    "public-source-audit": {"exit_code": 1, "result": "pre-existing findings"}
+  },
+  "new_tests": {
+    "crates/om9-core/tests/rhino_semantics.rs": 11,
+    "crates/om9-archive/tests/rhino_semantics_persistence.rs": 4
+  },
+  "l3_verified": 10,
+  "l4_verified": 50,
+  "human_approval": null
+}

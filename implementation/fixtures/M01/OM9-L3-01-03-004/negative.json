@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-004",
+  "l4": "OM9-L4-01-03-004-02",
+  "title": "Layer Domain Records",
+  "case": "om9-l3-01-03-004-negative",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_004_layer_record_keeps_its_identity_when_renamed|l3_004_layer_with_an_unknown_parent_is_refused|l3_004_layer_order_must_list_every_layer_exactly_once",
+  "negative_oracle": "see cases",
+  "cases": [
+    {
+      "id": "missing-parent",
+      "expect": {
+        "error": "Missing(\"layer\")"
+      }
+    },
+    {
+      "id": "duplicate-order-entry",
+      "expect": {
+        "error": "Invalid(\"layer order\")"
+      }
+    },
+    {
+      "call": "stored layer id != map key",
+      "id": "map-key-mismatch",
+      "expect": {
+        "error": "Invalid(\"layer ID/revision\")"
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+task: OM9-L4-01-01-004-03 (implementation) Docking Layout Default Restore
+utc: 2026-10-16T13:06:41Z
+cwd: H:\OpenMatrix9\standalone
+
+== RED: cargo test -p om9-app --test dock_layout_default (truoc khi sua) ==
+xem OM9-L4-01-01-004-02.red.log: 4 passed; 3 failed (N2 bao 'layout document' thay vi ten version; N9 thieu ban sua home; D1 ky vong sai ve right-dock)
+== GREEN: cargo test -p om9-app --test dock_layout_default ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+     Running tests\dock_layout_default.rs (target\debug\deps\dock_layout_default-c9ade85cedb91a3a.exe)
+
+running 7 tests
+test fixture_bytes_are_the_specification ... ok
+test n9_an_impossible_stored_home_is_repaired_with_a_diagnostic ... ok
+test d3_reset_returns_the_baseline_and_the_caller_decides_what_to_publish ... ok
+test d2_reset_is_idempotent ... ok
+test d1_reset_after_every_placement_kind_recreates_the_baseline ... ok
+test d4_reload_without_a_store_is_the_factory_default ... ok
+test n1_to_n8_a_layout_that_cannot_be_honoured_resets_to_the_baseline ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+exit=0
+== cargo test -p om9-app --lib ==
+
+test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+
+
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 0

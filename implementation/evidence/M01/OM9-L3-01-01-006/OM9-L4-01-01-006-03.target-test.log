@@ -1,0 +1,44 @@
+task: OM9-L4-01-01-006-03 (implementation) Active Document Window State
+utc: 2026-10-16T13:18:11Z
+cwd: H:\OpenMatrix9\standalone
+
+== RED: cargo test -p om9-app --test document_window_state (truoc khi sua) ==
+xem OM9-L4-01-01-006-02.red.log: 8 passed; 1 failed. Loi san pham duy nhat: sau khi mo mot tep, Document::name van la 'Untitled' (tieu de dung vi uu tien duong dan, nhung ten tai lieu thi khong theo tep).
+== GREEN: cargo test -p om9-app --test document_window_state ==
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+warning: function `key` is never used
+  --> crates\om9-app\tests\document_window_state.rs:48:4
+   |
+48 | fn key(key: Key) -> Event {
+   |    ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-app` (test "document_window_state") generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.80s
+     Running tests\document_window_state.rs (target\debug\deps\document_window_state-43c877077b928291.exe)
+
+running 9 tests
+test fixture_design_pair_is_present ... ok
+test w1_a_new_session_is_named_and_clean ... ok
+test w7_a_long_name_is_cut_on_a_character_boundary ... ok
+test w2_a_changed_document_is_marked ... ok
+test w3_saving_removes_the_marker_and_names_the_file ... ok
+test w6_only_menus_moved_leaves_the_document_clean ... ok
+test w4_a_change_after_saving_marks_it_again ... ok
+test w5_switching_documents_changes_the_name_and_clears_the_state ... ok
+test c1_to_c9_unsaved_work_requires_an_explicit_decision ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.34s
+
+
+exit=0
+== cargo test -p om9-app --lib ==
+
+test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.71s
+
+
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 101
+error: function `key` is never used
+error: could not compile `om9-app` (test "document_window_state") due to 1 previous error

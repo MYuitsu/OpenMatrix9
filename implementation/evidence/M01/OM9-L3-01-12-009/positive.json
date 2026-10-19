@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-009",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "binary-layout",
+      "expect": {
+        "bytes": "84 + 12*50",
+        "normals": "unit"
+      }
+    },
+    {
+      "id": "mm-scale-header",
+      "expect": {
+        "header": "scale 1 mm-per-unit"
+      }
+    },
+    {
+      "id": "inch-scale",
+      "expect": {
+        "coordinate": "-5 mm -> -0.19685 in"
+      }
+    },
+    {
+      "id": "outward-normal",
+      "expect": {
+        "+Z normal.z": "> 0.99",
+        "open_edges": 0
+      }
+    },
+    {
+      "id": "flip-winding",
+      "expect": {
+        "normal": "negated"
+      }
+    }
+  ]
+}

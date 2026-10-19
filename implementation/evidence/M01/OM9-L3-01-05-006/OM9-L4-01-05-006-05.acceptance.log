@@ -1,0 +1,4 @@
+# OM9-L4-01-05-006-05 — nghiệm thu Transform matrix service
+# utc: 2026-10-18
+# oracle: translation moves z to 5..9 without changing the 400 volume; a 90 degree turn keeps the symmetric bounds and the volume; a 2x scale cubes the volume to 3200
+# result: all crate tests pass (see the kernel-test log beside this file)

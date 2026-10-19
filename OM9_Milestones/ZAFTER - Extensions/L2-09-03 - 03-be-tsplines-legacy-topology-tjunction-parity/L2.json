@@ -1,0 +1,81 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-03",
+  "milestone": "AFTER",
+  "title": "03-be-tsplines-legacy-topology-tjunction-parity",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "T-spline topological model including T-junctions.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/03-be-tsplines-legacy-topology-tjunction-parity/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-03",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/03-be-tsplines-legacy-topology-tjunction-parity/",
+    "tag": "be",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/03-be-tsplines-legacy-topology-tjunction-parity/",
+    "scope": "T-spline topological model including T-junctions.",
+    "exclude": "Không phải OCCT native NURBS; không nằm trên critical path.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          267,
+          324
+        ],
+        "pdf_pages_1based": [
+          41,
+          98
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 7,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/03-be-tsplines-legacy-topology-tjunction-parity/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-03-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-03 - 03-be-tsplines-legacy-topology-tjunction-parity/L3-001 - T-Spline Control Mesh Topology/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-03-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-03 - 03-be-tsplines-legacy-topology-tjunction-parity/L3-002 - T-Spline Tjunction And Extraordinary Points/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-03-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-03 - 03-be-tsplines-legacy-topology-tjunction-parity/L3-003 - T-Spline Insert Edges And Points/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-03-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-03 - 03-be-tsplines-legacy-topology-tjunction-parity/L3-004 - T-Spline Subdivide And Unweld Weld/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-03-005",
+      "file": "AFTER - Post-Release Extensions/L2-09-03 - 03-be-tsplines-legacy-topology-tjunction-parity/L3-005 - T-Spline Bridge Append Fill And Extrude/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-03-006",
+      "file": "AFTER - Post-Release Extensions/L2-09-03 - 03-be-tsplines-legacy-topology-tjunction-parity/L3-006 - T-Spline Crease Weight And Smoothness/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-03-007",
+      "file": "AFTER - Post-Release Extensions/L2-09-03 - 03-be-tsplines-legacy-topology-tjunction-parity/L3-007 - T-Spline Topology Geometry Regression/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

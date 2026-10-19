@@ -1,0 +1,11 @@
+# M00-L4-02-01-03 - C ABI ownership and OCCT exception contract
+# utc: 2026-10-17
+# occt: 8.0.1 (tag V8_0_1, commit b8f597c677811d1f9f4d8a97f5ae2825c0353a42)
+# release asset: opencascade-release-no-pch.zip sha256 307f694f1d4a280c7f58ee2ddb69a7f7e2b78d82749339efd40ce8b8b116d76c
+# 3rdparty asset: 3rdparty-vc14-64.zip sha256 12d04f688c583b8e896758f65cd7012458fee921cedb792ec6caaf469b372598
+# toolchain: MSVC 14.44.35207, CMake 4.x, VS2022 x64
+# build: cmake -S build/native-occt -B build/native-occt/out -G "Visual Studio 17 2022" -A x64 && cmake --build ... --config Release
+# run: build/native-occt/out/Release/om9-occt-probe.exe
+# run exit: 0
+
+{"status": "ok", "kernel": "occt", "version": "8.0.1", "version_major": 8, "version_minor": 0, "version_maintenance": 1, "box_made": true, "box_faces": 6, "box_edges": 24, "box_vertices": 48, "box_wires": 6, "box_valid": true, "moved_min_z": 4.9999998999999997, "moved_max_z": 9.0000000999999994, "mesh_done": true, "mesh_nodes": 24, "mesh_triangles": 12, "line_face_hits": 2, "first_hit": [5, 5, 5], "first_hit_parameter": 15, "boolean_done": true, "boolean_valid": true, "boolean_faces": 7, "box_volume": 399.99999999999989, "cut_volume": 349.73451754256325, "invalid_input_caught": true, "invalid_input_type": "Standard_ConstructionError"}

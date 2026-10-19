@@ -1,0 +1,43 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.19s
+     Running tests\command_context.rs (target\debug\deps\command_context-b6bef80407f77523.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... ok
+test c2_switching_the_active_view_mid_command_refuses_and_cancels ... ok
+test c3_a_context_captured_before_the_switch_is_refused_afterwards ... ok
+test c1_the_context_snapshot_names_document_view_selection_and_revisions ... ok
+test c4_a_command_keeps_the_context_it_started_against ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_state_machine.rs (target\debug\deps\command_state_machine-5e02fc0f22afb8a7.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... FAILED
+test n1_to_n6_out_of_order_input_cannot_commit_partial_geometry ... FAILED
+test m1_to_m4_the_command_walks_its_phases ... ok
+
+failures:
+
+---- fixture_design_pair_is_present stdout ----
+
+thread 'fixture_design_pair_is_present' (10856) panicked at crates\om9-app\tests\command_state_machine.rs:222:5:
+H:\OpenMatrix9\standalone\crates\om9-app\../../../implementation/design/M01/OM9-L3-01-02-004/api.md
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- n1_to_n6_out_of_order_input_cannot_commit_partial_geometry stdout ----
+
+thread 'n1_to_n6_out_of_order_input_cannot_commit_partial_geometry' (16664) panicked at crates\om9-app\tests\command_state_machine.rs:199:5:
+assertion `left == right` failed
+  left: "Start of line (BothSides=No): "
+ right: "Command: "
+
+
+failures:
+    fixture_design_pair_is_present
+    n1_to_n6_out_of_order_input_cannot_commit_partial_geometry
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-app --test command_state_machine`

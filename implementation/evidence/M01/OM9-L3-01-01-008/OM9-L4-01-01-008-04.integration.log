@@ -1,0 +1,14 @@
+task: OM9-L4-01-01-008-04 (integrate) the reserved area in a real window
+utc: 2026-10-16T13:39:58Z
+
+== how the reservation is checked end to end ==
+1. a stored layout file that tries to float, hide and move the reserved slot is refused and repaired (fixtures B6/Y4, tests/builder_slot.rs).
+2. the real window still shows the reserved area in the left column below PROJECTS with the placeholder:
+om9.exe --ui-audit exit=0
+left_sections        : icon-history, main-menu, display, snaps, info-settings, layers, projects, builder-slot
+right_sections       : 
+floating_sections    : 
+builder_slot_visible : True
+builder_slot_rect    : 
+screenshot_saved     : True
+screenshot copied    : implementation/evidence/M01/OM9-L3-01-01-008/builders-in-a-real-window.png

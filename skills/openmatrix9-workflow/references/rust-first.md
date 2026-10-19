@@ -1,21 +1,12 @@
-# Rust là ưu tiên số 1 trong OpenMatrix9
+# Rust trước và ownership OM9 v2
 
-Quy tắc do người dùng yêu cầu: ưu tiên Rust để tăng an toàn bộ nhớ, sau đó mới dùng ngôn ngữ khác. Áp dụng khi chọn kiến trúc, viết mới và chuyển code OM9; không thay mục tiêu chức năng, tên lệnh hoặc phạm vi nghiệm thu.
+Đọc [đích milestone](milestones-target.md). Safe Rust sở hữu nghiệp vụ, document/model/IDs/generations, command/session/options, History/Undo/journal, UI state/scene/index/cache và workers. Giữ nguyên hợp đồng Matrix9 UI/feature; ưu tiên Rust không cho phép thay semantics hoặc scope nghiệm thu.
 
-1. **Safe Rust trước:** Rust sở hữu logic nghiệp vụ, command/editor state, dữ liệu độc lập, validation số/CV/weight/knot, thuật toán hình học có thể tách khỏi kernel, spatial index/cache, budget và worker orchestration. Code cũ bằng C++/Python không phải lý do để tiếp tục đặt logic mới ở đó. Đánh giá phương án Rust trước; tiện, quen hoặc nhanh viết hơn không đủ để bỏ Rust.
-2. **C++ sau Rust, chỉ cho ràng buộc native:** giữ lớp cầu nối tối thiểu với FreeCAD document/transactions, Qt widgets/views, OCCT và openNURBS. Kernel/thư viện native không bị viết lại chỉ để đổi ngôn ngữ. C++ đọc metadata/topology và dựng/commit native shape; chuyển quyết định và dữ liệu độc lập sang Rust. UI model/state/validation thuộc Rust, widget adapter có thể vẫn là Qt/C++.
-3. **Python và ngôn ngữ khác sau đó:** chỉ dùng cho bootstrap/API bắt buộc, cầu nối thật sự cần thiết, test ứng dụng và công cụ hỗ trợ khi Rust chưa phù hợp. Không thêm business logic hoặc vòng lặp hình học nặng vào Python vì tiện. Macro Rhino/FreeCAD và generator/audit hiện hữu được giữ để kiểm chứng, không tự động viết lại mọi tool hay SVG thành Rust.
+- Giữ/thử port Rust logic hiện có nếu host-free; native property/transaction/FCStd/Qt-Coin adapter của FreeCAD phải chuyển sang own OM9. Không mặc định dùng FreeCAD/Project/Shell của QymCAD.
+- C++ chỉ bridge OCCT/openNURBS hoặc API native thực sự cần. Rust own math/data/UI/state khi phù hợp; operation adapter không sở hữu document, quyết định publish hay session. Ghi constraint, owner, ABI/error/lifetime/concurrency và closure cần thiết cho mỗi ngoại lệ.
+- Python giữ tooling/audit/fixture khi cần; không workbench registration hoặc vòng lặp hình học production. Old FCMacro/Rhino tests là nguồn replay intent, không tự phải viết lại tất cả tool thành Rust.
+- Owned Vec/String/typed structs, checked allocation/indexing, snapshot độc lập và identity/generation/version. Unsafe/FFI nhỏ; không unwinding qua ABI, allocation/free cùng phía. Safe Rust caller không tự chứng nhận native dependencies memory-safe.
+- Worker chỉ dùng dữ liệu bất biến/owned hoặc handle kernel đã chứng minh concurrency; không mutable UI/document pointers. Publish có source/context/permission guards, global atomic rollback và old Redo protection. Worker60% là budget, không cam kết phần trăm CPU/RAM.
+- Affine Gumball drag dùng display cache/matrix, cheap guards trên pointer path; exact geometry validation/commit ở publication. Geometry-changing previews có budget riêng. Đo runtime mới, không tuyên bố nhanh từ kiến trúc.
 
-## Ranh giới bộ nhớ và đa luồng
-
-- Ưu tiên dữ liệu Rust sở hữu bằng Vec/String/typed structs, borrowed slices có thời hạn rõ và checked arithmetic trước allocation/indexing. Cô lập unsafe vào FFI module nhỏ; ghi điều kiện pointer/length/alignment/lifetime, lỗi, allocation/free cùng phía và concurrency. Không cho panic hoặc exception đi xuyên ABI; xác định và kiểm thử chính sách panic/error của build.
-- Không cho Rust giữ raw pointer tới Qt widget/FreeCAD document/OCCT object đã hết lifetime. Dùng snapshot độc lập và identity/generation để loại stale requests. Việc đọc/mutate document và commit transaction chạy theo quy tắc GUI/native host; worker chỉ nhận dữ liệu độc lập bất biến hoặc bản copy kernel được chứng minh an toàn, không nhận mutable document.
-- Safe Rust không tự chứng nhận unsafe, FFI, native dependencies hoặc toàn ứng dụng memory-safe. Kiểm ownership, bounds, cancellation và lifecycle ở cả hai phía; Rust unit tests không thay thế native/host/Rhino regression.
-
-## Chuyển code và ngoại lệ
-
-Chuyển từng phần với behavioral baseline, test Rust và replay native/ứng dụng trên source/runtime mới có hash. Giữ Undo/Redo/Cancel/current geometry/worker60% và ngưỡng CAD đã duyệt. Không dùng số file Rust làm tỷ lệ completion hay gọi cập nhật skill là đã chuyển code.
-
-Khi cần dùng ngôn ngữ khác, ghi trong feature/design record: phần code, API/ràng buộc cụ thể khiến Rust chưa phù hợp, owner dữ liệu ở mỗi phía, lớp adapter tối thiểu, hướng chuyển Rust nếu khả thi và điều kiện bỏ fallback. Ngoại lệ thường trực do native API phải được phân biệt với fallback tạm thời. Không cần xin lại phép cho một bridge nằm trong công việc đã được người dùng cho phép.
-
-Ví dụ: sửa curve CV — Rust validate basis và quản lý request sở hữu; Qt nhận trường số; adapter OCCT tạo và kiểm native curve; FreeCAD commit một transaction trên GUI thread. Không thêm validation nghiệp vụ tương tự trong Python hoặc C++ rồi gọi toàn pipeline memory-safe.
+Ví dụ CV edit: Rust validate basis/state/owned inputs, native operation adapter chỉ tạo/kiểm curve khi cần, OM9 journal publish một transaction; UI giữ Matrix9 interaction. Chuyển từng capability và replay geometry/Undo/Cancel/.om9/3DM/UI trên app mới có fingerprint, không dùng số file Rust làm completion.

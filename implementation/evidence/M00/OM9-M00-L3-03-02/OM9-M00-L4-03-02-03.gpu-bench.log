@@ -1,0 +1,8 @@
+# M00-L4-03-02-03 - Bench FPS, first frame latency va memory GPU
+# utc: 2026-10-17
+# harness: native/gpu-probe (standalone, wgpu 30.0.1 + pollster; M00 la gate, khong co code san pham)
+# command: cargo run --manifest-path native/gpu-probe/Cargo.toml
+# scope: 1280x720 offscreen, mot tam giac, 120 frame submit+poll; do adapter/device that su dung
+# caveat: con so fps la vong lap render toi thieu (khong co scene, khong co egui), KHONG phai FPS viewport
+
+{"adapter": {"name": "NVIDIA GeForce RTX 3060", "backend": "Vulkan", "device_type": "DiscreteGpu", "driver": "NVIDIA"}, "limits": {"max_texture_dimension_2d": 32768, "max_buffer_size": 4294967295}, "device_seconds": 0.0437, "first_frame_seconds": 0.029416, "mean_frame_seconds": 0.000242, "p99_frame_seconds": 0.000366, "fps": 4126.9, "painted_pixels": 152064, "total_pixels": 921600, "gpu_bytes_estimate": 7372836}

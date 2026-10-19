@@ -1,0 +1,96 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-13",
+  "milestone": "M05",
+  "title": "05-febe-gem-instance-edits-and-reports",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Gem Control/Map/Reporter, gemstone editing",
+  "source_original_path": "specs/05-ms05-gems-and-layout/05-febe-gem-instance-edits-and-reports/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-13",
+    "milestone_id": "M05",
+    "module_path": "specs/05-ms05-gems-and-layout/05-febe-gem-instance-edits-and-reports/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/13-febe-gem-instance-edits-and-reports/",
+    "scope": "Gem Control/Map/Reporter, gemstone editing",
+    "exclude": "Gem metadata owner là CAD Base, không nhân đôi.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          450,
+          467
+        ],
+        "pdf_pages_1based": [
+          224,
+          241
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-04-09",
+      "OM9-L2-04-10"
+    ],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M05-UI",
+    "l3_count": 9,
+    "l3_catalog_path": "specs/05-ms05-gems-and-layout/05-febe-gem-instance-edits-and-reports/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-13-001",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-001 - Gem Positioner MSR/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-13-002",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-002 - Gem Control And Size Edits/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-13-003",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-003 - Gem Match Attributes/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-13-004",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-004 - Gem Style Save/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-13-005",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-005 - Gem Style Load/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-13-006",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-006 - Gem Update And Regenerate/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-13-007",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-007 - Gem Map Viewport Overlay/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-13-008",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-008 - Gem Reporter Count And Weight/l3.json",
+      "target_implementation_milestone": "M05"
+    },
+    {
+      "id": "OM9-L3-04-13-009",
+      "file": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-009 - Gem Attribute History And ID Preservation/l3.json",
+      "target_implementation_milestone": "M05"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m05": 27
+}

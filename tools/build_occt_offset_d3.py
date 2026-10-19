@@ -11,6 +11,11 @@ from pathlib import Path
 
 ARCHIVE_SHA='7c033d917ee8f040c0512d289dcc5f02c148889d5bac17c3e25639accb44f0da'
 
+def wrap(command,use_rtk):
+    '''The harness wrapper is optional: it rewrites command output for token savings but does not
+    carry the MSVC environment, which Ninja needs.'''
+    return (['rtk','proxy'] if use_rtk else [])+command
+
 def fingerprint(path):
     raw=path.read_bytes()
     return dict(path=path.as_posix(),bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest())
@@ -21,6 +26,7 @@ def main():
     parser.add_argument('--sdk',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--workers',type=int,default=14)
+    parser.add_argument('--rtk',action='store_true',help='wrap cmake/git in the rtk harness proxy; it drops the MSVC environment, so a plain call is the default')
     args=parser.parse_args()
     assert args.output.is_absolute() and not args.output.exists(),'Preserve existing outputs'
     assert fingerprint(args.archive)['sha256']==ARCHIVE_SHA,'Pinned archive mismatch'
@@ -41,7 +47,7 @@ def main():
     libraries=['TKMath','TKernel','TKG2d']
     unchanged=[fingerprint(args.sdk/group/(name+suffix))for name in libraries+['TKG3d']for group,suffix in [('lib','.lib'),('bin','.dll')]]+headers
     patch=Path(__file__).parent/'patches/occt-8.0.1-offset-d3.patch'
-    subprocess.run(['rtk','proxy','git','-C',str(source),'apply','--ignore-space-change',str(patch.resolve())],check=True)
+    subprocess.run(wrap(['git','-C',str(source),'apply','--ignore-space-change',str(patch.resolve())],args.rtk),check=True)
     driver=args.output/'driver';driver.mkdir()
     root=(source/'src/ModelingData/TKG3d').as_posix();sdk=args.sdk.as_posix();output=args.output.as_posix()
     (driver/'CMakeLists.txt').write_text(f'''cmake_minimum_required(VERSION 3.20)
@@ -71,7 +77,7 @@ set_target_properties(TKG3d PROPERTIES RUNTIME_OUTPUT_DIRECTORY "{output}/bin" A
     receipt=dict(scope='TKG3d only; imported existing SDK libraries; SDK not modified',archive=fingerprint(args.archive),patch=fingerprint(patch),original_sources=rows,sdk_headers_exact=headers,shared_outputs_before=unchanged)
     for stage,command in [('configure',['cmake','-G','Ninja','-S',str(driver),'-B',str(args.output/'build'),'-DCMAKE_BUILD_TYPE=Release']),('build',['cmake','--build',str(args.output/'build'),'--target','TKG3d','--parallel',str(max(1,args.workers))])]:
         with(args.output/(stage+'.log')).open('w',encoding='utf-8')as log:
-            result=subprocess.run(['rtk','proxy']+command,stdout=log,stderr=subprocess.STDOUT)
+            result=subprocess.run(wrap(command,args.rtk),stdout=log,stderr=subprocess.STDOUT)
         receipt[stage+'_exit_code']=result.returncode
         (args.output/'build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         if result.returncode:raise SystemExit(result.returncode)

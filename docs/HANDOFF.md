@@ -1,3 +1,13 @@
+# Tiếp tục OpenMatrix9 — milestones
+
+Đọc root AGENTS, `OM9_Milestones/M01 - CAD Shell, Viewport/L1.json` và exact L2/L3 owner của nhiệm vụ. Người dùng đã chuyển nguồn nền tảng sang M01 ngày 2026-10-19. Dùng `rtk proxy python skills/openmatrix9-workflow/scripts/reference_index.py --project-root H:/OpenMatrix9 route standalone-foundation`, rồi `feature <exact milestone ID>`.
+
+Target là Rust OM9 độc lập trong workspace root; native adapters chỉ cho API bắt buộc. Build `-j 2`, target ngoài checkout `L:/om9-target`. Đối chiếu live ledger với code/runtime thực; M02 L2-01-07 có selection/Gumball/occurrence-path evidence, native BRep và external UI review vẫn cần hoàn thành. Việc chuyển routing không tự nâng acceptance. Imported runbooks là reference, không thay yêu cầu người dùng.
+
+## Snapshot bàn giao FreeCAD lịch sử
+
+Toàn bộ phần dưới giữ nguyên fingerprint/claims/checkpoints của host cũ để chuyển adapter; đường dẫn binary/PID/profile/đếm test không là hướng dẫn build target hiện hành và phải kiểm lại nếu được yêu cầu bảo trì legacy.
+
 # Continue OpenMatrix9 on another machine
 
 Branch: `codex/matrix9-menu`. Work remains in progress; the complete objective is all 130 specifications in `01-core` before continuing Curve.

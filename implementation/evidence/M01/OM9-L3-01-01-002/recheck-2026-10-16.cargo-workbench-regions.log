@@ -1,0 +1,56 @@
+task: OM9-L3-01-01-002 re-run doc lap (phien khac)
+utc: 2026-10-16T09:33:55Z
+cwd: H:\OpenMatrix9\standalone
+
+== cargo test -p om9-app --lib workbench_regions ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running unittests src\lib.rs (target\debug\deps\om9_app-3a2356c5e25e2c74.exe)
+
+running 24 tests
+test workbench_regions::tests::errors_are_visible_text_and_convert_to_the_core_error ... ok
+test workbench_regions::tests::narrow_window_yields_right_dock_with_note ... ok
+test workbench_regions::tests::nonfinite_stored_size_is_an_explicit_error ... ok
+test workbench_regions::tests::hidden_left_rail_does_not_change_the_floor ... ok
+test workbench_regions::tests::floor_800x400_keeps_every_minimum ... ok
+test workbench_regions::tests::hidden_right_dock_is_a_defined_state ... ok
+test workbench_regions::tests::one_maximized_view_fills_the_center ... ok
+test workbench_regions::tests::without_a_docked_menu_the_right_dock_is_absent ... ok
+test workbench_regions::tests::supported_minimum_and_floor_are_the_documented_numbers ... ok
+test workbench_regions::tests::hidden_command_line_is_kept_with_note ... ok
+test workbench_regions::tests::real_workspace_feeds_the_scene_seam ... ok
+test workbench_regions::tests::right_dock_threshold_boundary ... ok
+test workbench_regions::tests::compute_regions_changes_nothing_but_its_return_value ... ok
+test workbench_regions::tests::valid_layout_exposes_left_center_four_views_and_optional_right_dock ... ok
+test workbench_regions::tests::view_set_must_be_one_to_four_distinct_views ... ok
+test workbench_regions::tests::hosts_are_asked_only_what_the_contract_documents ... ok
+test workbench_regions::tests::plan_is_serde_ready ... ok
+test workbench_regions::tests::window_below_the_minimum_returns_window_too_small ... ok
+test workbench_regions::tests::dead_notes_stay_unreachable ... ok
+test workbench_regions::tests::tile_views_rejects_a_degenerate_center ... ok
+test workbench_regions::tests::plans_for_normal_sizes_never_overlap_and_tile_the_center ... ok
+test workbench_regions::tests::zero_negative_nonfinite_and_huge_windows_are_invalid ... ok
+test workbench_regions::tests::validate_detects_overlap_and_a_short_command_input ... ok
+test workbench_regions::tests::narrow_window_never_overlaps_or_hides_command_input ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 56 filtered out; finished in 0.04s
+
+
+exit=0
+== cargo test -p om9-app --test workbench_regions ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running tests\workbench_regions.rs (target\debug\deps\workbench_regions-e2c1e545441806ff.exe)
+
+running 8 tests
+test positive_fixture_cases_match_the_hand_computed_regions ... ok
+test negative_fixture_cases_are_explicit_and_leave_the_layout_unchanged ... ok
+test negative_fixture_sweep_never_overlaps_or_hides_the_command_input ... ok
+test normal_window_shows_left_rail_four_viewports_and_the_right_dock ... ok
+test an_unrelated_failure_is_not_cleared_by_the_region_check ... ok
+test the_plan_matches_the_regions_egui_actually_lays_out ... ok
+test too_small_window_reports_visibly_and_changes_nothing_else ... ok
+test narrow_window_yields_the_right_dock_and_keeps_the_command_input ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s
+
+
+exit=0

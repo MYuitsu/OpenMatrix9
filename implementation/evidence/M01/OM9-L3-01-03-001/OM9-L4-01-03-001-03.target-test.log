@@ -1,0 +1,43 @@
+# OM9-L2-01-03 focused verification
+# utc: 2026-10-17T01:04:56Z
+
+# command: cargo test -p om9-core --test document_graph l3_001
+# exit: 0
+
+warning: variable does not need to be mutable
+   --> crates\om9-core\tests\document_graph.rs:868:10
+    |
+868 |     let (mut c, d, a, _b) = grouped_coordinator();
+    |          ----^
+    |          |
+    |          help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-core` (test "document_graph") generated 1 warning (run `cargo fix --test "document_graph" -p om9-core` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running tests\document_graph.rs (L:\om9-target\debug\deps\document_graph-b1a683feb2892502.exe)
+
+running 3 tests
+test l3_001_a_feature_output_must_be_a_live_object ... ok
+test l3_001_retired_feature_id_is_never_reallocated ... ok
+test l3_001_two_entities_and_one_feature_receive_unique_stable_ids ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 27 filtered out; finished in 0.00s
+
+
+# command: cargo test -p om9-archive --test document_identity_round_trip
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\document_identity_round_trip.rs (L:\om9-target\debug\deps\document_identity_round_trip-aa938d2dd9cbc7b7.exe)
+
+running 4 tests
+test a_document_without_the_new_keys_is_byte_identical ... ok
+test additive_keys_are_admitted_in_schema4_and_refused_by_legacy_schema3 ... ok
+test unknown_geometry_variant_is_unsupported_not_downgraded ... ok
+test entity_feature_and_group_ids_survive_save_and_reopen ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+

@@ -1,0 +1,19 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-006",
+  "l4": "OM9-L4-01-03-006-02",
+  "title": "Layer Selection Visibility Rules",
+  "case": "om9-l3-01-03-006-negative",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_006_a_hidden_layer_hides_and_a_locked_layer_denies_editing|l3_006_a_locked_layer_refuses_the_write_without_mutating_the_document",
+  "negative_oracle": "see cases",
+  "cases": [
+    {
+      "call": "Mutation::Attributes on a locked-layer object",
+      "id": "locked-no-mutation",
+      "expect": {
+        "snapshot_unchanged": true,
+        "error": "Permission(\"source edit\")"
+      }
+    }
+  ]
+}

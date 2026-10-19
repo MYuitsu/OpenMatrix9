@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-08-007",
+  "l4": "OM9-L4-01-08-007-02",
+  "title": "Coordinate Numeric Input Primitives",
+  "case": "om9-l3-01-08-007-negative",
+  "negative_oracle": "Local point không có frame là Missing; ngữ pháp x,y[,z] và nhãn lỗi giữ nguyên.",
+  "refusals": [
+    "Missing(\"coordinate frame\") — a local point cannot become world without a frame",
+    "Invalid(\"x,y[,z] coordinate\") / Invalid(\"coordinate number\") / Invalid(\"length conversion\")"
+  ],
+  "runtime_tests": [
+    "cargo test -p om9-core --test coordinates",
+    "cargo test -p om9-scene --test coordinate_frame"
+  ]
+}

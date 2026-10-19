@@ -1,0 +1,36 @@
+task: OM9-L4-01-01-007-03 (implementation) Global Status And Error Surface
+utc: 2026-10-16T13:27:44Z
+cwd: H:\OpenMatrix9\standalone
+
+== RED: cargo test -p om9-app --test global_status_surface (truoc khi sua) ==
+xem OM9-L4-01-01-007-02.red.log: 9 passed; 1 failed. Loi san pham: lenh sai chi hien 'unsupported unknown/unavailable command', khong neu ten lenh nguoi dung vua go.
+== GREEN: cargo test -p om9-app --test global_status_surface ==
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.72s
+     Running tests\global_status_surface.rs (target\debug\deps\global_status_surface-0fbe48d719cfa2fe.exe)
+
+running 10 tests
+test x7_the_surface_is_pure ... ok
+test g5_to_g10_the_surface_reports_what_the_fixture_states ... ok
+test fixture_design_pair_is_present ... ok
+test x3_the_surface_never_answers_for_another_owner ... ok
+test g4_a_panel_message_never_hides_a_failure ... ok
+test g1_an_invalid_command_is_visible_and_retrievable ... ok
+test g3_only_dismiss_clears_a_failure ... ok
+test x1_escape_still_cancels_a_running_command_under_a_failure ... ok
+test x2_to_x6_the_surface_never_swallows_state ... ok
+test g2_a_failure_survives_a_later_success ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s
+
+
+exit=0
+== cargo test -p om9-app --lib ==
+
+test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s
+
+
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 101
+error: function `key` is never used
+error: could not compile `om9-app` (test "document_window_state") due to 1 previous error

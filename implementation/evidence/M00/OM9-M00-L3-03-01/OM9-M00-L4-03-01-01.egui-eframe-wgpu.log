@@ -1,0 +1,26 @@
+# M00-L4-03-01-01 - egui + eframe + wgpu/glow
+# utc: 2026-10-17
+
+# M00-L3-03-01 — đánh giá kiến trúc UI nguồn (bằng chứng)
+
+Ngày: 2026-10-17 · Gate: **G00-03** · Harness: đọc mã nguồn trong repo (không phải code mới của M00)
+
+Đây là **đánh giá**, không phải triển khai: mỗi kết luận dưới đây trích một file/dòng cụ thể trong
+checkout, để lần sau kiểm lại không phải suy đoán.
+
+## L4-03-01-01 — egui + eframe + wgpu/glow
+
+| Sự thật | Bằng chứng |
+| --- | --- |
+| eframe pin `=0.36.2`, `default-features = false`, bật `wgpu`, `default_fonts`, `__screenshot` | `crates/om9-app/Cargo.toml` |
+| App chọn renderer **Wgpu** tường minh | `crates/om9-app/src/ui.rs:2170` `renderer: eframe::Renderer::Wgpu` |
+| Render state của wgpu được lấy ra để dùng | `crates/om9-app/src/ui.rs:2184` `.wgpu_render_state` |
+| Không có pipeline/mesh/shader tự viết | quét `wgpu|RenderPass|create_pipeline|vertex_buffer|wgsl` trong `crates/om9-app` và `crates/om9-scene`: **0** kết quả (chỉ có chuỗi lỗi `"wgpu: no adapter"` trong test `startup.rs`) |
+| **glow không có mặt** | `default-features = false` + chỉ bật `wgpu`; không có `glow` trong manifest |
+
+**Kết luận:** egui + eframe + wgpu **dùng được** (đã chạy), nhưng hiện **chưa có đường render 3D riêng**:
+viewport đang vẽ bằng painter của egui, chưa có pass wgpu/GPU buffer cho B-Rep. **glow không phải
+fallback khả dụng** trong cấu hình hiện tại — nếu cần fallback phải bật feature hoặc hạ xuống software
+adapter của wgpu.
+
+

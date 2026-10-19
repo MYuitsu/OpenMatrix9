@@ -1,0 +1,26 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-002",
+  "l4": "OM9-L4-01-03-002-02",
+  "title": "Typed Scene Entity Records",
+  "case": "om9-l3-01-03-002-positive",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_002_every_typed_entity_record_keeps_its_kind_when_round_tripped|l3_002_unsupported_entity_kinds_are_reported_never_downgraded",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "kinds": [
+        "Point",
+        "Curve",
+        "Surface",
+        "Mesh",
+        "Cloud",
+        "Instance"
+      ],
+      "id": "kinds-roundtrip",
+      "expect": {
+        "kind_preserved_each": true,
+        "json_roundtrip_equal": true
+      }
+    }
+  ]
+}

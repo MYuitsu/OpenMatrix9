@@ -2,6 +2,8 @@
 /build/
 /cmake-build-*/
 /rust/target/
+/target/
+/.superpowers/
 
 # Python caches
 __pycache__/
@@ -28,6 +30,16 @@ Thumbs.db
 /private-references/
 /Matrix90_Codex_Guide_MD/
 /docs/openmatrix9-reference-locations.json
+# Local index of what the private reference archive holds; describes private inputs.
+/docs/private-reference-index.md
+# Derived analysis of the private reference trees (signature/type inventories etc.):
+# names and signatures extracted from decompiled commercial source stay private.
+/docs/analysis/
+# Authored algorithm notes derived from reading the decompiled Matrix9 source: they
+# cite private paths and describe commercial behaviour, so they are not published.
+/docs/private-algorithm-notes.json
+# Local vendor checkouts kept for reading only; never published from this repository.
+/vendor-research/QymCAD/
 
 *.pdf
 *.chm

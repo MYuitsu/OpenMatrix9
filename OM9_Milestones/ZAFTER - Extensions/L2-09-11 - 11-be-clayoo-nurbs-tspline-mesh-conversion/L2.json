@@ -1,0 +1,76 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-09-11",
+  "milestone": "AFTER",
+  "title": "11-be-clayoo-nurbs-tspline-mesh-conversion",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Clayoo SubD to mesh/NURBS/legacy TSpline conversions.",
+  "source_original_path": "specs/90-after/04-organic-clayoo-tsplines-after/11-be-clayoo-nurbs-tspline-mesh-conversion/module.json",
+  "definition": {
+    "module_id": "OM9-L2-09-11",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/04-organic-clayoo-tsplines-after/11-be-clayoo-nurbs-tspline-mesh-conversion/",
+    "tag": "be",
+    "delivery": "after",
+    "original_l1": "09-organic-clayoo-tsplines-after",
+    "legacy_v07_path": "specs/09-organic-clayoo-tsplines-after/11-be-clayoo-nurbs-tspline-mesh-conversion/",
+    "scope": "Clayoo SubD to mesh/NURBS/legacy TSpline conversions.",
+    "exclude": "Toàn bộ hoãn; không chặn NURBS jewelry MVP.",
+    "manual_references": [
+      {
+        "manual_id": "m9",
+        "filename": "matrix9.0_addendum_manual.pdf",
+        "printed_pages": [
+          2,
+          50
+        ],
+        "pdf_pages_1based": [
+          8,
+          56
+        ]
+      }
+    ],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 6,
+    "l3_catalog_path": "specs/90-after/04-organic-clayoo-tsplines-after/11-be-clayoo-nurbs-tspline-mesh-conversion/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-09-11-001",
+      "file": "AFTER - Post-Release Extensions/L2-09-11 - 11-be-clayoo-nurbs-tspline-mesh-conversion/L3-001 - Clayoo Controlmesh To SubD Evaluator/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-11-002",
+      "file": "AFTER - Post-Release Extensions/L2-09-11 - 11-be-clayoo-nurbs-tspline-mesh-conversion/L3-002 - Clayoo SubD To NURBS Surfaces/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-11-003",
+      "file": "AFTER - Post-Release Extensions/L2-09-11 - 11-be-clayoo-nurbs-tspline-mesh-conversion/L3-003 - Clayoo SubD To Triangle Mesh/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-11-004",
+      "file": "AFTER - Post-Release Extensions/L2-09-11 - 11-be-clayoo-nurbs-tspline-mesh-conversion/L3-004 - Clayoo NURBS To SubD Mesh Policy/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-11-005",
+      "file": "AFTER - Post-Release Extensions/L2-09-11 - 11-be-clayoo-nurbs-tspline-mesh-conversion/L3-005 - Clayoo T-Spline Conversion Boundary/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-09-11-006",
+      "file": "AFTER - Post-Release Extensions/L2-09-11 - 11-be-clayoo-nurbs-tspline-mesh-conversion/L3-006 - Clayoo Conversion Error And Loss Report/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

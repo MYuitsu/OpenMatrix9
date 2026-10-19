@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-08-005",
+  "l4": "OM9-L4-01-08-005-02",
+  "title": "Builder Parameter Range Validation",
+  "case": "om9-l3-01-08-005-negative",
+  "negative_oracle": "Số trần bị MissingUnit; sai bước là Invalid(\"numeric option step\"); schema sai bị từ chối trước mọi giá trị.",
+  "refusals": [
+    "Invalid(\"numeric option bounds\") / Invalid(\"numeric option step\")",
+    "Invalid(\"missing unit\") — a bare number never satisfies a Number domain",
+    "Invalid(\"numeric option domain\") — outside range / non-integral count"
+  ],
+  "runtime_tests": [
+    "cargo test -p om9-core --test units_parameters l3_005"
+  ]
+}

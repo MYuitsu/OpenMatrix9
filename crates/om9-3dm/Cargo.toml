@@ -1,0 +1,18 @@
+[package]
+name = "om9-3dm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "openNURBS 3DM mesh import: read mesh objects into om9_core::geometry::Mesh"
+
+[build-dependencies]
+cc = "1"
+
+[dependencies]
+om9-core = { path = "../om9-core" }
+
+[dev-dependencies]
+om9-render = { path = "../om9-render" }
+pollster = "0.4"
+wgpu = "=30.0.1"

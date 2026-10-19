@@ -1,0 +1,28 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-01-05-008",
+  "reviewer": {
+    "name": "cổng AUTO_ONLY (bằng chứng tự động)",
+    "role": "automated evidence gate",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "APPROVED",
+  "approved_at_utc": "2026-10-18T03:20:00Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "Shape tessellation interface: deviation <= deflection at 0.01 and 0.001, zero boundary edges (closed), positive triangle count. The L3 declares requires_manual_test=false, so its acceptance is the automated test the_tessellation_stays_on_the_exact_sphere.",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-008/OM9-L4-01-05-008-03.kernel-test.log",
+      "sha256": "9a94587c807455a6019964a8d93d50dc845dfae5f5726af2289a3755e7c5228f"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-008/OM9-L4-01-05-008-05.acceptance.log",
+      "sha256": "4bfa7b1b069c182326c0f2af35e13b2a848da892f6cea457d8c3559d246fbd6d"
+    },
+    {
+      "path": "implementation/evidence/M01/OM9-L3-01-05-008/source_crosswalk.json",
+      "sha256": "d3777a91bbc30d5b436ce394b2b01fc61705a201b747c9a531367155ebe19a13"
+    }
+  ],
+  "note": "no human test is required for this L3; the record is the documented AUTO_ONLY path, not a human signature"
+}

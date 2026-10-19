@@ -1,0 +1,53 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-06-02",
+  "milestone": "AFTER",
+  "title": "02-febe-additional-jewelry-cad-formats",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Các adapter bổ sung như STEP/IGES khi cần trao đổi với xưởng/đối tác trang sức.",
+  "source_original_path": "specs/90-after/01-cad-base-after/02-febe-additional-jewelry-cad-formats/module.json",
+  "definition": {
+    "module_id": "OM9-L2-06-02",
+    "milestone_id": "AFTER",
+    "module_path": "specs/90-after/01-cad-base-after/02-febe-additional-jewelry-cad-formats/",
+    "tag": "febe",
+    "delivery": "after",
+    "original_l1": "06-cad-base-after",
+    "legacy_v07_path": "specs/06-cad-base-after/02-febe-additional-jewelry-cad-formats/",
+    "scope": "Các adapter bổ sung như STEP/IGES khi cần trao đổi với xưởng/đối tác trang sức.",
+    "exclude": "3DM và STL không đặt ở đây; không lập pipeline CAD cơ khí riêng.",
+    "manual_references": [],
+    "dependencies": [],
+    "downstream_contracts": [],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_NOT_CREATED_V09",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "AFTER-UI",
+    "l3_count": 4,
+    "l3_catalog_path": "specs/90-after/01-cad-base-after/02-febe-additional-jewelry-cad-formats/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-06-02-001",
+      "file": "AFTER - Post-Release Extensions/L2-06-02 - 02-febe-additional-jewelry-cad-formats/L3-001 - Step Part Model Import Adapter/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-02-002",
+      "file": "AFTER - Post-Release Extensions/L2-06-02 - 02-febe-additional-jewelry-cad-formats/L3-002 - Iges Surface Import Adapter/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-02-003",
+      "file": "AFTER - Post-Release Extensions/L2-06-02 - 02-febe-additional-jewelry-cad-formats/L3-003 - Additional Format File Dialog Integration/l3.json",
+      "target_implementation_milestone": "AFTER"
+    },
+    {
+      "id": "OM9-L3-06-02-004",
+      "file": "AFTER - Post-Release Extensions/L2-06-02 - 02-febe-additional-jewelry-cad-formats/L3-004 - Exchange Format Compatibility Report/l3.json",
+      "target_implementation_milestone": "AFTER"
+    }
+  ]
+}

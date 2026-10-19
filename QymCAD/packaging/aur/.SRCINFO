@@ -1,0 +1,21 @@
+pkgbase = qymcad-bin
+	pkgdesc = Parametric associative B-rep CAD/CAM
+	pkgver = 0.1.0.dev.20261001
+	pkgrel = 2
+	url = https://github.com/QymIs-Tech/QymCAD
+	install = qymcad-bin.install
+	arch = x86_64
+	license = AGPL-3.0-or-later
+	depends = libglvnd
+	depends = fontconfig
+	depends = hicolor-icon-theme
+	optdepends = vulkan-icd-loader: hardware acceleration through Vulkan
+	provides = qymcad
+	conflicts = qymcad
+	noextract = qymcad-0.1.0-dev.20261001-x86_64.AppImage
+	options = !strip
+	options = !debug
+	source = qymcad-0.1.0-dev.20261001-x86_64.AppImage::https://github.com/QymIs-Tech/QymCAD/releases/download/v0.1.0-dev.20261001/qymcad-0.1.0-dev.20261001-x86_64.AppImage
+	sha256sums = 63709f7ab9d38ea3bc082babf6c93de53c714a9ee2c6894e9349132e0a62c2d3
+
+pkgname = qymcad-bin

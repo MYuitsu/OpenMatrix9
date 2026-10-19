@@ -1,0 +1,35 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-007",
+  "l4": "OM9-L4-01-03-007-02",
+  "title": "Group Membership Model",
+  "case": "om9-l3-01-03-007-negative",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_007_grouping_and_ungrouping_never_changes_geometry_or_object_ids|l3_007_deleting_the_last_member_removes_the_empty_group_and_keeps_the_rest|l3_007_a_group_can_reference_an_object_created_by_the_same_request|l3_007_unknown_or_duplicate_members_are_refused_atomically|l3_007_an_undone_group_id_is_never_reallocated",
+  "negative_oracle": "see cases",
+  "cases": [
+    {
+      "id": "unknown-member",
+      "expect": {
+        "error": "Missing(\"group member\")"
+      }
+    },
+    {
+      "id": "duplicate-member",
+      "expect": {
+        "error": "Invalid(\"duplicate group member\")"
+      }
+    },
+    {
+      "id": "empty-group",
+      "expect": {
+        "error": "Invalid(\"empty group\")"
+      }
+    },
+    {
+      "id": "group-id-not-reused",
+      "expect": {
+        "error": "Invalid(\"allocated group UUID\")"
+      }
+    }
+  ]
+}

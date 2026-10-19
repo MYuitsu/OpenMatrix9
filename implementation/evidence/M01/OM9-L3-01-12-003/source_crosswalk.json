@@ -1,0 +1,43 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-12-003",
+  "title": "B-Rep Mesh And Instance Encoding",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "B-Rep native source plus display/topology snapshot, mesh/cloud channels and definition/instance links; no mesh substitution.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-core/src/geometry.rs:490-499",
+      "what": "Geometry Brep/Point/Curve/Surface/Mesh/Cloud/Instance"
+    },
+    {
+      "path_line": "crates/om9-core/src/brep.rs:14-39",
+      "what": "Brep + BrepDisplay fields"
+    },
+    {
+      "path_line": "crates/om9-core/src/brep.rs:43-55",
+      "what": "from_native binds source digest to display"
+    },
+    {
+      "path_line": "crates/om9-core/src/brep.rs:59-128",
+      "what": "topology bounds, unique non-nil UUIDs"
+    },
+    {
+      "path_line": "crates/om9-core/src/geometry.rs:570-604",
+      "what": "mesh vertex/face/channel validation"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:632-650",
+      "what": "instance creation"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:724-728",
+      "what": "instance definition existence"
+    }
+  ],
+  "reuse_decision": "ADD authored rust-owned B-Rep snapshot; OCCT only through the om9-kernel adapter for measurement.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-01-12/crosswalk.json"
+}

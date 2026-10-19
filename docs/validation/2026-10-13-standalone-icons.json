@@ -1,0 +1,423 @@
+{
+  "scope": "embedded_existing_authored_icons",
+  "renderer": "resvg=0.45.1 default-features=false",
+  "count": 58,
+  "sources": [
+    {
+      "name": "Line",
+      "command_key": "CurveLineSingleLine",
+      "feature_id": "OM9-CURVE-002",
+      "source": "Resources/icons/curve-minimal/CurveLineSingleLine.svg",
+      "sha256": "a60243563ccc4c352274bbb960b27a2b1779a168acccd819f9ec76380b19abc3"
+    },
+    {
+      "name": "Point",
+      "command_key": "CurvePointObjectSinglePoint",
+      "feature_id": "OM9-CURVE-034",
+      "source": "Resources/icons/curve-minimal/CurvePointObjectSinglePoint.svg",
+      "sha256": "33e1572bec629d8e30f18da97d4274700a13065dc5ff5d8be6dfc7ba9ed3911e"
+    },
+    {
+      "name": "Circle",
+      "command_key": "CurveCircleCenterRadius",
+      "feature_id": "OM9-CURVE-005",
+      "source": "Resources/icons/curve-minimal/CurveCircleCenterRadius.svg",
+      "sha256": "2bd6cb38ec32dbe59c56a558daa98204183145256890d7c51496d47908405f86"
+    },
+    {
+      "name": "Rectangle",
+      "command_key": "CurveRectangleCornertoCorner",
+      "feature_id": "OM9-CURVE-004",
+      "source": "Resources/icons/curve-minimal/CurveRectangleCornertoCorner.svg",
+      "sha256": "b1c3fb7c21f0ecdf09757f11856cd73d421dc769a0d16595033fdfaf1071b5bc"
+    },
+    {
+      "name": "Polyline",
+      "command_key": "CurvePolylinePolyline",
+      "feature_id": "OM9-CURVE-001",
+      "source": "Resources/icons/curve-minimal/CurvePolylinePolyline.svg",
+      "sha256": "945b8f5984140c245dfe260b44ab5f26a0b04d36f960c80d5f6bba37998a80aa"
+    },
+    {
+      "name": "Interpolate",
+      "command_key": "CurveFreeFormInterpolatePoints",
+      "feature_id": null,
+      "source": "Resources/icons/curve-minimal/CurveFreeFormInterpolatePoints.svg",
+      "sha256": "98b7f90b8d7284fe79b933f46f8b4f5fdfb44bee137f8e3b6f2b1f3bd05ac783"
+    },
+    {
+      "name": "Ellipse",
+      "command_key": "CurveEllipseFromCenter",
+      "feature_id": null,
+      "source": "Resources/icons/curve-minimal/CurveEllipseFromCenter.svg",
+      "sha256": "6414d14808e096d11b2a4bf9dc17528c43ebda56b3f09944fd285de9342dfb31"
+    },
+    {
+      "name": "Offset",
+      "command_key": "CurveOffsetCurve",
+      "feature_id": null,
+      "source": "Resources/icons/curve-minimal/CurveOffsetCurve.svg",
+      "sha256": "ad0da1d35c75273fce548877abc28a9cba2e0f7e0096c1cb45ada25c6fcc833e"
+    },
+    {
+      "name": "ProjectCurve",
+      "command_key": "CurveCurveFromObjectsProject",
+      "feature_id": null,
+      "source": "Resources/icons/curve-minimal/CurveCurveFromObjectsProject.svg",
+      "sha256": "9ddb176faf6c28fcc216ffa0f658e95f50367314ea31bf8f0a869c9fd45d4f13"
+    },
+    {
+      "name": "Box",
+      "command_key": "SolidBoxCornertoCornerHeight",
+      "feature_id": "OM9-SOLID-012",
+      "source": "Resources/icons/solid-minimal/SolidBoxCornertoCornerHeight.svg",
+      "sha256": "b19d3d2db8a317f05741b4a0988a5a1a94cc6b8fa2901024f40a8a5c5cf3e402"
+    },
+    {
+      "name": "Sphere",
+      "command_key": "SolidSphereCenterRadius",
+      "feature_id": "OM9-SOLID-014",
+      "source": "Resources/icons/solid-minimal/SolidSphereCenterRadius.svg",
+      "sha256": "b1444b9faf3fa3efb2c47cbabcb8f3af31422be4c8da7ef2db5891d35d0a8ead"
+    },
+    {
+      "name": "Union",
+      "command_key": "SolidUnion",
+      "feature_id": null,
+      "source": "Resources/icons/solid-minimal/SolidUnion.svg",
+      "sha256": "ae6585f0c02c074a2f8c6fc4241235b938744934fdf7391a8dd95b190429f893"
+    },
+    {
+      "name": "Difference",
+      "command_key": "SolidDifference",
+      "feature_id": null,
+      "source": "Resources/icons/solid-minimal/SolidDifference.svg",
+      "sha256": "12bb2aa5757aff8400435b8e716edede43f15a1947c1a48ad7a08d3435c81920"
+    },
+    {
+      "name": "Intersection",
+      "command_key": "SolidIntersection",
+      "feature_id": null,
+      "source": "Resources/icons/solid-minimal/SolidIntersection.svg",
+      "sha256": "24fb46e518c9e9f1b0da76aa06b2b0f90ff61a68c7d88af3206cce17d907d9b1"
+    },
+    {
+      "name": "Sweep",
+      "command_key": "SurfaceSweepSweep1Rail",
+      "feature_id": null,
+      "source": "Resources/icons/surface-minimal/SurfaceSweepSweep1Rail.svg",
+      "sha256": "1aae24a0f0f743e44f2971dbe20b29d500fd20c8b90d744a6908137de04cc837"
+    },
+    {
+      "name": "Loft",
+      "command_key": "SurfaceLoft",
+      "feature_id": null,
+      "source": "Resources/icons/surface-minimal/SurfaceLoft.svg",
+      "sha256": "414b26ca01e32bf24f7022344171fb1bcf9cf410e282d223d889390798969b04"
+    },
+    {
+      "name": "Revolve",
+      "command_key": "SurfaceRevolve",
+      "feature_id": null,
+      "source": "Resources/icons/surface-minimal/SurfaceRevolve.svg",
+      "sha256": "6db818c5ad09cbe179b0ff6e890e7924987051127e77a040c1341a435ac67665"
+    },
+    {
+      "name": "Move",
+      "command_key": "TopIconMove",
+      "feature_id": "OM9-TOP11-006",
+      "source": "Resources/icons/core-minimal/TopIconMove.svg",
+      "sha256": "b2798aa791cc678fd6b3b7b75cf3021ed6446d9c162b70b6839f2ad79dee875e"
+    },
+    {
+      "name": "Rotate",
+      "command_key": "TopIconRotate",
+      "feature_id": "OM9-TOP11-007",
+      "source": "Resources/icons/core-minimal/TopIconRotate.svg",
+      "sha256": "bcb695bc05293aafc7f6725cec2e6f8556d59be94f8bf8593926cd6e858063f4"
+    },
+    {
+      "name": "Scale",
+      "command_key": "TransformScaleScale3D",
+      "feature_id": "OM9-TRANSFORM-001",
+      "source": "Resources/icons/transform-minimal/TransformScaleScale3D.svg",
+      "sha256": "f1650956912fee0dc34034684f8d3f9f3e5400aa822648e73f7eab27f49b855c"
+    },
+    {
+      "name": "Mirror",
+      "command_key": "TopIconMirror",
+      "feature_id": "OM9-TOP11-004",
+      "source": "Resources/icons/core-minimal/TopIconMirror.svg",
+      "sha256": "7caa4a4cf378be06d184cfbd924419b43a508ba0e96913525ccdd73fa8fe6ea5"
+    },
+    {
+      "name": "Join",
+      "command_key": "TopIconJoin",
+      "feature_id": "OM9-TOP11-008",
+      "source": "Resources/icons/core-minimal/TopIconJoin.svg",
+      "sha256": "f318a2492fca2ce6d2c38cfdb12936920a242649015efc21bf7dea746ffd00e5"
+    },
+    {
+      "name": "Split",
+      "command_key": "TopIconSplit",
+      "feature_id": "OM9-TOP11-009",
+      "source": "Resources/icons/core-minimal/TopIconSplit.svg",
+      "sha256": "451f80fa8693e687b1c85908c18b5fd1f3b6fb947a845a9dcb4e18c3ca3a6eaf"
+    },
+    {
+      "name": "Trim",
+      "command_key": "TopIconTrim",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/TopIconTrim.svg",
+      "sha256": "96fbcd4f635c5d698a8b02ca39b9da2b3624727986df72787a6b0526d3e43b0f"
+    },
+    {
+      "name": "Duplicate",
+      "command_key": "TopIconDuplicate",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/TopIconDuplicate.svg",
+      "sha256": "8426827065265baba721ecb8825df5432ed0824e7d7f061b1a8d7847dda1de5c"
+    },
+    {
+      "name": "EditPoints",
+      "command_key": "TopIconEditPointsOn",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/TopIconEditPointsOn.svg",
+      "sha256": "85b5bf1664b3f2edbb8add533898bf4dce0bb9cc670d3d3f1f841a4c4daa5991"
+    },
+    {
+      "name": "Undo",
+      "command_key": "Undo",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/Undo.svg",
+      "sha256": "5bc40939123d98f57e468a431c0e26e0a41d0f354afa40bf14de2e3f58c61b07"
+    },
+    {
+      "name": "Redo",
+      "command_key": "Redo",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/Redo.svg",
+      "sha256": "a69d9147849e0a3068ce9555bece7185c9db2ec4c70310fc0e3e01f181e5558b"
+    },
+    {
+      "name": "Save",
+      "command_key": "FileSave",
+      "feature_id": "OM9-FILE-005",
+      "source": "Resources/icons/core-minimal/FileSave.svg",
+      "sha256": "1a6e0748806c984a7d17179a9b3ed0132d52a114d57a4d5baa21cf3b41f2d596"
+    },
+    {
+      "name": "Open",
+      "command_key": "FileOpen",
+      "feature_id": "OM9-FILE-003",
+      "source": "Resources/icons/core-minimal/FileOpen.svg",
+      "sha256": "b141032aec60843c5be37310add989829aa7049961c502745a64ef876aa4326a"
+    },
+    {
+      "name": "New",
+      "command_key": "FileNew",
+      "feature_id": "OM9-FILE-002",
+      "source": "Resources/icons/core-minimal/FileNew.svg",
+      "sha256": "d648f024a8ab2f79a0e9386ae1187ea3aa4bebd09db2d9813fe5c8cb67be32f6"
+    },
+    {
+      "name": "Wireframe",
+      "command_key": "Dial_Wireframe",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/Dial_Wireframe.svg",
+      "sha256": "00fae61be6b22b57f38a815d023fcac9048c0164a0edd1bc46b5b648fa67e6a0"
+    },
+    {
+      "name": "Shaded",
+      "command_key": "Dial_Shaded",
+      "feature_id": "OM9-DISPLAY-008",
+      "source": "Resources/icons/core-minimal/Dial_Shaded.svg",
+      "sha256": "8a77511b51a405952dbb5d5c60a36c35a96e4a078ebdbc6d36e88f93054bdc0e"
+    },
+    {
+      "name": "SnapEnd",
+      "command_key": "ToolsObjectSnapEnd",
+      "feature_id": "OM9-SNAP-002",
+      "source": "Resources/icons/core-minimal/ToolsObjectSnapEnd.svg",
+      "sha256": "489091c6a11b06840eda2c753bf50fc2304d0b9cb6f5ecd61d0db2327a8e7d59"
+    },
+    {
+      "name": "SnapMid",
+      "command_key": "ToolsObjectSnapMidpoint",
+      "feature_id": "OM9-SNAP-003",
+      "source": "Resources/icons/core-minimal/ToolsObjectSnapMidpoint.svg",
+      "sha256": "bdb531b2e08e86949ce26d0f5d51c4b350b280ebb05d5e5419e9985c1d909653"
+    },
+    {
+      "name": "SnapCenter",
+      "command_key": "ToolsObjectSnapCenter",
+      "feature_id": "OM9-SNAP-001",
+      "source": "Resources/icons/core-minimal/ToolsObjectSnapCenter.svg",
+      "sha256": "420653da71498bb79488bd1ea41c7c0224e2f2635b537cc4be54c9789c3522c8"
+    },
+    {
+      "name": "SnapPoint",
+      "command_key": "ToolsObjectSnapPoint",
+      "feature_id": "OM9-SNAP-007",
+      "source": "Resources/icons/core-minimal/ToolsObjectSnapPoint.svg",
+      "sha256": "acfeb1da82baa1b6599a0db438251404e27b4e249448bbe5847b4586bf42ee8b"
+    },
+    {
+      "name": "Grid",
+      "command_key": "GridON",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/GridON.svg",
+      "sha256": "3250e0ccc5d09852dbc847cf61027690667553cf5bada11c5766b735bb3e74d2"
+    },
+    {
+      "name": "GridSnap",
+      "command_key": "GridSnapON",
+      "feature_id": "OM9-SNAP-013",
+      "source": "Resources/icons/core-minimal/GridSnapON.svg",
+      "sha256": "8cae80f259cb09a3c657538b0514ec916873e8a2fb3df61561c5b63b0049b1da"
+    },
+    {
+      "name": "Ortho",
+      "command_key": "OrthoSnapON",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/OrthoSnapON.svg",
+      "sha256": "f29c4c73a1780d51c5ee0cb7bd22349a13a623b079eb55044ebebb107def6186"
+    },
+    {
+      "name": "Planar",
+      "command_key": "PlanarSnapON",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/PlanarSnapON.svg",
+      "sha256": "b40ad5fb54cfb8f556bf4bbae2fc3cccce600ee09e67a01a8f4b936f37e14d51"
+    },
+    {
+      "name": "Settings",
+      "command_key": "RhinoOptions",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/RhinoOptions.svg",
+      "sha256": "64f4a65b742c4e13a30a87f6dcabf0d56dbfbfd0ecfffb122e01293026299d8f"
+    },
+    {
+      "name": "Properties",
+      "command_key": "ObjectProperties",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/ObjectProperties.svg",
+      "sha256": "2971f0c1f75104decdb077dd9d3b78d0951114c36f6720f525c5c5f5d5e2a9a9"
+    },
+    {
+      "name": "Layers",
+      "command_key": "LayerVisibility",
+      "feature_id": "OM9-LAYER-001",
+      "source": "Resources/icons/core-minimal/LayerVisibility.svg",
+      "sha256": "2015ebc3b0b78387ffbfabc69ab1605f4df5cf25c8a9218bf2abde0d5054757f"
+    },
+    {
+      "name": "LayerLock",
+      "command_key": "LayerLock",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/LayerLock.svg",
+      "sha256": "555717532d3e92067005f9cd8b57fa4d8b6ac34af4dcbbe18472927c0849d028"
+    },
+    {
+      "name": "LayerShow",
+      "command_key": "LayerShow",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/LayerShow.svg",
+      "sha256": "18b47daade6d9246e036ebbfc8bda73162893a8e5495d499bae4b61d9cb1aade"
+    },
+    {
+      "name": "LayerHide",
+      "command_key": "LayerHide",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/LayerHide.svg",
+      "sha256": "adaed5eb53a08f338b1d1aae30e29782e0ffc7e51a4fcf1d3ecdd748e5224de0"
+    },
+    {
+      "name": "Gem",
+      "command_key": "BuilderGemLoader",
+      "feature_id": "OM9-GEM-001",
+      "source": "Resources/icons/gems-minimal/BuilderGemLoader.svg",
+      "sha256": "90a9557f20dedbe8c01404729f935c3b015a03b7d659af6b0ef40ffe51d74ce8"
+    },
+    {
+      "name": "Emerald",
+      "command_key": "BuilderEmerald",
+      "feature_id": "OM9-GEM-013",
+      "source": "Resources/icons/gems-minimal/BuilderEmerald.svg",
+      "sha256": "089fbb0a9f37c6992c5dc1b2f0b3321edfb3fffbfd8ca43baffd1fb221f8a791"
+    },
+    {
+      "name": "Builder",
+      "command_key": "BuilderEternity",
+      "feature_id": "OM9-BUILDER-001",
+      "source": "Resources/icons/builder-minimal/BuilderEternity.svg",
+      "sha256": "2dd440f6fbe4e54c97dcc7b735aeb34cbb151f08e22970c7b71534352d0706c7"
+    },
+    {
+      "name": "RingRail",
+      "command_key": "BuilderRingRail",
+      "feature_id": "OM9-TOOLS-001",
+      "source": "Resources/icons/tools-minimal/BuilderRingRail.svg",
+      "sha256": "c07d39fb877c6243e0eba746299bb81f7ef30a44e7d64d9bde2a0c1283644a7c"
+    },
+    {
+      "name": "Project",
+      "command_key": "ProjectManager",
+      "feature_id": "OM9-PROJECT-001",
+      "source": "Resources/icons/core-minimal/ProjectManager.svg",
+      "sha256": "6b2ad9a59133cd6ae8af94005783cb0af9832c041f5bac5443f9788fa8accb21"
+    },
+    {
+      "name": "ProjectIn",
+      "command_key": "ProjectIn",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/ProjectIn.svg",
+      "sha256": "089fcc92a0f9ec26c098d8a1ae799b0ba106fc515cb3a2b1f6d765591a3201cc"
+    },
+    {
+      "name": "ProjectSave",
+      "command_key": "ProjectSave",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/ProjectSave.svg",
+      "sha256": "b25d051017f5e99d7635ec38b37f22b53a8c8511e9462eeb6968b4182d1c3bcb"
+    },
+    {
+      "name": "Cutters",
+      "command_key": "BuilderGemCutter",
+      "feature_id": null,
+      "source": "Resources/icons/cutters-minimal/BuilderGemCutter.svg",
+      "sha256": "2bbc4064c98c519aaf755ee19749700f41a9b4af538c4654cdd7d36600f408f9"
+    },
+    {
+      "name": "Render",
+      "command_key": "BuilderRenderVrayRenderStyler",
+      "feature_id": null,
+      "source": "Resources/icons/render-minimal/BuilderRenderVrayRenderStyler.svg",
+      "sha256": "8dfaaae019e39ef6390cc260a307a282cf1b0999b5c53bbcd81dbe0dc407f3a7"
+    },
+    {
+      "name": "Delete",
+      "command_key": "Delete",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/Delete.svg",
+      "sha256": "a560c79e49624a3195aaffa61dbc9c93fad1b48a8efc352cbd021bcd84eccc29"
+    },
+    {
+      "name": "Fit",
+      "command_key": "ViewZoomZoomExtents",
+      "feature_id": null,
+      "source": "Resources/icons/core-minimal/ViewZoomZoomExtents.svg",
+      "sha256": "ebdd26eb95f41a50f96c2e78f0eb6dcd9cf35c95a9d57a4ec713e08ff35bace7"
+    }
+  ],
+  "module_sha256": "8ebacde541007928be37c618ab579535b8ae592a662e763e83e61b330c32466a",
+  "module": {
+    "path": "standalone/crates/om9-app/src/icons.rs",
+    "sha256": "8ebacde541007928be37c618ab579535b8ae592a662e763e83e61b330c32466a"
+  },
+  "scope_limitations": [
+    "authored icon identity only; no command capability promoted",
+    "no commercial screenshot pixels embedded",
+    "full UI/DPI/pixel parity remains open"
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "verdict": "CHANGES_REQUESTED",
+  "findings": [
+    {
+      "id": 1,
+      "severity": "MEDIUM",
+      "title": "Baseline already stale; L3-002 measurements now exist and settle Layers visibility that the design still calls unmeasured (and §9 contradicts)",
+      "where": "design.md §0 baseline table, §2.1, §5.3 D6 L2, §9 capped 894.67x432, §10.3 item 3, §15 A12",
+      "fix": "Mark left-dock-measurements.md present and FEAT-001 completed. Fix or re-capture the ui.rs hash at P0 (tree has 6F924EA0…3597). Record the measured Layers bar 337..351 (rail 300) / 397..411 (rail 460) with the sidebar starting at y 23, and re-measure after the G12 row changes. Assert the Layers bar fully inside sidebar_rect at scroll 0 at every listed size, capped sizes included, at rail 300 and 460, with the existing report-only failure rule as fallback. Delete the 'Layers below the fold' claim for 894.67x432."
+    },
+    {
+      "id": 2,
+      "severity": "MEDIUM",
+      "title": "Steering/screenshot 'two-line Command box' (~30 px capture, ~42 pt) not reconciled with the 3-row rule (C ≈ 56)",
+      "where": "design.md §0 precedence, §4.3, §15 A6, §14 BR15",
+      "fix": "Add assumption A15: 'two-line' is read as two history rows above the pinned input row, per the approved command-and-curve.md rule. Show the measured C next to the capture estimate in the final report and ask the user to confirm. Do not tune C without that answer."
+    },
+    {
+      "id": 3,
+      "severity": "MEDIUM",
+      "title": "§12 and the re-grep miss L3-003's own C-dependent fixtures, stale env/receipt keys and the in-crate drop-zone tests",
+      "where": "design.md §10.1 re-grep, §12 positive.json/negative.json, S28",
+      "fix": "Recompute positive.json derived_geometry_1600x1000_no_right_dock (center y 88+C, height 892-C, toolbar y 21+C, view rows per S23). Rename layers_placement keys to the §5.6 names and replace OM9_UI_AUDIT_RIGHT_DOCK with OM9_UI_AUDIT_LAYOUT_MODE=default. Update the N5 SideView rect. Extend the re-grep to implementation/fixtures/M01/OM9-L3-01-01-003, standalone/crates/om9-app/src and tools/validate_m01_l3_002_ui_matrix.py."
+    },
+    {
+      "id": 4,
+      "severity": "MEDIUM",
+      "title": "Source-scan test has no defined banned token set or allowlist; existing legitimate dock mutations would fail it or make it vacuous",
+      "where": "design.md §5.2 Owner, §8, §10.3",
+      "fix": "Ban dock_section/place_section/move_section/float_section/toggle_section/set_section_collapsed/set_section_visible/set_section_height on a dock receiver outside dock_layout.rs, panel_ops.rs and MatrixApp::apply_panel_op. Allowlist reset_to_default, clamp_floats, set_float(PanelId::CommandSearch), set_size and set_visible(PanelId::*) by file. Route the audit user-docked-right hook through apply_panel_op(PanelOp::Dock). Strip comments and strings before scanning."
+    },
+    {
+      "id": 5,
+      "severity": "MEDIUM",
+      "title": "New CMD-history appends from panel ops re-open the proven stale-cursor keystroke drop (Transcript::append_history vs protected_chars)",
+      "where": "design.md §5.5 Messages, §7, D5",
+      "fix": "After every transcript.append_history in the apply_panel_op message path and the +/>> handlers, set focus_cmd = true. Add a frame test: close-box click, then Event::Text('L'), and the draft must equal 'L'. Record the general append_history cursor fix as an out-of-scope caveat."
+    },
+    {
+      "id": 6,
+      "severity": "MEDIUM",
+      "title": "Command outer/inner sync made conditional though the code fixes drift at 6 pt; row metric has no epsilon and is a proxy",
+      "where": "design.md §4.3 Command size sync, §10.3 item 5, §5.6 command_history_rows",
+      "fix": "Make the outer sync unconditional: sync_panel_size(CommandLine, panel.response.rect.height()) after show, and make the S26 slack exact. Define command_history_rows = floor((history_height + 0.5) / (r + 2)) with r from TextStyle::Monospace at the live zoom. Assert == 2 at zoom 1.0 and >= 2 at 1.25/1.5."
+    },
+    {
+      "id": 7,
+      "severity": "NIT",
+      "title": "Builders close box shows a roll-up/move refusal text",
+      "where": "design.md §4.2, §4.6, D4",
+      "fix": "Draw no close box on the BUILDERS bar."
+    },
+    {
+      "id": 8,
+      "severity": "NIT",
+      "title": "DocSnapshot.workspace type is a placeholder",
+      "where": "design.md §10.3 item 9",
+      "fix": "workspace: om9_scene::Workspace (clone of app.controller.workspace; Clone + PartialEq)."
+    },
+    {
+      "id": 9,
+      "severity": "NIT",
+      "title": "Narrow band (full window height) and drop zone (views only) cover different y-ranges without saying so",
+      "where": "design.md §5.4 rules 3-4, S28",
+      "fix": "State the asymmetry deliberately, and say S28 is the union of view_rects (compute_right_drop_zone), not the canvas."
+    },
+    {
+      "id": 10,
+      "severity": "NIT",
+      "title": "A1 records the 300 value but not the DPI-only scaling rule as the assumption",
+      "where": "design.md §15 A1",
+      "fix": "A1: fixed logical width (default 300 pt), scaled only by DPI, never by window size, is an assumption pending a second Matrix9 capture."
+    },
+    {
+      "id": 11,
+      "severity": "NIT",
+      "title": "Visible differences from the capture (A7-A9, A11) should be listed in the final report",
+      "where": "design.md §4.6, §15",
+      "fix": "Final report lists the Icon History arrows, the Coarse Mesh/Shaded dropdowns, the plugin menus and the status bar as 'differences from the Matrix9 capture, not added (owner / reason)'."
+    },
+    {
+      "id": 12,
+      "severity": "NIT",
+      "title": "A saved CommandLine.size 90 keeps about four history rows",
+      "where": "design.md §4.3",
+      "fix": "State: a saved size is user state, not rewritten; Reset Menus gives C."
+    },
+    {
+      "id": 13,
+      "severity": "NIT",
+      "title": "PNG paths may not match the FEAT-003 validator output layout (default/ subfolder)",
+      "where": "design.md §10.4",
+      "fix": "Resolve each PNG from the receipt paths the validator writes."
+    },
+    {
+      "id": 14,
+      "severity": "NIT",
+      "title": "'Test host display is 1440x900' stated as a constant",
+      "where": "design.md §10.4 step 3",
+      "fix": "Reword to 'on the current host (observed 1440x900)'; the classification is computed per receipt."
+    }
+  ],
+  "reviewDoc": "h:\\OpenMatrix9\\implementation\\design\\M01\\OM9-L3-01-01-003\\design-review.md"
+}

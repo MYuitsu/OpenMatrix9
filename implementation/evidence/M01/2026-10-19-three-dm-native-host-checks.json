@@ -1,0 +1,253 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "three-dm-native-host-2026-10-19",
+  "date": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "target_dir": "L:/om9-target",
+  "native": {
+    "executable": "build/native-exchange/Release/om9-exchange-native.exe",
+    "sha256": "6c96316f4403a12f2f43afc4619e0e27d770356ad0b094803aa479d7c0f215f5",
+    "source": "native/native_exchange.cpp",
+    "build_script": "tools/build-native-exchange.ps1",
+    "opennurbs_pin": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "nlohmann_json_sha256": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+    "build_log": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/native-build.log",
+    "build_log_sha256": "3c9947fc149b5436c203b9a04356d7a61790a7f6074808ee4c7681c9a522567e"
+  },
+  "checks": [
+    {
+      "name": "native-inspect-fixture",
+      "command": [
+        "om9-exchange-native.exe",
+        "--inspect",
+        "build/standalone-deps/g00-04-fixture.3dm"
+      ],
+      "exit_code": 0,
+      "objects": 5,
+      "layers": 1,
+      "diagnostics": 0,
+      "note": "smoke read of the authored fixture before the round trip"
+    },
+    {
+      "name": "rust-cli-import-3dm",
+      "command": [
+        "om9",
+        "--import-3dm",
+        "build/standalone-deps/g00-04-fixture.3dm",
+        "<run>/imported.om9"
+      ],
+      "environment": [
+        "OM9_EXCHANGE_NATIVE",
+        "OM9_EXCHANGE_NATIVE_SHA256"
+      ],
+      "exit_code": 0,
+      "imported_objects": 5,
+      "output": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/import-out.json",
+      "output_sha256": "cba9c0b4592651f90cdcdbca22fcb94037e95df4214d904504e9a4f6337af052",
+      "project": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/imported.om9",
+      "project_sha256": "973c2e68f59620689aeb3df804046ec1f9b3025710913a09ba0995f48cbf1280"
+    },
+    {
+      "name": "rust-cli-export-3dm",
+      "command": [
+        "om9",
+        "--export-3dm",
+        "<run>/imported.om9",
+        "<run>/exported.3dm"
+      ],
+      "exit_code": 0,
+      "file_bytes": 9392,
+      "file_sha256": "9f7829d581c15b29a59ff8bcac7db32ae11ae9941d21f1239b81b77046c18b48",
+      "output": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/export-out.json",
+      "output_sha256": "8e0d6354025732348f5f30e63ead948bd4c853f71e85c6b3dc80947bb626d1a1"
+    },
+    {
+      "name": "native-inspect-exported",
+      "command": [
+        "om9-exchange-native.exe",
+        "--inspect",
+        "<run>/exported.3dm"
+      ],
+      "exit_code": 0,
+      "objects": 5,
+      "layers": 1,
+      "diagnostics": 0,
+      "output": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/exported-inspect.json",
+      "output_sha256": "473c5cf830257aaf233485731eab581ae7c57a40785833955f6231f5670108c2"
+    },
+    {
+      "name": "rust-e2e-host-test",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "three_dm_native_roundtrip",
+        "-j",
+        "2",
+        "--",
+        "--ignored"
+      ],
+      "exit_code": 0,
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/host-e2e.log",
+      "test_count": 3,
+      "log_sha256": "6e31be049b04591cdba2aef6682f3a4c42554ad6a62233a32f9e18c3a7aeb73d",
+      "detail": "CLI import/export, Controller import/export, failed import keeps document+Undo"
+    },
+    {
+      "name": "app-lib-tests",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--lib",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 101
+    },
+    {
+      "name": "app-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-app",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "workspace-all",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--no-fail-fast",
+        "-j",
+        "2"
+      ],
+      "exit_code": 101,
+      "note": "cargo test --workspace --exclude om9-render --no-fail-fast; same two known app failures (mesh_fill, ui_events)",
+      "passed_suites": 171,
+      "test_count": 1185,
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/workspace-all-final7.log",
+      "log_sha256": "6d917775380027024c14b0cbd2ff0c3e5d7588883ad26ecc68c406a124de7833"
+    },
+    {
+      "name": "ui-file-menu-host",
+      "description": "File > Import 3DM / Export 3DM enabled; native 3DM picker filter",
+      "detail": "DialogFilter::ThreeDm/choose_3dm + native_picker::pick_3dm + File menu actions + Controller::import_3dm/export_3dm; native-owner 8 tests, app lib 100, file_widgets 21"
+    },
+    {
+      "name": "app-file-widgets",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "file_widgets",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "test_count": 21
+    },
+    {
+      "name": "packaged-layout-import",
+      "command": [
+        "om9",
+        "--import-3dm",
+        "build/standalone-deps/g00-04-fixture.3dm",
+        "<run>/layout-import.om9"
+      ],
+      "environment": "no OM9_EXCHANGE_NATIVE vars; native exe + .sha256 beside om9.exe",
+      "exit_code": 0,
+      "imported_objects": 5,
+      "output": "build/three-dm-layout/out.json",
+      "output_sha256": "e7095319bbad464d41a133466e8f191eba1bf02bbdab2206f70a542d4569aecf"
+    },
+    {
+      "name": "ci-native-exchange-build",
+      "command": [
+        "./tools/ci/build-native-exchange.ps1"
+      ],
+      "exit_code": 0,
+      "artifact": "build/ci-native-exchange-test/",
+      "note": "workflow job native-exchange uploads exe + .sha256 + manifest",
+      "executable_sha256": "cf44972e0bb5c00f904ce4256ab5367c99d38d0df7328bebe7f4c98c97cf9537"
+    },
+    {
+      "name": "curve-mesh-exact-roundtrip",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "three_dm_curve_roundtrip",
+        "-j",
+        "2",
+        "--",
+        "--ignored"
+      ],
+      "exit_code": 0,
+      "test_count": 1,
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/curve-roundtrip.log",
+      "log_sha256": "21ea4cf7466cbf74904c8adbde5507c066782493355250989bf97eb5521c2c4c",
+      "detail": "Line, full Circle, partial Arc, Polyline, rational NURBS, NURBS Surface, Mesh, Layer (name/color/visible/locked/parent), block definition/instance; geometry exact (NURBS poles <=1e-12); history empty; second round trip stable"
+    },
+    {
+      "name": "brep-retained-roundtrip",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "three_dm_brep_roundtrip",
+        "--",
+        "--ignored"
+      ],
+      "exit_code": 0,
+      "test_count": 1,
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/brep-roundtrip.log",
+      "log_sha256": "6814967e5a87dd7d9294f432987f1e45aa0e8e6fd4d4a8823a2ac658c6848741",
+      "detail": "NativeBrep display + chunked payload + topology CRC; export inspected as ON_Brep; reimport NativeBrep with same CRC, never Mesh"
+    },
+    {
+      "name": "layer-surface-block-history",
+      "detail": "Layer name/color/visible/locked/parent + assignment; NURBS Surface exact; block definition/instance exact; history empty; second round trip stable",
+      "log": "build/standalone-validation/ui-artifacts/m01-three-dm-host-20261019/curve-roundtrip.log",
+      "log_sha256": "1f064a62b6156af16fdef6398931d8eccf5328133dd402e38a60bdb4d6c718a1"
+    }
+  ],
+  "roundtrip": {
+    "fixture": "build/standalone-deps/g00-04-fixture.3dm",
+    "imported_objects": 5,
+    "exported_objects": 5,
+    "exported_layers": 1,
+    "exported_diagnostics": 0
+  },
+  "remaining": [
+    "BRep is retained/opaque; topology/solid editing requires a separate ON_Brep <-> OCCT bridge.",
+    "Rational NURBS poles can differ by at most one ULP because openNURBS stores homogeneous CVs; shape is exact within 1e-12.",
+    "The layout files still need to come from a signed installer.",
+    "UI picker/menu needs a human visual review.",
+    "Other Rhino tables (material/linetype/dimstyle) are intentionally excluded; layer table and display attributes are retained.",
+    "BRep display requires a cached Rhino render mesh; payload-only BRep still round-trips but has no shaded display."
+  ],
+  "adjusted_tests": [
+    "crates/om9-app/tests/gumball_numeric.rs: the final MoveX assertion assumed ids[0] was the point at x=0; BTreeMap UUID order made it flaky. It now compares against the same object world position (test-only fix)."
+  ]
+}

@@ -1,0 +1,61 @@
+# OM9-L2-01-03 focused verification
+# utc: 2026-10-17T01:04:56Z
+
+# command: cargo test
+# exit: 1
+
+error: unexpected argument 's' found
+
+Usage: test [OPTIONS] [TESTNAME] [-- [ARGS]...]
+
+For more information, try '--help'.
+
+# command: cargo -p
+# exit: 101
+
+error: no such command: `-`
+
+help: a command with a similar name exists: `b`
+
+help: view all installed commands with `cargo --list`
+help: find a package to install `-` with `cargo search cargo--`
+
+# command: cargo om9-core
+# exit: 101
+
+error: no such command: `o`
+
+help: a command with a similar name exists: `b`
+
+help: view all installed commands with `cargo --list`
+help: find a package to install `o` with `cargo search cargo-o`
+
+# command: cargo --test
+# exit: 101
+
+error: no such command: `-`
+
+help: a command with a similar name exists: `b`
+
+help: view all installed commands with `cargo --list`
+help: find a package to install `-` with `cargo search cargo--`
+
+# command: cargo document_graph
+# exit: 1
+
+error: unexpected argument 'o' found
+
+Usage: doc [OPTIONS]
+
+For more information, try '--help'.
+
+# command: cargo l3_007
+# exit: 101
+
+error: no such command: `l`
+
+help: a command with a similar name exists: `b`
+
+help: view all installed commands with `cargo --list`
+help: find a package to install `l` with `cargo search cargo-l`
+

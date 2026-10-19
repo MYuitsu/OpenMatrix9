@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-02-011-05",
+  "l3_id": "OM9-L3-01-02-011",
+  "title": "Command Availability Preconditions",
+  "oracle": {
+    "positive": "Unavailable command disabled when wrong selection/document state",
+    "negative": "Hidden implementation missing must not appear clickable or mutate doc"
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-16",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY for every L3 of OM9-L2-01-02, so acceptance rests on the automated checks below; no human item is requested.",
+    "scope": "no on-screen behaviour of its own: the descriptor and the availability rules are pure data"
+  },
+  "checks_run": [
+    "RED (behavioural, captured by temporarily restoring the pre-fix gate so the test still compiled): 2 passed; 2 failed. A7 failed in a session where the preconditions WERE met (has_document, selection 2, active view): admit() ignored the context it was handed and used the empty default, so a command that could run was refused. A8 failed because admit() compared option names case-sensitively while the descriptor declares them without case.",
+    "GREEN: cargo test -p om9-core --test command_availability -> 4 passed; 0 failed (8 positive cases, 7 negative cases)",
+    "cargo test -p om9-core: every group ok",
+    "cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real windows: tools/validate_m01_l3_003_panels.py -> 7/7 PASS (the application still starts and dispatches)"
+  ],
+  "code_change": [
+    "capability.rs: Preconditions { needs_document, needs_selection, needs_active_view } on the descriptor, and ContextState { has_document, selection, has_active_view } as the session facts.",
+    "capability.rs: availability_with(id, context) checks the preconditions first, in a fixed order, and returns the reason; availability(id) keeps its meaning by delegating with an empty context.",
+    "capability.rs: admit_with(id, kind, options, phase, context) is the gate that takes the real context; admit() delegates with an empty context (no context claimed => a command that needs one is refused rather than run blind).",
+    "capability.rs: admit() now reads options through Operation::option, so the gate and the descriptor agree about a name's case."
+  ],
+  "artefacts": [
+    "OM9-L4-01-02-011-02.red.log",
+    "OM9-L4-01-02-011-02.green.log",
+    "OM9-L4-01-02-011-03.diffstat.txt",
+    "OM9-L4-01-02-011-03.target-test.log",
+    "OM9-L4-01-02-011-05.regression.log"
+  ],
+  "gate": {
+    "m01_l2_01_02_l3_011_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

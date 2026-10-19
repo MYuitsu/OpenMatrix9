@@ -1,0 +1,29 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-010",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "corrupted-bundle",
+      "expect": {
+        "error": "Invalid",
+        "original": "usable"
+      }
+    },
+    {
+      "id": "duplicate-identity",
+      "expect": {
+        "error": "Invalid(entity identity/revision)"
+      }
+    },
+    {
+      "id": "real-process-corrupt",
+      "expect": {
+        "exit": "non-zero",
+        "success JSON": false
+      }
+    }
+  ]
+}

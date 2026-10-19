@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-03-005",
+  "l4": "OM9-L4-01-03-005-02",
+  "title": "Entity To Layer Membership",
+  "case": "om9-l3-01-03-005-positive",
+  "runtime_tests": "om9-core/tests/document_graph.rs::l3_005_reassigning_an_object_to_another_layer_keeps_its_entity_id|l3_005_a_deleted_layer_never_leaves_dangling_membership",
+  "positive_oracle": "see cases",
+  "cases": [
+    {
+      "id": "metals-to-gems",
+      "expect": {
+        "layer": "Gems",
+        "attributes_revision": 2,
+        "object_id_unchanged": true
+      },
+      "steps": [
+        "Point on Metals",
+        "Attributes.layer = Gems"
+      ]
+    }
+  ]
+}

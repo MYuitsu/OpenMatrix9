@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-005",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "atomic-replace",
+      "expect": {
+        "reopen": "current document",
+        "staging": "removed"
+      }
+    },
+    {
+      "id": "verify-before-write",
+      "expect": {
+        "decode(encode)": "equal",
+        "staged reread": "equal"
+      }
+    }
+  ]
+}

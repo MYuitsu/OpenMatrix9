@@ -1,0 +1,16 @@
+# OM9-L2-01-08 focused verification
+# utc: 2026-10-17
+
+# command: cargo test -p om9-core --test units_parameters l3_006
+# exit: 0
+
+
+running 2 tests
+test l3_006_a_stored_quantity_keeps_its_dimension_through_json ... ok
+test l3_006_wire_forms_are_unit_tagged_and_never_interchangeable ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\units_parameters.rs (L:\om9-target\debug\deps\units_parameters-aa83b2f4cb824b64.exe)
+

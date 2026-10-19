@@ -1,0 +1,36 @@
+# OM9-L2-01-03 focused verification
+# utc: 2026-10-17T01:04:56Z
+
+# command: cargo test -p om9-core --test document_changes
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\document_changes.rs (L:\om9-target\debug\deps\document_changes-7deb1fc613c5a156.exe)
+
+running 6 tests
+test a_diff_between_two_documents_is_refused ... ok
+test an_idle_document_produces_no_batch ... ok
+test deleting_an_entity_reports_removal_and_group_pruning ... ok
+test feature_and_group_lifecycle_changes_are_ordered_and_deterministic ... ok
+test an_extension_edit_is_reported_as_an_extension_change ... ok
+test adding_an_entity_and_a_group_is_one_ordered_batch_each_with_a_new_revision ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+# command: cargo test -p om9-app --test document_contract l3_011
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running tests\document_contract.rs (L:\om9-target\debug\deps\document_contract-b700f62a9f572b35.exe)
+
+running 5 tests
+test l3_011_one_edit_publishes_one_ordered_batch_with_a_new_revision ... ok
+test l3_011_an_observer_cannot_change_the_document_it_is_told_about ... ok
+test l3_011_a_panicking_observer_is_recorded_and_the_others_still_run ... ok
+test l3_011_undo_and_redo_are_published_with_their_own_cause ... ok
+test l3_011_recording_starts_with_the_first_observer_and_holds_nothing_before ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+

@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-007-01",
+  "l3_id": "OM9-L3-01-03-007",
+  "l3_title": "Group Membership Model",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "group objects without merging geometric identity",
+  "positive_oracle": "Group rồi ungroup không đổi hình học và ID; xoá thành viên cuối thì group tự mất.",
+  "negative_oracle": "Thành viên không tồn tại/lặp/rỗng bị từ chối; GroupId đã nghỉ không được cấp lại.",
+  "reuse_decision": "ADD",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "symbols": [
+        "Group",
+        "Group::new",
+        "Document.groups",
+        "Document::group",
+        "Document::groups_of",
+        "Document::prune_membership"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-core/src/transaction.rs",
+      "symbols": [
+        "Mutation::GroupCreate",
+        "Mutation::GroupDelete",
+        "AllocatedIdentity::Group",
+        "IdentityLedger::contains_group"
+      ],
+      "decision": "ADD"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/{model,transaction}.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_007 -> 5 passed"
+  ],
+  "notes": "ADD the group record and its two mutations; REUSE the identity ledger"
+}

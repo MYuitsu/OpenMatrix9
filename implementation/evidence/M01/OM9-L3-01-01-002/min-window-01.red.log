@@ -1,0 +1,51 @@
+COMMAND: cargo test -j 1 -p om9-app --lib startup  (temporary stub: effective_min_size always returns the nominal 1280x720)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.76s
+     Running unittests src\lib.rs (target\debug\deps\om9_app-3a2356c5e25e2c74.exe)
+
+running 13 tests
+test startup::tests::adapter_note_explains_the_software_fallback ... ok
+test startup::tests::detail_is_bounded_on_char_boundaries_and_newlines_are_folded ... ok
+test startup::tests::nominal_minimum_is_1280x720_and_the_builder_gets_the_planner_floor ... ok
+test startup::tests::app_config_refuses_an_unusable_start_before_any_window_exists ... ok
+test startup::tests::effective_min_size_keeps_1280x720_on_large_screens ... ok
+test startup::tests::dialog_is_opt_out_for_automation_only ... ok
+test startup::tests::failure_line_names_the_stage_and_keeps_the_detail ... ok
+test startup::tests::effective_min_size_fits_a_1366x768_screen_at_100_percent ... FAILED
+test startup::tests::effective_min_size_falls_back_safely_for_degenerate_input ... FAILED
+test startup::tests::effective_min_size_is_capped_to_the_work_area_at_125_and_150_percent ... FAILED
+test startup::tests::effective_min_size_is_always_finite_and_between_the_floor_and_the_minimum ... ok
+test startup::tests::receipt_is_bounded_json_that_replaces_the_previous_failure ... ok
+test ui::layer_dialog_audit::tests::startup_focus_wait_is_bounded_and_never_fabricates_os_focus ... ok
+
+failures:
+
+---- startup::tests::effective_min_size_fits_a_1366x768_screen_at_100_percent stdout ----
+
+thread 'startup::tests::effective_min_size_fits_a_1366x768_screen_at_100_percent' (29636) panicked at crates\om9-app\src\startup.rs:363:9:
+1366x768 @100%: got [1280.0, 720.0], expected [1280.0, 688.0]
+
+---- startup::tests::effective_min_size_falls_back_safely_for_degenerate_input stdout ----
+
+thread 'startup::tests::effective_min_size_falls_back_safely_for_degenerate_input' (29736) panicked at crates\om9-app\src\startup.rs:405:9:
+assertion `left == right` failed
+  left: [1280.0, 720.0]
+ right: [800.0, 400.0]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- startup::tests::effective_min_size_is_capped_to_the_work_area_at_125_and_150_percent stdout ----
+
+thread 'startup::tests::effective_min_size_is_capped_to_the_work_area_at_125_and_150_percent' (28660) panicked at crates\om9-app\src\startup.rs:363:9:
+1366x768 @125%: got [1280.0, 720.0], expected [1076.8, 534.4]
+
+
+failures:
+    startup::tests::effective_min_size_falls_back_safely_for_degenerate_input
+    startup::tests::effective_min_size_fits_a_1366x768_screen_at_100_percent
+    startup::tests::effective_min_size_is_capped_to_the_work_area_at_125_and_150_percent
+
+test result: FAILED. 10 passed; 3 failed; 0 ignored; 0 measured; 59 filtered out; finished in 0.33s
+
+error: test failed, to rerun pass `-p om9-app --lib`
+
+EXIT: 101

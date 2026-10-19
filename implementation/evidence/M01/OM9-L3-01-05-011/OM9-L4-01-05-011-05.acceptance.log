@@ -1,0 +1,4 @@
+# OM9-L4-01-05-011-05 — nghiệm thu Reference shape fixture evaluation
+# utc: 2026-10-18
+# oracle: box 400 mm3 / 360 mm2, sphere 523.598775598299 / 314.159265358979, cylinder 50.265482457437 / 75.398223686155
+# result: all crate tests pass (see the kernel-test log beside this file)

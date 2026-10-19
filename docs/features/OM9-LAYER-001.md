@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-LAYER-001](../../OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-layer-001-layer-management.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # OM9-LAYER-001 — Layer Management
 
 Panel Layers đã triển khai và nghiệm thu trên plugin dùng shared SDK, ngày 2026-10-11.

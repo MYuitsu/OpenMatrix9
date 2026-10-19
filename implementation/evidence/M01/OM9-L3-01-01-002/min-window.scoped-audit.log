@@ -1,0 +1,6 @@
+min-window public source audit record, 2026-10-16
+Evidence only. The FULL audit did NOT pass. The scoped mirror covers only the mirrored files. tools/public_source_audit.py was not edited.
+full audit exit=1 source_files=23827 errors=11721 by_first_segment={'om9-window.png': 1, 'vendor-research': 114, 'ref': 5611, 'QymCAD': 114, 'OM9_Milestones': 5877, 'manuals': 4}
+scoped mirror (565 files in mirror, 17 refreshed) exit=0 {"source_files": 565, "icon_bindings": 511, "svg_files": 510, "errors": []}
+control exit=1 errors=['Private/binary artifact: control.exe', 'Unreviewed raster artifact: control.png']
+re-run after deleting control files exit=0 errors=[]

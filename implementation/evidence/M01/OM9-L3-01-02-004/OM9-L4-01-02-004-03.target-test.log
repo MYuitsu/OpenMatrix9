@@ -1,0 +1,27 @@
+task: OM9-L4-01-02-004-03 (implementation) Interactive Command State Machine
+utc: 2026-10-16T15:15:47Z
+cwd: H:\OpenMatrix9\standalone
+
+RED: 1 passed; 2 failed. Loi san pham: prompt() van hoi 'End of line ...' trong khi is_running() da bao lenh khong con chay (N5) - phase va prompt bat dong y kien. GREEN: 3 passed; 0 failed.
+== GREEN: cargo test -p om9-app --test command_state_machine ==
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+     Running tests\command_state_machine.rs (target\debug\deps\command_state_machine-5e02fc0f22afb8a7.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... ok
+test n1_to_n6_out_of_order_input_cannot_commit_partial_geometry ... ok
+test m1_to_m4_the_command_walks_its_phases ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+exit=0
+== cargo test -p om9-app --lib ==
+
+test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+
+
+== cargo fmt --check / cargo clippy --workspace --all-targets -- -D warnings ==
+exit 0 / exit 101
+error: this `if` statement can be collapsed
+error: could not compile `om9-core` (test "command_registry") due to 1 previous error

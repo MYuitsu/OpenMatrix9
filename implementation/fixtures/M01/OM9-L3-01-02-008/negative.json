@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-008",
+  "l4": "OM9-L4-01-02-008-02",
+  "case": "command-cancel-rollback-negative",
+  "negative_oracle": "Cancel after partial state or C++ error must not leave orphan preview entity",
+  "cases": [
+    {
+      "id": "Y1-no-orphan-entity-after-a-cancel-from-a-partial-state",
+      "expect": {
+        "entities_unchanged": true,
+        "no_entity_with_the_preview_geometry": true
+      }
+    },
+    {
+      "id": "Y2-a-click-after-the-cancel-cannot-commit-the-old-preview",
+      "expect": {
+        "error": "Missing",
+        "entities_unchanged": true
+      }
+    },
+    {
+      "id": "Y3-cancelling-twice-is-harmless",
+      "expect": {
+        "entities_unchanged": true,
+        "undo_unchanged": true
+      }
+    },
+    {
+      "id": "Y4-a-failed-command-keeps-its-preview-for-a-retry",
+      "action": "zero-length line, then a valid end point",
+      "expect": {
+        "entities": 1,
+        "undo_entries": 1,
+        "detail": "a refusal is not a cancel"
+      }
+    }
+  ]
+}

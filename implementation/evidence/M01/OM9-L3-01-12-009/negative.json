@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-009",
+  "kind": "negative",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "open-surface",
+      "expect": {
+        "error": "OpenSurface {open_edges: 4}"
+      }
+    },
+    {
+      "id": "bad-scale",
+      "expect": {
+        "error": "BadScale"
+      }
+    },
+    {
+      "id": "nonfinite",
+      "expect": {
+        "error": "NonFinite"
+      }
+    },
+    {
+      "id": "degenerate",
+      "expect": {
+        "error": "Degenerate"
+      }
+    },
+    {
+      "id": "empty",
+      "expect": {
+        "error": "Empty"
+      }
+    }
+  ]
+}

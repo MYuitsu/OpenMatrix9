@@ -1,0 +1,78 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-M00-L3-02-03",
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  },
+  "entries": [
+    {
+      "l4": "OM9-M00-L4-02-03-01",
+      "capability": "unit-pinned fixtures measured against analytic volume and area",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bridge.cpp#om9_occt_box_measures",
+        "#om9_occt_sphere_measures",
+        "#om9_occt_cylinder_measures"
+      ],
+      "occt_symbols": [
+        "BRepPrimAPI_MakeBox",
+        "BRepPrimAPI_MakeSphere",
+        "BRepPrimAPI_MakeCylinder",
+        "BRepGProp::VolumeProperties",
+        "BRepGProp::SurfaceProperties"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L4-02-03-01.unit-fixtures.log",
+      "finding": "box 400 mm3 / 360 mm2 (1.1e-13 / 0), sphere 523.598775598299 / 314.159265358979 (1.1e-13 / 0), cylinder 50.265482457437 / 75.398223686155 (7.1e-15 / 1.4e-14)"
+    },
+    {
+      "l4": "OM9-M00-L4-02-03-02",
+      "capability": "boolean, fillet, offset and the degenerate error contract",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bridge.cpp#om9_occt_fillet_volume",
+        "#om9_occt_offset_volume",
+        "#om9_occt_degenerate"
+      ],
+      "occt_symbols": [
+        "BRepAlgoAPI_Cut",
+        "BRepFilletAPI_MakeFillet",
+        "BRepOffsetAPI_MakeOffsetShape",
+        "BRepCheck_Analyzer",
+        "Standard_DomainError"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L4-02-03-02.boolean-fillet-offset-degenerate.log",
+      "finding": "fillet 399.141592653590 (5.7e-14 vs 400 - (1 - pi/4)*4); inward offset 128.0 (2.8e-14); touching cut stays valid at 400; offset past the wall reports invalid; a 1e-12 box returns Standard_DomainError"
+    },
+    {
+      "l4": "OM9-M00-L4-02-03-03",
+      "capability": "tessellation against B-Rep exactness",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bridge.cpp#om9_occt_sphere_mesh"
+      ],
+      "occt_symbols": [
+        "BRepMesh_IncrementalMesh",
+        "Poly_Triangulation"
+      ],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L4-02-03-03.tessellation-vs-brep.log",
+      "finding": "nodes stay on the exact sphere (8.9e-16 at 0.01, 1.8e-15 at 0.001); 5 008 and 50 424 triangles; boundary edges 0 (closed) and 2 non-manifold pole edges at both deflections"
+    },
+    {
+      "l4": "OM9-M00-L4-02-03-04",
+      "capability": "viability decision for the kernel",
+      "upstream_sources": [
+        "native/occt-rust-proof/src/bin/numeric.rs"
+      ],
+      "occt_symbols": [],
+      "evidence": "implementation/evidence/M00/OM9-M00-L3-02-03/OM9-M00-L4-02-03-04.viability-decision.log",
+      "finding": "8/8 analytic checks pass, 3 degenerate cases are reported without a crash, the mesh is closed; decision VIABLE with the recorded caveat of 2 non-manifold pole edges"
+    }
+  ],
+  "decision": {
+    "verdict": "VIABLE",
+    "scope": "box/sphere/cylinder, boolean cut, fillet, inward offset, tessellation, degenerate inputs",
+    "caveats": [
+      "OCCT sphere meshes carry one non-manifold edge per pole; a consumer that needs a manifold mesh must heal it",
+      "the accuracy patch for offset-curve D2/D3 is still required for kernel-internal offset surfaces (see OCCT-UPGRADE-GATE.md)"
+    ]
+  }
+}

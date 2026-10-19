@@ -1,0 +1,143 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-12",
+  "milestone": "M01",
+  "title": "Be Native Project Codec Stl Export",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Save/load native document đầy đủ geometry/history/layer/gem instance; xuất STL watertight và báo lỗi hình học.",
+  "definition": {
+    "module_id": "OM9-L2-01-12",
+    "milestone_id": "M01",
+    "tag": "be",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "scope": "Save/load native document đầy đủ geometry/history/layer/gem instance; xuất STL watertight và báo lỗi hình học.",
+    "exclude": "Không xây thêm 3DM reader trong codec native; không làm STEP/IGES ở giai đoạn này.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          79,
+          86
+        ],
+        "pdf_pages_1based": [
+          89,
+          96
+        ]
+      },
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          48,
+          56
+        ],
+        "pdf_pages_1based": [
+          58,
+          66
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-03"
+    ],
+    "downstream_contracts": [
+      "scene-save-and-stl"
+    ],
+    "early_slices": [
+      "M01: native snapshot, empty/fixture document save-load and versioned codec envelope.",
+      "M07: complete reliable STL export (same canonical owner) plus geometry validation."
+    ],
+    "manual_test_required": false,
+    "acceptance_gate": "AUTO",
+    "l3_count": 10
+  },
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Native project codec: schema-4 container, atomic save/load, validated admission, runtime restoration and legacy migration; B-Rep/mesh/instance/feature/history persistence; STL millimetre/winding policy.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-01-12/crosswalk.json",
+      "implementation/design/M01/OM9-L2-01-12/l4-matrix.json",
+      "implementation/design/M01/OM9-L2-01-12/oracles.json",
+      "implementation/design/M01/OM9-L2-01-12/api.md",
+      "implementation/design/M01/OM9-L2-01-12/EXECUTION.md",
+      "implementation/evidence/M01/2026-10-19-l2-01-12-checks.json",
+      "build/standalone-validation/ui-artifacts/m01-l2-01-12-20261019/checks-final.json",
+      "build/standalone-validation/ui-artifacts/m01-l2-01-12-20261019/archive-all.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-01-12-20261019/exchange-all.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-01-12-20261019/core-all.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-01-12-20261019/app-project-codec.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-01-12-20261019/clippy-archive-exchange.log",
+      "build/standalone-validation/ui-artifacts/m01-l2-01-12-20261019/workspace-all.log"
+    ],
+    "l3_done_with_evidence": 9,
+    "l4_verified": 45,
+    "l3_deferred_to_m07": [
+      "OM9-L3-01-12-008"
+    ],
+    "full_l2_complete": false,
+    "human_approval": null,
+    "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
+    "validation_summary": {
+      "archive": 52,
+      "exchange": 97,
+      "core": 374,
+      "app_project_codec": 38,
+      "clippy": "exit 0 with -D warnings",
+      "rustfmt_touched_files": "exit 0",
+      "workspace": "cargo test --workspace --no-fail-fast -j 2: exit 101, 1184 passed / 168 suites, 2 known unrelated failures (mesh_fill, ui_events still expect the removed CPU painter; docs/openmatrix9-progress.json:12939); see workspace-all.log",
+      "public_source_audit": "exit 1 pre-existing repo-wide findings (6136 unreviewed rasters, 292 private/binary artifacts); no new external source or asset imported"
+    },
+    "remaining": [
+      "M07 owns tessellation and the document STL export command (OM9-L3-01-12-008).",
+      "External reviewer sign-off is not recorded (human_approval null).",
+      "Real OCCT volume is proven by crates/om9-app/tests/brep_selection.rs; the archive fixture proves display volume and byte equality without OCCT.",
+      "Global M00 execution gate is NOT READY (pre-existing missing M00 records); no QymCAD code or new upstream source was imported by this execution."
+    ]
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-12-001",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-001 - Native Project Container Format/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-002",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-002 - Scene And Layer State Encoding/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-003",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-003 - B-Rep Mesh And Instance Encoding/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-004",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-004 - Builder History Stub Persistence/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-005",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-005 - Atomic Save And Write Failure Recovery/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-006",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-006 - Project Load Validation And Compatibility/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-007",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-007 - Document Reload And Restoration/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-008",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-008 - STL Tessellation Export Codec/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-009",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-009 - Export Mesh Units And Winding/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-12-010",
+      "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-010 - Project Roundtrip Regression Fixtures/l3.json"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-02-006-01",
+  "l3_id": "OM9-L3-01-02-006",
+  "l3_title": "Atomic Command Transactions",
+  "owner_module_id": "OM9-L2-01-02",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "one user action equals one document transaction",
+  "positive_oracle": "One UI action creates one transaction and one revision even with multiple objects",
+  "negative_oracle": "Mid-operation failure rolls back every change and preserves undo journal",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE / gui.rs:448 comment: carry out what the properties panel asked for, after it has drawn"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the command applies its change in one place, after the user has finished choosing. QymCAD has no transaction object at all: a change is applied directly, so a failure halfway cannot be taken back.",
+      "om9_owner": "standalone/crates/om9-core/src/transaction.rs + standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "No transaction or journal surface."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No transaction or journal surface.",
+      "om9_owner": "standalone/crates/om9-core/src/transaction.rs + standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "Parameter state only."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Parameter state only.",
+      "om9_owner": "standalone/crates/om9-core/src/transaction.rs + standalone/crates/om9-app/src/session.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "Dependency shape only."
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "standalone/crates/om9-core/src/transaction.rs + standalone/crates/om9-app/src/session.rs"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session.rs::accept_world_point builds ONE TransactionRequest for the finished command and calls coordinator.prepare_with_held_usage then commit; the session state advances only on receipt.published",
+    "TransactionCoordinator::commit returns a Receipt { published } and the undo journal counts the published transactions"
+  ],
+  "gap_found_by_this_task": [
+    "Pinned rather than changed: one completed command adds exactly one journal entry and exactly one entity; a command refused at any step (zero length, Busy, stale context, Escape) adds none and moves no entity count. The probe behind these fixtures showed context_revision does NOT move on an edit — it is the document identity token — so the per-action counter the plan means is the journal/epoch, and the api.md says so instead of pretending otherwise.",
+    "The all-or-nothing property of a multi-mutation request is the coordinator's own contract (`cargo test -p om9-core` in the evidence log); the fixtures pin what the session adds on top: exactly one request per finished command."
+  ],
+  "reuse_decision": "ADAPT the single doorway of gui.rs (apply once, at the end); ADD the prepared/committed transaction and the journal.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-02-006/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-02-006/negative.json",
+    "standalone/crates/om9-app/tests/command_transactions.rs"
+  ]
+}

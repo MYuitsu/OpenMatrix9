@@ -1,0 +1,87 @@
+{
+  "scope": "historical_pre_audit_target_guard_checkpoint",
+  "original_receipt_kept_verbatim": true,
+  "copies": [
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-layer-dialogs-regression/dialog-color.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-layer-dialogs-regression\\dialog-color.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-layer-dialogs-regression/dialog-rename.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-layer-dialogs-regression\\dialog-rename.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-layer-dialogs-regression/dialog-selective-show.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-layer-dialogs-regression\\dialog-selective-show.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-layer-dialogs-regression/workspace.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-layer-dialogs-regression\\workspace.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-layers-regression/workspace.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-layers-regression\\workspace.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-native/workspace.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-native\\workspace.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-startup/workspace.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-startup\\workspace.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-success/alternate.om9",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-success\\alternate.om9"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-success/selected.om9",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-success\\selected.om9"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-success/workspace.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-success\\workspace.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-viewport-regression/workspace.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-viewport-regression\\workspace.png"
+    },
+    {
+      "original": "build/standalone-validation/ui-artifacts/2026-10-14-owned-file-selection-wm-native/workspace.png",
+      "copy": "build\\standalone-validation\\ui-artifacts\\owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-wm-native\\workspace.png"
+    },
+    {
+      "original": "docs/validation/2026-10-14-owned-file-selection-layer-dialogs-regression/ui-receipt.json",
+      "copy": "docs\\validation\\2026-10-14-owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-layer-dialogs-regression\\ui-receipt.json"
+    },
+    {
+      "original": "docs/validation/2026-10-14-owned-file-selection-layers-regression/ui-receipt.json",
+      "copy": "docs\\validation\\2026-10-14-owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-layers-regression\\ui-receipt.json"
+    },
+    {
+      "original": "docs/validation/2026-10-14-owned-file-selection-native/ui-receipt.json",
+      "copy": "docs\\validation\\2026-10-14-owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-native\\ui-receipt.json"
+    },
+    {
+      "original": "docs/validation/2026-10-14-owned-file-selection-startup/ui-receipt.json",
+      "copy": "docs\\validation\\2026-10-14-owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-startup\\ui-receipt.json"
+    },
+    {
+      "original": "docs/validation/2026-10-14-owned-file-selection-success/ui-receipt.json",
+      "copy": "docs\\validation\\2026-10-14-owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-success\\ui-receipt.json"
+    },
+    {
+      "original": "docs/validation/2026-10-14-owned-file-selection-viewport-regression/ui-receipt.json",
+      "copy": "docs\\validation\\2026-10-14-owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-viewport-regression\\ui-receipt.json"
+    },
+    {
+      "original": "docs/validation/2026-10-14-owned-file-selection-wm-native/ui-receipt.json",
+      "copy": "docs\\validation\\2026-10-14-owned-file-selection-before-target-guard\\2026-10-14-owned-file-selection-wm-native\\ui-receipt.json"
+    }
+  ],
+  "binary_copy": {
+    "original": "standalone\\target\\release\\om9.exe",
+    "copy": "build\\standalone-validation\\native-bin-history\\owned-file-selection-before-target-guard\\om9.exe",
+    "sha256": "c867378b20d36e2d30531157382625a6472a4e2bc900a277d67db790857de614"
+  }
+}

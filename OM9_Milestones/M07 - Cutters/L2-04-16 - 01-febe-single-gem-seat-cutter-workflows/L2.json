@@ -1,0 +1,89 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-04-16",
+  "milestone": "M07",
+  "title": "01-febe-single-gem-seat-cutter-workflows",
+  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "scope": "Gem Seat/Gem Cutters cho 1 viên đá",
+  "source_original_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/module.json",
+  "definition": {
+    "module_id": "OM9-L2-04-16",
+    "milestone_id": "M07",
+    "module_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "04-matrix8-book2",
+    "legacy_v07_path": "specs/04-matrix8-book2/16-febe-single-gem-seat-cutter-workflows/",
+    "scope": "Gem Seat/Gem Cutters cho 1 viên đá",
+    "exclude": "Không duplicate BRep boolean.",
+    "manual_references": [
+      {
+        "manual_id": "book2",
+        "filename": "matrix_8_manual_book2.pdf",
+        "printed_pages": [
+          498,
+          518
+        ],
+        "pdf_pages_1based": [
+          272,
+          292
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-04-09",
+      "OM9-L2-01-10",
+      "OM9-L2-04-14"
+    ],
+    "downstream_contracts": [
+      "jewelry-cutters-seats"
+    ],
+    "early_slices": [],
+    "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
+    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
+    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "manual_test_required": true,
+    "acceptance_gate": "M07-UI",
+    "l3_count": 7,
+    "l3_catalog_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/l3-index.json"
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-04-16-001",
+      "file": "M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-001 - Gem Cutter Azure For Single Stone/l3.json",
+      "target_implementation_milestone": "M07"
+    },
+    {
+      "id": "OM9-L3-04-16-002",
+      "file": "M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-002 - Gem Cutter Multiple Stones/l3.json",
+      "target_implementation_milestone": "M07"
+    },
+    {
+      "id": "OM9-L3-04-16-003",
+      "file": "M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-003 - Gem Cutter Library Profiles/l3.json",
+      "target_implementation_milestone": "M07"
+    },
+    {
+      "id": "OM9-L3-04-16-004",
+      "file": "M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-004 - Bezel Cutter Builder/l3.json",
+      "target_implementation_milestone": "M07"
+    },
+    {
+      "id": "OM9-L3-04-16-005",
+      "file": "M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-005 - Cutter Pavilion Clearance And Depth Controls/l3.json",
+      "target_implementation_milestone": "M07"
+    },
+    {
+      "id": "OM9-L3-04-16-006",
+      "file": "M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-006 - Interactive Boolean On Metal/l3.json",
+      "target_implementation_milestone": "M07"
+    },
+    {
+      "id": "OM9-L3-04-16-007",
+      "file": "M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-007 - Cutter Body Preserve Remove Option/l3.json",
+      "target_implementation_milestone": "M07"
+    }
+  ],
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "planned_l4_count_m07": 24
+}

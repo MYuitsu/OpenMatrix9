@@ -1,0 +1,10 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-005",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-005-NEG",
+      "expected": "an unknown primitive kind returns InvalidInput"
+    }
+  ]
+}

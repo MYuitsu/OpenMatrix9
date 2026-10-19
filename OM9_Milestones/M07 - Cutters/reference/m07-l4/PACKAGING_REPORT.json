@@ -1,0 +1,68 @@
+{
+  "package_version": "v0.13-M07-L4-plan",
+  "baseline_archive": "OpenMatrix9_v012_M00_Source_Reviewed.zip",
+  "full_archive": {
+    "name": "OpenMatrix9_v013_M07_L4_Reviewed.zip",
+    "size_bytes": 4488644,
+    "entries": 2254
+  },
+  "patch_archive": {
+    "name": "OpenMatrix9_v013_M07_L4_Patch.zip",
+    "size_bytes": 771969,
+    "changed_files": 59,
+    "new_files": 147,
+    "entries": 206
+  },
+  "l2_count": 95,
+  "l3_count": 772,
+  "E12_L3_count": 20,
+  "planned_M07_L4_count": 69,
+  "implemented_M07_L4_count": 0,
+  "execution_waves": 6,
+  "owners": {
+    "OM9-L2-01-12": 4,
+    "OM9-L2-04-16": 24,
+    "OM9-L2-04-17": 19,
+    "OM9-L2-04-18": 22
+  },
+  "claims": [
+    "Static plan validation PASS",
+    "No runtime build/test/manufacturing PASS claimed",
+    "No copyrighted Matrix manuals or QymCAD sources repackaged"
+  ],
+  "added_paths_sample": [
+    "OpenMatrix9/planning/CHANGES_V012_TO_V013.md",
+    "OpenMatrix9/tools/validate_m07_l4.py",
+    "OpenMatrix9/planning/M07/SELF_REVIEW.md",
+    "OpenMatrix9/planning/M07/RELEASE_GATE.md",
+    "OpenMatrix9/planning/M07/M07_L4_EXECUTION_MANIFEST.csv",
+    "OpenMatrix9/planning/M07/LUNA_START_HERE.md",
+    "OpenMatrix9/planning/M07/GPT6_LUNA_TASK_PROMPT.md",
+    "OpenMatrix9/planning/M07/M07_L4_EXECUTION_MANIFEST.json",
+    "OpenMatrix9/planning/M07/README.md",
+    "OpenMatrix9/planning/M07/04-18-005/04-04-adversarial-release-evidence/TASK.md",
+    "OpenMatrix9/planning/M07/04-18-005/04-04-adversarial-release-evidence/l4.json",
+    "OpenMatrix9/planning/M07/04-18-005/02-02-domain-integration/TASK.md",
+    "OpenMatrix9/planning/M07/04-18-005/02-02-domain-integration/l4.json",
+    "OpenMatrix9/planning/M07/04-18-005/01-01-contract-source-preflight/TASK.md",
+    "OpenMatrix9/planning/M07/04-18-005/01-01-contract-source-preflight/l4.json"
+  ],
+  "modified_paths_sample": [
+    "OpenMatrix9/README.md",
+    "OpenMatrix9/planning/EXECUTION_MANIFEST.csv",
+    "OpenMatrix9/planning/CODEX_TASK_PROTOCOL.md",
+    "OpenMatrix9/planning/L4_TEMPLATE.md",
+    "OpenMatrix9/planning/EXECUTION_MANIFEST.json",
+    "OpenMatrix9/planning/E12.md",
+    "OpenMatrix9/planning/README.md",
+    "OpenMatrix9/tools/validate_l3.py",
+    "OpenMatrix9/tools/validate_v010_plan.py",
+    "OpenMatrix9/tools/validate_m00_l4.py",
+    "OpenMatrix9/specs/_meta/l3-registry.json",
+    "OpenMatrix9/specs/07-ms07-cutters-manufacturing-check/03-febe-ring-finger-plane-quad-cutters/module.json",
+    "OpenMatrix9/specs/07-ms07-cutters-manufacturing-check/03-febe-ring-finger-plane-quad-cutters/README.md",
+    "OpenMatrix9/specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/module.json",
+    "OpenMatrix9/specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/README.md"
+  ],
+  "hash_note": "Archive SHA256 deliberately excluded from embedded report because it would be self-referential; compute externally after packaging."
+}

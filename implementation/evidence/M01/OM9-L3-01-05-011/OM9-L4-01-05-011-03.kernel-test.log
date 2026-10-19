@@ -1,0 +1,13 @@
+# OM9-L4-01-05-011-03 — Reference shape fixture evaluation
+# utc: 2026-10-18
+# command: cargo test -p om9-kernel -j 2
+# test: the_reference_fixtures_match_their_analytic_values
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.36s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+box 400 mm3 / 360 mm2, sphere 523.598775598299 / 314.159265358979, cylinder 50.265482457437 / 75.398223686155

@@ -1,0 +1,962 @@
+{
+  "schema": "om9.m01.ui_review.v1",
+  "task_id": "OM9-L4-01-01-002-05",
+  "l3_id": "OM9-L3-01-01-002",
+  "l3_title": "Workbench Docking Regions",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "oracle_schema": "om9.m01.oracle.v1.5 (no local definition; carried as a field only)",
+  "positive_oracle": "Show left rail, four viewport center region and optional right properties dock",
+  "negative_oracle": "Narrow window does not overlap/lose critical command input panel",
+  "runtime": {
+    "adapter": "NVIDIA GeForce RTX 3060, Vulkan (from the receipt)",
+    "command": "om9.exe --ui-audit <dir> with audit-only OM9_UI_AUDIT_WINDOW and OM9_UI_AUDIT_RIGHT_DOCK=1",
+    "build": "debug (target/debug/om9.exe)",
+    "normal": {
+      "window": "1600x1000",
+      "launch": "LAUNCHED",
+      "exit_code": 0,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/normal/workspace.png",
+      "screenshot_sha256": "f4b0f8ce048b1e9f849c999b9bce7328e6064c9899aea3da755734a59c05e066",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/normal/ui-receipt.json",
+      "receipt_sha256": "2f56bfefbec054a299c5d455e431b8d46e278024e715af4a5d4ba37cc497e973",
+      "view_rects": {
+        "Looking Down": [
+          300.0,
+          178.0,
+          499.0,
+          401.0
+        ],
+        "Perspective": [
+          801.0,
+          178.0,
+          499.0,
+          401.0
+        ],
+        "Side View": [
+          801.0,
+          581.0,
+          499.0,
+          401.0
+        ],
+        "Through Finger": [
+          300.0,
+          581.0,
+          499.0,
+          401.0
+        ]
+      },
+      "plan": {
+        "center": {
+          "height": 809.0,
+          "width": 1010.0,
+          "x": 295.0,
+          "y": 171.0
+        },
+        "command_input": {
+          "height": 83.0,
+          "width": 1305.0,
+          "x": 295.0,
+          "y": 21.0
+        },
+        "left_rail": {
+          "height": 979.0,
+          "width": 295.0,
+          "x": 0.0,
+          "y": 21.0
+        },
+        "menu_bar": {
+          "height": 21.0,
+          "width": 1600.0,
+          "x": 0.0,
+          "y": 0.0
+        },
+        "notes": [],
+        "right_dock": {
+          "height": 829.0,
+          "width": 295.0,
+          "x": 1305.0,
+          "y": 171.0
+        },
+        "status_bar": {
+          "height": 20.0,
+          "width": 1010.0,
+          "x": 295.0,
+          "y": 980.0
+        },
+        "toolbar": {
+          "height": 67.0,
+          "width": 1305.0,
+          "x": 295.0,
+          "y": 104.0
+        },
+        "views": [
+          {
+            "rect": {
+              "height": 403.5,
+              "width": 504.0,
+              "x": 295.0,
+              "y": 171.0
+            },
+            "view": "LookingDown"
+          },
+          {
+            "rect": {
+              "height": 403.5,
+              "width": 504.0,
+              "x": 801.0,
+              "y": 171.0
+            },
+            "view": "Perspective"
+          },
+          {
+            "rect": {
+              "height": 403.5,
+              "width": 504.0,
+              "x": 295.0,
+              "y": 576.5
+            },
+            "view": "ThroughFinger"
+          },
+          {
+            "rect": {
+              "height": 403.5,
+              "width": 504.0,
+              "x": 801.0,
+              "y": 576.5
+            },
+            "view": "SideView"
+          }
+        ],
+        "window": {
+          "height": 1000.0,
+          "width": 1600.0
+        }
+      },
+      "region_error": null,
+      "sidebar_px": [
+        2.0,
+        23.0,
+        295.0,
+        975.0
+      ],
+      "right_dock_px": [
+        1303.0,
+        180.0,
+        295.0,
+        818.0
+      ],
+      "command_input_px": [
+        303.0,
+        91.03125,
+        1294.0,
+        15.96875
+      ],
+      "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: Discret"
+    }
+  },
+  "negative_runtime": {
+    "narrow": {
+      "window": "800x600",
+      "launch": "LAUNCHED",
+      "exit_code": 0,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/narrow/workspace.png",
+      "screenshot_sha256": "5d357dce39182882aaecd92b87ca0f2487cb876129143b7fdb3d5636c32389b3",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-docking/narrow/ui-receipt.json",
+      "receipt_sha256": "1907c9a8880b6978d3d6f33867f85699cea166a9e985457f7ead607a5abb548d",
+      "view_rects": {
+        "Looking Down": [
+          300.0,
+          178.0,
+          249.0,
+          201.0
+        ],
+        "Perspective": [
+          551.0,
+          178.0,
+          249.0,
+          201.0
+        ],
+        "Side View": [
+          551.0,
+          381.0,
+          249.0,
+          201.0
+        ],
+        "Through Finger": [
+          300.0,
+          381.0,
+          249.0,
+          201.0
+        ]
+      },
+      "plan": {
+        "center": {
+          "height": 409.0,
+          "width": 505.0,
+          "x": 295.0,
+          "y": 171.0
+        },
+        "command_input": {
+          "height": 83.0,
+          "width": 505.0,
+          "x": 295.0,
+          "y": 21.0
+        },
+        "left_rail": {
+          "height": 579.0,
+          "width": 295.0,
+          "x": 0.0,
+          "y": 21.0
+        },
+        "menu_bar": {
+          "height": 21.0,
+          "width": 800.0,
+          "x": 0.0,
+          "y": 0.0
+        },
+        "notes": [
+          {
+            "RightDockYielded": {
+              "reason": "NarrowWindow"
+            }
+          }
+        ],
+        "right_dock": null,
+        "status_bar": {
+          "height": 20.0,
+          "width": 505.0,
+          "x": 295.0,
+          "y": 580.0
+        },
+        "toolbar": {
+          "height": 67.0,
+          "width": 505.0,
+          "x": 295.0,
+          "y": 104.0
+        },
+        "views": [
+          {
+            "rect": {
+              "height": 203.5,
+              "width": 251.5,
+              "x": 295.0,
+              "y": 171.0
+            },
+            "view": "LookingDown"
+          },
+          {
+            "rect": {
+              "height": 203.5,
+              "width": 251.5,
+              "x": 548.5,
+              "y": 171.0
+            },
+            "view": "Perspective"
+          },
+          {
+            "rect": {
+              "height": 203.5,
+              "width": 251.5,
+              "x": 295.0,
+              "y": 376.5
+            },
+            "view": "ThroughFinger"
+          },
+          {
+            "rect": {
+              "height": 203.5,
+              "width": 251.5,
+              "x": 548.5,
+              "y": 376.5
+            },
+            "view": "SideView"
+          }
+        ],
+        "window": {
+          "height": 600.0,
+          "width": 800.0
+        }
+      },
+      "region_error": null,
+      "sidebar_px": [
+        2.0,
+        23.0,
+        295.0,
+        575.0
+      ],
+      "right_dock_px": null,
+      "command_input_px": [
+        303.0,
+        91.03125,
+        494.0,
+        15.96875
+      ],
+      "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: Discret"
+    },
+    "expectation": "right dock yielded with RightDockYielded/NarrowWindow note, left rail and command input kept, four viewports present",
+    "narrow_capture": "CAPTURED",
+    "previous_defect_fixed_in_closeout": "status bar text overlaps itself at 800x600 (pre-existing L3-007 behavior, not changed by this task)",
+    "closeout_note": "Fixed in the closeout (FEAT-001): message and summary are elided to their widths; receipt status_text_overlap is false."
+  },
+  "not_captured": [
+    "real OS 125%/150% display scaling on a real 1366x768 device (only simulated with OM9_UI_AUDIT_ZOOM / OM9_UI_AUDIT_MONITOR)",
+    "second monitor",
+    "window edge dragged live by a person (live drag preview stays with L3-003)",
+    "maximized start on a real small high-DPI screen",
+    "real work area (taskbar) of a device: estimated as monitor minus 16 x 80 points",
+    "below-minimum window in a real window (startup refuses it; the Layout error path is covered by the frame test only)"
+  ],
+  "checks_run": [
+    "cargo test -p om9-app --lib workbench_regions: 24 passed (re-run 2026-10-16; the earlier record said 21 before 3 tests were added)",
+    "cargo test -p om9-app --test workbench_regions: 8 passed",
+    "cargo test -p om9-app: all passed",
+    "cargo test --workspace: exit 0",
+    "cargo check --workspace --all-targets: exit 0",
+    "cargo build --workspace: exit 0",
+    "cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "cargo fmt --all -- --check: exit 0",
+    "python tools/public_source_audit.py: exit 1, 11721 pre-existing errors in private/untracked trees, 0 in L3-002 paths (see regression.log)",
+    "python tools/validate_m01_spec.py: NOT RUN (tool absent)",
+    "cargo test -p om9-app --test workbench_regions_sizes: 10 passed (SIMULATED/AUTOMATED)",
+    "python tools/validate_m01_l3_002_ui_matrix.py: exit 0, 10 real-window cases (SIMULATED/AUTOMATED)",
+    "cargo test -p om9-app --test workbench_regions: 8 passed (independent re-run by a second session)",
+    "python tools/validate_m01_l3_002_ui_matrix.py --mode all: 14/14 cases PASS, all_passed=true"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PASSED BY HUMAN REVIEW (2026-10-16)",
+    "scope_note": "Shortened 2026-10-16 to the supported range: minimum 1280x720 logical, smallest device 1366x768. Live drag preview stays with L3-003.",
+    "items": [
+      {
+        "id": 1,
+        "step": "Real 1366x768 device at 100%, 125% and 150% Windows DPI: the window starts fully on screen, the status bar and command line are above the taskbar, left rail, four viewports and command panel are visible and not overlapped.",
+        "machine_proven": "Pure sizing function and the MinInnerSize command on the first frame (window_minimum.rs); frame contract at 1280x720, 1366x728, 1093x585, 911x480 (SIMULATED); real-window lap100/lap125/lap150 with a SIMULATED 1366x768 monitor and audit zoom (SIMULATED).",
+        "human_must_verify": "A maximized/normal start on a real 1366x768 device at each DPI; the usable area is only estimated (monitor minus 16 x 80 pt).",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": 2,
+        "step": "Window-minimum enforcement by dragging an edge: the window stops at 1280x720 logical (or the capped value on a small screen) and cannot be shrunk further.",
+        "machine_proven": "The app sends ViewportCommand::MinInnerSize(effective) on frame 0 and on a monitor change (headless frame test); startup refuses a window below 1280x720 (real exe, exit 1, no receipt).",
+        "human_must_verify": "That Windows actually enforces the size while a person drags, and that the window does not jump.",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": 3,
+        "step": "Second monitor with a different DPI: move the window; the minimum follows and nothing overlaps.",
+        "machine_proven": "Changing the monitor between frames emits exactly one new MinInnerSize command (headless).",
+        "human_must_verify": "A real second monitor and per-monitor DPI.",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": 4,
+        "step": "Right dock shows from 1200 logical points and yields below it with a notice in the CMD history and status bar; the command line cannot be lost.",
+        "machine_proven": "Boundary tests at 1199/1199.99/1200 (pure planner, dock_layout, full frame sweep 1150..=1250); hidden command line is kept (CommandInputKept) through the layout API.",
+        "human_must_verify": "The menu or mouse path for the right dock and the visual result; whether Matrix9 should have an optional right dock at all (the Matrix9 screenshot rule shows none; the user decides).",
+        "reviewer_decision": "PASS"
+      },
+      {
+        "id": 5,
+        "step": "Read the bottom status line at the minimum (1280x720, and the capped 911x480 case).",
+        "machine_proven": "status_bar_overlap and size-matrix rect tests; receipt status_text_overlap false with non-null status_message_px and status_summary_px in every real-window case; screenshots viewed by the agent.",
+        "human_must_verify": "Whether the elided text is readable enough.",
+        "reviewer_decision": "PASS"
+      }
+    ],
+    "reviewer_statement": "test roi okie het nha"
+  },
+  "reviewer": {
+    "status": "SIGNED",
+    "role": "project owner (human reviewer) running the app on Windows",
+    "date_utc": "2026-10-16",
+    "statement": "test roi okie het nha",
+    "scope": "1) real 1366x768 at 100/125/150% DPI: window fits, status bar and command line above the taskbar, left rail + four viewports + command panel visible and not overlapped; 2) window minimum enforced while dragging an edge (stops at 1280x720 logical, no jump); 3) second monitor with a different DPI: minimum follows, nothing overlaps; 4) right dock shows from 1200 logical points and yields below with a notice, command line never lost; 5) bottom status line readable at the minimum (1280x720 and the capped 911x480 case)",
+    "signature_note": "recorded from the owner's in-session confirmation; the implementer did not sign"
+  },
+  "gate": {
+    "m01_ui": "L3-002 scope CLOSED BY HUMAN REVIEW; whole-module M01-UI still OPEN",
+    "m01_ui_l3_002_scope": "CLOSED_BY_HUMAN_REVIEW",
+    "m00": "NOT_SIGNED",
+    "legal_reuse": "PENDING_HUMAN_M00_APPROVAL"
+  },
+  "remaining": [
+    "Human M01-UI manual verification on Windows (checklist above)",
+    "M00 gate G00-01 sign-off and legal reuse approval (G00-06)",
+    "OM9-L2-01-02 command dispatch/Undo and OM9-L2-01-03 document/scene are not implemented; the CommandInputHost seam adapter only reports the CMD frame as attached",
+    "tools/validate_m01_spec.py and om9.m01.oracle.v1.5 definition are absent locally",
+    "public_source_audit.py fails on pre-existing private/untracked trees",
+    "Real OS DPI scaling and multi-monitor behaviour by a human (only simulated so far)",
+    "Archive encoder fails to save a document containing a Line (found by the size-matrix test; unrelated to the regions)"
+  ],
+  "automated_simulated_evidence": {
+    "label": "SIMULATED/AUTOMATED - does not replace human M01-UI sign-off",
+    "rust_first_exception": "tools/validate_m01_l3_002_ui_matrix.py is the only non-Rust file: it launches the real om9.exe in a GPU window (impossible inside cargo test), holds no business logic, and only reads the receipt and screenshot the application wrote.",
+    "honest_limits": [
+      "Primary display only (it reported 1440x900 at 100% in this run); no real second monitor was used.",
+      "dpi150-style and lap125/lap150 cases use the audit-only OM9_UI_AUDIT_ZOOM (egui zoom at OS scale 100%); this is not real OS per-monitor DPI.",
+      "lap100/lap125/lap150 use OM9_UI_AUDIT_MONITOR=1366x768, a SIMULATED monitor size.",
+      "The usable area is estimated as monitor size minus a fixed reserve of 16 x 80 points; the real work area is not read.",
+      "A maximized start on a real 1366x768 device at 125%/150% DPI is not covered.",
+      "No person watched or dragged any window."
+    ],
+    "frame_test": {
+      "file": "standalone/crates/om9-app/tests/workbench_regions_sizes.rs",
+      "command": "cargo test -j 1 -p om9-app --test workbench_regions_sizes",
+      "result": "9 passed, 0 failed, exit 0",
+      "covers": [
+        "supported sizes 1280x720, 1366x728, 1093x585, 911x480, 1920x1080, 5120x1440, 1280x2000 with Layers docked and not docked",
+        "capped high-DPI case 911x480 (1366x768 at 150%): left rail, four viewports, command panel; dock yielded",
+        "dock threshold sweep 1150..=1250 at height 800: first dock width = 1200; 1199 absent, 1200 present",
+        "layout_evidence_table: pure planner numbers asserted exactly, frame within 8 pt, OM9_LAYOUT lines",
+        "simulated DPI 1.25 / 1.5 in point space (1366x720@1.5, 1920x1080@1.5, 1366x731@1.25, 1600x1000@1.5)",
+        "unsupported size, error path: 799x600 and 800x399 -> WindowTooSmall, Layout: status error, last good plan, dock JSON, workspace and entity count unchanged",
+        "startup refuses a window below 1280x720",
+        "hidden command line + right dock toggle through the layout API",
+        "Line, Undo, Redo, Point, save to temp .om9, reopen: region plan equal to baseline at every step"
+      ],
+      "first_dock_width_points": 1200
+    },
+    "other_commands": [
+      {
+        "command": "cargo fmt --all -- --check",
+        "result": "exit 0"
+      },
+      {
+        "command": "cargo check --workspace --all-targets",
+        "result": "exit 0"
+      },
+      {
+        "command": "cargo build --workspace",
+        "result": "exit 0"
+      },
+      {
+        "command": "cargo clippy --workspace --all-targets -- -D warnings",
+        "result": "exit 0"
+      },
+      {
+        "command": "cargo test --workspace -j 1",
+        "result": "exit 0; 596 passed, 0 failed, 24 ignored (native-gated); om9-app lib 73, window_minimum 5, workbench_regions 8, workbench_regions_sizes 9, status_bar_overlap 4, shell_docking 10, startup_contract 3"
+      }
+    ],
+    "runner": {
+      "command": "python tools/validate_m01_l3_002_ui_matrix.py --output build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix",
+      "exit_code": 0,
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/matrix-summary.json",
+      "binary_sha256": "b3a8fec6c67460799c5720c2bf29d08d68499735ea510f6d69321122ea5fd554",
+      "runner_sha256": "8d97d7ac6777410c380f2e5727ac84fe0c70c97059286c40e6bdacf3ce62e06d",
+      "all_passed": true
+    },
+    "cases": [
+      {
+        "case": "min-1280x720",
+        "label": "AUTOMATED real window (primary display, OS scale as reported)",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1280x720",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1"
+        },
+        "exit_code": 0,
+        "passed": true,
+        "window_points": [
+          1280.0,
+          720.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": true,
+        "expected_right_dock": true,
+        "min_window": {
+          "monitor_points": [
+            1440.0,
+            900.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "expected_min_window": [
+          1280.0,
+          720.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          704.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          380.90625,
+          705.0,
+          597.09375,
+          11.0
+        ],
+        "screenshot_px": [
+          1280,
+          720
+        ],
+        "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/min-1280x720/workspace.png",
+        "screenshot_sha256": "e0fa1c0314062c3af3e9d8d00077f520fbcd164b6c1df9f5ae938df33f0ae9cd",
+        "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/min-1280x720/ui-receipt.json",
+        "receipt_sha256": "1565cd95208e89df77a7674d8b97c4de4fb15f70fff216091e3d2d5e6eb9f0d8"
+      },
+      {
+        "case": "laptop-1366x728",
+        "label": "AUTOMATED real window (primary display, OS scale as reported)",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1366x728",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1"
+        },
+        "exit_code": 0,
+        "passed": true,
+        "window_points": [
+          1366.0,
+          728.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": true,
+        "expected_right_dock": true,
+        "min_window": {
+          "monitor_points": [
+            1440.0,
+            900.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "expected_min_window": [
+          1280.0,
+          720.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          712.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          466.90625,
+          713.0,
+          597.09375,
+          11.0
+        ],
+        "screenshot_px": [
+          1366,
+          728
+        ],
+        "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/laptop-1366x728/workspace.png",
+        "screenshot_sha256": "515a446d9370ca66a62d479138bfc7250721919317fafc1cb2650a572e4a2d7c",
+        "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/laptop-1366x728/ui-receipt.json",
+        "receipt_sha256": "1ce189cb7ac327e56216eb1a470cb09c27f6eabd366d7cf7645d4fd26db1f52d"
+      },
+      {
+        "case": "wide-1440x720",
+        "label": "AUTOMATED real window (primary display, OS scale as reported)",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1440x720",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1"
+        },
+        "exit_code": 0,
+        "passed": true,
+        "window_points": [
+          1440.0,
+          720.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": true,
+        "expected_right_dock": true,
+        "min_window": {
+          "monitor_points": [
+            1440.0,
+            900.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "expected_min_window": [
+          1280.0,
+          720.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          704.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          540.90625,
+          705.0,
+          597.09375,
+          11.0
+        ],
+        "screenshot_px": [
+          1440,
+          720
+        ],
+        "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/wide-1440x720/workspace.png",
+        "screenshot_sha256": "cc0fb3b594276bc83b24d79448af2cf0f5eeabc974d152d7faf0ac392235e93f",
+        "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/wide-1440x720/ui-receipt.json",
+        "receipt_sha256": "650b60fbd46a0d942da81c0c1c8f32a738597ca7d0a40608560618919dfe7e5e"
+      },
+      {
+        "case": "display-1440x900",
+        "label": "AUTOMATED real window (primary display, OS scale as reported)",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1440x900",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1"
+        },
+        "exit_code": 0,
+        "passed": true,
+        "window_points": [
+          1440.0,
+          900.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": true,
+        "expected_right_dock": true,
+        "min_window": {
+          "monitor_points": [
+            1440.0,
+            900.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "expected_min_window": [
+          1280.0,
+          720.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          884.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          540.90625,
+          885.0,
+          597.09375,
+          11.0
+        ],
+        "screenshot_px": [
+          1440,
+          900
+        ],
+        "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/display-1440x900/workspace.png",
+        "screenshot_sha256": "a1981117f891c3ba242b20bdf0e5bc3b0e22bc0440c1708d497492ee135d9f2b",
+        "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/display-1440x900/ui-receipt.json",
+        "receipt_sha256": "a7cb7ece454577a803c1282bf05dd7d8ed3cbedd166013d42236928f01564f99"
+      },
+      {
+        "case": "tall-1280x900",
+        "label": "AUTOMATED real window (primary display, OS scale as reported)",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1280x900",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1"
+        },
+        "exit_code": 0,
+        "passed": true,
+        "window_points": [
+          1280.0,
+          900.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": true,
+        "expected_right_dock": true,
+        "min_window": {
+          "monitor_points": [
+            1440.0,
+            900.0
+          ],
+          "sent": [
+            1280.0,
+            720.0
+          ],
+          "source": "viewport"
+        },
+        "expected_min_window": [
+          1280.0,
+          720.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          884.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          380.90625,
+          885.0,
+          597.09375,
+          11.0
+        ],
+        "screenshot_px": [
+          1280,
+          900
+        ],
+        "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/tall-1280x900/workspace.png",
+        "screenshot_sha256": "8f6c0e87d7e8fdabf21dede614ae24d45bd9f7e84c5757f27dbd218683902981",
+        "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/tall-1280x900/ui-receipt.json",
+        "receipt_sha256": "208ed1a99780c048bd452b4c2434f96190e2306d779335ef110a88d89d2dba26"
+      },
+      {
+        "case": "lap100-1366x690",
+        "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1366x690",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1",
+          "OM9_UI_AUDIT_MONITOR": "1366x768"
+        },
+        "exit_code": 0,
+        "passed": true,
+        "window_points": [
+          1366.0,
+          690.0
+        ],
+        "pixels_per_point": 1.0,
+        "zoom_factor": 1.0,
+        "right_dock_shown": true,
+        "expected_right_dock": true,
+        "min_window": {
+          "monitor_points": [
+            1366.0,
+            768.0
+          ],
+          "sent": [
+            1280.0,
+            688.0
+          ],
+          "source": "audit-simulated"
+        },
+        "expected_min_window": [
+          1280.0,
+          688.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          674.0,
+          65.3125,
+          13.0
+        ],
+        "status_summary_px": [
+          466.90625,
+          675.0,
+          597.09375,
+          11.0
+        ],
+        "screenshot_px": [
+          1366,
+          690
+        ],
+        "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/lap100-1366x690/workspace.png",
+        "screenshot_sha256": "891a2e0de931c430f88ac4268688ef2d1ff46f0b0b6d96e900e740f64c02405b",
+        "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/lap100-1366x690/ui-receipt.json",
+        "receipt_sha256": "c64178d4c0a1786a742eb9e10da286dee07156efbb2d7bbbb6dbc6f98b74b49b"
+      },
+      {
+        "case": "lap125-1366x680",
+        "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1366x680",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1",
+          "OM9_UI_AUDIT_ZOOM": "1.25",
+          "OM9_UI_AUDIT_MONITOR": "1366x768"
+        },
+        "exit_code": 0,
+        "passed": true,
+        "window_points": [
+          1092.8125,
+          544.0
+        ],
+        "pixels_per_point": 1.25,
+        "zoom_factor": 1.25,
+        "right_dock_shown": false,
+        "expected_right_dock": false,
+        "min_window": {
+          "monitor_points": [
+            1092.800048828125,
+            614.4000244140625
+          ],
+          "sent": [
+            1076.800048828125,
+            534.4000244140625
+          ],
+          "source": "audit-simulated"
+        },
+        "expected_min_window": [
+          1076.8,
+          534.4
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.0,
+          528.09375,
+          251.9375,
+          12.8125
+        ],
+        "status_summary_px": [
+          557.0625,
+          528.90625,
+          489.1875,
+          11.1875
+        ],
+        "screenshot_px": [
+          1366,
+          680
+        ],
+        "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/lap125-1366x680/workspace.png",
+        "screenshot_sha256": "361530cece8be7d50c8d2ff87838a06513e741e3d70cb5bc06c6170aabe66730",
+        "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/lap125-1366x680/ui-receipt.json",
+        "receipt_sha256": "bd7577e80f8b85d1c27610e64710258cff5e11af21a4e5cb9e7048e96bbcb364"
+      },
+      {
+        "case": "lap150-1366x700",
+        "label": "SIMULATED/AUTOMATED - does not replace the human M01-UI sign-off",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1366x700",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1",
+          "OM9_UI_AUDIT_ZOOM": "1.5",
+          "OM9_UI_AUDIT_MONITOR": "1366x768"
+        },
+        "exit_code": 0,
+        "passed": true,
+        "window_points": [
+          910.65625,
+          466.65625
+        ],
+        "pixels_per_point": 1.5,
+        "zoom_factor": 1.5,
+        "right_dock_shown": false,
+        "expected_right_dock": false,
+        "min_window": {
+          "monitor_points": [
+            910.6666870117188,
+            512.0
+          ],
+          "sent": [
+            894.6666870117188,
+            432.0
+          ],
+          "source": "audit-simulated"
+        },
+        "expected_min_window": [
+          894.6666666666666,
+          432.0
+        ],
+        "status_text_overlap": false,
+        "status_message_px": [
+          302.375,
+          450.84375,
+          251.9375,
+          12.65625
+        ],
+        "status_summary_px": [
+          562.09375,
+          451.5,
+          302.0,
+          11.34375
+        ],
+        "screenshot_px": [
+          1366,
+          700
+        ],
+        "screenshot": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/lap150-1366x700/workspace.png",
+        "screenshot_sha256": "b86c731f6c306b218f62450b6333dcc6f400315373617ec343379878463ec819",
+        "receipt": "build/standalone-validation/ui-artifacts/2026-10-16-m01-l3-002-min-window/matrix/lap150-1366x700/ui-receipt.json",
+        "receipt_sha256": "9b0f5fd574f96db8e975705c1bf3c76832df38051a1553a66df9dad753cb1d8a"
+      },
+      {
+        "case": "unsupported-1000x600-startup-refused",
+        "label": "unsupported size, error path (real om9.exe, window below 1280x720)",
+        "env": {
+          "OM9_UI_AUDIT_WINDOW": "1000x600",
+          "OM9_UI_AUDIT_RIGHT_DOCK": "1",
+          "OM9_STARTUP_DIALOG": "0"
+        },
+        "exit_code": 1,
+        "passed": true,
+        "window_points": null,
+        "pixels_per_point": null,
+        "zoom_factor": null,
+        "right_dock_shown": null,
+        "expected_right_dock": null,
+        "min_window": null,
+        "expected_min_window": null,
+        "status_text_overlap": null,
+        "status_message_px": null,
+        "status_summary_px": null,
+        "screenshot_px": null,
+        "screenshot": null,
+        "screenshot_sha256": null,
+        "receipt": null,
+        "receipt_sha256": null
+      }
+    ],
+    "frame_test_only": [
+      {
+        "case": "just-below-os-minimum-719x479",
+        "covered_by": "workbench_regions_sizes::os_minimum_720x480_and_just_below_still_plan_and_startup_rejects_below"
+      },
+      {
+        "case": "plan-minimum-559x286-and-560x285",
+        "covered_by": "workbench_regions_sizes::one_pixel_below_the_minimum_is_a_visible_error_that_changes_nothing"
+      },
+      {
+        "case": "plan-minimum-560x286",
+        "covered_by": "workbench_regions_sizes::minimum_usable_size_560x286_is_valid"
+      },
+      {
+        "case": "dpi150-800x600 (533x400 pt)",
+        "covered_by": "workbench_regions_sizes::simulated_150_percent_of_800x600_is_below_the_minimum_in_points"
+      }
+    ],
+    "screenshots_viewed_by_agent": {
+      "min-720x480": "left rail, four small viewports, command input and toolbar present, no right dock; bottom status line elided with an ellipsis; no overlapping glyphs; toolbar tabs clipped at the right edge.",
+      "boundary-914x700": "no right dock; four wider viewports; status line shows the message and an elided summary without overlap.",
+      "boundary-915x700": "right dock with the Layers panel visible next to four narrower viewports; status line elided; no overlap.",
+      "ultrawide-2560x600": "left rail, four viewports, wide toolbar tab strip and Layers dock; full status text and summary readable on one line; left rail cut at the bottom (window height 600).",
+      "tall-narrow-720x1300": "no right dock; left rail shows all sections including Builders; four tall viewports; status line elided.",
+      "dpi150-1600x1000": "screenshot 1600x1000 px with text and widgets visibly larger than at 1.0; right dock shown; four viewports; status line elided with an ellipsis, no overlap. Simulated zoom only."
+    },
+    "findings": [
+      "Plan-versus-frame gap at heights below 311 px: the plan clamps the command panel to 58 px but egui draws the stored taller command panel (input line ends 28 px below the planned panel at 560x286). Unreachable in a real window (OS minimum 480 px). Region-plan behaviour left unchanged.",
+      "The egui command input line ends about 3 px below the plan command_input rectangle at normal sizes (frame margins); tolerated at 8 px as in tests/workbench_regions.rs.",
+      "Saving a document that contains a Line fails with Invalid(\"archive encoding verification\") in the archive encoder (Point saves fine). Found while driving save/reopen; unrelated to the regions and not fixed here.",
+      "Command-line hiding has no menu or mouse entry in ui.rs / ui/chrome.rs; it is proven only through the layout API."
+    ],
+    "window_minimum_frame_test": {
+      "file": "standalone/crates/om9-app/tests/window_minimum.rs",
+      "result": "5 passed, 0 failed",
+      "covers": "MinInnerSize on frame 0 for 2560x1440, 1920x1080, 1366x768 (1280x688), 1093x614 (1076.8x534.4), 911x512 (894.7x432) and an unknown monitor (1280x720); not re-sent on the same monitor; one new command when the monitor changes"
+    },
+    "superseded_note": "The earlier 10-case matrix (min-720x480 ... dpi150-1280x800, first dock width 915) is superseded by the 2026-10-16 minimum-window rule; its artifacts stay in the closeout folder as history."
+  },
+  "independent_recheck": {
+    "utc": "2026-10-16",
+    "by": "second session (same checkout, same commit)",
+    "logs": [
+      "recheck-2026-10-16.cargo-workbench-regions.log",
+      "recheck-2026-10-16.ui-matrix-summary.json"
+    ],
+    "result": "lib 24/24, integration 8/8, real-window matrix 14/14 all_passed"
+  }
+}

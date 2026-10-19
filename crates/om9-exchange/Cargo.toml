@@ -1,0 +1,16 @@
+[package]
+name = "om9-exchange"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+om9-core = { path = "../om9-core" }
+om9-archive = { path = "../om9-archive" }
+om9-native-owner = { path = "../om9-native-owner" }
+om9-scene = { path = "../om9-scene" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+uuid.workspace = true

@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-12-002",
+  "title": "Scene And Layer State Encoding",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "Entity/layer/visibility/lock/color/membership persistence with stable typed UUIDs and layer-order validation.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-core/src/model.rs:13-24",
+      "what": "Attributes layer/visible/hidden/selectable/locked/color"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:289-300",
+      "what": "Layer record"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:330-385",
+      "what": "Document tables and typed UUID map admission"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:505-546",
+      "what": "effective permissions compose layer and object flags"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:709-714",
+      "what": "entity layer must exist"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:1132-1142",
+      "what": "layer_order/current_layer consistency"
+    }
+  ],
+  "reuse_decision": "REUSE_IN_PLACE document model; container extension only.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-01-12/crosswalk.json"
+}

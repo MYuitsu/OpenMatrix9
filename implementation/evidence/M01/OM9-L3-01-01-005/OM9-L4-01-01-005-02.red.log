@@ -1,0 +1,35 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.96s
+     Running tests\dock_layout_persistence.rs (target\debug\deps\dock_layout_persistence-c0caec79a6c929cb.exe)
+
+running 6 tests
+test fixture_design_pair_is_present ... ok
+test m1_to_m13_a_file_that_cannot_be_honoured_is_repaired_with_a_warning ... FAILED
+test s4_a_session_without_a_kept_file_is_the_baseline ... ok
+test s3_a_kept_file_reopens_the_same_named_ids ... ok
+test s1_a_session_keeps_what_the_user_arranged ... FAILED
+test s2_a_written_file_is_a_fixed_point ... ok
+
+failures:
+
+---- m1_to_m13_a_file_that_cannot_be_honoured_is_repaired_with_a_warning stdout ----
+
+thread 'm1_to_m13_a_file_that_cannot_be_honoured_is_repaired_with_a_warning' (35112) panicked at crates\om9-app\tests\dock_layout_persistence.rs:300:68:
+M3-a-non-finite-panel-size-is-repaired-with-a-warning: Invalid("layout document")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- s1_a_session_keeps_what_the_user_arranged stdout ----
+
+thread 's1_a_session_keeps_what_the_user_arranged' (33180) panicked at crates\om9-app\tests\dock_layout_persistence.rs:160:5:
+assertion `left == right` failed
+  left: ["icon-history", "main-menu", "layers", "info-settings", "projects", "builder-slot"]
+ right: ["icon-history", "main-menu", "display", "layers", "projects", "builder-slot"]
+
+
+failures:
+    m1_to_m13_a_file_that_cannot_be_honoured_is_repaired_with_a_warning
+    s1_a_session_keeps_what_the_user_arranged
+
+test result: FAILED. 4 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p om9-app --test dock_layout_persistence`

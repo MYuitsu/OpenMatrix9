@@ -1,0 +1,14 @@
+# Reference material
+
+Source: OpenMatrix9 manuals split (text and images extracted from the PDF manuals).
+
+| Source | Pages | Section title | Text | Images | Confidence | Note |
+|---|---|---|---|---|---|---|
+| matrix8_book_1.pdf | 37-37 | Project Notes | [m8book1__p37-37__project-not.md](text/m8book1__p37-37__project-not.md) | [m8book1_p37_img01.png](images/m8book1_p37_img01.png) (shared page)<br>[m8book1_p37_img02.png](images/m8book1_p37_img02.png) (shared page)<br>[m8book1_p37_img03.png](images/m8book1_p37_img03.png) (shared page)<br>[m8book1_p24_img03.png](images/m8book1_p24_img03.png) (shared page) | high | stored here |
+| matrix8_book_1.pdf | 63-63 | Project Manager Database | [m8book1__p63-63__project-manager-database.md](../../reference/text/m8book1__p63-63__project-manager-database.md) | [m8book1_p63_img01.png](../../reference/images/m8book1_p63_img01.png) | high | shared at L2 reference |
+| matrix8_book_1.pdf | 64-66 | Project Manager Database | [m8book1__p64-66__project-manager-database.md](../../reference/text/m8book1__p64-66__project-manager-database.md) | [m8book1_p64_img01.png](../../reference/images/m8book1_p64_img01.png)<br>[m8book1_p64_img02.png](../../reference/images/m8book1_p64_img02.png)<br>[m8book1_p65_img01.png](../../reference/images/m8book1_p65_img01.png)<br>[m8book1_p65_img02.png](../../reference/images/m8book1_p65_img02.png)<br>[m8book1_p65_img03.png](../../reference/images/m8book1_p65_img03.png)<br>[m8book1_p66_img01.png](../../reference/images/m8book1_p66_img01.png)<br>[m8book1_p66_img02.png](../../reference/images/m8book1_p66_img02.png)<br>[m8book1_p66_img03.png](../../reference/images/m8book1_p66_img03.png) | high | shared at L2 reference |
+| matrix8_book_1.pdf | 93-93 | Notes ￼ | [m8book1__p93-93__notes.md](text/m8book1__p93-93__notes.md) | [m8book1_p93_img01.png](images/m8book1_p93_img01.png) (shared page) | high | stored here |
+| rhino5.pdf | 100-101 | Notes | [rhino5__p100-101__notes.md](text/rhino5__p100-101__notes.md) | [rhino5_p100_img01.png](images/rhino5_p100_img01.png) (shared page)<br>[rhino5_p100_img02.png](images/rhino5_p100_img02.png) (shared page)<br>[rhino5_p101_img01.png](images/rhino5_p101_img01.png) (shared page)<br>[rhino5_p101_img02.png](images/rhino5_p101_img02.png) (shared page) | low | stored here |
+
+## Usage
+Use these extracted manual sections as behavioural reference when implementing this function: read the linked text for the exact command behaviour, options and workflow, and open the linked images (screenshots, dialogs, icons) to match the expected UI and results. Rows marked 'shared at L2 reference' live once in the parent L2 reference folder and are linked here rather than copied. Higher-confidence rows are direct references; low or medium rows are background. Pages marked as shared may also contain content of the neighbouring section.

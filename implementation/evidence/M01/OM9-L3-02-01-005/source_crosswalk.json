@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-02-01-005",
+  "title": "Trimmed Vs Underlying Surface Model",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "Underlying NURBS surface plus outer/inner UV trim loops, persisted and never promoted to an untrimmed surface.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-core/src/rhino_semantics.rs:449-532",
+      "what": "TrimmedSurface, loop validation, extension helpers"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:100-111",
+      "what": "known extension slots"
+    },
+    {
+      "path_line": "crates/om9-core/src/model.rs:716",
+      "what": "document validation hook"
+    }
+  ],
+  "reuse_decision": "ADD authored trim record; REUSE entity extension persistence.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-02-01/crosswalk.json"
+}

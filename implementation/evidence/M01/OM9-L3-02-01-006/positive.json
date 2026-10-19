@@ -1,0 +1,28 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-02-01-006",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "boundary-edge",
+      "call": "BoundaryEdge::new(object, face UUID, edge UUID)",
+      "expect": {
+        "is_model_edge": true,
+        "is_pickable": true,
+        "is_display_only": false
+      }
+    },
+    {
+      "id": "isocurve",
+      "call": "DisplayIsocurve::from_surface(plane, U, 0.5)",
+      "expect": {
+        "is_display_only": true,
+        "is_model_edge": false,
+        "is_pickable": false,
+        "value": 0.5
+      }
+    }
+  ]
+}

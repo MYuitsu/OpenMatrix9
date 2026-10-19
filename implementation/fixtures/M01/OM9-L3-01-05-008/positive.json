@@ -1,0 +1,11 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-L3-01-05-008",
+  "cases": [
+    {
+      "id": "OM9-L3-01-05-008-POS",
+      "test": "the_tessellation_stays_on_the_exact_sphere",
+      "expected": "deviation <= deflection at 0.01 and 0.001, zero boundary edges (closed), positive triangle count"
+    }
+  ]
+}

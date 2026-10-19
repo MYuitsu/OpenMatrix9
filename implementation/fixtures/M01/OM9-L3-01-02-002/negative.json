@@ -1,0 +1,58 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-002",
+  "l4": "OM9-L4-01-02-002-02",
+  "case": "typed-command-descriptor-negative",
+  "negative_oracle": "Missing mandatory input or unregistered option rejected",
+  "cases": [
+    {
+      "id": "E1-a-mandatory-input-without-a-type-is-refused",
+      "operation": {
+        "id": "line",
+        "feature": "OM9-FEAT-001",
+        "prompt": "Start of line: ",
+        "input_types": [],
+        "requires_input": true,
+        "options": []
+      },
+      "expect": {
+        "error": "InvalidOperation",
+        "message_contains": ["a mandatory input has no declared type"]
+      }
+    },
+    {
+      "id": "E2-an-unregistered-option-is-refused-by-name",
+      "lookup": "Angle",
+      "expect": {
+        "error": "UnknownOption",
+        "message": "command 'line' has no option 'Angle'"
+      }
+    },
+    {
+      "id": "E3-a-descriptor-with-no-input-no-output-and-no-prompt-is-refused",
+      "operation": {
+        "id": "nothing",
+        "feature": "OM9-FEAT-002",
+        "input_types": [],
+        "requires_input": false,
+        "options": []
+      },
+      "expect": {
+        "error": "InvalidOperation",
+        "message_contains": ["declares no input, no output and no prompt"]
+      }
+    },
+    {
+      "id": "E4-an-empty-option-name-is-refused",
+      "operation": {
+        "id": "line",
+        "feature": "OM9-FEAT-001",
+        "prompt": "Start of line: ",
+        "input_types": ["Point"],
+        "requires_input": false,
+        "options": ["  "]
+      },
+      "expect": { "error": "InvalidOperation", "message_contains": ["an option is empty or repeated"] }
+    }
+  ]
+}

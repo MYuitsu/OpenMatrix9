@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3_id": "OM9-L3-01-12-003",
+  "kind": "positive",
+  "target": "standalone Rust OM9",
+  "expected_source": "authored from the l3/l4 oracles",
+  "cases": [
+    {
+      "id": "brep-roundtrip",
+      "expect": {
+        "variant": "Brep",
+        "source": "exact",
+        "faces": "same UUIDs",
+        "volume_mm3": 6000
+      }
+    },
+    {
+      "id": "real-occt-box",
+      "expect": {
+        "source_volume": 6000,
+        "object_id": "stable"
+      }
+    },
+    {
+      "id": "instance-link",
+      "expect": {
+        "geometry": "Instance(definition)",
+        "members": "preserved"
+      }
+    }
+  ]
+}

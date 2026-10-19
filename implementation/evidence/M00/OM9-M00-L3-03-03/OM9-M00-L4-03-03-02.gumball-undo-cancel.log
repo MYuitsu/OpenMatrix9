@@ -1,0 +1,37 @@
+# M00-L4-03-03-02 - Gumball drag undo/cancel
+# utc: 2026-10-17
+# method: danh gia duong da co (khong tao code san pham trong M00) + chay test san pham lam bang chung
+# source: crates/om9-core/src/gumball.rs (Session::begin/drag/reset/move_mutations/copy_mutations)
+#         crates/om9-scene/src/affine.rs (AffineGesture::begin/update/cancel/prepare)
+# commands: cargo test -p om9-core --test gumball ; cargo test -p om9-scene --test affine_gesture
+
+## Semantics
+- drag chi cong don trong Session; move_mutations tra Mutation::Placement -> mot buoc undo
+- copy_mutations tra Mutation::Insert voi ObjectId moi
+- AffineGesture::update chi preview; cancel tra scene ve nguyen trang, khong dung undo/redo; prepare -> PreparedTransaction
+
+## gumball tests
+test a_handle_refuses_the_wrong_kind_of_drag_input ... ok
+test a_plane_handle_drops_the_normal_component ... ok
+test a_polar_array_spreads_occurrences_around_the_frame_axis ... ok
+test a_rotated_frame_axis_drag_follows_its_axis ... ok
+test a_session_refuses_an_empty_duplicate_or_nil_target_set ... ok
+test arrays_refuse_impossible_counts_and_spacing ... ok
+test an_axis_handle_keeps_only_the_component_along_its_axis ... ok
+test a_session_composes_successive_drags_in_world_order ... ok
+test rotation_and_scale_refuse_bad_parameters ... ok
+test handle_codes_round_trip_like_the_legacy_wire ... ok
+test rotation_about_a_point_keeps_that_point_fixed ... ok
+test scaling_along_an_axis_keeps_the_other_axes_and_the_origin ... ok
+test a_rectangular_array_places_every_occurrence_on_the_frame_grid ... ok
+test a_copy_session_inserts_clones_with_fresh_identities ... ok
+test a_move_session_rewrites_placement_only_and_is_one_undo_step ... ok
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+## affine gesture tests
+test preview_and_pick_proxy_use_the_same_gesture_matrix ... ok
+test warm_affine_updates_reuse_buffers_and_cancel_keeps_geometry_and_undo ... ok
+test commit_updates_exact_placement_in_one_undo_and_redo ... ok
+test stale_gesture_is_rejected_without_touching_public_redo ... ok
+test unchanged_gesture_accepts_no_document_write_or_undo_and_keeps_redo ... ok
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

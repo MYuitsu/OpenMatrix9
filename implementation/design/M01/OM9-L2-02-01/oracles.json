@@ -1,0 +1,144 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "oracle_schema": "om9.m01.oracle.v1.5",
+  "oracle_schema_note": "No local definition of om9.m01.oracle.v1.5 exists; the string is carried as a compatibility field.",
+  "l2": "OM9-L2-02-01",
+  "target": "standalone Rust OM9",
+  "source": "Expected values are authored structural/analytic facts (kinds, counts, domains, loop areas, 10x20x30 box extents), not copied from program output.",
+  "status": "RUNTIME_DRIVEN_BY_TEST",
+  "l3": {
+    "OM9-L3-02-01-001": {
+      "positive": [
+        { "id": "point", "call": "geometry_semantic_kind(Geometry::Point)", "expect": { "kind": "Point" } },
+        { "id": "line", "call": "geometry_semantic_kind(Geometry::Curve(Line))", "expect": { "kind": "Line", "endpoints": "start/end" } },
+        { "id": "polyline", "call": "geometry_semantic_kind(curve_build::polyline(3 connected points))", "expect": { "kind": "Polyline" } },
+        { "id": "polycurve", "call": "two disconnected line segments", "expect": { "kind": "Polycurve" } }
+      ],
+      "negative": [
+        { "id": "exact-zero-line", "call": "Curve::Line start == end", "expect": { "error": "Invalid(degenerate line)" } },
+        { "id": "below-tolerance-line", "call": "classify_curve(0.0005 mm line, tolerance 0.001)", "expect": { "error": "Invalid(degenerate curve within tolerance)", "not inferred as": ["Point", "Polygon"] } }
+      ],
+      "proven_by": [
+        "crates/om9-core/tests/rhino_semantics.rs:83",
+        "crates/om9-core/tests/rhino_semantics.rs:134"
+      ]
+    },
+    "OM9-L3-02-01-002": {
+      "positive": [
+        { "id": "cubic", "call": "inspect_nurbs_curve(cubic, 4 poles)", "expect": { "degree": 3, "pole_count": 4, "weight_count": 4, "knot_count": 8, "expected_knot_count": 8, "rational": false } },
+        { "id": "rational", "call": "weights [1, 0.5, 0.5, 1]", "expect": { "rational": true } }
+      ],
+      "negative": [
+        { "id": "short-knot-vector", "call": "drop one knot", "expect": { "error": "Invalid(NURBS knots)" } },
+        { "id": "zero-weight", "call": "weights[1] = 0", "expect": { "error": "Invalid(supported positive rational weights)" } }
+      ],
+      "proven_by": ["crates/om9-core/tests/rhino_semantics.rs:156"]
+    },
+    "OM9-L3-02-01-003": {
+      "positive": [
+        { "id": "full-circle", "call": "classify_curve(circle, 1e-9)", "expect": { "closed": true, "planar": true } },
+        { "id": "open-spline", "call": "classify_curve(non-planar cubic)", "expect": { "closed": false, "planar": false } },
+        { "id": "near-closed-inside", "call": "0.0005 gap, tolerance 0.001", "expect": { "closed": true } }
+      ],
+      "negative": [
+        { "id": "near-closed-outside", "call": "0.0005 gap, tolerance 0.0001", "expect": { "closed": false } }
+      ],
+      "policy": "closed iff distance(sampled start, sampled end) <= stated tolerance; never raw equality",
+      "proven_by": ["crates/om9-core/tests/rhino_semantics.rs:191"]
+    },
+    "OM9-L3-02-01-004": {
+      "positive": [
+        { "id": "plane", "call": "classify_surface(plane)", "expect": { "domain": [[0.0, 1.0], [0.0, 1.0]], "periodic": [false, false], "seam": [null, null] } },
+        { "id": "closed-cylinder", "call": "classify_surface(cylinder)", "expect": { "periodic": [false, false], "seam": [0.0, null] } },
+        { "id": "periodic-u", "call": "unclamped U knots + periodic [true,false]", "expect": { "periodic": [true, false], "seam": [0.25, null], "domain": [[0.25, 1.0], [0.0, 1.0]] } }
+      ],
+      "negative": [
+        { "id": "periodic-flag-missing", "call": "unclamped knots + periodic false", "expect": { "error": "Invalid(surface periodic flag missing)" } },
+        { "id": "periodic-flag-mismatch", "call": "clamped knots + periodic true", "expect": { "error": "Invalid(surface periodic flag mismatch)" } },
+        { "id": "u-v-swapped", "call": "require_orientation expected [false,true]", "expect": { "error": "Invalid(surface U/V orientation)" } }
+      ],
+      "proven_by": ["crates/om9-core/tests/rhino_semantics.rs:242"]
+    },
+    "OM9-L3-02-01-005": {
+      "positive": [
+        { "id": "trim-record", "call": "TrimmedSurface(plane, outer 4 pts, inner 3 pts)", "expect": { "is_trimmed": true, "underlying.domain": [[0,1],[0,1]] } },
+        { "id": "entity-kind", "call": "entity with Geometry::Surface + om9.trim.surface", "expect": { "kind": "TrimmedSurface" } },
+        { "id": "save-open", "call": "Archive::save/open", "expect": { "trim record equal": true, "kind": "TrimmedSurface" } }
+      ],
+      "negative": [
+        { "id": "promote-untrimmed", "call": "to_untrimmed()", "expect": { "error": "Unsupported(trimmed surface cannot be promoted to an untrimmed surface)" } },
+        { "id": "loop-outside-domain", "call": "outer U = 2.0", "expect": { "error": "Invalid(trim loop outside surface domain)" } },
+        { "id": "inner-outside-outer", "call": "inner at (0.05,0.05) with outer [0.2,0.8]", "expect": { "error": "Invalid(trim inner loop outside outer loop)" } },
+        { "id": "damaged-payload", "call": "archive metadata with 2-point outer loop", "expect": { "error": "Invalid(trim outer loop)", "publication": false } }
+      ],
+      "proven_by": [
+        "crates/om9-core/tests/rhino_semantics.rs:328",
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:62",
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:139"
+      ]
+    },
+    "OM9-L3-02-01-006": {
+      "positive": [
+        { "id": "boundary-edge", "call": "BoundaryEdge::new(object, face UUID, edge UUID)", "expect": { "is_model_edge": true, "is_pickable": true, "is_display_only": false } },
+        { "id": "isocurve", "call": "DisplayIsocurve::from_surface(plane, U, 0.5)", "expect": { "is_display_only": true, "is_model_edge": false, "is_pickable": false, "value": 0.5 } }
+      ],
+      "negative": [
+        { "id": "isocurve-as-geometry", "call": "to_geometry()", "expect": { "error": "Unsupported(isocurve is display-only)" } },
+        { "id": "nil-edge", "call": "BoundaryEdge::new with nil UUID", "expect": { "error": "Invalid(boundary edge identity)" } }
+      ],
+      "proven_by": ["crates/om9-core/tests/rhino_semantics.rs:391"]
+    },
+    "OM9-L3-02-01-007": {
+      "positive": [
+        { "id": "closed-cube", "call": "classify_shell(cube, all shells closed, kind Solid)", "expect": { "class": "Solid" } },
+        { "id": "open-polysurface", "call": "5-face open shell", "expect": { "class": "Polysurface" } },
+        { "id": "single-face", "call": "one-face open shell", "expect": { "class": "Surface" } }
+      ],
+      "negative": [
+        { "id": "open-claims-solid", "call": "kind Solid with shell.closed = false", "expect": { "error": "Invalid(open shell is not a solid)" } },
+        { "id": "self-overlap", "call": "two distinct-index faces over the same four corners", "expect": { "error": "Invalid(self-overlapping shell)" } }
+      ],
+      "proven_by": ["crates/om9-core/tests/rhino_semantics.rs:523"]
+    },
+    "OM9-L3-02-01-008": {
+      "positive": [
+        { "id": "convert", "call": "Extrusion(10x20 rectangle, +Z, 30, capped).convert()", "expect": { "class": "Solid", "vertices": 8, "faces": 6, "extents": [[0,0,0],[10,20,30]] } },
+        { "id": "provenance", "call": "ExtrusionConversion.source", "expect": { "equals original": true } },
+        { "id": "save-open", "call": "entity with om9.extrusion roundtrip", "expect": { "kind": "Extrusion", "convert after reload": true } }
+      ],
+      "negative": [
+        { "id": "open-profile", "call": "open polyline profile", "expect": { "error": "Invalid(extrusion profile must be closed)" } },
+        { "id": "zero-height", "call": "height = 0", "expect": { "error": "Invalid(extrusion height)" } },
+        { "id": "zero-direction", "call": "direction = [0,0,0]", "expect": { "error": "Invalid(extrusion direction)" } }
+      ],
+      "proven_by": [
+        "crates/om9-core/tests/rhino_semantics.rs:611",
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:101"
+      ]
+    },
+    "OM9-L3-02-01-009": {
+      "positive": [
+        { "id": "mesh-kind", "call": "geometry_semantic_kind(Geometry::Mesh(cube))", "expect": { "kind": "Mesh", "exact": false } },
+        { "id": "brep-kind", "call": "geometry_semantic_kind(Geometry::Brep(box))", "expect": { "kind": "Brep", "exact": true } }
+      ],
+      "negative": [
+        { "id": "mesh-as-nurbs", "call": "require_exact_nurbs(mesh)", "expect": { "error": "Unsupported(mesh is not exact NURBS)" } },
+        { "id": "after-codec", "call": "mesh entity save/open", "expect": { "kind still Mesh": true, "exact": false } }
+      ],
+      "proven_by": [
+        "crates/om9-core/tests/rhino_semantics.rs:756",
+        "crates/om9-archive/tests/rhino_semantics_persistence.rs:165"
+      ]
+    },
+    "OM9-L3-02-01-010": {
+      "positive": [
+        { "id": "two-occurrences", "call": "block_instances(document, definition)", "expect": { "count": 2, "shared definition": true, "distinct object ids": true, "distinct transforms": true } },
+        { "id": "move-one", "call": "set_instance_transform(first, [5,2,1])", "expect": { "definition unchanged": true, "sibling transform unchanged": true } }
+      ],
+      "negative": [
+        { "id": "unknown-definition", "call": "block_instances(random DefinitionId)", "expect": { "error": "Missing(instance definition)" } }
+      ],
+      "proven_by": ["crates/om9-core/tests/rhino_semantics.rs:774"]
+    }
+  }
+}

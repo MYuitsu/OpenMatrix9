@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-12-001",
+  "title": "Native Project Container Format",
+  "audited_utc": "2026-10-19",
+  "target": "standalone Rust OM9",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "scope": "Versioned schema-4 container: magic, exact schema, chunk table, document metadata manifest and deterministic encoding.",
+  "symbols": [
+    {
+      "path_line": "crates/om9-archive/src/container.rs:14-15",
+      "what": "MAGIC and VERSION=4"
+    },
+    {
+      "path_line": "crates/om9-archive/src/container.rs:44-120",
+      "what": "encode: validate, bounded JSON, header/manifest fields, resource chunks"
+    },
+    {
+      "path_line": "crates/om9-archive/src/container.rs:156-176",
+      "what": "decode: magic and exact schema match, no implicit migration"
+    },
+    {
+      "path_line": "crates/om9-archive/src/container.rs:241-267",
+      "what": "duplicate IDs, flags and SHA-256 chunk checksums"
+    }
+  ],
+  "reuse_decision": "ADD authored OM9 container; pinned qcad project_file.rs read as architecture reference only, no code copied.",
+  "upstream_code_copied": false,
+  "qymcad_role": "Pinned source read for architecture only; no build-time dependency and no copied code.",
+  "design_record": "implementation/design/M01/OM9-L2-01-12/crosswalk.json"
+}

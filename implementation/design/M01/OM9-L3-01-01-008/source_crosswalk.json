@@ -1,0 +1,80 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-01-008-01",
+  "l3_id": "OM9-L3-01-01-008",
+  "l3_title": "Builder Panel Docking Slot",
+  "owner_module_id": "OM9-L2-01-01",
+  "milestone": "M01",
+  "goal": "reserved dock area under Project Manager",
+  "positive_oracle": "Reserve Builder docking slot below Projects without creating a second Builder model",
+  "negative_oracle": "Absent Builder implementation shows noninteractive placeholder",
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "vendor-research/QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "checkout_note": "As recorded for OM9-L3-01-01-004: the pinned revision is verified in vendor-research/QymCAD; QymCAD/ is not a git checkout here.",
+  "method": "git rev-parse HEAD + git status in the pinned checkout, then bounded file reads with line numbers. Decisions are OM9-owned; no upstream code is copied.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "lines": 130,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { Menu, Top, Left, Right, Bottom, Centre }",
+        "qymcad-shell/src/lib.rs:59 pub struct Place { key, slot, size, resizable, framed, separator }",
+        "qymcad-shell/src/lib.rs:113 pub fn put(&mut self, p: Place)"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A keyed place in a strip (the 'reserved area' idea). The shell has no notion of a RESERVED place: nothing stops a workbench from moving, hiding or filling it, and there is no placeholder concept.",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs (SectionId::BuilderSlot, is_reserved) + ui/chrome.rs::builder_slot_ui"
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "lines": 2419,
+      "observed_symbols": [
+        "gui.rs:118 comment: only the nodes that depend on a datum are marked dirty — the document is not the interface",
+        "gui.rs:347 BarAsk::WidthPick => self.start_width_pick()",
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE",
+        "gui.rs:448 comment: carry out what the properties panel asked for, after it has drawn"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "QymCAD has real builders that own real state. OM9 M01 must reserve the AREA while M04 owns the builders, so the placeholder has to come from the layout model rather than from a builder object.",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs + ui/chrome.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "lines": 1913,
+      "observed_symbols": ["ui-state/src/lib.rs:87 pub fn cmd_val", "ui-state/src/lib.rs:95 pub fn set_thread_params"],
+      "decision": "ADD",
+      "what_is_missing": "Feature parameter state, not interface placement.",
+      "om9_owner": "standalone/crates/om9-app/src/dock_layout.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "lines": 67,
+      "observed_symbols": ["qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "standalone/crates/om9-app/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "dock_layout.rs: SectionId::BuilderSlot in ALL at index 7 (directly below Projects), is_reserved()",
+    "panel_ops.rs::apply_panel_op refuses every operation on a reserved section with NotPermitted",
+    "ui/chrome.rs::section draws no close box and starts no drag on a reserved bar (OM9-L3-01-01-003 NIT 7 / N21)",
+    "ui/chrome.rs::builder_slot_ui draws the placeholder with disabled widgets only"
+  ],
+  "gap_found_by_this_task": [
+    "normalize() repaired a layout document for every section except the reserved one: a file could set builder-slot.dock = right/floating, order 0, or visible = false, and the reservation was broken after a reopen. The item forces the reserved section back to the documented left slot with a diagnostic."
+  ],
+  "reuse_decision": "ADAPT the keyed-place idea from qymcad-shell; ADD the reservation (a section no operation may move) and the placeholder that needs no builder model.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-01-01-008/positive.json",
+    "implementation/fixtures/M01/OM9-L3-01-01-008/negative.json",
+    "standalone/crates/om9-app/tests/builder_slot.rs"
+  ]
+}

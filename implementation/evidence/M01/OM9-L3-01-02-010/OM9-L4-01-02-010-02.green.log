@@ -1,0 +1,13 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\standalone\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.70s
+     Running tests\command_events_surface.rs (target\debug\deps\command_events_surface-51963efe137cb09d.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... ok
+test z2_a_cancelled_run_finishes_with_the_cancel_outcome ... ok
+test z3_and_z4_the_order_is_total_and_the_log_is_bounded ... ok
+test z1_a_run_reports_its_steps_in_order ... ok
+test aa1_to_aa4_a_broken_observer_cannot_touch_the_run ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

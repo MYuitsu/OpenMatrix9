@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-008",
+  "l4": "OM9-L4-01-02-008-02",
+  "case": "command-cancel-rollback-positive",
+  "positive_oracle": "Preview geometry canceled with Escape restores document and no undo entry",
+  "cases": [
+    {
+      "id": "X1-a-preview-exists-while-the-command-runs",
+      "expect": {
+        "preview_during": true,
+        "preview_is_start_to_cursor": true
+      }
+    },
+    {
+      "id": "X2-escape-drops-the-preview-and-writes-nothing",
+      "expect": {
+        "preview_after": null,
+        "entities_unchanged": true,
+        "undo_unchanged": true,
+        "running": false
+      }
+    },
+    {
+      "id": "X3-the-document-is-untouched-by-the-cancelled-run",
+      "expect": {
+        "entities": 0,
+        "undo_entries": 0,
+        "redo_entries": 0
+      }
+    }
+  ]
+}

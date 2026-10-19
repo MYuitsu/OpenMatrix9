@@ -1,0 +1,250 @@
+{
+  "date": "2026-10-19T01:34:05.810373+00:00",
+  "module": "OM9-L2-01-07",
+  "scope": "rotation feedback overdraw correction",
+  "checks": [
+    {
+      "name": "rotation-feedback",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "--lib",
+        "ui::rotation_feedback",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 2,
+      "seconds": 8.233,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/rotation-feedback.log",
+      "log_sha256": "ca0db6801a1a61155b5219760550baa3215a9cc4a03ef665c8d3b9a8b3a6f802"
+    },
+    {
+      "name": "interaction-regressions",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "--test",
+        "gumball_interaction",
+        "--test",
+        "gumball_viewport",
+        "--test",
+        "selection_overlay",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 16,
+      "seconds": 16.069,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/interaction-regressions.log",
+      "log_sha256": "7678ad0b08ffbcbc41a5be928f27d523d2a34bf28dd092466455e0146593c169"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 6.715,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/clippy.log",
+      "log_sha256": "0fe075e68d6801a4f0d0424c818cd2714a4f43025f193ef39163eb73649b866f"
+    },
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "build",
+        "-p",
+        "om9-app",
+        "--features",
+        "gpu-sphere",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 0.423,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/build.log",
+      "log_sha256": "b2c020f27a01faabb96e5d55c11fd219cf7c484c9cf34b3342bfc8444d934c89"
+    },
+    {
+      "name": "native-gpu-100",
+      "command": [
+        "python",
+        "tools/validate_m02_selection.py",
+        "--gpu",
+        "--output",
+        "build/standalone-validation/ui-artifacts/m02-rotation-20261019-gpu-100"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 10.918,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/native-gpu-100.log",
+      "log_sha256": "0d8662afd0929a69b03a59400a59fb47d992a9c264321e1f900f7c8035119126"
+    },
+    {
+      "name": "native-gpu-150",
+      "command": [
+        "python",
+        "tools/validate_m02_selection.py",
+        "--gpu",
+        "--zoom",
+        "1.5",
+        "--output",
+        "build/standalone-validation/ui-artifacts/m02-rotation-20261019-gpu-150"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 13.398,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/native-gpu-150.log",
+      "log_sha256": "7a839141ac3de7eb9a5ee7f5d11833750e8af764a6e5ee8aaeae2ef0a1d5f890"
+    },
+    {
+      "name": "native-cpu-100",
+      "command": [
+        "python",
+        "tools/validate_m02_selection.py",
+        "--output",
+        "build/standalone-validation/ui-artifacts/m02-rotation-20261019-cpu-100"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 8.351,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/native-cpu-100.log",
+      "log_sha256": "0401b4c95cdae1c2139e6fdeac8f45f8112b540ac78d0df6cdf3d20d293e83d1"
+    },
+    {
+      "name": "public-source-audit",
+      "command": [
+        "python",
+        "tools/public_source_audit.py"
+      ],
+      "exit_code": 1,
+      "passed_tests": 0,
+      "seconds": 2.364,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/public-source-audit.log",
+      "log_sha256": "33efcefdca1792f3d7bc6ef6821866b5ceb6533fe9185a9217797eb6be710b57",
+      "existing_findings": 11735
+    },
+    {
+      "name": "default-build",
+      "command": [
+        "cargo",
+        "build",
+        "-p",
+        "om9-app",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 16.106,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/default-build.log",
+      "log_sha256": "43e2f6605f273d83d5bdb0abb7489d10bd7d48e072b8d98d020358d319e7b9d4"
+    },
+    {
+      "name": "native-default-cpu-100",
+      "command": [
+        "python",
+        "tools/validate_m02_selection.py",
+        "--output",
+        "build/standalone-validation/ui-artifacts/m02-rotation-20261019-default-cpu-100"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "seconds": 9.918,
+      "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/native-default-cpu-100.log",
+      "log_sha256": "01de73dcb1ca3979220c1280db28a9ff757a3bb3a55cea83c66deebe77858b3f"
+    }
+  ],
+  "previous_attempts": [
+    [
+      {
+        "name": "rotation-feedback",
+        "command": [
+          "cargo",
+          "test",
+          "-p",
+          "om9-app",
+          "--features",
+          "gpu-sphere",
+          "--lib",
+          "ui::rotation_feedback",
+          "-j",
+          "2"
+        ],
+        "exit_code": 0,
+        "passed_tests": 2,
+        "seconds": 24.642,
+        "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/attempt-1-rotation-feedback.log",
+        "log_sha256": "c46e73f0a8edb1bc2fe0343d8147d22feff74fd7b828812557101140af547347"
+      },
+      {
+        "name": "interaction-regressions",
+        "command": [
+          "cargo",
+          "test",
+          "-p",
+          "om9-app",
+          "--features",
+          "gpu-sphere",
+          "--test",
+          "gumball_interaction",
+          "--test",
+          "gumball_viewport",
+          "--test",
+          "selection_overlay",
+          "-j",
+          "2"
+        ],
+        "exit_code": 0,
+        "passed_tests": 16,
+        "seconds": 20.449,
+        "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/attempt-1-interaction-regressions.log",
+        "log_sha256": "92ef4a133fa5b753afff51757a122ec600752a8ce15f88e90933b04ad60b779d"
+      },
+      {
+        "name": "clippy",
+        "command": [
+          "cargo",
+          "clippy",
+          "-p",
+          "om9-app",
+          "--features",
+          "gpu-sphere",
+          "--all-targets",
+          "-j",
+          "2",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit_code": 101,
+        "passed_tests": 0,
+        "seconds": 1.907,
+        "log": "build/standalone-validation/ui-artifacts/m02-rotation-20261019-checks/attempt-1-clippy.log",
+        "log_sha256": "92d5fde9b903384caac9af416efb1e105d95f86571d340fac40a78802a01104f"
+      }
+    ]
+  ]
+}

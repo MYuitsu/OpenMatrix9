@@ -1,3 +1,6 @@
+> **Current target: specs v2 (2026-10-13).** [OM9-HISTORY-001](../../OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-history-001-history-workflow.md) · [OM9-INFO-015](../../OpenMatrix9_Codex_Spec_v2/specs/01-core/om9-info-015-rhino-history.md) · [OM9-TOOLS-017](../../OpenMatrix9_Codex_Spec_v2/specs/09-tools/om9-tools-017-join-history.md)
+> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+
 # Native History contract — 2026-10-09
 
 Applies to OM9-HISTORY-001, OM9-TOOLS-017 and OM9-INFO-015..018.

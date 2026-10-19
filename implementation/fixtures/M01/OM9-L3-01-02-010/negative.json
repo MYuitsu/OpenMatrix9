@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-01-02-010",
+  "l4": "OM9-L4-01-02-010-02",
+  "case": "command-event-and-observer-negative",
+  "negative_oracle": "Observer panic/exception handled without corrupting dispatch transaction",
+  "cases": [
+    {
+      "id": "AA1-a-panicking-observer-does-not-reach-the-run",
+      "expect": {
+        "survivors": 1,
+        "log_unchanged": true,
+        "document_unchanged": true
+      }
+    },
+    {
+      "id": "AA2-the-transaction-still-commits-after-a-panicking-observer",
+      "expect": {
+        "entities": 1,
+        "undo_entries": 1
+      }
+    },
+    {
+      "id": "AA3-a-refused-command-adds-no-event",
+      "action": "zero-length line",
+      "expect": {
+        "events_unchanged": true,
+        "phase": "AwaitEnd"
+      }
+    },
+    {
+      "id": "AA4-an-event-without-a-run-is-not-invented",
+      "action": "warn with no command running",
+      "expect": {
+        "events_unchanged": true
+      }
+    }
+  ]
+}

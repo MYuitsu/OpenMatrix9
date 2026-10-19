@@ -1,0 +1,19 @@
+# M00-L4-03-01-02 - Bon viewport va chia se scene
+# utc: 2026-10-17
+
+## L4-03-01-02 — 4 viewport và chia sẻ scene
+
+| Sự thật | Bằng chứng |
+| --- | --- |
+| Dock layout có 4 viewport với công thức rõ ràng: rail trái/phải 300, gap 2 → mỗi viewport `(W−602)/2` | `crates/om9-app/src/dock_layout.rs:91-93` |
+| Rail trái có miền `240..=460` (assert compile-time `LEFT_RAIL_MAX == 460`) | `dock_layout.rs:41,46,1155` |
+| Mỗi view có `ViewState` riêng, gom theo `ViewId` | `ui.rs:326` `viewport_views: Option<BTreeMap<ViewId, ViewState>>` |
+| Camera tách khỏi scene: `Viewport`, `Camera`, `Projection` (Ortho/Perspective) | `crates/om9-scene/src/camera.rs:41,62` |
+| Scene **một** store chia sẻ: `Scene::capture`, `revalidate`, `pick`, cache | `crates/om9-scene/src/scene.rs:112,727,805` |
+| Có audit riêng cho viewport | `crates/om9-app/src/viewport_audit.rs` |
+
+**Kết luận:** mô hình "một scene + nhiều camera/viewport" **đã có** và hợp lý cho 4 view. Điều còn thiếu
+là đường render GPU cho từng view (xem L4-03-01-01): hiện scene là dữ liệu CPU (`SceneObject`, pick
+geometry, cache) chứ chưa phải buffer GPU.
+
+

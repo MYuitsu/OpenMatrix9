@@ -1,0 +1,53 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-03-009-01",
+  "l3_id": "OM9-L3-01-03-009",
+  "l3_title": "Jewelry Semantic Extension Record",
+  "owner_module_id": "OM9-L2-01-03",
+  "milestone": "M01",
+  "stage": "E01",
+  "gate": "AUTO_ONLY",
+  "goal": "metadata slots for gems, rails, heads and cutters",
+  "positive_oracle": "Slot om9.gem giữ ObjectId/generation, chỉ tăng attributes_revision; payload giữ nguyên văn bản.",
+  "negative_oracle": "Slot lạ được giữ và báo cáo; payload sai/version 0/tên slot trần bị từ chối.",
+  "reuse_decision": "ADD",
+  "method": "No QymCAD or OCCT source is copied for this L3. The document model, its records, the transaction mutations and the tests are OM9-owned Rust; the audit below names the exact existing OM9 symbols this L3 extends, so REUSE vs ADD is checkable against the checkout without an upstream fork. The planning record's QymCAD anchors belong to other modules (viewport/render); they are not used here.",
+  "verified_utc": "2026-10-17",
+  "existing_om9_symbols": [
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "symbols": [
+        "Extension",
+        "Extension::new",
+        "slot_name_valid",
+        "extension_slot_known",
+        "Entity.extensions",
+        "Entity::extension",
+        "Document::extension",
+        "Document::unknown_extension_slots"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-core/src/transaction.rs",
+      "symbols": [
+        "Mutation::Extension",
+        "extension slot validation"
+      ],
+      "decision": "ADD"
+    },
+    {
+      "path": "crates/om9-archive/src/json_admission.rs",
+      "symbols": [
+        "legacy_new_field (Document->groups|features, Entity->extensions)"
+      ],
+      "decision": "EXTEND"
+    }
+  ],
+  "om9_owner": "crates/om9-core/src/{model,transaction}.rs",
+  "runtime_tests": [
+    "cargo test -p om9-core --test document_graph l3_009 -> 6 passed",
+    "cargo test -p om9-archive --test document_identity_round_trip -> 4 passed"
+  ],
+  "notes": "ADD the versioned named-slot record; EXTEND Entity and the mutation set"
+}

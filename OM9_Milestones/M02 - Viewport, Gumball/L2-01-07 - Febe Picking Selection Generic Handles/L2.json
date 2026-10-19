@@ -1,0 +1,126 @@
+{
+  "level": "L2",
+  "id": "OM9-L2-01-07",
+  "milestone": "M02",
+  "title": "Febe Picking Selection Generic Handles",
+  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "scope": "Picking object/face/edge/vertex, selection set, gizmo hooks và hover hit-tests.",
+  "definition": {
+    "module_id": "OM9-L2-01-07",
+    "milestone_id": "M02",
+    "tag": "febe",
+    "delivery": "mainline",
+    "original_l1": "01-cad-base",
+    "scope": "Picking object/face/edge/vertex, selection set, gizmo hooks và hover hit-tests.",
+    "exclude": "Không tự tạo F6/Matrix Gumball UI hoặc Clayoo sub-object modes.",
+    "manual_references": [
+      {
+        "manual_id": "book1",
+        "filename": "matrix8_book_1.pdf",
+        "printed_pages": [
+          12,
+          16
+        ],
+        "pdf_pages_1based": [
+          22,
+          26
+        ]
+      },
+      {
+        "manual_id": "rhino5",
+        "filename": "windows_pdf_user_s_guide (1).pdf",
+        "printed_pages": [
+          25,
+          30
+        ],
+        "pdf_pages_1based": [
+          33,
+          38
+        ]
+      }
+    ],
+    "dependencies": [
+      "OM9-L2-01-03",
+      "OM9-L2-01-06"
+    ],
+    "downstream_contracts": [
+      "picking-and-selection-engine"
+    ],
+    "early_slices": [],
+    "manual_test_required": true,
+    "acceptance_gate": "M02-UI",
+    "l3_count": 8
+  },
+  "children_l3": [
+    {
+      "id": "OM9-L3-01-07-001",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-001 - Screen Ray And Hit Test Query/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-07-002",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-002 - Object Selection Set Core/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-07-003",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-003 - Subobject Face Edge Vertex Picking/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-07-004",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-004 - Selection Window And Crossing/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-07-005",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-005 - Object Selection Disambiguation/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-07-006",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-006 - Selection Highlighting And Hover/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-07-007",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-007 - Generic Translation Rotation Scale Handles/l3.json"
+    },
+    {
+      "id": "OM9-L3-01-07-008",
+      "file": "M02 - Viewport, Gumball/L2-01-07 - Febe Picking Selection Generic Handles/L3-008 - Drag Transaction And Commit Cancel/l3.json"
+    }
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-19",
+    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "target": "standalone Rust OM9",
+    "evidence": [
+      "implementation/evidence/M02/2026-10-19-selection-video-review.md",
+      "implementation/evidence/M02/2026-10-19-native-selection.json",
+      "implementation/evidence/M02/2026-10-19-selection-checks.json",
+      "implementation/evidence/M02/2026-10-19-occurrence-selection.md",
+      "implementation/evidence/M02/2026-10-19-occurrence-native.json",
+      "implementation/evidence/M02/2026-10-19-occurrence-checks.json",
+      "implementation/evidence/M02/2026-10-19-brep-selection.md",
+      "implementation/evidence/M02/2026-10-19-brep-checks.json",
+      "implementation/evidence/M02/2026-10-19-brep-native.json",
+      "implementation/evidence/M02/2026-10-19-rotation-feedback.md",
+      "implementation/evidence/M02/2026-10-19-rotation-feedback-checks.json",
+      "implementation/evidence/M02/2026-10-19-rotation-feedback-native.json"
+    ],
+    "l3_with_verified_supported_scope": 8,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "human_approval": null,
+    "remaining": [
+      "M02-UI external review; QymCAD pinned-source audit is not certified (no reuse)"
+    ],
+    "occurrence_path_subselection": "VALIDATED",
+    "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
+    "native_brep_selection": "VALIDATED_SOURCE_BOUND_UUID_TOPOLOGY",
+    "technical_scope_complete": true,
+    "rotation_feedback_overdraw": "CORRECTED_AND_AUTOMATED_TARGET_VALIDATED",
+    "desktop_viewport_backend": "GPU_ONLY",
+    "gpu_only_evidence": [
+      "implementation/evidence/M02/2026-10-19-gpu-only.md",
+      "implementation/evidence/M02/2026-10-19-gpu-only-checks.json",
+      "implementation/evidence/M02/2026-10-19-gpu-only-native.json"
+    ],
+    "software_fallback": false
+  }
+}

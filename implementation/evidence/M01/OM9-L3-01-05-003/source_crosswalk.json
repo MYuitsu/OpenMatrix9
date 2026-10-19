@@ -1,0 +1,35 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-05-003",
+  "entries": [
+    {
+      "l4": "OM9-L4-01-05-003-01",
+      "capability": "NURBS curve evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-003/",
+      "test": "the_rational_nurbs_quarter_circle_evaluates_exactly"
+    },
+    {
+      "l4": "OM9-L4-01-05-003-02",
+      "capability": "NURBS curve evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-003/",
+      "test": "the_rational_nurbs_quarter_circle_evaluates_exactly"
+    },
+    {
+      "l4": "OM9-L4-01-05-003-03",
+      "capability": "NURBS curve evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-003/",
+      "test": "the_rational_nurbs_quarter_circle_evaluates_exactly"
+    },
+    {
+      "l4": "OM9-L4-01-05-003-05",
+      "capability": "NURBS curve evaluation adapter",
+      "evidence": "implementation/evidence/M01/OM9-L3-01-05-003/",
+      "test": "the_rational_nurbs_quarter_circle_evaluates_exactly"
+    }
+  ],
+  "kernel": {
+    "name": "opencascade",
+    "version": "8.0.1",
+    "pin": "native/occt/pin.json"
+  }
+}

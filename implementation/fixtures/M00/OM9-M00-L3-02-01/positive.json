@@ -1,0 +1,24 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-02-01",
+  "kernel": { "name": "opencascade", "version": "8.0.1", "pin": "native/occt/pin.json" },
+  "cases": [
+    {
+      "id": "M00-FX-02-01-POS-01",
+      "call": "box_volume",
+      "input": { "width": 10.0, "height": 10.0, "depth": 4.0 },
+      "expected": { "volume": 400.0, "tolerance": 1e-9 }
+    },
+    {
+      "id": "M00-FX-02-01-POS-02",
+      "call": "drilled_volume",
+      "input": { "width": 10.0, "height": 10.0, "depth": 4.0, "radius": 2.0 },
+      "expected": { "volume": 349.7345175425633, "tolerance": 1e-6, "formula": "400 - pi*2^2*4" }
+    },
+    {
+      "id": "M00-FX-02-01-POS-03",
+      "call": "version",
+      "expected": { "prefix": "8.0." }
+    }
+  ]
+}

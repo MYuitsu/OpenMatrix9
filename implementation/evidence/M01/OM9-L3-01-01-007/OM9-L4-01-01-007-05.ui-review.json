@@ -1,0 +1,84 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-01-01-007-05",
+  "l3_id": "OM9-L3-01-01-007",
+  "title": "Global Status And Error Surface",
+  "oracle": {
+    "positive": "Invalid command/OCCT diagnostic visible in status, not lost in console",
+    "negative": "Error popup cannot swallow escape/cancel state or dismiss silently"
+  },
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) running the app on Windows",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-app --test global_status_surface -> 9 passed; 1 failed. The one product defect: an unknown command was reported as 'unsupported unknown/unavailable command' without naming what the user typed.",
+    "GREEN: cargo test -p om9-app --test global_status_surface -> 10 passed; 0 failed (G1..G10 visible/retrievable, X1..X6 no swallowed state)",
+    "cargo test -p om9-app --lib: 83 passed",
+    "cargo test --workspace -j 2: every group ok; cargo check --workspace --all-targets: exit 0",
+    "cargo fmt --check: exit 0; cargo clippy --workspace --all-targets -- -D warnings: exit 0",
+    "real window: om9.exe --ui-audit writes a receipt carrying status_kind, status_message and status_tail (OM9-L4-01-01-007-04.integration.log); L3-002 size matrix 14/14 PASS; L3-003 panel scenarios 7/7 PASS"
+  ],
+  "code_change": [
+    "ui.rs::submit_draft: an unknown command is now reported as 'unknown command: <what was typed>' in both the status line and the command history, instead of the generic refusal that did not name it.",
+    "ui/chrome.rs::status_bar_ui: hovering the status line lists the recent messages (the bounded tail), so a diagnostic the user did not read when it appeared is still reachable.",
+    "ui.rs::dock_receipt: the receipt carries status_kind, status_message and status_tail, so an evaluator can check the surface after the fact."
+  ],
+  "artefacts": [
+    "OM9-L4-01-01-007-02.red.log",
+    "OM9-L4-01-01-007-02.green.log",
+    "OM9-L4-01-01-007-03.diffstat.txt",
+    "OM9-L4-01-01-007-03.target-test.log",
+    "OM9-L4-01-01-007-04.integration.log",
+    "OM9-L4-01-01-007-05.regression.log"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The lifetime and the Esc behaviour are machine-proven; how the line and its hover read on screen is the owner's call.",
+    "items": [
+      {
+        "id": "S1",
+        "step": "Type a command the program does not have (for example NotACommand) and press Enter.",
+        "machine_proven": "G1: the line reads 'Error: unknown command: NotACommand', the same text is in the history, and the tail carries it.",
+        "human_must_verify": "The red-ish error line names the command you typed, and you can find the same line by scrolling the command history.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "S2",
+        "step": "After that failure, run a command that works (for example Line).",
+        "machine_proven": "G2: the failure stays; complete_success refuses while a failure is unacknowledged.",
+        "human_must_verify": "The error line is still there after the successful command, and Dismiss is the only thing that clears it.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "S3",
+        "step": "Hover the status line after a few messages have gone by.",
+        "machine_proven": "G9/G10: the tail keeps the last eight messages, oldest first, and a second failure keeps the first.",
+        "human_must_verify": "The hover lists the recent messages, so a warning you missed is still readable.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "S4",
+        "step": "With a failure on the line, start a command (for example Line) and press Escape.",
+        "machine_proven": "X1/X2: Escape still cancels the command and does not dismiss the failure.",
+        "human_must_verify": "Escape cancels the command, the failure stays, and no dialog appears that traps the keyboard.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "S5",
+        "step": "Repeat the invalid command with a very long line, and with a warning-producing action (for example a floating menu that has to be pulled back inside).",
+        "machine_proven": "G5/G7: a warning is visible without becoming a failure; a long diagnostic is cut at 512 bytes on a character boundary.",
+        "human_must_verify": "Nothing overflows the status bar, the text stays readable and the summary on the right is still elided sensibly.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_ui_l3_007_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "oracle_schema": "om9.m01.oracle.v1.5",
+  "oracle_schema_note": "no local definition of om9.m01.oracle.v1.5 exists in this repository; the string is carried as a field only",
+  "l2": "OM9-L2-01-08",
+  "source": "authored for the OM9 standalone backend from the l3.json positive/negative oracles; every expected value is hand-derived (unit factors from geometry.rs:46-55, IEEE-754 doubles), NOT copied from program output",
+  "non_finite_tokens": "JSON cannot carry NaN/inf; the strings \"NaN\", \"inf\", \"-inf\" stand for those f64 values",
+  "status": "RUNTIME_DRIVEN_BY_TEST (to be split into implementation/fixtures/M01/<L3>/positive.json|negative.json at L4-02 if the loop prefers per-L3 files)",
+  "l3": {
+    "OM9-L3-01-08-001": {
+      "positive": [
+        { "id": "length-2.5mm", "call": "LengthMm::try_new(2.5)", "expect": { "ok": true, "mm": 2.5, "json": "{\"mm\":2.5}", "reload_equal": true } },
+        { "id": "inch-to-mm", "call": "LengthMm::from_unit(2.0, Unit::Inch)", "expect": { "ok": true, "mm": 50.8 } },
+        { "id": "parse-suffix", "call": "LengthMm::parse(\"0.5 cm\", Unit::Millimeter)", "expect": { "ok": true, "mm": 5.0 } },
+        { "id": "parse-default-unit", "call": "LengthMm::parse(\"2\", Unit::Inch)", "expect": { "ok": true, "mm": 50.8 } }
+      ],
+      "negative": [
+        { "id": "nan", "call": "LengthMm::try_new(\"NaN\")", "expect": { "error": "UnitError::NonFinite" } },
+        { "id": "inf", "call": "LengthMm::try_new(\"inf\")", "expect": { "error": "UnitError::NonFinite" } },
+        { "id": "overflow-conversion", "call": "LengthMm::from_unit(f64::MAX, Unit::Inch)", "expect": { "error": "UnitError::NonFinite" } },
+        { "id": "unsupported-unit", "call": "Unit::parse(\"yd\")", "expect": { "error": "UnitError::UnsupportedUnit", "core_error": "Error::Unsupported" } },
+        { "id": "bare-json", "call": "serde_json::from_str::<LengthMm>(\"2.5\")", "expect": { "error": "deserialize" } },
+        { "id": "document-unchanged", "call": "Mutation::Insert with Point built from a NaN LengthMm is impossible; CMD 'NaN,0,0' during Point", "expect": { "error": "Invalid(\"length conversion\")", "coordinator_snapshot_unchanged": true } }
+      ]
+    },
+    "OM9-L3-01-08-002": {
+      "positive": [
+        { "id": "180deg-is-pi", "call": "AngleDeg::try_new(180.0)?.to_radians().rad()", "expect": { "near": 3.141592653589793, "abs_tol": 8.9e-16 } },
+        { "id": "pi-back-to-180", "call": "AngleRad::try_new(PI)?.to_degrees()?.deg()", "expect": { "near": 180.0, "abs_tol": 1e-12 } },
+        { "id": "parse-deg", "call": "AngleDeg::parse(\"90deg\")", "expect": { "deg": 90.0 } },
+        { "id": "parse-rad-explicit", "call": "AngleDeg::parse(\"3.141592653589793rad\")", "expect": { "near": 180.0, "abs_tol": 1e-12 } },
+        { "id": "json-tag", "call": "serde_json::to_string(&AngleDeg::try_new(45.0)?)", "expect": { "json": "{\"deg\":45.0}" } }
+      ],
+      "negative": [
+        { "id": "nan", "call": "AngleDeg::try_new(\"NaN\")", "expect": { "error": "UnitError::NonFinite" } },
+        { "id": "very-large", "call": "AngleDeg::try_new(1.0e7)", "expect": { "error": "UnitError::OutOfRange", "limit": 1.0e6 } },
+        { "id": "radians-labelled-as-degrees", "call": "serde_json::from_str::<AngleDeg>(\"{\\\"rad\\\":1.5707963267948966}\")", "expect": { "error": "deserialize (unknown field rad)" } },
+        { "id": "unknown-angle-unit", "call": "AngleDeg::parse(\"90grad\")", "expect": { "error": "UnitError::UnsupportedUnit" } }
+      ]
+    },
+    "OM9-L3-01-08-003": {
+      "positive": [
+        { "id": "set-document-tolerance", "call": "commit Mutation::Tolerance { tolerance: Tolerance::try_new(0.001, 1e-6, 0.0174532925199433)? }", "expect": { "undo_len_delta": 1, "revision_delta": 1, "effective_tolerance.absolute_mm": 0.001, "effective_tolerance.relative": 1e-6, "context_revision_delta": 0 } },
+        { "id": "undo-restores-unset", "call": "undo()", "expect": { "effective_tolerance": "Err(Missing(\"document tolerance\"))" } },
+        { "id": "feature-above-tolerance", "call": "t.admit_feature(LengthMm::try_new(0.002)?)", "expect": { "ok": true } }
+      ],
+      "negative": [
+        { "id": "zero-absolute", "call": "Tolerance::try_new(0.0, 1e-6, 0.0)", "expect": { "error": "Invalid(\"absolute tolerance\")" } },
+        { "id": "negative-absolute", "call": "Tolerance::try_new(-0.001, 1e-6, 0.0)", "expect": { "error": "Invalid(\"absolute tolerance\")" } },
+        { "id": "negative-relative", "call": "Tolerance::try_new(0.001, -1e-6, 0.0)", "expect": { "error": "Invalid(\"relative tolerance\")" } },
+        { "id": "nan-angular", "call": "Tolerance::try_new(0.001, 0.0, \"NaN\")", "expect": { "error": "Invalid(\"angular tolerance\")" } },
+        { "id": "invalid-in-mutation", "call": "prepare Mutation::Tolerance with Tolerance {absolute_mm: 0.0, ..} built by struct literal", "expect": { "error": "Invalid(\"effective tolerance\")", "coordinator_snapshot_unchanged": true } },
+        { "id": "stale-revision", "call": "prepare Mutation::Tolerance { expected_revision: revision - 1 }", "expect": { "error": "Stale(\"document tolerance revision\")", "coordinator_snapshot_unchanged": true } },
+        { "id": "feature-at-or-below-tolerance", "call": "t.admit_feature(LengthMm::try_new(0.001)?)", "expect": { "error": "Invalid(\"feature at or below document absolute tolerance\")" } },
+        { "id": "kernel-pass-through", "status": "NEEDS_USER_M00_DECISION (OCCT not approved; OM9-L2-01-05 absent)", "expect": "only Document::effective_tolerance() is asserted" }
+      ]
+    },
+    "OM9-L3-01-08-004": {
+      "positive": [
+        { "id": "four-kinds", "call": "Value::length(1.2mm), Value::angle(90deg), Value::count(3), Value::ratio(0.5)", "expect": { "as_length": 1.2, "as_angle": 90.0, "as_count": 3, "as_ratio": 0.5, "pairwise_distinct": true } }
+      ],
+      "negative": [
+        { "id": "angle-into-length", "call": "Value::angle(90deg).as_length()", "expect": { "error": "UnitError::WrongDimension" } },
+        { "id": "count-2.5", "call": "OptionDomain::Number{dimension: Count, ..}.check(&Value::Quantity{value: 2.5, dimension: Count})", "expect": { "error": "Invalid(\"numeric option domain\")" } },
+        { "id": "bare-number-for-length", "call": "OptionDomain::Number{dimension: Length, ..}.check(&Value::Number(1.2))", "expect": { "error": "Invalid(\"option unit/dimension\")" } },
+        { "id": "before-mutation", "call": "request::admit with Count=2.5 option", "expect": { "error": true, "world_unchanged": true } }
+      ]
+    },
+    "OM9-L3-01-08-005": {
+      "positive": [
+        { "id": "step-5.5", "domain": { "dimension": "Length", "min": 1, "min_inclusive": true, "max": 10, "step": 0.5 }, "value_mm": 5.5, "expect": { "ok": true } },
+        { "id": "endpoints", "domain": { "dimension": "Length", "min": 1, "min_inclusive": true, "max": 10, "step": 0.5 }, "values_mm": [1, 10], "expect": { "ok": true } }
+      ],
+      "negative": [
+        { "id": "below-min", "value_mm": 0, "expect": { "error": "Invalid(\"numeric option domain\")" } },
+        { "id": "above-max", "value_mm": 11, "expect": { "error": "Invalid(\"numeric option domain\")" } },
+        { "id": "nan", "value_mm": "NaN", "expect": { "error": "Invalid(\"numeric option domain\")" } },
+        { "id": "off-step", "value_mm": 5.25, "expect": { "error": "Invalid(\"numeric option step\")" } },
+        { "id": "step-zero", "domain": { "step": 0 }, "call": "OptionDomain::validate", "expect": { "error": "Invalid(\"numeric option domain\")" } },
+        { "id": "min-greater-than-max", "domain": { "min": 10, "max": 1 }, "call": "OptionDomain::validate", "expect": { "error": "Invalid(\"numeric option domain\")" } },
+        { "id": "state-unchanged", "call": "request::admit with an invalid domain or value", "expect": { "world_validate_equal_before_after": true } }
+      ]
+    },
+    "OM9-L3-01-08-006": {
+      "positive": [
+        { "id": "line-save", "document": "Curve::Line {start [0,0,0], end [12,6,0], domain [0, 12f64.hypot(6.)]}", "call": "Archive::save + Archive::open", "expect": { "ok": true, "reopened_entity_equal": true, "domain_end_bits": "12f64.hypot(6.).to_bits()" } },
+        { "id": "params-roundtrip", "recipe_parameters": { "Length": { "mm": 1.234 }, "Angle": { "deg": 45 } }, "call": "Archive::encode/decode of a Detached recipe carrying Value::length(1.234mm) and Value::angle(45deg)", "expect": { "kind_preserved": true, "value_bits_equal": true } },
+        { "id": "computed-length-json", "call": "serde_json round-trip of Value::length(LengthMm::try_new(12f64.hypot(6.)))", "expect": { "bits_equal": true } }
+      ],
+      "negative": [
+        { "id": "missing-unit", "json": "{\"Number\": 1.234}", "call": "decode Value then OptionDomain::Number{Length}.check", "expect": { "error": "Invalid(\"option unit/dimension\")" } },
+        { "id": "missing-page-unit", "call": "decode archive metadata without page_unit", "expect": { "error": "Invalid(\"typed document metadata/schema\")" } },
+        { "id": "wrong-version", "call": "decode container with version 5", "expect": { "error": "Unsupported(\"OM9 schema version; no implicit migration\")" } }
+      ]
+    },
+    "OM9-L3-01-08-007": {
+      "positive": [
+        { "id": "world-identity", "call": "resolve(World(WorldPoint(1,2,3)), None)", "expect": { "xyz": [1, 2, 3] } },
+        { "id": "local-two-frames", "frames": { "world_xy": "CPlane::world_xy()", "shifted": "CPlane::new([10,20,30],[0,1,0],[0,0,1])" }, "call": "resolve(Local(LocalPoint(1,2,3)), Some(frame))", "expect": { "world_xy": [1, 2, 3], "shifted": [13, 21, 32] } },
+        { "id": "to-local-inverse", "call": "shifted.to_local(shifted.to_world(LocalPoint(1,2,3))?)", "expect": { "near": [1, 2, 3], "abs_tol": 1e-12 } },
+        { "id": "parse-inch", "call": "parse_local(\"1,2\", Unit::Inch)", "expect": { "xyz": [25.4, 50.8, 0] } }
+      ],
+      "negative": [
+        { "id": "local-without-frame", "call": "resolve(Local(LocalPoint(1,2,3)), None)", "expect": { "error": "Missing(\"coordinate frame\")" } },
+        { "id": "one-component", "call": "parse_local(\"1\", Unit::Millimeter)", "expect": { "error": "Invalid(\"x,y[,z] coordinate\")" } },
+        { "id": "not-a-number", "call": "parse_local(\"1,a\", Unit::Millimeter)", "expect": { "error": "Invalid(\"coordinate number\")" } },
+        { "id": "nan-token", "call": "parse_local(\"NaN,0\", Unit::Millimeter)", "expect": { "error": "Invalid(\"length conversion\")" } },
+        { "id": "nonfinite-world", "call": "WorldPoint::try_new([inf,0,0])", "expect": { "error": "Invalid(\"nonfinite coordinate\")" } }
+      ]
+    }
+  }
+}

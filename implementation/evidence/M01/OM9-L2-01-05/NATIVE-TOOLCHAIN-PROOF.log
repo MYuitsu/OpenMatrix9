@@ -1,0 +1,14 @@
+# OM9-L2-01-05 native toolchain proof
+# utc: 2026-10-17
+# kernel: openNURBS (McNeel)
+# pin: eb92af3ba1806b0a34a99aba0d3bda83e3d46083
+# upstream: https://github.com/mcneel/opennurbs
+# license: build/standalone-deps/opennurbs/LICENSE (notice: Resources/licenses/openNURBS.txt)
+# cmake: cmake version 4.3.1
+# msvc: 14.44.35207 (Visual Studio 2022)
+# configure: cmake -S build/native-brep -B build/native-brep/out -G "Visual Studio 17 2022" -A x64 (exit 0)
+# build: cmake --build build/native-brep/out --config Release --parallel 2 (exit 0)
+# run: build/native-brep/out/Release/om9-brep-probe.exe
+# run exit: 0
+
+{"box_made": true, "box_vertices": 8, "box_edges": 12, "box_trims": 24, "box_loops": 6, "box_faces": 6, "face_loop_edges": 4, "face_loop_closed": true, "nurbs_curve_valid": true, "nurbs_curve_degree": 2, "nurbs_curve_cvs": 9, "curve_start": [2, 0, 0], "curve_mid": [0, 2, 0], "curve_end": [2, 0, 0], "face_evaluated": true, "face_point": [0.5, 0, 0.5], "translated_point": [1, 2, 8], "rotated_point": [0, 1, 0], "box_transformed": true, "box_min_z": 5, "box_max_z": 9, "curve_surface_intersection_api": false, "brep_mesher_available": false, "plane_mesh_vertices": 4, "plane_mesh_faces": 1, "sphere_made": true, "sphere_faces": 1, "status": "ok", "kernel": "opennurbs"}

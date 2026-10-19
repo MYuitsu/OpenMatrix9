@@ -1,0 +1,154 @@
+{
+  "schema": "om9.m01.module_crosswalk.v1",
+  "l2_id": "OM9-L2-01-08",
+  "l2_title": "Be Units Tolerances Basic Parameters",
+  "milestone": "M01",
+  "audited_utc": "2026-10-16",
+  "workspace": "h:/OpenMatrix9/standalone",
+  "repo_head": "b5a15dae9ece3ba4a01e7c26fe60b051c9837e2a",
+  "working_tree_note": "Line numbers are 1-based on the working tree at audit time. om9-app/src/{ui.rs,ui/chrome.rs,dock_layout.rs,startup.rs,workbench_regions.rs} carry uncommitted edits by a concurrent UI workflow; om9-core, om9-archive and om9-scene are clean, so their line numbers are stable.",
+  "spec_package": "OpenMatrix9_Codex_Spec_v2/ is ABSENT in this checkout (Test-Path false). The planning tree OM9_Milestones/M01 (L2.json, l3.json, l4.json) and the root AGENTS.md summary are the only local specification sources; nothing was invented to replace the missing package.",
+  "m00_scope": "User clarification 2026-10-16: M00 approval covers ONLY QymCAD code reuse. OCCT, UI, 3DM, Associative, License and Reproducible are NOT approved. Items that need one of them are marked NEEDS_USER_M00_DECISION; the coder stops and asks (send_message severity 'warning') instead of proceeding.",
+  "status_vocabulary": {
+    "DONE_WITH_EVIDENCE": "code exists at the owner AND existing automated tests prove both the positive and the negative oracle",
+    "PARTIAL": "owner code exists; the listed gaps are missing. PARTIAL(test-only) means only a proving test is missing",
+    "MISSING": "no owner code for the capability"
+  },
+  "counts": { "DONE_WITH_EVIDENCE": 0, "PARTIAL": 6, "MISSING": 1 },
+  "owner_crates": ["om9-core (units, tolerance, parameters, coordinates)", "om9-scene (CPlane frame adapter only)", "om9-app/src/session.rs (CMD numeric input caller only)"],
+  "l3": [
+    {
+      "id": "OM9-L3-01-08-001",
+      "title": "Millimeter World Unit Model",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/geometry.rs:37-63 enum Unit {Millimeter, Centimeter, Meter, Inch, Foot, Micrometer}; Unit::factor; Unit::length_to_mm rejects a non-finite RESULT",
+        "om9-core/src/model.rs:183 Document::new sets page_unit = Unit::Millimeter; Document.page_unit is a required serde field (no default)",
+        "om9-core/src/history.rs:124-126 Recipe::validate rejects environment.length_unit != Millimeter ('canonical recipe lengths')",
+        "om9-core/src/geometry.rs:227 NurbsCurve::convert_lengths validates all conversions before mutating",
+        "om9-app/src/session.rs:318-330 CMD 'x,y[,z]' text converts each coordinate with s.unit.length_to_mm",
+        "TEST om9-core/tests/model_admission.rs:270 unit_conversion_changes_lengths_without_scaling_dimensionless_basis",
+        "TEST om9-app/tests/command_sessions.rs:60 numeric_cmd_points_use_page_units_and_captured_cplane_exactly_once"
+      ],
+      "gaps": [
+        "No typed canonical length: lengths are raw f64; there is no LengthMm::try_new(f64) -> Result<LengthMm, UnitError>. NaN input is only rejected by accident (NaN * factor is non-finite).",
+        "No Unit::parse(token) and no typed UnsupportedUnit error for an unknown unit token.",
+        "'2.5 mm serializes and reloads exactly' is untested, and arbitrary computed lengths do NOT reload exactly (see OM9-L3-01-08-006 root cause)."
+      ],
+      "m00": "none (pure Rust types)",
+      "reuse": "REUSE_IN_PLACE Unit/factor; ADD om9-core/src/units.rs (LengthMm, UnitError)"
+    },
+    {
+      "id": "OM9-L3-01-08-002",
+      "title": "Angle Conversion And Degrees",
+      "status": "MISSING",
+      "evidence": [
+        "Only ad-hoc radians exist: om9-scene/src/workspace.rs:115 35f64.to_radians() for the perspective camera; om9-core/src/history.rs:20 Tolerance.angular_rad; om9-core/src/geometry.rs:304 Circle.angle_domain (radians)",
+        "om9-core/src/request.rs:17-22 Dimension::Angle exists but no unit convention (degrees vs radians) is defined for its value"
+      ],
+      "gaps": [
+        "No AngleDeg / AngleRad types, no degree<->radian conversion owner, no bound for very large angles, no rejection of radians mislabeled as degrees."
+      ],
+      "m00": "none",
+      "reuse": "ADD om9-core/src/units.rs (AngleDeg, AngleRad)"
+    },
+    {
+      "id": "OM9-L3-01-08-003",
+      "title": "Document Absolute Relative Tolerances",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/history.rs:14-31 struct Tolerance {absolute_mm, relative, angular_rad}; validate() requires finite, >= 0 and absolute_mm != 0",
+        "om9-core/src/history.rs:33-43 ReplayEnvironment.tolerance (per recipe, not per document)",
+        "om9-core/src/retained.rs:43-53 NativeUnits.{absolute_tolerance, relative_tolerance, angular_tolerance_radians} keep imported SOURCE-space tolerances only",
+        "TEST om9-core/tests/history_replay.rs:49-55 recipes carry Tolerance {absolute_mm: 0.001, relative: 1e-6}"
+      ],
+      "gaps": [
+        "No per-document tolerance field on Document (model.rs:129-168), no accessor, no undoable mutation.",
+        "No Tolerance::try_new constructor; no check that a feature size at or below the absolute tolerance is refused.",
+        "No pass-through from the document to the kernel/replay environment.",
+        "No archive legacy guard for a new 'tolerance' key (om9-archive/src/json_admission.rs:50-55)."
+      ],
+      "m00": "NEEDS_USER_M00_DECISION for two sub-items: (a) persisting Document.tolerance adds a key to the .om9 metadata = archive format decision; (b) kernel pass-through targets OCCT (not approved and OM9-L2-01-05 absent). The in-memory type, constructor, feature check, mutation and accessor need no decision and are implemented first.",
+      "reuse": "EXTEND history::Tolerance (single tolerance type); EXTEND Document + transaction::Mutation"
+    },
+    {
+      "id": "OM9-L3-01-08-004",
+      "title": "Typed Numeric Parameter Values",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/request.rs:17-30 enum Dimension {Length, Angle, Ratio, Count}; enum Value {Number, Quantity{value, dimension}, Choice, Boolean, Text}",
+        "om9-core/src/request.rs:368-399 option(): Quantity of another dimension is refused; Count must be integral and >= 0",
+        "TEST om9-core/tests/source_binding.rs:160 numeric_option_domain_and_dimension_are_explicit (NaN, exclusive 0 and Angle-for-Length rejected)"
+      ],
+      "gaps": [
+        "A bare Value::Number is admitted for ANY dimensioned domain (request.rs:380) - a unit-less number is silently taken as mm/deg.",
+        "No typed constructors/accessors tying Value to LengthMm/AngleDeg/Count/Ratio.",
+        "'Count = 2.5 rejected before mutation' has code (request.rs:390) but no test."
+      ],
+      "m00": "none",
+      "reuse": "EXTEND request::Value (it IS the typed parameter enum; no second ParamValue type)"
+    },
+    {
+      "id": "OM9-L3-01-08-005",
+      "title": "Builder Parameter Range Validation",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/request.rs:65-72 OptionDomain::Number {dimension, min, min_inclusive, max}",
+        "om9-core/src/request.rs:386-391 finite, min/max and exclusive-min checks",
+        "TEST om9-core/tests/source_binding.rs:160 (NaN and exclusive minimum)"
+      ],
+      "gaps": [
+        "No step/increment in OptionDomain::Number; step = 0 cannot even be expressed.",
+        "No validation of the domain itself (min > max, non-finite bounds are only caught per value, step <= 0).",
+        "No public check entry point for a builder (option() is private); max-exceeded case untested."
+      ],
+      "m00": "none",
+      "reuse": "EXTEND request::OptionDomain"
+    },
+    {
+      "id": "OM9-L3-01-08-006",
+      "title": "Unit Safe Parameter Serialization",
+      "status": "PARTIAL",
+      "evidence": [
+        "Value::Quantity serializes its dimension (request.rs:24-30); Document.page_unit is required, so a document without a unit is rejected",
+        "om9-archive/src/container.rs:158-166 explicit schema version check ('no implicit migration')",
+        "TEST om9-archive/tests/container_admission.rs:74 checksum_truncation_version_and_trailing_payload_corruption_reject",
+        "TEST om9-archive/tests/container_admission.rs:170 unknown_fields_and_missing_required_metadata_do_not_migrate_implicitly"
+      ],
+      "gaps": [
+        "ROOT CAUSE of the known Line-save failure: the workspace pins serde_json =1.0.150 with default features only (standalone/Cargo.toml:13; target/*/.fingerprint/serde_json-*: features [default, std]). Without 'float_roundtrip' the parser is best-effort: a scratch probe with the same pinned crate gave 13.416407864998739 (hypot(12,6), the domain end of the Line 0,0,0 -> 12,6,0) -> '13.416407864998739' -> 13.41640786499874, and 15461 of 199999 sampled f64 values did not round-trip. atomic_file.rs:75 then fails 'archive encoding verification'. Point 1,2,3 saves because its values are exact integers.",
+        "No round-trip test for Length/Angle parameter values or for an arbitrary computed length.",
+        "Bare Number for a dimensioned parameter is not refused (same gap as L3-004)."
+      ],
+      "m00": "No M00 decision: the fix changes only how the reader parses floats; the writer (shortest round-trip text) and therefore the .om9 bytes and schema are unchanged, and no crate version or Cargo.lock entry changes. GUARD: if any existing golden byte/fingerprint test changes after the feature flag, the coder stops and asks (archive format / Reproducible are not approved).",
+      "reuse": "Manifest feature fix (one line) + EXTEND request.rs; tests in om9-core and om9-archive"
+    },
+    {
+      "id": "OM9-L3-01-08-007",
+      "title": "Coordinate Numeric Input Primitives",
+      "status": "PARTIAL",
+      "evidence": [
+        "om9-core/src/geometry.rs:9-17 type Point3 = [f64; 3]; finite()",
+        "om9-scene/src/camera.rs:83-136 CPlane {origin, x, y, revision}; CPlane::point(local) -> world (validated orthonormal frame)",
+        "om9-app/src/session.rs:318-330 private 'x,y[,z]' parser; converts with page unit then s.plane.point(p)",
+        "TEST om9-scene/tests/camera_grid.rs:64 cplane_coordinate_resolution_is_independent_from_camera_navigation",
+        "TEST om9-app/tests/command_sessions.rs:60 numeric points use page units and the captured CPlane exactly once"
+      ],
+      "gaps": [
+        "No typed WorldPoint / LocalPoint; local and world points are both raw [f64; 3], so nothing prevents treating a local value as world without a frame.",
+        "The numeric coordinate parser is private to om9-app; there is no reusable primitive in the unit owner."
+      ],
+      "m00": "none",
+      "reuse": "ADD om9-core/src/coords.rs; ADAPT om9-scene CPlane (impl LocalFrame); session.rs delegates (behavior-preserving)"
+    }
+  ],
+  "qymcad": {
+    "consulted": false,
+    "reason": "The L3 anchors (crates/qymcad-core/src/model.rs, qymcad-io/src/units.rs) were not needed: OM9 already owns Unit/Tolerance/Value and the gaps are small typed wrappers. No QymCAD text is copied and no build dependency is added."
+  },
+  "line_save_bug": {
+    "verdict": "Not an OM9-L2-01-02 transaction or OM9-L2-01-03 snapshot defect. Owner of the codec is OM9-L2-01-12 (native project codec); the defect is the serde_json parser configuration it relies on. Because OM9-L3-01-08-006 ('serializes and reloads exactly') and OM9-L3-01-03-012 (restore reproduces geometry) both require exact f64 round-trips, the one-line fix is scheduled as the FIRST item of the OM9-L2-01-08 loop. No archive logic changes.",
+    "fix": "standalone/Cargo.toml [workspace.dependencies] serde_json = { version = \"=1.0.150\", features = [\"float_roundtrip\"] }",
+    "red_test": "om9-archive/tests/float_roundtrip.rs: Archive::save of a Document holding Curve::Line {start [0,0,0], end [12,6,0], domain [0, 12f64.hypot(6.)]} returns Err(Invalid(\"archive encoding verification\")) before the fix and Ok after; reopened entity equals the saved one bit-for-bit"
+  }
+}

@@ -1,0 +1,19 @@
+rejected as expected: min-1280x720 / Layers placed before Info & Settings (order) -> left_sections is
+rejected as expected: min-1280x720 / default mode with a visible right dock -> in default mode
+rejected as expected: min-1280x720 / sidebar scrolled -> sidebar_scroll_offset
+rejected as expected: min-1280x720 / wrong icon edge -> left_icon_edge_px
+rejected as expected: rail460-1280x720 / wrong icon edge at rail 460 -> left_icon_edge_px
+rejected as expected: min-1280x720 / wrong mode label -> audit.mode_label
+rejected as expected: min-1280x720 / wrong layout mode -> audit.layout_mode
+rejected as expected: rail240-1280x720 / wrong outer width -> left_rail_outer_px
+rejected as expected: min-1280x720 / icons outside the sidebar -> left_icon_rects_in_sidebar
+rejected as expected: min-1280x720 / spurious CMD error text -> cmd contains 'unsupported'
+rejected as expected: min-1280x720 / missing CMD focus check -> audit CMD focus ready
+rejected as expected: udr-1280x720 / udr Layers as the user-docked fixture (fixture check) -> right_sections is
+SELF-TEST FAIL doctored receipt ACCEPTED or wrong problem: min-1280x720 / Layers moved to right_sections: expected 'layers in right_sections', got ["left_sections is ['icon-history', 'main-menu', 'display', 'snaps', 'info-settings', 'projects', 'builder-slot'], expected ['icon-history', 'main-menu', 'display', 'snaps', 'info-settings', 'layers', 'projects', 'builder-slot']", "right_sections is ['layers'] in default mode, expected empty"]
+SELF-TEST FAIL doctored receipt ACCEPTED or wrong problem: min-1280x720 / Layers removed from left: expected 'layers missing from left_sections', got ["left_sections is ['icon-history', 'main-menu', 'display', 'snaps', 'info-settings', 'projects', 'builder-slot'], expected ['icon-history', 'main-menu', 'display', 'snaps', 'info-settings', 'layers', 'projects', 'builder-slot']"]
+SELF-TEST FAIL doctored receipt ACCEPTED or wrong problem: min-1280x720 / Layers placed before Info & Settings: expected 'layers title bar is not between info-settings and projects', got ["left_sections is ['icon-history', 'main-menu', 'display', 'snaps', 'layers', 'info-settings', 'projects', 'builder-slot'], expected ['icon-history', 'main-menu', 'display', 'snaps', 'info-settings', 'layers', 'projects', 'builder-slot']"]
+SELF-TEST FAIL doctored receipt ACCEPTED or wrong problem: min-1280x720 / Layers title bar below the sidebar: expected 'outside the sidebar', got []
+SELF-TEST FAIL doctored receipt ACCEPTED or wrong problem: min-1280x720 / Layers floating: expected 'layers in floating_sections', got []
+SELF-TEST FAIL doctored receipt ACCEPTED or wrong problem: udr-1280x720 / Layers as the user-docked fixture: expected 'layers in right_sections', got ["left_sections is ['icon-history', 'main-menu', 'display', 'snaps', 'info-settings', 'projects', 'builder-slot'], expected ['icon-history', 'main-menu', 'display', 'info-settings', 'layers', 'projects', 'builder-slot']", "right_sections is ['layers'] in user-docked-right mode, expected ['snaps']"]
+red (layers check disabled) exit=1

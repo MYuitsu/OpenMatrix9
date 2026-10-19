@@ -1,0 +1,53 @@
+{
+  "schema": "om9.fixture.v1",
+  "l3_id": "OM9-M00-L3-03-02",
+  "cases": [
+    {
+      "id": "M00-FX-03-02-POS-01",
+      "check": "mesh_upload",
+      "input": {
+        "file": "gpu-mesh.txt"
+      },
+      "expected": {
+        "vertices": 2542,
+        "triangles": 5008
+      }
+    },
+    {
+      "id": "M00-FX-03-02-POS-02",
+      "check": "zoom_area_law",
+      "input": {
+        "zoom": 0.5
+      },
+      "expected": {
+        "painted_fraction_max": 0.12
+      }
+    },
+    {
+      "id": "M00-FX-03-02-POS-03",
+      "check": "dpi_invariance",
+      "input": {
+        "dpi": [
+          1.5,
+          2.0
+        ]
+      },
+      "expected": {
+        "fraction_delta_max": 0.002
+      }
+    },
+    {
+      "id": "M00-FX-03-02-POS-04",
+      "check": "orbit_invariance",
+      "input": {
+        "orbit_deg": [
+          -30,
+          30
+        ]
+      },
+      "expected": {
+        "fraction_delta_max": 0.002
+      }
+    }
+  ]
+}

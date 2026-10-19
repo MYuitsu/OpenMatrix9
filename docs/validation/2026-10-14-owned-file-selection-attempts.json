@@ -1,0 +1,443 @@
+{
+  "goal_complete": false,
+  "attempts": [
+    {
+      "result": "failed_audit_comparison",
+      "reason": "Native dialog selected Save/SaveAs/Open paths and restored geometry. Final full Document equality incorrectly included renewed runtime owner/session fields; correction must compare all persistent content and separately require renewed runtime authority.",
+      "receipt": {
+        "active_file_path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\standalone-validation\\om9-ui-profile-9q17g5bx\\selected.om9",
+        "adapter": "AdapterInfo { name: \"NVIDIA GeForce RTX 3060\", vendor: 4318, device: 9476, device_type: DiscreteGpu, device_pci_bus_id: \"0000:0b:00.0\", driver: \"NVIDIA\", driver_info: \"610.88\", backend: Vulkan, subgroup_min_size: 32, subgroup_max_size: 32, transient_saves_memory: Some(false), limit_bucket: None }",
+        "checks": [
+          "real Windows Save selection writes exact owned document",
+          "native SaveAs selection waits for owned overwrite without changing file",
+          "native owned Replace widget saves once without geometry Undo",
+          "native New toolbar renews runtime before reopen",
+          "FAILED selection step 22: document/IO invariant"
+        ],
+        "cmd": "Command: Point\nLocation of point: 1,2,3\nCommand: Save\nDocument saved.\nCommand: Point\nLocation of point: 9,8,7\nCommand: SaveAs\nDocument saved.\nCommand: Open\nCommand: ",
+        "document": {
+          "context_revision": 1,
+          "current_layer": null,
+          "definitions": {},
+          "entities": {
+            "afda4650-cc43-47a7-9386-75edc55911cb": {
+              "attributes": {
+                "color": null,
+                "layer": null,
+                "locked": false,
+                "selectable": true,
+                "visible": true
+              },
+              "attributes_revision": 1,
+              "generation": 1,
+              "geometry": {
+                "Point": [
+                  9.0,
+                  8.0,
+                  7.0
+                ]
+              },
+              "geometry_revision": 1,
+              "id": "afda4650-cc43-47a7-9386-75edc55911cb",
+              "label": "Point",
+              "placement": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "e9508184-37de-47f6-97a7-910a235e3cd8": {
+              "attributes": {
+                "color": null,
+                "layer": null,
+                "locked": false,
+                "selectable": true,
+                "visible": true
+              },
+              "attributes_revision": 1,
+              "generation": 1,
+              "geometry": {
+                "Point": [
+                  1.0,
+                  2.0,
+                  3.0
+                ]
+              },
+              "geometry_revision": 1,
+              "id": "e9508184-37de-47f6-97a7-910a235e3cd8",
+              "label": "Point",
+              "placement": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "epoch": 2,
+          "history": {
+            "recipes": {}
+          },
+          "id": "edc7dc32-a2a6-439d-922c-6e9a87ff62a8",
+          "layer_order": [],
+          "layers": {},
+          "name": "Untitled",
+          "owner_session": "da583ffe-2ecf-43c7-871d-f84492296a4a",
+          "page_unit": "Millimeter",
+          "results": {},
+          "revision": 3,
+          "session_generation": 2
+        },
+        "draft": "",
+        "file_operation_open": false,
+        "file_picker_receipts": [
+          {
+            "accept_posted": true,
+            "boundary": "owned PID/thread/root/modal/title; enabled IDOK child WM_COMMAND; real Show/GetResult; joined probe",
+            "close_posted": false,
+            "destroyed": true,
+            "elapsed_ms": 1209,
+            "observed": true,
+            "phase": "SavePath",
+            "pid": 32104,
+            "returned_path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\standalone-validation\\om9-ui-profile-9q17g5bx\\selected.om9",
+            "ui_thread": 16040
+          },
+          {
+            "accept_posted": true,
+            "boundary": "owned PID/thread/root/modal/title; enabled IDOK child WM_COMMAND; real Show/GetResult; joined probe",
+            "close_posted": false,
+            "destroyed": true,
+            "elapsed_ms": 1415,
+            "observed": true,
+            "phase": "SavePath",
+            "pid": 32104,
+            "returned_path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\standalone-validation\\om9-ui-profile-9q17g5bx\\selected.om9",
+            "ui_thread": 16040
+          },
+          {
+            "accept_posted": true,
+            "boundary": "owned PID/thread/root/modal/title; enabled IDOK child WM_COMMAND; real Show/GetResult; joined probe",
+            "close_posted": false,
+            "destroyed": true,
+            "elapsed_ms": 800,
+            "observed": true,
+            "phase": "OpenPath",
+            "pid": 32104,
+            "returned_path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\standalone-validation\\om9-ui-profile-9q17g5bx\\selected.om9",
+            "ui_thread": 16040
+          }
+        ],
+        "file_replay": [
+          {
+            "checks": [],
+            "objects": 0,
+            "phase": "None",
+            "picker_receipts": 0,
+            "raw_focused": true,
+            "step": 0
+          },
+          {
+            "checks": [],
+            "objects": 0,
+            "phase": "None",
+            "picker_receipts": 0,
+            "raw_focused": true,
+            "step": 1
+          },
+          {
+            "checks": [],
+            "objects": 0,
+            "phase": "None",
+            "picker_receipts": 0,
+            "raw_focused": true,
+            "step": 2
+          },
+          {
+            "checks": [],
+            "objects": 0,
+            "phase": "None",
+            "picker_receipts": 0,
+            "raw_focused": true,
+            "step": 3
+          },
+          {
+            "checks": [],
+            "objects": 1,
+            "phase": "None",
+            "picker_receipts": 0,
+            "raw_focused": true,
+            "step": 4
+          },
+          {
+            "checks": [],
+            "objects": 1,
+            "phase": "None",
+            "picker_receipts": 0,
+            "raw_focused": true,
+            "step": 5
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document"
+            ],
+            "objects": 1,
+            "phase": "None",
+            "picker_receipts": 1,
+            "raw_focused": true,
+            "step": 6
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document"
+            ],
+            "objects": 1,
+            "phase": "None",
+            "picker_receipts": 1,
+            "raw_focused": true,
+            "step": 7
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document"
+            ],
+            "objects": 1,
+            "phase": "None",
+            "picker_receipts": 1,
+            "raw_focused": true,
+            "step": 8
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document"
+            ],
+            "objects": 1,
+            "phase": "None",
+            "picker_receipts": 1,
+            "raw_focused": true,
+            "step": 9
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document"
+            ],
+            "objects": 1,
+            "phase": "None",
+            "picker_receipts": 1,
+            "raw_focused": true,
+            "step": 10
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document"
+            ],
+            "objects": 2,
+            "phase": "None",
+            "picker_receipts": 1,
+            "raw_focused": true,
+            "step": 11
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document"
+            ],
+            "objects": 2,
+            "phase": "None",
+            "picker_receipts": 1,
+            "raw_focused": true,
+            "step": 12
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file"
+            ],
+            "objects": 2,
+            "phase": "Some(Overwrite)",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 13
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file"
+            ],
+            "objects": 2,
+            "phase": "Some(Overwrite)",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 14
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file"
+            ],
+            "objects": 2,
+            "phase": "Some(Overwrite)",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 15
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file",
+              "native owned Replace widget saves once without geometry Undo"
+            ],
+            "objects": 2,
+            "phase": "None",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 16
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file",
+              "native owned Replace widget saves once without geometry Undo"
+            ],
+            "objects": 2,
+            "phase": "None",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 17
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file",
+              "native owned Replace widget saves once without geometry Undo"
+            ],
+            "objects": 2,
+            "phase": "None",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 18
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file",
+              "native owned Replace widget saves once without geometry Undo",
+              "native New toolbar renews runtime before reopen"
+            ],
+            "objects": 0,
+            "phase": "None",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 19
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file",
+              "native owned Replace widget saves once without geometry Undo",
+              "native New toolbar renews runtime before reopen"
+            ],
+            "objects": 0,
+            "phase": "None",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 20
+          },
+          {
+            "checks": [
+              "real Windows Save selection writes exact owned document",
+              "native SaveAs selection waits for owned overwrite without changing file",
+              "native owned Replace widget saves once without geometry Undo",
+              "native New toolbar renews runtime before reopen"
+            ],
+            "objects": 0,
+            "phase": "None",
+            "picker_receipts": 2,
+            "raw_focused": true,
+            "step": 21
+          }
+        ],
+        "limitations": [
+          "full Matrix9 UI acceptance pending",
+          "CAD native adapters pending",
+          "GPU geometry caching and performance acceptance pending",
+          "DPI/multi-monitor acceptance pending"
+        ],
+        "native_close_events": 0,
+        "objects": 2,
+        "passes": 31,
+        "saved_document_id": "edc7dc32-a2a6-439d-922c-6e9a87ff62a8",
+        "scope": "owned_file_native_selection_slice",
+        "screenshot": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\standalone-validation\\om9-ui-profile-9q17g5bx\\workspace.png",
+        "screenshot_saved": true,
+        "undo": 0,
+        "view_rects": {
+          "Looking Down": [
+            300.0,
+            178.0,
+            649.0,
+            410.0
+          ],
+          "Perspective": [
+            951.0,
+            178.0,
+            649.0,
+            410.0
+          ],
+          "Side View": [
+            951.0,
+            590.0,
+            649.0,
+            410.0
+          ],
+          "Through Finger": [
+            300.0,
+            590.0,
+            649.0,
+            410.0
+          ]
+        }
+      }
+    }
+  ]
+}
