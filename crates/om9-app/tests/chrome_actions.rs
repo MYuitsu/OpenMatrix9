@@ -217,11 +217,32 @@ fn icons_scale_with_the_screen_size() {
 }
 
 #[test]
+fn main_menu_categories_stay_on_one_horizontal_row() {
+    let (app, _context, _) = startup();
+    let rows: Vec<f32> = (0..12)
+        .map(|i| {
+            app.main_category_rect(i)
+                .expect("all twelve categories")
+                .center()
+                .y
+        })
+        .collect();
+    assert_eq!(rows.len(), 12);
+    assert!(
+        rows.iter().all(|y| (*y - rows[0]).abs() <= 0.5),
+        "category tabs split into multiple rows: {rows:?}"
+    );
+}
+
+#[test]
 fn main_menu_category_tabs_switch_palette_without_document_mutation() {
     let (mut app, context, _) = startup();
-    let gems = app.main_category_rect(8).expect("Gems category").center();
-    click(&mut app, &context, gems);
-    assert_eq!(app.main_menu_category(), 8);
+    let surface = app
+        .main_category_rect(1)
+        .expect("Surface category")
+        .center();
+    click(&mut app, &context, surface);
+    assert_eq!(app.main_menu_category(), 1);
     assert!(!app.controller.is_running());
     assert!(app.controller.document().entities.is_empty());
     assert_eq!(app.controller.coordinator().undo_len(), 0);

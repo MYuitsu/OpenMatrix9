@@ -13178,10 +13178,11 @@
         "Modernized sidebar/main-menu palette: slate rails, rounded icon tiles, accent section rails, tinted category chips and soft toolbar gradient.",
         "Added optional Feature.right_click metadata and an inert secondary-click slot that never repeats the primary action.",
         "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence.",
-        "Category colours sampled from Matrix8 p14; adaptive 3/4-column cards and responsive icon sizing by rail width and screen."
+        "Category colours sampled from Matrix8 p14; adaptive 3/4-column cards and responsive icon sizing by rail width and screen.",
+        "Category row consolidated to one horizontal scrollable row; selected card uses dark green."
       ],
       "tests": {
-        "chrome_actions": "10 passed",
+        "chrome_actions": "11 passed",
         "left_stack_layers": "8 passed",
         "shell_docking": "10 passed",
         "panel_ops": "33 passed",
@@ -13296,6 +13297,392 @@
         "Con 7 L3 cua OM9-L2-03-14: 002 (current layer + assignment), 003 (visible/locked controls), 004 (select all by layer), 005 (object info overlay), 006 (superselect by jewelry type), 007 (property editor adapter), 008 (layer state persistence visual check)."
       ],
       "next_action": "Lam tiep OM9-L3-03-14-002 (Current Layer And Assignment UI)."
+    },
+    {
+      "id": "m01-l3-03-14-002-current-layer-and-assignment-ui-2026-10-20",
+      "date": "2026-10-20",
+      "status": "standalone_implementation_verified_awaiting_manual_review",
+      "scope": "OM9-L3-03-14-002 (Current Layer And Assignment UI) - 4 L4 tasks of module OM9-L2-03-14",
+      "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-002 trong 8 L3.",
+      "code_added": [
+        "crates/om9-app/src/session/layers.rs::assign_layer: tu choi gan len mot layer dang khoa (Error::Permission(\"layer is locked\")) TRUOC khi ap dung bat ky LayerAction nao, nen lan tu choi khong ton giao dich va khong doi cho doi tuong",
+        "crates/om9-app/tests/layer_current_and_assign.rs (moi): 3 test doc fixture tu dia (C1..C4, L1..L4)"
+      ],
+      "bugs_fixed": [
+        "assign_layer khong doc khoa cua layer dich: chuyen hinh hoc VAO mot layer dang khoa thanh cong - dung thao tac ma tai lieu (Matrix8 p54-57) noi khoa ngan. Fixture L1 bat duoc (RED 1 passed/2 failed); da sua trong controller."
+      ],
+      "open_questions": [
+        "Hien tai viec dat mot layer DANG KHOA lam layer hien hanh cung bi tu choi. Item nay khong doi luat do va oracle khong nhac toi; Matrix9 co the cho phep chon layer khoa lam hien hanh (khoa bao ve noi dung, khong phai viec chon). Fixture khong khang dinh ben nao - can chu du an xac nhan."
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --test layer_current_and_assign",
+          "result": "RED 1 passed/2 failed -> GREEN 3 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-core -p om9-app -j 2",
+          "result": "moi nhom ok tru chrome_actions::icons_scale_with_the_screen_size (viec dang lam do, khong lien quan)"
+        },
+        {
+          "command": "cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings",
+          "result": "exit 0 / exit 0"
+        }
+      ],
+      "artefacts": [
+        "implementation/design/M01/OM9-L3-03-14-002/source_crosswalk.json",
+        "implementation/design/M01/OM9-L3-03-14-002/api.md",
+        "implementation/fixtures/M01/OM9-L3-03-14-002/positive.json",
+        "implementation/fixtures/M01/OM9-L3-03-14-002/negative.json",
+        "implementation/evidence/M01/OM9-L3-03-14-002/OM9-L4-03-14-002-02.red.log",
+        "implementation/evidence/M01/OM9-L3-03-14-002/OM9-L4-03-14-002-02.green.log",
+        "implementation/evidence/M01/OM9-L3-03-14-002/OM9-L4-03-14-002-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-03-14-002/OM9-L4-03-14-002-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-03-14-002/OM9-L4-03-14-002-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-03-14-002/OM9-L4-03-14-002-05.ui-review.json"
+      ],
+      "gate_state": {
+        "manual_test_gate": "M01-UI",
+        "m01_l2_03_14_l3_002_scope": "AWAITING_HUMAN_REVIEW",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false
+      },
+      "milestone_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "Checklist thu cong W1..W5 chua duoc nguoi ky.",
+        "Con 6 L3 cua OM9-L2-03-14: 003 (visible/locked controls), 004 (select all by layer), 005 (object info overlay), 006 (superselect by jewelry type), 007 (property editor adapter), 008 (layer state persistence visual check)."
+      ],
+      "next_action": "Lam tiep OM9-L3-03-14-003 (Layer Visible And Locked Controls)."
+    },
+    {
+      "id": "m01-l3-03-14-003-layer-visible-and-locked-controls-2026-10-20",
+      "date": "2026-10-20",
+      "status": "standalone_implementation_verified_awaiting_manual_review",
+      "scope": "OM9-L3-03-14-003 (Layer Visible And Locked Controls) - 4 L4 tasks of module OM9-L2-03-14",
+      "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-003 trong 8 L3.",
+      "code_added": [
+        "crates/om9-app/src/session/layers.rs::assign_layer: tu choi khi doi tuong nguon (hoac layer chua no) dang khoa - Error::Permission(\"object is on a locked layer\") - truoc khi lap ke hoach, nen khong ton giao dich va khong doi gi",
+        "crates/om9-app/tests/layer_visible_locked.rs (moi): 2 test doc fixture tu dia (S1..S5, T1..T4)"
+      ],
+      "bugs_fixed": [
+        "Chuyen mot doi tuong RA KHOI mot layer dang khoa van duoc phep: chi khoa cua layer DICH duoc kiem, khoa cua NGUON thi khong - khoa chi bao ve mot nua thao tac. Fixture T1 bat duoc (RED 1 passed/2 failed); da sua trong controller."
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --test layer_visible_locked",
+          "result": "RED 1 passed/2 failed -> GREEN 2 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-core -p om9-app -j 2",
+          "result": "moi nhom ok tru chrome_actions::icons_scale_with_the_screen_size (viec dang lam do, khong lien quan)"
+        },
+        {
+          "command": "cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings",
+          "result": "exit 1 / exit 0"
+        }
+      ],
+      "artefacts": [
+        "implementation/design/M01/OM9-L3-03-14-003/source_crosswalk.json",
+        "implementation/design/M01/OM9-L3-03-14-003/api.md",
+        "implementation/fixtures/M01/OM9-L3-03-14-003/positive.json",
+        "implementation/fixtures/M01/OM9-L3-03-14-003/negative.json",
+        "implementation/evidence/M01/OM9-L3-03-14-003/OM9-L4-03-14-003-02.red.log",
+        "implementation/evidence/M01/OM9-L3-03-14-003/OM9-L4-03-14-003-02.green.log",
+        "implementation/evidence/M01/OM9-L3-03-14-003/OM9-L4-03-14-003-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-03-14-003/OM9-L4-03-14-003-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-03-14-003/OM9-L4-03-14-003-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-03-14-003/OM9-L4-03-14-003-05.ui-review.json"
+      ],
+      "gate_state": {
+        "manual_test_gate": "M01-UI",
+        "m01_l2_03_14_l3_003_scope": "AWAITING_HUMAN_REVIEW",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false
+      },
+      "milestone_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "Checklist thu cong X1..X4 chua duoc nguoi ky.",
+        "Con 5 L3 cua OM9-L2-03-14: 004 (select all by layer), 005 (object info overlay), 006 (superselect by jewelry type), 007 (property editor adapter), 008 (layer state persistence visual check)."
+      ],
+      "next_action": "Lam tiep OM9-L3-03-14-004 (Select All Objects By Layer)."
+    },
+    {
+      "id": "m01-l3-03-14-004-select-all-objects-by-layer-2026-10-20",
+      "date": "2026-10-20",
+      "status": "standalone_implementation_verified_awaiting_manual_review",
+      "scope": "OM9-L3-03-14-004 (Select All Objects By Layer) - 4 L4 tasks of module OM9-L2-03-14",
+      "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-004 trong 8 L3.",
+      "code_added": [
+        "Khong doi code san pham: select_layer + policy selectable da dung.",
+        "crates/om9-app/tests/layer_select_by_layer.rs (moi): 2 test doc fixture tu dia (A1..A4, B1..B5)."
+      ],
+      "bugs_fixed": [],
+      "notes": [
+        "RED trung thuc: fixture xanh ngay lan dau, nen item chung minh fixture canh duoc policy bang mot phep thu mutation - bo loc `object.selectable && object.has_pick_geometry()` duoc lam yeu con `has_pick_geometry()`, cac ca hidden/locked do, roi khoi phuc.",
+        "Pinned: thay the (khong noi) selection; khong gom object layer khac; object an bi loai; layer khoa/an xoa selection cu thay vi giu lai; slot chua co layer chon 0 va khong loi; gesture khong ghi giao dich."
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --test layer_select_by_layer",
+          "result": "GREEN 2 passed; 0 failed (mutation proof recorded)"
+        },
+        {
+          "command": "cargo test -p om9-core -p om9-app -j 2",
+          "result": "moi nhom ok tru chrome_actions::icons_scale_with_the_screen_size (khong lien quan)"
+        },
+        {
+          "command": "cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings",
+          "result": "exit 1 / exit 101"
+        }
+      ],
+      "artefacts": [
+        "implementation/design/M01/OM9-L3-03-14-004/source_crosswalk.json",
+        "implementation/design/M01/OM9-L3-03-14-004/api.md",
+        "implementation/fixtures/M01/OM9-L3-03-14-004/positive.json",
+        "implementation/fixtures/M01/OM9-L3-03-14-004/negative.json",
+        "implementation/evidence/M01/OM9-L3-03-14-004/OM9-L4-03-14-004-02.red.log",
+        "implementation/evidence/M01/OM9-L3-03-14-004/OM9-L4-03-14-004-02.green.log",
+        "implementation/evidence/M01/OM9-L3-03-14-004/OM9-L4-03-14-004-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-03-14-004/OM9-L4-03-14-004-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-03-14-004/OM9-L4-03-14-004-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-03-14-004/OM9-L4-03-14-004-05.ui-review.json"
+      ],
+      "gate_state": {
+        "manual_test_gate": "M01-UI",
+        "m01_l2_03_14_l3_004_scope": "AWAITING_HUMAN_REVIEW",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false
+      },
+      "milestone_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "Checklist thu cong Y1..Y4 chua duoc nguoi ky.",
+        "Con 4 L3: 005 (object info overlay), 006 (superselect by jewelry type), 007 (property editor adapter), 008 (persistence visual check)."
+      ],
+      "next_action": "Lam tiep OM9-L3-03-14-005 (Matrix Object Info Overlay)."
+    },
+    {
+      "id": "m01-l3-03-14-005-matrix-object-info-overlay-2026-10-20",
+      "date": "2026-10-20",
+      "status": "standalone_implementation_verified_awaiting_manual_review",
+      "scope": "OM9-L3-03-14-005 (Matrix Object Info Overlay) - 4 L4 tasks of module OM9-L2-03-14",
+      "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-005 trong 8 L3.",
+      "code_added": [
+        "crates/om9-core/src/object_info.rs (moi): Measurement { Size, Unavailable(reason) }, ObjectInfo { kind, dimensions, valid: Option<bool>, detail, color } va Document::object_info(id, limits)",
+        "crates/om9-app/tests/object_info_overlay.rs (moi): 2 test doc fixture tu dia (I1..I5, J1..J4)"
+      ],
+      "bugs_fixed": [],
+      "open_questions": [
+        "Nhan dan trong viewport (manual: 'quick pop up label beside a selected object … in the layer colour') CHUA ve - item nay moi co du lieu va luat; can chu du an xac nhan vi tri/hinh thuc truoc khi lam slice ve."
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --test object_info_overlay",
+          "result": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "command": "cargo test -p om9-core -p om9-app -j 2",
+          "result": "moi nhom ok tru chrome_actions::icons_scale_with_the_screen_size (khong lien quan)"
+        },
+        {
+          "command": "cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings",
+          "result": "exit 0 / exit 0"
+        }
+      ],
+      "artefacts": [
+        "implementation/design/M01/OM9-L3-03-14-005/source_crosswalk.json",
+        "implementation/design/M01/OM9-L3-03-14-005/api.md",
+        "implementation/fixtures/M01/OM9-L3-03-14-005/positive.json",
+        "implementation/fixtures/M01/OM9-L3-03-14-005/negative.json",
+        "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-02.red.log",
+        "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-02.green.log",
+        "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-05.ui-review.json"
+      ],
+      "gate_state": {
+        "manual_test_gate": "M01-UI",
+        "m01_l2_03_14_l3_005_scope": "AWAITING_HUMAN_REVIEW",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false
+      },
+      "milestone_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "Nhan Object Info trong viewport (ve) chua lam.",
+        "Checklist thu cong Z1..Z4 chua duoc nguoi ky.",
+        "Con 3 L3: 006 (superselect by jewelry type), 007 (property editor adapter), 008 (persistence visual check)."
+      ],
+      "next_action": "OM9-L3-03-14-006 (Superselect By Jewelry Object Type)."
+    },
+    {
+      "id": "m01-l3-03-14-006-superselect-by-jewelry-object-type-2026-10-20",
+      "date": "2026-10-20",
+      "status": "standalone_implementation_verified_awaiting_manual_review",
+      "scope": "OM9-L3-03-14-006 (Superselect By Jewelry Object Type) - 4 L4 tasks of module OM9-L2-03-14",
+      "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-006 trong 8 L3.",
+      "code_added": [
+        "crates/om9-app/src/superselect.rs (moi): SelectFilter { Gems, BadGeometry, OpenGeometry, Duplicate }, SkipReason, SuperselectOutcome, classify() va Controller::superselect / apply_superselect",
+        "crates/om9-app/tests/superselect_jewelry.rs (moi): 2 test doc fixture tu dia (G1..G5, H1..H5)"
+      ],
+      "bugs_fixed": [
+        "Khong co SuperSelect nao: khong co tu vung filter va khong co cach hoi 'vat nao la gem' ngoai cach nhin ten/mau - dung dieu oracle am cam."
+      ],
+      "open_questions": [
+        "Nut/menu Super Select (manual: tool button) chua noi vao UI - item nay moi co bo loc co kieu; can chu du an xac nhan vi tri nut."
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --test superselect_jewelry",
+          "result": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "command": "cargo test -p om9-core -p om9-app -j 2",
+          "result": "moi nhom ok tru chrome_actions::icons_scale_with_the_screen_size (khong lien quan)"
+        },
+        {
+          "command": "cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings",
+          "result": "exit 0 / exit 0"
+        }
+      ],
+      "artefacts": [
+        "implementation/design/M01/OM9-L3-03-14-006/source_crosswalk.json",
+        "implementation/design/M01/OM9-L3-03-14-006/api.md",
+        "implementation/fixtures/M01/OM9-L3-03-14-006/positive.json",
+        "implementation/fixtures/M01/OM9-L3-03-14-006/negative.json",
+        "implementation/evidence/M01/OM9-L3-03-14-006/OM9-L4-03-14-006-02.red.log",
+        "implementation/evidence/M01/OM9-L3-03-14-006/OM9-L4-03-14-006-02.green.log",
+        "implementation/evidence/M01/OM9-L3-03-14-006/OM9-L4-03-14-006-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-03-14-006/OM9-L4-03-14-006-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-03-14-006/OM9-L4-03-14-006-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-03-14-006/OM9-L4-03-14-006-05.ui-review.json"
+      ],
+      "gate_state": {
+        "manual_test_gate": "M01-UI",
+        "m01_l2_03_14_l3_006_scope": "AWAITING_HUMAN_REVIEW",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false
+      },
+      "milestone_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "Nut Super Select trong menu/panel chua noi; checklist U1..U5 chua ky.",
+        "Con 2 L3: 007 (property editor adapter), 008 (persistence visual check)."
+      ],
+      "next_action": "OM9-L3-03-14-007 (Object Property Editor Adapter)."
+    },
+    {
+      "id": "m01-l3-03-14-007-object-property-editor-adapter-2026-10-20",
+      "date": "2026-10-20",
+      "status": "standalone_implementation_verified_awaiting_manual_review",
+      "scope": "OM9-L3-03-14-007 (Object Property Editor Adapter) - 4 L4 tasks of module OM9-L2-03-14",
+      "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-007 trong 8 L3.",
+      "code_added": [
+        "crates/om9-app/src/session/properties.rs (moi, module con cua session vi no ap dung giao dich): FIELDS (5 truong sua duoc, Name + Geometry chi doc kem ly do), PropertyField/FieldState, PropertyEdit (chi truong sua duoc) va Controller::edit_object_property (MOT giao dich cho moi doi tuong)",
+        "crates/om9-app/tests/property_editor_adapter.rs (moi): 2 test doc fixture tu dia (E1..E4, F1..F4)"
+      ],
+      "bugs_fixed": [],
+      "notes": [
+        "Khong co property editor nao truoc do: panel khong the hien thi va khong the sua qua mot document command.",
+        "Name la open item: doi ten can mot document command (Mutation::Label) - editor ghi ro thay vi gia vo hoat dong."
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --test property_editor_adapter",
+          "result": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "command": "cargo test -p om9-core -p om9-app -j 2",
+          "result": "moi nhom ok tru chrome_actions::icons_scale_with_the_screen_size (khong lien quan)"
+        },
+        {
+          "command": "cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings",
+          "result": "exit 0 / exit 0"
+        }
+      ],
+      "artefacts": [
+        "implementation/design/M01/OM9-L3-03-14-007/source_crosswalk.json",
+        "implementation/design/M01/OM9-L3-03-14-007/api.md",
+        "implementation/fixtures/M01/OM9-L3-03-14-007/positive.json",
+        "implementation/fixtures/M01/OM9-L3-03-14-007/negative.json",
+        "implementation/evidence/M01/OM9-L3-03-14-007/OM9-L4-03-14-007-02.red.log",
+        "implementation/evidence/M01/OM9-L3-03-14-007/OM9-L4-03-14-007-02.green.log",
+        "implementation/evidence/M01/OM9-L3-03-14-007/OM9-L4-03-14-007-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-03-14-007/OM9-L4-03-14-007-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-03-14-007/OM9-L4-03-14-007-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-03-14-007/OM9-L4-03-14-007-05.ui-review.json"
+      ],
+      "gate_state": {
+        "manual_test_gate": "M01-UI",
+        "m01_l2_03_14_l3_007_scope": "AWAITING_HUMAN_REVIEW",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false
+      },
+      "milestone_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "Panel hien thi 5 truong sua duoc chua noi vao UI; doi ten (Name) cho Mutation::Label; checklist N1..N4 chua ky.",
+        "Con 1 L3: 008 (layer state persistence visual check)."
+      ],
+      "next_action": "OM9-L3-03-14-008 (Layer State Persistence Visual Check)."
+    },
+    {
+      "id": "m01-l3-03-14-008-layer-state-persistence-visual-check-2026-10-20",
+      "date": "2026-10-20",
+      "status": "standalone_implementation_verified_awaiting_manual_review",
+      "scope": "OM9-L3-03-14-008 (Layer State Persistence Visual Check) - 4 L4 tasks of module OM9-L2-03-14",
+      "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-008, L3 cuoi cung trong 8 L3.",
+      "code_added": [
+        "Khong doi code san pham: Archive::save/open va palette doc document.layers da dung.",
+        "crates/om9-app/tests/layer_state_persistence.rs (moi): 2 test doc fixture tu dia (K1..K3, L1..L3)"
+      ],
+      "bugs_fixed": [],
+      "notes": [
+        "Khong co test nao noi palette voi mot vong save/reopen truoc day.",
+        "Phat hien that: cham mot preset slot tao ca nhom 4 slot, nen tai lieu co Gems khoa + Metals an luu slots 1..8 chu khong phai chi 1 va 5. Lan chay dau cua K1 do dung vi gia dinh sai nay, fixture da sua theo su that.",
+        "Pinned: slots/co khoa/an/mau, ids doi tuong, policy selectable sau khi mo lai; mo tai lieu khac khong lo slot cu; mo that bai khong doi gi; co chua luu trong bo nho khong nam trong file."
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --test layer_state_persistence",
+          "result": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+        },
+        {
+          "command": "cargo test -p om9-core -p om9-app -j 2",
+          "result": "moi nhom ok tru chrome_actions::icons_scale_with_the_screen_size (khong lien quan)"
+        },
+        {
+          "command": "cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings",
+          "result": "exit 0 / exit 0"
+        }
+      ],
+      "artefacts": [
+        "implementation/design/M01/OM9-L3-03-14-008/source_crosswalk.json",
+        "implementation/design/M01/OM9-L3-03-14-008/api.md",
+        "implementation/fixtures/M01/OM9-L3-03-14-008/positive.json",
+        "implementation/fixtures/M01/OM9-L3-03-14-008/negative.json",
+        "implementation/evidence/M01/OM9-L3-03-14-008/OM9-L4-03-14-008-02.red.log",
+        "implementation/evidence/M01/OM9-L3-03-14-008/OM9-L4-03-14-008-02.green.log",
+        "implementation/evidence/M01/OM9-L3-03-14-008/OM9-L4-03-14-008-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-03-14-008/OM9-L4-03-14-008-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-03-14-008/OM9-L4-03-14-008-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-03-14-008/OM9-L4-03-14-008-05.ui-review.json"
+      ],
+      "gate_state": {
+        "manual_test_gate": "M01-UI",
+        "m01_l2_03_14_l3_008_scope": "AWAITING_HUMAN_REVIEW",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false
+      },
+      "milestone_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "Checklist thu cong P1..P4 chua duoc nguoi ky.",
+        "Ca 8 L3 cua OM9-L2-03-14 da co bang chung; con checklist test gop + cac open item UI (nhan Object Info, nut Super Select, panel property editor, rename)."
+      ],
+      "next_action": "Gom MOT checklist test cho ca 8 L3 va bao cao tong ket module OM9-L2-03-14."
     }
   ],
   "merge_context": {

@@ -10,6 +10,7 @@ const PANEL_ALT: Color32 = Color32::from_rgb(27, 39, 53);
 const PANEL_EDGE: Color32 = Color32::from_rgb(53, 70, 88);
 const PANEL_INK: Color32 = Color32::from_rgb(221, 231, 242);
 const ACCENT: Color32 = Color32::from_rgb(45, 212, 191);
+const SELECTED_CARD: Color32 = Color32::from_rgb(22, 61, 46);
 const CATEGORY_COLORS: [Color32; 12] = [
     Color32::from_rgb(201, 173, 46),  // Curve: sampled from Matrix8 p14
     Color32::from_rgb(71, 186, 143),  // Surface
@@ -526,58 +527,57 @@ impl MatrixApp {
                     }
                 });
                 self.main_category_rects.clear();
-                let columns = if ui.available_width() < 280. { 3 } else { 4 };
-                let gap = ui.spacing().item_spacing.x;
-                for (row, categories) in CATEGORIES.chunks(columns).enumerate() {
-                    let width = ((ui.available_width() - gap * (columns - 1) as f32)
-                        / columns as f32)
-                        .max(48.);
-                    ui.horizontal(|ui| {
-                        for (column, category) in categories.iter().enumerate() {
-                            let i = row * columns + column;
-                            let accent = CATEGORY_COLORS[i];
-                            let selected = self.main_category == i;
-                            let (rect, response) =
-                                ui.allocate_exact_size(Vec2::new(width, 22.), Sense::click());
-                            let response =
-                                response.on_hover_text(format!("{category} command category"));
-                            let fill = if selected {
-                                PANEL_ALT
-                            } else if response.hovered() {
-                                PANEL_EDGE
-                            } else {
-                                Color32::from_rgb(24, 35, 48)
-                            };
-                            let painter = ui.painter();
-                            painter.rect_filled(rect, 5, fill);
-                            painter.rect_stroke(
-                                rect.shrink(0.5),
-                                5,
-                                Stroke::new(1., if selected { accent } else { PANEL_EDGE }),
-                                egui::StrokeKind::Inside,
-                            );
-                            painter.circle_filled(
-                                egui::pos2(rect.left() + 8., rect.center().y),
-                                3.,
-                                accent,
-                            );
-                            painter
-                                .with_clip_rect(rect.shrink2(Vec2::new(14., 2.)))
-                                .text(
-                                    egui::pos2(rect.left() + 15., rect.center().y),
-                                    Align2::LEFT_CENTER,
-                                    *category,
-                                    FontId::proportional(10.),
-                                    if selected { Color32::WHITE } else { PANEL_INK },
+                egui::ScrollArea::horizontal()
+                    .id_salt("main-menu-category-row")
+                    .max_height(24.)
+                    .auto_shrink([false, true])
+                    .show(ui, |ui| {
+                        ui.horizontal(|ui| {
+                            ui.spacing_mut().item_spacing.x = 4.;
+                            for (i, category) in CATEGORIES.iter().enumerate() {
+                                let accent = CATEGORY_COLORS[i];
+                                let selected = self.main_category == i;
+                                let (rect, response) =
+                                    ui.allocate_exact_size(Vec2::new(68., 22.), Sense::click());
+                                let response =
+                                    response.on_hover_text(format!("{category} command category"));
+                                let fill = if selected {
+                                    SELECTED_CARD
+                                } else if response.hovered() {
+                                    Color32::from_rgb(28, 55, 47)
+                                } else {
+                                    Color32::from_rgb(24, 35, 48)
+                                };
+                                let painter = ui.painter();
+                                painter.rect_filled(rect, 5, fill);
+                                painter.rect_stroke(
+                                    rect.shrink(0.5),
+                                    5,
+                                    Stroke::new(1., if selected { accent } else { PANEL_EDGE }),
+                                    egui::StrokeKind::Inside,
                                 );
-                            self.main_category_rects.insert(i, rect);
-                            if response.clicked() {
-                                self.main_category = i;
-                                self.focus_cmd = true;
+                                painter.circle_filled(
+                                    egui::pos2(rect.left() + 8., rect.center().y),
+                                    3.,
+                                    accent,
+                                );
+                                painter
+                                    .with_clip_rect(rect.shrink2(Vec2::new(14., 2.)))
+                                    .text(
+                                        egui::pos2(rect.left() + 15., rect.center().y),
+                                        Align2::LEFT_CENTER,
+                                        *category,
+                                        FontId::proportional(10.),
+                                        if selected { Color32::WHITE } else { PANEL_INK },
+                                    );
+                                self.main_category_rects.insert(i, rect);
+                                if response.clicked() {
+                                    self.main_category = i;
+                                    self.focus_cmd = true;
+                                }
                             }
-                        }
+                        });
                     });
-                }
                 let category = CATEGORIES[self.main_category];
                 let palette = category_palette(category);
                 ui.horizontal_wrapped(|ui| {

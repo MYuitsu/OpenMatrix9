@@ -19,9 +19,9 @@ The visual language is modernized without changing hit targets or layout geometr
 - Main Menu categories use the **RGB values sampled from Matrix8 p14** and keep the reference
   colour identity: gold Curve, teal Surface, purple Solid, red Transform, green SubD/TSpline,
   yellow-green Art, red Builder, indigo Tools, blue Gems, magenta Setting, orange Cutters, teal
-  Render. Each is a modern dark card with a coloured dot and white label; the selected category gets
-  a matching accent border. The grid adapts to 3 columns on a narrow rail and 4 on a normal rail,
-  preserving the documented category order.
+  Render. Each is a modern dark card with a coloured dot and white label; the selected category uses a
+  dark-green fill (`#163D2E`) and a matching accent border. All twelve categories stay on one
+  horizontal, scrollable row; the documented category order is preserved.
 - Toolbar row uses a soft light gradient and keeps the existing 67-point allocation.
 - Icon tooltips keep the command name and append an optional registered right-click command. If no
   alternative is registered, the secondary click is inert and never replays the primary command.
@@ -40,7 +40,7 @@ The visual language is modernized without changing hit targets or layout geometr
 
 ## Verification
 
-- `chrome_actions` — **10 passed**: F4 datum, category card selection, right-click inert slot, screen
+- `chrome_actions` — **11 passed**: F4 datum, category single-row selection, right-click inert slot, screen
   icon scaling, view tabs/menu, maximized tab switch, disabled snaps.
 - `left_stack_layers` — **8 passed**: documented left stack, 300-pt rail, layer placement, reset and
   save/reload.
@@ -50,7 +50,7 @@ The visual language is modernized without changing hit targets or layout geometr
 - `startup_contract` — **3**: failed start leaves layout untouched.
 - `om9-app --lib` — **104 passed**.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
-  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `71d05ed1…`). The screenshot shows the modern
+  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `25ceab0d…`). The screenshot shows the modern
   slate rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
   placement.
   This is automated evidence, not human sign-off.
