@@ -217,6 +217,47 @@ fn icons_scale_with_the_screen_size() {
 }
 
 #[test]
+fn every_reference_menu_has_its_full_icon_list() {
+    for (name, expected) in [
+        ("Curve", 58),
+        ("Surface", 40),
+        ("Solid", 30),
+        ("Transform", 40),
+        ("SubD", 58),
+        ("Art", 7),
+        ("Builder", 16),
+        ("Tools", 31),
+        ("Gems", 35),
+        ("Setting", 12),
+        ("Cutters", 11),
+        ("Render", 23),
+        ("File", 13),
+        ("View", 15),
+        ("Utilities", 22),
+        ("Measure", 17),
+        ("Custom", 0),
+    ] {
+        assert_eq!(
+            om9_app::menu_catalog::category(name).unwrap().len(),
+            expected
+        );
+    }
+}
+
+#[test]
+fn top_menu_labels_are_interactive_and_return_to_categories() {
+    let (mut app, context, _) = startup();
+    let file = app.top_menu_rect(0).expect("File top menu").center();
+    click(&mut app, &context, file);
+    assert_eq!(app.top_menu_selected(), Some(0));
+    let curve = app.main_category_rect(0).expect("Curve category").center();
+    click(&mut app, &context, curve);
+    assert_eq!(app.top_menu_selected(), None);
+    assert!(!app.controller.is_running());
+    assert!(app.controller.document().entities.is_empty());
+}
+
+#[test]
 fn main_menu_categories_wrap_at_the_rail_edge() {
     let (app, _context, _) = startup();
     let sidebar = app.sidebar_rect.expect("sidebar rect");

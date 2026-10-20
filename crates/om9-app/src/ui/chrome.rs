@@ -25,6 +25,7 @@ const CATEGORY_COLORS: [Color32; 12] = [
     Color32::from_rgb(244, 116, 33),  // Cutters
     Color32::from_rgb(31, 185, 184),  // Render
 ];
+const TOP_MENUS: [&str; 5] = ["File", "View", "Utilities", "Measure", "Custom"];
 const CATEGORIES: [&str; 12] = [
     "Curve",
     "Surface",
@@ -507,6 +508,25 @@ impl MatrixApp {
             self.icon(ui, name, false, name);
         }
     }
+    pub fn top_menu_rect(&self, index: usize) -> Option<Rect> {
+        self.current_ui_context.as_ref().and_then(|context| {
+            context.memory(|memory| {
+                memory
+                    .data
+                    .get_temp::<Rect>(egui::Id::new(("main-top-menu-rect", index)))
+            })
+        })
+    }
+    pub fn top_menu_selected(&self) -> Option<usize> {
+        self.current_ui_context.as_ref().and_then(|context| {
+            context.memory(|memory| {
+                memory
+                    .data
+                    .get_temp::<Option<usize>>(egui::Id::new("main-top-menu"))
+                    .flatten()
+            })
+        })
+    }
     fn icon_row(&mut self, ui: &mut egui::Ui, names: &[&str]) {
         ui.horizontal_wrapped(|ui| {
             for name in names {
@@ -593,10 +613,39 @@ impl MatrixApp {
                 });
             }
             SectionId::MainMenu => {
+                let top_id = egui::Id::new("main-top-menu");
+                let mut top = ui
+                    .ctx()
+                    .memory(|memory| memory.data.get_temp::<Option<usize>>(top_id).flatten());
                 ui.horizontal_wrapped(|ui| {
-                    for label in ["File", "View", "Utilities", "Measure", "Custom"] {
-                        ui.add_enabled(false, egui::Button::new(label).frame(false))
-                            .on_hover_text("Menu customization pending");
+                    for (index, label) in TOP_MENUS.iter().enumerate() {
+                        let selected = top == Some(index);
+                        let response = ui
+                            .add(
+                                egui::Button::new(
+                                    RichText::new(*label)
+                                        .color(if selected { Color32::WHITE } else { PANEL_INK })
+                                        .size(11.),
+                                )
+                                .frame(false)
+                                .fill(if selected {
+                                    PANEL_ALT
+                                } else {
+                                    Color32::TRANSPARENT
+                                })
+                                .corner_radius(3),
+                            )
+                            .on_hover_text(format!("{label} menu"));
+                        ui.ctx().memory_mut(|memory| {
+                            memory.data.insert_temp(
+                                egui::Id::new(("main-top-menu-rect", index)),
+                                response.rect,
+                            );
+                        });
+                        if response.clicked() {
+                            top = Some(index);
+                            self.focus_cmd = true;
+                        }
                     }
                 });
                 self.main_category_rects.clear();
@@ -660,24 +709,30 @@ impl MatrixApp {
                         self.main_category_rects.insert(i, rect);
                         if response.clicked() {
                             self.main_category = i;
+                            top = None;
                             self.focus_cmd = true;
                         }
                     }
                 });
                 let category = CATEGORIES[self.main_category];
-                let palette = category_palette(category);
+                let palette_name = top.map_or(category, |index| TOP_MENUS[index]);
+                let palette = if top.is_some() {
+                    crate::menu_catalog::category(palette_name).unwrap_or(&[])
+                } else {
+                    category_palette(category)
+                };
                 // Keep the full reference palette scrollable inside a bounded
                 // section so Layers/Projects stay visible on short windows. The
                 // arrow column mirrors the reference menu's page buttons, so a
                 // user never has to drag or wheel through the palette.
-                let scroll_id = egui::Id::new(("main-menu-palette-scroll", category));
+                let scroll_id = egui::Id::new(("main-menu-palette-scroll", palette_name));
                 let mut offset = ui
                     .ctx()
                     .memory(|memory| memory.data.get_temp::<f32>(scroll_id).unwrap_or(0.));
                 let scroll_width = (ui.available_width() - 20.).max(80.);
                 ui.horizontal(|ui| {
                     let output = egui::ScrollArea::vertical()
-                        .id_salt(("main-menu-palette", category))
+                        .id_salt(("main-menu-palette", palette_name))
                         .max_height(26.)
                         .max_width(scroll_width)
                         .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden)
@@ -705,8 +760,10 @@ impl MatrixApp {
                     memory.data.insert_temp(scroll_id, offset);
                 });
                 if palette.is_empty() {
-                    ui.label(format!("{category} tools unavailable"));
+                    ui.label(format!("{palette_name} menu has no pinned commands"));
                 }
+                ui.ctx()
+                    .memory_mut(|memory| memory.data.insert_temp(top_id, top));
             }
             SectionId::Display => {
                 self.icon_row(

@@ -39,9 +39,11 @@ The visual language is modernized without changing hit targets or layout geometr
 The category palettes are no longer a hand-picked subset. They are generated from all 18
 `Resources/menu/MainMenu.ini` sections and `Resources/menu/icons.ini`; the twelve category menus
 now carry the reference lists: Curve 58, Surface 40, Solid 30, Transform 40, SubD 58, Art 7,
-Builder 16, Tools 31, Gems 35, Setting 12, Cutters 11, Render 23. 308 of the 356 unique icons map
-to a feature via `tools/named-icon-bindings.json` or a category/command match; unmapped authored
-icons stay visible and disabled instead of disappearing. Icon tooltips show the feature name. The
+Builder 16, Tools 31, Gems 35, Setting 12, Cutters 11, Render 23, plus the top File 13, View 15,
+Utilities 22 and Measure 17 lists. 362 of the 423 unique icons map to a feature via
+`tools/named-icon-bindings.json` or a category/command match; unmapped authored icons stay visible
+and disabled instead of disappearing. Icon tooltips show the feature name. The File/View/Utilities/
+Measure/Custom labels are interactive and open their reference lists; Custom is empty until pinned. The
 long palette scrolls inside a bounded section so Layers/Projects remain visible on short windows;
 a two-button page column (drawn triangles, not font glyphs) steps the rows without dragging or wheeling.
 
@@ -56,7 +58,7 @@ a two-button page column (drawn triangles, not font glyphs) steps the rows witho
 
 ## Verification
 
-- `chrome_actions` — **11 passed**: F4 datum, category single-row selection, right-click inert slot, screen
+- `chrome_actions` — **13 passed**: F4 datum, category single-row selection, right-click inert slot, screen
   icon scaling, view tabs/menu, maximized tab switch, disabled snaps.
 - `left_stack_layers` — **8 passed**: documented left stack, 300-pt rail, layer placement, reset and
   save/reload.
@@ -66,7 +68,7 @@ a two-button page column (drawn triangles, not font glyphs) steps the rows witho
 - `startup_contract` — **3**: failed start leaves layout untouched.
 - `om9-app --lib` — **106 passed**, including `menu_catalog` full-list and feature-mapping tests.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
-  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `19daef67…`). The screenshot shows the modern
+  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `ed6b3994…`). The screenshot shows the modern
   near-black rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
   placement.
   This is automated evidence, not human sign-off.

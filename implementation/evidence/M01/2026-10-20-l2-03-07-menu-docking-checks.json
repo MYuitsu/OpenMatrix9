@@ -51,7 +51,7 @@
         "2"
       ],
       "exit_code": 0,
-      "test_count": 11,
+      "test_count": 13,
       "covers": "category wrap at rail edge, inert right-click, screen icon scaling"
     },
     {
@@ -204,9 +204,9 @@
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "19daef6771c61590200deab7c519440df95b3274d0658976cd99299d0b9ea724",
+    "screenshot_sha256": "ed6b399441edadcfbc090b48efee6533ebe0751e6910dcbf77dc80f34de9184d",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "911d01e428a4188613b261f61fc7bdbbcd6a4b4fe1d0bb8bb286f50debc8559e",
+    "receipt_sha256": "c64cf11152e04b2474e7960575e57cb72f805901d11fe8768e623ca90bfb4a96",
     "passes": 21,
     "view_rects": {
       "Looking Down": [
@@ -244,8 +244,8 @@
       "Resources/menu/icons.ini",
       "tools/named-icon-bindings.json"
     ],
-    "unique_icons": 356,
-    "mapped_to_feature": 308,
+    "unique_icons": 423,
+    "mapped_to_feature": 362,
     "counts": {
       "Curve": 58,
       "Surface": 40,
@@ -258,11 +258,17 @@
       "Gems": 35,
       "Setting": 12,
       "Cutters": 11,
-      "Render": 23
+      "Render": 23,
+      "File": 13,
+      "View": 15,
+      "Utilities": 22,
+      "Measure": 17,
+      "Custom": 0
     },
     "tests": [
       "menu_catalog::every_menu_has_the_full_reference_icon_list",
       "menu_catalog::most_reference_icons_map_to_a_feature"
-    ]
+    ],
+    "top_menus_interactive": true
   }
 }

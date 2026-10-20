@@ -1,6 +1,81 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 //! Full authored Matrix main-menu icon lists, generated from Resources/menu/MainMenu.ini.
 
+pub const FILE: &[&str] = &[
+    "FileNew",
+    "FileOpen",
+    "FileExportSelected",
+    "FileImport",
+    "FileSave",
+    "FileSaveAs",
+    "FileSaveSmall",
+    "FileSaveSmallAs",
+    "FileUserLibrary",
+    "FileUserLibraryAdd",
+    "FileStullerSubmit",
+    "FileNotes",
+    "FilePrint",
+];
+pub const VIEW: &[&str] = &[
+    "ViewBackgroundBitmapPictureFrame",
+    "ViewRestoreViewports",
+    "OthersViewSynchronizeViews",
+    "ViewZoomZoomDynamic",
+    "ViewZoomZoomExtents",
+    "ViewZoomZoomSelected",
+    "ViewZoomZoomWindow",
+    "ViewManager",
+    "ViewCaptureToFile",
+    "OthersSetCrosshairs",
+    "ViewZoomZoom1To1",
+    "ViewZoomZoom1To1Calibrate",
+    "ViewSetCameraCenterViewport",
+    "ClayooCreationBlueprint",
+    "OthersSystem6HD3View",
+];
+pub const UTILITIES: &[&str] = &[
+    "AnalyzeDirection",
+    "AnalyzeDiagnosticsSelectBadObjects",
+    "AnalyzeDiagnosticsCheck",
+    "AnalyzeEdgeToolsShowEdges",
+    "AnalyzeEdgeToolsSplitEdge",
+    "AnalyzeEdgeToolsMergeEdge",
+    "AnalyzeEdgeToolsJoin2NakedEdges",
+    "AnalyzeEdgeToolsUnjoinEdge",
+    "DimensionMake2DDrawing",
+    "AnalyzeBoundingBox",
+    "AnalyzeCenterPoint",
+    "EditGroupsGroup",
+    "EditGroupsUnGroup",
+    "OthersExtractBadSurface",
+    "ViewShowZBuffer",
+    "MeshMeshRepairToolsFillHole",
+    "MeshMeshRepairToolsFillHoles",
+    "MeshMeshRepairToolsAlignMeshVertices",
+    "MeshFromNURBSObject",
+    "MeshMeshEditToolsCollapseReduceVertexCount",
+    "MeshApplyMeshUVN",
+    "MeshMeshEditToolsExtractRenderMesh",
+];
+pub const MEASURE: &[&str] = &[
+    "AnalyzeAngle",
+    "AnalyzeDistance",
+    "AnalyzeLength",
+    "AnalyzeRadius",
+    "OthersMeasureDimHorizontal",
+    "OthersMeasureDimVertical",
+    "DimensionAngleDimension",
+    "DimensionRotatedDimension",
+    "DimensionAlignedDimension",
+    "DimensionDiameterDimension",
+    "DimensionRadialDimension",
+    "DimensionLeader",
+    "DimensionTextBlock",
+    "OthersMeasureEditText",
+    "OthersMeasureEditDim",
+    "DimensionRecenterDimensionText",
+    "OthersMeasureDimOptions",
+];
 pub const CURVE: &[&str] = &[
     "CurvePolylinePolyline",
     "CurveLineSingleLine",
@@ -387,9 +462,14 @@ pub const RENDER: &[&str] = &[
     "RenderEffectsApplyDisplacement",
 ];
 
-/// Menu icons for one category, in the reference order.
+/// Menu icons for one top menu or category, in the reference order.
 pub fn category(name: &str) -> Option<&'static [&'static str]> {
     match name {
+        "File" => Some(FILE),
+        "View" => Some(VIEW),
+        "Utilities" => Some(UTILITIES),
+        "Measure" => Some(MEASURE),
+        "Custom" => Some(&[]),
         "Curve" => Some(CURVE),
         "Surface" => Some(SURFACE),
         "Solid" => Some(SOLID),
@@ -425,6 +505,11 @@ mod tests {
             ("Setting", 12),
             ("Cutters", 11),
             ("Render", 23),
+            ("File", 13),
+            ("View", 15),
+            ("Utilities", 22),
+            ("Measure", 17),
+            ("Custom", 0),
         ] {
             let icons = category(name).unwrap_or_else(|| panic!("{name} menu"));
             assert_eq!(icons.len(), expected, "{name} icon count");
@@ -439,22 +524,28 @@ mod tests {
 
     #[test]
     fn most_reference_icons_map_to_a_feature() {
-        let mapped = category("Curve")
-            .unwrap()
-            .iter()
-            .chain(category("Surface").unwrap())
-            .chain(category("Solid").unwrap())
-            .chain(category("Transform").unwrap())
-            .chain(category("SubD").unwrap())
-            .chain(category("Art").unwrap())
-            .chain(category("Builder").unwrap())
-            .chain(category("Tools").unwrap())
-            .chain(category("Gems").unwrap())
-            .chain(category("Setting").unwrap())
-            .chain(category("Cutters").unwrap())
-            .chain(category("Render").unwrap())
-            .filter(|name| crate::icons::feature_for(name).is_some())
-            .count();
-        assert!(mapped >= 300, "only {mapped} menu icons map to features");
+        let mapped = [
+            "Curve",
+            "Surface",
+            "Solid",
+            "Transform",
+            "SubD",
+            "Art",
+            "Builder",
+            "Tools",
+            "Gems",
+            "Setting",
+            "Cutters",
+            "Render",
+            "File",
+            "View",
+            "Utilities",
+            "Measure",
+        ]
+        .iter()
+        .flat_map(|name| category(name).unwrap_or(&[]).iter())
+        .filter(|name| crate::icons::feature_for(name).is_some())
+        .count();
+        assert!(mapped >= 350, "only {mapped} menu icons map to features");
     }
 }
