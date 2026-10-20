@@ -605,17 +605,12 @@ impl MatrixApp {
                     for (i, category) in CATEGORIES.iter().enumerate() {
                         let accent = CATEGORY_COLORS[i];
                         let selected = self.main_category == i;
-                        let font = FontId::proportional(11.);
+                        let font = FontId::proportional(12.);
                         let text_color = category_text(accent);
                         let galley = ui.painter().layout_no_wrap(
                             (*category).to_owned(),
                             font.clone(),
                             text_color,
-                        );
-                        let shadow_galley = ui.painter().layout_no_wrap(
-                            (*category).to_owned(),
-                            font,
-                            Color32::BLACK,
                         );
                         let width = galley.size().x + 18.;
                         let (rect, response) =
@@ -623,8 +618,7 @@ impl MatrixApp {
                         let response =
                             response.on_hover_text(format!("{category} command category"));
                         let painter = ui.painter();
-                        // Raised card: a soft drop shadow, a lit top edge and a
-                        // dark text shadow under the coloured label.
+                        // Keep the raised card separate from the brighter label.
                         painter.rect_filled(
                             rect.translate(Vec2::new(0., 2.)),
                             5,
@@ -659,7 +653,9 @@ impl MatrixApp {
                         );
                         let text_pos =
                             egui::pos2(rect.left() + 9., rect.center().y - galley.size().y / 2.);
-                        painter.galley(text_pos + Vec2::new(0., 1.), shadow_galley, Color32::BLACK);
+                        // A small same-colour overprint strengthens the bundled
+                        // font at menu size without a dark shadow muddying it.
+                        painter.galley(text_pos + Vec2::new(0.35, 0.), galley.clone(), text_color);
                         painter.galley(text_pos, galley, text_color);
                         self.main_category_rects.insert(i, rect);
                         if response.clicked() {
@@ -671,18 +667,43 @@ impl MatrixApp {
                 let category = CATEGORIES[self.main_category];
                 let palette = category_palette(category);
                 // Keep the full reference palette scrollable inside a bounded
-                // section so Layers/Projects stay visible on short windows.
-                egui::ScrollArea::vertical()
-                    .id_salt(("main-menu-palette", category))
-                    .max_height(26.)
-                    .auto_shrink([false, false])
-                    .show(ui, |ui| {
-                        ui.horizontal_wrapped(|ui| {
-                            for name in palette {
-                                self.feature_icon(ui, "", name);
-                            }
+                // section so Layers/Projects stay visible on short windows. The
+                // arrow column mirrors the reference menu's page buttons, so a
+                // user never has to drag or wheel through the palette.
+                let scroll_id = egui::Id::new(("main-menu-palette-scroll", category));
+                let mut offset = ui
+                    .ctx()
+                    .memory(|memory| memory.data.get_temp::<f32>(scroll_id).unwrap_or(0.));
+                let scroll_width = (ui.available_width() - 20.).max(80.);
+                ui.horizontal(|ui| {
+                    let output = egui::ScrollArea::vertical()
+                        .id_salt(("main-menu-palette", category))
+                        .max_height(26.)
+                        .max_width(scroll_width)
+                        .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden)
+                        .auto_shrink([false, false])
+                        .vertical_scroll_offset(offset)
+                        .show(ui, |ui| {
+                            ui.horizontal_wrapped(|ui| {
+                                for name in palette {
+                                    self.feature_icon(ui, "", name);
+                                }
+                            });
                         });
+                    offset = output.state.offset.y;
+                    ui.spacing_mut().item_spacing.y = 1.;
+                    ui.vertical(|ui| {
+                        if menu_scroll_arrow(ui, true).clicked() {
+                            offset = (offset - 30.).max(0.);
+                        }
+                        if menu_scroll_arrow(ui, false).clicked() {
+                            offset += 30.;
+                        }
                     });
+                });
+                ui.ctx().memory_mut(|memory| {
+                    memory.data.insert_temp(scroll_id, offset);
+                });
                 if palette.is_empty() {
                     ui.label(format!("{category} tools unavailable"));
                 }
@@ -1308,11 +1329,49 @@ fn feature_category(f: &Feature) -> &str {
         "Tools"
     }
 }
+fn menu_scroll_arrow(ui: &mut egui::Ui, up: bool) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(Vec2::new(18., 12.), Sense::click());
+    let painter = ui.painter();
+    painter.rect_filled(
+        rect,
+        3,
+        if response.hovered() {
+            ACCENT
+        } else {
+            PANEL_EDGE
+        },
+    );
+    let center = rect.center();
+    let (tip, left, right) = if up {
+        (
+            egui::pos2(center.x, center.y - 4.),
+            egui::pos2(center.x - 5., center.y + 3.),
+            egui::pos2(center.x + 5., center.y + 3.),
+        )
+    } else {
+        (
+            egui::pos2(center.x, center.y + 4.),
+            egui::pos2(center.x - 5., center.y - 3.),
+            egui::pos2(center.x + 5., center.y - 3.),
+        )
+    };
+    painter.add(egui::Shape::convex_polygon(
+        vec![tip, left, right],
+        Color32::WHITE,
+        Stroke::NONE,
+    ));
+    response.on_hover_text(if up {
+        "Previous menu row"
+    } else {
+        "Next menu row"
+    })
+}
+
 fn category_text(accent: Color32) -> Color32 {
     let luminance =
         (0.2126 * accent.r() as f32 + 0.7152 * accent.g() as f32 + 0.0722 * accent.b() as f32)
             / 255.;
-    let mix = if luminance < 0.42 { 0.42 } else { 0.18 };
+    let mix = if luminance < 0.42 { 0.55 } else { 0.32 };
     let channel = |value: u8| (value as f32 * (1. - mix) + 255. * mix) as u8;
     Color32::from_rgb(
         channel(accent.r()),

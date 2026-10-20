@@ -5,6 +5,50 @@
   "active_item": "desktop-gpu-only-renderer-2026-10-19",
   "items": [
     {
+      "key": "main-menu-label-readability-2026-10-20",
+      "stage": "ui-menu",
+      "feature_ids": [
+        "OM9-L3-03-07-002"
+      ],
+      "status": "validated",
+      "outputs": [
+        "crates/om9-app/src/ui/chrome.rs",
+        "implementation/evidence/M01/2026-10-20-menu-text-contrast.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-menu-text-contrast.json"
+      ],
+      "tests": [
+        {
+          "suite": "chrome_actions",
+          "passed": 11
+        },
+        {
+          "suite": "left_stack_layers",
+          "passed": 8
+        },
+        {
+          "suite": "panel_ops",
+          "passed": 33
+        },
+        {
+          "suite": "shell_docking",
+          "passed": 10
+        },
+        {
+          "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib chrome_tests -- --test-threads=1",
+          "passed": 4
+        }
+      ],
+      "uncertainties": [
+        "Formal manual M01-UI approval remains pending.",
+        "Existing running user app remains on its loaded binary; preview executable is separate.",
+        "FAIL: existing private/binary/reference/raster artifacts across the working tree (including manuals, vendor-research and milestone reference images). No reference assets added by this text styling change."
+      ],
+      "next_document": "implementation/evidence/M01/2026-10-20-menu-text-contrast.json",
+      "next_action": "User visually reviews the brighter menu text in the separate preview executable; formal M01-UI gate remains open."
+    },
+    {
       "key": "public-source-snapshot",
       "stage": "ui-menu",
       "feature_ids": [],
@@ -13185,7 +13229,8 @@
         "Font hinting disabled so menu glyphs render with anti-aliased outlines.",
         "Category cards raised with drop shadow/lit top edge; label contrast raised to at least 7.5:1.",
         "Main-menu palettes expanded to the full MainMenu.ini reference: 356 unique authored icons across 12 menus, 308 feature-mapped.",
-        "Full menus keep a bounded scrolling palette so Layers/Projects stay visible at 911x480."
+        "Full menus keep a bounded scrolling palette so Layers/Projects stay visible at 911x480.",
+        "Menu page arrows (drawn triangles) step the long palette without drag/wheel."
       ],
       "tests": {
         "chrome_actions": "11 passed",
