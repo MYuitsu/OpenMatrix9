@@ -26,7 +26,9 @@
       "category flow row wraps at the rail edge",
       "dark-green selected category card",
       "icons scale with rail width and screen size",
-      "soft toolbar gradient"
+      "soft toolbar gradient",
+      "25% larger command icons",
+      "11 pt crisper menu labels"
     ]
   },
   "checks": [
@@ -188,17 +190,17 @@
   ],
   "logs": {
     "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
-    "acceptance_sha256": "6f19775b4071931dcfd77db999b4ce1ae958f2fc1f813ad31a2a9d2f8e5c1e33",
+    "acceptance_sha256": "6d31c8e91a89c5f429a16b55b5c0374ee85d58a0ec947647cf567582104a68b3",
     "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
-    "app_lib_sha256": "a1ddf6f54b990d04c66755851175f468e85c8c3c1dcddffd783cd1e56c728622",
+    "app_lib_sha256": "69468beab2e0186dfb1f060e930bd3e46d7373c2e0124d043072b8dd01d7cc02",
     "clippy_touched": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/clippy-touched.log",
     "clippy_touched_sha256": "be7d9b18a8593ed71d6869e3c97c9ddf51916f41de7924019082515b0463e590"
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "36fdd5db4f7fb71516148cbbd6da02ed456c5db498721fb5f41345a2f3bb7ca9",
+    "screenshot_sha256": "b22af631067cd2510d3ce038c151066d2e683008f7461b8a73db3f6bcdff1d6a",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "8b811d495d23d71cd67556ecaaf77172f9a42edadba0a329781a94d466c1be6c",
+    "receipt_sha256": "021da753c0b87b8656c6eaebd0a55387f1dd21d016ba9b680101ffe86886127d",
     "passes": 21,
     "view_rects": {
       "Looking Down": [

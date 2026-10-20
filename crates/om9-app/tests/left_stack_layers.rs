@@ -322,7 +322,7 @@ fn icon_edge_follows_the_rail_width() {
         assert!((outer - rail).abs() <= 0.5, "{label}: outer {outer}");
         let edge = app.left_icon_edge;
         let expected = (rail_icon_edge(outer) * app.screen_icon_scale())
-            .clamp(18., 34.)
+            .clamp(23., 42.)
             .round();
         assert_eq!(edge, expected, "{label}: edge follows outer and screen");
         if let Some(previous) = previous {
@@ -357,9 +357,9 @@ fn icon_edge_follows_the_rail_width() {
         );
     }
     // Anchors of the rule at the three documented widths.
-    assert_eq!(rail_icon_edge(LEFT_RAIL_MIN), 18.);
-    assert_eq!(rail_icon_edge(LEFT_RAIL_DEFAULT), 22.);
-    assert_eq!(rail_icon_edge(LEFT_RAIL_MAX), 34.);
+    assert_eq!(rail_icon_edge(LEFT_RAIL_MIN), 23.);
+    assert_eq!(rail_icon_edge(LEFT_RAIL_DEFAULT), 28.);
+    assert_eq!(rail_icon_edge(LEFT_RAIL_MAX), 42.);
 }
 
 #[test]

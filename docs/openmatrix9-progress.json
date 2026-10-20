@@ -13179,7 +13179,8 @@
         "Added optional Feature.right_click metadata and an inert secondary-click slot that never repeats the primary action.",
         "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence.",
         "Category colours sampled from Matrix8 p14; adaptive 3/4-column cards and responsive icon sizing by rail width and screen.",
-        "Category flow row wraps at the rail edge; labels use their reference colour without leading dots; selected card is dark green."
+        "Category flow row wraps at the rail edge; labels use their reference colour without leading dots; selected card is dark green.",
+        "Icon base edge +25% (27.5 pt, rail 23–42 pt); 11 pt menu/category labels."
       ],
       "tests": {
         "chrome_actions": "11 passed",
@@ -13500,7 +13501,8 @@
         "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-03.diffstat.txt",
         "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-03.target-test.log",
         "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-05.regression.log",
-        "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-05.ui-review.json"
+        "implementation/evidence/M01/OM9-L3-03-14-005/OM9-L4-03-14-005-05.ui-review.json",
+        "implementation/evidence/M01/OM9-L3-03-14-005/object-info-label-in-a-real-window.png"
       ],
       "gate_state": {
         "manual_test_gate": "M01-UI",
@@ -13512,13 +13514,14 @@
       "plan_tree_modified": false,
       "not_yet_done": [
         "Checklist thu cong Z1..Z4 chua duoc nguoi ky.",
-        "Anh cua so that cua nhan: da xac dinh 2 manh ghep (allow-list PANEL_AUDIT_SCENARIOS + record_panel_checks diền đủ trường chuẩn), con mot cau hoi (arm dispatch co duoc chay khong) — xem ui-review L3-005."
+        "Harness: them mot lan retry cho tien trinh bi OS kill (da gap 2 lan, khong phai loi app)."
       ],
       "next_action": "OM9-L3-03-14-006 (Superselect By Jewelry Object Type).",
       "notes": [
         "Real window: the harness itself was broken by the 2026-10-17 tree merge (it looked for <root>/target/debug/om9.exe while the build uses CARGO_TARGET_DIR, and it ran the app with cwd=<root>/standalone, which no longer exists). Both are fixed in tools/validate_m01_l3_003_panels.py. After the fix it runs 6/7 PASS; the one failure is `readback-recover` (extra float_after_readback.3 132.0 != 120.0, notes [] lack Recovered) — a FLOATING PANE MINIMUM case, not the Object Info label, and NOT diagnosed yet. The panel scenarios do not select an object, so they cannot prove the label: a scripted selection scenario is the next slice. No real-window claim is made for the label.",
         "RESOLVED AND GREEN: the harness expectation was stale and is corrected. The scenario now forces the window-readback path with a 300x40 rectangle; the app clamps it to [28,49,300,120] (FLOAT_MIN_HEIGHT) and says 'Display was moved back inside the window'; one frame later the REAL window reports its own 132 px height, above the minimum and inside the work area, which the readback legitimately accepts. The harness asserts on the forced clamp and the message (float_after_force.2/3, message_after_force) instead of the frame-later state. Full harness: 7/7 PASS.",
-        "Window harness: 7/7 PASS (verified twice; one earlier 'float-drop exit -1' was a race with a concurrent cargo build, not a code regression — run alone it passes). The Object Info label still has no window photo. Findings for the next attempt: (1) OM9_UI_AUDIT_PANELS is validated against PANEL_AUDIT_SCENARIOS in ui.rs, so a new scenario needs its name added there (this was the real cause of the three timeouts); (2) record_panel_checks DOES fill left_order, work_area, floating and drag_in_progress from live state, so a receipt whose checks lack those fields did not come from the arm we added — verify the dispatch actually takes it (log audit.panel_checks.len()) before trusting the run."
+        "Window harness: 7/7 PASS (verified twice; one earlier 'float-drop exit -1' was a race with a concurrent cargo build, not a code regression — run alone it passes). The Object Info label still has no window photo. Findings for the next attempt: (1) OM9_UI_AUDIT_PANELS is validated against PANEL_AUDIT_SCENARIOS in ui.rs, so a new scenario needs its name added there (this was the real cause of the three timeouts); (2) record_panel_checks DOES fill left_order, work_area, floating and drag_in_progress from live state, so a receipt whose checks lack those fields did not come from the arm we added — verify the dispatch actually takes it (log audit.panel_checks.len()) before trusting the run.",
+        "REAL WINDOW: the new `object-info` audit scenario drew one line, selected it and the receipt carries dock.object_info = {\"kind\": \"Line\", \"label\": \"Line \\u00b7 10.000 \\u00d7 4.000 \\u00d7 0.000 \\u00b7 valid\"}; the screenshot is implementation/evidence/M01/OM9-L3-03-14-005/object-info-label-in-a-real-window.png. The scenario passes on its own (3 consecutive runs) and in a full run was once killed by the OS (exit -1, no receipt) — a harness-level transient already seen with float-drop; a one-retry in tools/validate_m01_l3_003_panels.py is the next small fix. Two real causes found on the way: the scenario name had to be added to PANEL_AUDIT_SCENARIOS (ui.rs) and the dispatch arm needed `return` (without it the default drag script ran too)."
       ]
     },
     {

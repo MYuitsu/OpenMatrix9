@@ -293,7 +293,7 @@ impl MatrixApp {
             rect.left_center() + Vec2::new(8., 0.),
             Align2::LEFT_CENTER,
             id.bar_title(),
-            FontId::proportional(10.5),
+            FontId::proportional(11.),
             PANEL_INK,
         );
         // The reserved BUILDER area carries no close box (design review NIT 7):
@@ -357,7 +357,7 @@ impl MatrixApp {
         right_click: Option<&str>,
     ) -> egui::Response {
         // Menu columns draw at the width-driven edge; every other caller (the
-        // toolbars) keeps the base 22 because `column_icon_edge` is reset after
+        // toolbars) keeps the responsive base because `column_icon_edge` is reset after
         // each column.
         let (rect, response) = ui.allocate_exact_size(
             Vec2::splat(self.column_icon_edge),
@@ -532,7 +532,7 @@ impl MatrixApp {
                     for (i, category) in CATEGORIES.iter().enumerate() {
                         let accent = CATEGORY_COLORS[i];
                         let selected = self.main_category == i;
-                        let text = RichText::new(*category).color(accent).size(9.5);
+                        let text = RichText::new(*category).color(accent).size(11.);
                         let button = egui::Button::new(text)
                             .fill(if selected {
                                 SELECTED_CARD
@@ -742,7 +742,7 @@ impl MatrixApp {
     }
     pub(super) fn toolbars_ui(&mut self, ui: &mut egui::Ui) {
         self.toolbar_icon_edge = (dock_layout::ICON_BASE_EDGE * self.screen_icon_scale)
-            .clamp(dock_layout::ICON_MIN_EDGE, 26.)
+            .clamp(dock_layout::ICON_MIN_EDGE, 32.)
             .round();
         self.column_icon_edge = self.toolbar_icon_edge;
         self.file_toolbar_rects.clear();

@@ -49,11 +49,11 @@ pub const LEFT_RAIL_DEFAULT: f32 = 300.;
 /// measured from a real frame (see `left-dock-measurements.md`).
 pub const LEFT_RAIL_CHROME_PX: f32 = 5.;
 /// Icon box edge (points) in the left column at the default rail width.
-pub const ICON_BASE_EDGE: f32 = 22.;
+pub const ICON_BASE_EDGE: f32 = 27.5;
 /// Smallest icon box edge a narrow rail uses.
-pub const ICON_MIN_EDGE: f32 = 18.;
+pub const ICON_MIN_EDGE: f32 = 23.;
 /// Largest icon box edge a widened rail uses.
-pub const ICON_MAX_EDGE: f32 = 34.;
+pub const ICON_MAX_EDGE: f32 = 42.;
 /// Neutral section used wherever an audit, fixture or test needs something in
 /// the right dock. It is never Layers: Matrix9 shows no right dock and Layers
 /// lives in the left column.
@@ -63,7 +63,7 @@ pub const RIGHT_DOCK_FIXTURE: SectionId = SectionId::Snaps;
 // It stays the rightmost strip of the views' union, not a fixed edge overlay.
 
 /// Icon box edge for a column of the given OUTER width: proportional to the
-/// default 300 px rail, clamped to 18..34 and rounded to whole points.
+/// default 300 px rail, clamped to 23..42 and rounded to whole points.
 /// Non-finite widths give the base edge.
 pub fn rail_icon_edge(outer_width: f32) -> f32 {
     if !outer_width.is_finite() {
@@ -1159,9 +1159,9 @@ mod tests {
 
     #[test]
     fn rail_icon_edge_hits_its_anchors_and_stays_monotone_and_clamped() {
-        assert_eq!(rail_icon_edge(240.), 18.);
-        assert_eq!(rail_icon_edge(300.), 22.);
-        assert_eq!(rail_icon_edge(460.), 34.);
+        assert_eq!(rail_icon_edge(240.), 23.);
+        assert_eq!(rail_icon_edge(300.), 28.);
+        assert_eq!(rail_icon_edge(460.), 42.);
         assert_eq!(rail_icon_edge(0.), ICON_MIN_EDGE);
         assert_eq!(rail_icon_edge(10_000.), ICON_MAX_EDGE);
         for bad in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
