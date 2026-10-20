@@ -11,18 +11,18 @@ const PANEL_EDGE: Color32 = Color32::from_rgb(53, 70, 88);
 const PANEL_INK: Color32 = Color32::from_rgb(221, 231, 242);
 const ACCENT: Color32 = Color32::from_rgb(45, 212, 191);
 const CATEGORY_COLORS: [Color32; 12] = [
-    Color32::from_rgb(212, 176, 0),  // Curve: gold, Matrix reference
-    Color32::from_rgb(46, 158, 107), // Surface: teal-green
-    Color32::from_rgb(123, 63, 160), // Solid: purple
-    Color32::from_rgb(214, 69, 69),  // Transform: red
-    Color32::from_rgb(76, 175, 80),  // SubD/TSpline: green
-    Color32::from_rgb(198, 198, 58), // Art: yellow-green
-    Color32::from_rgb(214, 69, 69),  // Builder: red
-    Color32::from_rgb(91, 75, 154),  // Tools: indigo
-    Color32::from_rgb(47, 128, 237), // Gems: blue
-    Color32::from_rgb(193, 58, 166), // Setting: magenta
-    Color32::from_rgb(242, 140, 40), // Cutters: orange
-    Color32::from_rgb(42, 167, 160), // Render: teal
+    Color32::from_rgb(201, 173, 46),  // Curve: sampled from Matrix8 p14
+    Color32::from_rgb(71, 186, 143),  // Surface
+    Color32::from_rgb(133, 88, 164),  // Solid
+    Color32::from_rgb(239, 71, 35),   // Transform
+    Color32::from_rgb(123, 194, 70),  // SubD/TSpline
+    Color32::from_rgb(211, 211, 45),  // Art
+    Color32::from_rgb(212, 34, 46),   // Builder
+    Color32::from_rgb(107, 102, 174), // Tools
+    Color32::from_rgb(74, 130, 195),  // Gems
+    Color32::from_rgb(166, 34, 142),  // Setting
+    Color32::from_rgb(244, 116, 33),  // Cutters
+    Color32::from_rgb(31, 185, 184),  // Render
 ];
 const CATEGORIES: [&str; 12] = [
     "Curve",
@@ -526,38 +526,51 @@ impl MatrixApp {
                     }
                 });
                 self.main_category_rects.clear();
-                for (row, categories) in CATEGORIES.chunks(6).enumerate() {
-                    ui.horizontal_wrapped(|ui| {
+                let columns = if ui.available_width() < 280. { 3 } else { 4 };
+                let gap = ui.spacing().item_spacing.x;
+                for (row, categories) in CATEGORIES.chunks(columns).enumerate() {
+                    let width = ((ui.available_width() - gap * (columns - 1) as f32)
+                        / columns as f32)
+                        .max(48.);
+                    ui.horizontal(|ui| {
                         for (column, category) in categories.iter().enumerate() {
-                            let i = row * 6 + column;
+                            let i = row * columns + column;
                             let accent = CATEGORY_COLORS[i];
                             let selected = self.main_category == i;
-                            let label = format!("   {category}");
-                            let text = RichText::new(label)
-                                .color(if selected { Color32::WHITE } else { PANEL_INK })
-                                .size(9.5);
-                            let button = egui::Button::new(text)
-                                .fill(if selected {
-                                    PANEL_ALT
-                                } else {
-                                    Color32::TRANSPARENT
-                                })
-                                .corner_radius(4)
-                                .stroke(if selected {
-                                    Stroke::new(1., accent)
-                                } else {
-                                    Stroke::NONE
-                                })
-                                .min_size(Vec2::new(0., 18.));
-                            let response = ui
-                                .add(button)
-                                .on_hover_text(format!("{category} command category"));
-                            ui.painter().circle_filled(
-                                egui::pos2(response.rect.left() + 7., response.rect.center().y),
-                                2.4,
+                            let (rect, response) =
+                                ui.allocate_exact_size(Vec2::new(width, 22.), Sense::click());
+                            let response =
+                                response.on_hover_text(format!("{category} command category"));
+                            let fill = if selected {
+                                PANEL_ALT
+                            } else if response.hovered() {
+                                PANEL_EDGE
+                            } else {
+                                Color32::from_rgb(24, 35, 48)
+                            };
+                            let painter = ui.painter();
+                            painter.rect_filled(rect, 5, fill);
+                            painter.rect_stroke(
+                                rect.shrink(0.5),
+                                5,
+                                Stroke::new(1., if selected { accent } else { PANEL_EDGE }),
+                                egui::StrokeKind::Inside,
+                            );
+                            painter.circle_filled(
+                                egui::pos2(rect.left() + 8., rect.center().y),
+                                3.,
                                 accent,
                             );
-                            self.main_category_rects.insert(i, response.rect);
+                            painter
+                                .with_clip_rect(rect.shrink2(Vec2::new(14., 2.)))
+                                .text(
+                                    egui::pos2(rect.left() + 15., rect.center().y),
+                                    Align2::LEFT_CENTER,
+                                    *category,
+                                    FontId::proportional(10.),
+                                    if selected { Color32::WHITE } else { PANEL_INK },
+                                );
+                            self.main_category_rects.insert(i, rect);
                             if response.clicked() {
                                 self.main_category = i;
                                 self.focus_cmd = true;
@@ -754,6 +767,10 @@ impl MatrixApp {
         });
     }
     pub(super) fn toolbars_ui(&mut self, ui: &mut egui::Ui) {
+        self.toolbar_icon_edge = (dock_layout::ICON_BASE_EDGE * self.screen_icon_scale)
+            .clamp(dock_layout::ICON_MIN_EDGE, 26.)
+            .round();
+        self.column_icon_edge = self.toolbar_icon_edge;
         self.file_toolbar_rects.clear();
         self.toolbar_rect = Some(ui.max_rect());
         egui::ScrollArea::horizontal()
@@ -788,12 +805,12 @@ impl MatrixApp {
         let tab = TABS[self.toolbar_tab];
         egui::ScrollArea::horizontal()
             .id_salt(("toolbar-palette", tab))
-            .max_height(24.)
+            .max_height(self.toolbar_icon_edge + 2.)
             .auto_shrink([false, true])
             .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden)
             .show(ui, |ui| {
                 ui.horizontal(|ui| {
-                    ui.set_min_height(22.);
+                    ui.set_min_height(self.toolbar_icon_edge);
                     let palette = toolbar_palette(tab);
                     if palette.is_empty() {
                         ui.weak(format!("{tab} tools unavailable"));

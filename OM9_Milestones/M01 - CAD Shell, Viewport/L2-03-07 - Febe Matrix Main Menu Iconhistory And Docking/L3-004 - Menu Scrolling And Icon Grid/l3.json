@@ -181,7 +181,7 @@
     "date": "2026-10-20",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Scrollable/wrapped icon grid per selected category and narrow-rail allocation.",
+    "scope": "Scrollable/wrapped icon grid per selected category; icon boxes scale with rail width and logical screen size and stay inside the narrow-rail allocation.",
     "evidence": [
       "implementation/design/M01/OM9-L2-03-07/README.md",
       "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",

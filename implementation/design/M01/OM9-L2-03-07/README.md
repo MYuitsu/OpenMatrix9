@@ -16,14 +16,18 @@ The visual language is modernized without changing hit targets or layout geometr
   remains the same click/drag target.
 - Command icons are rounded tiles with a subtle outline, dark resting fill, lighter hover and muted
   disabled state instead of raised bevel buttons.
-- Main Menu categories follow the Matrix reference colours as a coloured bullet plus a white label
-  (gold Curve, teal Surface, purple Solid, red Transform, green SubD/TSpline, yellow-green Art, red
-  Builder, indigo Tools, blue Gems, magenta Setting, orange Cutters, teal Render). The selected
-  category gets a subtle dark card and matching accent border; the 6-per-row arrangement and all
-  twelve names/order are unchanged.
+- Main Menu categories use the **RGB values sampled from Matrix8 p14** and keep the reference
+  colour identity: gold Curve, teal Surface, purple Solid, red Transform, green SubD/TSpline,
+  yellow-green Art, red Builder, indigo Tools, blue Gems, magenta Setting, orange Cutters, teal
+  Render. Each is a modern dark card with a coloured dot and white label; the selected category gets
+  a matching accent border. The grid adapts to 3 columns on a narrow rail and 4 on a normal rail,
+  preserving the documented category order.
 - Toolbar row uses a soft light gradient and keeps the existing 67-point allocation.
 - Icon tooltips keep the command name and append an optional registered right-click command. If no
   alternative is registered, the secondary click is inert and never replays the primary command.
+- Command-icon boxes scale with both the dock width and the logical screen size: rail icons follow
+  the 240–460 pt rail and toolbar icons follow a 0.85–1.2 screen scale, clamped so the toolbar keeps
+  its 67-pt allocation.
 
 ## Delivered behavior
 
@@ -36,17 +40,19 @@ The visual language is modernized without changing hit targets or layout geometr
 
 ## Verification
 
-- `chrome_actions` — **9 passed**: F4 datum, category chip selection, right-click inert slot, view
-  tabs/menu, maximized tab switch, disabled snaps.
+- `chrome_actions` — **10 passed**: F4 datum, category card selection, right-click inert slot, screen
+  icon scaling, view tabs/menu, maximized tab switch, disabled snaps.
 - `left_stack_layers` — **8 passed**: documented left stack, 300-pt rail, layer placement, reset and
   save/reload.
 - `shell_docking` — **10 passed**; `panel_ops` — **33 passed**: collapse/reorder/float/dock.
 - `dock_layout_default` — **7**, `dock_layout_persistence` — **6**: default/reset/reload.
 - `command_sessions` — **6**, `command_options_and_repeat` — **6**: recent command history.
 - `startup_contract` — **3**: failed start leaves layout untouched.
+- `om9-app --lib` — **104 passed**.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
-  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `071a0519…`). The screenshot shows the modern
-  slate rail, colored category chips, rounded icon tiles and the unchanged four-viewport placement.
+  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `71d05ed1…`). The screenshot shows the modern
+  slate rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
+  placement.
   This is automated evidence, not human sign-off.
 
 ## Remaining

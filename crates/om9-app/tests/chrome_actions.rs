@@ -53,6 +53,24 @@ fn click(app: &mut MatrixApp, context: &egui::Context, at: Pos2) -> egui::FullOu
         ],
     )
 }
+fn frame_at(
+    app: &mut MatrixApp,
+    context: &egui::Context,
+    size: Vec2,
+    events: Vec<Event>,
+) -> egui::FullOutput {
+    let mut output = context.run_ui(
+        egui::RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, size)),
+            events,
+            ..Default::default()
+        },
+        |ui| app.show(ui),
+    );
+    output.textures_delta.clear();
+    output
+}
+
 fn secondary_click(app: &mut MatrixApp, context: &egui::Context, at: Pos2) -> egui::FullOutput {
     frame(
         app,
@@ -184,6 +202,18 @@ fn help_popup_contains_help_and_about_without_feature_catalog_actions() {
     assert!(text_positions(&opened, "Matrix Interface").is_empty());
     assert!(text_positions(&opened, "Line").is_empty());
     assert!(!app.controller.is_running());
+}
+
+#[test]
+fn icons_scale_with_the_screen_size() {
+    let context = egui::Context::default();
+    let mut small = MatrixApp::new(Document::new("small screen")).unwrap();
+    frame_at(&mut small, &context, Vec2::new(1280., 720.), Vec::new());
+    let mut large = MatrixApp::new(Document::new("large screen")).unwrap();
+    frame_at(&mut large, &context, Vec2::new(1600., 1000.), Vec::new());
+    assert!(large.screen_icon_scale() > small.screen_icon_scale());
+    assert!(large.toolbar_icon_edge() > small.toolbar_icon_edge());
+    assert!(large.left_icon_edge >= small.left_icon_edge);
 }
 
 #[test]

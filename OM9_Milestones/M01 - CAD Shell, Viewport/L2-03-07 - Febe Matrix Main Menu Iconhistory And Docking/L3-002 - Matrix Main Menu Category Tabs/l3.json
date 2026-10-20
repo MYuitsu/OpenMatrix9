@@ -181,7 +181,7 @@
     "date": "2026-10-20",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Twelve Main Menu category chips with modern accent colors and selection state; File/View/Utilities/Measure/Custom placeholders.",
+    "scope": "Twelve Main Menu categories with RGB values sampled from Matrix8 p14, modern dark cards, adaptive 3/4-column grid and selection state; File/View/Utilities/Measure/Custom placeholders.",
     "evidence": [
       "implementation/design/M01/OM9-L2-03-07/README.md",
       "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",

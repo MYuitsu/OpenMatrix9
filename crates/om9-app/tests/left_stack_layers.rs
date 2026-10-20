@@ -23,9 +23,9 @@
 //! SIMULATED/AUTOMATED evidence. It does not replace the human M01-UI sign-off.
 use eframe::egui::{self, Vec2};
 use om9_app::dock_layout::{
-    CANVAS_MIN_WIDTH, FloatRect, ICON_BASE_EDGE, LEFT_RAIL_CHROME_PX, LEFT_RAIL_DEFAULT,
-    LEFT_RAIL_MAX, LEFT_RAIL_MIN, NARROW_WINDOW_WIDTH, PanelId, RIGHT_DOCK_FIXTURE, RIGHT_DOCK_MAX,
-    SectionId, rail_icon_edge,
+    CANVAS_MIN_WIDTH, FloatRect, LEFT_RAIL_CHROME_PX, LEFT_RAIL_DEFAULT, LEFT_RAIL_MAX,
+    LEFT_RAIL_MIN, NARROW_WINDOW_WIDTH, PanelId, RIGHT_DOCK_FIXTURE, RIGHT_DOCK_MAX, SectionId,
+    rail_icon_edge,
 };
 use om9_app::file_lifecycle::FileKind;
 use om9_app::ui::MatrixApp;
@@ -321,7 +321,10 @@ fn icon_edge_follows_the_rail_width() {
         let outer = app.left_rail_outer_px;
         assert!((outer - rail).abs() <= 0.5, "{label}: outer {outer}");
         let edge = app.left_icon_edge;
-        assert_eq!(edge, rail_icon_edge(outer), "{label}: edge follows outer");
+        let expected = (rail_icon_edge(outer) * app.screen_icon_scale())
+            .clamp(18., 34.)
+            .round();
+        assert_eq!(edge, expected, "{label}: edge follows outer and screen");
         if let Some(previous) = previous {
             assert!(edge > previous, "{label}: {edge} not above {previous}");
         }
@@ -339,13 +342,13 @@ fn icon_edge_follows_the_rail_width() {
                 "{label}: icon {rect:?} overflows the sidebar {sidebar:?}"
             );
         }
-        // Toolbar icons are not part of the column rule: they stay 22.
+        // Toolbar icons follow the same screen scale, not the rail column rule.
         let toolbar = app
             .file_toolbar_rect(FileKind::New)
             .expect("New toolbar icon");
         assert!(
-            (toolbar.width() - ICON_BASE_EDGE).abs() <= 0.5,
-            "{label}: toolbar icon {toolbar:?} must stay {ICON_BASE_EDGE}"
+            (toolbar.width() - app.toolbar_icon_edge()).abs() <= 0.5,
+            "{label}: toolbar icon {toolbar:?} must match the responsive edge"
         );
         println!(
             "OM9_SWEEP icon_edge rail={rail} outer={outer} edge={edge} icons={} toolbar={}",

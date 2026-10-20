@@ -203,6 +203,10 @@ pub struct MatrixApp {
     pub window_title: String,
     /// F4 jewelry datum overlay (world 0,0,0 origin and ring centre).
     world_datum_visible: bool,
+    /// Responsive icon scale derived from the logical screen size.
+    screen_icon_scale: f32,
+    /// Toolbar icon edge after the responsive scale is applied.
+    toolbar_icon_edge: f32,
     current_ui_context: Option<egui::Context>,
     hover: Option<Point3>,
     /// Rubber-band selection: where the drag started, in screen points.
@@ -510,6 +514,8 @@ impl MatrixApp {
             file_f6_rects: BTreeMap::new(),
             window_title: String::new(),
             world_datum_visible: true,
+            screen_icon_scale: 1.,
+            toolbar_icon_edge: 22.,
             current_ui_context: None,
             hover: None,
             band_start: None,
@@ -1237,6 +1243,25 @@ impl MatrixApp {
         self.world_datum_visible
     }
 
+    pub fn screen_icon_scale(&self) -> f32 {
+        self.screen_icon_scale
+    }
+
+    pub fn toolbar_icon_edge(&self) -> f32 {
+        self.toolbar_icon_edge
+    }
+
+    /// The seven palette categories, in the order the Layers menu shows them
+    /// (Matrix8 book 1, pages 54-57; OM9-L3-03-14-001).
+    pub fn palette_categories(&self) -> [&'static str; 7] {
+        om9_core::layers::LayerCategory::ALL.map(|category| category.label())
+    }
+    /// The category a palette slot belongs to, or its own label when it has none
+    /// (slot 33, "Lights").
+    pub fn palette_slot_label(&self, number: u8) -> Option<&'static str> {
+        let slot = om9_core::layers::PresetSlot::new(number).ok()?;
+        Some(slot.category_label())
+    }
     pub fn main_menu_category(&self) -> usize {
         self.main_category
     }
@@ -1247,6 +1272,7 @@ impl MatrixApp {
 
     pub fn show(&mut self, ui: &mut egui::Ui) {
         self.passes += 1;
+        self.screen_icon_scale = responsive_icon_scale(ui.ctx().content_rect());
         if !self.viewport_menu_owns_frame
             && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::F4))
         {
@@ -1500,9 +1526,11 @@ impl MatrixApp {
             .show(ui, |ui| {
                 self.sidebar_rect = Some(ui.max_rect());
                 // Icons follow the OUTER width (inner content plus frame chrome).
-                self.left_icon_edge = dock_layout::rail_icon_edge(
+                self.left_icon_edge = (dock_layout::rail_icon_edge(
                     ui.max_rect().width() + dock_layout::LEFT_RAIL_CHROME_PX,
-                );
+                ) * self.screen_icon_scale)
+                    .clamp(dock_layout::ICON_MIN_EDGE, dock_layout::ICON_MAX_EDGE)
+                    .round();
                 self.column_icon_edge = self.left_icon_edge;
                 self.icon_column = IconColumn::Left;
                 if self.viewport_menu_owns_frame {
@@ -1560,9 +1588,11 @@ impl MatrixApp {
                 )
                 .show(ui, |ui| {
                     self.right_dock_rect = Some(ui.max_rect());
-                    self.column_icon_edge = dock_layout::rail_icon_edge(
+                    self.column_icon_edge = (dock_layout::rail_icon_edge(
                         ui.max_rect().width() + dock_layout::LEFT_RAIL_CHROME_PX,
-                    );
+                    ) * self.screen_icon_scale)
+                        .clamp(dock_layout::ICON_MIN_EDGE, dock_layout::ICON_MAX_EDGE)
+                        .round();
                     self.icon_column = IconColumn::Right;
                     if self.viewport_menu_owns_frame {
                         ui.disable();
@@ -2824,6 +2854,12 @@ impl MatrixApp {
             "right_dock_outer_px": self.right_dock_outer_px,
             "command_line_px": self.regions.command_line,
             "status_bar_px": self.regions.status_bar,
+            "palette": {
+                "categories": self.palette_categories(),
+                "slots": (1..=33u8)
+                    .filter_map(|number| self.palette_slot_label(number).map(|label| (number, label)))
+                    .collect::<Vec<_>>(),
+            },
             "status_kind": self.status.kind().label(),
             "status_message": self.status.message(),
             "status_tail": self.status.tail(),
@@ -3091,6 +3127,22 @@ impl MatrixApp {
         }
     }
 }
+/// Responsive icon scale: 1.0 at the 1280x900 design size, gently shrinking on
+/// smaller screens and growing on larger ones. Bounded so the 67-pt toolbar and
+/// the 240..460-pt rail keep their documented allocations.
+fn responsive_icon_scale(rect: Rect) -> f32 {
+    if !rect.width().is_finite()
+        || !rect.height().is_finite()
+        || rect.width() <= 0.
+        || rect.height() <= 0.
+    {
+        return 1.;
+    }
+    (rect.width() / 1280.)
+        .min(rect.height() / 900.)
+        .clamp(0.85, 1.2)
+}
+
 /// F4 jewelry datum: world (0,0,0) and the ring centre, drawn as a small
 /// crosshair plus ring. It is display-only and never moves any datum coordinate.
 fn paint_world_datum(painter: &egui::Painter, camera: &Camera, viewport: Viewport, rect: Rect) {

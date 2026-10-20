@@ -13177,10 +13177,11 @@
       "changes": [
         "Modernized sidebar/main-menu palette: slate rails, rounded icon tiles, accent section rails, tinted category chips and soft toolbar gradient.",
         "Added optional Feature.right_click metadata and an inert secondary-click slot that never repeats the primary action.",
-        "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence."
+        "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence.",
+        "Category colours sampled from Matrix8 p14; adaptive 3/4-column cards and responsive icon sizing by rail width and screen."
       ],
       "tests": {
-        "chrome_actions": "9 passed",
+        "chrome_actions": "10 passed",
         "left_stack_layers": "8 passed",
         "shell_docking": "10 passed",
         "panel_ops": "33 passed",
@@ -13188,7 +13189,8 @@
         "dock_layout_persistence": "6 passed",
         "command_sessions": "6 passed",
         "command_options_and_repeat": "6 passed",
-        "startup_contract": "3 passed"
+        "startup_contract": "3 passed",
+        "app_lib": "104 passed"
       },
       "evidence": [
         "implementation/design/M01/OM9-L2-03-07/README.md",
@@ -13229,6 +13231,71 @@
         "transcript_redaction": 3
       },
       "evidence": "implementation/evidence/M01/OM9-L2-03-10-AUDIT.md"
+    },
+    {
+      "id": "m01-l3-03-14-001-matrix-layer-category-palette-2026-10-20",
+      "date": "2026-10-20",
+      "status": "standalone_implementation_verified_awaiting_manual_review",
+      "scope": "OM9-L3-03-14-001 (Matrix Layer Category Palette) - 4 L4 tasks of module OM9-L2-03-14",
+      "why": "Chu du an yeu cau module OM9-L2-03-14 (Febe Matrix Layers Objectinfo Superselect); day la L3-001 trong 8 L3.",
+      "code_added": [
+        "crates/om9-core/src/layers/category.rs (moi): PaletteGroup (4 nhom theo Matrix8 p54-57) va LayerCategory (7 category theo ke hoach), anh xa slot 1..=33, slots cua tung category, nhan; PresetSlot::category/palette_group/category_label; 4 unit test",
+        "crates/om9-app/src/ui/layers.rs: moi dong palette ve nhan category o vung trong ben trai (khong che ten/swatch/lock/visibility ben phai)",
+        "crates/om9-app/src/ui.rs: MatrixApp::palette_categories / palette_slot_label + khoi palette (categories + slot labels) trong audit receipt",
+        "crates/om9-app/tests/layer_category_palette.rs (moi): 6 test doc fixture tu dia (P1..P5, N1..N6)"
+      ],
+      "bugs_fixed": [
+        "Khong co semantic category nao: palette chi ve cac khoi 4 dong vo danh, nen 7 ten ma ke hoach va tai lieu dung (Metals/Gems/User/Heads/Finger/Cutting/Creation) khong ton tai o dau ca - khong trong code, khong tren man hinh.",
+        "Bon nhom cua tai lieu (Metals, Gems, User, Builders) cung khong duoc mo hinh hoa: group(slot) chi la khoi thi giac, khong phai nhom, va bon mau builder khong phan biet duoc voi khoi Metals/Gems/User."
+      ],
+      "validation_commands": [
+        {
+          "command": "cargo test -p om9-app --test layer_category_palette",
+          "result": "RED 4 passed/2 failed (mapping 17..=32 tam bo) -> GREEN 6 passed; 0 failed"
+        },
+        {
+          "command": "cargo test -p om9-core --lib layers::category",
+          "result": "4 passed"
+        },
+        {
+          "command": "cargo test -p om9-core -p om9-app -j 2",
+          "result": "moi nhom ok tru chrome_actions::icons_scale_with_the_screen_size (viec dang lam do cua nguoi khac trong cay lam viec, khong lien quan palette)"
+        },
+        {
+          "command": "cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings",
+          "result": "exit 0 / exit 0"
+        },
+        {
+          "command": "om9.exe --ui-audit (cua so that)",
+          "result": "dock.palette.categories = 7 nhan; 17=User, 33=Lights; exit 0"
+        }
+      ],
+      "artefacts": [
+        "implementation/design/M01/OM9-L3-03-14-001/source_crosswalk.json",
+        "implementation/design/M01/OM9-L3-03-14-001/api.md",
+        "implementation/fixtures/M01/OM9-L3-03-14-001/positive.json",
+        "implementation/fixtures/M01/OM9-L3-03-14-001/negative.json",
+        "implementation/evidence/M01/OM9-L3-03-14-001/OM9-L4-03-14-001-02.red.log",
+        "implementation/evidence/M01/OM9-L3-03-14-001/OM9-L4-03-14-001-02.green.log",
+        "implementation/evidence/M01/OM9-L3-03-14-001/OM9-L4-03-14-001-03.diffstat.txt",
+        "implementation/evidence/M01/OM9-L3-03-14-001/OM9-L4-03-14-001-03.target-test.log",
+        "implementation/evidence/M01/OM9-L3-03-14-001/OM9-L4-03-14-001-05.regression.log",
+        "implementation/evidence/M01/OM9-L3-03-14-001/OM9-L4-03-14-001-05.ui-review.json",
+        "implementation/evidence/M01/OM9-L3-03-14-001/palette-in-a-real-window.png"
+      ],
+      "gate_state": {
+        "manual_test_gate": "M01-UI",
+        "m01_l2_03_14_l3_001_scope": "AWAITING_HUMAN_REVIEW",
+        "implementation_status_promoted": false,
+        "plan_tree_modified": false
+      },
+      "milestone_status_promoted": false,
+      "plan_tree_modified": false,
+      "not_yet_done": [
+        "Checklist thu cong V1..V5 chua duoc nguoi ky (ui-review.json dang NOT_SIGNED).",
+        "Con 7 L3 cua OM9-L2-03-14: 002 (current layer + assignment), 003 (visible/locked controls), 004 (select all by layer), 005 (object info overlay), 006 (superselect by jewelry type), 007 (property editor adapter), 008 (layer state persistence visual check)."
+      ],
+      "next_action": "Lam tiep OM9-L3-03-14-002 (Current Layer And Assignment UI)."
     }
   ],
   "merge_context": {

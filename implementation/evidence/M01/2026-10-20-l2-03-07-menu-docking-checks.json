@@ -16,13 +16,15 @@
       "#141D28 panel",
       "#1B2735 card",
       "#2DD4BF accent",
-      "twelve reference category accents"
+      "RGB values sampled from Matrix8 p14"
     ],
     "preserved_positions": "left rail 300 outer, documented section order, 6 category chips per row",
     "modernized": [
       "rounded icon tiles",
       "flat section cards with accent rails",
-      "reference-colour bullet categories with white labels",
+      "reference-sampled colour dots on modern category cards",
+      "adaptive 3/4-column category grid",
+      "icons scale with rail width and screen size",
       "soft toolbar gradient"
     ]
   },
@@ -40,7 +42,8 @@
         "2"
       ],
       "exit_code": 0,
-      "test_count": 9
+      "test_count": 10,
+      "covers": "category cards, inert right-click, screen icon scaling"
     },
     {
       "name": "left-stack-layers",
@@ -174,7 +177,7 @@
         "2"
       ],
       "exit_code": 0,
-      "test_count": 101
+      "test_count": 104
     }
   ],
   "manual_gate": "M01-UI",
@@ -184,15 +187,17 @@
   ],
   "logs": {
     "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
-    "acceptance_sha256": "33adf35194b027e03f82535133ac31813b36be218c503774f3554178a6c981c0",
+    "acceptance_sha256": "6409f2029771c670b6bf2d9ca3bfdd428fe11d07247063d06211e7cbe18c73cc",
     "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
-    "app_lib_sha256": "edfb4fd8cd662876c3a5b139e73f582e09ba871bee0f868255e62275d6d06b8c"
+    "app_lib_sha256": "88e8bbb52c3994c5ece1b19ce13cbc303286a2d2cb70951758b09d7c71ea9300",
+    "clippy_touched": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/clippy-touched.log",
+    "clippy_touched_sha256": "15d07e0a160c151a1c4f4e5bc1d934afb52a8afb3cc776f08af2d4cb500b6f8d"
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "071a0519fd830679a823603bae11b0e7f73adb08e153a6394ddadb3200faaa3f",
+    "screenshot_sha256": "71d05ed19b4d46a5f4deacecb6c282adb13611f9c684ef7c1d379e6e2730fd18",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "ca0c32756c73615e87a15929e98325fb18ab96dabe7e927e08d1194b4187b043",
+    "receipt_sha256": "8262230cc951bb8376b04276fabd8571d8035268efc07314ceec16bc60a0cade",
     "passes": 21,
     "view_rects": {
       "Looking Down": [
@@ -220,5 +225,8 @@
         359.5
       ]
     }
-  }
+  },
+  "known_unrelated": [
+    "cargo clippy --all-targets reports pre-existing bool_assert_comparison in tests/layer_current_and_assign.rs:147; touched-target clippy is clean."
+  ]
 }

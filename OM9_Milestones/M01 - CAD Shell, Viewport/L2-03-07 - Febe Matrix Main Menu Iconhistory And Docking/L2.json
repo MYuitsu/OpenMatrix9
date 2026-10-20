@@ -80,7 +80,7 @@
     "date": "2026-10-20",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Matrix left sidebar order, modern menu color/card language, category tabs, SVG icon grid/tooltips/right-click slot, nine recent commands, collapse/reorder/float/reset, disabled-action visibility.",
+    "scope": "Matrix left sidebar order; reference-sampled category colours in modern dark cards; responsive SVG icon sizing by dock width and screen; category tabs, tooltips/right-click slot, nine recent commands, collapse/reorder/float/reset, disabled visibility.",
     "evidence": [
       "implementation/design/M01/OM9-L2-03-07/README.md",
       "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",
