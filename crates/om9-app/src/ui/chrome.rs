@@ -1400,20 +1400,17 @@ fn feature_category(f: &Feature) -> &str {
 fn menu_page_button(ui: &mut egui::Ui, index: usize, selected: bool) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(Vec2::new(22., 14.), Sense::click());
     let painter = ui.painter();
-    painter.rect_filled(rect, 2, Color32::from_gray(30));
+    painter.rect_filled(rect, 2, Color32::from_rgb(0, 24, 12));
     let inner = rect.shrink(1.5);
     let (top, bottom) = if selected {
         (
-            Color32::from_rgb(112, 171, 235),
-            Color32::from_rgb(54, 103, 173),
+            Color32::from_rgb(52, 164, 96),
+            Color32::from_rgb(21, 105, 58),
         )
     } else if response.hovered() {
-        (
-            Color32::from_rgb(103, 103, 103),
-            Color32::from_rgb(66, 66, 66),
-        )
+        (Color32::from_rgb(0, 58, 30), Color32::from_rgb(0, 42, 22))
     } else {
-        (Color32::from_rgb(91, 91, 91), Color32::from_rgb(57, 57, 57))
+        (Color32::from_rgb(0, 45, 22), Color32::from_rgb(0, 30, 15))
     };
     gradient(painter, inner, top, bottom);
     painter.rect_stroke(
@@ -1422,9 +1419,9 @@ fn menu_page_button(ui: &mut egui::Ui, index: usize, selected: bool) -> egui::Re
         Stroke::new(
             1.,
             if selected {
-                Color32::from_rgba_unmultiplied(255, 255, 255, 210)
+                Color32::from_rgb(190, 245, 210)
             } else {
-                Color32::from_gray(145)
+                Color32::from_rgb(80, 150, 105)
             },
         ),
         egui::StrokeKind::Inside,
@@ -1449,13 +1446,13 @@ fn menu_page_button(ui: &mut egui::Ui, index: usize, selected: bool) -> egui::Re
                 egui::pos2(inner.center().x, inner.center().y - 4.),
                 egui::pos2(inner.center().x, inner.center().y + 4.),
             ],
-            Stroke::new(2., Color32::from_rgb(20, 32, 42)),
+            Stroke::new(2., Color32::from_rgb(4, 38, 20)),
         );
     } else {
         painter.circle_stroke(
             inner.center(),
             2.6,
-            Stroke::new(1., Color32::from_rgb(98, 159, 226)),
+            Stroke::new(1., Color32::from_rgb(143, 227, 174)),
         );
     }
     response.on_hover_text(format!("Page {}", index + 1))
