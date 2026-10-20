@@ -30,7 +30,8 @@
       "soft toolbar gradient",
       "25% larger command icons",
       "11 pt crisper menu labels",
-      "near-black eye-comfort panel background with WCAG AA label contrast"
+      "near-black eye-comfort panel background with WCAG AA label contrast",
+      "font hinting disabled for smoother anti-aliased glyphs"
     ]
   },
   "checks": [
@@ -192,17 +193,17 @@
   ],
   "logs": {
     "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
-    "acceptance_sha256": "9439f46f4d7c7883f492905648336a1f3dd785e8be1f8fc169af458923206451",
+    "acceptance_sha256": "707efa2fe2d3e7259a9635e7f7428fd07e90df7c64f7937f0ec2ea229ff680b1",
     "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
-    "app_lib_sha256": "4994da0333828805183a604da2ed37b8bb2b14aeeda3fc690d1eb87517ee8cfb",
+    "app_lib_sha256": "762ddac506ce051b59565201471da93a0ed4409f3f5756b24eafdcfcb1b6cdc7",
     "clippy_touched": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/clippy-touched.log",
     "clippy_touched_sha256": "be7d9b18a8593ed71d6869e3c97c9ddf51916f41de7924019082515b0463e590"
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "9cdded26c00ce9fd952b33429f8bccd38f6e0f934f8999abc0edec8d30d77044",
+    "screenshot_sha256": "8132a4a48e268f831605e390a48d78fa94a324b3dedc9cc0c5323a3b3be1a518",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "1465e05c392e0538ffd0d30522b7210dd3064bd9bdf178ab5f94a4567f24aae7",
+    "receipt_sha256": "344f3af88893ec50c4c6bf5ef14ef1ba2f83e3b3f5ae479923497d3ecaf2e03b",
     "passes": 21,
     "view_rects": {
       "Looking Down": [

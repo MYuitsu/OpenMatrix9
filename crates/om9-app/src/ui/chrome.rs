@@ -91,6 +91,7 @@ impl MatrixApp {
         style.visuals.widgets.inactive.weak_bg_fill = Color32::from_rgb(238, 243, 248);
         style.visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(220, 235, 250);
         style.visuals.widgets.active.weak_bg_fill = Color32::from_rgb(199, 232, 227);
+        style.visuals.text_options.font_hinting = false;
         style.visuals.selection.bg_fill = ACCENT;
         style.visuals.selection.stroke = Stroke::new(1., Color32::from_rgb(15, 23, 42));
         style.visuals.window_corner_radius = 8.into();
@@ -98,6 +99,7 @@ impl MatrixApp {
         ctx.set_style_of(egui::Theme::Light, style);
     }
     pub(super) fn menu_ui(&mut self, ui: &mut egui::Ui) {
+        self.menu_rects.clear();
         egui::MenuBar::new().ui(ui, |ui| {
             for name in [
                 "File",
@@ -115,6 +117,23 @@ impl MatrixApp {
                 "Help",
             ] {
                 let menu=ui.menu_button(name, |ui| match name {
+                    "Tools" => {
+                        // Super Select (OM9-L3-03-14-006): typed filters, the manual's tool.
+                        for (label, key, filter) in [
+                            ("Super Select: Gems", "super-gems", crate::superselect::SelectFilter::Gems),
+                            ("Super Select: Bad geometry", "super-bad", crate::superselect::SelectFilter::BadGeometry),
+                            ("Super Select: Open surfaces", "super-open", crate::superselect::SelectFilter::OpenGeometry),
+                        ] {
+                            let response = ui.button(label);
+                            self.menu_rects.insert(key, response.rect);
+                            if response.clicked() {
+                                let count = self.controller.apply_superselect(filter);
+                                self.status.info(&format!("{label}: {count} selected"));
+                                self.focus_cmd = true;
+                                ui.close();
+                            }
+                        }
+                    }
                     "File" => {
                         for kind in crate::file_lifecycle::FileKind::ALL {
                             let label=if kind==crate::file_lifecycle::FileKind::New {kind.label().to_owned()} else {format!("{}…",kind.label())};
@@ -261,6 +280,7 @@ impl MatrixApp {
                     }
                 });
                 if name=="File" {self.file_menu_rect=Some(menu.response.rect);}
+                self.menu_rects.insert(name, menu.response.rect);
             }
         });
     }

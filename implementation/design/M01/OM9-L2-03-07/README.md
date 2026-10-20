@@ -30,7 +30,9 @@ The visual language is modernized without changing hit targets or layout geometr
   the 240–460 pt rail and toolbar icons follow a 0.85–1.2 screen scale. The base edge is 25% larger
   than the previous 22 pt design (27.5 pt; 23–42 pt on the rail), while the toolbar keeps its 67-pt
   allocation.
-- Menu and category labels use 11 pt type for a crisper read at 100% DPI.
+- Menu and category labels use 11 pt type for a crisper read at 100% DPI. Font hinting is disabled
+  (`Visuals::text_options.font_hinting = false`) so glyph edges use the anti-aliased outline instead
+  of grid-fitted, jagged stems.
 
 ## Delivered behavior
 
