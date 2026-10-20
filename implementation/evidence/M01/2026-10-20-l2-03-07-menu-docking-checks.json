@@ -23,7 +23,7 @@
       "rounded icon tiles",
       "flat section cards with accent rails",
       "reference-sampled colour dots on modern category cards",
-      "single horizontal scrollable category row",
+      "category flow row wraps at the rail edge",
       "dark-green selected category card",
       "icons scale with rail width and screen size",
       "soft toolbar gradient"
@@ -44,7 +44,7 @@
       ],
       "exit_code": 0,
       "test_count": 11,
-      "covers": "single-row category cards, inert right-click, screen icon scaling"
+      "covers": "category wrap at rail edge, inert right-click, screen icon scaling"
     },
     {
       "name": "left-stack-layers",
@@ -188,17 +188,17 @@
   ],
   "logs": {
     "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
-    "acceptance_sha256": "97cbae4daf92033dae1a809f053535a12a6f8a703475dda9df2e885c5a45c95e",
+    "acceptance_sha256": "f13b16c1ac1792dd2fbdd15af0dd1fd28c10f34be5502ab31d3735be3c7149f6",
     "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
-    "app_lib_sha256": "7175c917af4daf0e9e71227644b7a4ea2dea2730e005390f84d20ea7704e9472",
+    "app_lib_sha256": "cba99e470d8e254e28eaf6ac4a6bd3cfba161312d05d17472b5ae5866d5af3cf",
     "clippy_touched": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/clippy-touched.log",
-    "clippy_touched_sha256": "12a15ee3686a969a7bf5e90ecbc5f456cdffca3394c7672b4d1384c4da397488"
+    "clippy_touched_sha256": "be7d9b18a8593ed71d6869e3c97c9ddf51916f41de7924019082515b0463e590"
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "25ceab0dc846c016193f8382803b333bff4515117cd6a754e874646ea94ca556",
+    "screenshot_sha256": "5a8df9f5a147c0a80dcc42ed920e39ed8b52d75e596be3d0b3a487a5bdc6612d",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "f4d9048f12a456f1e1f18e00f1a8bf234cae148b1114d282d250c332a99a3e61",
+    "receipt_sha256": "9e1abf460a6b0b4be8fb3c9bb2a1599d328c99eef239e39e5e57a09f2d2e84d4",
     "passes": 21,
     "view_rects": {
       "Looking Down": [
@@ -228,6 +228,6 @@
     }
   },
   "known_unrelated": [
-    "cargo clippy --all-targets reports pre-existing bool_assert_comparison in tests/layer_current_and_assign.rs:147; touched-target clippy is clean."
+    "cargo clippy --all-targets reports pre-existing lints in unrelated working-tree files: tests/layer_current_and_assign.rs:147 and src/ui/panel_audit.rs:749."
   ]
 }

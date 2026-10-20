@@ -13179,7 +13179,7 @@
         "Added optional Feature.right_click metadata and an inert secondary-click slot that never repeats the primary action.",
         "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence.",
         "Category colours sampled from Matrix8 p14; adaptive 3/4-column cards and responsive icon sizing by rail width and screen.",
-        "Category row consolidated to one horizontal scrollable row; selected card uses dark green."
+        "Category flow row wraps naturally at the rail edge; selected card uses dark green."
       ],
       "tests": {
         "chrome_actions": "11 passed",
@@ -13470,12 +13470,11 @@
       "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-005 trong 8 L3.",
       "code_added": [
         "crates/om9-core/src/object_info.rs (moi): Measurement { Size, Unavailable(reason) }, ObjectInfo { kind, dimensions, valid: Option<bool>, detail, color } va Document::object_info(id, limits)",
-        "crates/om9-app/tests/object_info_overlay.rs (moi): 2 test doc fixture tu dia (I1..I5, J1..J4)"
+        "crates/om9-app/tests/object_info_overlay.rs (moi): 2 test doc fixture tu dia (I1..I5, J1..J4)",
+        "crates/om9-core/src/object_info.rs: label_text() + unit test; crates/om9-app/src/ui.rs: object_info_label paints the label beside a single selected object in the layer colour, and the receipt carries object_info { kind, label }"
       ],
       "bugs_fixed": [],
-      "open_questions": [
-        "Nhan dan trong viewport (manual: 'quick pop up label beside a selected object … in the layer colour') CHUA ve - item nay moi co du lieu va luat; can chu du an xac nhan vi tri/hinh thuc truoc khi lam slice ve."
-      ],
+      "open_questions": [],
       "validation_commands": [
         {
           "command": "cargo test -p om9-app --test object_info_overlay",
@@ -13511,11 +13510,14 @@
       "milestone_status_promoted": false,
       "plan_tree_modified": false,
       "not_yet_done": [
-        "Nhan Object Info trong viewport (ve) chua lam.",
         "Checklist thu cong Z1..Z4 chua duoc nguoi ky.",
-        "Con 3 L3: 006 (superselect by jewelry type), 007 (property editor adapter), 008 (persistence visual check)."
+        "Window harness after the merge fix: 6/7 PASS. The failing one, `readback-recover`, is PRECISE now: the float comes back as height 132 where the harness expects 120, and with no `Recovered` note. Measured facts: FLOAT_MIN_HEIGHT = 120 (dock_layout.rs:102) and the scenario drops DISPLAY near the bottom edge of the views; a 132 px rectangle is therefore ABOVE the minimum, so the recovery path is legitimately not triggered — the scenario only forces a recovery when the drop happens to land with less than the minimum room under it, which is incidental to window geometry and cannot be forced because the audit window size is fixed. So the likely truth is that the HARNESS expectation (120 + `Recovered`) is stale, not that the app regressed; I have not proven it and no code changed on that basis. Next step, written down: make the scenario set an explicit too-small float rectangle through the panel op instead of relying on where the drop lands, then assert the clamped 120 and the note.",
+        "Kich ban script CHON mot doi tuong de chung minh nhan Object Info bang cua so that (cac kich ban panel khong chon gi)."
       ],
-      "next_action": "OM9-L3-03-14-006 (Superselect By Jewelry Object Type)."
+      "next_action": "OM9-L3-03-14-006 (Superselect By Jewelry Object Type).",
+      "notes": [
+        "Real window: the harness itself was broken by the 2026-10-17 tree merge (it looked for <root>/target/debug/om9.exe while the build uses CARGO_TARGET_DIR, and it ran the app with cwd=<root>/standalone, which no longer exists). Both are fixed in tools/validate_m01_l3_003_panels.py. After the fix it runs 6/7 PASS; the one failure is `readback-recover` (extra float_after_readback.3 132.0 != 120.0, notes [] lack Recovered) — a FLOATING PANE MINIMUM case, not the Object Info label, and NOT diagnosed yet. The panel scenarios do not select an object, so they cannot prove the label: a scripted selection scenario is the next slice. No real-window claim is made for the label."
+      ]
     },
     {
       "id": "m01-l3-03-14-006-superselect-by-jewelry-object-type-2026-10-20",

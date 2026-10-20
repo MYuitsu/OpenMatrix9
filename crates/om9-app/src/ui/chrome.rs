@@ -527,57 +527,50 @@ impl MatrixApp {
                     }
                 });
                 self.main_category_rects.clear();
-                egui::ScrollArea::horizontal()
-                    .id_salt("main-menu-category-row")
-                    .max_height(24.)
-                    .auto_shrink([false, true])
-                    .show(ui, |ui| {
-                        ui.horizontal(|ui| {
-                            ui.spacing_mut().item_spacing.x = 4.;
-                            for (i, category) in CATEGORIES.iter().enumerate() {
-                                let accent = CATEGORY_COLORS[i];
-                                let selected = self.main_category == i;
-                                let (rect, response) =
-                                    ui.allocate_exact_size(Vec2::new(68., 22.), Sense::click());
-                                let response =
-                                    response.on_hover_text(format!("{category} command category"));
-                                let fill = if selected {
-                                    SELECTED_CARD
-                                } else if response.hovered() {
-                                    Color32::from_rgb(28, 55, 47)
-                                } else {
-                                    Color32::from_rgb(24, 35, 48)
-                                };
-                                let painter = ui.painter();
-                                painter.rect_filled(rect, 5, fill);
-                                painter.rect_stroke(
-                                    rect.shrink(0.5),
-                                    5,
-                                    Stroke::new(1., if selected { accent } else { PANEL_EDGE }),
-                                    egui::StrokeKind::Inside,
-                                );
-                                painter.circle_filled(
-                                    egui::pos2(rect.left() + 8., rect.center().y),
-                                    3.,
-                                    accent,
-                                );
-                                painter
-                                    .with_clip_rect(rect.shrink2(Vec2::new(14., 2.)))
-                                    .text(
-                                        egui::pos2(rect.left() + 15., rect.center().y),
-                                        Align2::LEFT_CENTER,
-                                        *category,
-                                        FontId::proportional(10.),
-                                        if selected { Color32::WHITE } else { PANEL_INK },
-                                    );
-                                self.main_category_rects.insert(i, rect);
-                                if response.clicked() {
-                                    self.main_category = i;
-                                    self.focus_cmd = true;
-                                }
-                            }
-                        });
-                    });
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing = Vec2::new(3., 3.);
+                    for (i, category) in CATEGORIES.iter().enumerate() {
+                        let accent = CATEGORY_COLORS[i];
+                        let selected = self.main_category == i;
+                        let font = FontId::proportional(9.5);
+                        let mut job = egui::text::LayoutJob::default();
+                        job.append(
+                            "● ",
+                            0.,
+                            egui::TextFormat {
+                                font_id: font.clone(),
+                                color: accent,
+                                ..Default::default()
+                            },
+                        );
+                        job.append(
+                            category,
+                            0.,
+                            egui::TextFormat {
+                                font_id: font,
+                                color: if selected { Color32::WHITE } else { PANEL_INK },
+                                ..Default::default()
+                            },
+                        );
+                        let button = egui::Button::new(job)
+                            .fill(if selected {
+                                SELECTED_CARD
+                            } else {
+                                Color32::from_rgb(24, 35, 48)
+                            })
+                            .corner_radius(4)
+                            .stroke(Stroke::new(1., if selected { accent } else { PANEL_EDGE }))
+                            .min_size(Vec2::new(0., 20.));
+                        let response = ui
+                            .add(button)
+                            .on_hover_text(format!("{category} command category"));
+                        self.main_category_rects.insert(i, response.rect);
+                        if response.clicked() {
+                            self.main_category = i;
+                            self.focus_cmd = true;
+                        }
+                    }
+                });
                 let category = CATEGORIES[self.main_category];
                 let palette = category_palette(category);
                 ui.horizontal_wrapped(|ui| {

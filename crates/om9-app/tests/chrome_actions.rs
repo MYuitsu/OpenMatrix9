@@ -217,20 +217,31 @@ fn icons_scale_with_the_screen_size() {
 }
 
 #[test]
-fn main_menu_categories_stay_on_one_horizontal_row() {
+fn main_menu_categories_wrap_at_the_rail_edge() {
     let (app, _context, _) = startup();
-    let rows: Vec<f32> = (0..12)
-        .map(|i| {
-            app.main_category_rect(i)
-                .expect("all twelve categories")
-                .center()
-                .y
-        })
+    let sidebar = app.sidebar_rect.expect("sidebar rect");
+    let rects: Vec<Rect> = (0..12)
+        .map(|i| app.main_category_rect(i).expect("all twelve categories"))
         .collect();
-    assert_eq!(rows.len(), 12);
+    assert_eq!(rects.len(), 12);
+    for rect in &rects {
+        assert!(
+            rect.max.x <= sidebar.max.x + 0.5,
+            "category {rect:?} overflowed the rail edge {sidebar:?}"
+        );
+    }
+    let rows = rects
+        .iter()
+        .filter(|rect| (rect.center().y - rects[0].center().y).abs() <= 0.5)
+        .count();
+    assert!(rows >= 2, "only one category fits the first row");
+    let distinct_rows = rects
+        .iter()
+        .map(|rect| rect.center().y.round() as i32)
+        .collect::<std::collections::BTreeSet<_>>();
     assert!(
-        rows.iter().all(|y| (*y - rows[0]).abs() <= 0.5),
-        "category tabs split into multiple rows: {rows:?}"
+        distinct_rows.len() >= 2,
+        "categories did not wrap at the rail edge: {distinct_rows:?}"
     );
 }
 

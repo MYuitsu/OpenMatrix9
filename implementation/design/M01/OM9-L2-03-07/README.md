@@ -20,8 +20,8 @@ The visual language is modernized without changing hit targets or layout geometr
   colour identity: gold Curve, teal Surface, purple Solid, red Transform, green SubD/TSpline,
   yellow-green Art, red Builder, indigo Tools, blue Gems, magenta Setting, orange Cutters, teal
   Render. Each is a modern dark card with a coloured dot and white label; the selected category uses a
-  dark-green fill (`#163D2E`) and a matching accent border. All twelve categories stay on one
-  horizontal, scrollable row; the documented category order is preserved.
+  dark-green fill (`#163D2E`) and a matching accent border. Categories flow on one horizontal row
+  and wrap naturally when they reach the rail edge; the documented category order is preserved.
 - Toolbar row uses a soft light gradient and keeps the existing 67-point allocation.
 - Icon tooltips keep the command name and append an optional registered right-click command. If no
   alternative is registered, the secondary click is inert and never replays the primary command.
@@ -50,7 +50,7 @@ The visual language is modernized without changing hit targets or layout geometr
 - `startup_contract` — **3**: failed start leaves layout untouched.
 - `om9-app --lib` — **104 passed**.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
-  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `25ceab0d…`). The screenshot shows the modern
+  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `5a8df9f5…`). The screenshot shows the modern
   slate rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
   placement.
   This is automated evidence, not human sign-off.
