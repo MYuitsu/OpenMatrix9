@@ -5,12 +5,12 @@ use super::*;
 use egui::{Align2, FontId, RichText};
 
 const GREEN: Color32 = Color32::from_rgb(130, 180, 140);
-const PANEL_BG: Color32 = Color32::from_rgb(20, 29, 40);
-const PANEL_ALT: Color32 = Color32::from_rgb(27, 39, 53);
-const PANEL_EDGE: Color32 = Color32::from_rgb(53, 70, 88);
-const PANEL_INK: Color32 = Color32::from_rgb(221, 231, 242);
+const PANEL_BG: Color32 = Color32::from_rgb(10, 14, 19);
+const PANEL_ALT: Color32 = Color32::from_rgb(16, 23, 31);
+const PANEL_EDGE: Color32 = Color32::from_rgb(42, 57, 73);
+const PANEL_INK: Color32 = Color32::from_rgb(230, 237, 243);
 const ACCENT: Color32 = Color32::from_rgb(45, 212, 191);
-const SELECTED_CARD: Color32 = Color32::from_rgb(22, 61, 46);
+const SELECTED_CARD: Color32 = Color32::from_rgb(18, 58, 42);
 const CATEGORY_COLORS: [Color32; 12] = [
     Color32::from_rgb(201, 173, 46),  // Curve: sampled from Matrix8 p14
     Color32::from_rgb(71, 186, 143),  // Surface
@@ -532,7 +532,9 @@ impl MatrixApp {
                     for (i, category) in CATEGORIES.iter().enumerate() {
                         let accent = CATEGORY_COLORS[i];
                         let selected = self.main_category == i;
-                        let text = RichText::new(*category).color(accent).size(11.);
+                        let text = RichText::new(*category)
+                            .color(category_text(accent))
+                            .size(11.);
                         let button = egui::Button::new(text)
                             .fill(if selected {
                                 SELECTED_CARD
@@ -639,6 +641,7 @@ impl MatrixApp {
             SectionId::Projects => {
                 self.projects_ui(ui);
             }
+
             SectionId::BuilderSlot => {
                 self.builder_slot_ui(ui);
             }
@@ -1210,6 +1213,19 @@ fn feature_category(f: &Feature) -> &str {
         "Tools"
     }
 }
+fn category_text(accent: Color32) -> Color32 {
+    let luminance =
+        (0.2126 * accent.r() as f32 + 0.7152 * accent.g() as f32 + 0.0722 * accent.b() as f32)
+            / 255.;
+    let mix = if luminance < 0.42 { 0.42 } else { 0.18 };
+    let channel = |value: u8| (value as f32 * (1. - mix) + 255. * mix) as u8;
+    Color32::from_rgb(
+        channel(accent.r()),
+        channel(accent.g()),
+        channel(accent.b()),
+    )
+}
+
 fn section_accent(id: SectionId) -> Color32 {
     match id {
         SectionId::IconHistory => CATEGORY_COLORS[0],

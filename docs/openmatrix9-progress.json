@@ -13180,7 +13180,8 @@
         "Added category-chip and right-click acceptance tests; recorded L2/L3 runtime evidence.",
         "Category colours sampled from Matrix8 p14; adaptive 3/4-column cards and responsive icon sizing by rail width and screen.",
         "Category flow row wraps at the rail edge; labels use their reference colour without leading dots; selected card is dark green.",
-        "Icon base edge +25% (27.5 pt, rail 23–42 pt); 11 pt menu/category labels."
+        "Icon base edge +25% (27.5 pt, rail 23–42 pt); 11 pt menu/category labels.",
+        "Near-black sidebar (#0A0E13) with brighter category text (all labels >=5.1:1 contrast)."
       ],
       "tests": {
         "chrome_actions": "11 passed",
@@ -13513,15 +13514,15 @@
       "milestone_status_promoted": false,
       "plan_tree_modified": false,
       "not_yet_done": [
-        "Checklist thu cong Z1..Z4 chua duoc nguoi ky.",
-        "Harness: them mot lan retry cho tien trinh bi OS kill (da gap 2 lan, khong phai loi app)."
+        "Checklist thu cong Z1..Z4 chua duoc nguoi ky."
       ],
       "next_action": "OM9-L3-03-14-006 (Superselect By Jewelry Object Type).",
       "notes": [
         "Real window: the harness itself was broken by the 2026-10-17 tree merge (it looked for <root>/target/debug/om9.exe while the build uses CARGO_TARGET_DIR, and it ran the app with cwd=<root>/standalone, which no longer exists). Both are fixed in tools/validate_m01_l3_003_panels.py. After the fix it runs 6/7 PASS; the one failure is `readback-recover` (extra float_after_readback.3 132.0 != 120.0, notes [] lack Recovered) — a FLOATING PANE MINIMUM case, not the Object Info label, and NOT diagnosed yet. The panel scenarios do not select an object, so they cannot prove the label: a scripted selection scenario is the next slice. No real-window claim is made for the label.",
         "RESOLVED AND GREEN: the harness expectation was stale and is corrected. The scenario now forces the window-readback path with a 300x40 rectangle; the app clamps it to [28,49,300,120] (FLOAT_MIN_HEIGHT) and says 'Display was moved back inside the window'; one frame later the REAL window reports its own 132 px height, above the minimum and inside the work area, which the readback legitimately accepts. The harness asserts on the forced clamp and the message (float_after_force.2/3, message_after_force) instead of the frame-later state. Full harness: 7/7 PASS.",
         "Window harness: 7/7 PASS (verified twice; one earlier 'float-drop exit -1' was a race with a concurrent cargo build, not a code regression — run alone it passes). The Object Info label still has no window photo. Findings for the next attempt: (1) OM9_UI_AUDIT_PANELS is validated against PANEL_AUDIT_SCENARIOS in ui.rs, so a new scenario needs its name added there (this was the real cause of the three timeouts); (2) record_panel_checks DOES fill left_order, work_area, floating and drag_in_progress from live state, so a receipt whose checks lack those fields did not come from the arm we added — verify the dispatch actually takes it (log audit.panel_checks.len()) before trusting the run.",
-        "REAL WINDOW: the new `object-info` audit scenario drew one line, selected it and the receipt carries dock.object_info = {\"kind\": \"Line\", \"label\": \"Line \\u00b7 10.000 \\u00d7 4.000 \\u00d7 0.000 \\u00b7 valid\"}; the screenshot is implementation/evidence/M01/OM9-L3-03-14-005/object-info-label-in-a-real-window.png. The scenario passes on its own (3 consecutive runs) and in a full run was once killed by the OS (exit -1, no receipt) — a harness-level transient already seen with float-drop; a one-retry in tools/validate_m01_l3_003_panels.py is the next small fix. Two real causes found on the way: the scenario name had to be added to PANEL_AUDIT_SCENARIOS (ui.rs) and the dispatch arm needed `return` (without it the default drag script ran too)."
+        "REAL WINDOW: the new `object-info` audit scenario drew one line, selected it and the receipt carries dock.object_info = {\"kind\": \"Line\", \"label\": \"Line \\u00b7 10.000 \\u00d7 4.000 \\u00d7 0.000 \\u00b7 valid\"}; the screenshot is implementation/evidence/M01/OM9-L3-03-14-005/object-info-label-in-a-real-window.png. The scenario passes on its own (3 consecutive runs) and in a full run was once killed by the OS (exit -1, no receipt) — a harness-level transient already seen with float-drop; a one-retry in tools/validate_m01_l3_003_panels.py is the next small fix. Two real causes found on the way: the scenario name had to be added to PANEL_AUDIT_SCENARIOS (ui.rs) and the dispatch arm needed `return` (without it the default drag script ran too).",
+        "FINAL: the real-window harness has EIGHT scenarios now (the seventh was object-info) and passes 8/8; the single verification point tools/verify_m01_l2_03_14.py is 13/13 groups ok (exit 0), saved as implementation/evidence/M01/OM9-L2-03-14/AUTOMATED_VERIFICATION.log. Fixes that made it stable: the scenario name in PANEL_AUDIT_SCENARIOS, the missing `return` in the dispatch arm, a repaint until the shot is requested (otherwise the window idles before the record step), the focus step waiting for the status row (roll-up's intermittent lost first click), a one-retry for a killed launch, and the harness picking the check entry by scenario name."
       ]
     },
     {
@@ -13575,10 +13576,13 @@
       "milestone_status_promoted": false,
       "plan_tree_modified": false,
       "not_yet_done": [
-        "Nut Super Select trong menu/panel chua noi; checklist U1..U5 chua ky.",
-        "Con 2 L3: 007 (property editor adapter), 008 (persistence visual check)."
+        "Nut Super Select trong UI: da thu o vong 22 va RUT LAI vi chrome.rs dang bi phien khac ghi (2 loi cu phap la xuat hien o dong khong lien quan; da sua nhu build fix). Lam lai khi file on dinh.",
+        "Checklist thu cong U1..U5 chua duoc nguoi ky."
       ],
-      "next_action": "OM9-L3-03-14-007 (Object Property Editor Adapter)."
+      "next_action": "OM9-L3-03-14-007 (Object Property Editor Adapter).",
+      "notes": [
+        "Super Select UI wiring attempted in round 22 and REVERTED: while editing crates/om9-app/src/ui/chrome.rs two syntax corruptions appeared at lines this work never touched (a stray apostrophe after `fn section_accent(...) -> Color32 {` and another before `fn category_text(...)`), which means the file is being written by another session right now (the working tree has 88 modified/untracked paths under crates/). The stray quotes were repaired as plain build fixes; my Super Select row was removed so the file is not fought over. The wiring itself is small (three buttons calling Controller::apply_superselect, rects stored in the existing layer_action_rects map, a frame test clicking them) and can be redone as soon as the file is stable."
+      ]
     },
     {
       "id": "m01-l3-03-14-007-object-property-editor-adapter-2026-10-20",
@@ -13588,12 +13592,14 @@
       "why": "Chu du an yeu cau module OM9-L2-03-14; day la L3-007 trong 8 L3.",
       "code_added": [
         "crates/om9-app/src/session/properties.rs (moi, module con cua session vi no ap dung giao dich): FIELDS (5 truong sua duoc, Name + Geometry chi doc kem ly do), PropertyField/FieldState, PropertyEdit (chi truong sua duoc) va Controller::edit_object_property (MOT giao dich cho moi doi tuong)",
-        "crates/om9-app/tests/property_editor_adapter.rs (moi): 2 test doc fixture tu dia (E1..E4, F1..F4)"
+        "crates/om9-app/tests/property_editor_adapter.rs (moi): 2 test doc fixture tu dia (E1..E4, F1..F4)",
+        "crates/om9-core/src/transaction.rs: Mutation::Label + validation + apply + source() arm; crates/om9-app/src/session/properties.rs: PropertyEdit::Label, FIELDS Name editable"
       ],
       "bugs_fixed": [],
       "notes": [
         "Khong co property editor nao truoc do: panel khong the hien thi va khong the sua qua mot document command.",
-        "Name la open item: doi ten can mot document command (Mutation::Label) - editor ghi ro thay vi gia vo hoat dong."
+        "Name la open item: doi ten can mot document command (Mutation::Label) - editor ghi ro thay vi gia vo hoat dong.",
+        "Round 23: rename (Name) is implemented through Mutation::Label - one transaction, Undo restores the old name, empty/padded labels refused. The editor now has six editable fields and one read-only (Geometry)."
       ],
       "validation_commands": [
         {
@@ -13630,8 +13636,7 @@
       "milestone_status_promoted": false,
       "plan_tree_modified": false,
       "not_yet_done": [
-        "Panel hien thi 5 truong sua duoc chua noi vao UI; doi ten (Name) cho Mutation::Label; checklist N1..N4 chua ky.",
-        "Con 1 L3: 008 (layer state persistence visual check)."
+        "Panel hien thi cac truong chua noi vao UI; checklist N1..N4 chua ky."
       ],
       "next_action": "OM9-L3-03-14-008 (Layer State Persistence Visual Check)."
     },

@@ -11,7 +11,7 @@ The documented Matrix positions and sidebar order are kept:
 
 The visual language is modernized without changing hit targets or layout geometry:
 
-- Deep slate left/right rails (`#141D28` / `#1B2735`) with cool ink text.
+- Near-black left/right rails (`#0A0E13` / `#10171F`) with cool ink text (minimum category contrast 5.1:1).
 - Section headers are flat rounded cards with a colored accent rail per section; collapse/expand
   remains the same click/drag target.
 - Command icons are rounded tiles with a subtle outline, dark resting fill, lighter hover and muted
@@ -54,7 +54,7 @@ The visual language is modernized without changing hit targets or layout geometr
 - `om9-app --lib` — **104 passed**.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
   `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `36fdd5db…`). The screenshot shows the modern
-  slate rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
+  near-black rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
   placement.
   This is automated evidence, not human sign-off.
 

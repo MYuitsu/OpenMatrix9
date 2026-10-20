@@ -1520,7 +1520,7 @@ impl MatrixApp {
             .resizable(true)
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_rgb(20, 29, 40))
+                    .fill(Color32::from_rgb(10, 14, 19))
                     .inner_margin(2),
             )
             .show(ui, |ui| {
@@ -1583,7 +1583,7 @@ impl MatrixApp {
                 .resizable(true)
                 .frame(
                     egui::Frame::new()
-                        .fill(Color32::from_rgb(27, 39, 53))
+                        .fill(Color32::from_rgb(16, 23, 31))
                         .inner_margin(3),
                 )
                 .show(ui, |ui| {
@@ -1613,7 +1613,7 @@ impl MatrixApp {
             .exact_size(dock_layout::STATUS_BAR_HEIGHT)
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_rgb(17, 24, 39))
+                    .fill(Color32::from_rgb(8, 11, 15))
                     .inner_margin(2),
             )
             .show(ui, |ui| {
