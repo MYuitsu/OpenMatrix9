@@ -11,7 +11,7 @@ The documented Matrix positions and sidebar order are kept:
 
 The visual language is modernized without changing hit targets or layout geometry:
 
-- Near-black left/right rails (`#0A0E13` / `#10171F`) with cool ink text (minimum category contrast 5.1:1).
+- Near-black left/right rails (`#0A0E13` / `#10171F`) with cool ink text (minimum category contrast 7.5:1).
 - Section headers are flat rounded cards with a colored accent rail per section; collapse/expand
   remains the same click/drag target.
 - Command icons are rounded tiles with a subtle outline, dark resting fill, lighter hover and muted
@@ -19,9 +19,9 @@ The visual language is modernized without changing hit targets or layout geometr
 - Main Menu categories use the **RGB values sampled from Matrix8 p14** and keep the reference
   colour identity: gold Curve, teal Surface, purple Solid, red Transform, green SubD/TSpline,
   yellow-green Art, red Builder, indigo Tools, blue Gems, magenta Setting, orange Cutters, teal
-  Render. Each is a modern dark card showing only the category name in its reference colour (no leading
-  square/dot); the selected category uses a dark-green fill (`#163D2E`) and a matching accent
-  border. Categories flow on one horizontal row
+  Render. Each is a raised dark card showing only the category name in a brightened reference hue (no
+  leading square/dot), with a soft drop shadow, a lit top edge and a dark text shadow; the selected
+  category uses a dark-green fill (`#123A2A`) and a matching accent border. Categories flow on one horizontal row
   and wrap naturally when they reach the rail edge; the documented category order is preserved.
 - Toolbar row uses a soft light gradient and keeps the existing 67-point allocation.
 - Icon tooltips keep the command name and append an optional registered right-click command. If no
@@ -55,7 +55,7 @@ The visual language is modernized without changing hit targets or layout geometr
 - `startup_contract` — **3**: failed start leaves layout untouched.
 - `om9-app --lib` — **104 passed**.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
-  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `36fdd5db…`). The screenshot shows the modern
+  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `ed6723bd…`). The screenshot shows the modern
   near-black rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
   placement.
   This is automated evidence, not human sign-off.

@@ -13182,7 +13182,8 @@
         "Category flow row wraps at the rail edge; labels use their reference colour without leading dots; selected card is dark green.",
         "Icon base edge +25% (27.5 pt, rail 23–42 pt); 11 pt menu/category labels.",
         "Near-black sidebar (#0A0E13) with brighter category text (all labels >=5.1:1 contrast).",
-        "Font hinting disabled so menu glyphs render with anti-aliased outlines."
+        "Font hinting disabled so menu glyphs render with anti-aliased outlines.",
+        "Category cards raised with drop shadow/lit top edge; label contrast raised to at least 7.5:1."
       ],
       "tests": {
         "chrome_actions": "11 passed",
@@ -13299,7 +13300,10 @@
         "Checklist thu cong V1..V5 chua duoc nguoi ky (ui-review.json dang NOT_SIGNED).",
         "Con 7 L3 cua OM9-L2-03-14: 002 (current layer + assignment), 003 (visible/locked controls), 004 (select all by layer), 005 (object info overlay), 006 (superselect by jewelry type), 007 (property editor adapter), 008 (layer state persistence visual check)."
       ],
-      "next_action": "Lam tiep OM9-L3-03-14-002 (Current Layer And Assignment UI)."
+      "next_action": "Lam tiep OM9-L3-03-14-002 (Current Layer And Assignment UI).",
+      "notes": [
+        "Round 32: the single verification point tools/verify_m01_l2_03_14.py now runs 10 L3 targets (the two UI click proofs included) + lib/core/fmt/clippy + the 8-scenario real window: 15/15 groups ok, exit 0."
+      ]
     },
     {
       "id": "m01-l3-03-14-002-current-layer-and-assignment-ui-2026-10-20",
@@ -13355,7 +13359,10 @@
         "Checklist thu cong W1..W5 chua duoc nguoi ky.",
         "Con 6 L3 cua OM9-L2-03-14: 003 (visible/locked controls), 004 (select all by layer), 005 (object info overlay), 006 (superselect by jewelry type), 007 (property editor adapter), 008 (layer state persistence visual check)."
       ],
-      "next_action": "Lam tiep OM9-L3-03-14-003 (Layer Visible And Locked Controls)."
+      "next_action": "Lam tiep OM9-L3-03-14-003 (Layer Visible And Locked Controls).",
+      "notes": [
+        "Round 32: the single verification point tools/verify_m01_l2_03_14.py now runs 10 L3 targets (the two UI click proofs included) + lib/core/fmt/clippy + the 8-scenario real window: 15/15 groups ok, exit 0."
+      ]
     },
     {
       "id": "m01-l3-03-14-003-layer-visible-and-locked-controls-2026-10-20",
@@ -13408,7 +13415,10 @@
         "Checklist thu cong X1..X4 chua duoc nguoi ky.",
         "Con 5 L3 cua OM9-L2-03-14: 004 (select all by layer), 005 (object info overlay), 006 (superselect by jewelry type), 007 (property editor adapter), 008 (layer state persistence visual check)."
       ],
-      "next_action": "Lam tiep OM9-L3-03-14-004 (Select All Objects By Layer)."
+      "next_action": "Lam tiep OM9-L3-03-14-004 (Select All Objects By Layer).",
+      "notes": [
+        "Round 32: the single verification point tools/verify_m01_l2_03_14.py now runs 10 L3 targets (the two UI click proofs included) + lib/core/fmt/clippy + the 8-scenario real window: 15/15 groups ok, exit 0."
+      ]
     },
     {
       "id": "m01-l3-03-14-004-select-all-objects-by-layer-2026-10-20",
@@ -13423,7 +13433,8 @@
       "bugs_fixed": [],
       "notes": [
         "RED trung thuc: fixture xanh ngay lan dau, nen item chung minh fixture canh duoc policy bang mot phep thu mutation - bo loc `object.selectable && object.has_pick_geometry()` duoc lam yeu con `has_pick_geometry()`, cac ca hidden/locked do, roi khoi phuc.",
-        "Pinned: thay the (khong noi) selection; khong gom object layer khac; object an bi loai; layer khoa/an xoa selection cu thay vi giu lai; slot chua co layer chon 0 va khong loi; gesture khong ghi giao dich."
+        "Pinned: thay the (khong noi) selection; khong gom object layer khac; object an bi loai; layer khoa/an xoa selection cu thay vi giu lai; slot chua co layer chon 0 va khong loi; gesture khong ghi giao dich.",
+        "Round 32: the single verification point tools/verify_m01_l2_03_14.py now runs 10 L3 targets (the two UI click proofs included) + lib/core/fmt/clippy + the 8-scenario real window: 15/15 groups ok, exit 0."
       ],
       "validation_commands": [
         {
@@ -13523,7 +13534,8 @@
         "RESOLVED AND GREEN: the harness expectation was stale and is corrected. The scenario now forces the window-readback path with a 300x40 rectangle; the app clamps it to [28,49,300,120] (FLOAT_MIN_HEIGHT) and says 'Display was moved back inside the window'; one frame later the REAL window reports its own 132 px height, above the minimum and inside the work area, which the readback legitimately accepts. The harness asserts on the forced clamp and the message (float_after_force.2/3, message_after_force) instead of the frame-later state. Full harness: 7/7 PASS.",
         "Window harness: 7/7 PASS (verified twice; one earlier 'float-drop exit -1' was a race with a concurrent cargo build, not a code regression — run alone it passes). The Object Info label still has no window photo. Findings for the next attempt: (1) OM9_UI_AUDIT_PANELS is validated against PANEL_AUDIT_SCENARIOS in ui.rs, so a new scenario needs its name added there (this was the real cause of the three timeouts); (2) record_panel_checks DOES fill left_order, work_area, floating and drag_in_progress from live state, so a receipt whose checks lack those fields did not come from the arm we added — verify the dispatch actually takes it (log audit.panel_checks.len()) before trusting the run.",
         "REAL WINDOW: the new `object-info` audit scenario drew one line, selected it and the receipt carries dock.object_info = {\"kind\": \"Line\", \"label\": \"Line \\u00b7 10.000 \\u00d7 4.000 \\u00d7 0.000 \\u00b7 valid\"}; the screenshot is implementation/evidence/M01/OM9-L3-03-14-005/object-info-label-in-a-real-window.png. The scenario passes on its own (3 consecutive runs) and in a full run was once killed by the OS (exit -1, no receipt) — a harness-level transient already seen with float-drop; a one-retry in tools/validate_m01_l3_003_panels.py is the next small fix. Two real causes found on the way: the scenario name had to be added to PANEL_AUDIT_SCENARIOS (ui.rs) and the dispatch arm needed `return` (without it the default drag script ran too).",
-        "FINAL: the real-window harness has EIGHT scenarios now (the seventh was object-info) and passes 8/8; the single verification point tools/verify_m01_l2_03_14.py is 13/13 groups ok (exit 0), saved as implementation/evidence/M01/OM9-L2-03-14/AUTOMATED_VERIFICATION.log. Fixes that made it stable: the scenario name in PANEL_AUDIT_SCENARIOS, the missing `return` in the dispatch arm, a repaint until the shot is requested (otherwise the window idles before the record step), the focus step waiting for the status row (roll-up's intermittent lost first click), a one-retry for a killed launch, and the harness picking the check entry by scenario name."
+        "FINAL: the real-window harness has EIGHT scenarios now (the seventh was object-info) and passes 8/8; the single verification point tools/verify_m01_l2_03_14.py is 13/13 groups ok (exit 0), saved as implementation/evidence/M01/OM9-L2-03-14/AUTOMATED_VERIFICATION.log. Fixes that made it stable: the scenario name in PANEL_AUDIT_SCENARIOS, the missing `return` in the dispatch arm, a repaint until the shot is requested (otherwise the window idles before the record step), the focus step waiting for the status row (roll-up's intermittent lost first click), a one-retry for a killed launch, and the harness picking the check entry by scenario name.",
+        "Round 32: the single verification point tools/verify_m01_l2_03_14.py now runs 10 L3 targets (the two UI click proofs included) + lib/core/fmt/clippy + the 8-scenario real window: 15/15 groups ok, exit 0."
       ]
     },
     {
@@ -13577,13 +13589,14 @@
       "milestone_status_promoted": false,
       "plan_tree_modified": false,
       "not_yet_done": [
-        "Checklist thu cong U1..U5 chua duoc nguoi ky.",
-        "Duong bam qua menu chua duoc test tu dong (popup khong kich hoat item trong setup egui nay); bo loc da co test o tang controller."
+        "Checklist thu cong U1..U5 chua duoc nguoi ky."
       ],
       "next_action": "OM9-L3-03-14-007 (Object Property Editor Adapter).",
       "notes": [
         "Super Select UI wiring attempted in round 22 and REVERTED: while editing crates/om9-app/src/ui/chrome.rs two syntax corruptions appeared at lines this work never touched (a stray apostrophe after `fn section_accent(...) -> Color32 {` and another before `fn category_text(...)`), which means the file is being written by another session right now (the working tree has 88 modified/untracked paths under crates/). The stray quotes were repaired as plain build fixes; my Super Select row was removed so the file is not fought over. The wiring itself is small (three buttons calling Controller::apply_superselect, rects stored in the existing layer_action_rects map, a frame test clicking them) and can be redone as soon as the file is stable.",
-        "Super Select is reachable from the Tools menu (three items calling Controller::apply_superselect; the menu bar records its buttons and items in MatrixApp::menu_rects, cleared every frame). An automated CLICK test through the menu popup did NOT activate the item in this egui setup (the popup opened, the item rect was found, the click left the selection empty), so no automation claim is made for the click path: the filter itself is proven at the controller level (tests/superselect_jewelry.rs 2/2) and the click path is on the manual checklist."
+        "Super Select is reachable from the Tools menu (three items calling Controller::apply_superselect; the menu bar records its buttons and items in MatrixApp::menu_rects, cleared every frame). An automated CLICK test through the menu popup did NOT activate the item in this egui setup (the popup opened, the item rect was found, the click left the selection empty), so no automation claim is made for the click path: the filter itself is proven at the controller level (tests/superselect_jewelry.rs 2/2) and the click path is on the manual checklist.",
+        "REAL UI PROOF: the Tools -> Super Select: Gems item works end to end. The click test opens the Tools menu, clicks the item, and asserts status 'Super Select: Gems: 1 selected' with exactly the semantic gem selected (the same-named plain 'Line' stays unselected). The earlier failures were the TEST FIXTURE, not the feature: the gem mesh carried one normal for three vertices, so MatrixApp::new refused the document (the panic pointed at construction, not at the menu). With a valid mesh the item is delivered through the popup. tests/super_select_ui.rs -> 1 passed.",
+        "Round 32: the single verification point tools/verify_m01_l2_03_14.py now runs 10 L3 targets (the two UI click proofs included) + lib/core/fmt/clippy + the 8-scenario real window: 15/15 groups ok, exit 0."
       ]
     },
     {
@@ -13595,13 +13608,16 @@
       "code_added": [
         "crates/om9-app/src/session/properties.rs (moi, module con cua session vi no ap dung giao dich): FIELDS (5 truong sua duoc, Name + Geometry chi doc kem ly do), PropertyField/FieldState, PropertyEdit (chi truong sua duoc) va Controller::edit_object_property (MOT giao dich cho moi doi tuong)",
         "crates/om9-app/tests/property_editor_adapter.rs (moi): 2 test doc fixture tu dia (E1..E4, F1..F4)",
-        "crates/om9-core/src/transaction.rs: Mutation::Label + validation + apply + source() arm; crates/om9-app/src/session/properties.rs: PropertyEdit::Label, FIELDS Name editable"
+        "crates/om9-core/src/transaction.rs: Mutation::Label + validation + apply + source() arm; crates/om9-app/src/session/properties.rs: PropertyEdit::Label, FIELDS Name editable",
+        "crates/om9-app/src/ui.rs: edit_selected_property + undo_len (tested, 4/4)"
       ],
       "bugs_fixed": [],
       "notes": [
         "Khong co property editor nao truoc do: panel khong the hien thi va khong the sua qua mot document command.",
         "Name la open item: doi ten can mot document command (Mutation::Label) - editor ghi ro thay vi gia vo hoat dong.",
-        "Round 23: rename (Name) is implemented through Mutation::Label - one transaction, Undo restores the old name, empty/padded labels refused. The editor now has six editable fields and one read-only (Geometry)."
+        "Round 23: rename (Name) is implemented through Mutation::Label - one transaction, Undo restores the old name, empty/padded labels refused. The editor now has six editable fields and one read-only (Geometry).",
+        "UI panel: the property editor lives in the Edit menu popup. For the single selected object it offers six items (Visible/Hidden/Selectable/Locked toggles with their state in the label, Colour: red, Colour: layer) and each click goes through MatrixApp::edit_selected_property, so one toggle is one transaction. cargo test -p om9-app --test property_menu_ui -> 1 passed: click Edit, click 'Locked: off', the Undo journal grows by exactly one. This also proves that a menu-popup item click is delivered, which the Super Select attempt of round 26-28 did not demonstrate (that test selected nothing, most likely because its fixture's gem payload is not what the Gems filter classifies as a gem).",
+        "Round 32: the single verification point tools/verify_m01_l2_03_14.py now runs 10 L3 targets (the two UI click proofs included) + lib/core/fmt/clippy + the 8-scenario real window: 15/15 groups ok, exit 0."
       ],
       "validation_commands": [
         {
@@ -13638,7 +13654,8 @@
       "milestone_status_promoted": false,
       "plan_tree_modified": false,
       "not_yet_done": [
-        "Panel hien thi cac truong chua noi vao UI; checklist N1..N4 chua ky."
+        "Checklist thu cong N1..N4 chua duoc nguoi ky.",
+        "Rename trong menu chua co o nhap (adapter da co, test 3/3 o tang controller)."
       ],
       "next_action": "OM9-L3-03-14-008 (Layer State Persistence Visual Check)."
     },
@@ -13656,7 +13673,8 @@
       "notes": [
         "Khong co test nao noi palette voi mot vong save/reopen truoc day.",
         "Phat hien that: cham mot preset slot tao ca nhom 4 slot, nen tai lieu co Gems khoa + Metals an luu slots 1..8 chu khong phai chi 1 va 5. Lan chay dau cua K1 do dung vi gia dinh sai nay, fixture da sua theo su that.",
-        "Pinned: slots/co khoa/an/mau, ids doi tuong, policy selectable sau khi mo lai; mo tai lieu khac khong lo slot cu; mo that bai khong doi gi; co chua luu trong bo nho khong nam trong file."
+        "Pinned: slots/co khoa/an/mau, ids doi tuong, policy selectable sau khi mo lai; mo tai lieu khac khong lo slot cu; mo that bai khong doi gi; co chua luu trong bo nho khong nam trong file.",
+        "Round 32: the single verification point tools/verify_m01_l2_03_14.py now runs 10 L3 targets (the two UI click proofs included) + lib/core/fmt/clippy + the 8-scenario real window: 15/15 groups ok, exit 0."
       ],
       "validation_commands": [
         {
@@ -14383,5 +14401,8 @@
       "evidence": "implementation/evidence/M02/2026-10-19-brep-selection.md",
       "scope": "Replace active specification-package routing; preserve historical records and imported raw inputs"
     }
+  ],
+  "notes": [
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
   ]
 }

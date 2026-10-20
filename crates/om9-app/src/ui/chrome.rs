@@ -181,6 +181,55 @@ impl MatrixApp {
                             self.feedback(r);
                             ui.close();
                         }
+                        // The property editor (OM9-L3-03-14-007): the six editable
+                        // fields for the single selected object, applied through the
+                        // adapter so each toggle is one transaction.
+                        let selected: Vec<_> = self.controller.selected().iter().copied().collect();
+                        if selected.len() == 1 {
+                            let id = selected[0];
+                            let attributes = self.controller.document().entities[&id].attributes.clone();
+                            ui.separator();
+                            for (key, label, edit) in [
+                                (
+                                    "prop-visible",
+                                    format!("Visible: {}", if attributes.visible { "on" } else { "off" }),
+                                    crate::session::PropertyEdit::Visible(!attributes.visible),
+                                ),
+                                (
+                                    "prop-hidden",
+                                    format!("Hidden: {}", if attributes.hidden { "on" } else { "off" }),
+                                    crate::session::PropertyEdit::Hidden(!attributes.hidden),
+                                ),
+                                (
+                                    "prop-selectable",
+                                    format!("Selectable: {}", if attributes.selectable { "on" } else { "off" }),
+                                    crate::session::PropertyEdit::Selectable(!attributes.selectable),
+                                ),
+                                (
+                                    "prop-locked",
+                                    format!("Locked: {}", if attributes.locked { "on" } else { "off" }),
+                                    crate::session::PropertyEdit::Locked(!attributes.locked),
+                                ),
+                                (
+                                    "prop-color-red",
+                                    "Colour: red".to_owned(),
+                                    crate::session::PropertyEdit::Color(Some([220, 40, 40, 255])),
+                                ),
+                                (
+                                    "prop-color-default",
+                                    "Colour: layer".to_owned(),
+                                    crate::session::PropertyEdit::Color(None),
+                                ),
+                            ] {
+                                let response = ui.button(label);
+                                self.menu_rects.insert(key, response.rect);
+                                if response.clicked() {
+                                    let outcome = self.edit_selected_property(edit);
+                                    self.feedback(outcome);
+                                    ui.close();
+                                }
+                            }
+                        }
                     }
                     "View" => {
                         for id in [
@@ -548,26 +597,67 @@ impl MatrixApp {
                 });
                 self.main_category_rects.clear();
                 ui.horizontal_wrapped(|ui| {
-                    ui.spacing_mut().item_spacing = Vec2::new(3., 3.);
+                    ui.spacing_mut().item_spacing = Vec2::new(3., 2.);
                     for (i, category) in CATEGORIES.iter().enumerate() {
                         let accent = CATEGORY_COLORS[i];
                         let selected = self.main_category == i;
-                        let text = RichText::new(*category)
-                            .color(category_text(accent))
-                            .size(11.);
-                        let button = egui::Button::new(text)
-                            .fill(if selected {
+                        let font = FontId::proportional(11.);
+                        let text_color = category_text(accent);
+                        let galley = ui.painter().layout_no_wrap(
+                            (*category).to_owned(),
+                            font.clone(),
+                            text_color,
+                        );
+                        let shadow_galley = ui.painter().layout_no_wrap(
+                            (*category).to_owned(),
+                            font,
+                            Color32::BLACK,
+                        );
+                        let width = galley.size().x + 18.;
+                        let (rect, response) =
+                            ui.allocate_exact_size(Vec2::new(width, 20.), Sense::click());
+                        let response =
+                            response.on_hover_text(format!("{category} command category"));
+                        let painter = ui.painter();
+                        // Raised card: a soft drop shadow, a lit top edge and a
+                        // dark text shadow under the coloured label.
+                        painter.rect_filled(
+                            rect.translate(Vec2::new(0., 2.)),
+                            5,
+                            Color32::from_rgba_unmultiplied(
+                                0,
+                                0,
+                                0,
+                                if selected { 140 } else { 95 },
+                            ),
+                        );
+                        painter.rect_filled(
+                            rect,
+                            5,
+                            if selected {
                                 SELECTED_CARD
                             } else {
-                                Color32::from_rgb(24, 35, 48)
-                            })
-                            .corner_radius(4)
-                            .stroke(Stroke::new(1., if selected { accent } else { PANEL_EDGE }))
-                            .min_size(Vec2::new(0., 20.));
-                        let response = ui
-                            .add(button)
-                            .on_hover_text(format!("{category} command category"));
-                        self.main_category_rects.insert(i, response.rect);
+                                Color32::from_rgb(19, 27, 36)
+                            },
+                        );
+                        painter.line_segment(
+                            [
+                                egui::pos2(rect.left() + 5., rect.top() + 1.),
+                                egui::pos2(rect.right() - 5., rect.top() + 1.),
+                            ],
+                            Stroke::new(1., Color32::from_rgba_unmultiplied(255, 255, 255, 34)),
+                        );
+                        painter.rect_stroke(
+                            rect.shrink(0.5),
+                            5,
+                            Stroke::new(1., if selected { accent } else { PANEL_EDGE }),
+                            egui::StrokeKind::Inside,
+                        );
+                        let text_pos =
+                            egui::pos2(rect.left() + 9., rect.center().y - galley.size().y / 2.);
+                        painter.galley(text_pos + Vec2::new(0., 1.), shadow_galley, Color32::BLACK);
+                        painter.galley(text_pos, galley, text_color);
+                        self.main_category_rects.insert(i, rect);
                         if response.clicked() {
                             self.main_category = i;
                             self.focus_cmd = true;

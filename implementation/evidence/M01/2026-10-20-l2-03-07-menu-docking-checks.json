@@ -17,7 +17,7 @@
       "#10171F card",
       "#E6EDF3 ink",
       "selected #123A2A",
-      "category text >=5.1:1 contrast"
+      "category text >=7.5:1 contrast"
     ],
     "preserved_positions": "left rail 300 outer, documented section order, 6 category chips per row",
     "modernized": [
@@ -31,7 +31,9 @@
       "25% larger command icons",
       "11 pt crisper menu labels",
       "near-black eye-comfort panel background with WCAG AA label contrast",
-      "font hinting disabled for smoother anti-aliased glyphs"
+      "font hinting disabled for smoother anti-aliased glyphs",
+      "raised category cards with drop shadow and lit top edge",
+      "dark text shadow under coloured labels"
     ]
   },
   "checks": [
@@ -193,17 +195,17 @@
   ],
   "logs": {
     "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
-    "acceptance_sha256": "707efa2fe2d3e7259a9635e7f7428fd07e90df7c64f7937f0ec2ea229ff680b1",
+    "acceptance_sha256": "3cae3798dfb4eaa6401eea090041a16c8d09fb42e1bdd7a7986229680121a725",
     "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
-    "app_lib_sha256": "762ddac506ce051b59565201471da93a0ed4409f3f5756b24eafdcfcb1b6cdc7",
+    "app_lib_sha256": "5378e600a16552b0175c821baa1d96983a931a1f51d3beca439b20623f5cf2ac",
     "clippy_touched": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/clippy-touched.log",
     "clippy_touched_sha256": "be7d9b18a8593ed71d6869e3c97c9ddf51916f41de7924019082515b0463e590"
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "8132a4a48e268f831605e390a48d78fa94a324b3dedc9cc0c5323a3b3be1a518",
+    "screenshot_sha256": "ed6723bdb724f0c7a0120662e8cdd67caf59b38ee886d0ec0566626b8a857b64",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "344f3af88893ec50c4c6bf5ef14ef1ba2f83e3b3f5ae479923497d3ecaf2e03b",
+    "receipt_sha256": "e8a093291448ec1af7ddb6e6516e373d0cef221e33e701f52abc3cb1d9d1b5ec",
     "passes": 21,
     "view_rects": {
       "Looking Down": [
