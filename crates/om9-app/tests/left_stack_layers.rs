@@ -334,8 +334,10 @@ fn icon_edge_follows_the_rail_width() {
         assert!(!app.rail_icon_rects.is_empty(), "{label}: icons drawn");
         for rect in &app.rail_icon_rects {
             assert!(
-                (rect.width() - edge).abs() <= 0.5 && (rect.height() - edge).abs() <= 0.5,
-                "{label}: icon {rect:?} is not {edge} wide"
+                rect.width() <= edge + 0.5
+                    && rect.width() >= 16.
+                    && (rect.width() - rect.height()).abs() <= 0.5,
+                "{label}: icon {rect:?} does not fit the {edge} rail edge"
             );
             assert!(
                 rect.min.x >= sidebar.min.x - 0.5 && rect.max.x <= sidebar.max.x + 0.5,

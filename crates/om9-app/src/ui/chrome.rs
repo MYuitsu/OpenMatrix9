@@ -702,9 +702,7 @@ impl MatrixApp {
                         );
                         let text_pos =
                             egui::pos2(rect.left() + 9., rect.center().y - galley.size().y / 2.);
-                        // A small same-colour overprint strengthens the bundled
-                        // font at menu size without a dark shadow muddying it.
-                        painter.galley(text_pos + Vec2::new(0.35, 0.), galley.clone(), text_color);
+                        // A real semibold face keeps one antialiased glyph pass.
                         painter.galley(text_pos, galley, text_color);
                         self.main_category_rects.insert(i, rect);
                         if response.clicked() {
@@ -721,43 +719,55 @@ impl MatrixApp {
                 } else {
                     category_palette(category)
                 };
-                // Reference menus page their icon list: two rows per page and
-                // one rectangle per page on the right. This replaces the old
-                // arrow pair, so the number of visible pages is explicit.
+                // Reference menus use ten icons per row, two rows per page and
+                // a fixed page column on the far right. The page column never
+                // follows the icon content: it is anchored right-to-left.
+                const PAGE_COLUMNS: usize = 10;
+                const PAGE_ROWS: usize = 2;
                 let page_id = egui::Id::new(("main-menu-page", palette_name));
                 let mut page = ui
                     .ctx()
                     .memory(|memory| memory.data.get_temp::<usize>(page_id).unwrap_or(0));
                 let page_width = (ui.available_width() - 22.).max(80.);
-                let icon_edge = self.column_icon_edge;
                 let gap = ui.spacing().item_spacing.x;
-                let columns = (((page_width + gap) / (icon_edge + gap)).floor() as usize).max(1);
-                let page_size = columns * 2;
+                let fit_edge = ((page_width - gap * (PAGE_COLUMNS - 1) as f32)
+                    / PAGE_COLUMNS as f32)
+                    .floor()
+                    .clamp(16., self.column_icon_edge);
+                let saved_edge = self.column_icon_edge;
+                self.column_icon_edge = fit_edge;
+                let page_size = PAGE_COLUMNS * PAGE_ROWS;
                 let pages = palette.len().div_ceil(page_size).max(1);
                 page = page.min(pages - 1);
                 let start = page * page_size;
-                let end = (start + page_size).min(palette.len());
                 ui.horizontal(|ui| {
                     ui.allocate_ui_with_layout(
-                        Vec2::new(page_width, icon_edge * 2. + gap),
+                        Vec2::new(page_width, fit_edge * PAGE_ROWS as f32 + gap),
                         egui::Layout::top_down(egui::Align::Min),
                         |ui| {
-                            ui.horizontal_wrapped(|ui| {
-                                for name in &palette[start..end] {
-                                    self.feature_icon(ui, "", name);
-                                }
-                            });
+                            for row in 0..PAGE_ROWS {
+                                ui.horizontal(|ui| {
+                                    for column in 0..PAGE_COLUMNS {
+                                        let index = start + row * PAGE_COLUMNS + column;
+                                        if let Some(name) = palette.get(index) {
+                                            self.feature_icon(ui, "", name);
+                                        }
+                                    }
+                                });
+                            }
                         },
                     );
-                    ui.spacing_mut().item_spacing.y = 1.;
-                    ui.vertical(|ui| {
-                        for index in 0..pages {
-                            if menu_page_button(ui, index, page == index).clicked() {
-                                page = index;
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Min), |ui| {
+                        ui.vertical(|ui| {
+                            for index in 0..pages {
+                                if menu_page_button(ui, index, page == index).clicked() {
+                                    page = index;
+                                }
                             }
-                        }
+                        });
                     });
                 });
+                self.column_icon_edge = saved_edge;
                 ui.ctx()
                     .memory_mut(|memory| memory.data.insert_temp(page_id, page));
                 if palette.is_empty() {
@@ -1390,28 +1400,24 @@ fn feature_category(f: &Feature) -> &str {
 fn menu_page_button(ui: &mut egui::Ui, index: usize, selected: bool) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(Vec2::new(18., 12.), Sense::click());
     let painter = ui.painter();
-    painter.rect_filled(
-        rect,
-        3,
-        if selected {
-            Color32::from_rgb(37, 99, 170)
-        } else if response.hovered() {
-            ACCENT
-        } else {
-            PANEL_EDGE
-        },
-    );
-    painter.rect_stroke(
-        rect.shrink(0.5),
-        3,
-        Stroke::new(1., if selected { Color32::WHITE } else { PANEL_EDGE }),
-        egui::StrokeKind::Inside,
-    );
-    painter.circle_stroke(
-        rect.center(),
-        2.4,
-        Stroke::new(1., Color32::from_rgba_unmultiplied(230, 237, 243, 220)),
-    );
+    if response.hovered() {
+        painter.rect_filled(rect, 3, PANEL_EDGE);
+    }
+    if selected {
+        painter.line_segment(
+            [
+                egui::pos2(rect.center().x, rect.center().y - 4.),
+                egui::pos2(rect.center().x, rect.center().y + 4.),
+            ],
+            Stroke::new(2., Color32::WHITE),
+        );
+    } else {
+        painter.circle_stroke(
+            rect.center(),
+            2.4,
+            Stroke::new(1., Color32::from_rgb(190, 202, 214)),
+        );
+    }
     response.on_hover_text(format!("Page {}", index + 1))
 }
 

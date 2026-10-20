@@ -34,7 +34,7 @@
       "font hinting disabled for smoother anti-aliased glyphs",
       "raised category cards with drop shadow and lit top edge",
       "dark text shadow under coloured labels",
-      "reference-style page rectangles (two rows per page)"
+      "ten-icon rows with a right-anchored page column; | selected, circles otherwise"
     ]
   },
   "checks": [
@@ -196,17 +196,17 @@
   ],
   "logs": {
     "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
-    "acceptance_sha256": "63e40fce455058ea9bce043c00e367d15b4eb8d36acb983ca5239890c3948b70",
+    "acceptance_sha256": "1e86932be1ce6d35489e79f95e394f91dc1a991b05c0f31f044715bc401a9743",
     "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
-    "app_lib_sha256": "70fe77bd70c03d29880427176e7a828ad9c4917da2acef1a4425d1ea3bc2b791",
+    "app_lib_sha256": "2904fd18f31623753c219c044912ea45565e1a7cb6db7b6fc6b446a6b3224552",
     "clippy_touched": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/clippy-touched.log",
     "clippy_touched_sha256": "be7d9b18a8593ed71d6869e3c97c9ddf51916f41de7924019082515b0463e590"
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "ccd07c06dadff61dc29863c085d3fcd5216a126b72b46270c606f3ee29e63747",
+    "screenshot_sha256": "c40532b1c0f2d64131ef8d8cd2932f9b8fff2b1a67b1842ee67a291b01ba4ef3",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "8e4e1ffbbfd8b9f78a3f73c53e2da1395e15077ccaf0138888528fa2a54076e3",
+    "receipt_sha256": "a9b68317eb689fe81bf492ec25740332f43938e3439c6204ff64bea51e190592",
     "passes": 21,
     "view_rects": {
       "Looking Down": [
