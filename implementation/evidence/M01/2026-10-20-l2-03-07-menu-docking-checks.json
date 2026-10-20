@@ -22,7 +22,7 @@
     "modernized": [
       "rounded icon tiles",
       "flat section cards with accent rails",
-      "reference-sampled colour dots on modern category cards",
+      "reference-coloured category labels without leading dots",
       "category flow row wraps at the rail edge",
       "dark-green selected category card",
       "icons scale with rail width and screen size",
@@ -188,17 +188,17 @@
   ],
   "logs": {
     "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
-    "acceptance_sha256": "f13b16c1ac1792dd2fbdd15af0dd1fd28c10f34be5502ab31d3735be3c7149f6",
+    "acceptance_sha256": "6f19775b4071931dcfd77db999b4ce1ae958f2fc1f813ad31a2a9d2f8e5c1e33",
     "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
-    "app_lib_sha256": "cba99e470d8e254e28eaf6ac4a6bd3cfba161312d05d17472b5ae5866d5af3cf",
+    "app_lib_sha256": "a1ddf6f54b990d04c66755851175f468e85c8c3c1dcddffd783cd1e56c728622",
     "clippy_touched": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/clippy-touched.log",
     "clippy_touched_sha256": "be7d9b18a8593ed71d6869e3c97c9ddf51916f41de7924019082515b0463e590"
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "5a8df9f5a147c0a80dcc42ed920e39ed8b52d75e596be3d0b3a487a5bdc6612d",
+    "screenshot_sha256": "36fdd5db4f7fb71516148cbbd6da02ed456c5db498721fb5f41345a2f3bb7ca9",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "9e1abf460a6b0b4be8fb3c9bb2a1599d328c99eef239e39e5e57a09f2d2e84d4",
+    "receipt_sha256": "8b811d495d23d71cd67556ecaaf77172f9a42edadba0a329781a94d466c1be6c",
     "passes": 21,
     "view_rects": {
       "Looking Down": [

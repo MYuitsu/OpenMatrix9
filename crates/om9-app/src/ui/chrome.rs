@@ -532,27 +532,8 @@ impl MatrixApp {
                     for (i, category) in CATEGORIES.iter().enumerate() {
                         let accent = CATEGORY_COLORS[i];
                         let selected = self.main_category == i;
-                        let font = FontId::proportional(9.5);
-                        let mut job = egui::text::LayoutJob::default();
-                        job.append(
-                            "● ",
-                            0.,
-                            egui::TextFormat {
-                                font_id: font.clone(),
-                                color: accent,
-                                ..Default::default()
-                            },
-                        );
-                        job.append(
-                            category,
-                            0.,
-                            egui::TextFormat {
-                                font_id: font,
-                                color: if selected { Color32::WHITE } else { PANEL_INK },
-                                ..Default::default()
-                            },
-                        );
-                        let button = egui::Button::new(job)
+                        let text = RichText::new(*category).color(accent).size(9.5);
+                        let button = egui::Button::new(text)
                             .fill(if selected {
                                 SELECTED_CARD
                             } else {
