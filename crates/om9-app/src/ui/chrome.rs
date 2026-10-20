@@ -721,44 +721,45 @@ impl MatrixApp {
                 } else {
                     category_palette(category)
                 };
-                // Keep the full reference palette scrollable inside a bounded
-                // section so Layers/Projects stay visible on short windows. The
-                // arrow column mirrors the reference menu's page buttons, so a
-                // user never has to drag or wheel through the palette.
-                let scroll_id = egui::Id::new(("main-menu-palette-scroll", palette_name));
-                let mut offset = ui
+                // Reference menus page their icon list: two rows per page and
+                // one rectangle per page on the right. This replaces the old
+                // arrow pair, so the number of visible pages is explicit.
+                let page_id = egui::Id::new(("main-menu-page", palette_name));
+                let mut page = ui
                     .ctx()
-                    .memory(|memory| memory.data.get_temp::<f32>(scroll_id).unwrap_or(0.));
-                let scroll_width = (ui.available_width() - 20.).max(80.);
+                    .memory(|memory| memory.data.get_temp::<usize>(page_id).unwrap_or(0));
+                let page_width = (ui.available_width() - 22.).max(80.);
+                let icon_edge = self.column_icon_edge;
+                let gap = ui.spacing().item_spacing.x;
+                let columns = (((page_width + gap) / (icon_edge + gap)).floor() as usize).max(1);
+                let page_size = columns * 2;
+                let pages = palette.len().div_ceil(page_size).max(1);
+                page = page.min(pages - 1);
+                let start = page * page_size;
+                let end = (start + page_size).min(palette.len());
                 ui.horizontal(|ui| {
-                    let output = egui::ScrollArea::vertical()
-                        .id_salt(("main-menu-palette", palette_name))
-                        .max_height(26.)
-                        .max_width(scroll_width)
-                        .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden)
-                        .auto_shrink([false, false])
-                        .vertical_scroll_offset(offset)
-                        .show(ui, |ui| {
+                    ui.allocate_ui_with_layout(
+                        Vec2::new(page_width, icon_edge * 2. + gap),
+                        egui::Layout::top_down(egui::Align::Min),
+                        |ui| {
                             ui.horizontal_wrapped(|ui| {
-                                for name in palette {
+                                for name in &palette[start..end] {
                                     self.feature_icon(ui, "", name);
                                 }
                             });
-                        });
-                    offset = output.state.offset.y;
+                        },
+                    );
                     ui.spacing_mut().item_spacing.y = 1.;
                     ui.vertical(|ui| {
-                        if menu_scroll_arrow(ui, true).clicked() {
-                            offset = (offset - 30.).max(0.);
-                        }
-                        if menu_scroll_arrow(ui, false).clicked() {
-                            offset += 30.;
+                        for index in 0..pages {
+                            if menu_page_button(ui, index, page == index).clicked() {
+                                page = index;
+                            }
                         }
                     });
                 });
-                ui.ctx().memory_mut(|memory| {
-                    memory.data.insert_temp(scroll_id, offset);
-                });
+                ui.ctx()
+                    .memory_mut(|memory| memory.data.insert_temp(page_id, page));
                 if palette.is_empty() {
                     ui.label(format!("{palette_name} menu has no pinned commands"));
                 }
@@ -1386,49 +1387,39 @@ fn feature_category(f: &Feature) -> &str {
         "Tools"
     }
 }
-fn menu_scroll_arrow(ui: &mut egui::Ui, up: bool) -> egui::Response {
+fn menu_page_button(ui: &mut egui::Ui, index: usize, selected: bool) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(Vec2::new(18., 12.), Sense::click());
     let painter = ui.painter();
     painter.rect_filled(
         rect,
         3,
-        if response.hovered() {
+        if selected {
+            Color32::from_rgb(37, 99, 170)
+        } else if response.hovered() {
             ACCENT
         } else {
             PANEL_EDGE
         },
     );
-    let center = rect.center();
-    let (tip, left, right) = if up {
-        (
-            egui::pos2(center.x, center.y - 4.),
-            egui::pos2(center.x - 5., center.y + 3.),
-            egui::pos2(center.x + 5., center.y + 3.),
-        )
-    } else {
-        (
-            egui::pos2(center.x, center.y + 4.),
-            egui::pos2(center.x - 5., center.y - 3.),
-            egui::pos2(center.x + 5., center.y - 3.),
-        )
-    };
-    painter.add(egui::Shape::convex_polygon(
-        vec![tip, left, right],
-        Color32::WHITE,
-        Stroke::NONE,
-    ));
-    response.on_hover_text(if up {
-        "Previous menu row"
-    } else {
-        "Next menu row"
-    })
+    painter.rect_stroke(
+        rect.shrink(0.5),
+        3,
+        Stroke::new(1., if selected { Color32::WHITE } else { PANEL_EDGE }),
+        egui::StrokeKind::Inside,
+    );
+    painter.circle_stroke(
+        rect.center(),
+        2.4,
+        Stroke::new(1., Color32::from_rgba_unmultiplied(230, 237, 243, 220)),
+    );
+    response.on_hover_text(format!("Page {}", index + 1))
 }
 
 fn category_text(accent: Color32) -> Color32 {
     let luminance =
         (0.2126 * accent.r() as f32 + 0.7152 * accent.g() as f32 + 0.0722 * accent.b() as f32)
             / 255.;
-    let mix = if luminance < 0.42 { 0.55 } else { 0.32 };
+    let mix = if luminance < 0.42 { 0.65 } else { 0.40 };
     let channel = |value: u8| (value as f32 * (1. - mix) + 255. * mix) as u8;
     Color32::from_rgb(
         channel(accent.r()),

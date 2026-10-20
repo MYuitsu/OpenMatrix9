@@ -13344,7 +13344,8 @@
         "Main-menu palettes expanded to the full MainMenu.ini reference: 356 unique authored icons across 12 menus, 308 feature-mapped.",
         "Full menus keep a bounded scrolling palette so Layers/Projects stay visible at 911x480.",
         "Menu page arrows (drawn triangles) step the long palette without drag/wheel.",
-        "Top File/View/Utilities/Measure/Custom menus are interactive and open their full reference palettes."
+        "Top File/View/Utilities/Measure/Custom menus are interactive and open their full reference palettes.",
+        "Menu palettes use reference-style page rectangles (two rows per page) instead of arrows."
       ],
       "tests": {
         "chrome_actions": "13 passed",
