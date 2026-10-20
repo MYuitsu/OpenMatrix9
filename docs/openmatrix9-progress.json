@@ -13346,7 +13346,8 @@
         "Menu page arrows (drawn triangles) step the long palette without drag/wheel.",
         "Top File/View/Utilities/Measure/Custom menus are interactive and open their full reference palettes.",
         "Menu palettes use reference-style page rectangles (two rows per page) instead of arrows.",
-        "Menu palette uses ten icons per row, a fixed right page column, | for selected page and circles otherwise."
+        "Menu palette uses ten icons per row, a fixed right page column, | for selected page and circles otherwise.",
+        "Page indicators use framed beveled buttons (blue | selected, gray circles otherwise)."
       ],
       "tests": {
         "chrome_actions": "13 passed",

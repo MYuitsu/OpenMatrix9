@@ -728,7 +728,7 @@ impl MatrixApp {
                 let mut page = ui
                     .ctx()
                     .memory(|memory| memory.data.get_temp::<usize>(page_id).unwrap_or(0));
-                let page_width = (ui.available_width() - 22.).max(80.);
+                let page_width = (ui.available_width() - 26.).max(80.);
                 let gap = ui.spacing().item_spacing.x;
                 let fit_edge = ((page_width - gap * (PAGE_COLUMNS - 1) as f32)
                     / PAGE_COLUMNS as f32)
@@ -1398,24 +1398,64 @@ fn feature_category(f: &Feature) -> &str {
     }
 }
 fn menu_page_button(ui: &mut egui::Ui, index: usize, selected: bool) -> egui::Response {
-    let (rect, response) = ui.allocate_exact_size(Vec2::new(18., 12.), Sense::click());
+    let (rect, response) = ui.allocate_exact_size(Vec2::new(22., 14.), Sense::click());
     let painter = ui.painter();
-    if response.hovered() {
-        painter.rect_filled(rect, 3, PANEL_EDGE);
-    }
+    painter.rect_filled(rect, 2, Color32::from_gray(30));
+    let inner = rect.shrink(1.5);
+    let (top, bottom) = if selected {
+        (
+            Color32::from_rgb(112, 171, 235),
+            Color32::from_rgb(54, 103, 173),
+        )
+    } else if response.hovered() {
+        (
+            Color32::from_rgb(103, 103, 103),
+            Color32::from_rgb(66, 66, 66),
+        )
+    } else {
+        (Color32::from_rgb(91, 91, 91), Color32::from_rgb(57, 57, 57))
+    };
+    gradient(painter, inner, top, bottom);
+    painter.rect_stroke(
+        inner,
+        2,
+        Stroke::new(
+            1.,
+            if selected {
+                Color32::from_rgba_unmultiplied(255, 255, 255, 210)
+            } else {
+                Color32::from_gray(145)
+            },
+        ),
+        egui::StrokeKind::Inside,
+    );
+    painter.line_segment(
+        [
+            egui::pos2(inner.left() + 2., inner.top() + 1.),
+            egui::pos2(inner.right() - 2., inner.top() + 1.),
+        ],
+        Stroke::new(1., Color32::from_rgba_unmultiplied(255, 255, 255, 165)),
+    );
+    painter.line_segment(
+        [
+            egui::pos2(inner.left() + 1., inner.top() + 2.),
+            egui::pos2(inner.left() + 1., inner.bottom() - 2.),
+        ],
+        Stroke::new(1., Color32::from_rgba_unmultiplied(255, 255, 255, 120)),
+    );
     if selected {
         painter.line_segment(
             [
-                egui::pos2(rect.center().x, rect.center().y - 4.),
-                egui::pos2(rect.center().x, rect.center().y + 4.),
+                egui::pos2(inner.center().x, inner.center().y - 4.),
+                egui::pos2(inner.center().x, inner.center().y + 4.),
             ],
-            Stroke::new(2., Color32::WHITE),
+            Stroke::new(2., Color32::from_rgb(20, 32, 42)),
         );
     } else {
         painter.circle_stroke(
-            rect.center(),
-            2.4,
-            Stroke::new(1., Color32::from_rgb(190, 202, 214)),
+            inner.center(),
+            2.6,
+            Stroke::new(1., Color32::from_rgb(98, 159, 226)),
         );
     }
     response.on_hover_text(format!("Page {}", index + 1))

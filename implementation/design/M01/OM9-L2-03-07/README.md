@@ -68,7 +68,7 @@ a two-button page column (drawn triangles, not font glyphs) steps the rows witho
 - `startup_contract` — **3**: failed start leaves layout untouched.
 - `om9-app --lib` — **106 passed**, including `menu_catalog` full-list and feature-mapping tests.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
-  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `c40532b1…`). The screenshot shows the modern
+  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `316ad877…`). The screenshot shows the modern
   near-black rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
   placement.
   This is automated evidence, not human sign-off.
