@@ -80,7 +80,7 @@
     "date": "2026-10-20",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Matrix left sidebar order; reference-sampled category label colours without leading dots; one flow row that wraps at the rail edge with dark-green selection; responsive SVG icon sizing by dock width and screen; recent history, collapse/reorder/float/reset and disabled visibility.",
+    "scope": "Matrix left sidebar order; full MainMenu.ini category icon lists (356 unique authored icons, 308 feature-mapped); reference-sampled label colours without dots; wrapping flow; responsive icon sizing; recent history, docking/reset and disabled visibility.",
     "evidence": [
       "implementation/design/M01/OM9-L2-03-07/README.md",
       "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",

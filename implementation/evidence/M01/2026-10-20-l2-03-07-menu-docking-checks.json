@@ -185,7 +185,7 @@
         "2"
       ],
       "exit_code": 0,
-      "test_count": 104
+      "test_count": 106
     }
   ],
   "manual_gate": "M01-UI",
@@ -195,17 +195,17 @@
   ],
   "logs": {
     "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/acceptance.log",
-    "acceptance_sha256": "3cae3798dfb4eaa6401eea090041a16c8d09fb42e1bdd7a7986229680121a725",
+    "acceptance_sha256": "8997f91d7c669056c51faa21e6631f850eecc1c274ee61422fa3d269982885a1",
     "app_lib": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/app-lib.log",
-    "app_lib_sha256": "5378e600a16552b0175c821baa1d96983a931a1f51d3beca439b20623f5cf2ac",
+    "app_lib_sha256": "0c96f22a0d20eb747623452072133a01b655e6155350a5bf34c362cac76a0efc",
     "clippy_touched": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261020/clippy-touched.log",
     "clippy_touched_sha256": "be7d9b18a8593ed71d6869e3c97c9ddf51916f41de7924019082515b0463e590"
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "ed6723bdb724f0c7a0120662e8cdd67caf59b38ee886d0ec0566626b8a857b64",
+    "screenshot_sha256": "92434f57cb10074a348e0bbb302b38c5505381d8e8bc9f1cf7f8c5c744a8f361",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "e8a093291448ec1af7ddb6e6516e373d0cef221e33e701f52abc3cb1d9d1b5ec",
+    "receipt_sha256": "48dd052e92b0a3457299346a0e2ba524b8488ea999a65354e48efeb06a45250e",
     "passes": 21,
     "view_rects": {
       "Looking Down": [
@@ -236,5 +236,32 @@
   },
   "known_unrelated": [
     "cargo clippy --all-targets reports pre-existing lints in unrelated working-tree files: tests/layer_current_and_assign.rs:147 and src/ui/panel_audit.rs:749."
-  ]
+  ],
+  "menu_catalog": {
+    "source": [
+      "Resources/menu/MainMenu.ini",
+      "Resources/menu/icons.ini",
+      "tools/named-icon-bindings.json"
+    ],
+    "unique_icons": 356,
+    "mapped_to_feature": 308,
+    "counts": {
+      "Curve": 58,
+      "Surface": 40,
+      "Solid": 30,
+      "Transform": 40,
+      "SubD": 58,
+      "Art": 7,
+      "Builder": 16,
+      "Tools": 31,
+      "Gems": 35,
+      "Setting": 12,
+      "Cutters": 11,
+      "Render": 23
+    },
+    "tests": [
+      "menu_catalog::every_menu_has_the_full_reference_icon_list",
+      "menu_catalog::most_reference_icons_map_to_a_feature"
+    ]
+  }
 }

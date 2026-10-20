@@ -481,22 +481,26 @@ impl MatrixApp {
         response
     }
     fn feature_icon(&mut self, ui: &mut egui::Ui, id: &str, name: &str) {
-        let feature = self
-            .features
-            .iter()
-            .find(|f| crate::icons::icon_name(&f.id) == Some(name))
-            .cloned();
-        let actual = feature
-            .as_ref()
-            .map(|f| f.id.clone())
+        let actual = crate::icons::feature_for(name)
+            .map(str::to_owned)
+            .or_else(|| {
+                self.features
+                    .iter()
+                    .find(|f| crate::icons::icon_name(&f.id) == Some(name))
+                    .map(|f| f.id.clone())
+            })
             .or_else(|| (id == LINE || id == POINT).then(|| id.to_owned()));
+        let feature = actual
+            .as_ref()
+            .and_then(|id| self.features.iter().find(|f| &f.id == id).cloned());
         if let Some(actual) = actual {
             let enabled = Controller::availability(&actual).is_ok();
+            let help = feature.as_ref().map_or(name, |f| f.name.as_str());
             let right = feature
                 .as_ref()
                 .and_then(|f| f.right_click.as_deref())
                 .filter(|command| Controller::availability(command).is_ok());
-            if self.icon_slot(ui, name, enabled, &actual, right).clicked() {
+            if self.icon_slot(ui, name, enabled, help, right).clicked() {
                 self.invoke(&actual, InvocationOrigin::Menu);
             }
         } else {
@@ -615,7 +619,7 @@ impl MatrixApp {
                         );
                         let width = galley.size().x + 18.;
                         let (rect, response) =
-                            ui.allocate_exact_size(Vec2::new(width, 20.), Sense::click());
+                            ui.allocate_exact_size(Vec2::new(width, 18.), Sense::click());
                         let response =
                             response.on_hover_text(format!("{category} command category"));
                         let painter = ui.painter();
@@ -666,11 +670,19 @@ impl MatrixApp {
                 });
                 let category = CATEGORIES[self.main_category];
                 let palette = category_palette(category);
-                ui.horizontal_wrapped(|ui| {
-                    for name in palette {
-                        self.feature_icon(ui, "", name);
-                    }
-                });
+                // Keep the full reference palette scrollable inside a bounded
+                // section so Layers/Projects stay visible on short windows.
+                egui::ScrollArea::vertical()
+                    .id_salt(("main-menu-palette", category))
+                    .max_height(26.)
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| {
+                        ui.horizontal_wrapped(|ui| {
+                            for name in palette {
+                                self.feature_icon(ui, "", name);
+                            }
+                        });
+                    });
                 if palette.is_empty() {
                     ui.label(format!("{category} tools unavailable"));
                 }
@@ -1249,34 +1261,7 @@ impl MatrixApp {
     }
 }
 fn category_palette(category: &str) -> &'static [&'static str] {
-    match category {
-        "Curve" => &[
-            "Polyline",
-            "Line",
-            "Interpolate",
-            "Circle",
-            "Rectangle",
-            "Ellipse",
-            "Point",
-            "Offset",
-            "ProjectCurve",
-            "Trim",
-            "Join",
-            "Split",
-        ],
-        "Surface" => &["Sweep", "Loft", "Revolve"],
-        "Solid" => &["Box", "Sphere", "Union", "Difference", "Intersection"],
-        "Transform" => &["Move", "Rotate", "Scale", "Mirror", "Duplicate"],
-        "Builder" => &["Builder", "RingRail"],
-        "Tools" => &["RingRail", "Fit", "Properties"],
-        "Gems" => &["Gem", "Emerald"],
-        "Setting" => &["Settings", "Properties", "Layers"],
-        "Cutters" => &["Cutters"],
-        "Render" => &["Render"],
-        // There is no accepted operation or selected authored palette for these
-        // groups yet. Show their availability rather than unrelated solids.
-        _ => &[],
-    }
+    crate::menu_catalog::category(category).unwrap_or(&[])
 }
 fn toolbar_palette(tab: &str) -> &'static [&'static str] {
     match tab {

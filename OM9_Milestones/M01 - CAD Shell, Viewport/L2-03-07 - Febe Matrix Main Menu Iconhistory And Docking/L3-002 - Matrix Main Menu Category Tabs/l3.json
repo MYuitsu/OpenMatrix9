@@ -181,7 +181,7 @@
     "date": "2026-10-20",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Twelve Main Menu categories with RGB values sampled from Matrix8 p14, no leading square/dot, labels coloured like their category; flow row wraps at the rail edge; dark-green selected card; exact category order.",
+    "scope": "Twelve Main Menu categories backed by the full MainMenu.ini icon lists (356 unique authored icons) in reference order.",
     "evidence": [
       "implementation/design/M01/OM9-L2-03-07/README.md",
       "implementation/evidence/M01/2026-10-20-l2-03-07-menu-docking-checks.json",

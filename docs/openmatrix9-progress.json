@@ -13183,7 +13183,9 @@
         "Icon base edge +25% (27.5 pt, rail 23–42 pt); 11 pt menu/category labels.",
         "Near-black sidebar (#0A0E13) with brighter category text (all labels >=5.1:1 contrast).",
         "Font hinting disabled so menu glyphs render with anti-aliased outlines.",
-        "Category cards raised with drop shadow/lit top edge; label contrast raised to at least 7.5:1."
+        "Category cards raised with drop shadow/lit top edge; label contrast raised to at least 7.5:1.",
+        "Main-menu palettes expanded to the full MainMenu.ini reference: 356 unique authored icons across 12 menus, 308 feature-mapped.",
+        "Full menus keep a bounded scrolling palette so Layers/Projects stay visible at 911x480."
       ],
       "tests": {
         "chrome_actions": "11 passed",
@@ -13195,7 +13197,7 @@
         "command_sessions": "6 passed",
         "command_options_and_repeat": "6 passed",
         "startup_contract": "3 passed",
-        "app_lib": "104 passed"
+        "app_lib": "106 passed"
       },
       "evidence": [
         "implementation/design/M01/OM9-L2-03-07/README.md",
