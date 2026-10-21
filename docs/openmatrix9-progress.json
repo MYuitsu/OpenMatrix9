@@ -11,7 +11,7 @@
       "feature_ids": [
         "OM9-L3-01-01-001"
       ],
-      "status": "github_build_verified_tagged_release_prepared",
+      "status": "github_tagged_release_published_and_integrity_verified",
       "target": "Standalone Rust Windows product and selected MSVC native adapters",
       "outputs": [
         ".github/workflows/release-windows.yml",
@@ -26,7 +26,8 @@
       "evidence": [
         "docs/validation/2026-10-21-standalone-github-actions.md",
         "docs/validation/2026-10-21-standalone-github-actions.json",
-        "docs/validation/2026-10-21-standalone-release-preflight.json"
+        "docs/validation/2026-10-21-standalone-release-preflight.json",
+        "docs/validation/2026-10-21-standalone-release-published.json"
       ],
       "tests": [
         "Actionlint 1.7.12 and PowerShell AST parsing: PASS.",
@@ -34,14 +35,14 @@
         "Full default-feature product build and portable package: exit 0; 432 payload hashes verified.",
         "Fresh MSVC x64 configure, zlib/openNURBS build, adapter link and clean-PATH CLI/native loader checks: PASS.",
         "Public source audit: 0 errors.",
-        "GitHub-hosted run 39543107947: product build, native exchange, attestation and artifact uploads passed; branch publish was skipped by the tag guard."
+        "GitHub-hosted run 39543107947: product build, native exchange, attestation and artifact uploads passed; branch publish was skipped by the tag guard.",
+        "Tagged run 39560216857: build/native-exchange/publish all passed. Published ZIP/checksum and all 432 payload hashes verified against tagged commit 9cdee1de."
       ],
       "uncertainties": [
-        "Tagged rebuild and publication are pending at the release-preflight checkpoint.",
-        "CI remains build-only; UI/manual and native geometry conformance are separate gates."
+        "CI is build-only. Manual UI, native geometry conformance and viewport presentation/performance acceptance remain separate."
       ],
-      "next_document": "docs/validation/2026-10-21-standalone-release-preflight.json",
-      "next_action": "Push the metadata commit and matching v0.3.6-202610211407 tag; inspect tagged Windows builds and published ZIP/checksum assets.",
+      "next_document": "docs/validation/2026-10-21-standalone-release-published.json",
+      "next_action": "Use the published standalone ZIP; retain separate UI/geometry/performance gates and preserve immutable existing releases.",
       "manual_gate_promoted": false,
       "business_skill_rules_changed": false
     },

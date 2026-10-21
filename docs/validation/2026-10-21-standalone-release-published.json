@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-21",
+  "status": "published_assets_verified",
+  "tag": "v0.3.6-202610211407",
+  "release_url": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.6-202610211407",
+  "source_commit": "9cdee1de56ad1499e3f89e82c86f8b47c5a88756",
+  "run_id": 39560216857,
+  "release_id": 419262593,
+  "prerelease": true,
+  "files_verified": 432,
+  "zip_sha256": "fc0f56cb161eaf503497dc21a049b68e12ca9b7d2f8c87150756fbf95500ce84",
+  "asset_names": [
+    "OpenMatrix9-0.3.6-202610211407-Standalone-Windows-x64.zip",
+    "SHA256SUMS.txt"
+  ],
+  "build_only": true,
+  "manual_gate_promoted": false,
+  "existing_releases_overwritten": false
+}

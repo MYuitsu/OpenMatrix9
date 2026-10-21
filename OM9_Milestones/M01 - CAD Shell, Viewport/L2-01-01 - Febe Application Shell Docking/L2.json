@@ -95,13 +95,15 @@
       "scope": "Fresh/factory layout and Reset Menus use 360 outer logical pixels. Existing persisted custom sizes still reload. Right dock remains 300. Existing icon scale at a given width retained by separating its 300-point reference width from the startup default."
     },
     "standalone_ci_2026_10_21": {
-      "status": "local_build_package_verified_github_run_pending",
+      "status": "github_tagged_release_published_and_integrity_verified",
       "evidence": [
         "docs/validation/2026-10-21-standalone-github-actions.md",
-        "docs/validation/2026-10-21-standalone-github-actions.json"
+        "docs/validation/2026-10-21-standalone-github-actions.json",
+        "docs/validation/2026-10-21-standalone-release-published.json"
       ],
       "scope": "Build/package/loader only; no UI or geometry gate promotion",
-      "manual_gate_promoted": false
+      "manual_gate_promoted": false,
+      "release_url": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.6-202610211407"
     }
   }
 }

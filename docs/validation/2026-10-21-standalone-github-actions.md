@@ -78,3 +78,25 @@ runner downloads, permissions, artifact upload, attestation and tagged publicati
 are not established by local compilation. No release was created to test publication.
 GPU UI startup/manual gates and native geometry conformance remain separate from
 these CLI/archive/loader checks. No reusable business rules or skills were changed.
+
+## Hosted verification and publication — later checkpoint
+
+[Main run 39543107947](https://github.com/MYuitsu/OpenMatrix9/actions/runs/39543107947)
+passed both Windows jobs, attestation and artifact uploads. Its publish job was
+correctly skipped because it was a branch push.
+
+Version/tag `v0.3.6-202610211407` was then created on commit
+`9cdee1de56ad1499e3f89e82c86f8b47c5a88756`.
+[Tagged run 39560216857](https://github.com/MYuitsu/OpenMatrix9/actions/runs/39560216857)
+passed `build`, `native-exchange` and `publish`.
+The [pre-release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.6-202610211407)
+contains the standalone ZIP and `SHA256SUMS.txt`.
+
+Both assets were downloaded and matched GitHub's SHA256 digests; the ZIP matched
+the checksum file, tagged commit, clean source identity and version in its manifest.
+All 432 payload file hashes were verified. See
+[published receipt](2026-10-21-standalone-release-published.json).
+The local build hashes earlier in this document remain historical local evidence;
+the published ZIP has its own digest in the later receipt. Existing releases/tags
+were preserved. This closes the hosted build/publication gap, without promoting
+manual UI, geometry or performance acceptance.
