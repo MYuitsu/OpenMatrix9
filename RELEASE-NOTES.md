@@ -1,4 +1,23 @@
-# OpenMatrix9 0.3.5-202610121520 — Gumball chọn nhiều object
+# OpenMatrix9 0.3.6-202610211407 — Standalone Windows x64
+
+Phát hành ứng dụng standalone Rust với viewport GPU, điều hướng orbit/pan/zoom
+và adapter OCCT/openNURBS đã pin. Gói portable chứa runtime DLL, adapter 3DM,
+manifest SHA256, giấy phép và nguồn/bản vá OCCT TKG3d đi kèm.
+
+Tải `OpenMatrix9-0.3.6-202610211407-Standalone-Windows-x64.zip` trong Assets,
+giải nén toàn bộ thư mục rồi chạy `Start-OM9.cmd` hoặc `om9.exe`. Giữ các DLL,
+adapter 3DM và tệp digest cạnh executable. Ứng dụng cần GPU tương thích wgpu.
+Kiểm tra gói bằng `SHA256SUMS.txt` của cùng release.
+
+Run main `39543107947` đã build thành công cả sản phẩm và native adapter.
+Release mới được dựng lại từ commit/tag tương ứng; không đổi tên artifact cũ
+để gán cho version mới. CI giữ `validation_kind: build_only`,
+`tests_executed: false`; các gate UI, geometry và performance vẫn theo bằng chứng
+riêng. Đây là pre-release. Giữ aa/bb ở 0/3, tăng patch 5→6; timestamp Asia/Saigon.
+
+---
+
+# OpenMatrix9 0.3.5-202610121520 — Gumball chọn nhiều object (lịch sử)
 
 Sửa lỗi Gumball biến mất khi chọn nhiều object ở **Object Alignment**.
 Giữ **Shift** rồi click thêm object, hoặc kéo khung chọn; cả selection dùng

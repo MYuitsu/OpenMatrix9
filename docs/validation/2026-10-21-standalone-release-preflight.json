@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-21",
+  "scope": "Preflight checkpoint before creating the standalone release tag",
+  "version": "0.3.6-202610211407",
+  "tag": "v0.3.6-202610211407",
+  "previous_version": "0.3.5-202610121520",
+  "time_zone": "Asia/Saigon",
+  "verified_main_commit": "05ae5818ac1535e18616988a480f2548e04337b6",
+  "verified_main_run": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/39543107947",
+  "main_run_result": "success",
+  "jobs": {
+    "build": "success",
+    "native-exchange": "success",
+    "publish": "skipped: main branch push, not a tag push"
+  },
+  "main_artifact": {
+    "id": 12321445238,
+    "name": "om9-release-files",
+    "digest": "sha256:60c521601ac0976de5e2e3a0f84d1bc379ba32571b2ea9a506ef5863f2d75fcc",
+    "expired": false
+  },
+  "release_action": "Commit updated metadata on main, then push matching new tag; workflow rebuilds and publishes that version after both Windows jobs succeed",
+  "existing_tags_changed": false,
+  "existing_releases_overwritten": false,
+  "tagged_build_acceptance": "PENDING_AT_PREFLIGHT",
+  "publication": "PENDING_AT_PREFLIGHT",
+  "manual_gate_promoted": false
+}
