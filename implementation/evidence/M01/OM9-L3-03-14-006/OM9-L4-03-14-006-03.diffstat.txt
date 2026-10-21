@@ -1,0 +1,101 @@
+ M crates/om9-3dm/build.rs
+ M crates/om9-3dm/src/lib.rs
+ M crates/om9-3dm/tests/import_roundtrip.rs
+ M crates/om9-3dm/tests/jewelry_scene.rs
+ M crates/om9-app/src/gpu_viewport.rs
+ M crates/om9-app/src/lib.rs
+ M crates/om9-app/src/session.rs
+ M crates/om9-app/src/session/gumball_numeric.rs
+ M crates/om9-app/src/session/layers.rs
+ M crates/om9-app/src/session/stress.rs
+ M crates/om9-app/src/session/subobjects.rs
+ M crates/om9-app/src/startup.rs
+ M crates/om9-app/src/transcript.rs
+ M crates/om9-app/src/ui/command.rs
+ M crates/om9-app/src/ui/files.rs
+ M crates/om9-app/src/ui/layers.rs
+ M crates/om9-app/tests/acceptance_selection_set.rs
+ M crates/om9-app/tests/acceptance_viewport_selection.rs
+ M crates/om9-app/tests/brep_selection.rs
+ M crates/om9-app/tests/clip_behaviours.rs
+ M crates/om9-app/tests/file_lifecycle.rs
+ M crates/om9-app/tests/gumball_cold.rs
+ M crates/om9-app/tests/gumball_interaction.rs
+ M crates/om9-app/tests/gumball_placement.rs
+ M crates/om9-app/tests/gumball_viewport.rs
+ M crates/om9-app/tests/mesh_fill.rs
+ M crates/om9-app/tests/mesh_stress_command.rs
+ M crates/om9-app/tests/pick_disambiguation.rs
+ M crates/om9-app/tests/preview_drag.rs
+ M crates/om9-app/tests/rubber_band.rs
+ M crates/om9-app/tests/selection_overlay.rs
+ M crates/om9-app/tests/startup_contract.rs
+ M crates/om9-app/tests/subobject_selection.rs
+ M crates/om9-archive/tests/project_codec_acceptance.rs
+ M crates/om9-archive/tests/restore_modules.rs
+ M crates/om9-core/src/layers.rs
+ M crates/om9-core/src/lib.rs
+ M crates/om9-core/src/offset_curve.rs
+ M crates/om9-core/tests/offset_curve.rs
+ M crates/om9-exchange/src/lib.rs
+ M crates/om9-exchange/src/stl.rs
+ M crates/om9-exchange/tests/stl_export_policy.rs
+ M crates/om9-kernel/build.rs
+ M crates/om9-kernel/src/lib.rs
+ M crates/om9-kernel/tests/kernel.rs
+ M crates/om9-kernel/tests/l2_01_05.rs
+ M crates/om9-kernel/tests/lifetime.rs
+ M crates/om9-kernel/tests/numeric.rs
+ M crates/om9-render/src/cluster.rs
+ M crates/om9-render/src/lib.rs
+ M crates/om9-render/src/lod.rs
+ M crates/om9-render/src/meshlet.rs
+ M crates/om9-render/src/occlusion.rs
+ M crates/om9-render/src/overlay.rs
+ M crates/om9-render/src/pyramid.rs
+ M crates/om9-render/src/qem.rs
+ M crates/om9-render/src/scene.rs
+ M crates/om9-render/src/shapes.rs
+ M crates/om9-render/src/streaming.rs
+ M crates/om9-render/src/tests_support.rs
+ M crates/om9-render/tests/antialiasing.rs
+ M crates/om9-render/tests/render_loop.rs
+ M crates/om9-render/tests/scene_bench.rs
+ M crates/om9-scene/src/camera.rs
+ M crates/om9-scene/src/gumball_view.rs
+ M crates/om9-scene/src/lib.rs
+ M crates/om9-scene/src/picking.rs
+ M crates/om9-scene/tests/acceptance_l2_01_07.rs
+ M crates/om9-scene/tests/camera_orbit.rs
+ M crates/om9-scene/tests/subobject_pick.rs
+?? crates/om9-app/src/superselect.rs
+?? crates/om9-app/tests/command_feedback_adapter.rs
+?? crates/om9-app/tests/command_shortcuts.rs
+?? crates/om9-app/tests/command_tokens.rs
+?? crates/om9-app/tests/layer_category_palette.rs
+?? crates/om9-app/tests/layer_current_and_assign.rs
+?? crates/om9-app/tests/layer_select_by_layer.rs
+?? crates/om9-app/tests/layer_visible_locked.rs
+?? crates/om9-app/tests/object_info_overlay.rs
+?? crates/om9-app/tests/superselect_jewelry.rs
+?? crates/om9-core/src/layers/category.rs
+?? crates/om9-core/src/object_info.rs
+?? implementation/design/M01/OM9-L3-03-14-001/
+?? implementation/design/M01/OM9-L3-03-14-002/
+?? implementation/design/M01/OM9-L3-03-14-003/
+?? implementation/design/M01/OM9-L3-03-14-004/
+?? implementation/design/M01/OM9-L3-03-14-005/
+?? implementation/design/M01/OM9-L3-03-14-006/
+?? implementation/evidence/M01/OM9-L2-03-10-AUDIT.md
+?? implementation/evidence/M01/OM9-L3-03-14-001/
+?? implementation/evidence/M01/OM9-L3-03-14-002/
+?? implementation/evidence/M01/OM9-L3-03-14-003/
+?? implementation/evidence/M01/OM9-L3-03-14-004/
+?? implementation/evidence/M01/OM9-L3-03-14-005/
+?? implementation/evidence/M01/OM9-L3-03-14-006/
+?? implementation/fixtures/M01/OM9-L3-03-14-001/
+?? implementation/fixtures/M01/OM9-L3-03-14-002/
+?? implementation/fixtures/M01/OM9-L3-03-14-003/
+?? implementation/fixtures/M01/OM9-L3-03-14-004/
+?? implementation/fixtures/M01/OM9-L3-03-14-005/
+?? implementation/fixtures/M01/OM9-L3-03-14-006/

@@ -57,7 +57,11 @@ fn frames(app: &mut MatrixApp, context: &egui::Context, count: usize) {
 
 fn events(app: &mut MatrixApp, context: &egui::Context, events: Vec<Event>) {
     let mut output = context.run_ui(
-        egui::RawInput { screen_rect: Some(screen_rect()), events, ..Default::default() },
+        egui::RawInput {
+            screen_rect: Some(screen_rect()),
+            events,
+            ..Default::default()
+        },
         |ui| app.show(ui),
     );
     output.textures_delta.clear();
@@ -77,7 +81,10 @@ fn viewport_of(app: &MatrixApp) -> Viewport {
 
 fn screen_of(app: &MatrixApp, point: [f64; 3]) -> Pos2 {
     let camera = &app.controller.workspace.views[&ViewId::Perspective].camera;
-    let projected = camera.project(point, viewport_of(app)).expect("project").expect("front");
+    let projected = camera
+        .project(point, viewport_of(app))
+        .expect("project")
+        .expect("front");
     Pos2::new(projected.screen[0] as f32, projected.screen[1] as f32)
 }
 
@@ -112,7 +119,8 @@ fn world_per_pixel(camera: &om9_scene::camera::Camera, viewport: Viewport) -> f6
         om9_scene::camera::Projection::Perspective { vertical_fov_rad } => {
             let d = camera.eye;
             let t = camera.target;
-            let distance = ((d[0] - t[0]).powi(2) + (d[1] - t[1]).powi(2) + (d[2] - t[2]).powi(2)).sqrt();
+            let distance =
+                ((d[0] - t[0]).powi(2) + (d[1] - t[1]).powi(2) + (d[2] - t[2]).powi(2)).sqrt();
             2.0 * (vertical_fov_rad / 2.0).tan() * distance / viewport.size[1]
         }
         om9_scene::camera::Projection::Orthographic { vertical_span_mm } => {
@@ -124,7 +132,9 @@ fn world_per_pixel(camera: &om9_scene::camera::Camera, viewport: Viewport) -> f6
 /// Screen length of the X move arrow, in pixels: the gumball is drawn at ninety pixels.
 fn gumball_pixels(app: &MatrixApp) -> f32 {
     let frame = app.controller.gumball_pivot().expect("pivot");
-    let camera = app.controller.workspace.views[&ViewId::Perspective].camera.clone();
+    let camera = app.controller.workspace.views[&ViewId::Perspective]
+        .camera
+        .clone();
     let size = world_per_pixel(&camera, viewport_of(app)) * 90.0;
     let view = om9_scene::gumball_view::GumballView::with_size(
         frame,
@@ -134,10 +144,23 @@ fn gumball_pixels(app: &MatrixApp) -> f32 {
     let segment = view
         .segments()
         .into_iter()
-        .find(|segment| matches!(segment.handle, om9_core::gumball::Handle::MoveAxis(om9_core::gumball::Axis::X)))
+        .find(|segment| {
+            matches!(
+                segment.handle,
+                om9_core::gumball::Handle::MoveAxis(om9_core::gumball::Axis::X)
+            )
+        })
         .expect("x arrow");
-    let start = camera.project(segment.start, viewport_of(app)).expect("project").expect("front").screen;
-    let end = camera.project(segment.end, viewport_of(app)).expect("project").expect("front").screen;
+    let start = camera
+        .project(segment.start, viewport_of(app))
+        .expect("project")
+        .expect("front")
+        .screen;
+    let end = camera
+        .project(segment.end, viewport_of(app))
+        .expect("project")
+        .expect("front")
+        .screen;
     ((end[0] - start[0]).hypot(end[1] - start[1])) as f32
 }
 
@@ -146,19 +169,40 @@ fn clicking_selects_and_empty_space_deselects_with_the_gumball_following() {
     let context = egui::Context::default();
     let mut app = MatrixApp::new(document()).expect("app");
     frames(&mut app, &context, 4);
-    let id = *app.controller.document().entities.keys().next().expect("line");
+    let id = *app
+        .controller
+        .document()
+        .entities
+        .keys()
+        .next()
+        .expect("line");
     let on_line = screen_of(&app, [0.0, 0.0, 0.0]);
 
     // 1. click the line: selected, gumball present.
     left_click(&mut app, &context, on_line);
-    assert!(app.controller.selected().contains(&id), "the line is selected");
-    assert!(app.controller.gumball_pivot().is_some(), "the gumball appears");
+    assert!(
+        app.controller.selected().contains(&id),
+        "the line is selected"
+    );
+    assert!(
+        app.controller.gumball_pivot().is_some(),
+        "the gumball appears"
+    );
 
     // 2. click empty space: nothing selected, gumball gone.
-    let empty = Pos2::new(view_rect(&app).right() - 12.0, view_rect(&app).bottom() - 12.0);
+    let empty = Pos2::new(
+        view_rect(&app).right() - 12.0,
+        view_rect(&app).bottom() - 12.0,
+    );
     left_click(&mut app, &context, empty);
-    assert!(app.controller.selected().is_empty(), "empty space clears the selection");
-    assert!(app.controller.gumball_pivot().is_none(), "the gumball disappears");
+    assert!(
+        app.controller.selected().is_empty(),
+        "empty space clears the selection"
+    );
+    assert!(
+        app.controller.gumball_pivot().is_none(),
+        "the gumball disappears"
+    );
 }
 
 #[test]
@@ -170,7 +214,9 @@ fn orbiting_and_zooming_leave_the_gumball_attached_and_the_same_screen_size() {
     left_click(&mut app, &context, on_line);
     let pivot = app.controller.gumball_pivot().expect("pivot").origin;
     let before_size = gumball_pixels(&app);
-    let before_eye = app.controller.workspace.views[&ViewId::Perspective].camera.eye;
+    let before_eye = app.controller.workspace.views[&ViewId::Perspective]
+        .camera
+        .eye;
 
     // 3a. right-drag orbits the camera.
     let centre = view_rect(&app).center();
@@ -186,7 +232,13 @@ fn orbiting_and_zooming_leave_the_gumball_attached_and_the_same_screen_size() {
         }],
     );
     for step in 1..=6 {
-        events(&mut app, &context, vec![Event::PointerMoved(centre + Vec2::new(step as f32 * 12.0, 0.0))]);
+        events(
+            &mut app,
+            &context,
+            vec![Event::PointerMoved(
+                centre + Vec2::new(step as f32 * 12.0, 0.0),
+            )],
+        );
         frames(&mut app, &context, 1);
     }
     events(
@@ -200,9 +252,18 @@ fn orbiting_and_zooming_leave_the_gumball_attached_and_the_same_screen_size() {
         }],
     );
     frames(&mut app, &context, 2);
-    let after_eye = app.controller.workspace.views[&ViewId::Perspective].camera.eye;
-    assert!((after_eye[0] - before_eye[0]).abs() + (after_eye[1] - before_eye[1]).abs() > 1e-6, "the camera orbited");
-    assert_eq!(app.controller.gumball_pivot().expect("pivot").origin, pivot, "the gumball stays on the object");
+    let after_eye = app.controller.workspace.views[&ViewId::Perspective]
+        .camera
+        .eye;
+    assert!(
+        (after_eye[0] - before_eye[0]).abs() + (after_eye[1] - before_eye[1]).abs() > 1e-6,
+        "the camera orbited"
+    );
+    assert_eq!(
+        app.controller.gumball_pivot().expect("pivot").origin,
+        pivot,
+        "the gumball stays on the object"
+    );
 
     // 3b. the wheel dollies; the gumball keeps its ninety-pixel size.
     events(
@@ -264,7 +325,11 @@ fn a_window_band_selects_the_set_and_escape_clears_it() {
     );
     for step in 1..=4 {
         let t = step as f32 / 4.0;
-        events(&mut app, &context, vec![Event::PointerMoved(start + (end - start) * t)]);
+        events(
+            &mut app,
+            &context,
+            vec![Event::PointerMoved(start + (end - start) * t)],
+        );
     }
     events(
         &mut app,
@@ -277,8 +342,15 @@ fn a_window_band_selects_the_set_and_escape_clears_it() {
         }],
     );
     frames(&mut app, &context, 2);
-    assert_eq!(app.controller.selection_state().objects.len(), 2, "the band takes both lines");
-    assert!(app.controller.gumball_pivot().is_some(), "the gumball shows the set");
+    assert_eq!(
+        app.controller.selection_state().objects.len(),
+        2,
+        "the band takes both lines"
+    );
+    assert!(
+        app.controller.gumball_pivot().is_some(),
+        "the gumball shows the set"
+    );
 
     // 7. Esc clears the selection and the gumball.
     events(
@@ -293,6 +365,9 @@ fn a_window_band_selects_the_set_and_escape_clears_it() {
         }],
     );
     frames(&mut app, &context, 2);
-    assert!(app.controller.selected().is_empty(), "Esc clears the selection");
+    assert!(
+        app.controller.selected().is_empty(),
+        "Esc clears the selection"
+    );
     assert!(app.controller.gumball_pivot().is_none(), "and the gumball");
 }

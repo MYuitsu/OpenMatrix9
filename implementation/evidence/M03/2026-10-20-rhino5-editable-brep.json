@@ -1,0 +1,212 @@
+{
+  "schema_version": "om9.m03.3dm-r5.v1",
+  "id": "2026-10-20-rhino5-editable-brep",
+  "date_utc": "2026-10-20",
+  "status": "R5_B_CORE_E2E_GREEN_MANUAL_SELECTION_AND_FULL_AUDIT_PENDING",
+  "actual_execution": true,
+  "scope": "Rhino 5 (archive version 50) 3DM import, full object binding, editable OCCT BRep, 3DM export/reimport",
+  "fixture": {
+    "path": "C:/Users/nguye/Downloads/bong 5X7.3dm",
+    "sha256": "573bb8b0b1523424c95cf0dfa2b26500c71e5add06b57462421a2ffc697f1218",
+    "bytes": 2643916,
+    "archive_version": 50,
+    "provenance": "local user fixture; not committed"
+  },
+  "native": {
+    "path": "build/native-exchange/Release/om9-exchange-native.exe",
+    "sha256": "923caba857b4f738b6641f3dfe1abd68705c33e32c5aab0de3f21e9069b1d1be"
+  },
+  "measured": {
+    "import_release": {
+      "seconds": 5.37,
+      "om9_bytes": 8566153,
+      "root_objects": 43,
+      "root_breps": 29,
+      "root_curves": 13,
+      "root_instances": 1,
+      "layers": 34,
+      "definition_members": 1,
+      "breps_editable": 30,
+      "breps_opaque": 0,
+      "root_brep_empty_display": 0
+    },
+    "export_release": {
+      "seconds": 4.83,
+      "three_dm_bytes": 2195121,
+      "native_inspect_objects": 44,
+      "native_inspect_layers": 34,
+      "native_inspect_definitions": 1,
+      "native_inspect_breps": 30,
+      "native_inspect_diagnostics": 0
+    },
+    "reimport_release": {
+      "seconds": 6.54,
+      "root_objects": 43,
+      "root_breps": 29,
+      "root_curves": 13,
+      "root_instances": 1,
+      "layers": 34
+    }
+  },
+  "tests": [
+    {
+      "command": "cargo test -p om9-exchange -j 2",
+      "result": "exit 0; all included suites passed"
+    },
+    {
+      "command": "cargo test -p om9-archive -j 2",
+      "result": "exit 0; all included suites passed"
+    },
+    {
+      "command": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+      "result": "exit 0; kernel suites passed; real-payload test is ignored by default"
+    },
+    {
+      "command": "OM9_BREP_3DM_PAYLOAD=<payload> cargo test -p om9-kernel --features 3dm-brep --test brep_3dm -- --ignored",
+      "result": "1 passed; ON_Brep -> OCCT -> complete snapshot round-trip; 0.38 s"
+    },
+    {
+      "command": "OM9_EXCHANGE_NATIVE=<native> OM9_THREE_DM_FIXTURE=<file> cargo test -p om9-app --features occt-brep --test three_dm_editable_brep -- --ignored",
+      "result": "1 passed; 30 editable BRep, 29 root + 1 definition member; export wrote a non-empty 3DM; 41.67 s debug"
+    },
+    {
+      "command": "OM9_THREE_DM_OM9=<imported.om9> cargo test -p om9-app --features occt-brep --test three_dm_ui_smoke -- --ignored",
+      "result": "1 passed; 4 view rects, 34 layers, 43 entities, 29 root Brep; 16.00 s debug"
+    },
+    {
+      "command": "OM9_THREE_DM_OM9=<imported.om9> cargo test -p om9-app --test three_dm_brep_pick -- --ignored",
+      "result": "1 passed; face and edge picks hit the imported Brep; 21.24 s debug"
+    },
+    {
+      "command": "OM9_EXCHANGE_NATIVE=<native> OM9_EXCHANGE_NATIVE_SHA256=<sha> cargo test -p om9-app --test three_dm_groups -- --ignored",
+      "result": "1 passed; group name/member survives export->native V5->import; 1.31 s debug"
+    },
+    {
+      "command": "OM9_EXCHANGE_NATIVE=<native> OM9_EXCHANGE_NATIVE_SHA256=<sha> cargo test -p om9-app --test three_dm_line_patterns -- --ignored",
+      "result": "1 passed; line pattern/material/dim-style/hatch-pattern table with line definitions, page-space host overlay plus layer/entity material+line-pattern refs, plot color/weight, display order and model-space attribute survive export->native V5->import; 1.39 s debug"
+    },
+    {
+      "command": "OM9_EXCHANGE_NATIVE=<native> OM9_EXCHANGE_NATIVE_SHA256=<sha> cargo test -p om9-app --test three_dm_hatch -- --ignored",
+      "result": "1 passed; Hatch display proxy, exact boundary loops and pattern #0 survive export->native ON_Hatch->import; 1.29 s debug"
+    },
+    {
+      "command": "cargo build --release -p om9-app -j 2 (default features)",
+      "result": "exit 0; default PE imports TKernel/TKBRep/TKMesh; no-default release built separately and has no OCCT imports"
+    },
+    {
+      "command": "cargo test -p om9-app --features occt-brep --lib -j 2",
+      "result": "117 passed; 0 failed"
+    },
+    {
+      "command": "cargo clippy -p om9-kernel --features 3dm-brep --all-targets -- -D warnings",
+      "result": "exit 0"
+    },
+    {
+      "command": "cargo clippy -p om9-exchange -p om9-archive --all-targets -- -D warnings",
+      "result": "exit 0"
+    },
+    {
+      "command": "cargo clippy -p om9-app --features occt-brep --lib -- -D warnings",
+      "result": "exit 0"
+    },
+    {
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; public scope 0 errors; --strict still reports private material"
+    }
+  ],
+  "code_changes": [
+    "native/native_exchange.cpp: V5-only project-source gate; layer material/linetype fingerprint reset; opaque Geometry.userdata projection; inventory/packet node split; 16 MiB inventory stdout; BRep cached-face display merge",
+    "crates/om9-core/src/budget.rs: max_nodes default 4,000,000",
+    "crates/om9-archive/src/json_admission.rs: allow canonical BRep source string above the 16 KiB name cap, still bounded by max_bytes; added archive round-trip test",
+    "crates/om9-kernel: optional 3dm-brep feature, openNURBS link, ported ON_Brep <-> OCCT conversion, from_3dm/to_3dm FFI, real-payload test",
+    "crates/om9-exchange: BrepMode/BrepBridge/BrepExport, strict import conversion, editable export conversion on a private document copy, receipt counts",
+    "crates/om9-app: occt-brep is now a default feature; OcctBrepBridge wired into ThreeDmHost import/export; UI four-view and face/edge pick smoke tests",
+    "crates/om9-core/src/geometry.rs + om9-scene: Geometry::Hatch display proxy with native ON_Hatch import/export round-trip",
+    "crates/om9-core/src/exchange.rs: dimension-style table (name/text height/length resolution) with native import/export round-trip",
+    "crates/om9-core/src/exchange.rs: render-material table (name/diffuse) with native import/export round-trip",
+    "crates/om9-core/src/exchange.rs: text-style import scaffold; native export is retained-only with explicit diagnostic (not complete)",
+    "crates/om9-core/src/exchange.rs + model.rs: typed line-pattern table, layer/object refs/source, plot color/weight/source, display order and model-space; native round-trip",
+    "crates/om9-core/src/retained.rs + crates/om9-exchange/src/imported.rs: host group table/membership import and export",
+    "crates/om9-app/src/ui/icon_size_audit.rs: isolated rail width and DPI tolerance",
+    "crates/om9-kernel/src/legacy3dm/ThreeDmBrep.cpp: ShapeFix only when sewing output is invalid",
+    "tools/public_source_audit.py: git-public scope with --strict for private local material"
+  ],
+  "remaining": [
+    "R5-A fallback: NativeBrep without cached display mesh is reported as BREP_DISPLAY_UNAVAILABLE; feature-off does not promise editable/visible BRep",
+    "Four-view startup smoke is automated (4 view rects, 34 layers, 43 entities, 29 root Brep); manual face/edge selection and warning-summary review are still pending",
+    "Extended V5 annotation/hatch/light are retained/diagnosed, not host types",
+    "Editable strict mode aborts the whole import on the first unconvertible BRep; EditableBestEffort is defined but not wired in the UI",
+    "V6/V7/V8 are deferred; V4 legacy policy is not implemented",
+    "Release import 5.09 s / export 5.23 s improved from 8.62 s / 7.21 s but still above the proposed <=5 s target",
+    "Public audit passes in git-public scope; tracked OM9_Milestones reference images/private material still require the planned move to the private archive before --strict can pass"
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -9,7 +9,10 @@ use om9_core::{
     model::{Document, Entity, Permissions},
     transaction::TransactionCoordinator,
 };
-use std::{collections::BTreeMap, sync::Arc};
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, OnceLock},
+};
 mod admission;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -56,6 +59,55 @@ impl SceneObject {
     }
     pub fn display_transform(&self) -> Result<Transform> {
         self.preview.compose(self.transform)
+    }
+
+    /// World-space bounding sphere of this occurrence, for the CPU picking BVH. Points, curves and
+    /// meshes all use their display vertices; the exact geometry test still happens after the BVH.
+    pub fn sphere_bounds(&self) -> Result<([f64; 3], f64)> {
+        let mut min = [f64::INFINITY; 3];
+        let mut max = [f64::NEG_INFINITY; 3];
+        let mut include = |p: [f64; 3]| {
+            for axis in 0..3 {
+                min[axis] = min[axis].min(p[axis]);
+                max[axis] = max[axis].max(p[axis]);
+            }
+        };
+        match self.buffers.as_ref() {
+            RenderBuffers::Points { points, .. } => {
+                for p in points {
+                    include(*p);
+                }
+            }
+            RenderBuffers::Curve { points, .. } => {
+                for p in points {
+                    include(*p);
+                }
+            }
+            RenderBuffers::Mesh { vertices, .. } => {
+                for p in vertices {
+                    include(*p);
+                }
+            }
+        }
+        if !min[0].is_finite() || min[0] > max[0] {
+            return Ok(([0.0; 3], 0.0));
+        }
+        let centre = [
+            (min[0] + max[0]) * 0.5,
+            (min[1] + max[1]) * 0.5,
+            (min[2] + max[2]) * 0.5,
+        ];
+        let transform = self.display_transform()?;
+        let world = transform.point(centre)?;
+        // A half longest side is not an enclosing sphere: it rejects box corners. Transform all
+        // eight AABB corners so nonuniform scale, shear and previews remain conservative as well.
+        let mut radius=0.0f64;
+        for corner in 0..8 {
+            let p=transform.point(std::array::from_fn(|axis|if corner&(1<<axis)==0 {min[axis]}else{max[axis]}))?;
+            radius=radius.max((0..3).map(|axis|(p[axis]-world[axis]).powi(2)).sum::<f64>().sqrt());
+        }
+        radius+=(0..3).map(|axis|world[axis].abs()).fold(1.0,f64::max)*f64::EPSILON*8.;
+        Ok((world, radius))
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -130,6 +182,9 @@ pub struct Scene {
     pub diagnostics: Vec<String>,
     pub(crate) limits: Limits,
     buffers_usage: Usage,
+    /// Picking BVH, built on first use from each occurrence sphere.
+    spatial: OnceLock<crate::spatial::SpatialIndex>,
+    spheres: OnceLock<Vec<([f64; 3], f64)>>,
 }
 fn combined(a: Permissions, b: Permissions) -> Permissions {
     Permissions {
@@ -344,6 +399,8 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
             })
         }
         Geometry::Mesh(m) => mesh_buffers(m, usage, l),
+        Geometry::Hatch(h) => mesh_buffers(&h.display, usage, l),
+        Geometry::Light(light) => cache(&Geometry::Point(light.display), usage, l),
         Geometry::NativeBrep(brep) => mesh_buffers(&brep.display, usage, l),
         _ => Err(Error::Unsupported("representation display adapter")),
     }
@@ -498,6 +555,33 @@ impl Capture<'_> {
     }
 }
 impl Scene {
+    /// Owned render preparation snapshot: immutable document/buffers are shared; mutable picking
+    /// caches are not. No UI/session/native owner is sent to the preparation worker.
+    pub fn render_snapshot(&self) -> Self {
+        Self { document:self.document.clone(),epoch:self.epoch,objects:self.objects.clone(),
+            diagnostics:self.diagnostics.clone(),limits:self.limits,buffers_usage:self.buffers_usage,
+            spatial:OnceLock::new(),spheres:OnceLock::new() }
+    }
+    /// Picking index for this scene epoch; built once from the occurrence spheres.
+    pub fn spatial_index(&self) -> &crate::spatial::SpatialIndex {
+        let spheres = self.object_spheres();
+        self.spatial.get_or_init(|| {
+            let centres: Vec<[f64; 3]> = spheres.iter().map(|(centre, _)| *centre).collect();
+            let radii: Vec<f64> = spheres.iter().map(|(_, radius)| *radius).collect();
+            crate::spatial::SpatialIndex::build(&centres, &radii)
+        })
+    }
+
+    /// World-space sphere per occurrence, aligned with `objects`.
+    pub fn object_spheres(&self) -> &[([f64; 3], f64)] {
+        self.spheres.get_or_init(|| {
+            self.objects
+                .iter()
+                .map(|object| object.sphere_bounds().unwrap_or(([0.0; 3], 0.0)))
+                .collect()
+        })
+    }
+
     /// Heap admission for the cache only; its document Arc is already owned by
     /// the coordinator/current or prepared Undo state. Buffers are counted once.
     pub fn cache_usage(&self) -> Result<Usage> {
@@ -763,6 +847,8 @@ impl Scene {
             diagnostics,
             limits: *limits,
             buffers_usage,
+            spatial: OnceLock::new(),
+            spheres: OnceLock::new(),
         })
     }
     pub fn capture(document: Arc<Document>, epoch: u64, limits: &Limits) -> Result<Self> {
@@ -841,6 +927,8 @@ impl Scene {
             diagnostics: capture.diagnostics,
             limits: *limits,
             buffers_usage: capture.buffers_usage,
+            spatial: OnceLock::new(),
+            spheres: OnceLock::new(),
         })
     }
     pub fn pick(
@@ -872,6 +960,7 @@ impl Scene {
             tolerance_pixels,
             intent,
             kind,
+            true,
         )?
         .into_iter()
         .next())
@@ -894,6 +983,7 @@ impl Scene {
             tolerance_pixels,
             intent,
             PickKind::Object,
+            false,
         )
     }
     /// Read the exact root/member path represented by this scene occurrence.

@@ -14,10 +14,12 @@ pub mod gumball_numeric;
 pub mod stress;
 mod subobjects;
 pub use subobjects::SelectedSubobject;
-mod gumball;
 mod files;
+mod gumball;
 mod layer_dialogs;
 mod layers;
+mod properties;
+pub use properties::{FIELDS, FieldState, PropertyEdit, PropertyField};
 pub const LINE: &str = "OM9-CURVE-002";
 pub const POINT: &str = "OM9-CURVE-034";
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -265,6 +267,54 @@ impl Controller {
     }
     /// The repeat slot as stored, for the audit: it is either empty or a
     /// repeatable feature.
+    /// Resolves a typed command name through the declared aliases of the implemented commands.
+    /// Registry aliases such as `Ln` are part of the record, so typing them must reach the same command.
+    pub fn resolve_alias(text: &str) -> Option<&'static str> {
+        let text = text.trim();
+        if text.eq_ignore_ascii_case("undo") {
+            return Some("undo");
+        }
+        if text.eq_ignore_ascii_case("redo") {
+            return Some("redo");
+        }
+        for descriptor in [Self::line_descriptor(), Self::point_descriptor()] {
+            if text.eq_ignore_ascii_case(&descriptor.feature)
+                || descriptor
+                    .aliases
+                    .iter()
+                    .any(|alias| text.eq_ignore_ascii_case(alias))
+            {
+                return Some(if descriptor.feature == LINE {
+                    LINE
+                } else {
+                    POINT
+                });
+            }
+        }
+        None
+    }
+
+    /// Whether the running line command draws both sides of its start point.
+    pub fn both_sides(&self) -> Option<bool> {
+        self.session.as_ref().map(|session| session.both_sides)
+    }
+
+    /// Sets the BothSides option through the same parser path a typed assignment uses.
+    pub fn set_both_sides(&mut self, value: bool) -> Result<()> {
+        if self.phase() == CmdPhase::Idle {
+            return Err(Error::Missing("active command"));
+        }
+        self.submit_geometry_text(&format!("BothSides={}", if value { "Yes" } else { "No" }))
+    }
+
+    /// The canonical feature id the command line should echo: the running command when one is active,
+    /// otherwise the repeatable command an empty Enter would run.
+    pub fn active_feature(&self) -> Option<&str> {
+        self.session
+            .as_ref()
+            .map(|session| session.feature)
+            .or_else(|| self.repeatable_last())
+    }
     pub fn repeat_slot(&self) -> Option<&str> {
         self.repeat.as_deref()
     }
@@ -303,6 +353,30 @@ impl Controller {
     /// The descriptor of the geometry commands this session runs: the option names
     /// the parser checks against (OM9-L3-01-02-005). The registry (OM9-L3-01-02-001)
     /// will own the catalogue; the session reads the same shape meanwhile.
+    pub fn point_descriptor() -> om9_core::capability::Operation {
+        om9_core::capability::Operation {
+            id: "point".to_owned(),
+            feature: POINT.to_owned(),
+            aliases: vec!["Point".into(), "Pt".into()],
+            prompt: "Location of point: ".into(),
+            input_types: vec![om9_core::geometry::GeometryKind::Point],
+            requires_input: true,
+            output: vec![om9_core::geometry::GeometryKind::Point],
+            options: Vec::new(),
+            preconditions: om9_core::capability::Preconditions {
+                needs_document: true,
+                needs_selection: false,
+                needs_active_view: true,
+            },
+            backend: om9_core::capability::Backend::Rust {
+                version: env!("CARGO_PKG_VERSION").to_owned(),
+            },
+            prepare: true,
+            preview: true,
+            commit: true,
+            receipts: Vec::new(),
+        }
+    }
     pub fn line_descriptor() -> om9_core::capability::Operation {
         om9_core::capability::Operation {
             id: "line".to_owned(),
@@ -501,15 +575,15 @@ impl Controller {
             match command {
                 GumballPlacement::Origin(origin) => self.relocate_gumball(Some(origin)),
                 GumballPlacement::Reset => self.relocate_gumball(None),
-                GumballPlacement::World => self.set_gumball_alignment(
-                    self::gumball::GumballAlignment::World,
-                ),
-                GumballPlacement::Object => self.set_gumball_alignment(
-                    self::gumball::GumballAlignment::Object,
-                ),
-                GumballPlacement::CPlane => self.set_gumball_alignment(
-                    self::gumball::GumballAlignment::CPlane,
-                ),
+                GumballPlacement::World => {
+                    self.set_gumball_alignment(self::gumball::GumballAlignment::World)
+                }
+                GumballPlacement::Object => {
+                    self.set_gumball_alignment(self::gumball::GumballAlignment::Object)
+                }
+                GumballPlacement::CPlane => {
+                    self.set_gumball_alignment(self::gumball::GumballAlignment::CPlane)
+                }
             }
             self.events.emit(
                 crate::command_events::EventKind::Finished,
@@ -556,17 +630,23 @@ impl Controller {
                     .ok_or(Error::Missing("previous repeatable command"))?;
                 return self.dispatch(&repeat, InvocationOrigin::Cmd);
             }
-            return match text.to_ascii_lowercase().as_str() {
-                "line" => self.dispatch(LINE, InvocationOrigin::Cmd),
-                "point" => self.dispatch(POINT, InvocationOrigin::Cmd),
-                "undo" => self.undo(),
-                "redo" => self.redo(),
+            return match Self::resolve_alias(text) {
+                Some(LINE) => self.dispatch(LINE, InvocationOrigin::Cmd),
+                Some(POINT) => self.dispatch(POINT, InvocationOrigin::Cmd),
+                Some("undo") => self.undo(),
+                Some("redo") => self.redo(),
                 _ => Err(Error::Unsupported("unknown/unavailable command")),
             };
         }
         let s = self.validate_session()?.clone();
         if text.is_empty() {
             return Err(Error::Invalid("point required"));
+        }
+        // Rhino p22: an option can be activated by typing its underlined letter. BothSides is the only flag
+        // the implemented commands declare, so `B` toggles it through the same assignment path.
+        if s.feature == LINE && text.chars().count() == 1 && text.eq_ignore_ascii_case("b") {
+            self.set_both_sides(!s.both_sides)?;
+            return Ok(());
         }
         if let Some(parsed) = crate::option_parser::parse_option(
             self.document().page_unit,

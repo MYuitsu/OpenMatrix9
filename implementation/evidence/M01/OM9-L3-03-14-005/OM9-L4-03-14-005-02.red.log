@@ -1,0 +1,19 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+warning: unused import: `Point3`
+ --> crates\om9-app\tests\object_info_overlay.rs:5:68
+  |
+5 | use om9_core::geometry::{Cloud, Curve, Geometry, Mesh, NativeBrep, Point3};
+  |                                                                    ^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-app` (test "object_info_overlay") generated 1 warning (run `cargo fix --test "object_info_overlay" -p om9-app` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.77s
+     Running tests\object_info_overlay.rs (L:\om9-target\debug\deps\object_info_overlay-d882034764d99f79.exe)
+
+running 2 tests
+test j1_to_j4_an_unavailable_measurement_is_never_a_zero ... ok
+test i1_to_i5_the_info_is_sourced_from_the_model ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

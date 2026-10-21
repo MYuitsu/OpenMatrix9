@@ -1,0 +1,42 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-004",
+  "l4": "OM9-L4-03-14-004-02",
+  "case": "select-all-objects-by-layer-negative",
+  "negative_oracle": "Hidden/locked objects must respect selectable policy without silent override",
+  "cases": [
+    {
+      "id": "B1-a-locked-layer-selects-nothing",
+      "expect": {
+        "selected": 0,
+        "error": null
+      }
+    },
+    {
+      "id": "B2-a-hidden-layer-selects-nothing",
+      "expect": {
+        "selected": 0,
+        "error": null
+      }
+    },
+    {
+      "id": "B3-a-refused-selection-does-not-keep-the-old-one-silently",
+      "expect": {
+        "detail": "selecting an empty layer clears the previous selection instead of leaving a stale set"
+      }
+    },
+    {
+      "id": "B4-selection-does-not-touch-the-document",
+      "expect": {
+        "journal_unchanged": true
+      }
+    },
+    {
+      "id": "B5-an-unknown-slot-layer-selects-nothing",
+      "expect": {
+        "selected": 0,
+        "error": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-14-003-01",
+  "l3_id": "OM9-L3-03-14-003",
+  "l3_title": "Layer Visible And Locked Controls",
+  "owner_module_id": "OM9-L2-03-14",
+  "milestone": "M01",
+  "stage": "E02",
+  "gate": "M01-UI",
+  "goal": "toggle layer display/lock from palette",
+  "positive_oracle": "Toggle visible/locked on Gems affects viewport and picking immediately",
+  "negative_oracle": "Locked object edit attempt must have no mutation and informative status",
+  "behaviour_reference": {
+    "source": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/reference/text/m8book1__p54-57__the-layers-menu.md",
+    "quote": "It also organizes things by turning off or hiding those parts you don't need to see right at the moment; selecting things you need to use all at once, and \"locking\" layers you don't wish to change with a certain operation.",
+    "decision": "Hide = not visible and not pickable; lock = visible for inspection but protected from change. Both are per layer and take effect at once."
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "Behavioural source: the extracted Matrix9 manual shipped with the milestone. QymCAD is consulted only for panel technique.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:118 comment: only the nodes that depend on a datum are marked dirty"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A property change repaints only what depends on it: the idea OM9 keeps when one layer toggle flips visibility for its objects. QymCAD has no layer lock.",
+      "om9_owner": "crates/om9-app/src/session/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No layer surface.",
+      "om9_owner": "crates/om9-app/src/ui/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No layer flags.",
+      "om9_owner": "crates/om9-core/src/model.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session/layers.rs: set_layer_property(Visible/Locked) and toggle_layer_group; the document already exposed display_attributes with visible/selectable/editable",
+    "ui/layers.rs: the lock icon (white/grey) and the visibility slash already reflected the flags",
+    "core layers.rs: the Assign arm protected the TARGET layer through editable_layer"
+  ],
+  "gap_found_by_this_task": [
+    "Moving an object OFF a locked layer was allowed: the target lock was checked, the source lock was not, so a lock only guarded half of the operation (fixture T1, RED 1 passed / 2 failed). Fixed in the controller before any action is planned: a source whose entity or owning layer is locked is refused with Permission(\"object is on a locked layer\"), so the edit costs no transaction.",
+    "Pinned, unchanged because they already held: hiding a layer flips display_attributes.visible/selectable and the scene entry at once, a hidden layer offers nothing to select_layer, showing it restores both, and locking keeps the objects visible while making them non-editable."
+  ],
+  "reuse_decision": "ADAPT the 'repaint only what depends on it' habit of gui.rs; ADD the source-side lock rule.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-03-14-003/positive.json",
+    "implementation/fixtures/M01/OM9-L3-03-14-003/negative.json",
+    "crates/om9-app/tests/layer_visible_locked.rs"
+  ]
+}

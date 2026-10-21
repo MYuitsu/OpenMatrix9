@@ -86,6 +86,8 @@ fn bundle() -> ImportBundle {
         entities: vec![entity],
         layers: vec![],
         definitions: vec![],
+        groups: vec![],
+        exchange: Default::default(),
     }
 }
 fn move_point(
@@ -314,3 +316,6 @@ fn caller_abort_after_preparation_rejects_a_late_global_import() {
     assert!(c.commit(prepared).is_err());
     assert_eq!(c.snapshot(), before);
 }
+
+
+

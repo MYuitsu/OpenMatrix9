@@ -126,24 +126,42 @@
     }
   ],
   "m03_l4_planned_count": 66,
-  "execution_state": "RUNTIME_IMPLEMENTED_PARTIAL_BREP_RETAINED",
+  "execution_state": "R5_B_CORE_E2E_GREEN_UI_AND_R5A_FALLBACK_PENDING",
   "readiness_state": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
   "runtime_implementation": {
-    "date": "2026-10-19",
-    "status": "AUTOMATED_TARGET_VALIDATED_WITH_RETAINED_BREP_REVIEW_PENDING",
+    "date": "2026-10-20",
+    "status": "R5_B_CORE_E2E_GREEN_UI_AND_R5A_FALLBACK_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "3DM import: layers/attributes, exact curves/surfaces/meshes, blocks/instances, opaque retained BRep with display, geometry-only transaction; no history/material/table.",
+    "scope": "Rhino 5 (archive 50) import: layers/attributes, exact curves/surfaces/meshes, blocks/instances, 30/30 BRep editable through OCCT, export/reimport; V6+ deferred.",
     "evidence": [
-      "implementation/design/M01/THREE-DM-HOST-ADAPTER.md",
-      "implementation/evidence/M01/2026-10-19-three-dm-native-host-checks.json",
-      "crates/om9-app/tests/three_dm_curve_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_brep_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_native_roundtrip.rs",
+      "implementation/design/M03/THREEDM-FULL-OBJECT-IMPORT.md",
+      "implementation/evidence/M03/2026-10-20-rhino5-editable-brep.json",
+      "crates/om9-kernel/tests/brep_3dm.rs",
+      "crates/om9-archive/tests/brep_source_admission.rs",
       "native/native_exchange.cpp"
     ],
     "human_approval": null,
     "remaining": [
-      "BRep is retained/opaque and cannot be edited topologically yet."
+      "Manual UI four-view/select smoke and warning summary review pending.",
+      "R5-A fallback cannot display NativeBrep without OCCT because public openNURBS has no ON_Brep::CreateMesh implementation.",
+      "Extended V5 annotation/hatch/light remain retained-only; V6/V7/V8 deferred and V4 legacy policy not implemented.",
+      "Strict editable mode aborts the whole import on the first unconvertible BRep; best-effort UI wiring pending.",
+      "Release import/export timings are 5.37 s / 4.83 s on the measured fixture, close to but still above the proposed 5 s target.",
+      "R5-A fallback now emits BREP_DISPLAY_UNAVAILABLE instead of claiming editable/visible BRep; feature-off still cannot display BRep without OCCT.",
+      "Tracked OM9_Milestones private reference images still need the planned private-archive move before public audit --strict can pass."
     ]
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

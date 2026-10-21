@@ -1,0 +1,80 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-14-004-01",
+  "l3_id": "OM9-L3-03-14-004",
+  "l3_title": "Select All Objects By Layer",
+  "owner_module_id": "OM9-L2-03-14",
+  "milestone": "M01",
+  "stage": "E02",
+  "gate": "M01-UI",
+  "goal": "choose geometry by right-click/color swatch",
+  "positive_oracle": "Select all objects in active layer returns exactly its editable objects",
+  "negative_oracle": "Hidden/locked objects must respect selectable policy without silent override",
+  "behaviour_reference": {
+    "source": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/reference/text/m8book1__p54-57__the-layers-menu.md",
+    "quote": "selecting things you need to use all at once",
+    "decision": "One gesture selects the layer's usable objects: visible, unlocked and pickable. Hidden or locked objects are left out, never silently included."
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "Behavioural source: the extracted Matrix9 manual shipped with the milestone. QymCAD only for panel technique.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:118 comment: only the nodes that depend on a datum are marked dirty"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A gesture gathers what it may use in one step; QymCAD has no layer selection.",
+      "om9_owner": "crates/om9-app/src/session/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No layer surface.",
+      "om9_owner": "crates/om9-app/src/ui/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No selection policy.",
+      "om9_owner": "crates/om9-core/src/model.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session/layers.rs: select_layer(slot) replaces the selection with the layer's selectable, pickable objects, with a budget check and a scene-epoch check",
+    "core model: permissions_for_entity derives selectable through the whole layer chain (visible, unlocked, object flags)"
+  ],
+  "gap_found_by_this_task": [
+    "No product defect: every fixture passed on the first run (2 passed; the only failure was the missing api.md). To keep the RED honest the item proves the fixtures are load-bearing: with the selectable filter weakened to has_pick_geometry() alone, the hidden/locked cases fail, and restoring the filter turns them green.",
+    "Pinned: the selection is replaced, not appended; another layer's object is never included; a hidden object of the layer stays out; a locked or hidden layer clears the selection instead of silently keeping a stale one; a slot with no layer selects nothing without an error; the gesture writes no transaction."
+  ],
+  "reuse_decision": "ADAPT the 'gather what may be used' idea; ADD nothing to the product (the policy already existed), and pin it with fixtures.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-03-14-004/positive.json",
+    "implementation/fixtures/M01/OM9-L3-03-14-004/negative.json",
+    "crates/om9-app/tests/layer_select_by_layer.rs"
+  ]
+}

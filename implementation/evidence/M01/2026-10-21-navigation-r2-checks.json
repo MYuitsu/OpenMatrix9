@@ -1,0 +1,2285 @@
+{
+  "schema_version": 1,
+  "summary": "build/standalone-validation/ui-artifacts/navigation-final-r2-20261021/summary.json",
+  "runs": 108,
+  "integrity_errors": [],
+  "application_target_failures": [
+    [
+      "n125-h30-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      69,
+      40.0
+    ],
+    [
+      "n125-h30-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n125-h30-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      83,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      66,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h30-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n125-h30-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n125-h60-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      41,
+      25.0
+    ],
+    [
+      "n125-h60-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      50,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      38,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      38,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n125-h60-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n125-h60-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n729-h30-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n729-h30-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      66,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n729-h30-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h30-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n729-h30-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n729-h60-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n729-h60-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n729-h60-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n729-h60-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n729-h60-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h30-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n27000-h30-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      66,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      66,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      68,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      67,
+      35.0
+    ],
+    [
+      "n27000-h30-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      67,
+      40.0
+    ],
+    [
+      "n27000-h60-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      32,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h60-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h60-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h60-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h60-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n27000-h60-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n27000-h60-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n27000-h60-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h60-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v1-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1.25-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1.25-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1.25-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      34,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1.5-q1-r1",
+      "geometry_submit_interval",
+      "p99",
+      38,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p95",
+      33,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1.5-q1-r2",
+      "geometry_submit_interval",
+      "p99",
+      33,
+      25.0
+    ],
+    [
+      "n27000-h60-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p95",
+      34,
+      18.5
+    ],
+    [
+      "n27000-h60-v4-dpi1.5-q1-r3",
+      "geometry_submit_interval",
+      "p99",
+      50,
+      25.0
+    ]
+  ],
+  "source_fingerprints": [
+    "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828"
+  ],
+  "presentation_acceptance": "NOT_PROVED",
+  "physical_dpi_acceptance": "PENDING",
+  "local_rdp_acceptance": "PENDING",
+  "manual_gate_promoted": false,
+  "details": [
+    {
+      "name": "n125-h30-v1-dpi1-q1-r1",
+      "navigation_events": 71,
+      "frame_records": 239,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v1-dpi1-q1-r2",
+      "navigation_events": 71,
+      "frame_records": 238,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v1-dpi1-q1-r3",
+      "navigation_events": 71,
+      "frame_records": 239,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v1-dpi1.25-q1-r1",
+      "navigation_events": 71,
+      "frame_records": 242,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v1-dpi1.25-q1-r2",
+      "navigation_events": 71,
+      "frame_records": 239,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v1-dpi1.25-q1-r3",
+      "navigation_events": 71,
+      "frame_records": 242,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v1-dpi1.5-q1-r1",
+      "navigation_events": 71,
+      "frame_records": 237,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v1-dpi1.5-q1-r2",
+      "navigation_events": 71,
+      "frame_records": 244,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v1-dpi1.5-q1-r3",
+      "navigation_events": 71,
+      "frame_records": 240,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h30-v4-dpi1-q1-r1",
+      "navigation_events": 71,
+      "frame_records": 268,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h30-v4-dpi1-q1-r2",
+      "navigation_events": 71,
+      "frame_records": 249,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h30-v4-dpi1-q1-r3",
+      "navigation_events": 71,
+      "frame_records": 255,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h30-v4-dpi1.25-q1-r1",
+      "navigation_events": 91,
+      "frame_records": 264,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 8
+    },
+    {
+      "name": "n125-h30-v4-dpi1.25-q1-r2",
+      "navigation_events": 71,
+      "frame_records": 266,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h30-v4-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 261,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h30-v4-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 254,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h30-v4-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 264,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n125-h30-v4-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 256,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h60-v1-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 102,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h60-v1-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 101,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h60-v1-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 95,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h60-v1-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 138,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 3
+    },
+    {
+      "name": "n125-h60-v1-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 143,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 3
+    },
+    {
+      "name": "n125-h60-v1-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 141,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h60-v1-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 137,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h60-v1-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 138,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 3
+    },
+    {
+      "name": "n125-h60-v1-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 144,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n125-h60-v4-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 154,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h60-v4-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 162,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n125-h60-v4-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 154,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h60-v4-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 156,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h60-v4-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 158,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h60-v4-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 154,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n125-h60-v4-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 158,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n125-h60-v4-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 161,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n125-h60-v4-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 156,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v1-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 233,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h30-v1-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 235,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h30-v1-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 235,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h30-v1-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 233,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 3
+    },
+    {
+      "name": "n729-h30-v1-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 239,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h30-v1-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 241,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h30-v1-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 241,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h30-v1-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 237,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h30-v1-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 240,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h30-v4-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 294,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v4-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 295,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v4-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 294,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v4-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 288,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v4-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 274,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v4-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 283,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v4-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 281,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v4-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 283,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h30-v4-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 277,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h60-v1-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 155,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v1-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 163,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v1-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 162,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v1-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 167,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v1-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 164,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v1-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 163,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v1-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 163,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v1-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 166,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v1-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 160,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n729-h60-v4-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 213,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h60-v4-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 210,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h60-v4-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 210,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n729-h60-v4-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 206,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h60-v4-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 203,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h60-v4-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 203,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h60-v4-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 196,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n729-h60-v4-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 205,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n729-h60-v4-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 202,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h30-v1-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 166,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h30-v1-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 161,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h30-v1-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 150,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h30-v1-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 238,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h30-v1-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 242,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h30-v1-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 240,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h30-v1-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 236,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 3
+    },
+    {
+      "name": "n27000-h30-v1-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 233,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h30-v1-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 234,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h30-v4-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 242,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h30-v4-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 242,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n27000-h30-v4-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 243,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h30-v4-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 241,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h30-v4-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 250,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h30-v4-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 245,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h30-v4-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 241,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h30-v4-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 240,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h30-v4-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 235,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h60-v1-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 98,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h60-v1-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 101,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h60-v1-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 100,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h60-v1-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 142,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h60-v1-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 149,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h60-v1-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 139,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 3
+    },
+    {
+      "name": "n27000-h60-v1-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 152,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h60-v1-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 141,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 3
+    },
+    {
+      "name": "n27000-h60-v1-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 147,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 4
+    },
+    {
+      "name": "n27000-h60-v4-dpi1-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 150,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n27000-h60-v4-dpi1-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 152,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h60-v4-dpi1-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 149,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h60-v4-dpi1.25-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 154,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h60-v4-dpi1.25-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 150,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h60-v4-dpi1.25-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 153,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n27000-h60-v4-dpi1.5-q1-r1",
+      "navigation_events": 74,
+      "frame_records": 148,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 6
+    },
+    {
+      "name": "n27000-h60-v4-dpi1.5-q1-r2",
+      "navigation_events": 74,
+      "frame_records": 146,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    },
+    {
+      "name": "n27000-h60-v4-dpi1.5-q1-r3",
+      "navigation_events": 74,
+      "frame_records": 152,
+      "source_fingerprint": "73cbacf4addce8014bd68c48617f044d46ac14ac547c75276199bafbaf426828",
+      "final_snapshots": 7
+    }
+  ]
+}

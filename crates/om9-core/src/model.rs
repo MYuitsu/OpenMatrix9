@@ -18,9 +18,43 @@ pub struct Attributes {
     pub selectable: bool,
     pub locked: bool,
     pub color: Option<[u8; 4]>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub line_pattern: Option<LinePatternId>,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub line_pattern_source: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub material: Option<MaterialId>,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub material_source: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plot_color: Option<[u8; 4]>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plot_weight_mm: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plot_color_source: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plot_weight_source: Option<u32>,
+    #[serde(default, skip_serializing_if = "is_zero_i32")]
+    pub display_order: i32,
+    #[serde(default = "model_space", skip_serializing_if = "is_model_space")]
+    pub space: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub viewport_id: Option<ViewportId>,
+}
+fn is_zero_i32(value: &i32) -> bool {
+    *value == 0
+}
+fn model_space() -> u32 {
+    1
+}
+fn is_model_space(value: &u32) -> bool {
+    *value == 1
 }
 fn not_hidden(value: &bool) -> bool {
     !*value
+}
+fn is_zero_u32(value: &u32) -> bool {
+    *value == 0
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -69,6 +103,17 @@ impl Entity {
                 selectable: true,
                 locked: false,
                 color,
+                line_pattern: None,
+                line_pattern_source: 0,
+                material: None,
+                material_source: 0,
+                plot_color: None,
+                plot_weight_mm: None,
+                plot_color_source: None,
+                plot_weight_source: None,
+                display_order: 0,
+                space: 1,
+                viewport_id: None,
             },
             extensions: BTreeMap::new(),
         }
@@ -306,6 +351,16 @@ pub struct Layer {
     pub color: [u8; 4],
     pub revision: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub line_pattern: Option<LinePatternId>,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub line_pattern_source: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub material: Option<MaterialId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plot_color: Option<[u8; 4]>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plot_weight_mm: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub preset_slot: Option<crate::layers::PresetSlot>,
 }
 impl Layer {
@@ -319,6 +374,11 @@ impl Layer {
             locked: false,
             color,
             revision: 1,
+            line_pattern: None,
+            line_pattern_source: 0,
+            material: None,
+            plot_color: None,
+            plot_weight_mm: None,
             preset_slot: None,
         }
     }
@@ -392,6 +452,11 @@ pub struct Document {
         deserialize_with = "crate::identity::unique_uuid_map"
     )]
     pub features: BTreeMap<FeatureId, Feature>,
+    #[serde(
+        default,
+        skip_serializing_if = "crate::exchange::ExchangeMetadata::is_empty"
+    )]
+    pub exchange: crate::exchange::ExchangeMetadata,
 }
 struct DefinitionPath<'a> {
     id: DefinitionId,
@@ -421,6 +486,7 @@ impl Document {
             import_namespaces: BTreeMap::new(),
             groups: BTreeMap::new(),
             features: BTreeMap::new(),
+            exchange: crate::exchange::ExchangeMetadata::default(),
         }
     }
     /// A new document that starts with the OM9 template tolerance policy. The policy
@@ -835,6 +901,9 @@ impl Document {
             )?;
             total.add(Usage::array::<ObjectId>(feature.outputs.capacity())?, l)?;
         }
+        if !self.exchange.is_empty() {
+            total.add(self.exchange.validate(l)?, l)?;
+        }
         for resource in self.resources.values() {
             total.add(
                 if payloads {
@@ -1078,6 +1147,9 @@ impl Document {
         }
         if !self.features.is_empty() {
             total.add(Usage::btree::<FeatureId, Feature>(self.features.len())?, l)?;
+        }
+        if !self.exchange.is_empty() {
+            total.add(self.exchange.validate(l)?, l)?;
         }
         for (id, group) in &self.groups {
             if id.is_nil() || *id != group.id || group.revision == 0 {

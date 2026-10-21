@@ -4,8 +4,40 @@
 use super::*;
 use std::sync::Arc;
 
+// Sampled from the user's 2026-10-20 green/gold reference.
+pub(super) const COMMAND_BG: Color32 = Color32::from_rgb(1, 57, 28);
+const COMMAND_INPUT_BG: Color32 = Color32::from_rgb(0, 81, 38);
+const COMMAND_GOLD: Color32 = Color32::from_rgb(253, 216, 128);
+const COMMAND_SELECTION: Color32 = Color32::from_rgb(24, 108, 65);
+
+fn apply_command_theme(ui: &mut egui::Ui) {
+    let visuals = ui.visuals_mut();
+    visuals.override_text_color = Some(COMMAND_GOLD);
+    visuals.panel_fill = COMMAND_BG;
+    visuals.extreme_bg_color = COMMAND_BG;
+    visuals.faint_bg_color = COMMAND_INPUT_BG;
+    visuals.selection.bg_fill = COMMAND_SELECTION;
+    visuals.selection.stroke = Stroke::new(1., COMMAND_GOLD);
+    visuals.text_cursor.stroke = Stroke::new(1., COMMAND_GOLD);
+    for widget in [
+        &mut visuals.widgets.noninteractive,
+        &mut visuals.widgets.inactive,
+        &mut visuals.widgets.hovered,
+        &mut visuals.widgets.active,
+        &mut visuals.widgets.open,
+    ] {
+        widget.bg_fill = COMMAND_INPUT_BG;
+        widget.weak_bg_fill = COMMAND_INPUT_BG;
+        widget.fg_stroke = Stroke::new(1., COMMAND_GOLD);
+        widget.bg_stroke = Stroke::new(1., COMMAND_SELECTION);
+    }
+    visuals.widgets.hovered.bg_fill = COMMAND_SELECTION;
+    visuals.widgets.hovered.weak_bg_fill = COMMAND_SELECTION;
+}
+
 impl MatrixApp {
     pub(super) fn command_ui(&mut self, ui: &mut egui::Ui) {
+        apply_command_theme(ui);
         let ctx = ui.ctx().clone();
         let id = egui::Id::new("matrix-command-transcript");
         let popup_open = self.viewport_menu_owns_frame || egui::Popup::is_any_open(&ctx);
@@ -49,6 +81,14 @@ impl MatrixApp {
         }
         if enter {
             self.submit_draft();
+        } else if !focused
+            && !popup_open
+            && self.transcript.draft().is_empty()
+            && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Space))
+        {
+            // Space repeats when the command line is idle, exactly like an empty Enter; while the editor has
+            // focus Space is ordinary text and never repeats (OM9-L3-03-10-006).
+            self.submit_draft();
         }
         if self.focus_cmd && !popup_open {
             ctx.memory_mut(|m| m.request_focus(id));
@@ -81,7 +121,7 @@ impl MatrixApp {
                 0.,
                 egui::TextFormat {
                     font_id: font.clone(),
-                    color: Color32::BLACK,
+                    color: COMMAND_GOLD,
                     ..Default::default()
                 },
             );
@@ -108,7 +148,7 @@ impl MatrixApp {
                     .interactive(!popup_open)
                     .id(id)
                     .font(font.clone())
-                    .text_color(Color32::BLACK)
+                    .text_color(COMMAND_GOLD)
                     .frame(egui::Frame::new())
                     .desired_width(f32::INFINITY)
                     .desired_rows(1)
@@ -122,7 +162,7 @@ impl MatrixApp {
         let full_origin = scrolled.inner.galley_pos;
         let history_chars = self.transcript.history().chars().count();
         let live: String = self.transcript.text().chars().skip(history_chars).collect();
-        let live_galley = ui.fonts_mut(|f| f.layout_no_wrap(live, font, Color32::BLACK));
+        let live_galley = ui.fonts_mut(|f| f.layout_no_wrap(live, font, COMMAND_GOLD));
         let rect = Rect::from_min_size(
             egui::pos2(area.left(), area.bottom() - row_height),
             Vec2::new(area.width(), row_height),
@@ -138,9 +178,10 @@ impl MatrixApp {
             },
         );
         let painter = ui.painter().with_clip_rect(rect);
+        painter.rect_filled(rect, 0, COMMAND_INPUT_BG);
         painter.line_segment(
             [rect.left_top(), rect.right_top()],
-            Stroke::new(1., Color32::from_gray(190)),
+            Stroke::new(1., COMMAND_GOLD.gamma_multiply(0.45)),
         );
         let mut origin = rect.min + Vec2::new(0., 1.);
         let focused = ctx.memory(|m| m.has_focus(id));
@@ -205,7 +246,7 @@ impl MatrixApp {
                         origin + Vec2::new(b.left(), row_height - 2.),
                     ),
                     0,
-                    Color32::from_rgb(165, 201, 220),
+                    COMMAND_SELECTION,
                 );
                 if self.cmd_ime_composing {
                     painter.line_segment(
@@ -213,7 +254,7 @@ impl MatrixApp {
                             origin + Vec2::new(a.left(), row_height - 2.),
                             origin + Vec2::new(b.left(), row_height - 2.),
                         ],
-                        Stroke::new(1., Color32::from_rgb(30, 70, 130)),
+                        Stroke::new(1., COMMAND_GOLD),
                     );
                 }
             }
@@ -223,7 +264,7 @@ impl MatrixApp {
                     .translate(origin.to_vec2());
                 painter.line_segment(
                     [caret.left_top(), caret.left_bottom()],
-                    Stroke::new(1., Color32::BLACK),
+                    Stroke::new(1., COMMAND_GOLD),
                 );
                 // Native IME composition still belongs to the same TextEdit;
                 // place its candidate window at the visible pinned caret.
@@ -235,7 +276,50 @@ impl MatrixApp {
                 });
             }
         }
-        painter.galley(origin, Arc::clone(&live_galley), Color32::BLACK);
+        painter.galley(origin, Arc::clone(&live_galley), COMMAND_GOLD);
+        // Declared options as clickable tokens above the entry row, so a click and a typed assignment reach
+        // the same parser path. Clicking a flag twice cannot commit anything: it only toggles the option.
+        self.cmd_token_rects.clear();
+        if !popup_open
+            && self.controller.phase() != crate::session::CmdPhase::Idle
+            && self.controller.active_feature() == Some(crate::session::LINE)
+        {
+            let both = self.controller.both_sides().unwrap_or(false);
+            let mut clicked: Option<&'static str> = None;
+            egui::Area::new(egui::Id::new("cmd-option-tokens"))
+                .fixed_pos(egui::pos2(rect.left(), rect.top() - 21.0))
+                .order(egui::Order::Middle)
+                .show(&ctx, |ui| {
+                    apply_command_theme(ui);
+                    ui.horizontal(|ui| {
+                        for (name, label) in [
+                            (
+                                "BothSides",
+                                if both {
+                                    "BothSides=Yes"
+                                } else {
+                                    "BothSides=No"
+                                },
+                            ),
+                            ("Length", "Length="),
+                        ] {
+                            let response = ui.small_button(label);
+                            self.cmd_token_rects.insert(name.to_owned(), response.rect);
+                            if response.clicked() {
+                                clicked = Some(name);
+                            }
+                        }
+                    });
+                });
+            if let Some(name) = clicked {
+                if name == "BothSides" {
+                    let _ = self.controller.set_both_sides(!both);
+                } else {
+                    self.transcript.set_draft("Length=");
+                    self.focus_cmd = true;
+                }
+            }
+        }
         state.store(&ctx, id);
         ui.allocate_rect(rect, Sense::hover());
     }

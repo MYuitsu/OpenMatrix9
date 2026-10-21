@@ -1,0 +1,86 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-03-14-001-05",
+  "l3_id": "OM9-L3-03-14-001",
+  "title": "Matrix Layer Category Palette",
+  "oracle": {
+    "positive": "Palette has Metals/Gems/User/Heads/Finger/Cutting/Creation semantic categories",
+    "negative": "Duplicate display label must not cause ID collision"
+  },
+  "manual_test_gate": "M01-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) at the running application",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: with the documented mapping for the extra user colours (17..=32) temporarily removed, the fixture failed (P3 for slots 17/24/25/32): the mapping is guarded, not assumed. Restored immediately.",
+    "GREEN: cargo test -p om9-app --test layer_category_palette -> 6 passed; 0 failed (P1..P5, N1..N6)",
+    "cargo test -p om9-core --lib layers::category -> 4 passed",
+    "cargo test -p om9-core -p om9-app -j 2: every group passes except chrome_actions::icons_scale_with_the_screen_size, which belongs to the in-flight screen_icon_scale work already uncommitted in this tree and is unrelated to the palette (recorded in the -05 regression log)",
+    "cargo fmt --check: exit 0; cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0",
+    "real window: om9.exe --ui-audit writes dock.palette.categories = Metals | Gems | User | Heads | Finger | Cutting | Creation and dock.palette.slots with 17=User, 33=Lights (palette-in-a-real-window.png)",
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
+  ],
+  "code_change": [
+    "crates/om9-core/src/layers/category.rs (new): PaletteGroup (the manual's four groups) and LayerCategory (the plan's seven), slot mapping for 1..=33, category slots, labels; PresetSlot::category / palette_group / category_label.",
+    "crates/om9-app/src/ui/layers.rs: every palette row paints its category label in the free left area (the name/swatch/lock/visibility controls stay on the right).",
+    "crates/om9-app/src/ui.rs: MatrixApp::palette_categories / palette_slot_label and a palette block (categories + per-slot labels) in the audit receipt."
+  ],
+  "artefacts": [
+    "OM9-L4-03-14-001-02.red.log",
+    "OM9-L4-03-14-001-02.green.log",
+    "OM9-L4-03-14-001-03.diffstat.txt",
+    "OM9-L4-03-14-001-03.target-test.log",
+    "OM9-L4-03-14-001-05.regression.log",
+    "palette-in-a-real-window.png"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The model and the receipt are machine-proven; the look of the palette and the feel of the group toggles are yours to confirm.",
+    "items": [
+      {
+        "id": "V1",
+        "step": "Open the LAYERS panel and read the rows.",
+        "machine_proven": "P1/P5 and the real-window receipt: the palette exposes Metals, Gems, User, Heads, Finger, Cutting, Creation in that order.",
+        "human_must_verify": "All seven names are readable in the panel without covering the layer name, the colour swatch, the lock or the visibility control.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "V2",
+        "step": "Compare the colours with Matrix8 book 1 p54-57 (reference in the milestone).",
+        "machine_proven": "P3/P4: slots 1-4 Metals, 5-8 Gems, 9-12 User, 13 Heads, 14 Finger, 15 Cutting, 16 Creation; 17-32 are extra User colours.",
+        "human_must_verify": "The metals/gems/user/builders colours match the manual closely enough to model with.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "V3",
+        "step": "Click the four-row block toggles and a row's lock/visibility.",
+        "machine_proven": "the existing layer tests (left_stack_layers, layer_widgets) and the recipe paths are unchanged by this item.",
+        "human_must_verify": "The blocks still toggle together, and the new category text did not move or shrink the controls.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "V4",
+        "step": "Rename a custom layer (ADVANCED, slots 17-32) to something else and look at it again.",
+        "machine_proven": "N1/N2/N3: the row keeps its own name, the category stays User, and the slot number is the identity; a reserved label is refused.",
+        "human_must_verify": "The renamed row shows its own text and still says User, and it is still the same layer after save/reopen (the persistence check is L3-008).",
+        "reviewer_decision": null
+      },
+      {
+        "id": "V5",
+        "step": "Look at the Lights row (slot 33) and the ADVANCED rows.",
+        "machine_proven": "P3/N6: slot 33 is labelled Lights and is not one of the seven categories; 17-32 are User.",
+        "human_must_verify": "Lights reads as its own row, not as a colour category, and the advanced rows read User.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_l2_03_14_l3_001_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

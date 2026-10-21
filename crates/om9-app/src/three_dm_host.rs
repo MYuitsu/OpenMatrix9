@@ -12,8 +12,8 @@ use om9_core::{
     transaction::{Cancellation, TransactionCoordinator},
 };
 use om9_exchange::{
-    ExportCapture, ExportReceipt, ImportCapture, ImportMode, ImportOptions, ImportReceipt,
-    NativeExchange,
+    BrepMode, ExportCapture, ExportReceipt, ImportCapture, ImportMode, ImportOptions,
+    ImportReceipt, NativeExchange,
 };
 use om9_native_owner::{NativeProgram, ProcessLimits};
 use std::{
@@ -128,6 +128,11 @@ impl ThreeDmHost {
                 // The product requirement is editable geometry: no retained history/source
                 // tables are needed to continue editing curves, lines and meshes.
                 mode: ImportMode::Geometry,
+                brep: if cfg!(feature = "occt-brep") {
+                    BrepMode::EditableStrict
+                } else {
+                    BrepMode::RetainOpaque
+                },
                 ..ImportOptions::default()
             },
             cancel,
@@ -144,6 +149,20 @@ impl ThreeDmHost {
     ) -> Result<ImportReceipt> {
         let capture = ImportCapture::target(coordinator, document)?;
         let staging = std::env::temp_dir();
+        #[cfg(feature = "occt-brep")]
+        let prepared = {
+            let bridge = crate::brep_bridge::OcctBrepBridge;
+            self.exchange.prepare_import_with_brep(
+                coordinator,
+                capture,
+                source,
+                &staging,
+                options,
+                Some(&bridge),
+                cancel,
+            )?
+        };
+        #[cfg(not(feature = "occt-brep"))]
         let prepared = self.exchange.prepare_import(
             coordinator,
             capture,
@@ -167,6 +186,13 @@ impl ThreeDmHost {
         cancel: &Cancellation,
     ) -> Result<ExportReceipt> {
         let capture = ExportCapture::all(coordinator, document)?;
+        #[cfg(feature = "occt-brep")]
+        let validated = {
+            let bridge = crate::brep_bridge::OcctBrepBridge;
+            self.exchange
+                .prepare_with_brep(coordinator, capture, target, cancel, Some(&bridge))?
+        };
+        #[cfg(not(feature = "occt-brep"))]
         let validated = self
             .exchange
             .prepare(coordinator, capture, target, cancel)?;

@@ -1,0 +1,83 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-14-007-01",
+  "l3_id": "OM9-L3-03-14-007",
+  "l3_title": "Object Property Editor Adapter",
+  "owner_module_id": "OM9-L2-03-14",
+  "milestone": "M01",
+  "stage": "E02",
+  "gate": "M01-UI",
+  "goal": "expose relevant document attributes without duplicating model",
+  "positive_oracle": "Edit color/name/property through document command once; undo restores previous value",
+  "negative_oracle": "Editing derived read-only BRep field must be disabled",
+  "behaviour_reference": {
+    "source": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/reference/text/m8book1__p32-34__using-info-settings-menu.md",
+    "quote": "Object Properties / Object Information … The program stores information about all objects on-screen.",
+    "decision": "The editor shows the model's attributes and edits them through the document's own transaction, with the derived fields disabled and the reason shown."
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "Behavioural source: the extracted Matrix9 manual shipped with the milestone. QymCAD only for panel technique.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:448 comment: carry out what the properties panel asked for, after it has drawn"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A properties panel asks and the model carries it out through one doorway: the idea OM9 keeps. QymCAD's panel writes its own state; OM9's editor goes through a document transaction so Undo owns the history.",
+      "om9_owner": "crates/om9-app/src/session/properties.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:59 pub struct Place { … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No property editor.",
+      "om9_owner": "crates/om9-app/src/session/properties.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No document attributes.",
+      "om9_owner": "crates/om9-core/src/model.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "om9-core transaction: Mutation::Attributes { source, attributes } validated against the layer's editable permission, and Mutation has no label variant",
+    "om9-app: only set_objects_hidden existed for object attributes; there was no editor table and no way to change a colour or the selectable/locked flags of an object"
+  ],
+  "gap_found_by_this_task": [
+    "No property editor existed at all: the panel could show nothing and edit nothing through a document command.",
+    "Added session/properties.rs: the FIELDS table (five editable attribute fields, Name and Geometry read-only with their reasons), PropertyEdit (only editable fields, so a read-only edit cannot even be expressed) and Controller::edit_object_property, which sends ONE transaction for all edited objects.",
+    "Pinned with fixtures: a colour edit is one journal entry and Undo restores the previous colour; the hidden flag follows the same rule; a no-op writes nothing; an edit on a locked layer is refused by the core and changes nothing.",
+    "RED is API-level and stated as such (the module is new). The Name field is an open item: renaming needs a document command (a Mutation::Label variant); the editor states that instead of pretending the field works.",
+    "ROUND 23: rename is implemented. `Mutation::Label { source, label }` was added to the core (variant, validation: non-empty, no padding, no control characters, at most 128 bytes; the apply bumps attributes_revision and invalidates dependents; `Mutation::source()` knows it), and `PropertyEdit::Label` drives it through the same one-transaction path. The editor's Name field is editable now; Geometry stays read-only."
+  ],
+  "reuse_decision": "ADAPT the 'the panel asks, the model carries it out' idea of gui.rs; ADD the editor table and the one-transaction edit.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-03-14-007/positive.json",
+    "implementation/fixtures/M01/OM9-L3-03-14-007/negative.json",
+    "crates/om9-app/tests/property_editor_adapter.rs"
+  ]
+}

@@ -151,7 +151,11 @@ impl DepthPyramidGpu {
         });
         let dummy = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("pyramid dummy"),
-            size: wgpu::Extent3d { width: 1, height: 1, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width: 1,
+                height: 1,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -159,7 +163,16 @@ impl DepthPyramidGpu {
             usage: wgpu::TextureUsages::TEXTURE_BINDING,
             view_formats: &[],
         });
-        Self { layout, from_depth, downsample, dims, texture: None, array_view: None, dummy, levels: Vec::new() }
+        Self {
+            layout,
+            from_depth,
+            downsample,
+            dims,
+            texture: None,
+            array_view: None,
+            dummy,
+            levels: Vec::new(),
+        }
     }
 
     /// Creates the layered texture for a target size; a no-op when the size is unchanged.
@@ -189,7 +202,9 @@ impl DepthPyramidGpu {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::R32Float,
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_SRC,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+                | wgpu::TextureUsages::TEXTURE_BINDING
+                | wgpu::TextureUsages::COPY_SRC,
             view_formats: &[],
         });
         self.array_view = Some(texture.create_view(&wgpu::TextureViewDescriptor {
@@ -216,7 +231,12 @@ impl DepthPyramidGpu {
     }
 
     /// Copies one layer back for diagnostics: the maximum and the first few values.
-    pub fn debug_layer(&self, device: &wgpu::Device, queue: &wgpu::Queue, level: usize) -> Option<(f32, Vec<f32>)> {
+    pub fn debug_layer(
+        &self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        level: usize,
+    ) -> Option<(f32, Vec<f32>)> {
         let texture = self.texture.as_ref()?;
         let (width, height) = *self.levels.get(level)?;
         let padded = (width * 4).div_ceil(256) * 256;
@@ -226,12 +246,18 @@ impl DepthPyramidGpu {
             usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
             mapped_at_creation: false,
         });
-        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("pyramid read") });
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("pyramid read"),
+        });
         encoder.copy_texture_to_buffer(
             wgpu::TexelCopyTextureInfo {
                 texture,
                 mip_level: 0,
-                origin: wgpu::Origin3d { x: 0, y: 0, z: level as u32 },
+                origin: wgpu::Origin3d {
+                    x: 0,
+                    y: 0,
+                    z: level as u32,
+                },
                 aspect: wgpu::TextureAspect::All,
             },
             wgpu::TexelCopyBufferInfo {
@@ -242,18 +268,33 @@ impl DepthPyramidGpu {
                     rows_per_image: Some(height),
                 },
             },
-            wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+            wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
         );
         queue.submit(std::iter::once(encoder.finish()));
-        device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("poll");
+        device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("poll");
         let slice = readback.slice(..);
         slice.map_async(wgpu::MapMode::Read, |_| {});
-        device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("map");
+        device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("map");
         let data = slice.get_mapped_range().expect("mapped");
         let mut values = Vec::with_capacity(width as usize * height as usize);
         for row in 0..height {
             let start = (row * padded) as usize;
-            let row_values: &[f32] = bytemuck::cast_slice(&data[start..start + (width * 4) as usize]);
+            let row_values: &[f32] =
+                bytemuck::cast_slice(&data[start..start + (width * 4) as usize]);
             values.extend_from_slice(row_values);
         }
         drop(data);
@@ -291,7 +332,9 @@ impl DepthPyramidGpu {
             queue.write_buffer(
                 &self.dims,
                 0,
-                bytemuck::bytes_of(&Dims { values: [(level.saturating_sub(1)) as u32, width, height, 0] }),
+                bytemuck::bytes_of(&Dims {
+                    values: [(level.saturating_sub(1)) as u32, width, height, 0],
+                }),
             );
             // Reading the whole array while writing one of its layers aliases; bind the source layer
             // alone, and a dummy texel for level 0 which reads no previous layer.
@@ -324,9 +367,18 @@ impl DepthPyramidGpu {
                 label: Some("pyramid"),
                 layout: &self.layout,
                 entries: &[
-                    wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(depth_view) },
-                    wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&previous_view) },
-                    wgpu::BindGroupEntry { binding: 2, resource: self.dims.as_entire_binding() },
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: wgpu::BindingResource::TextureView(depth_view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::TextureView(&previous_view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 2,
+                        resource: self.dims.as_entire_binding(),
+                    },
                 ],
             });
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -346,7 +398,11 @@ impl DepthPyramidGpu {
                 multiview_mask: None,
             });
             pass.set_viewport(0.0, 0.0, width as f32, height as f32, 0.0, 1.0);
-            pass.set_pipeline(if level == 0 { &self.from_depth } else { &self.downsample });
+            pass.set_pipeline(if level == 0 {
+                &self.from_depth
+            } else {
+                &self.downsample
+            });
             pass.set_bind_group(0, &bind, &[]);
             pass.draw(0..3, 0..1);
         }

@@ -72,6 +72,8 @@ fn bundle() -> ImportBundle {
         entities: vec![entity],
         layers: vec![],
         definitions: vec![],
+        groups: vec![],
+        exchange: Default::default(),
     }
 }
 fn fixture() -> (TransactionCoordinator, DocumentId, DocumentId) {
@@ -938,3 +940,4 @@ fn import_requires_every_root_layer_definition_and_local_member_to_be_source_bou
         }
     }
 }
+

@@ -8,7 +8,10 @@ use crate::MeshData;
 /// A closed UV sphere: `rings` bands from pole to pole and `segments` around, so the triangle count is
 /// `2 * rings * segments`. The default is the same order of magnitude as a tessellated OCCT sphere.
 pub fn sphere(rings: usize, segments: usize, radius: f32) -> MeshData {
-    assert!(rings >= 2 && segments >= 3, "a sphere needs at least two rings and three segments");
+    assert!(
+        rings >= 2 && segments >= 3,
+        "a sphere needs at least two rings and three segments"
+    );
     let mut positions = Vec::with_capacity((rings + 1) * segments);
     for ring in 0..=rings {
         let v = std::f32::consts::PI * ring as f32 / rings as f32;

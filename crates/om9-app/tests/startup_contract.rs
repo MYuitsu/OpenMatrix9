@@ -173,10 +173,15 @@ fn negative_fixture_reports_every_start_failure_instead_of_exiting_silently() {
             "no-hardware-adapter" => {
                 let expect = &case["expect"];
                 assert!(case["adapter"].is_null());
-                let error=gpu_adapter_identity(None).expect_err("GPU-only startup must refuse a missing adapter");
-                let failure=StartupFailure::from_error(StartupStage::Renderer,&error);
-                assert_eq!(failure.stage.label(),case["stage"].as_str().unwrap());
-                assert!(failure.detail().contains(expect["diagnostic_contains"].as_str().unwrap()));
+                let error = gpu_adapter_identity(None)
+                    .expect_err("GPU-only startup must refuse a missing adapter");
+                let failure = StartupFailure::from_error(StartupStage::Renderer, &error);
+                assert_eq!(failure.stage.label(), case["stage"].as_str().unwrap());
+                assert!(
+                    failure
+                        .detail()
+                        .contains(expect["diagnostic_contains"].as_str().unwrap())
+                );
             }
             "silent-exit-forbidden" => {
                 let expect = &case["expect"];

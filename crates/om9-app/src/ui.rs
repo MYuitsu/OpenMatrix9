@@ -21,10 +21,17 @@ use om9_scene::{
 };
 mod chrome;
 mod command;
+mod icon_resize_audit;
+#[cfg(test)]
+mod icon_size_audit;
 mod layer_audit;
 mod layer_dialog_audit;
 mod layers;
 mod panel_audit;
+mod sidebar_palettes;
+#[cfg(test)]
+mod sidebar_scroll_audit;
+mod typography;
 pub use layers::LayerControl;
 mod file_audit;
 mod file_success_audit;
@@ -143,7 +150,7 @@ pub fn parse_audit_rail_width(text: &str) -> Option<f32> {
     .then_some(width)
 }
 /// The scripted menu-drag scenarios of `OM9_UI_AUDIT_PANELS` (L3-003).
-pub const PANEL_AUDIT_SCENARIOS: [&str; 7] = [
+pub const PANEL_AUDIT_SCENARIOS: [&str; 8] = [
     "reorder",
     "float",
     "dock-right",
@@ -151,6 +158,7 @@ pub const PANEL_AUDIT_SCENARIOS: [&str; 7] = [
     "roll-up",
     "float-drop",
     "readback-recover",
+    "object-info",
 ];
 /// Parse `OM9_UI_AUDIT_PANELS`: unset, or one of the documented scenarios.
 pub fn parse_audit_panels(text: &str) -> Option<String> {
@@ -224,6 +232,14 @@ pub struct MatrixApp {
     sub_object_kind: om9_scene::scene::PickKind,
     /// Object under the pointer, and where/when it was computed, so hovering does not pick every frame.
     hover_object: Option<om9_core::identity::ObjectId>,
+    hover_job: Option<(
+        om9_core::identity::DocumentId,
+        om9_scene::camera::Camera,
+        u64,
+        egui::Pos2,
+        Viewport,
+        std::sync::mpsc::Receiver<Option<om9_core::identity::ObjectId>>,
+    )>,
     hover_picked_at: Option<(egui::Pos2, u64, u64)>,
     pub audit: Option<UiAudit>,
     passes: u64,
@@ -251,6 +267,9 @@ pub struct MatrixApp {
     pub last_panel_op: Option<panel_audit::PanelOpRecord>,
     /// Menus whose closed-bar controls rendered this frame.
     pub closed_bar_controls: std::collections::BTreeSet<&'static str>,
+    /// Menu buttons and their items, cleared every frame (the Layers panel clears
+    /// the action map, so menus keep their own).
+    pub menu_rects: std::collections::BTreeMap<&'static str, Rect>,
     /// A floated menu needs its rectangle read back into the work area.
     float_resync: bool,
     /// Title bars rendered this frame, with the column they belong to.
@@ -277,6 +296,29 @@ pub struct MatrixApp {
     /// One GPU target per viewport, so all four render their own camera instead of sharing pixels.
     gpu_viewports: std::collections::BTreeMap<ViewId, crate::gpu_viewport::GpuViewport>,
     gpu_state: Option<eframe::egui_wgpu::RenderState>,
+    /// One document scene shared by the four viewports; geometry is uploaded once, not once per view.
+    shared_scene: crate::gpu_viewport::SharedResourcePool,
+    /// Opt-in JSONL log of camera and gumball gestures (`OM9_INTERACTION_LOG`).
+    interaction_log: Option<crate::interaction_log::InteractionLog>,
+    /// Opt-in scripted camera gesture (`OM9_CAMERA_AUDIT=<frames>`): orbit, zoom, then pan the
+    /// Perspective view and log every frame, so interaction cost is measured without OS input.
+    camera_audit: Option<CameraAudit>,
+    /// Window-owned navigation; cameras remain in workspace.
+    navigation: crate::navigation::NavigationController,
+    scheduler: crate::frame_scheduler::WindowFrameScheduler,
+    nav_frame_token: Option<u64>,
+    nav_logged_token: Option<u64>,
+    navigation_audit: Option<crate::navigation_audit::NavigationAudit>,
+    nav_raw_events: Option<Vec<egui::Event>>,
+    nav_time_origin: Option<(f64, std::time::Instant)>,
+    nav_sample_now: std::time::Instant,
+    nav_render_due: bool,
+    nav_received: Option<std::time::Instant>,
+    nav_frame_started: std::time::Instant,
+    nav_document: Option<om9_core::identity::DocumentId>,
+    nav_actions: std::collections::BTreeMap<ViewId, &'static str>,
+    nav_cameras: std::collections::BTreeMap<ViewId, om9_scene::camera::Camera>,
+    nav_camera_sources: BTreeMap<ViewId, u64>,
     /// Which gumball handles are shown when no modifier is held.
     gumball_mode: om9_scene::gumball_view::Mode,
     /// Gumball gesture in flight: the drag session, its handle and the last pointer position.
@@ -319,6 +361,9 @@ pub struct MatrixApp {
     pub right_dock_icon_rects: Vec<Rect>,
     /// Size of the scrollable left stack content last frame.
     pub sidebar_content_size: Option<Vec2>,
+    /// Scroll viewport and separately allocated slim bar (logical points).
+    pub sidebar_content_rect: Option<Rect>,
+    pub sidebar_scrollbar_rect: Option<Rect>,
     audit_layout_mode: AuditLayoutMode,
     audit_rail_width: Option<f32>,
     pub builder_slot_rect: Option<Rect>,
@@ -444,13 +489,20 @@ impl UiAudit {
 /// A cached selection frame: the keys it was computed for and the rectangle itself.
 type SelectionFrame = ((u64, u64, u64, Camera, Rect), Option<Rect>);
 
+/// Scripted camera gesture for interaction measurements (`OM9_CAMERA_AUDIT=<frames>`).
+struct CameraAudit {
+    remaining: usize,
+    total: usize,
+    frames: usize,
+}
+
 impl MatrixApp {
     pub fn from_file(path: &std::path::Path) -> Result<Self> {
-        Self::from_controller(Controller::from_file(path, Limits::default())?)
+        Self::from_controller(Controller::from_file(path, crate::document_limits())?)
     }
     pub fn new(document: Document) -> Result<Self> {
         let document = mesh_stress_document(document);
-        Self::from_controller(Controller::new(document, Limits::default())?)
+        Self::from_controller(Controller::new(document, crate::document_limits())?)
     }
     /// Typed startup: validate the configuration, open the empty document and
     /// load the owned layout. No window exists yet, so a failure here is a
@@ -476,6 +528,32 @@ impl MatrixApp {
         let mut app = Self {
             gpu_viewports: std::collections::BTreeMap::new(),
             gpu_state: None,
+            shared_scene: Default::default(),
+            interaction_log: crate::interaction_log::InteractionLog::from_env(),
+            navigation: Default::default(),
+            scheduler: crate::frame_scheduler::WindowFrameScheduler::from_env(),
+            nav_frame_token: None,
+            nav_logged_token: None,
+            navigation_audit: crate::navigation_audit::NavigationAudit::from_env(),
+            nav_raw_events: None,
+            nav_time_origin: None,
+            nav_sample_now: std::time::Instant::now(),
+            nav_render_due: true,
+            nav_received: None,
+            nav_frame_started: std::time::Instant::now(),
+            nav_document: None,
+            nav_actions: Default::default(),
+            nav_cameras: Default::default(),
+            nav_camera_sources: Default::default(),
+            camera_audit: std::env::var("OM9_CAMERA_AUDIT")
+                .ok()
+                .and_then(|value| value.trim().parse::<usize>().ok())
+                .filter(|frames| *frames > 0)
+                .map(|frames| CameraAudit {
+                    remaining: frames,
+                    total: frames,
+                    frames: 0,
+                }),
             controller,
             gumball_mode: om9_scene::gumball_view::Mode::Move,
             gumball_session: None,
@@ -527,6 +605,7 @@ impl MatrixApp {
             sub_object: None,
             sub_object_kind: om9_scene::scene::PickKind::Face,
             hover_object: None,
+            hover_job: None,
             hover_picked_at: None,
             audit: None,
             passes: 0,
@@ -546,6 +625,7 @@ impl MatrixApp {
             work_area: None,
             last_panel_op: None,
             closed_bar_controls: std::collections::BTreeSet::new(),
+            menu_rects: std::collections::BTreeMap::new(),
             float_resync: false,
             panel_bars: Vec::new(),
             left_content_bottom: 0.,
@@ -578,6 +658,8 @@ impl MatrixApp {
             rail_icon_rects: Vec::new(),
             right_dock_icon_rects: Vec::new(),
             sidebar_content_size: None,
+            sidebar_content_rect: None,
+            sidebar_scrollbar_rect: None,
             audit_layout_mode: AuditLayoutMode::Default,
             audit_rail_width: None,
             builder_slot_rect: None,
@@ -590,7 +672,83 @@ impl MatrixApp {
         for diagnostic in app.controller.file_diagnostics() {
             app.transcript.append_history(diagnostic);
         }
+        if let Some(log) = app.interaction_log.as_mut() {
+            let limits = app.controller.coordinator().limits();
+            log.record(serde_json::json!({
+                "event": "session_start",
+                "document": app.controller.document().name,
+                "objects": app.controller.document().entities.len(),
+                "max_objects": limits.max_objects,
+                "max_points": limits.max_points,
+                "max_bytes": limits.max_bytes,
+            }));
+        }
         Ok(app)
+    }
+    /// Scripted orbit, zoom then pan of the Perspective view, one camera step per frame, with a JSONL
+    /// record of the frame time and scene counters. It closes the window after the requested frames.
+    fn camera_audit_frame(&mut self, ui: &mut egui::Ui) {
+        let Some(audit) = self.camera_audit.as_mut() else {
+            return;
+        };
+        if audit.remaining == 0 {
+            return;
+        }
+        audit.remaining -= 1;
+        audit.frames += 1;
+        let frame = audit.frames;
+        let total = audit.total.max(1);
+        let done = audit.remaining == 0;
+        let action = if frame * 3 <= total {
+            "orbit"
+        } else if frame * 3 <= total * 2 {
+            "zoom"
+        } else {
+            "pan"
+        };
+        let id = ViewId::Perspective;
+        let camera = self
+            .controller
+            .workspace
+            .views
+            .get_mut(&id)
+            .and_then(|view| {
+                let result = match action {
+                    "orbit" => view.camera.orbit(0.01, 0.004),
+                    "zoom" => view.camera.zoom(
+                        std::env::var("OM9_AUDIT_ZOOM_FACTOR")
+                            .ok()
+                            .and_then(|value| value.trim().parse::<f64>().ok())
+                            .unwrap_or(0.996),
+                    ),
+                    _ => view.camera.pan([0.01, 0.0]),
+                };
+                result.ok().map(|()| view.camera.clone())
+            });
+        let frame_ms = crate::interaction_log::frame_ms(ui.input(|input| input.stable_dt));
+        let port = self.gpu_viewports.get(&id);
+        let stats = port.and_then(|port| port.frame_stats());
+        if let (Some(log), Some(camera)) = (self.interaction_log.as_mut(), camera.as_ref()) {
+            log.record(serde_json::json!({
+                "event": "camera_audit",
+                "frame": frame,
+                "action": action,
+                "frame_ms": frame_ms,
+                "revision": camera.revision,
+                "eye": camera.eye,
+                "target": camera.target,
+                "scene_objects": stats.map(|stats| stats.objects),
+                "visible": stats.map(|stats| stats.visible),
+                "culled": stats.map(|stats| stats.culled),
+                "draw_calls": stats.map(|stats| stats.draw_calls),
+                "prepare_ms": port.map(|port| port.last_prepare_ms()),
+                "draw_ms": port.map(|port| port.last_draw_ms()),
+            }));
+        }
+        ui.ctx().request_repaint();
+        if done {
+            ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+        }
     }
     fn feedback(&mut self, result: Result<()>) {
         match result {
@@ -1162,20 +1320,74 @@ impl MatrixApp {
             }
             None => true,
         };
-        if stale {
-            self.hover_picked_at = Some((pointer, view.camera.revision, epoch));
-            self.hover_object = self.controller.scene().and_then(|scene| {
-                scene
-                    .pick_all(
-                        [f64::from(pointer.x), f64::from(pointer.y)],
-                        &view.camera,
-                        viewport,
-                        pick_tolerance(ui),
-                        om9_scene::scene::PickIntent::Select,
-                    )
-                    .ok()
-                    .and_then(|hits| hits.first().map(|hit| hit.root))
-            });
+        let mut completed = false;
+        if let Some((document, camera, job_epoch, pos, vp, receiver)) = self.hover_job.as_ref() {
+            match receiver.try_recv() {
+                Ok(hit) => {
+                    let valid = self.controller.document().id == *document
+                        && view.camera == *camera
+                        && epoch == *job_epoch
+                        && pointer.distance(*pos) <= 3.
+                        && viewport.origin == vp.origin
+                        && viewport.size == vp.size;
+                    if valid {
+                        self.hover_object = hit;
+                        self.hover_picked_at = Some((pointer, camera.revision, epoch));
+                        completed = true;
+                    } else {
+                        self.hover_picked_at = None;
+                        self.hover_object = None;
+                    }
+                    self.hover_job = None;
+                }
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                    self.hover_job = None;
+                    self.hover_picked_at = None;
+                }
+                _ => {}
+            }
+        }
+        if stale && !completed && self.hover_job.is_none() {
+            let tolerance = pick_tolerance(ui);
+            if let Some(scene) = self.controller.scene() {
+                if scene.objects.len() > 128 {
+                    let document = scene.document.id;
+                    let snapshot = scene.render_snapshot();
+                    let camera = view.camera.clone();
+                    let captured_camera = camera.clone();
+                    let ctx = ui.ctx().clone();
+                    let (tx, rx) = std::sync::mpsc::channel();
+                    std::thread::spawn(move || {
+                        let hit = snapshot
+                            .pick_all(
+                                [pointer.x as f64, pointer.y as f64],
+                                &camera,
+                                viewport,
+                                tolerance,
+                                om9_scene::scene::PickIntent::Select,
+                            )
+                            .ok()
+                            .and_then(|hits| hits.first().map(|h| h.root));
+                        let _ = tx.send(hit);
+                        ctx.request_repaint();
+                    });
+                    self.hover_job =
+                        Some((document, captured_camera, epoch, pointer, viewport, rx));
+                    self.hover_object = None;
+                } else {
+                    self.hover_picked_at = Some((pointer, view.camera.revision, epoch));
+                    self.hover_object = scene
+                        .pick_all(
+                            [pointer.x as f64, pointer.y as f64],
+                            &view.camera,
+                            viewport,
+                            tolerance,
+                            om9_scene::scene::PickIntent::Select,
+                        )
+                        .ok()
+                        .and_then(|hits| hits.first().map(|h| h.root));
+                }
+            }
         }
         let Some(hovered) = self.hover_object else {
             return;
@@ -1233,6 +1445,10 @@ impl MatrixApp {
     pub fn layer_control_rect(&self, slot: u8, control: LayerControl) -> Option<Rect> {
         self.layer_rects.get(&(slot, control)).copied()
     }
+    /// The rect of a menu button or one of its items, as drawn this frame.
+    pub fn menu_rect(&self, key: &str) -> Option<Rect> {
+        self.menu_rects.get(key).copied()
+    }
     pub fn layer_action_rect(&self, action: &str) -> Option<Rect> {
         self.layer_action_rects.get(action).copied()
     }
@@ -1250,7 +1466,59 @@ impl MatrixApp {
     pub fn toolbar_icon_edge(&self) -> f32 {
         self.toolbar_icon_edge
     }
+    /// Fixed-column palettes also follow live window size. Keep their growth
+    /// within the existing row capacity instead of changing column counts.
+    fn palette_icon_scale(&self) -> f32 {
+        0.9 + 0.1 * ((self.screen_icon_scale - 0.85) / 0.35).clamp(0., 1.)
+    }
 
+    /// The number of Undo steps (the adapter test checks that an edit is one step).
+    pub fn undo_len(&self) -> usize {
+        self.controller.coordinator().undo_len()
+    }
+    /// Edit one property of the single selected object through the same document
+    /// command the editor uses (OM9-L3-03-14-007). The panel is the caller's job;
+    /// this is the adapter that turns a field edit into one transaction.
+    pub fn edit_selected_property(
+        &mut self,
+        edit: crate::session::PropertyEdit,
+    ) -> om9_core::Result<()> {
+        let selected: Vec<_> = self.controller.selected().iter().copied().collect();
+        if selected.len() != 1 {
+            return Err(om9_core::Error::Missing("single selection"));
+        }
+        let sources = self
+            .controller
+            .collect_object_sources(selected.into_iter())?;
+        self.controller.edit_object_property(sources, edit)
+    }
+    /// Select exactly these objects (the palette and the Super Select tool need
+    /// the same door the CMD path uses).
+    pub fn select_objects(&mut self, ids: &[om9_core::identity::ObjectId]) -> om9_core::Result<()> {
+        self.controller.select_objects(ids)
+    }
+    /// The Object Info line the receipt carries for a single selection: the same
+    /// line the overlay paints. `None` when nothing (or more than one thing) is
+    /// selected, so a receipt never claims information about a set.
+    pub fn object_info_block(&self) -> Option<serde_json::Value> {
+        self.controller
+            .selected()
+            .iter()
+            .next()
+            .filter(|_| self.controller.selected().len() == 1)
+            .and_then(|id| {
+                self.controller
+                    .document()
+                    .object_info(*id, self.controller.coordinator().limits())
+                    .ok()
+            })
+            .map(|info| {
+                serde_json::json!({
+                    "kind": info.kind,
+                    "label": om9_core::object_info::label_text(&info),
+                })
+            })
+    }
     /// The seven palette categories, in the order the Layers menu shows them
     /// (Matrix8 book 1, pages 54-57; OM9-L3-03-14-001).
     pub fn palette_categories(&self) -> [&'static str; 7] {
@@ -1269,9 +1537,32 @@ impl MatrixApp {
     pub fn main_category_rect(&self, index: usize) -> Option<Rect> {
         self.main_category_rects.get(&index).copied()
     }
+    /// Flush opt-in diagnostic output for an audit reader, outside the frame path.
+    pub fn flush_interaction_log(&self) {
+        if let Some(log) = &self.interaction_log {
+            log.flush();
+        }
+    }
 
     pub fn show(&mut self, ui: &mut egui::Ui) {
+        // The headless adapter has no raw_input_hook; preserve its events before CMD consumes Escape.
+        if self.nav_frame_token != Some(ui.ctx().cumulative_frame_nr())
+            && self.nav_raw_events.is_none()
+        {
+            self.nav_raw_events = Some(ui.input(|i| i.events.clone()));
+        }
+        if self.gpu_state.is_none() && self.nav_frame_token != Some(ui.ctx().cumulative_frame_nr())
+        {
+            self.nav_frame_started = std::time::Instant::now();
+        }
         self.passes += 1;
+        if self
+            .camera_audit
+            .as_ref()
+            .is_some_and(|audit| audit.remaining > 0)
+        {
+            self.camera_audit_frame(ui);
+        }
         self.screen_icon_scale = responsive_icon_scale(ui.ctx().content_rect());
         if !self.viewport_menu_owns_frame
             && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::F4))
@@ -1518,11 +1809,7 @@ impl MatrixApp {
             .min_size(dock_layout::LEFT_RAIL_MIN)
             .max_size(dock_layout::LEFT_RAIL_MAX)
             .resizable(true)
-            .frame(
-                egui::Frame::new()
-                    .fill(Color32::from_rgb(10, 14, 19))
-                    .inner_margin(2),
-            )
+            .frame(egui::Frame::new().fill(chrome::PANEL_BG).inner_margin(2))
             .show(ui, |ui| {
                 self.sidebar_rect = Some(ui.max_rect());
                 // Icons follow the OUTER width (inner content plus frame chrome).
@@ -1549,11 +1836,7 @@ impl MatrixApp {
             .min_size(dock_layout::COMMAND_MIN)
             .max_size(dock_layout::COMMAND_MAX)
             .resizable(true)
-            .frame(
-                egui::Frame::new()
-                    .fill(Color32::from_rgb(130, 180, 140))
-                    .inner_margin(3),
-            )
+            .frame(egui::Frame::new().fill(command::COMMAND_BG).inner_margin(3))
             .show(ui, |ui| {
                 ui.set_min_height(ui.available_height());
                 self.sync_panel_size(PanelId::CommandLine, ui.max_rect().height());
@@ -1581,11 +1864,7 @@ impl MatrixApp {
                 .min_size(dock_layout::RIGHT_DOCK_MIN)
                 .max_size(dock_layout::RIGHT_DOCK_MAX)
                 .resizable(true)
-                .frame(
-                    egui::Frame::new()
-                        .fill(Color32::from_rgb(16, 23, 31))
-                        .inner_margin(3),
-                )
+                .frame(egui::Frame::new().fill(chrome::PANEL_BG).inner_margin(3))
                 .show(ui, |ui| {
                     self.right_dock_rect = Some(ui.max_rect());
                     self.column_icon_edge = (dock_layout::rail_icon_edge(
@@ -1626,7 +1905,10 @@ impl MatrixApp {
         egui::CentralPanel::default()
             .frame(egui::Frame::new().fill(Color32::BLACK).inner_margin(0))
             .show(ui, |ui| {
-                let rect = ui.available_rect_before_wrap();
+                let rect = ui
+                    .available_rect_before_wrap()
+                    .intersect(ui.clip_rect())
+                    .intersect(ui.ctx().content_rect());
                 let views = self.controller.workspace.visible_views();
                 self.view_rects.clear();
                 // The tiling lives in workbench_regions; the frame feeds it the
@@ -1634,14 +1916,30 @@ impl MatrixApp {
                 let center = RegionRect::new(rect.min.x, rect.min.y, rect.width(), rect.height());
                 match tile_views(center, &views) {
                     Ok(slots) => {
+                        let mut panes = Vec::new();
                         for slot in slots {
-                            let view_rect = Rect::from_min_size(
+                            let rect = Rect::from_min_size(
                                 egui::pos2(slot.rect.x, slot.rect.y),
                                 Vec2::new(slot.rect.width, slot.rect.height),
                             );
-                            self.view_rects.insert(slot.view, view_rect);
-                            self.viewport_ui(ui, slot.view, view_rect);
+                            self.view_rects.insert(slot.view, rect);
+                            let canvas = Rect::from_min_max(
+                                egui::pos2(rect.min.x, rect.min.y + 18.),
+                                rect.max,
+                            );
+                            let response = ui.interact(
+                                canvas,
+                                ui.id().with(("canvas", slot.view.title())),
+                                Sense::click_and_drag(),
+                            );
+                            panes.push((slot.view, rect, response));
                         }
+                        self.navigation_frame(ui, &panes);
+                        let render_started = std::time::Instant::now();
+                        for (id, rect, response) in panes {
+                            self.viewport_ui(ui, id, rect, response);
+                        }
+                        self.navigation_frame_finished(ui, render_started);
                     }
                     Err(error) => {
                         // Not drawn, and said so on the status line.
@@ -1748,103 +2046,398 @@ impl MatrixApp {
             self.viewport_menu_pointer_guard = false;
         }
     }
-    /// Orbit, pan and zoom for one viewport.
-    ///
-    /// Right-drag orbits the camera around its target, right-drag with Shift (or the middle button) pans,
-    /// and the wheel dollies. Every accepted change lands on the workspace camera, so it persists and the
-    /// frame drawn below already uses it.
-    fn viewport_camera_input(
-        &mut self,
-        ui: &mut egui::Ui,
-        id: ViewId,
-        response: &egui::Response,
-        viewport: Viewport,
-    ) {
-        let (shift, wheel) = ui.input(|input| (input.modifiers.shift, input.smooth_scroll_delta.y));
-        let delta = response.drag_delta();
-        // In an orthographic view a turntable drag has no useful degree of freedom (the elevation is
-        // already at a pole), so the right button pans there, which is what a 2D view expects. Only the
-        // perspective view orbits.
-        let orthographic = matches!(
-            self.controller
-                .workspace
-                .views
-                .get(&id)
-                .map(|view| view.camera.projection),
-            Some(om9_scene::camera::Projection::Orthographic { .. })
-        );
-        let orbit_drag =
-            response.dragged_by(egui::PointerButton::Secondary) && !shift && !orthographic;
-        let pan_drag = response.dragged_by(egui::PointerButton::Middle)
-            || (response.dragged_by(egui::PointerButton::Secondary) && (shift || orthographic));
-        let wheel_over = response.hovered() && wheel != 0.0;
-        if !orbit_drag && !pan_drag && !wheel_over {
+    /// Route one event stream before painting any pane; layout retries cannot consume it again.
+    fn navigation_frame(&mut self, ui: &mut egui::Ui, panes: &[(ViewId, Rect, egui::Response)]) {
+        let token = ui.ctx().cumulative_frame_nr();
+        if self.nav_frame_token == Some(token) {
+            self.nav_render_due = false;
             return;
         }
-        let Some(current) = self
-            .controller
-            .workspace
-            .views
-            .get(&id)
-            .map(|view| view.camera.clone())
-        else {
-            return;
-        };
-        let mut camera = current;
-        if orbit_drag && delta != Vec2::ZERO {
-            if camera
-                .orbit(delta.x as f64 * 0.01, -(delta.y as f64) * 0.01)
-                .is_err()
-            {
-                return;
-            }
-        } else if pan_drag && delta != Vec2::ZERO {
-            let per_pixel = world_per_pixel(&camera, viewport);
-            if camera
-                .pan([-delta.x as f64 * per_pixel, delta.y as f64 * per_pixel])
-                .is_err()
-            {
-                return;
-            }
-        } else if wheel_over {
-            if camera.zoom(0.9_f64.powf(wheel as f64 / 40.0)).is_err() {
-                return;
-            }
+        self.nav_frame_token = Some(token);
+        self.nav_actions.clear();
+        let input_time = ui.input(|i| i.time);
+        let origin = *self
+            .nav_time_origin
+            .get_or_insert((input_time, std::time::Instant::now()));
+        let now = if self.gpu_state.is_some() {
+            std::time::Instant::now()
         } else {
+            origin.1 + std::time::Duration::from_secs_f64((input_time - origin.0).max(0.).min(1e9))
+        };
+        self.nav_sample_now = now;
+        let events = self
+            .nav_raw_events
+            .take()
+            .unwrap_or_else(|| ui.input(|i| i.events.clone()));
+        let document = self.controller.document().id;
+        if self.nav_document != Some(document) {
+            self.navigation = Default::default();
+            self.nav_cameras.clear();
+            self.nav_camera_sources.clear();
+            self.scheduler.idle();
+            self.nav_document = Some(document);
+        }
+        let blocked = !ui.input(|i| i.focused)
+            || events.iter().any(|e| {
+                matches!(
+                    e,
+                    egui::Event::Key {
+                        key: Key::Escape,
+                        pressed: true,
+                        ..
+                    }
+                )
+            })
+            || self.viewport_menu_owns_frame
+            || self.gumball_session.is_some()
+            || self.controller.layer_dialog().is_some()
+            || self.controller.file_operation().is_some()
+            || egui::Popup::is_any_open(ui.ctx());
+        if self.navigation_audit.is_some() {
+            if let Some(log) = self.interaction_log.as_mut() {
+                log.record(serde_json::json!({"event":"navigation_route","focused":ui.input(|i|i.focused),"blocked":blocked,"events":events.len()}));
+            }
+        }
+        if blocked {
+            self.navigation.cancel();
+            self.nav_cameras.clear();
+            self.nav_camera_sources.clear();
+        }
+        if self
+            .navigation
+            .gesture
+            .is_some_and(|g| !panes.iter().any(|p| p.0 == g.view))
+        {
+            self.navigation.cancel();
+        }
+        self.navigation
+            .views
+            .retain(|id, _| panes.iter().any(|p| p.0 == *id));
+        self.nav_cameras
+            .retain(|id, _| panes.iter().any(|p| p.0 == *id));
+        self.nav_camera_sources
+            .retain(|id, _| panes.iter().any(|p| p.0 == *id));
+        for (id, _, _) in panes {
+            if let Some(v) = self.controller.workspace.views.get(id) {
+                if self
+                    .nav_camera_sources
+                    .get(id)
+                    .is_some_and(|source| *source != v.camera.revision)
+                {
+                    self.nav_cameras.remove(id);
+                    self.nav_camera_sources.remove(id);
+                    self.navigation.cancel();
+                }
+                if !self.nav_cameras.contains_key(id) {
+                    self.navigation.sync(*id, &v.camera, now);
+                }
+            }
+        }
+        let speed = crate::navigation::finite_speed(
+            std::env::var("OM9_NAV_SPEED")
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(1.),
+        );
+        let mut cursor = ui.input(|i| i.pointer.interact_pos());
+        let mut shift = ui.input(|i| i.modifiers.shift);
+        for event in events {
+            self.navigation.input_seq = self.navigation.input_seq.wrapping_add(1);
+            if matches!(
+                &event,
+                egui::Event::PointerMoved(_)
+                    | egui::Event::PointerButton { .. }
+                    | egui::Event::MouseWheel { .. }
+                    | egui::Event::WindowFocused(_)
+                    | egui::Event::Key {
+                        key: Key::Escape,
+                        ..
+                    }
+            ) {
+                if let Some(log) = self.interaction_log.as_mut() {
+                    log.record(serde_json::json!({"event":"navigation_input","frame_id":token,"input_seq":self.navigation.input_seq,"raw_event":format!("{event:?}")}));
+                }
+            }
+            match event {
+                egui::Event::PointerButton {
+                    pos,
+                    button,
+                    pressed,
+                    modifiers,
+                } => {
+                    cursor = Some(pos);
+                    shift = modifiers.shift;
+                    if !pressed && self.navigation.gesture.is_some_and(|g| g.button == button) {
+                        self.navigation.end_drag();
+                    }
+                    if pressed
+                        && !blocked
+                        && ui.input(|i| i.focused)
+                        && matches!(
+                            button,
+                            egui::PointerButton::Secondary | egui::PointerButton::Middle
+                        )
+                    {
+                        if let Some((id, _, _)) = panes.iter().find(|(_, r, response)| {
+                            pos.y >= r.min.y + 18.
+                                && r.contains(pos)
+                                && (response.hovered() || response.is_pointer_button_down_on())
+                        }) {
+                            if self.navigation.gesture.is_none() {
+                                if let Some(v) = self.controller.workspace.views.get_mut(id) {
+                                    if let Some(displayed) = self
+                                        .gpu_viewports
+                                        .get(id)
+                                        .and_then(|p| p.displayed_camera())
+                                        .filter(|c| **c != v.camera)
+                                    {
+                                        let mut pose = displayed.clone();
+                                        pose.revision = v.camera.revision.wrapping_add(1);
+                                        v.camera = pose;
+                                    }
+                                    self.nav_cameras.remove(id);
+                                    self.nav_camera_sources.remove(id);
+                                    self.navigation.begin_drag(*id, button, pos, &v.camera, now);
+                                }
+                            }
+                        }
+                    }
+                }
+                egui::Event::PointerMoved(pos) => {
+                    cursor = Some(pos);
+                    if let Some(g) = self.navigation.gesture {
+                        if let Some((_, rect, _)) = panes.iter().find(|p| p.0 == g.view) {
+                            let vp = Viewport {
+                                origin: [rect.min.x as f64, rect.min.y as f64],
+                                size: [rect.width() as f64, rect.height() as f64],
+                            };
+                            if let Some(view) = self.controller.workspace.views.get(&g.view) {
+                                let current = self.nav_cameras.get(&g.view).unwrap_or(&view.camera);
+                                let pan = g.button == egui::PointerButton::Middle
+                                    || shift
+                                    || matches!(
+                                        view.camera.projection,
+                                        om9_scene::camera::Projection::Orthographic { .. }
+                                    );
+                                if let Some(camera) = self.navigation.drag(
+                                    current,
+                                    vp,
+                                    [(pos.x - g.last.x) as f64, (pos.y - g.last.y) as f64],
+                                    pan,
+                                    now,
+                                ) {
+                                    self.nav_camera_sources
+                                        .entry(g.view)
+                                        .or_insert(view.camera.revision);
+                                    self.nav_cameras.insert(g.view, camera);
+                                    self.nav_actions
+                                        .insert(g.view, if pan { "pan" } else { "orbit" });
+                                }
+                            }
+                        }
+                        if let Some(g) = self.navigation.gesture.as_mut() {
+                            g.last = pos;
+                        }
+                    }
+                }
+                egui::Event::MouseWheel {
+                    unit,
+                    delta,
+                    modifiers,
+                    phase: _,
+                } if !blocked => {
+                    if let Some(pos) = cursor {
+                        if let Some((id, rect, _response)) = panes
+                            .iter()
+                            .find(|(_, r, response)| r.contains(pos) && response.hovered())
+                        {
+                            let options = ui.ctx().options(|o| o.input_options.clone());
+                            let mut delta = match unit {
+                                egui::MouseWheelUnit::Point => delta,
+                                egui::MouseWheelUnit::Line => delta * options.line_scroll_speed,
+                                egui::MouseWheelUnit::Page => {
+                                    delta * ui.ctx().content_rect().height()
+                                }
+                            };
+                            if modifiers.matches_any(options.horizontal_scroll_modifier)
+                                && !modifiers.matches_any(options.vertical_scroll_modifier)
+                            {
+                                delta = Vec2::new(delta.x + delta.y, 0.);
+                            }
+                            if !modifiers.matches_any(options.horizontal_scroll_modifier)
+                                && modifiers.matches_any(options.vertical_scroll_modifier)
+                            {
+                                delta = Vec2::new(0., delta.x + delta.y);
+                            }
+                            let vp = Viewport {
+                                origin: [rect.min.x as f64, rect.min.y as f64],
+                                size: [rect.width() as f64, rect.height() as f64],
+                            };
+                            if let Some(view) = self.controller.workspace.views.get(id) {
+                                self.navigation.wheel_displayed(
+                                    *id,
+                                    &view.camera,
+                                    self.gpu_viewports
+                                        .get(id)
+                                        .and_then(|p| p.displayed_camera())
+                                        .unwrap_or(&view.camera),
+                                    vp,
+                                    [pos.x as f64, pos.y as f64],
+                                    delta.y as f64,
+                                    now,
+                                    speed,
+                                );
+                                self.nav_actions.insert(*id, "zoom");
+                            }
+                        }
+                    }
+                }
+                egui::Event::WindowFocused(false) => {
+                    self.navigation.cancel();
+                    self.nav_cameras.clear();
+                    self.nav_camera_sources.clear();
+                }
+                _ => {}
+            }
+        }
+        if self
+            .navigation
+            .gesture
+            .is_some_and(|g| !ui.input(|i| i.pointer.button_down(g.button)))
+        {
+            self.navigation.end_drag();
+        }
+        self.nav_render_due = self.scheduler.due(now) || !self.navigation.needs_tick();
+        if self.nav_render_due {
+            for (id, camera) in std::mem::take(&mut self.nav_cameras) {
+                if let Some(view) = self.controller.workspace.views.get_mut(&id) {
+                    if self.nav_camera_sources.remove(&id) == Some(view.camera.revision) {
+                        view.camera = camera;
+                    }
+                }
+            }
+            for (id, _, _) in panes {
+                if let Some(view) = self.controller.workspace.views.get(id) {
+                    if let Some(camera) = self.navigation.tick(*id, &view.camera, now) {
+                        self.controller.workspace.views.get_mut(id).unwrap().camera = camera;
+                        self.nav_actions.entry(*id).or_insert("zoom");
+                    }
+                }
+            }
+            if self.navigation.needs_tick() {
+                self.scheduler.begin(now);
+            } else {
+                self.scheduler.idle();
+            }
+        }
+    }
+    fn navigation_frame_finished(&mut self, ui: &mut egui::Ui, started: std::time::Instant) {
+        if let Some(state) = self.gpu_state.as_ref() {
+            crate::gpu_viewport::submit_window(&self.shared_scene, state);
+            for port in self.gpu_viewports.values_mut() {
+                port.window_submitted(&state.queue);
+            }
+        }
+        if self.nav_logged_token == self.nav_frame_token {
             return;
         }
-        if let Some(state) = self.controller.workspace.views.get_mut(&id) {
-            state.camera = camera;
+        self.nav_logged_token = self.nav_frame_token;
+        let moving = self.navigation.views.values().any(|s| {
+            matches!(
+                s.phase,
+                crate::navigation::NavigationPhase::Dragging
+                    | crate::navigation::NavigationPhase::Settling
+            )
+        });
+        if self.nav_render_due && moving {
+            let gpu_ms = self
+                .gpu_viewports
+                .values()
+                .filter_map(|p| {
+                    p.gpu_sample
+                        .filter(|s| s.0 >= self.nav_frame_token.unwrap_or(0).saturating_sub(4))
+                        .map(|s| s.1)
+                })
+                .fold(0., f64::max);
+            self.scheduler.observe(
+                self.nav_sample_now,
+                self.nav_frame_started
+                    .elapsed()
+                    .max(std::time::Duration::from_secs_f64(gpu_ms / 1000.)),
+            );
         }
-        ui.ctx().request_repaint();
+        if !moving {
+            self.scheduler.reset_quality_feedback();
+        }
+        if let Some(log) = self.interaction_log.as_mut() {
+            for (&id, view) in &self.controller.workspace.views {
+                let state = self.navigation.views.get(&id);
+                let port = self.gpu_viewports.get(&id);
+                if state.is_none_or(|s| s.phase == crate::navigation::NavigationPhase::Idle)
+                    && !self.nav_actions.contains_key(&id)
+                    && !port.is_some_and(|p| {
+                        p.preparing()
+                            || p.encoded_frame == self.nav_frame_token
+                            || p.published_frame == self.nav_frame_token
+                    })
+                {
+                    continue;
+                }
+                let stats = port.and_then(|p| p.frame_stats());
+                log.record(serde_json::json!({"event":"viewport_prepare","frame_id":self.nav_frame_token,"view":id.title(),"preparing":port.map(|p|p.preparing()),"pending_geometry_bytes":port.map(|p|p.pending_geometry_bytes()),"error":port.and_then(|p|p.preparation_error())}));
+                log.record(serde_json::json!({"event":"nav_frame","pixels_per_point":ui.ctx().pixels_per_point(),"zoom_factor":ui.ctx().zoom_factor(),"document_id":self.controller.document().id,"scene_epoch":self.controller.scene().map(|s|s.epoch),"selection_revision":self.controller.selection_state().revision,"physical_extent":self.view_rects.get(&id).map(|r|[(r.width()*ui.ctx().pixels_per_point()).round(),(r.height()*ui.ctx().pixels_per_point()).round()]),"encoded_frame_id":port.and_then(|p|p.encoded_frame),"published_frame_id":port.and_then(|p|p.published_frame),"final_complete":port.map(|p|p.final_complete()),"frame_id":self.nav_frame_token,"input_seq":self.navigation.input_seq,"view":id.title(),"active_view":self.controller.workspace.active.title(),"owner_view":self.navigation.gesture.map(|g|g.view.title()),"phase":state.map(|s|s.phase.name()),"render_due":self.nav_render_due,"interval_ms":self.scheduler.interval.map(|d|d.as_secs_f64()*1000.),"work_ms":self.nav_frame_started.elapsed().as_secs_f64()*1000.,"pane_work_ms":started.elapsed().as_secs_f64()*1000.,"hz":self.scheduler.hz(),"next_deadline_in_ms":self.scheduler.wait(std::time::Instant::now()).as_secs_f64()*1000.,"quality":self.scheduler.quality.index(),"revision":view.camera.revision,"displayed_revision":port.and_then(|p|p.displayed_camera().map(|c|c.revision)),"draw_counter_scope":"scene_mesh_batch","generation":self.navigation.generation(id),"prepare_ms":port.map(|p|p.last_prepare_ms()),"submit_cpu_ms":port.map(|p|p.last_draw_ms()),"gpu_ms":port.and_then(|p|p.gpu_sample.map(|s|s.1)),"gpu_frame_id":port.and_then(|p|p.gpu_sample.map(|s|s.0)),"receive_to_submit_ms":self.nav_received.map(|t|t.elapsed().as_secs_f64()*1000.),"refinement_ms":port.and_then(|p|p.refinement_ms()),"present_ms":null,"scene_objects":stats.map(|s|s.objects),"visible":stats.map(|s|s.visible),"draw_calls":stats.map(|s|s.draw_calls)}));
+                if let Some(action) = self.nav_actions.get(&id) {
+                    log.record(serde_json::json!({"event":"camera","frame_id":self.nav_frame_token,"action":action,"view":id.title(),"revision":view.camera.revision,"eye":view.camera.eye,"target":view.camera.target,"frame_ms":crate::interaction_log::frame_ms(ui.input(|i|i.stable_dt)),"dt_ms":self.scheduler.interval.map(|d|d.as_secs_f64()*1000.),"timing_source":"window_monotonic","prepare_ms":port.map(|p|p.last_prepare_ms()),"draw_ms":port.map(|p|p.last_draw_ms())}));
+                }
+            }
+        }
+        if self
+            .gpu_viewports
+            .values()
+            .any(|p| p.encoded_frame == self.nav_frame_token)
+        {
+            self.nav_received = None;
+        }
+        if self.navigation.needs_tick() {
+            let now = if self.gpu_state.is_some() {
+                std::time::Instant::now()
+            } else {
+                self.nav_sample_now + started.elapsed()
+            };
+            ui.ctx().request_repaint_after(self.scheduler.wait(now));
+        } else {
+            self.scheduler.idle();
+        }
     }
 
-    fn viewport_ui(&mut self, ui: &mut egui::Ui, id: ViewId, rect: Rect) {
+    fn viewport_ui(&mut self, ui: &mut egui::Ui, id: ViewId, rect: Rect, response: egui::Response) {
         let viewport = Viewport {
             origin: [rect.min.x as f64, rect.min.y as f64],
             size: [rect.width() as f64, rect.height() as f64],
         };
-        // The camera is updated before anything is painted, so this frame already shows the new view.
-        let canvas = Rect::from_min_max(egui::pos2(rect.min.x, rect.min.y + 18.), rect.max);
-        let response = ui.interact(
-            canvas,
-            ui.id().with(("canvas", id.title())),
-            Sense::click_and_drag(),
-        );
-        self.viewport_camera_input(ui, id, &response, viewport);
-        let Some(view) = self.controller.workspace.views.get(&id).cloned() else {
+        let Some(mut view) = self.controller.workspace.views.get(&id).cloned() else {
             return;
         };
         let painter = ui.painter().with_clip_rect(rect);
         painter.rect_filled(rect, 0, Color32::BLACK);
 
         let gpu_drew = if let Some(state) = self.gpu_state.as_ref() {
-            // Each pane retains its own colour/depth target and camera.
+            // Each pane retains its own colour/depth target and camera. The close-range batch mode is
+            // shared by all panes, so the shared scene is not rebuilt once per viewport camera.
+            let shared_scene = self.shared_scene.clone();
+            let close = false;
             let port = self
                 .gpu_viewports
                 .entry(id)
-                .or_insert_with(|| crate::gpu_viewport::GpuViewport::new(state));
-            port.show(
+                .or_insert_with(|| crate::gpu_viewport::GpuViewport::new(state, shared_scene));
+            port.set_render_request(crate::gpu_viewport::ViewportRenderRequest {
+                frame_id: self.nav_frame_token.unwrap_or(0),
+                generation: self.navigation.generation(id),
+                moving: self.navigation.moving(id),
+                render_due: self.nav_render_due,
+                quality: self.scheduler.quality,
+            });
+            let drew = port.show(
                 ui,
                 rect,
                 state,
@@ -1856,7 +2449,33 @@ impl MatrixApp {
                 self.controller.selected(),
                 self.controller.selection_state().revision,
                 self.controller.preview_revision(),
-            )
+                close,
+            );
+            if port.final_complete() {
+                self.navigation
+                    .completed(id, self.navigation.generation(id));
+            }
+            if let Some(camera) = port.displayed_camera() {
+                view.camera = camera.clone();
+            }
+            if let Some(error) = port.preparation_error() {
+                painter.text(
+                    rect.min + Vec2::new(8., 36.),
+                    egui::Align2::LEFT_TOP,
+                    error,
+                    egui::FontId::proportional(13.),
+                    Color32::LIGHT_RED,
+                );
+            } else if port.refinement_delayed() {
+                painter.text(
+                    rect.min + Vec2::new(8., 36.),
+                    egui::Align2::LEFT_TOP,
+                    "Đang hoàn thiện hình ảnh",
+                    egui::FontId::proportional(13.),
+                    Color32::LIGHT_GRAY,
+                );
+            }
+            drew
         } else {
             false
         };
@@ -1868,16 +2487,21 @@ impl MatrixApp {
             painter.text(
                 rect.center(),
                 egui::Align2::CENTER_CENTER,
-                "GPU viewport unavailable",
+                if self.gpu_viewports.get(&id).is_some_and(|p| p.preparing()) {
+                    "Preparing viewport"
+                } else {
+                    "GPU viewport unavailable"
+                },
                 egui::FontId::proportional(13.),
                 Color32::LIGHT_RED,
             );
         }
         self.selection_frame(ui, id, &view, viewport, rect);
+        self.object_info_label(ui, &view, viewport, rect);
         self.subselection_overlay(ui, &view, viewport, rect);
         self.gumball_ui(ui, &response, &view, viewport, rect);
         self.selection_band(ui, &response, &view, viewport, rect);
-        if id == self.controller.workspace.active {
+        if id == self.controller.workspace.active && !self.navigation.moving(id) {
             self.hover_frame(ui, &response, &view, viewport, rect);
             self.ambiguous_popup(ui);
         }
@@ -2117,6 +2741,82 @@ impl MatrixApp {
     ///
     /// The frame is the screen bounding box of every projected vertex, so it grows with the selection and
     /// costs one pass over the selected geometry per viewport, not over the whole scene.
+    /// The Object Info label beside a single selected object (Matrix8 book 1,
+    /// pages 32-34: a quick pop up label beside a selected object, drawn in the
+    /// layer colour, showing the type, the size and the validity).
+    fn object_info_label(
+        &mut self,
+        ui: &mut egui::Ui,
+        view: &om9_scene::workspace::ViewState,
+        viewport: Viewport,
+        rect: Rect,
+    ) {
+        use om9_scene::scene::RenderBuffers;
+        if self.controller.selected().len() != 1 {
+            return;
+        }
+        let id = *self
+            .controller
+            .selected()
+            .iter()
+            .next()
+            .expect("one selected");
+        let Ok(info) = self
+            .controller
+            .document()
+            .object_info(id, self.controller.coordinator().limits())
+        else {
+            return;
+        };
+        let text = om9_core::object_info::label_text(&info);
+        let Some(scene) = self.controller.scene() else {
+            return;
+        };
+        let Some(object) = scene.objects.iter().find(|entry| entry.root == id) else {
+            return;
+        };
+        let Ok(transform) = object.display_transform() else {
+            return;
+        };
+        let points: &[[f64; 3]] = match object.buffers.as_ref() {
+            RenderBuffers::Points { points, .. } => points,
+            RenderBuffers::Curve { points, .. } => points,
+            RenderBuffers::Mesh { vertices, .. } => vertices,
+        };
+        let mut sum = [0.0_f64; 3];
+        let mut count = 0.0_f64;
+        for point in points.iter().take(256) {
+            if let Ok(world) = transform.point(*point) {
+                for axis in 0..3 {
+                    sum[axis] += world[axis];
+                }
+                count += 1.0;
+            }
+        }
+        if count == 0.0 {
+            return;
+        }
+        let centre = [sum[0] / count, sum[1] / count, sum[2] / count];
+        let Ok(Some(projected)) = view.camera.project(centre, viewport) else {
+            return;
+        };
+        let pos = egui::pos2(
+            projected.screen[0] as f32 + 10.0,
+            projected.screen[1] as f32 - 10.0,
+        );
+        let color = info
+            .color
+            .map(|c| Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]))
+            .unwrap_or(Color32::WHITE);
+        ui.painter().with_clip_rect(rect).text(
+            pos,
+            egui::Align2::LEFT_BOTTOM,
+            &text,
+            egui::FontId::proportional(9.0),
+            color,
+        );
+    }
+
     fn selection_frame(
         &mut self,
         ui: &mut egui::Ui,
@@ -2646,6 +3346,23 @@ impl MatrixApp {
                 self.feedback(Err(error));
                 return;
             }
+            let action = match self.gumball_handle {
+                Some(Handle::Rotate(_)) => "rotate",
+                Some(Handle::Scale(_)) => "scale",
+                Some(Handle::MoveAxis(_)) => "move",
+                _ => "move",
+            };
+            let frame_ms = crate::interaction_log::frame_ms(ui.input(|input| input.stable_dt));
+            let selected = self.controller.selected().len();
+            if let Some(log) = self.interaction_log.as_mut() {
+                log.record(serde_json::json!({
+                    "event": "gumball",
+                    "view": view.id.title(),
+                    "action": action,
+                    "frame_ms": frame_ms,
+                    "selected": selected,
+                }));
+            }
             ui.ctx().request_repaint();
         }
         if response.drag_stopped_by(egui::PointerButton::Primary) {
@@ -2848,12 +3565,15 @@ impl MatrixApp {
             "left_icon_count": self.rail_icon_rects.len(),
             "left_icon_rects_in_sidebar": icons_inside,
             "left_stack_content_px": self.sidebar_content_size.map(|s| [s.x, s.y]),
+            "sidebar_content_viewport_px": self.sidebar_content_rect.map(|r| [r.left(), r.top(), r.width(), r.height()]),
+            "sidebar_scrollbar_px": self.sidebar_scrollbar_rect.map(|r| [r.left(), r.top(), r.width(), r.height()]),
             "sidebar_scroll_offset": self.sidebar_scroll,
             "section_title_bars_px": title_bars,
             "layers_rect_px": layers_rect,
             "right_dock_outer_px": self.right_dock_outer_px,
             "command_line_px": self.regions.command_line,
             "status_bar_px": self.regions.status_bar,
+            "object_info": self.object_info_block(),
             "palette": {
                 "categories": self.palette_categories(),
                 "slots": (1..=33u8)
@@ -2885,6 +3605,7 @@ impl MatrixApp {
         })
     }
     fn audit_receipt(&mut self, ctx: &egui::Context) {
+        self.audit_icon_resize(ctx);
         let dock_receipt = if self
             .audit
             .as_ref()
@@ -3292,143 +4013,171 @@ impl eframe::App for MatrixApp {
         self.service_three_dm_picker(ui.ctx(), frame);
     }
     fn raw_input_hook(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
-        if self.audit.as_ref().is_some_and(|audit| audit.occurrences) && self.passes >= 2 {
-            self.occurrence_audit_input(ctx, raw);
-            return;
-        }
-        if self.audit.as_ref().is_some_and(|audit| audit.selection) && self.passes >= 2 {
-            self.selection_audit_input(ctx, raw);
-            return;
-        }
-        if self.audit.as_ref().is_some_and(|audit| audit.startup_file) && self.passes >= 2 {
-            self.startup_file_audit_input(ctx);
-            return;
-        }
-        if self.audit.as_ref().is_some_and(|audit| audit.file_success) && self.passes >= 2 {
-            self.file_success_audit_input(ctx, raw);
-            return;
-        }
-        if self.audit.as_ref().is_some_and(|audit| audit.files) && self.passes >= 2 {
-            self.file_audit_input(ctx, raw);
-            return;
-        }
-        if self.audit.as_ref().is_some_and(|a| a.layer_dialogs) && self.passes >= 2 {
-            self.layer_dialog_audit_input(ctx, raw);
-            return;
-        }
-        if self.audit.as_ref().is_some_and(|a| a.layers) && self.passes >= 2 {
-            self.layer_audit_input(ctx, raw);
-            return;
-        }
-        if self.audit.as_ref().is_some_and(|a| a.panels.is_some()) && self.passes >= 2 {
-            self.panel_audit_input(ctx, raw);
-            return;
-        }
-        if self.audit.as_ref().is_some_and(|a| a.viewport_menu) && self.passes >= 2 {
-            self.viewport_menu_audit_input(ctx, raw);
-            return;
-        }
-        let Some(audit) = &mut self.audit else {
-            return;
-        };
-        if self.passes < 2 {
-            ctx.request_repaint();
-            return;
-        }
-        // The scripted text goes to the focused CMD field at its cursor, so a
-        // step must not run before the field has focus with the cursor at the end
-        // of the transcript. Two races drop typed text otherwise: an early `Text`
-        // event before focus, and a history line appended in the same frame
-        // (for example a layout diagnostic), which leaves the stored cursor
-        // inside the protected history so `Transcript::insert` refuses the text.
-        // `focus_cmd` makes the CMD frame put the cursor back at the end. A field
-        // that never gets there is reported and the script continues, so the
-        // failure shows instead of hanging.
-        if audit.step <= 14 && !audit.cmd_focus_failed {
-            let id = egui::Id::new("matrix-command-transcript");
-            let at_end = TextEdit::load_state(ctx, id)
-                .and_then(|state| state.cursor.char_range())
-                .is_some_and(|range| {
-                    range == CCursorRange::one(CCursor::new(self.transcript.text().chars().count()))
-                });
-            if ctx.memory(|m| m.has_focus(id)) && at_end {
-                audit.cmd_focus_waits = 0;
-                if !audit.cmd_focus_ready {
-                    audit.cmd_focus_ready = true;
-                    audit.checks.push("audit CMD focus ready".into());
-                }
-            } else if audit.cmd_focus_waits < AUDIT_CMD_FOCUS_MAX_PASSES {
-                audit.cmd_focus_waits += 1;
-                self.focus_cmd = true;
+        self.nav_frame_started = std::time::Instant::now();
+        let mut audit_input = || {
+            if self.audit.as_ref().is_some_and(|audit| audit.occurrences) && self.passes >= 2 {
+                self.occurrence_audit_input(ctx, raw);
+                return;
+            }
+            if self.audit.as_ref().is_some_and(|audit| audit.selection) && self.passes >= 2 {
+                self.selection_audit_input(ctx, raw);
+                return;
+            }
+            if self.audit.as_ref().is_some_and(|audit| audit.startup_file) && self.passes >= 2 {
+                self.startup_file_audit_input(ctx);
+                return;
+            }
+            if self.audit.as_ref().is_some_and(|audit| audit.file_success) && self.passes >= 2 {
+                self.file_success_audit_input(ctx, raw);
+                return;
+            }
+            if self.audit.as_ref().is_some_and(|audit| audit.files) && self.passes >= 2 {
+                self.file_audit_input(ctx, raw);
+                return;
+            }
+            if self.audit.as_ref().is_some_and(|a| a.layer_dialogs) && self.passes >= 2 {
+                self.layer_dialog_audit_input(ctx, raw);
+                return;
+            }
+            if self.audit.as_ref().is_some_and(|a| a.layers) && self.passes >= 2 {
+                self.layer_audit_input(ctx, raw);
+                return;
+            }
+            if self.audit.as_ref().is_some_and(|a| a.panels.is_some()) && self.passes >= 2 {
+                self.panel_audit_input(ctx, raw);
+                return;
+            }
+            if self.audit.as_ref().is_some_and(|a| a.viewport_menu) && self.passes >= 2 {
+                self.viewport_menu_audit_input(ctx, raw);
+                return;
+            }
+            let Some(audit) = &mut self.audit else {
+                return;
+            };
+            if self.passes < 2 {
                 ctx.request_repaint();
                 return;
-            } else {
-                audit.cmd_focus_failed = true;
-                audit.checks.push("FAILED audit CMD focus".into());
             }
-        } // Explicit opt-in own-app event replay through the normal egui input
-        // path. It never controls another process or desktop input devices.
-        let step = audit.step;
-        audit.step += 1;
-        let key = |key| egui::Event::Key {
-            key,
-            physical_key: None,
-            pressed: true,
-            repeat: false,
-            modifiers: Modifiers::NONE,
+            // The scripted text goes to the focused CMD field at its cursor, so a
+            // step must not run before the field has focus with the cursor at the end
+            // of the transcript. Two races drop typed text otherwise: an early `Text`
+            // event before focus, and a history line appended in the same frame
+            // (for example a layout diagnostic), which leaves the stored cursor
+            // inside the protected history so `Transcript::insert` refuses the text.
+            // `focus_cmd` makes the CMD frame put the cursor back at the end. A field
+            // that never gets there is reported and the script continues, so the
+            // failure shows instead of hanging.
+            if audit.step <= 14 && !audit.cmd_focus_failed {
+                let id = egui::Id::new("matrix-command-transcript");
+                let at_end = TextEdit::load_state(ctx, id)
+                    .and_then(|state| state.cursor.char_range())
+                    .is_some_and(|range| {
+                        range
+                            == CCursorRange::one(CCursor::new(
+                                self.transcript.text().chars().count(),
+                            ))
+                    });
+                if ctx.memory(|m| m.has_focus(id)) && at_end {
+                    audit.cmd_focus_waits = 0;
+                    if !audit.cmd_focus_ready {
+                        audit.cmd_focus_ready = true;
+                        audit.checks.push("audit CMD focus ready".into());
+                    }
+                } else if audit.cmd_focus_waits < AUDIT_CMD_FOCUS_MAX_PASSES {
+                    audit.cmd_focus_waits += 1;
+                    self.focus_cmd = true;
+                    ctx.request_repaint();
+                    return;
+                } else {
+                    audit.cmd_focus_failed = true;
+                    audit.checks.push("FAILED audit CMD focus".into());
+                }
+            } // Explicit opt-in own-app event replay through the normal egui input
+            // path. It never controls another process or desktop input devices.
+            let step = audit.step;
+            audit.step += 1;
+            let key = |key| egui::Event::Key {
+                key,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            };
+            match step {
+                0 => {
+                    raw.events.push(egui::Event::Text("Line".into()));
+                }
+                1 => raw.events.push(key(Key::Enter)),
+                2 => raw.events.push(egui::Event::Text("0,0,0".into())),
+                3 => raw.events.push(key(Key::Enter)),
+                4 => raw.events.push(egui::Event::Text("12,6,0".into())),
+                5 => raw.events.push(key(Key::Enter)),
+                6 => {
+                    if self.controller.document().entities.len() == 1
+                        && self.controller.coordinator().undo_len() == 1
+                    {
+                        audit.checks.push("CMD line accepted once".into());
+                    }
+                    raw.events.push(egui::Event::Text("Undo".into()));
+                }
+                7 => raw.events.push(key(Key::Enter)),
+                8 => {
+                    if self.controller.document().entities.is_empty()
+                        && self.controller.coordinator().redo_len() == 1
+                    {
+                        audit.checks.push("actual CMD Undo".into());
+                    }
+                    raw.events.push(egui::Event::Text("Redo".into()));
+                }
+                9 => raw.events.push(key(Key::Enter)),
+                10 => {
+                    if self.controller.document().entities.len() == 1 {
+                        audit.checks.push("actual CMD Redo".into());
+                    }
+                    raw.events.push(egui::Event::Text("Line".into()));
+                }
+                11 => raw.events.push(key(Key::Enter)),
+                12 => raw.events.push(egui::Event::Text("2,2,0".into())),
+                13 => raw.events.push(key(Key::Enter)),
+                14 => raw.events.push(key(Key::Escape)),
+                15 => {
+                    if self.controller.document().entities.len() == 1
+                        && !self.controller.is_running()
+                        && self.controller.coordinator().undo_len() == 1
+                    {
+                        audit
+                            .checks
+                            .push("Esc canceled draft without publication".into());
+                    }
+                    ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(Default::default()));
+                    audit.awaiting_screenshot = true;
+                }
+                _ => {}
+            }
+            ctx.request_repaint();
         };
-        match step {
-            0 => {
-                raw.events.push(egui::Event::Text("Line".into()));
+        audit_input();
+        if let Some(audit) = self.navigation_audit.as_mut() {
+            let center = self
+                .view_rects
+                .get(&ViewId::Perspective)
+                .map(|r| r.center());
+            let ready = !self.gpu_viewports.is_empty()
+                && self.gpu_viewports.values().all(|p| p.final_complete())
+                && !self
+                    .navigation
+                    .views
+                    .values()
+                    .any(|s| matches!(s.phase, crate::navigation::NavigationPhase::Settling));
+            if let Some(log) = self.interaction_log.as_mut() {
+                log.record(serde_json::json!({"event":"navigation_audit_state","ready":ready,"center":center.map(|p|[p.x,p.y]),"final":self.gpu_viewports.iter().map(|(id,p)|(id.title(),p.final_complete())).collect::<BTreeMap<_,_>>()}));
             }
-            1 => raw.events.push(key(Key::Enter)),
-            2 => raw.events.push(egui::Event::Text("0,0,0".into())),
-            3 => raw.events.push(key(Key::Enter)),
-            4 => raw.events.push(egui::Event::Text("12,6,0".into())),
-            5 => raw.events.push(key(Key::Enter)),
-            6 => {
-                if self.controller.document().entities.len() == 1
-                    && self.controller.coordinator().undo_len() == 1
-                {
-                    audit.checks.push("CMD line accepted once".into());
-                }
-                raw.events.push(egui::Event::Text("Undo".into()));
-            }
-            7 => raw.events.push(key(Key::Enter)),
-            8 => {
-                if self.controller.document().entities.is_empty()
-                    && self.controller.coordinator().redo_len() == 1
-                {
-                    audit.checks.push("actual CMD Undo".into());
-                }
-                raw.events.push(egui::Event::Text("Redo".into()));
-            }
-            9 => raw.events.push(key(Key::Enter)),
-            10 => {
-                if self.controller.document().entities.len() == 1 {
-                    audit.checks.push("actual CMD Redo".into());
-                }
-                raw.events.push(egui::Event::Text("Line".into()));
-            }
-            11 => raw.events.push(key(Key::Enter)),
-            12 => raw.events.push(egui::Event::Text("2,2,0".into())),
-            13 => raw.events.push(key(Key::Enter)),
-            14 => raw.events.push(key(Key::Escape)),
-            15 => {
-                if self.controller.document().entities.len() == 1
-                    && !self.controller.is_running()
-                    && self.controller.coordinator().undo_len() == 1
-                {
-                    audit
-                        .checks
-                        .push("Esc canceled draft without publication".into());
-                }
-                ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(Default::default()));
-                audit.awaiting_screenshot = true;
-            }
-            _ => {}
+            audit.input(ctx, raw, center, ready, self.scheduler.hz());
         }
-        ctx.request_repaint();
+        self.nav_raw_events = Some(raw.events.clone());
+        if !raw.events.is_empty() {
+            self.nav_received = Some(std::time::Instant::now());
+        }
     }
 }
 /// Passes the audit script waits for the CMD field to take focus.
@@ -3624,6 +4373,34 @@ fn launch_with(mut app: MatrixApp, config: &crate::startup::AppConfig) -> Result
             audit_monitor_from_env().map_err(|detail| Error::Io(detail.into()))?;
     }
     let title = config.window_title().to_owned();
+    let navigation_zoom = if app.navigation_audit.is_some() {
+        std::env::var("OM9_NAVIGATION_AUDIT_DPI")
+            .ok()
+            .and_then(|v| v.parse::<f32>().ok())
+            .filter(|v| v.is_finite() && (1.0..=1.5).contains(v))
+    } else {
+        None
+    };
+    if app.navigation_audit.is_some()
+        && std::env::var("OM9_NAVIGATION_AUDIT_VIEWS").is_ok_and(|v| v == "1")
+    {
+        app.controller.workspace.maximized = Some(ViewId::Perspective);
+    }
+    let mut surface = eframe::egui_wgpu::SurfaceConfig::LOW_LATENCY;
+    if std::env::var("OM9_FRAME_LATENCY").is_ok_and(|v| v == "2") {
+        surface.desired_maximum_frame_latency = Some(2);
+    }
+    let mut wgpu_options =
+        eframe::egui_wgpu::WgpuConfiguration::default().with_surface_config(surface);
+    if let eframe::egui_wgpu::WgpuSetup::CreateNew(setup) = &mut wgpu_options.wgpu_setup {
+        let original = setup.device_descriptor.clone();
+        setup.device_descriptor = std::sync::Arc::new(move |adapter| {
+            let mut descriptor = original(adapter);
+            descriptor.required_features |=
+                adapter.features() & eframe::wgpu::Features::TIMESTAMP_QUERY;
+            descriptor
+        });
+    }
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size(config.window)
@@ -3632,6 +4409,7 @@ fn launch_with(mut app: MatrixApp, config: &crate::startup::AppConfig) -> Result
             .with_title(&title)
             .with_icon(egui::IconData::default()),
         renderer: eframe::Renderer::Wgpu,
+        wgpu_options,
         ..Default::default()
     };
     eframe::run_native(
@@ -3641,6 +4419,7 @@ fn launch_with(mut app: MatrixApp, config: &crate::startup::AppConfig) -> Result
             if let Some(zoom) = audit_zoom {
                 cc.egui_ctx.set_zoom_factor(zoom);
             }
+            if let Some(zoom)=navigation_zoom {cc.egui_ctx.set_zoom_factor(zoom);}
             app.configure_style(&cc.egui_ctx);
             let state = cc
                 .wgpu_render_state
@@ -3652,6 +4431,7 @@ fn launch_with(mut app: MatrixApp, config: &crate::startup::AppConfig) -> Result
                 info.device_type,
             )))?;
             app.gpu_state = Some(state.clone());
+            if let Some(log)=app.interaction_log.as_mut(){log.record(serde_json::json!({"event":"gpu_configuration","adapter":format!("{info:?}"),"timestamp_queries":state.device.features().contains(eframe::wgpu::Features::TIMESTAMP_QUERY),"frame_latency":surface.desired_maximum_frame_latency,"present_mode":format!("{:?}",surface.present_mode),"pixels_per_point":cc.egui_ctx.pixels_per_point(),"zoom_factor":cc.egui_ctx.zoom_factor(),"dpi_is_simulated":navigation_zoom.is_some()}));}
             Ok(Box::new(app))
         }),
     )

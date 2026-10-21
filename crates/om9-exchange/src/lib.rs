@@ -14,12 +14,12 @@ use std::{
     sync::Arc,
 };
 mod export_document;
-pub mod stl;
-pub mod three_dm;
-pub mod three_dm_clipboard;
 pub mod import_capture;
 mod inspection;
 mod staged;
+pub mod stl;
+pub mod three_dm;
+pub mod three_dm_clipboard;
 pub use import_capture::ImportCapture;
 mod current_overlay;
 mod dependency_cache;
@@ -55,11 +55,13 @@ pub use current_overlay::{
     ChangedFields, CurrentOverlay, HostValue, NamespaceOverlay, RecordAction, RecordOverlay,
 };
 pub use imported::{
-    ImportMode, ImportOptions, ImportReceipt, PreparedNativeImport, UnitResolution,
+    BrepBridge, BrepExport, BrepMode, ImportMode, ImportOptions, ImportReceipt,
+    PreparedNativeImport, UnitResolution,
 };
 pub use staged::{ExportReceipt, NativeExchange, ValidatedExport};
 pub struct ExportCapture {
     document: Arc<Document>,
+    converted: Option<Arc<Document>>,
     context: OperationContext,
     sources: Vec<SourceStamp>,
 }
@@ -79,6 +81,8 @@ struct ExportDocument<'a> {
     layers: export_document::Layers<'a>,
     entities: export_document::Entities<'a>,
     definitions: export_document::Definitions<'a>,
+    groups: export_document::Groups<'a>,
+    exchange: export_document::Exchange<'a>,
 }
 struct BoundedWriter {
     bytes: Vec<u8>,
@@ -106,6 +110,20 @@ impl Write for BoundedWriter {
         Ok(())
     }
 }
+fn convert_brep_geometry(
+    geometry: &mut om9_core::geometry::Geometry,
+    bridge: Option<&dyn crate::BrepExport>,
+    limits: &Limits,
+) -> Result<bool> {
+    let om9_core::geometry::Geometry::Brep(brep) = geometry else {
+        return Ok(false);
+    };
+    let Some(bridge) = bridge else {
+        return Err(Error::Missing("BRep export bridge"));
+    };
+    *geometry = om9_core::geometry::Geometry::NativeBrep(bridge.export(brep, limits)?);
+    Ok(true)
+}
 impl ExportCapture {
     pub fn all(coordinator: &TransactionCoordinator, id: DocumentId) -> Result<Self> {
         let (context, world) = coordinator.capture_context(None)?;
@@ -127,12 +145,44 @@ impl ExportCapture {
         }
         Ok(Self {
             document: document.clone(),
+            converted: None,
             context,
             sources,
         })
     }
     pub fn document(&self) -> &Document {
-        &self.document
+        self.converted.as_deref().unwrap_or(&self.document)
+    }
+    /// Build a private export-only document with editable BReps replaced by
+    /// native payloads. The shared document snapshot is never mutated, so the
+    /// later publication revalidation still sees the original Arc.
+    fn convert_breps(
+        &mut self,
+        bridge: Option<&dyn crate::BrepExport>,
+        limits: &om9_core::budget::Limits,
+    ) -> Result<()> {
+        let mut document = (*self.document).clone();
+        let mut converted = 0usize;
+        for entity in document.entities.values_mut() {
+            if convert_brep_geometry(&mut entity.geometry, bridge, limits)? {
+                converted = converted
+                    .checked_add(1)
+                    .ok_or(Error::Overflow("export editable BRep count"))?;
+            }
+        }
+        for definition in document.definitions.values_mut() {
+            for member in &mut definition.members {
+                if convert_brep_geometry(&mut member.geometry, bridge, limits)? {
+                    converted = converted
+                        .checked_add(1)
+                        .ok_or(Error::Overflow("export editable BRep count"))?;
+                }
+            }
+        }
+        if converted > 0 {
+            self.converted = Some(Arc::new(document));
+        }
+        Ok(())
     }
     pub fn revalidate(&self, coordinator: &TransactionCoordinator) -> Result<()> {
         if coordinator.authority() != self.context.authority() {
@@ -155,7 +205,7 @@ impl ExportCapture {
         Ok(())
     }
     pub fn encode(&self, limits: &Limits) -> Result<Vec<u8>> {
-        let mut usage = self.document.validate(limits)?;
+        let mut usage = self.document().validate(limits)?;
         usage.add(Usage::array::<SourceStamp>(self.sources.len())?, limits)?;
         let remaining = limits
             .max_bytes
@@ -168,7 +218,7 @@ impl ExportCapture {
         self.encode_up_to(limit)
     }
     fn encode_up_to(&self, limit: usize) -> Result<Vec<u8>> {
-        let d = &self.document;
+        let d = self.document();
         let document = ExportDocument {
             id: d.id,
             name: &d.name,
@@ -178,6 +228,8 @@ impl ExportCapture {
             layers: export_document::Layers(&d.layers),
             entities: export_document::Entities(&d.entities),
             definitions: export_document::Definitions(&d.definitions),
+            groups: export_document::Groups(&d.groups),
+            exchange: export_document::Exchange(&d.exchange),
         };
         let mut writer = BoundedWriter {
             bytes: vec![],

@@ -1,0 +1,31 @@
+task: OM9-L4-03-14-001-03 (implementation) Matrix Layer Category Palette
+utc: 2026-10-19T23:58:01Z
+cwd: H:\OpenMatrix9 (workspace at repo root; CARGO_TARGET_DIR=L:\om9-target)
+
+== RED ==
+OM9-L4-03-14-001-02.red.log: 4 passed; 2 failed. File nay bat buoc phai co: vong nay viet moi model nen khong co loi cu de do; de chung minh fixture thuc su canh duoc luat, mapping 17..=32 => User duoc TAM BO va P3 do ngay (slot 17/24/25/32), roi khoi phuc.
+== GREEN: cargo test -p om9-app --test layer_category_palette ==
+    Blocking waiting for file lock on build directory
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.94s
+     Running tests\layer_category_palette.rs (L:\om9-target\debug\deps\layer_category_palette-6e349b807b003a13.exe)
+
+running 6 tests
+test p3_every_slot_maps_to_its_documented_category ... ok
+test p4_a_category_lists_the_slots_it_shows ... ok
+test p1_and_p2_the_palette_has_the_seven_categories_and_the_four_groups ... ok
+test fixture_design_pair_is_present ... ok
+test n1_to_n6_a_display_label_is_not_an_identity ... ok
+test p5_the_palette_model_reaches_the_application ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+exit=0
+== cargo test -p om9-core --lib layers::category ==
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+
+
+== cargo fmt --check / cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings ==
+fmt exit 0 / clippy exit 0

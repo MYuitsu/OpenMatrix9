@@ -1,0 +1,30 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.70s
+     Running tests\layer_current_and_assign.rs (L:\om9-target\debug\deps\layer_current_and_assign-51ac2979023bd32e.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... FAILED
+test l1_to_l4_a_locked_layer_refuses_assignment_and_still_accepts_being_current ... FAILED
+test c1_to_c4_the_panel_and_the_model_agree_on_the_current_layer ... ok
+
+failures:
+
+---- fixture_design_pair_is_present stdout ----
+
+thread 'fixture_design_pair_is_present' (50948) panicked at crates\om9-app\tests\layer_current_and_assign.rs:183:5:
+H:\OpenMatrix9\crates\om9-app\../../implementation/design/M01/OM9-L3-03-14-002/api.md
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- l1_to_l4_a_locked_layer_refuses_assignment_and_still_accepts_being_current stdout ----
+
+thread 'l1_to_l4_a_locked_layer_refuses_assignment_and_still_accepts_being_current' (35600) panicked at crates\om9-app\tests\layer_current_and_assign.rs:123:9:
+permission denied: assigned layer lacks "5"
+
+
+failures:
+    fixture_design_pair_is_present
+    l1_to_l4_a_locked_layer_refuses_assignment_and_still_accepts_being_current
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p om9-app --test layer_current_and_assign`

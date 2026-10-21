@@ -1,0 +1,24 @@
+task: OM9-L4-03-14-002-03 (implementation) Current Layer And Assignment UI
+cwd: H:\OpenMatrix9 (CARGO_TARGET_DIR=L:\om9-target)
+
+== RED ==
+OM9-L4-03-14-002-02.red.log: 1 passed; 2 failed. Loi san pham: assign_layer khong doc khoa cua layer dich, nen chuyen hinh hoc VAO mot layer dang khoa lai thanh cong - dung thao tac ma tai lieu noi khoa ngan.
+
+== GREEN: cargo test -p om9-app --test layer_current_and_assign ==
+
+running 3 tests
+test fixture_design_pair_is_present ... ok
+test l1_to_l4_a_locked_layer_refuses_assignment_and_still_accepts_being_current ... ok
+test c1_to_c4_the_panel_and_the_model_agree_on_the_current_layer ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.14s
+     Running tests\layer_current_and_assign.rs (L:\om9-target\debug\deps\layer_current_and_assign-51ac2979023bd32e.exe)
+
+== cargo fmt --check: exit 0 ==
+
+== cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0 ==
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.32s
+

@@ -1,0 +1,172 @@
+{
+  "recorded_at": "2026-10-21T07:23:34.510145+07:00",
+  "scope": "Documentation and existing-log review verification only",
+  "application_code_modified_by_this_review": false,
+  "new_runtime_benchmark": false,
+  "rust_tests": "Not run; application source unchanged by this review",
+  "ui_artifact_batch_created": false,
+  "checks": [
+    {
+      "check": "input fingerprint and record counts",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "independent action counts",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "95 Side View records carry exact target dt",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "independent inclusive percentile",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "gap proxy and outlier counts",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "independent short-group percentile",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "reviewed input/source fingerprints remain unchanged",
+      "pass": true,
+      "details": [
+        {
+          "path": "implementation/design/M01/VIEWPORT-NAVIGATION-FORENSICS.md",
+          "unchanged": true
+        },
+        {
+          "path": "crates/om9-app/src/ui.rs",
+          "unchanged": true
+        },
+        {
+          "path": "crates/om9-app/src/frame_pace.rs",
+          "unchanged": true
+        },
+        {
+          "path": "crates/om9-app/src/camera_rig.rs",
+          "unchanged": true
+        },
+        {
+          "path": "crates/om9-app/src/camera_transition.rs",
+          "unchanged": true
+        },
+        {
+          "path": "crates/om9-app/src/interaction_log.rs",
+          "unchanged": true
+        },
+        {
+          "path": "crates/om9-app/src/gpu_viewport.rs",
+          "unchanged": true
+        },
+        {
+          "path": "crates/om9-scene/src/camera.rs",
+          "unchanged": true
+        },
+        {
+          "path": "crates/om9-app/tests/navigation_input.rs",
+          "unchanged": true
+        },
+        {
+          "path": "ref/matrix/decompiled-ui/Matrix/Commands/SetCameraTargetCommand.cs",
+          "unchanged": true
+        },
+        {
+          "path": "ref/matrix/decompiled-ui/Matrix/Commands/MouseCallBackHandler.cs",
+          "unchanged": true
+        },
+        {
+          "path": "ref/matrix/decompiled-ui/Matrix/Commands/Test/TestVRayDisplay.cs",
+          "unchanged": true
+        },
+        {
+          "path": "ref/rhino5/dnspy/RhinoCommon/RhinoCommon/Display/RhinoViewport.cs",
+          "unchanged": true
+        },
+        {
+          "path": "ref/rhino5/ghidra/rhcommon_c.dll.c",
+          "unchanged": true
+        },
+        {
+          "path": "ref/rhino5/ghidra/Rhino.exe.c",
+          "unchanged": true
+        },
+        {
+          "path": "QymCAD/crates/qymcad-ui-state/src/navigation.rs",
+          "unchanged": true
+        }
+      ]
+    },
+    {
+      "check": "independent projection-ratio drift algebra",
+      "pass": true,
+      "details": {
+        "drift_px": 1.1111111111110628,
+        "label": "Algebra only; no new renderer/runtime benchmark"
+      }
+    },
+    {
+      "check": "proposed consistent-scale anchor algebra",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "analysis Python syntax",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "new review relative links",
+      "pass": true,
+      "details": []
+    },
+    {
+      "check": "modified JSON parses",
+      "pass": true,
+      "details": [
+        "OM9_Milestones\\M01 - CAD Shell, Viewport\\L2-01-06 - Febe Viewport Gpu Draw Backend\\L2.json",
+        "OM9_Milestones\\M02 - Viewport, Gumball\\L2-03-02 - Febe Viewport Navigation Pan Zoom Orbit\\L2.json",
+        "docs\\openmatrix9-progress.json"
+      ]
+    },
+    {
+      "check": "ledger does not claim runtime completion",
+      "pass": true,
+      "details": null
+    },
+    {
+      "check": "public_source_audit",
+      "pass": true,
+      "details": {
+        "source_files": 8714,
+        "icon_bindings": 511,
+        "svg_files": 510,
+        "errors": []
+      }
+    }
+  ],
+  "status": "PASS",
+  "outputs": [
+    {
+      "path": "implementation\\design\\M01\\VIEWPORT-NAVIGATION-FORENSICS-REVIEW-2026-10-21.md",
+      "sha256": "fbab04e7fb3c3bb1d03c1ea8f89073dad554d4b00177834f8b3274d0435fa840"
+    },
+    {
+      "path": "implementation\\evidence\\M01\\2026-10-21-navigation-forensics-review.json",
+      "sha256": "6ff63dc9d0f14ced38d5477ab3c229730510dfdea5f94130f21e79ba51093425"
+    },
+    {
+      "path": "implementation\\tools\\analyze_viewport_navigation_review.py",
+      "sha256": "18e0a03af0a1f193e1ef1471adb5402e7e96193cfa3397c123b549fc045af85c"
+    }
+  ]
+}

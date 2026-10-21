@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Menu/sidebar/toolbar icon presentation only; authored SVGs and command availability unchanged.",
+  "change": "Icon inset reduced from 3pt to 1.5pt (3pt larger painted square in the same slot), brighter enabled card/hover/outline, subtle top-edge highlight. Disabled cards retain a darker fill and non-invoking interaction.",
+  "source": {
+    "path": "crates/om9-app/src/ui/chrome.rs",
+    "sha256": "d17599d120e811278536bc8c51abe4511106c7b01ec99fe299eb1d3f20a07b4f"
+  },
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-menu-icons.exe",
+    "sha256": "63633fbc0baaea1c209027bfb14bf19046e6d65f301648785503d06d8d037104"
+  },
+  "build": {
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-menu-icons.exe",
+    "result": "PASS; expected custom-output path warnings"
+  },
+  "tests": [
+    {
+      "suite": "chrome_actions",
+      "passed": 11,
+      "execution": "Fresh custom-output test executable om9-icon-chrome-tests-bd4deee6903de71c.exe --test-threads=1; cargo rustc built it but could not replace the unrelated running om9.exe."
+    },
+    {
+      "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib icons::tests -- --test-threads=1",
+      "passed": 2
+    },
+    {
+      "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib chrome_tests -- --test-threads=1",
+      "passed": 4
+    }
+  ],
+  "runtime": {
+    "command": "python tools/validate_m01_l3_003_panels.py --binary L:/om9-target/debug/om9-menu-icons.exe --output build/standalone-validation/ui-artifacts/2026-10-20-menu-icon-emphasis --only escape",
+    "result": "PASS; one native GPU replay; 1600x1000; no entity/Undo changes",
+    "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-menu-icon-emphasis/panels-summary.json",
+    "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-menu-icon-emphasis/escape/workspace.png"
+  },
+  "visual_inspection": "Actual native screenshot inspected: larger visible glyphs, stronger borders and highlights; cards remain inside the rail and Layers remains visible. Existing SVG hue roles retained.",
+  "public_source_audit": {
+    "command": "python tools/public_source_audit.py",
+    "status": "FAIL",
+    "existing_tree_findings": 11740,
+    "examples": [
+      "Private/binary artifact: brep-fixture.obj",
+      "Private/binary artifact: native_exchange.obj",
+      "Unreviewed raster artifact: om9-window.png",
+      "Private/binary artifact: source_inventory_fixture.obj"
+    ],
+    "note": "Existing reference/binary/raster artifacts across the working tree; no asset files added or modified for this change."
+  },
+  "limitations": [
+    "Formal manual M01-UI approval pending.",
+    "Current running OM9 executable is locked; separate preview built without closing the user session.",
+    "No new command implementation or broad DPI acceptance claimed."
+  ]
+}

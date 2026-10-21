@@ -1,0 +1,74 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-03-14-003-05",
+  "l3_id": "OM9-L3-03-14-003",
+  "title": "Layer Visible And Locked Controls",
+  "oracle": {
+    "positive": "Toggle visible/locked on Gems affects viewport and picking immediately",
+    "negative": "Locked object edit attempt must have no mutation and informative status"
+  },
+  "manual_test_gate": "M01-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) at the running application",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-app --test layer_visible_locked -> 1 passed; 2 failed. Product defect: moving an object OFF a locked layer was allowed (only the target lock was checked).",
+    "GREEN: 2 passed; 0 failed (S1..S5, T1..T4).",
+    "cargo test -p om9-core -p om9-app -j 2: every group passes except the pre-existing, unrelated chrome_actions::icons_scale_with_the_screen_size.",
+    "cargo fmt --check: exit 0; cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0",
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
+  ],
+  "code_change": [
+    "crates/om9-app/src/session/layers.rs::assign_layer refuses a source whose entity or owning layer is locked, before any action is planned (Permission(\"object is on a locked layer\")); no transaction, no mutation."
+  ],
+  "artefacts": [
+    "OM9-L4-03-14-003-02.red.log",
+    "OM9-L4-03-14-003-02.green.log",
+    "OM9-L4-03-14-003-03.diffstat.txt",
+    "OM9-L4-03-14-003-03.target-test.log",
+    "OM9-L4-03-14-003-05.regression.log"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The flags and refusals are machine-proven; the look of the two controls is yours to confirm.",
+    "items": [
+      {
+        "id": "X1",
+        "step": "Hide the Gems row.",
+        "machine_proven": "S1/S2: its objects become non-visible and non-selectable at once and select_layer selects nothing.",
+        "human_must_verify": "The objects disappear from the viewport immediately and cannot be clicked.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "X2",
+        "step": "Show it again.",
+        "machine_proven": "S3: visibility, selectability and the scene entry come back in the same call.",
+        "human_must_verify": "The objects reappear in their layer colour and can be picked.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "X3",
+        "step": "Lock Gems and try to move one of its objects to another layer.",
+        "machine_proven": "T1/T2: refused before anything is applied, with 'locked' in the message; entities and journal unchanged.",
+        "human_must_verify": "Nothing moves, the status names the lock, and Undo is not needed.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "X4",
+        "step": "Look at a locked layer's rows.",
+        "machine_proven": "T4: display attributes stay complete (name, layer, flags).",
+        "human_must_verify": "A locked layer still shows its objects and colours; only editing is refused.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_l2_03_14_l3_003_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

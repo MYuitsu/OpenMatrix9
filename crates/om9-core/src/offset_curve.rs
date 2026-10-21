@@ -206,21 +206,24 @@ impl<'a> NurbsBasis<'a> {
             let count = self.curve.poles.len();
             let last = count - 1;
             if index == last && u >= self.knot(index as isize) {
-                return if u <= self.knot(index as isize + 1) { 1.0 } else { 0.0 };
+                return if u <= self.knot(index as isize + 1) {
+                    1.0
+                } else {
+                    0.0
+                };
             }
             let left = self.knot(index as isize);
             let right = self.knot(index as isize + 1);
             return if u >= left && u < right { 1.0 } else { 0.0 };
         }
         let mut value = 0.0;
-        let denominator = self.knot(index as isize + degree as isize)
-            - self.knot(index as isize);
+        let denominator = self.knot(index as isize + degree as isize) - self.knot(index as isize);
         if denominator != 0.0 {
             value += (u - self.knot(index as isize)) / denominator
                 * self.basis_value(index, degree - 1, u);
         }
-        let denominator = self.knot(index as isize + degree as isize + 1)
-            - self.knot(index as isize + 1);
+        let denominator =
+            self.knot(index as isize + degree as isize + 1) - self.knot(index as isize + 1);
         if denominator != 0.0 {
             value += (self.knot(index as isize + degree as isize + 1) - u) / denominator
                 * self.basis_value(index + 1, degree - 1, u);
@@ -325,18 +328,12 @@ impl CurveBasis for NurbsBasis<'_> {
         let p = scale(a(0), 1.0 / w);
         let d1 = scale(sub(a(1), scale(p, dw(1))), 1.0 / w);
         let d2 = scale(
-            sub(
-                sub(a(2), scale(d1, 2.0 * dw(1))),
-                scale(p, dw(2)),
-            ),
+            sub(sub(a(2), scale(d1, 2.0 * dw(1))), scale(p, dw(2))),
             1.0 / w,
         );
         let d3 = scale(
             sub(
-                sub(
-                    sub(a(3), scale(d2, 3.0 * dw(1))),
-                    scale(d1, 3.0 * dw(2)),
-                ),
+                sub(sub(a(3), scale(d2, 3.0 * dw(1))), scale(d1, 3.0 * dw(2))),
                 scale(p, dw(3)),
             ),
             1.0 / w,
@@ -344,10 +341,7 @@ impl CurveBasis for NurbsBasis<'_> {
         let d4 = scale(
             sub(
                 sub(
-                    sub(
-                        sub(a(4), scale(d3, 4.0 * dw(1))),
-                        scale(d2, 6.0 * dw(2)),
-                    ),
+                    sub(sub(a(4), scale(d3, 4.0 * dw(1))), scale(d2, 6.0 * dw(2))),
                     scale(d1, 4.0 * dw(3)),
                 ),
                 scale(p, dw(4)),
@@ -404,7 +398,9 @@ impl<B: CurveBasis> OffsetCurve<B> {
         let a3 = cross_all(basis.d4);
         let big_r = norm(a0);
         if !big_r.is_finite() || big_r <= 1e-12 {
-            return Err(Error::Unsupported("offset direction parallel to the tangent"));
+            return Err(Error::Unsupported(
+                "offset direction parallel to the tangent",
+            ));
         }
         let r2 = big_r * big_r;
         let r3 = r2 * big_r;
@@ -417,10 +413,7 @@ impl<B: CurveBasis> OffsetCurve<B> {
         let point = add(basis.point, scale(a0, d / big_r));
         let d1 = add(
             basis.d1,
-            scale(
-                sub(scale(a1, 1.0 / big_r), scale(a0, dr / r3)),
-                d,
-            ),
+            scale(sub(scale(a1, 1.0 / big_r), scale(a0, dr / r3)), d),
         );
         let d2 = add(
             basis.d2,

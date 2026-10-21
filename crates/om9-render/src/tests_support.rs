@@ -7,7 +7,10 @@ use crate::MeshData;
 
 /// A closed torus with `major` steps around the ring and `minor` around the tube.
 pub fn torus(major: usize, minor: usize) -> MeshData {
-    assert!(major >= 3 && minor >= 3, "a torus needs at least three steps each way");
+    assert!(
+        major >= 3 && minor >= 3,
+        "a torus needs at least three steps each way"
+    );
     let major_radius = 2.0f32;
     let minor_radius = 0.6f32;
     let mut positions = Vec::with_capacity(major * minor);

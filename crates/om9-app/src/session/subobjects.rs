@@ -156,16 +156,24 @@ impl Controller {
     }
 }
 
-fn validate_subset(object: &om9_scene::scene::SceneObject, geometry:&om9_core::geometry::Geometry, subset: &Subelement) -> Result<()> {
+fn validate_subset(
+    object: &om9_scene::scene::SceneObject,
+    geometry: &om9_core::geometry::Geometry,
+    subset: &Subelement,
+) -> Result<()> {
     use om9_scene::scene::RenderBuffers;
-    if let om9_core::geometry::Geometry::Brep(shape)=geometry {
-        let valid=match subset {
-            Subelement::BrepFace(id)=>shape.display.faces.contains(id),
-            Subelement::BrepEdge(id)=>shape.display.edges.contains(id),
-            Subelement::BrepVertex(id)=>shape.display.vertex_ids.contains(id),
-            _=>false,
+    if let om9_core::geometry::Geometry::Brep(shape) = geometry {
+        let valid = match subset {
+            Subelement::BrepFace(id) => shape.display.faces.contains(id),
+            Subelement::BrepEdge(id) => shape.display.edges.contains(id),
+            Subelement::BrepVertex(id) => shape.display.vertex_ids.contains(id),
+            _ => false,
         };
-        return if valid {Ok(())} else {Err(Error::Stale("BRep topology identity"))};
+        return if valid {
+            Ok(())
+        } else {
+            Err(Error::Stale("BRep topology identity"))
+        };
     }
     let valid = match (subset, object.buffers.as_ref()) {
         (Subelement::MeshVertex(index), RenderBuffers::Mesh { vertices, .. }) => {

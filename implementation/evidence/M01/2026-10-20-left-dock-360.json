@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "User-authorized left dock factory/default-reset width: 300 to 360 logical pixels.",
+  "before": 300,
+  "after": 360,
+  "behavior": "Fresh/factory layout and Reset Menus use 360 outer logical pixels. Existing persisted custom sizes still reload. Right dock remains 300. Existing icon scale at a given width retained by separating its 300-point reference width from the startup default.",
+  "sources": [
+    {
+      "path": "crates/om9-app/src/dock_layout.rs",
+      "sha256": "7d6ff1c2e24bfc0f3d04cd1ee73531c978ce04f703c1ac0f6c88ffaeb48f6a8f"
+    },
+    {
+      "path": "crates/om9-app/tests/left_stack_layers.rs",
+      "sha256": "74a400c24f8e0afff8d4d57005bee960ca796425027501026690fd699c349c71"
+    },
+    {
+      "path": "tools/validate_m01_l3_002_ui_matrix.py",
+      "sha256": "565b2e3ebcdc628b7634fbe346903b736ab876253e9bcf72762d91b681b34e23"
+    },
+    {
+      "path": "implementation/fixtures/M01/OM9-L3-01-01-004/positive.json",
+      "sha256": "e8aea1084bf683aac7d5937e364513c17dd4882607b9c0cf2f9c01c9af340362"
+    },
+    {
+      "path": "implementation/fixtures/M01/OM9-L3-01-01-004/negative.json",
+      "sha256": "74b11e6e61559e0d83eb1d3215a851a677564b26a2b4916d5075bd3fc20e9288"
+    }
+  ],
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-dock-360.exe",
+    "sha256": "859b9977cd2cb09f80bc02c4f238f5f585618084d241f18e8728f50071a4d35a"
+  },
+  "build": {
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-dock-360.exe",
+    "result": "PASS"
+  },
+  "tests": {
+    "left_stack_layers": 8,
+    "dock_layout_default": 7,
+    "dock_layout_persistence": 6,
+    "shell_docking": 10,
+    "dock_layout_library": 16,
+    "total": 47,
+    "result": "PASS",
+    "execution": "Fresh integration executables in L:/om9-target/debug/deps were run directly after cargo test hit the running om9.exe lock; default-restore suite rerun after changing the two fixture oracles. cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib dock_layout -- --test-threads=1 passed all 16 library cases."
+  },
+  "native": {
+    "command": "python tools/validate_m01_l3_002_ui_matrix.py --binary L:/om9-target/debug/om9-dock-360.exe --output build/standalone-validation/ui-artifacts/2026-10-20-dock-360-final --only min-1280x720 --mode default",
+    "result": "PASS",
+    "outer_width": 360.0,
+    "inner_width": 355.0,
+    "layers_visible": true,
+    "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-dock-360-final/matrix-summary.json",
+    "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-dock-360-final/default/min-1280x720/workspace.png"
+  },
+  "validator": "Updated the stale icon constants and included the existing screen-size scaling in the oracle; no production icon size rule changed. Self-test: 5 good receipts accepted, 18 doctored receipts rejected.",
+  "public_source_audit": {
+    "status": "FAIL",
+    "existing_tree_findings": 11740,
+    "note": "Existing private/reference/binary/raster artifacts; no new reference assets."
+  },
+  "limitations": [
+    "Manual M01-UI acceptance remains pending.",
+    "Saved custom layouts retain their widths until Reset Menus or a manual resize.",
+    "Reusable skill update awaits user consent; no skill was modified."
+  ],
+  "proposed_skill_text": "Dock trái mặc định rộng 360 px logic (tính cả khung) khi tạo layout mới và Reset Menus. Tiếp tục khôi phục chiều rộng người dùng đã lưu; dock phải giữ mặc định 300 px."
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-002",
+  "l4": "OM9-L4-03-14-002-02",
+  "case": "current-layer-and-assignment-ui-positive",
+  "positive_oracle": "Select current layer Metals, assign object A, panel and model both reflect same LayerId",
+  "cases": [
+    {
+      "id": "C1-making-a-preset-current-creates-then-selects-the-same-layer",
+      "slot": 1,
+      "expect": {
+        "current_layer_slot": 1,
+        "panel_and_model_agree": true,
+        "created": true
+      }
+    },
+    {
+      "id": "C2-assigning-the-selection-moves-the-object-to-that-layer",
+      "slot": 5,
+      "expect": {
+        "current_layer_after": 1,
+        "object_layer_slot": 5,
+        "assign_is_one_transaction": true
+      }
+    },
+    {
+      "id": "C3-the-panel-reads-the-same-id-the-model-holds",
+      "expect": {
+        "panel_current_equals_document_current": true
+      }
+    },
+    {
+      "id": "C4-setting-the-current-layer-to-none-clears-it",
+      "expect": {
+        "current_layer_none": true
+      }
+    }
+  ]
+}

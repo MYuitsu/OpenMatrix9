@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-007",
+  "l4": "OM9-L4-03-14-007-02",
+  "case": "object-property-editor-adapter-negative",
+  "negative_oracle": "Editing derived read-only BRep field must be disabled",
+  "cases": [
+    {
+      "id": "F1-an-empty-or-padded-label-is-refused",
+      "expect": {
+        "refused": true,
+        "error": "Invalid"
+      },
+      "label": "  "
+    },
+    {
+      "id": "F2-the-geometry-is-derived-and-read-only",
+      "expect": {
+        "editable": false,
+        "reason_contains": "read-only"
+      }
+    },
+    {
+      "id": "F3-an-edit-on-a-locked-layer-is-refused",
+      "expect": {
+        "refused": true,
+        "error": "Permission",
+        "journal_unchanged": true
+      }
+    },
+    {
+      "id": "F4-a-refused-edit-leaves-the-previous-value",
+      "expect": {
+        "value_unchanged": true
+      }
+    }
+  ]
+}

@@ -390,21 +390,22 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "THREEDM",
   "runtime_implementation": {
-    "date": "2026-10-19",
-    "status": "PARTIAL_RETAINED_BREP_REVIEW_PENDING",
+    "date": "2026-10-20",
+    "status": "R5_B_TRIM_BREP_EDITABLE_E2E_GREEN_REVIEW_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Surface NURBS exact; trimmed BRep imported as opaque native payload plus display mesh, round-trip exact; no topology edit.",
+    "scope": "Rhino 5 trimmed BRep converted ON_Brep -> OCCT Geometry::Brep with exact payload/display; 30/30 file BReps editable and exportable; strict atomic failure on unconvertible input.",
     "evidence": [
-      "implementation/design/M01/THREE-DM-HOST-ADAPTER.md",
-      "implementation/evidence/M01/2026-10-19-three-dm-native-host-checks.json",
-      "crates/om9-app/tests/three_dm_curve_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_brep_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_native_roundtrip.rs",
+      "implementation/design/M03/THREEDM-FULL-OBJECT-IMPORT.md",
+      "implementation/evidence/M03/2026-10-20-rhino5-editable-brep.json",
+      "crates/om9-kernel/tests/brep_3dm.rs",
+      "crates/om9-app/tests/three_dm_editable_brep.rs",
       "native/native_exchange.cpp"
     ],
     "human_approval": null,
     "remaining": [
-      "BRep is opaque retained/display only; editing topology/solid operations requires a separate ON_Brep <-> OCCT bridge."
+      "Manual trimmed-face area/hole oracle and UI selection review pending.",
+      "Unsupported surface/trim variants fail strict conversion by design; best-effort diagnostics are not wired to the UI.",
+      "Conversion does not preserve proprietary BRep userdata in the host representation; source bytes remain retained."
     ]
   }
 }

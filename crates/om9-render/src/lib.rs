@@ -19,6 +19,7 @@ pub mod qem;
 pub mod scene;
 pub mod shapes;
 pub mod streaming;
+pub mod timing;
 pub mod tests_support;
 
 use wgpu::util::DeviceExt;
@@ -47,12 +48,19 @@ impl MeshData {
             if triangle.len() < 3 {
                 continue;
             }
-            for (a, b) in [(triangle[0], triangle[1]), (triangle[1], triangle[2]), (triangle[2], triangle[0])] {
+            for (a, b) in [
+                (triangle[0], triangle[1]),
+                (triangle[1], triangle[2]),
+                (triangle[2], triangle[0]),
+            ] {
                 let key = if a < b { (a, b) } else { (b, a) };
                 if !seen.insert(key) {
                     continue;
                 }
-                let (Some(from), Some(to)) = (self.positions.get(a as usize), self.positions.get(b as usize)) else {
+                let (Some(from), Some(to)) = (
+                    self.positions.get(a as usize),
+                    self.positions.get(b as usize),
+                ) else {
                     continue;
                 };
                 lines.push(*from);
@@ -77,9 +85,13 @@ pub struct Camera {
 /// How the camera turns view space into clip space.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Projection {
-    Perspective { vertical_fov_rad: f32 },
+    Perspective {
+        vertical_fov_rad: f32,
+    },
     /// Parallel projection; `vertical_span` is the world height the viewport covers at any depth.
-    Orthographic { vertical_span: f32 },
+    Orthographic {
+        vertical_span: f32,
+    },
 }
 
 impl Default for Camera {
@@ -88,7 +100,9 @@ impl Default for Camera {
             eye: [0.0, -2.0, 14.0],
             target: [0.0, 0.0, 0.0],
             up: [0.0, 1.0, 0.0],
-            projection: Projection::Perspective { vertical_fov_rad: 45f32.to_radians() },
+            projection: Projection::Perspective {
+                vertical_fov_rad: 45f32.to_radians(),
+            },
             near: 0.1,
             far: 100.0,
         }
@@ -97,13 +111,32 @@ impl Default for Camera {
 
 impl Camera {
     /// A perspective camera.
-    pub fn perspective(eye: [f32; 3], target: [f32; 3], up: [f32; 3], vertical_fov_rad: f32) -> Self {
-        Self { eye, target, up, projection: Projection::Perspective { vertical_fov_rad }, near: 0.1, far: 10_000.0 }
+    pub fn perspective(
+        eye: [f32; 3],
+        target: [f32; 3],
+        up: [f32; 3],
+        vertical_fov_rad: f32,
+    ) -> Self {
+        Self {
+            eye,
+            target,
+            up,
+            projection: Projection::Perspective { vertical_fov_rad },
+            near: 0.1,
+            far: 10_000.0,
+        }
     }
 
     /// An orthographic camera: no vanishing point, `vertical_span` covers the viewport height.
     pub fn orthographic(eye: [f32; 3], target: [f32; 3], up: [f32; 3], vertical_span: f32) -> Self {
-        Self { eye, target, up, projection: Projection::Orthographic { vertical_span }, near: 0.1, far: 20_000.0 }
+        Self {
+            eye,
+            target,
+            up,
+            projection: Projection::Orthographic { vertical_span },
+            near: 0.1,
+            far: 20_000.0,
+        }
     }
 
     /// `tan(fov/2)` for a perspective camera; 1 for an orthographic one, where the span is used instead.
@@ -131,28 +164,64 @@ impl Camera {
         let right = normalize(cross(forward, self.up));
         let true_up = cross(right, forward);
         let view = [
-            right[0], true_up[0], -forward[0], 0.0,
-            right[1], true_up[1], -forward[1], 0.0,
-            right[2], true_up[2], -forward[2], 0.0,
-            -dot(right, self.eye), -dot(true_up, self.eye), dot(forward, self.eye), 1.0,
+            right[0],
+            true_up[0],
+            -forward[0],
+            0.0,
+            right[1],
+            true_up[1],
+            -forward[1],
+            0.0,
+            right[2],
+            true_up[2],
+            -forward[2],
+            0.0,
+            -dot(right, self.eye),
+            -dot(true_up, self.eye),
+            dot(forward, self.eye),
+            1.0,
         ];
         let projection = match self.projection {
             Projection::Perspective { vertical_fov_rad } => {
                 let f = 1.0 / (vertical_fov_rad * 0.5).tan();
                 [
-                    f / aspect, 0.0, 0.0, 0.0,
-                    0.0, f, 0.0, 0.0,
-                    0.0, 0.0, self.far / (self.near - self.far), -1.0,
-                    0.0, 0.0, self.near * self.far / (self.near - self.far), 0.0,
+                    f / aspect,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    f,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    self.far / (self.near - self.far),
+                    -1.0,
+                    0.0,
+                    0.0,
+                    self.near * self.far / (self.near - self.far),
+                    0.0,
                 ]
             }
             Projection::Orthographic { vertical_span } => {
                 let half_height = (vertical_span * 0.5).max(1e-6);
                 [
-                    1.0 / (half_height * aspect), 0.0, 0.0, 0.0,
-                    0.0, 1.0 / half_height, 0.0, 0.0,
-                    0.0, 0.0, 1.0 / (self.near - self.far), 0.0,
-                    0.0, 0.0, self.near / (self.near - self.far), 1.0,
+                    1.0 / (half_height * aspect),
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0 / half_height,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0 / (self.near - self.far),
+                    0.0,
+                    0.0,
+                    0.0,
+                    self.near / (self.near - self.far),
+                    1.0,
                 ]
             }
         };
@@ -171,13 +240,20 @@ pub struct RenderStyle {
 
 impl Default for RenderStyle {
     fn default() -> Self {
-        Self { tint: [0.82, 0.52, 0.2, 1.0], wireframe: false, grid: false }
+        Self {
+            tint: [0.82, 0.52, 0.2, 1.0],
+            wireframe: false,
+            grid: false,
+        }
     }
 }
 
 impl RenderStyle {
     pub fn highlighted() -> Self {
-        Self { tint: [0.2, 0.9, 0.35, 1.0], ..Self::default() }
+        Self {
+            tint: [0.2, 0.9, 0.35, 1.0],
+            ..Self::default()
+        }
     }
 }
 
@@ -199,7 +275,12 @@ impl Frame {
 
     pub fn pixel(&self, x: u32, y: u32) -> [u8; 4] {
         let index = ((y * self.width + x) * 4) as usize;
-        [self.pixels[index], self.pixels[index + 1], self.pixels[index + 2], self.pixels[index + 3]]
+        [
+            self.pixels[index],
+            self.pixels[index + 1],
+            self.pixels[index + 2],
+            self.pixels[index + 3],
+        ]
     }
 
     /// Counts pixels whose green channel leads red, which is what the green highlight produces.
@@ -297,7 +378,10 @@ impl Renderer {
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("uniforms"),
             layout: &bind_layout,
-            entries: &[wgpu::BindGroupEntry { binding: 0, resource: uniform.as_entire_binding() }],
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: uniform.as_entire_binding(),
+            }],
         });
         let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("layout"),
@@ -377,7 +461,10 @@ impl Renderer {
                     }],
                 })],
             },
-            primitive: wgpu::PrimitiveState { cull_mode: None, ..Default::default() },
+            primitive: wgpu::PrimitiveState {
+                cull_mode: None,
+                ..Default::default()
+            },
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth32Float,
                 depth_write_enabled: Some(true),
@@ -456,7 +543,14 @@ impl Renderer {
     }
 
     /// Draws the mesh with the default style.
-    pub fn render(&mut self, key: u64, mesh: &MeshData, camera: Camera, width: u32, height: u32) -> Result<Frame, RenderError> {
+    pub fn render(
+        &mut self,
+        key: u64,
+        mesh: &MeshData,
+        camera: Camera,
+        width: u32,
+        height: u32,
+    ) -> Result<Frame, RenderError> {
         self.render_with(key, mesh, camera, width, height, RenderStyle::default())
     }
 
@@ -465,29 +559,60 @@ impl Renderer {
         if self.cache.contains_key(&key) {
             return;
         }
-        let vertex_data: Vec<u8> = mesh.positions.iter().flat_map(|p| p.iter().flat_map(|v| v.to_le_bytes())).collect();
+        let vertex_data: Vec<u8> = mesh
+            .positions
+            .iter()
+            .flat_map(|p| p.iter().flat_map(|v| v.to_le_bytes()))
+            .collect();
         let index_data: Vec<u8> = mesh.indices.iter().flat_map(|v| v.to_le_bytes()).collect();
         let edges = mesh.edge_lines();
-        let wire_data: Vec<u8> = edges.iter().flat_map(|p| p.iter().flat_map(|v| v.to_le_bytes())).collect();
+        let wire_data: Vec<u8> = edges
+            .iter()
+            .flat_map(|p| p.iter().flat_map(|v| v.to_le_bytes()))
+            .collect();
         let placeholder = [0u8; 12];
-        let vertex = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("mesh vertices"),
-            contents: if vertex_data.is_empty() { &placeholder } else { &vertex_data },
-            usage: wgpu::BufferUsages::VERTEX,
-        });
-        let index = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("mesh indices"),
-            contents: if index_data.is_empty() { &placeholder } else { &index_data },
-            usage: wgpu::BufferUsages::INDEX,
-        });
-        let wire = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("mesh wire"),
-            contents: if wire_data.is_empty() { &placeholder } else { &wire_data },
-            usage: wgpu::BufferUsages::VERTEX,
-        });
+        let vertex = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("mesh vertices"),
+                contents: if vertex_data.is_empty() {
+                    &placeholder
+                } else {
+                    &vertex_data
+                },
+                usage: wgpu::BufferUsages::VERTEX,
+            });
+        let index = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("mesh indices"),
+                contents: if index_data.is_empty() {
+                    &placeholder
+                } else {
+                    &index_data
+                },
+                usage: wgpu::BufferUsages::INDEX,
+            });
+        let wire = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("mesh wire"),
+                contents: if wire_data.is_empty() {
+                    &placeholder
+                } else {
+                    &wire_data
+                },
+                usage: wgpu::BufferUsages::VERTEX,
+            });
         self.cache.insert(
             key,
-            GpuMesh { vertex, index, index_count: mesh.indices.len() as u32, wire, wire_vertices: edges.len() as u32 },
+            GpuMesh {
+                vertex,
+                index,
+                index_count: mesh.indices.len() as u32,
+                wire,
+                wire_vertices: edges.len() as u32,
+            },
         );
         self.uploads += 1;
     }
@@ -509,18 +634,28 @@ impl Renderer {
         uniform_bytes.extend(style.tint.iter().flat_map(|v| v.to_le_bytes()));
         self.queue.write_buffer(&self.uniform, 0, &uniform_bytes);
         let grid = if style.grid { grid_lines() } else { Vec::new() };
-        let grid_bytes: Vec<u8> = grid.iter().flat_map(|p| p.iter().flat_map(|v| v.to_le_bytes())).collect();
+        let grid_bytes: Vec<u8> = grid
+            .iter()
+            .flat_map(|p| p.iter().flat_map(|v| v.to_le_bytes()))
+            .collect();
         let grid_vertices = grid.len() as u32;
         let grid_buffer = if grid.is_empty() {
             None
         } else {
-            Some(self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("grid"),
-                contents: &grid_bytes,
-                usage: wgpu::BufferUsages::VERTEX,
-            }))
+            Some(
+                self.device
+                    .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                        label: Some("grid"),
+                        contents: &grid_bytes,
+                        usage: wgpu::BufferUsages::VERTEX,
+                    }),
+            )
         };
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("frame") });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("frame"),
+            });
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("shaded"),
@@ -529,13 +664,21 @@ impl Renderer {
                     depth_slice: None,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.05, g: 0.05, b: 0.08, a: 1.0 }),
+                        load: wgpu::LoadOp::Clear(wgpu::Color {
+                            r: 0.05,
+                            g: 0.05,
+                            b: 0.08,
+                            a: 1.0,
+                        }),
                         store: wgpu::StoreOp::Store,
                     },
                 })],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                     view: depth_view,
-                    depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Clear(1.0), store: wgpu::StoreOp::Store }),
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: wgpu::StoreOp::Store,
+                    }),
                     stencil_ops: None,
                 }),
                 timestamp_writes: None,
@@ -602,7 +745,11 @@ impl Renderer {
         self.ensure_mesh(key, mesh);
         let colour = self.device.create_texture(&wgpu::TextureDescriptor {
             label: Some("colour"),
-            size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -612,7 +759,11 @@ impl Renderer {
         });
         let depth = self.device.create_texture(&wgpu::TextureDescriptor {
             label: Some("depth"),
-            size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -632,7 +783,11 @@ impl Renderer {
             mapped_at_creation: false,
         });
         self.draw_pass(&colour_view, &depth_view, key, camera, width, height, style);
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("readback") });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("readback"),
+            });
         encoder.copy_texture_to_buffer(
             wgpu::TexelCopyTextureInfo {
                 texture: &colour,
@@ -648,13 +803,27 @@ impl Renderer {
                     rows_per_image: Some(height),
                 },
             },
-            wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+            wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
         );
         self.queue.submit(std::iter::once(encoder.finish()));
-        self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("poll");
+        self.device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("poll");
         let slice = readback.slice(..);
         slice.map_async(wgpu::MapMode::Read, |_| {});
-        self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("map");
+        self.device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("map");
         let data = slice.get_mapped_range().expect("mapped range");
         // Strip the row padding so callers always get tightly packed RGBA8 rows.
         let mut pixels = Vec::with_capacity((row_bytes * height) as usize);
@@ -664,7 +833,11 @@ impl Renderer {
         }
         drop(data);
         readback.unmap();
-        Ok(Frame { width, height, pixels })
+        Ok(Frame {
+            width,
+            height,
+            pixels,
+        })
     }
 
     pub fn uploads(&self) -> usize {
@@ -750,7 +923,11 @@ fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
 }
 
 fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+    [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ]
 }
 
 fn normalize(a: [f32; 3]) -> [f32; 3] {
@@ -771,3 +948,7 @@ fn multiply(a: [f32; 16], b: [f32; 16]) -> [f32; 16] {
     }
     out
 }
+
+pub mod instances;
+
+pub mod geometry_store;

@@ -10,6 +10,7 @@
 
 use om9_archive::{Archive, ReplayKey};
 use om9_core::{
+    Error,
     brep::{Brep, BrepDisplay},
     budget::Limits,
     geometry::{Geometry, Transform, Unit},
@@ -18,9 +19,8 @@ use om9_core::{
     model::{Definition, Document, Entity, Feature, FeatureKind, Group, Layer},
     resource::{Resource, ResourceKind},
     transaction::Cancellation,
-    Error,
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeSet;
 use uuid::Uuid;

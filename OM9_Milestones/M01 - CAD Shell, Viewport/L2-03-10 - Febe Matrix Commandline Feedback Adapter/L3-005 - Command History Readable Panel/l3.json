@@ -199,5 +199,23 @@
       "id": "OM9-L4-03-10-005-05",
       "file": "M01 - CAD Shell, Viewport/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-005 - Command History Readable Panel/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "appearance_update": {
+      "date": "2026-10-20",
+      "target": "standalone Rust OM9",
+      "status": "COMMAND_THEME_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Command appearance only: history, prompt, input, caret, selection, IME underline, option tokens and scrollbar widget colours.",
+      "colours": {
+        "history_background": "#01391C",
+        "input_background": "#005126",
+        "text_caret_ime": "#FDD880",
+        "selection": "#186C41"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-command-green-gold.json"
+      ],
+      "limitation": "Appearance evidence only; no full L2/L3 command-completion promotion."
+    }
+  }
 }

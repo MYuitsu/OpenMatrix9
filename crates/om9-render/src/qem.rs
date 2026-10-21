@@ -97,7 +97,9 @@ struct Candidate {
 
 impl PartialEq for Candidate {
     fn eq(&self, other: &Self) -> bool {
-        self.error.total_cmp(&other.error) == Ordering::Equal && self.keep == other.keep && self.drop == other.drop
+        self.error.total_cmp(&other.error) == Ordering::Equal
+            && self.keep == other.keep
+            && self.drop == other.drop
     }
 }
 impl Eq for Candidate {}
@@ -109,7 +111,11 @@ impl PartialOrd for Candidate {
 impl Ord for Candidate {
     fn cmp(&self, other: &Self) -> Ordering {
         // `BinaryHeap` is a max-heap, so the cheapest edge must compare as smaller.
-        other.error.total_cmp(&self.error).then_with(|| self.keep.cmp(&other.keep)).then_with(|| self.drop.cmp(&other.drop))
+        other
+            .error
+            .total_cmp(&self.error)
+            .then_with(|| self.keep.cmp(&other.keep))
+            .then_with(|| self.drop.cmp(&other.drop))
     }
 }
 
@@ -123,6 +129,16 @@ pub fn simplify(mesh: &MeshData, target_triangles: usize) -> MeshData {
 /// The quadric value of a collapse is a squared distance, so the reported error is its square root: the
 /// worst distance a point of the original surface may have moved.
 pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshData, f32) {
+    simplify_with_error_locked(mesh, target_triangles, None)
+}
+
+/// Same as [`simplify_with_error`], but vertices marked in `locked` never move and never collapse.
+/// Jewellery use: open boundaries, cluster-group borders, sharp gem facets and thin prong vertices.
+pub fn simplify_with_error_locked(
+    mesh: &MeshData,
+    target_triangles: usize,
+    locked: Option<&[bool]>,
+) -> (MeshData, f32) {
     let triangle_count = mesh.indices.len() / 3;
     if target_triangles >= triangle_count {
         return (mesh.clone(), 0.0);
@@ -167,11 +183,16 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
     }
     // Boundary edges get a plane perpendicular to their face: collapsing across an open edge would
     // otherwise be nearly free and would eat the silhouette.
-    let mut edge_faces: std::collections::HashMap<(u32, u32), Vec<u32>> = std::collections::HashMap::new();
+    let mut edge_faces: std::collections::HashMap<(u32, u32), Vec<u32>> =
+        std::collections::HashMap::new();
     for (face_index, face) in faces.iter().enumerate() {
         let Some(face) = face else { continue };
         for (left, right) in [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])] {
-            let key = if left < right { (left, right) } else { (right, left) };
+            let key = if left < right {
+                (left, right)
+            } else {
+                (right, left)
+            };
             edge_faces.entry(key).or_default().push(face_index as u32);
         }
     }
@@ -182,8 +203,14 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
         let (a, b) = *edge;
         let pa = positions[a as usize];
         let pb = positions[b as usize];
-        let Some(face) = faces[owners[0] as usize] else { continue };
-        let pc = positions[face.iter().copied().find(|vertex| *vertex != a && *vertex != b).unwrap_or(face[0]) as usize];
+        let Some(face) = faces[owners[0] as usize] else {
+            continue;
+        };
+        let pc = positions[face
+            .iter()
+            .copied()
+            .find(|vertex| *vertex != a && *vertex != b)
+            .unwrap_or(face[0]) as usize];
         let normal = cross(sub(pb, pa), sub(pc, pa));
         let length = dot(normal, normal).sqrt();
         if length < 1e-12 {
@@ -196,7 +223,11 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
         if length < 1e-12 {
             continue;
         }
-        let unit = [boundary_normal[0] / length, boundary_normal[1] / length, boundary_normal[2] / length];
+        let unit = [
+            boundary_normal[0] / length,
+            boundary_normal[1] / length,
+            boundary_normal[2] / length,
+        ];
         let plane = plane_quadric(unit, -dot(unit, pa), 100.0);
         quadrics[a as usize] = add_quadric(&quadrics[a as usize], &plane);
         quadrics[b as usize] = add_quadric(&quadrics[b as usize], &plane);
@@ -213,7 +244,14 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
     let mut heap = BinaryHeap::new();
     let mut queued: HashSet<(u32, u32)> = HashSet::new();
     for edge in edge_faces.keys() {
-        queue_edge(&mut heap, &mut queued, &quadrics, &positions, edge.0, edge.1);
+        queue_edge(
+            &mut heap,
+            &mut queued,
+            &quadrics,
+            &positions,
+            edge.0,
+            edge.1,
+        );
     }
     let mut alive = triangle_count;
     let mut removed = vec![false; positions.len()];
@@ -224,6 +262,12 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
         }
         let keep = candidate.keep;
         let drop = candidate.drop;
+        if locked.is_some_and(|locked| {
+            locked.get(keep as usize).copied().unwrap_or(false)
+                || locked.get(drop as usize).copied().unwrap_or(false)
+        }) {
+            continue;
+        }
         let drop_faces: Vec<u32> = adjacency[drop as usize].iter().copied().collect();
         if drop_faces.is_empty() {
             removed[drop as usize] = true;
@@ -240,7 +284,10 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
         for face_index in &drop_faces {
             if let Some(face) = faces[*face_index as usize]
                 && face.contains(&keep)
-                && let Some(other) = face.iter().copied().find(|vertex| *vertex != keep && *vertex != drop)
+                && let Some(other) = face
+                    .iter()
+                    .copied()
+                    .find(|vertex| *vertex != keep && *vertex != drop)
             {
                 opposite.push(other);
             }
@@ -253,7 +300,9 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
         // Flip prevention: every surviving face must keep facing the same way.
         let mut flipped = false;
         for face_index in &drop_faces {
-            let Some(before) = faces[*face_index as usize] else { continue };
+            let Some(before) = faces[*face_index as usize] else {
+                continue;
+            };
             let old = triangle_normal(&positions, before);
             let mut after = before;
             for vertex in after.iter_mut() {
@@ -276,7 +325,9 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
         worst_error = worst_error.max(candidate.error.sqrt());
         positions[keep as usize] = candidate.position;
         for face_index in &drop_faces {
-            let Some(face) = faces[*face_index as usize].as_mut() else { continue };
+            let Some(face) = faces[*face_index as usize].as_mut() else {
+                continue;
+            };
             for vertex in face.iter_mut() {
                 if *vertex == drop {
                     *vertex = keep;
@@ -312,7 +363,11 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
             .filter(|vertex| *vertex != keep)
             .collect();
         for neighbour in neighbours {
-            let key = if keep < neighbour { (keep, neighbour) } else { (neighbour, keep) };
+            let key = if keep < neighbour {
+                (keep, neighbour)
+            } else {
+                (neighbour, keep)
+            };
             if queued.insert(key) {
                 queue_edge(&mut heap, &mut queued, &quadrics, &positions, key.0, key.1);
             }
@@ -325,13 +380,20 @@ pub fn simplify_with_error(mesh: &MeshData, target_triangles: usize) -> (MeshDat
     for face in faces.iter().flatten() {
         for vertex in face {
             let next = *remap.entry(*vertex).or_insert_with(|| {
-                out_positions.push([positions[*vertex as usize][0] as f32, positions[*vertex as usize][1] as f32, positions[*vertex as usize][2] as f32]);
+                out_positions.push([
+                    positions[*vertex as usize][0] as f32,
+                    positions[*vertex as usize][1] as f32,
+                    positions[*vertex as usize][2] as f32,
+                ]);
                 (out_positions.len() - 1) as u32
             });
             out_indices.push(next);
         }
     }
-    (MeshData::new(out_positions, out_indices), worst_error as f32)
+    (
+        MeshData::new(out_positions, out_indices),
+        worst_error as f32,
+    )
 }
 
 fn queue_edge(
@@ -344,7 +406,11 @@ fn queue_edge(
 ) {
     let pa = positions[a as usize];
     let pb = positions[b as usize];
-    let midpoint = [(pa[0] + pb[0]) * 0.5, (pa[1] + pb[1]) * 0.5, (pa[2] + pb[2]) * 0.5];
+    let midpoint = [
+        (pa[0] + pb[0]) * 0.5,
+        (pa[1] + pb[1]) * 0.5,
+        (pa[2] + pb[2]) * 0.5,
+    ];
     let combined = add_quadric(&quadrics[a as usize], &quadrics[b as usize]);
     let mut position = optimal_point(&combined, midpoint);
     // An unconstrained minimiser can land far outside the edge and turn two small faces into one huge
@@ -356,7 +422,12 @@ fn queue_edge(
         position[axis] = position[axis].clamp(low, high);
     }
     let error = quadric_error(&combined, position).max(0.0);
-    heap.push(Candidate { error, keep: a, drop: b, position });
+    heap.push(Candidate {
+        error,
+        keep: a,
+        drop: b,
+        position,
+    });
 }
 
 /// Memoryless simplification (Lindstrom & Turk 1998): run QEM in passes, rebuilding the quadrics from
@@ -435,7 +506,11 @@ fn dot(a: [f64; 3], b: [f64; 3]) -> f64 {
     a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 }
 fn cross(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
-    [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+    [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ]
 }
 
 #[cfg(test)]
@@ -445,10 +520,19 @@ mod tests {
     fn cube() -> MeshData {
         MeshData::new(
             vec![
-                [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, -0.5],
-                [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5], [-0.5, 0.5, 0.5],
+                [-0.5, -0.5, -0.5],
+                [0.5, -0.5, -0.5],
+                [0.5, 0.5, -0.5],
+                [-0.5, 0.5, -0.5],
+                [-0.5, -0.5, 0.5],
+                [0.5, -0.5, 0.5],
+                [0.5, 0.5, 0.5],
+                [-0.5, 0.5, 0.5],
             ],
-            vec![0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 2, 3, 7, 2, 7, 6, 1, 2, 6, 1, 6, 5, 0, 4, 7, 0, 7, 3],
+            vec![
+                0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 2, 3, 7, 2, 7, 6, 1, 2, 6, 1,
+                6, 5, 0, 4, 7, 0, 7, 3,
+            ],
         )
     }
 
@@ -468,7 +552,11 @@ mod tests {
             assert!((*index as usize) < result.positions.len());
         }
         for triangle in result.indices.chunks(3) {
-            assert!(triangle[0] != triangle[1] && triangle[1] != triangle[2] && triangle[0] != triangle[2]);
+            assert!(
+                triangle[0] != triangle[1]
+                    && triangle[1] != triangle[2]
+                    && triangle[0] != triangle[2]
+            );
         }
     }
 
@@ -500,13 +588,23 @@ mod tests {
         }
         let source = MeshData::new(positions, indices);
         let result = simplify(&source, 64);
-        assert!(result.triangle_count() <= 64, "got {} triangles", result.triangle_count());
+        assert!(
+            result.triangle_count() <= 64,
+            "got {} triangles",
+            result.triangle_count()
+        );
         assert!(result.triangle_count() > 0);
         let extent = |mesh: &MeshData| {
-            mesh.positions.iter().flat_map(|point| point.iter()).fold(0.0f32, |value, coordinate| value.max(coordinate.abs()))
+            mesh.positions
+                .iter()
+                .flat_map(|point| point.iter())
+                .fold(0.0f32, |value, coordinate| value.max(coordinate.abs()))
         };
         let (before, after) = (extent(&source), extent(&result));
-        assert!((before - after).abs() < 0.2, "extent changed from {before} to {after}");
+        assert!(
+            (before - after).abs() < 0.2,
+            "extent changed from {before} to {after}"
+        );
     }
 }
 
@@ -523,7 +621,11 @@ mod comparison {
             for j in 0..=u {
                 let theta = 2.0 * std::f64::consts::PI * j as f64 / u as f64;
                 let r = major + minor * phi.cos();
-                positions.push([(r * theta.cos()) as f32, (r * theta.sin()) as f32, (minor * phi.sin()) as f32]);
+                positions.push([
+                    (r * theta.cos()) as f32,
+                    (r * theta.sin()) as f32,
+                    (minor * phi.sin()) as f32,
+                ]);
             }
         }
         let cols = u + 1;
@@ -544,7 +646,10 @@ mod comparison {
     fn the_three_simplifiers_are_compared_on_the_same_ring() {
         let source = torus(48, 16);
         let (area0, volume0) = (surface_area(&source), signed_volume(&source));
-        eprintln!("source: {} triangles, area {area0:.4}, volume {volume0:.4}", source.triangle_count());
+        eprintln!(
+            "source: {} triangles, area {area0:.4}, volume {volume0:.4}",
+            source.triangle_count()
+        );
         for target in [500usize, 200, 80, 30] {
             let started = std::time::Instant::now();
             let qem = simplify(&source, target);
@@ -581,6 +686,203 @@ mod comparison {
             report("clustering", &clustered, 0.0);
             report("qem", &qem, qem_time);
             report("memoryless", &memoryless, memoryless_time);
+        }
+    }
+}
+
+#[cfg(test)]
+mod lock_tests {
+    use super::*;
+
+    fn grid(side: u32) -> MeshData {
+        let mut positions = Vec::new();
+        for y in 0..=side {
+            for x in 0..=side {
+                positions.push([x as f32, y as f32, 0.0]);
+            }
+        }
+        let mut indices = Vec::new();
+        let stride = side + 1;
+        for y in 0..side {
+            for x in 0..side {
+                let a = y * stride + x;
+                let b = a + 1;
+                let c = a + stride;
+                let d = c + 1;
+                indices.extend_from_slice(&[a, c, b, b, c, d]);
+            }
+        }
+        MeshData::new(positions, indices)
+    }
+
+    #[test]
+    fn locked_vertices_never_move_or_collapse() {
+        let side = 10;
+        let mesh = grid(side);
+        let stride = side + 1;
+        let mut locked = vec![false; (stride * stride) as usize];
+        for y in 0..=side {
+            for x in 0..=side {
+                if x == 0 || y == 0 || x == side || y == side {
+                    locked[(y * stride + x) as usize] = true;
+                }
+            }
+        }
+        let (out, _) = simplify_with_error_locked(&mesh, 20, Some(&locked));
+        assert!(out.indices.len() / 3 < mesh.indices.len() / 3);
+        for (index, is_locked) in locked.iter().enumerate() {
+            if !is_locked {
+                continue;
+            }
+            let point = mesh.positions[index];
+            assert!(
+                out.positions.iter().any(|other| {
+                    (other[0] - point[0]).abs() < 1e-6
+                        && (other[1] - point[1]).abs() < 1e-6
+                        && (other[2] - point[2]).abs() < 1e-6
+                }),
+                "locked boundary vertex {point:?} disappeared"
+            );
+        }
+    }
+}
+
+/// Vertices that jewellery simplification must keep: open boundaries and edges whose face normals
+/// differ by more than `sharp_degrees`. Gem facet rims and prong silhouettes sit on these edges.
+pub fn feature_locks(mesh: &MeshData, sharp_degrees: f64) -> Vec<bool> {
+    let mut locked = vec![false; mesh.positions.len()];
+    let mut edges: std::collections::HashMap<(u32, u32), Vec<u32>> = std::collections::HashMap::new();
+    let mut normals: Vec<Option<[f64; 3]>> = Vec::new();
+    for (face_index, chunk) in mesh.indices.chunks(3).enumerate() {
+        if chunk.len() != 3 {
+            continue;
+        }
+        let (a, b, c) = (chunk[0], chunk[1], chunk[2]);
+        let pa = mesh.positions[a as usize].map(|v| v as f64);
+        let pb = mesh.positions[b as usize].map(|v| v as f64);
+        let pc = mesh.positions[c as usize].map(|v| v as f64);
+        let n = cross(sub(pb, pa), sub(pc, pa));
+        let len = dot(n, n).sqrt();
+        normals.push((len > 1e-12).then(|| [n[0] / len, n[1] / len, n[2] / len]));
+        for (l, r) in [(a, b), (b, c), (c, a)] {
+            let key = if l < r { (l, r) } else { (r, l) };
+            edges.entry(key).or_default().push(face_index as u32);
+        }
+    }
+    let cos_limit = sharp_degrees.to_radians().cos();
+    for ((a, b), owners) in &edges {
+        let sharp = owners.len() == 1
+            || owners.iter().any(|left| {
+                owners.iter().any(|right| {
+                    let (Some(x), Some(y)) = (normals[*left as usize], normals[*right as usize]) else {
+                        return false;
+                    };
+                    dot(x, y) < cos_limit
+                })
+            });
+        if sharp {
+            locked[*a as usize] = true;
+            locked[*b as usize] = true;
+        }
+    }
+    locked
+}
+
+#[cfg(test)]
+mod feature_lock_tests {
+    use super::*;
+
+    #[test]
+    fn boundaries_and_sharp_edges_are_locked() {
+        let mesh = MeshData::new(
+            vec![
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+            ],
+            vec![0, 1, 2, 0, 2, 3, 0, 1, 4],
+        );
+        let locked = feature_locks(&mesh, 30.0);
+        assert!(locked[0] && locked[1] && locked[2] && locked[3], "open boundary");
+        assert!(locked[4], "sharp fold at the raised triangle");
+    }
+}
+
+#[cfg(test)]
+mod accuracy_tests {
+    use super::*;
+
+    #[test]
+    fn a_feature_locked_lod_keeps_area_and_volume() {
+        let mesh = crate::shapes::sphere(32, 16, 1.0);
+        let locked = feature_locks(&mesh, 30.0);
+        let (lod, _) = simplify_with_error_locked(&mesh, mesh.triangle_count() / 2, Some(&locked));
+        assert!(lod.triangle_count() < mesh.triangle_count());
+        let area_error = ((surface_area(&lod) - surface_area(&mesh)) / surface_area(&mesh) * 100.0).abs();
+        let volume_error = ((signed_volume(&lod) - signed_volume(&mesh)) / signed_volume(&mesh) * 100.0).abs();
+        eprintln!("locked LOD tris {} -> {}, area {area_error:.2}%, volume {volume_error:.2}%", mesh.triangle_count(), lod.triangle_count());
+        assert!(area_error < 2.0, "area error {area_error:.2}%");
+        assert!(volume_error < 4.0, "volume error {volume_error:.2}%");
+    }
+}
+
+#[cfg(test)]
+mod prong_accuracy_tests {
+    use super::*;
+
+    fn cylinder(sides: u32) -> MeshData {
+        let rings = 5u32;
+        let mut positions = Vec::new();
+        for ring in 0..rings {
+            let z = ring as f32 * 0.5;
+            for i in 0..sides {
+                let a = i as f32 / sides as f32 * std::f32::consts::TAU;
+                positions.push([0.2 * a.cos(), 0.2 * a.sin(), z]);
+            }
+        }
+        let bottom = positions.len() as u32;
+        positions.push([0.0, 0.0, 0.0]);
+        positions.push([0.0, 0.0, 2.0]);
+        let mut indices = Vec::new();
+        for ring in 0..rings - 1 {
+            let base = ring * sides;
+            let next = base + sides;
+            for i in 0..sides {
+                let j = (i + 1) % sides;
+                indices.extend_from_slice(&[base + i, base + j, next + i, base + j, next + j, next + i]);
+            }
+        }
+        for i in 0..sides {
+            let j = (i + 1) % sides;
+            indices.extend_from_slice(&[bottom, j, i]);
+            let top = (rings - 1) * sides;
+            indices.extend_from_slice(&[bottom + 1, top + i, top + j]);
+        }
+        MeshData::new(positions, indices)
+    }
+
+    #[test]
+    fn a_thin_prong_keeps_its_silhouette_after_lod() {
+        let mesh = cylinder(24);
+        let locked = feature_locks(&mesh, 30.0);
+        let (lod, _) = simplify_with_error_locked(&mesh, mesh.triangle_count() / 2, Some(&locked));
+        assert!(lod.triangle_count() < mesh.triangle_count());
+        let bounds = |positions: &[[f32; 3]]| {
+            positions.iter().fold(([f32::MAX; 3], [f32::MIN; 3]), |(mut lo, mut hi), p| {
+                for axis in 0..3 {
+                    lo[axis] = lo[axis].min(p[axis]);
+                    hi[axis] = hi[axis].max(p[axis]);
+                }
+                (lo, hi)
+            })
+        };
+        let (lo0, hi0) = bounds(&mesh.positions);
+        let (lo1, hi1) = bounds(&lod.positions);
+        for axis in 0..3 {
+            assert!((lo0[axis] - lo1[axis]).abs() < 1e-4, "prong min {axis} moved");
+            assert!((hi0[axis] - hi1[axis]).abs() < 1e-4, "prong max {axis} moved");
         }
     }
 }

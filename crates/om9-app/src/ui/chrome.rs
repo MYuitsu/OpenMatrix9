@@ -5,10 +5,12 @@ use super::*;
 use egui::{Align2, FontId, RichText};
 
 const GREEN: Color32 = Color32::from_rgb(130, 180, 140);
-const PANEL_BG: Color32 = Color32::from_rgb(10, 14, 19);
-const PANEL_ALT: Color32 = Color32::from_rgb(16, 23, 31);
-const PANEL_EDGE: Color32 = Color32::from_rgb(42, 57, 73);
-const PANEL_INK: Color32 = Color32::from_rgb(230, 237, 243);
+pub(super) const PANEL_BG: Color32 = super::command::COMMAND_BG;
+const PANEL_ALT: Color32 = Color32::from_rgb(0, 81, 38);
+const PANEL_EDGE: Color32 = Color32::from_rgb(35, 107, 72);
+pub(super) const PANEL_INK: Color32 = Color32::from_rgb(255, 244, 214);
+pub(super) const PANEL_MUTED: Color32 = Color32::from_rgb(205, 226, 210);
+const PANEL_TITLE: Color32 = Color32::from_rgb(253, 216, 128);
 const ACCENT: Color32 = Color32::from_rgb(45, 212, 191);
 const SELECTED_CARD: Color32 = Color32::from_rgb(18, 58, 42);
 const CATEGORY_COLORS: [Color32; 12] = [
@@ -63,12 +65,39 @@ const TABS: [&str; 20] = [
     "Settings",
 ];
 
+fn apply_dock_theme(ui: &mut egui::Ui) {
+    let visuals = ui.visuals_mut();
+    visuals.override_text_color = Some(PANEL_INK);
+    visuals.weak_text_color = Some(PANEL_MUTED);
+    visuals.disabled_alpha = 0.78;
+    visuals.panel_fill = PANEL_BG;
+    visuals.hyperlink_color = PANEL_TITLE;
+    visuals.selection.bg_fill = PANEL_EDGE;
+    visuals.selection.stroke = Stroke::new(1., PANEL_INK);
+    for widget in [
+        &mut visuals.widgets.noninteractive,
+        &mut visuals.widgets.inactive,
+        &mut visuals.widgets.hovered,
+        &mut visuals.widgets.active,
+        &mut visuals.widgets.open,
+    ] {
+        widget.fg_stroke = Stroke::new(1., PANEL_INK);
+    }
+    visuals.widgets.inactive.bg_fill = PANEL_ALT;
+    visuals.widgets.inactive.weak_bg_fill = PANEL_ALT;
+    visuals.widgets.hovered.bg_fill = PANEL_EDGE;
+    visuals.widgets.hovered.weak_bg_fill = PANEL_EDGE;
+    visuals.widgets.active.bg_fill = PANEL_EDGE;
+    visuals.widgets.active.weak_bg_fill = PANEL_EDGE;
+}
+
 impl MatrixApp {
     pub(super) fn configure_style(&mut self, ctx: &egui::Context) {
         if self.style_ready {
             return;
         }
         self.style_ready = true;
+        super::typography::configure_fonts(ctx);
         let mut style = (*ctx.style_of(egui::Theme::Light)).clone();
         style.visuals = egui::Visuals::light();
         style.spacing.item_spacing = Vec2::new(2., 2.);
@@ -92,7 +121,8 @@ impl MatrixApp {
         style.visuals.widgets.inactive.weak_bg_fill = Color32::from_rgb(238, 243, 248);
         style.visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(220, 235, 250);
         style.visuals.widgets.active.weak_bg_fill = Color32::from_rgb(199, 232, 227);
-        style.visuals.text_options.font_hinting = false;
+        style.visuals.text_options.font_hinting = true;
+        style.visuals.text_options.subpixel_binning = true;
         style.visuals.selection.bg_fill = ACCENT;
         style.visuals.selection.stroke = Stroke::new(1., Color32::from_rgb(15, 23, 42));
         style.visuals.window_corner_radius = 8.into();
@@ -364,7 +394,7 @@ impl MatrixApp {
             Align2::LEFT_CENTER,
             id.bar_title(),
             FontId::proportional(11.),
-            PANEL_INK,
+            PANEL_TITLE,
         );
         // The reserved BUILDER area carries no close box (design review NIT 7):
         // it cannot be rolled up, so a +/− would promise something it refuses.
@@ -375,7 +405,7 @@ impl MatrixApp {
                 Align2::CENTER_CENTER,
                 if state.collapsed { "+" } else { "−" },
                 FontId::proportional(12.),
-                accent,
+                category_text(accent),
             );
         }
         self.section_rects.insert(id.key(), rect);
@@ -418,7 +448,7 @@ impl MatrixApp {
     fn icon(&mut self, ui: &mut egui::Ui, name: &str, enabled: bool, help: &str) -> egui::Response {
         self.icon_slot(ui, name, enabled, help, None)
     }
-    fn icon_slot(
+    pub(super) fn icon_slot(
         &mut self,
         ui: &mut egui::Ui,
         name: &str,
@@ -440,9 +470,9 @@ impl MatrixApp {
         let fill = if !enabled {
             PANEL_BG
         } else if response.hovered() {
-            PANEL_EDGE
+            Color32::from_rgb(38, 62, 78)
         } else {
-            PANEL_ALT
+            Color32::from_rgb(24, 36, 48)
         };
         ui.painter().rect_filled(rect, 4, fill);
         ui.painter().rect_stroke(
@@ -451,14 +481,23 @@ impl MatrixApp {
             Stroke::new(
                 1.,
                 if enabled {
-                    PANEL_EDGE
+                    Color32::from_rgb(72, 99, 121)
                 } else {
-                    Color32::from_rgb(38, 52, 68)
+                    Color32::from_rgb(49, 65, 81)
                 },
             ),
             egui::StrokeKind::Inside,
         );
-        self.icons.paint(ui, rect.shrink(3.), name);
+        // The icon fills more of its existing slot; no extra rows or dock
+        // height are needed. A lit edge separates each card from the menu.
+        ui.painter().line_segment(
+            [
+                rect.left_top() + Vec2::new(4., 1.5),
+                rect.right_top() + Vec2::new(-4., 1.5),
+            ],
+            Stroke::new(1., Color32::from_white_alpha(if enabled { 65 } else { 28 })),
+        );
+        self.icons.paint(ui, rect.shrink(1.5), name);
         match self.icon_column {
             IconColumn::Left => self.rail_icon_rects.push(rect),
             IconColumn::Right => self.right_dock_icon_rects.push(rect),
@@ -527,24 +566,16 @@ impl MatrixApp {
             })
         })
     }
-    fn icon_row(&mut self, ui: &mut egui::Ui, names: &[&str]) {
-        ui.horizontal_wrapped(|ui| {
-            for name in names {
-                // Display, snaps and settings are separate command domains.
-                // Reusing an authored glyph never makes its geometry action
-                // available here. These adapters have no accepted operation yet.
-                self.icon(ui, name, false, name);
-            }
-        });
-    }
     pub(super) fn sidebar_ui(&mut self, ui: &mut egui::Ui) {
-        ui.visuals_mut().override_text_color = Some(PANEL_INK);
-        ui.visuals_mut().widgets.inactive.bg_fill = PANEL_ALT;
-        ui.visuals_mut().widgets.inactive.weak_bg_fill = PANEL_ALT;
-        ui.visuals_mut().widgets.hovered.bg_fill = PANEL_EDGE;
-        ui.visuals_mut().widgets.hovered.weak_bg_fill = PANEL_EDGE;
-        ui.visuals_mut().widgets.active.bg_fill = ACCENT;
-        ui.visuals_mut().widgets.active.weak_bg_fill = ACCENT;
+        apply_dock_theme(ui);
+        // Reserve a narrow gutter: a floating bar covers the far-right menu
+        // page buttons, Grid Snap and layer controls on narrow docks.
+        ui.spacing_mut().scroll = egui::style::ScrollStyle {
+            bar_width: 4.,
+            bar_inner_margin: 2.,
+            bar_outer_margin: 0.,
+            ..egui::style::ScrollStyle::solid()
+        };
         // The column order, visibility and roll-up state come from the typed
         // layout, so the documented Matrix order survives a session.
         let sections = self.dock.left_sections();
@@ -552,6 +583,7 @@ impl MatrixApp {
         self.rail_icon_rects.clear();
         let scrolled = egui::ScrollArea::vertical()
             .id_salt("matrix-sidebar-sections")
+            .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
             .vertical_scroll_offset(scroll)
             .auto_shrink([false, false])
             .show(ui, |ui| {
@@ -565,13 +597,13 @@ impl MatrixApp {
                 }
             });
         self.sidebar_content_size = Some(scrolled.content_size);
+        self.sidebar_content_rect = Some(scrolled.inner_rect);
+        self.sidebar_scrollbar_rect = Some(Rect::from_min_size(
+            scrolled.inner_rect.right_top() + Vec2::new(2., 0.),
+            Vec2::new(4., scrolled.inner_rect.height()),
+        ));
         self.left_content_bottom = scrolled.inner_rect.bottom();
-        self.sidebar_scroll = ui.ctx().memory(|memory| {
-            memory
-                .data
-                .get_temp::<f32>(egui::Id::new("matrix-sidebar-sections-offset"))
-                .unwrap_or(0.)
-        });
+        self.sidebar_scroll = scrolled.state.offset.y;
     }
     /// Body of one Matrix menu section. Builders open in the reserved area below
     /// Projects; the slot itself never owns a builder model.
@@ -617,30 +649,39 @@ impl MatrixApp {
                 let mut top = ui
                     .ctx()
                     .memory(|memory| memory.data.get_temp::<Option<usize>>(top_id).flatten());
-                ui.horizontal_wrapped(|ui| {
+                let top_gap = 1.0;
+                let top_width = ((ui.available_width() - top_gap * (TOP_MENUS.len() - 1) as f32)
+                    / TOP_MENUS.len() as f32)
+                    .floor();
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = top_gap;
                     for (index, label) in TOP_MENUS.iter().enumerate() {
                         let selected = top == Some(index);
-                        let response = ui
-                            .add(
-                                egui::Button::new(
-                                    RichText::new(*label)
-                                        .color(if selected { Color32::WHITE } else { PANEL_INK })
-                                        .size(11.),
-                                )
-                                .frame(false)
-                                .fill(if selected {
-                                    PANEL_ALT
-                                } else {
-                                    Color32::TRANSPARENT
-                                })
-                                .corner_radius(3),
-                            )
-                            .on_hover_text(format!("{label} menu"));
+                        let (rect, response) =
+                            ui.allocate_exact_size(Vec2::new(top_width, 18.), Sense::click());
+                        let response = response.on_hover_text(format!("{label} menu"));
+                        let painter = ui.painter();
+                        painter.rect_filled(rect, 4, Color32::from_rgb(19, 27, 36));
+                        if selected {
+                            painter.rect_filled(rect, 4, PANEL_ALT);
+                        }
+                        painter.rect_stroke(
+                            rect.shrink(0.5),
+                            4,
+                            Stroke::new(1., if selected { PANEL_EDGE } else { PANEL_TITLE }),
+                            egui::StrokeKind::Inside,
+                        );
+                        painter.text(
+                            rect.center(),
+                            Align2::CENTER_CENTER,
+                            *label,
+                            FontId::proportional(11.),
+                            PANEL_INK,
+                        );
                         ui.ctx().memory_mut(|memory| {
-                            memory.data.insert_temp(
-                                egui::Id::new(("main-top-menu-rect", index)),
-                                response.rect,
-                            );
+                            memory
+                                .data
+                                .insert_temp(egui::Id::new(("main-top-menu-rect", index)), rect);
                         });
                         if response.clicked() {
                             top = Some(index);
@@ -649,69 +690,80 @@ impl MatrixApp {
                     }
                 });
                 self.main_category_rects.clear();
-                ui.horizontal_wrapped(|ui| {
-                    ui.spacing_mut().item_spacing = Vec2::new(3., 2.);
-                    for (i, category) in CATEGORIES.iter().enumerate() {
-                        let accent = CATEGORY_COLORS[i];
-                        let selected = self.main_category == i;
-                        let font = FontId::proportional(12.);
-                        let text_color = category_text(accent);
-                        let galley = ui.painter().layout_no_wrap(
-                            (*category).to_owned(),
-                            font.clone(),
-                            text_color,
-                        );
-                        let width = galley.size().x + 18.;
-                        let (rect, response) =
-                            ui.allocate_exact_size(Vec2::new(width, 18.), Sense::click());
-                        let response =
-                            response.on_hover_text(format!("{category} command category"));
-                        let painter = ui.painter();
-                        // Keep the raised card separate from the brighter label.
-                        painter.rect_filled(
-                            rect.translate(Vec2::new(0., 2.)),
-                            5,
-                            Color32::from_rgba_unmultiplied(
-                                0,
-                                0,
-                                0,
-                                if selected { 140 } else { 95 },
-                            ),
-                        );
-                        painter.rect_filled(
-                            rect,
-                            5,
-                            if selected {
-                                SELECTED_CARD
-                            } else {
-                                Color32::from_rgb(19, 27, 36)
-                            },
-                        );
-                        painter.line_segment(
-                            [
-                                egui::pos2(rect.left() + 5., rect.top() + 1.),
-                                egui::pos2(rect.right() - 5., rect.top() + 1.),
-                            ],
-                            Stroke::new(1., Color32::from_rgba_unmultiplied(255, 255, 255, 34)),
-                        );
-                        painter.rect_stroke(
-                            rect.shrink(0.5),
-                            5,
-                            Stroke::new(1., if selected { accent } else { PANEL_EDGE }),
-                            egui::StrokeKind::Inside,
-                        );
-                        let text_pos =
-                            egui::pos2(rect.left() + 9., rect.center().y - galley.size().y / 2.);
-                        // A real semibold face keeps one antialiased glyph pass.
-                        painter.galley(text_pos, galley, text_color);
-                        self.main_category_rects.insert(i, rect);
-                        if response.clicked() {
-                            self.main_category = i;
-                            top = None;
-                            self.focus_cmd = true;
+                let columns = if ui.available_width() < 280. { 5 } else { 6 };
+                let gap = 1.0;
+                let card_width =
+                    ((ui.available_width() - gap * (columns - 1) as f32) / columns as f32).floor();
+                for (row, categories) in CATEGORIES.chunks(columns).enumerate() {
+                    ui.horizontal(|ui| {
+                        ui.spacing_mut().item_spacing = Vec2::new(gap, 2.);
+                        for (column, category) in categories.iter().enumerate() {
+                            let i = row * columns + column;
+                            let accent = CATEGORY_COLORS[i];
+                            let selected = self.main_category == i;
+                            let font = super::typography::semibold(
+                                ui.ctx(),
+                                if card_width < 48. { 9.5 } else { 10.5 },
+                            );
+                            let text_color = category_text(accent);
+                            let galley = ui.painter().layout_no_wrap(
+                                (*category).to_owned(),
+                                font.clone(),
+                                text_color,
+                            );
+                            let (rect, response) =
+                                ui.allocate_exact_size(Vec2::new(card_width, 18.), Sense::click());
+                            let response =
+                                response.on_hover_text(format!("{category} command category"));
+                            let painter = ui.painter();
+                            // Keep the raised card separate from the brighter label.
+                            painter.rect_filled(
+                                rect.translate(Vec2::new(0., 2.)),
+                                5,
+                                Color32::from_rgba_unmultiplied(
+                                    0,
+                                    0,
+                                    0,
+                                    if selected { 140 } else { 95 },
+                                ),
+                            );
+                            painter.rect_filled(
+                                rect,
+                                5,
+                                if selected {
+                                    SELECTED_CARD
+                                } else {
+                                    Color32::from_rgb(19, 27, 36)
+                                },
+                            );
+                            painter.line_segment(
+                                [
+                                    egui::pos2(rect.left() + 5., rect.top() + 1.),
+                                    egui::pos2(rect.right() - 5., rect.top() + 1.),
+                                ],
+                                Stroke::new(1., Color32::from_rgba_unmultiplied(255, 255, 255, 34)),
+                            );
+                            painter.rect_stroke(
+                                rect.shrink(0.5),
+                                5,
+                                Stroke::new(1., if selected { accent } else { PANEL_EDGE }),
+                                egui::StrokeKind::Inside,
+                            );
+                            let text_pos = egui::pos2(
+                                rect.center().x - galley.size().x / 2.,
+                                rect.center().y - galley.size().y / 2.,
+                            );
+                            // A real semibold face keeps one antialiased glyph pass.
+                            painter.galley(text_pos, galley, text_color);
+                            self.main_category_rects.insert(i, rect);
+                            if response.clicked() {
+                                self.main_category = i;
+                                top = None;
+                                self.focus_cmd = true;
+                            }
                         }
-                    }
-                });
+                    });
+                }
                 let category = CATEGORIES[self.main_category];
                 let palette_name = top.map_or(category, |index| TOP_MENUS[index]);
                 let palette = if top.is_some() {
@@ -728,12 +780,24 @@ impl MatrixApp {
                 let mut page = ui
                     .ctx()
                     .memory(|memory| memory.data.get_temp::<usize>(page_id).unwrap_or(0));
-                let page_width = (ui.available_width() - 26.).max(80.);
-                let gap = ui.spacing().item_spacing.x;
-                let fit_edge = ((page_width - gap * (PAGE_COLUMNS - 1) as f32)
+                let reserve = if ui.available_width() >= 280. {
+                    24.
+                } else {
+                    32.
+                };
+                let page_width = (ui.available_width() - reserve).max(80.);
+                let gap = 1.0;
+                let fit_capacity = ((page_width - gap * (PAGE_COLUMNS - 1) as f32)
                     / PAGE_COLUMNS as f32)
                     .floor()
-                    .clamp(16., self.column_icon_edge);
+                    .max(16.);
+                // Scale the actual fitted slot too: scaling only the generic
+                // dock edge stalls once ten columns reach their width limit.
+                let fit_edge = (fit_capacity * self.palette_icon_scale())
+                    .round()
+                    .max(18.)
+                    .min(fit_capacity)
+                    .min(self.column_icon_edge);
                 let saved_edge = self.column_icon_edge;
                 self.column_icon_edge = fit_edge;
                 let page_size = PAGE_COLUMNS * PAGE_ROWS;
@@ -776,75 +840,8 @@ impl MatrixApp {
                 ui.ctx()
                     .memory_mut(|memory| memory.data.insert_temp(top_id, top));
             }
-            SectionId::Display => {
-                self.icon_row(
-                    ui,
-                    &[
-                        "Grid",
-                        "Wireframe",
-                        "Shaded",
-                        "Sphere",
-                        "Gem",
-                        "Render",
-                        "Layers",
-                        "Fit",
-                        "Rotate",
-                        "Properties",
-                        "Settings",
-                        "Project",
-                    ],
-                );
-                ui.columns(2, |columns| {
-                    columns[0].add_enabled(false, egui::Button::new("Coarse Mesh ▾"));
-                    columns[1].add_enabled(false, egui::Button::new("Wireframe ▾"));
-                });
-            }
-            SectionId::Snaps => {
-                self.icon_row(
-                    ui,
-                    &[
-                        "SnapEnd",
-                        "SnapMid",
-                        "SnapPoint",
-                        "SnapCenter",
-                        "GridSnap",
-                        "Ortho",
-                        "Planar",
-                        "Settings",
-                    ],
-                );
-                ui.horizontal_wrapped(|ui| {
-                    for text in ["Grid", "Ortho", "Planar", "0.1", "0.25", "0.5", "1.0"] {
-                        ui.add_enabled(false, egui::Button::new(text));
-                    }
-                });
-            }
-            SectionId::InfoSettings => {
-                self.icon_row(
-                    ui,
-                    &[
-                        "Settings",
-                        "Properties",
-                        "Project",
-                        "Layers",
-                        "Save",
-                        "Open",
-                        "Builder",
-                        "Gem",
-                        "Fit",
-                        "Move",
-                        "Rotate",
-                        "Scale",
-                    ],
-                );
-                ui.horizontal_wrapped(|ui| {
-                    ui.label(format!("Units: {:?}", self.controller.document().page_unit));
-                    ui.separator();
-                    ui.label(format!(
-                        "Objects: {}",
-                        self.controller.document().entities.len()
-                    ));
-                });
+            SectionId::Display | SectionId::Snaps | SectionId::InfoSettings => {
+                self.fixed_sidebar_palette(ui, id);
             }
             SectionId::Layers => {
                 self.layers_ui(ui);
@@ -868,7 +865,7 @@ impl MatrixApp {
                 Align2::LEFT_TOP,
                 "Default",
                 FontId::proportional(10.),
-                Color32::WHITE,
+                PANEL_INK,
             );
             for (index, name) in ["Project", "Gem", "Emerald"].iter().enumerate() {
                 ui.allocate_ui_with_layout(
@@ -889,7 +886,7 @@ impl MatrixApp {
                             Align2::LEFT_TOP,
                             (index + 1).to_string(),
                             FontId::proportional(10.),
-                            Color32::WHITE,
+                            PANEL_INK,
                         );
                         response.on_hover_text("Project preview unavailable");
                         ui.add_enabled(false, egui::Button::new("↑  ▣  ×"));
@@ -907,7 +904,7 @@ impl MatrixApp {
                     Align2::LEFT_TOP,
                     name,
                     FontId::proportional(10.),
-                    Color32::WHITE,
+                    PANEL_INK,
                 );
                 response.on_hover_text("Project operation unavailable");
             }
@@ -1098,6 +1095,7 @@ impl MatrixApp {
     /// menus the user docked there. Each menu keeps the same title bar behavior
     /// (roll up, reorder, re-dock, float).
     pub(super) fn right_dock_ui(&mut self, ui: &mut egui::Ui) {
+        apply_dock_theme(ui);
         ui.set_min_width(ui.available_width());
         self.right_dock_icon_rects.clear();
         let sections = self.dock.right_sections();
@@ -1105,7 +1103,7 @@ impl MatrixApp {
             ui.label(
                 RichText::new("Drag a menu title bar here to dock it")
                     .size(10.)
-                    .color(Color32::from_gray(190)),
+                    .color(PANEL_MUTED),
             );
             return;
         }
@@ -1122,7 +1120,7 @@ impl MatrixApp {
                     .add(
                         egui::Button::selectable(
                             !state.collapsed,
-                            format!("{arrow} {}", id.bar_title()),
+                            RichText::new(format!("{arrow} {}", id.bar_title())).color(PANEL_TITLE),
                         )
                         .sense(Sense::click_and_drag()),
                     )
@@ -1205,15 +1203,28 @@ impl MatrixApp {
                     Vec2::new(area.width, area.height),
                 )
             });
-            let mut builder = egui::Window::new(id.title())
+            // The framework uses a pale active window header. Keep its title
+            // dark, with a cream inactive header for the same clear contrast.
+            let mut builder = egui::Window::new(RichText::new(id.title()).color(PANEL_BG))
                 .id(egui::Id::new(("om9-float-menu", id.key())))
                 .default_pos([stored.x, stored.y])
                 .default_size([stored.width, stored.height])
+                .frame(
+                    egui::Frame::window(&ctx.style_of(egui::Theme::Light))
+                        .fill(PANEL_BG)
+                        .stroke(Stroke::new(1., PANEL_EDGE)),
+                )
+                .title_frame(
+                    egui::Frame::window(&ctx.style_of(egui::Theme::Light))
+                        .fill(PANEL_INK)
+                        .stroke(Stroke::new(1., PANEL_EDGE)),
+                )
                 .open(&mut open);
             if let Some(work) = work {
                 builder = builder.constrain_to(work);
             }
             let window = builder.show(ctx, |ui| {
+                apply_dock_theme(ui);
                 ui.horizontal(|ui| {
                     dock_left = ui
                         .small_button("◀ Dock left")

@@ -8,8 +8,8 @@
 //! Requires `Features::MULTI_DRAW_INDIRECT`; [`ClusterRenderer::available`] reports whether the adapter has
 //! it before a caller builds one.
 
-use crate::meshlet::Meshlet;
 use crate::Camera;
+use crate::meshlet::Meshlet;
 use wgpu::util::DeviceExt;
 
 /// One GPU buffer pair. wgpu caps a single buffer, so cluster geometry lives in several chunks and each
@@ -96,6 +96,7 @@ pub struct ClusterRenderer {
     #[allow(dead_code)]
     group_error: wgpu::Buffer,
     coarse_pixels: f32,
+    level_count: u32,
     levels: Vec<u32>,
     cluster_count: u32,
     last_stats: ClusterStats,
@@ -138,7 +139,6 @@ impl ClusterRenderer {
             .unwrap_or(0)
     }
 
-
     /// `multi_draw_indexed_indirect` is core in wgpu 30, so an adapter that can render can do this.
     pub fn available(_adapter: &wgpu::Adapter) -> bool {
         true
@@ -146,6 +146,7 @@ impl ClusterRenderer {
 
     /// Uploads clusters with an explicit level and group per entry, and the group radii the compute pass
     /// uses to pick a level.
+    #[allow(clippy::too_many_arguments)]
     fn build(
         device: wgpu::Device,
         queue: wgpu::Queue,
@@ -153,10 +154,11 @@ impl ClusterRenderer {
         radii: &[f32],
         errors: &[f32],
         coarse_pixels: f32,
+        level_count: u32,
         budget_bytes: Option<u64>,
     ) -> Option<Self> {
         let mut used_bytes = 0u64;
-        
+
         let limit = device.limits().max_buffer_size;
         let mut cluster_bytes: Vec<u64> = Vec::with_capacity(entries.len());
         let mut records = Vec::with_capacity(entries.len());
@@ -203,7 +205,12 @@ impl ClusterRenderer {
                 index_count: cluster.indices.len() as u32,
                 base_vertex: base_vertex as i32,
                 level: *level,
-                centre_radius: [cluster.centre[0], cluster.centre[1], cluster.centre[2], cluster.radius],
+                centre_radius: [
+                    cluster.centre[0],
+                    cluster.centre[1],
+                    cluster.centre[2],
+                    cluster.radius,
+                ],
                 group: *group,
                 _pad: [0; 3],
             });
@@ -229,8 +236,14 @@ impl ClusterRenderer {
             chunk_resident.push(fits);
             let (vertex_data, index_data) = if fits {
                 (
-                    positions.iter().flat_map(|p| p.iter().flat_map(|v| v.to_le_bytes())).collect::<Vec<u8>>(),
-                    indices.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<u8>>(),
+                    positions
+                        .iter()
+                        .flat_map(|p| p.iter().flat_map(|v| v.to_le_bytes()))
+                        .collect::<Vec<u8>>(),
+                    indices
+                        .iter()
+                        .flat_map(|v| v.to_le_bytes())
+                        .collect::<Vec<u8>>(),
                 )
             } else {
                 // Never uploaded: a placeholder keeps the pipeline valid while the budget is spent
@@ -248,12 +261,18 @@ impl ClusterRenderer {
                     contents: &index_data,
                     usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST,
                 }),
-                vertex_bytes: if fits { (positions.len() as u64) * 12 } else { 0 },
+                vertex_bytes: if fits {
+                    (positions.len() as u64) * 12
+                } else {
+                    0
+                },
                 index_bytes: if fits { (indices.len() as u64) * 4 } else { 0 },
             });
         }
-        let initial_resident: Vec<u32> =
-            cluster_chunk.iter().map(|chunk| u32::from(chunk_resident[*chunk])).collect();
+        let initial_resident: Vec<u32> = cluster_chunk
+            .iter()
+            .map(|chunk| u32::from(chunk_resident[*chunk]))
+            .collect();
         let initial_count = initial_resident.iter().filter(|flag| **flag == 1).count();
         // A cluster whose chunk was never uploaded must not leave a stale draw argument behind.
         for (index, chunk) in cluster_chunk.iter().enumerate() {
@@ -270,7 +289,9 @@ impl ClusterRenderer {
         let indirect = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("cluster indirect"),
             contents: bytemuck::cast_slice(&args),
-            usage: wgpu::BufferUsages::INDIRECT | wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+            usage: wgpu::BufferUsages::INDIRECT
+                | wgpu::BufferUsages::STORAGE
+                | wgpu::BufferUsages::COPY_SRC,
         });
         let parse = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("cluster indirect readback"),
@@ -288,10 +309,11 @@ impl ClusterRenderer {
             contents: bytemuck::cast_slice(radii),
             usage: wgpu::BufferUsages::STORAGE,
         });
-        let error_data: Vec<f32> = if errors.len() == radii.len() {
+        let expected = radii.len() * level_count.max(1) as usize;
+        let error_data: Vec<f32> = if errors.len() == expected {
             errors.to_vec()
         } else {
-            vec![0.0; radii.len()]
+            vec![0.0; expected]
         };
         let group_error = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("cluster group error"),
@@ -395,7 +417,10 @@ impl ClusterRenderer {
         let render_bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("cluster render"),
             layout: &render_layout,
-            entries: &[wgpu::BindGroupEntry { binding: 0, resource: view.as_entire_binding() }],
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: view.as_entire_binding(),
+            }],
         });
         let compute_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("cluster cull"),
@@ -473,8 +498,17 @@ impl ClusterRenderer {
                     // stays under one pixel on screen. `coarse_pixels` is that threshold.
                     let group_distance = max(length(centre - eye), view.params.z);
                     if (view.screen.w > 0.5) {
-                        let error_pixels = group_error[cluster.group] * view.params.x / (group_distance * view.eye_tan.w);
-                        let wanted_level: u32 = select(0u, 1u, error_pixels < 1.0);
+                        let level_count = u32(view.screen.w);
+                        var wanted_level = 0u;
+                        let group_base = cluster.group * level_count;
+                        for (var level = 1u; level < level_count; level = level + 1u) {
+                            let error_pixels = group_error[group_base + level] * view.params.x / (group_distance * view.eye_tan.w);
+                            if (error_pixels < view.params.w) {
+                                wanted_level = level;
+                            } else {
+                                break;
+                            }
+                        }
                         if (cluster.level != wanted_level) {
                             visible = false;
                         }
@@ -584,11 +618,12 @@ impl ClusterRenderer {
                 .into(),
             ),
         });
-        let compute_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("cluster compute"),
-            bind_group_layouts: &[Some(&compute_layout)],
-            immediate_size: 0,
-        });
+        let compute_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("cluster compute"),
+                bind_group_layouts: &[Some(&compute_layout)],
+                immediate_size: 0,
+            });
         let compute = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("cluster cull"),
             layout: Some(&compute_pipeline_layout),
@@ -597,11 +632,12 @@ impl ClusterRenderer {
             compilation_options: Default::default(),
             cache: None,
         });
-        let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("cluster render"),
-            bind_group_layouts: &[Some(&render_layout)],
-            immediate_size: 0,
-        });
+        let render_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("cluster render"),
+                bind_group_layouts: &[Some(&render_layout)],
+                immediate_size: 0,
+            });
         let render = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("cluster draw"),
             layout: Some(&render_pipeline_layout),
@@ -619,7 +655,10 @@ impl ClusterRenderer {
                     }],
                 })],
             },
-            primitive: wgpu::PrimitiveState { cull_mode: None, ..Default::default() },
+            primitive: wgpu::PrimitiveState {
+                cull_mode: None,
+                ..Default::default()
+            },
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth32Float,
                 depth_write_enabled: Some(true),
@@ -656,6 +695,7 @@ impl ClusterRenderer {
             parse,
             group_radius,
             coarse_pixels,
+            level_count,
             group_error,
             levels: entries.iter().map(|(_, level, _)| *level).collect(),
             cluster_count: args.len() as u32,
@@ -692,7 +732,16 @@ impl ClusterRenderer {
             .map(|(index, cluster)| (cluster.clone(), 0, index as u32))
             .collect();
         let radii: Vec<f32> = clusters.iter().map(|cluster| cluster.radius).collect();
-        Self::build(device, queue, &entries, &radii, &[], 0.0, Some(budget_bytes))
+        Self::build(
+            device,
+            queue,
+            &entries,
+            &radii,
+            &[],
+            0.0,
+            0,
+            Some(budget_bytes),
+        )
     }
 
     /// Uploads a flat cluster list; every cluster is level 0 in its own group.
@@ -703,7 +752,7 @@ impl ClusterRenderer {
             .map(|(index, cluster)| (cluster.clone(), 0, index as u32))
             .collect();
         let radii: Vec<f32> = clusters.iter().map(|cluster| cluster.radius).collect();
-        Self::build(device, queue, &entries, &radii, &[], 0.0, None)
+        Self::build(device, queue, &entries, &radii, &[], 0.0, 0, None)
     }
 
     /// Uploads a cluster LOD hierarchy; the compute pass picks the level per group from its projected
@@ -714,11 +763,10 @@ impl ClusterRenderer {
         groups: &[crate::meshlet::ClusterGroup],
         coarse_pixels: f32,
     ) -> Option<Self> {
+        let level_count = groups.iter().map(|group| group.levels.len()).max().unwrap_or(1).max(1) as u32;
         let mut entries: Vec<(Meshlet, u32, u32)> = Vec::new();
         let mut radii: Vec<f32> = Vec::with_capacity(groups.len());
-        let mut errors: Vec<f32> = Vec::with_capacity(groups.len());
         for (group_index, group) in groups.iter().enumerate() {
-            errors.push(group.error_world);
             let radius = group
                 .levels
                 .iter()
@@ -735,7 +783,24 @@ impl ClusterRenderer {
         if entries.is_empty() {
             return None;
         }
-        Self::build(device, queue, &entries, &radii, &errors, coarse_pixels, None)
+        let mut errors = vec![0.0f32; groups.len() * level_count as usize];
+        for (group_index, group) in groups.iter().enumerate() {
+            let last = group.errors_world.last().copied().unwrap_or(0.0);
+            for level in 0..level_count as usize {
+                errors[group_index * level_count as usize + level] =
+                    group.errors_world.get(level).copied().unwrap_or(last);
+            }
+        }
+        Self::build(
+            device,
+            queue,
+            &entries,
+            &radii,
+            &errors,
+            coarse_pixels,
+            level_count,
+            None,
+        )
     }
 
     /// Creates the depth texture, the pyramid storage and the cull bind group for a target size.
@@ -745,7 +810,11 @@ impl ClusterRenderer {
         }
         let depth = self.device.create_texture(&wgpu::TextureDescriptor {
             label: Some("cluster depth"),
-            size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -773,13 +842,34 @@ impl ClusterRenderer {
             label: Some("cluster compute"),
             layout: &self.compute_layout,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: self.records.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: self.indirect.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 2, resource: self.view.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 3, resource: self.group_radius.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 4, resource: self.group_error.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 5, resource: wgpu::BindingResource::TextureView(pyramid_view) },
-                wgpu::BindGroupEntry { binding: 6, resource: self.residency.as_entire_binding() },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: self.records.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: self.indirect.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: self.view.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: self.group_radius.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: self.group_error.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 5,
+                    resource: wgpu::BindingResource::TextureView(pyramid_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 6,
+                    resource: self.residency.as_entire_binding(),
+                },
             ],
         }));
         self.depth = Some(depth);
@@ -792,8 +882,13 @@ impl ClusterRenderer {
         let (Some(depth_view), true) = (self.depth_view.as_ref(), self.pyramid.levels() > 1) else {
             return;
         };
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("pyramid") });
-        self.pyramid.build(&self.device, &self.queue, &mut encoder, depth_view);
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("pyramid"),
+            });
+        self.pyramid
+            .build(&self.device, &self.queue, &mut encoder, depth_view);
         self.queue.submit(std::iter::once(encoder.finish()));
         if self.pyramid_verified {
             self.occluding = true;
@@ -816,7 +911,8 @@ impl ClusterRenderer {
                 count += 1;
             }
         }
-        self.queue.write_buffer(&self.residency, 0, bytemuck::cast_slice(&resident));
+        self.queue
+            .write_buffer(&self.residency, 0, bytemuck::cast_slice(&resident));
         self.resident_count = count;
     }
 
@@ -827,7 +923,10 @@ impl ClusterRenderer {
 
     /// Bytes actually uploaded for resident chunks.
     pub fn resident_bytes(&self) -> u64 {
-        self.chunks.iter().map(|chunk| chunk.vertex_bytes + chunk.index_bytes).sum()
+        self.chunks
+            .iter()
+            .map(|chunk| chunk.vertex_bytes + chunk.index_bytes)
+            .sum()
     }
 
     /// Total bytes the clusters would need if all were resident.
@@ -836,6 +935,13 @@ impl ClusterRenderer {
     }
 
     /// Turns occlusion on or off; it is on by default once a pyramid exists.
+    /// Screen-space error budget for the coarse level, in pixels. Jewellery can use 0.5 for gem and
+    /// prong clusters while a 1.0 default suits general geometry.
+    pub fn set_coarse_pixels(&mut self, pixels: f32) {
+        self.coarse_pixels = pixels.max(0.0);
+        self.last_view = None;
+    }
+
     pub fn set_occlusion(&mut self, enabled: bool) {
         // A verified pyramid only takes effect after it has actually been built once, so the first frame
         // draws everything into depth and the second can cull against it.
@@ -869,7 +975,12 @@ impl ClusterRenderer {
         let uniform = ViewUniform {
             planes: planes_from(matrix),
             matrix: matrix_to_columns(matrix),
-            eye_tan: [camera.eye[0], camera.eye[1], camera.eye[2], camera.tan_half_fov()],
+            eye_tan: [
+                camera.eye[0],
+                camera.eye[1],
+                camera.eye[2],
+                camera.tan_half_fov(),
+            ],
             params: [height as f32 * 0.5, 0.5, camera.near, self.coarse_pixels],
             screen: [
                 width as f32,
@@ -879,7 +990,7 @@ impl ClusterRenderer {
                 } else {
                     0.0
                 },
-                if self.level_select { 1.0 } else { 0.0 },
+                if self.level_select { self.level_count.max(1) as f32 } else { 0.0 },
             ],
             projection: [
                 if camera.is_orthographic() { 1.0 } else { 0.0 },
@@ -889,14 +1000,26 @@ impl ClusterRenderer {
             ],
             levels: {
                 let mut table = [[0.0f32; 4]; 16];
-                for (level, (offset, level_width, level_height)) in self.pyramid_table.iter().enumerate().take(16) {
-                    table[level] = [*offset as f32, *level_width as f32, *level_height as f32, 0.0];
+                for (level, (offset, level_width, level_height)) in
+                    self.pyramid_table.iter().enumerate().take(16)
+                {
+                    table[level] = [
+                        *offset as f32,
+                        *level_width as f32,
+                        *level_height as f32,
+                        0.0,
+                    ];
                 }
                 table
             },
         };
-        self.queue.write_buffer(&self.view, 0, bytemuck::bytes_of(&uniform));
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("cluster") });
+        self.queue
+            .write_buffer(&self.view, 0, bytemuck::bytes_of(&uniform));
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("cluster"),
+            });
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
                 label: Some("cluster cull"),
@@ -916,13 +1039,21 @@ impl ClusterRenderer {
                     depth_slice: None,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.05, g: 0.05, b: 0.08, a: 1.0 }),
+                        load: wgpu::LoadOp::Clear(wgpu::Color {
+                            r: 0.05,
+                            g: 0.05,
+                            b: 0.08,
+                            a: 1.0,
+                        }),
                         store: wgpu::StoreOp::Store,
                     },
                 })],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                     view: &depth_view,
-                    depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Clear(1.0), store: wgpu::StoreOp::Store }),
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: wgpu::StoreOp::Store,
+                    }),
                     stencil_ops: None,
                 }),
                 timestamp_writes: None,
@@ -946,7 +1077,10 @@ impl ClusterRenderer {
         }
         self.queue.submit(std::iter::once(encoder.finish()));
         self.device
-            .poll(wgpu::PollType::Wait { submission_index: None, timeout: None })
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
             .map_err(|_| crate::RenderError::Lost)?;
         // Build the pyramid from this frame for the next one to cull against.
         self.build_pyramid();
@@ -956,36 +1090,63 @@ impl ClusterRenderer {
     /// Copies the indirect list back and counts the clusters with work, for tests and diagnostics.
     pub fn count_visible(&mut self) -> usize {
         let size = (self.cluster_count as usize * std::mem::size_of::<DrawArgs>()) as u64;
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("cluster read") });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("cluster read"),
+            });
         encoder.copy_buffer_to_buffer(&self.indirect, 0, &self.parse, 0, size);
         self.queue.submit(std::iter::once(encoder.finish()));
         self.device
-            .poll(wgpu::PollType::Wait { submission_index: None, timeout: None })
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
             .expect("poll");
         let slice = self.parse.slice(..);
         slice.map_async(wgpu::MapMode::Read, |_| {});
         self.device
-            .poll(wgpu::PollType::Wait { submission_index: None, timeout: None })
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
             .expect("map");
         let data = slice.get_mapped_range().expect("mapped");
         let args: &[DrawArgs] = bytemuck::cast_slice(&data);
         let visible = args.iter().filter(|arg| arg.index_count > 0).count();
         drop(data);
         self.parse.unmap();
-        self.last_stats = ClusterStats { clusters: self.cluster_count as usize, visible };
+        self.last_stats = ClusterStats {
+            clusters: self.cluster_count as usize,
+            visible,
+        };
         visible
     }
 
     /// Counts the visible clusters per level, for the LOD test.
     pub fn count_visible_levels(&mut self) -> (usize, usize) {
         let size = (self.cluster_count as usize * std::mem::size_of::<DrawArgs>()) as u64;
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("cluster read") });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("cluster read"),
+            });
         encoder.copy_buffer_to_buffer(&self.indirect, 0, &self.parse, 0, size);
         self.queue.submit(std::iter::once(encoder.finish()));
-        self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("poll");
+        self.device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("poll");
         let slice = self.parse.slice(..);
         slice.map_async(wgpu::MapMode::Read, |_| {});
-        self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("map");
+        self.device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("map");
         let data = slice.get_mapped_range().expect("mapped");
         let args: &[DrawArgs] = bytemuck::cast_slice(&data);
         let mut fine = 0;
@@ -1044,13 +1205,27 @@ fn view_hash(camera: &Camera) -> u64 {
 
 /// Normalised frustum planes from a column-major view-projection.
 fn planes_from(matrix: [f32; 16]) -> [[f32; 4]; 6] {
-    let row = |index: usize| [matrix[index], matrix[4 + index], matrix[8 + index], matrix[12 + index]];
+    let row = |index: usize| {
+        [
+            matrix[index],
+            matrix[4 + index],
+            matrix[8 + index],
+            matrix[12 + index],
+        ]
+    };
     let (r0, r1, r2, r3) = (row(0), row(1), row(2), row(3));
     let combine = |a: [f32; 4], b: [f32; 4], sign: f32| {
-        [a[0] + sign * b[0], a[1] + sign * b[1], a[2] + sign * b[2], a[3] + sign * b[3]]
+        [
+            a[0] + sign * b[0],
+            a[1] + sign * b[1],
+            a[2] + sign * b[2],
+            a[3] + sign * b[3],
+        ]
     };
     let normalise = |mut plane: [f32; 4]| {
-        let length = (plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]).sqrt().max(1e-9);
+        let length = (plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2])
+            .sqrt()
+            .max(1e-9);
         for value in &mut plane {
             *value /= length;
         }
@@ -1075,3 +1250,59 @@ fn matrix_to_columns(matrix: [f32; 16]) -> [[f32; 4]; 4] {
     ]
 }
 
+/// Highest LOD level whose projected geometric error stays below `threshold_px`. Level 0 is always
+/// acceptable. This is the CPU oracle for the compute shader and lets tests pin the accuracy policy.
+pub fn choose_level(
+    errors_world: &[f32],
+    distance: f32,
+    half_height_px: f32,
+    tan_half_fov: f32,
+    threshold_px: f32,
+) -> usize {
+    if errors_world.len() <= 1 || distance <= 0.0 || tan_half_fov <= 0.0 || threshold_px <= 0.0 {
+        return 0;
+    }
+    let mut chosen = 0;
+    for (level, error) in errors_world.iter().enumerate().skip(1) {
+        let pixels = *error * half_height_px / (distance * tan_half_fov);
+        if pixels < threshold_px {
+            chosen = level;
+        } else {
+            break;
+        }
+    }
+    chosen
+}
+
+#[cfg(test)]
+mod level_choice_tests {
+    use super::choose_level;
+
+    #[test]
+    fn the_level_is_the_highest_one_under_the_pixel_budget() {
+        let errors = [0.0, 0.01, 0.05, 0.2];
+        // 1000 px half-height, 35 degree fov, unit distance: error 0.05 -> ~0.08 px per 0.001.
+        let tan = (35f32 / 2.0).to_radians().tan();
+        assert_eq!(choose_level(&errors, 10.0, 500.0, tan, 32.0), 3);
+        assert_eq!(choose_level(&errors, 10.0, 500.0, tan, 8.0), 2);
+        assert_eq!(choose_level(&errors, 10.0, 500.0, tan, 2.0), 1);
+        assert_eq!(choose_level(&errors, 10.0, 500.0, tan, 1.0), 0);
+        assert_eq!(choose_level(&errors, 10.0, 500.0, tan, 0.0), 0);
+    }
+}
+
+#[cfg(test)]
+mod jewellery_threshold_tests {
+    use super::choose_level;
+
+    #[test]
+    fn gem_and_shank_thresholds_differ_at_the_same_distance() {
+        let errors = [0.0, 0.05];
+        let tan = 35f32.to_radians().tan() / 2.0;
+        let half = 500.0;
+        // Distance where 0.05 mm projects to about 0.8 px.
+        let distance = 0.05 * half / (0.8 * tan);
+        assert_eq!(choose_level(&errors, distance, half, tan, 0.5), 0, "gem keeps LOD 0");
+        assert_eq!(choose_level(&errors, distance, half, tan, 1.0), 1, "shank may use coarse");
+    }
+}

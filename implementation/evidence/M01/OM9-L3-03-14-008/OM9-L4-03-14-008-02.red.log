@@ -1,0 +1,36 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+warning: variable does not need to be mutable
+   --> crates\om9-app\tests\layer_state_persistence.rs:142:9
+    |
+142 |     let mut controller = Controller::new(current, limits).expect("controller");
+    |         ----^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-app` (test "layer_state_persistence") generated 1 warning (run `cargo fix --test "layer_state_persistence" -p om9-app` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.89s
+     Running tests\layer_state_persistence.rs (L:\om9-target\debug\deps\layer_state_persistence-95c151a75916a2a5.exe)
+
+running 2 tests
+test k1_to_k3_the_two_layers_come_back_with_their_flags_and_ids ... FAILED
+test l1_to_l3_the_palette_never_shows_cached_state ... ok
+
+failures:
+
+---- k1_to_k3_the_two_layers_come_back_with_their_flags_and_ids stdout ----
+
+thread 'k1_to_k3_the_two_layers_come_back_with_their_flags_and_ids' (44444) panicked at crates\om9-app\tests\layer_state_persistence.rs:77:5:
+assertion `left == right` failed
+  left: [1, 2, 3, 4, 5, 6, 7, 8]
+ right: [5, 1]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    k1_to_k3_the_two_layers_come_back_with_their_flags_and_ids
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+error: test failed, to rerun pass `-p om9-app --test layer_state_persistence`

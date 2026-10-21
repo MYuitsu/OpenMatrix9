@@ -195,6 +195,16 @@ fn displays_a_window(args: &[std::ffi::OsString]) -> bool {
         )
 }
 fn main() {
+    // Explicit replay bootstrap barrier: the owning harness arms ETW before any swapchain exists.
+    // This runs before the UI/event loop; normal application startup never waits for stdin.
+    if std::env::var_os("OM9_NAVIGATION_AUDIT").is_some()
+        && std::env::var("OM9_NAVIGATION_AUDIT_STDIN_GATE").is_ok_and(|v| v == "1")
+    {
+        let mut ready = String::new();
+        if std::io::stdin().read_line(&mut ready).is_err() || ready.trim() != "ready" {
+            std::process::exit(2);
+        }
+    }
     let args: Vec<_> = std::env::args_os().skip(1).collect();
     let ui_mode = displays_a_window(&args);
     if let Err(failure) = run() {

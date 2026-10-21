@@ -164,7 +164,7 @@ pub(crate) struct ComponentTable {
     #[serde(default)]
     pub texture_count: Option<u64>,
     #[serde(default)]
-    pub settings: Option<IgnoredAny>,
+    pub settings: Option<Value>,
     #[serde(default)]
     pub preservation: Option<Preservation>,
     #[serde(default)]
@@ -254,6 +254,9 @@ pub(crate) struct Attributes {
     pub groups: Vec<i32>,
     pub display_order: i32,
     pub plot_weight_mm: f64,
+    pub plot_color: Option<[u8; 4]>,
+    pub plot_color_source: u32,
+    pub plot_weight_source: u32,
     pub userdata: Vec<IgnoredAny>,
 }
 #[derive(Deserialize)]
@@ -299,6 +302,8 @@ pub(crate) struct Layer {
     #[serde(deserialize_with = "optional_uuid")]
     pub parent: Option<Uuid>,
     pub color: [u8; 4],
+    pub plot_color: [u8; 4],
+    pub plot_weight_mm: f64,
     pub visible: bool,
     pub locked: bool,
     pub relations: Vec<Relation>,

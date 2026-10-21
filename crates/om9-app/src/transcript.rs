@@ -166,3 +166,58 @@ impl Transcript {
         }
     }
 }
+
+/// Strips directory prefixes from anything that looks like an absolute path, so the command history never
+/// stores a user name, a network share or a confidential folder name from a file dialog. Only the file name
+/// survives.
+pub fn redact_paths(message: &str) -> String {
+    let mut out = String::with_capacity(message.len());
+    for token in message.split_inclusive(' ') {
+        let trimmed = token.trim_end_matches(' ');
+        let looks_like_path = (trimmed.len() > 2
+            && trimmed.as_bytes()[1] == b':'
+            && matches!(trimmed.as_bytes()[2], b'\\' | b'/'))
+            || trimmed.starts_with('/')
+            || trimmed.contains("\\\\");
+        if looks_like_path {
+            let name = trimmed
+                .rsplit(['\\', '/'])
+                .next()
+                .filter(|name| !name.is_empty())
+                .unwrap_or(trimmed);
+            out.push_str(name);
+        } else {
+            out.push_str(trimmed);
+        }
+        if token.ends_with(' ') {
+            out.push(' ');
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod redaction_tests {
+    use super::redact_paths;
+
+    #[test]
+    fn a_windows_path_keeps_only_the_file_name() {
+        assert_eq!(
+            redact_paths("Exported Rhino 3DM: C:\\Users\\me\\secret\\ring.3dm"),
+            "Exported Rhino 3DM: ring.3dm"
+        );
+    }
+
+    #[test]
+    fn a_unc_path_keeps_only_the_file_name() {
+        assert_eq!(
+            redact_paths("Imported Rhino 3DM: \\\\server\\share\\client\\ring.3dm"),
+            "Imported Rhino 3DM: ring.3dm"
+        );
+    }
+
+    #[test]
+    fn ordinary_words_are_untouched() {
+        assert_eq!(redact_paths("Document saved."), "Document saved.");
+    }
+}

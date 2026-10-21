@@ -1,0 +1,22 @@
+task: OM9-L4-03-14-008-03 (implementation) Layer State Persistence Visual Check
+
+== RED ==
+API-level for the new fixture file (no earlier behaviour failed); the round trip itself already worked. The fixture records one real finding: touching one preset slot creates its four-slot group, so the file holds slots 1..8 (the first run of K1 failed with exactly that: expected [5,1], stored [1..8]).
+
+== GREEN ==
+
+running 2 tests
+test k1_to_k3_the_two_layers_come_back_with_their_flags_and_ids ... ok
+test l1_to_l3_the_palette_never_shows_cached_state ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.75s
+     Running tests\layer_state_persistence.rs (L:\om9-target\debug\deps\layer_state_persistence-95c151a75916a2a5.exe)
+
+== cargo fmt --check: exit 0 ==
+== cargo clippy: exit 0 ==
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.65s
+

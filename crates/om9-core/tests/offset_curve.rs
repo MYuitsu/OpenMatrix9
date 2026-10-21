@@ -27,10 +27,7 @@ fn relative(actual: Point3, expected: Point3) -> f64 {
 /// Five-point second derivative of the point, extrapolated (Richardson) to cancel `O(h²)`.
 fn finite_d2(curve: &impl CurveBasis, u: f64, h: f64) -> Point3 {
     let fd = |step: f64| {
-        let minus_two = curve
-            .derivatives(u - 2.0 * step)
-            .expect("parameter")
-            .point;
+        let minus_two = curve.derivatives(u - 2.0 * step).expect("parameter").point;
         let minus_one = curve.derivatives(u - step).expect("parameter").point;
         let zero = curve.derivatives(u).expect("parameter").point;
         let plus_one = curve.derivatives(u + step).expect("parameter").point;
@@ -59,10 +56,7 @@ fn finite_d2(curve: &impl CurveBasis, u: f64, h: f64) -> Point3 {
 
 fn finite_d3(curve: &impl CurveBasis, u: f64, h: f64) -> Point3 {
     let fd = |step: f64| {
-        let minus_two = curve
-            .derivatives(u - 2.0 * step)
-            .expect("parameter")
-            .point;
+        let minus_two = curve.derivatives(u - 2.0 * step).expect("parameter").point;
         let minus_one = curve.derivatives(u - step).expect("parameter").point;
         let plus_one = curve.derivatives(u + step).expect("parameter").point;
         let plus_two = curve.derivatives(u + 2.0 * step).expect("parameter").point;
@@ -161,7 +155,11 @@ impl CurveBasis for WarpedCircle {
 
 /// The exact expressions OCCT 8.0.1 uses, kept here as the negative control: the checks below must
 /// reject them while accepting the module's own derivation.
-fn occt_8_0_1_offset_derivatives(basis: &Derivatives, distance: f64, v: Point3) -> (Point3, Point3) {
+fn occt_8_0_1_offset_derivatives(
+    basis: &Derivatives,
+    distance: f64,
+    v: Point3,
+) -> (Point3, Point3) {
     let sub3 = sub;
     let cross = |a: Point3, b: Point3| {
         [
@@ -294,8 +292,11 @@ fn the_occt_8_0_1_expansion_fails_the_same_oracle() {
     let mut worst_d3: f64 = 0.0;
     for u in [0.3, 1.1, 2.0] {
         let correct = offset.derivatives(u).expect("derivatives");
-        let (wrong_d2, wrong_d3) =
-            occt_8_0_1_offset_derivatives(&basis.derivatives(u).expect("basis"), distance, [0.0, 0.0, 1.0]);
+        let (wrong_d2, wrong_d3) = occt_8_0_1_offset_derivatives(
+            &basis.derivatives(u).expect("basis"),
+            distance,
+            [0.0, 0.0, 1.0],
+        );
         worst_d2 = worst_d2.max(relative(wrong_d2, correct.d2));
         worst_d3 = worst_d3.max(relative(wrong_d3, correct.d3));
     }
@@ -313,7 +314,11 @@ fn quarter_circle(radius: f64) -> NurbsCurve {
     let h = std::f64::consts::FRAC_1_SQRT_2;
     NurbsCurve {
         degree: 2,
-        poles: vec![[radius, 0.0, 0.0], [radius, radius, 0.0], [0.0, radius, 0.0]],
+        poles: vec![
+            [radius, 0.0, 0.0],
+            [radius, radius, 0.0],
+            [0.0, radius, 0.0],
+        ],
         weights: vec![1.0, h, 1.0],
         knots: vec![0.0, 0.0, 0.0, 1.0, 1.0, 1.0],
         domain: [0.0, 1.0],
@@ -391,7 +396,9 @@ fn a_direction_parallel_to_the_tangent_is_unsupported() {
     let offset = OffsetCurve::new(basis, 1.0, [0.0, 0.0, 1.0]).expect("offset");
     assert!(matches!(
         offset.derivatives(0.5),
-        Err(Error::Unsupported("offset direction parallel to the tangent"))
+        Err(Error::Unsupported(
+            "offset direction parallel to the tangent"
+        ))
     ));
 }
 

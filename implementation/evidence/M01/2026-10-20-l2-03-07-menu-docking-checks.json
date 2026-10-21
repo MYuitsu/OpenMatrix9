@@ -34,7 +34,8 @@
       "font hinting disabled for smoother anti-aliased glyphs",
       "raised category cards with drop shadow and lit top edge",
       "dark text shadow under coloured labels",
-      "ten-icon rows with a right-anchored green page column (green | selected, light-green circles)"
+      "ten-icon rows with a right-anchored green page column (green | selected, light-green circles)",
+      "compact two-row category grid at the 300 px dock"
     ]
   },
   "checks": [
@@ -204,9 +205,9 @@
   },
   "ui_audit": {
     "screenshot": "build/ui-audit-l2-03-07/workspace.png",
-    "screenshot_sha256": "c791228a65c98b06c1dd83612e659c345eadc533d231b99eec13a9c7b7ab4132",
+    "screenshot_sha256": "5c8779784070620a0169d2547e8ca2ca4a2172d4e976f1da2a2489d6a8e4c0e9",
     "receipt": "build/ui-audit-l2-03-07/ui-receipt.json",
-    "receipt_sha256": "02d97d71dec9da3565116964ed035376a7d0b8c2bc25ad073c0e2fd1d5363a2c",
+    "receipt_sha256": "6f599471995c46ab0c213686507c6e1fc39d1cc38c1e5e0405e84132df301b90",
     "passes": 21,
     "view_rects": {
       "Looking Down": [

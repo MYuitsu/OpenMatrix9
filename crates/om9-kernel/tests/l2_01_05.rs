@@ -7,7 +7,7 @@
 //! the reference fixtures.
 
 use om9_kernel::{
-    box_measures, cylinder_measures, curve_point_and_derivative, line_face_hits, sphere_measures,
+    box_measures, curve_point_and_derivative, cylinder_measures, line_face_hits, sphere_measures,
     sphere_mesh, surface_point_and_normal, topology, transform_box,
 };
 use std::f64::consts::PI;
@@ -20,7 +20,12 @@ fn close(actual: f64, expected: f64, tolerance: f64) -> bool {
 fn face_wire_edge_topology_is_exact() {
     let box_topology = topology(0).expect("box topology");
     assert_eq!(
-        (box_topology.faces, box_topology.edges, box_topology.vertices, box_topology.wires),
+        (
+            box_topology.faces,
+            box_topology.edges,
+            box_topology.vertices,
+            box_topology.wires
+        ),
         (6, 12, 8, 6),
         "a box has 6 faces, 12 edges, 8 vertices and 6 wires (unique, not per-face occurrences)"
     );
@@ -32,7 +37,10 @@ fn face_wire_edge_topology_is_exact() {
     assert!(sphere.valid);
 
     let cylinder = topology(2).expect("cylinder topology");
-    assert_eq!(cylinder.faces, 3, "a cylinder has two caps and one lateral face");
+    assert_eq!(
+        cylinder.faces, 3,
+        "a cylinder has two caps and one lateral face"
+    );
     assert_eq!(cylinder.wires, 3);
     assert!(cylinder.valid);
 }
@@ -51,15 +59,26 @@ fn a_transform_moves_the_box_and_keeps_its_volume() {
     assert!(close(rotated.volume, 400.0, 1e-6));
 
     let scaled = transform_box(0.0, 0.0, 0.0, 0.0, 2.0).expect("scale");
-    assert!(close(scaled.volume, 3200.0, 1e-5), "a 2x scale cubes the volume");
+    assert!(
+        close(scaled.volume, 3200.0, 1e-5),
+        "a 2x scale cubes the volume"
+    );
 }
 
 #[test]
 fn the_rational_nurbs_quarter_circle_evaluates_exactly() {
     let (point, derivative) = curve_point_and_derivative(0.5).expect("curve");
     let expected = 5.0 / 2.0_f64.sqrt();
-    assert!(close(point[0], expected, 1e-9), "x {} != {expected}", point[0]);
-    assert!(close(point[1], expected, 1e-9), "y {} != {expected}", point[1]);
+    assert!(
+        close(point[0], expected, 1e-9),
+        "x {} != {expected}",
+        point[0]
+    );
+    assert!(
+        close(point[1], expected, 1e-9),
+        "y {} != {expected}",
+        point[1]
+    );
     assert!(close(point[2], 0.0, 1e-12));
     let speed = derivative[0].hypot(derivative[1]);
     assert!(speed > 0.0, "the derivative must not vanish");
@@ -77,7 +96,10 @@ fn the_sphere_normal_is_the_unit_radial_direction() {
         assert!(close(length, 1.0, 1e-9), "the normal must be a unit vector");
         // The normal of a sphere is parallel to the position vector.
         let dot = (point[0] * normal[0] + point[1] * normal[1] + point[2] * normal[2]) / radius;
-        assert!(close(dot.abs(), 1.0, 1e-9), "u={u} v={v}: normal/point alignment {dot}");
+        assert!(
+            close(dot.abs(), 1.0, 1e-9),
+            "u={u} v={v}: normal/point alignment {dot}"
+        );
     }
 }
 
@@ -87,14 +109,22 @@ fn a_line_through_the_box_hits_two_faces() {
     assert_eq!(hits, 2, "a line through a box enters and leaves it");
     let first = first.expect("first hit");
     assert!(close(first[0], 5.0, 1e-9) && close(first[1], 5.0, 1e-9));
-    assert!(close(first[2], 0.0, 1e-7), "the first hit is the bottom face at z=0, got {}", first[2]);
+    assert!(
+        close(first[2], 0.0, 1e-7),
+        "the first hit is the bottom face at z=0, got {}",
+        first[2]
+    );
 }
 
 #[test]
 fn the_tessellation_stays_on_the_exact_sphere() {
     for tolerance in [0.01, 0.001] {
         let report = sphere_mesh(5.0, tolerance).expect("mesh");
-        assert!(report.max_deviation <= tolerance, "tolerance {tolerance}: deviation {}", report.max_deviation);
+        assert!(
+            report.max_deviation <= tolerance,
+            "tolerance {tolerance}: deviation {}",
+            report.max_deviation
+        );
         assert_eq!(report.boundary_edges, 0, "the mesh must be closed");
         assert!(report.triangles > 0);
     }

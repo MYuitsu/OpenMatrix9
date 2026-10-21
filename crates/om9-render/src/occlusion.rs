@@ -58,7 +58,11 @@ impl DepthPyramid {
             current_width = next_width;
             current_height = next_height;
         }
-        Some(Self { levels, widths, heights })
+        Some(Self {
+            levels,
+            widths,
+            heights,
+        })
     }
 
     pub fn levels(&self) -> usize {

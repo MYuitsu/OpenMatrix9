@@ -25,7 +25,13 @@ pub fn cluster_error(cell: f32) -> f32 {
 
 /// The largest cell whose projected error stays under `max_pixels` for a mesh `radius` wide seen from
 /// `distance` in a viewport `height` pixels tall with a vertical field of view of `fov` radians.
-pub fn cell_for_pixel_error(radius: f32, distance: f32, height: f32, fov: f32, max_pixels: f32) -> f32 {
+pub fn cell_for_pixel_error(
+    radius: f32,
+    distance: f32,
+    height: f32,
+    fov: f32,
+    max_pixels: f32,
+) -> f32 {
     let tan_half = (fov * 0.5).tan().max(1e-6);
     // error_px = cell * sqrt(3)/2 * height / (distance * tan_half) <= max_pixels
     let allowed_error = max_pixels * distance * tan_half / height.max(1.0);
@@ -98,10 +104,19 @@ mod tests {
     fn cube() -> MeshData {
         MeshData::new(
             vec![
-                [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, -0.5],
-                [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5], [-0.5, 0.5, 0.5],
+                [-0.5, -0.5, -0.5],
+                [0.5, -0.5, -0.5],
+                [0.5, 0.5, -0.5],
+                [-0.5, 0.5, -0.5],
+                [-0.5, -0.5, 0.5],
+                [0.5, -0.5, 0.5],
+                [0.5, 0.5, 0.5],
+                [-0.5, 0.5, 0.5],
             ],
-            vec![0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 2, 3, 7, 2, 7, 6, 1, 2, 6, 1, 6, 5, 0, 4, 7, 0, 7, 3],
+            vec![
+                0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 2, 3, 7, 2, 7, 6, 1, 2, 6, 1,
+                6, 5, 0, 4, 7, 0, 7, 3,
+            ],
         )
     }
 
@@ -170,7 +185,10 @@ mod tests {
                     (dx * dx + dy * dy + dz * dz).sqrt()
                 })
                 .fold(f32::MAX, f32::min);
-            assert!(nearest <= bound + cell * 0.5, "a vertex moved {nearest} with bound {bound}");
+            assert!(
+                nearest <= bound + cell * 0.5,
+                "a vertex moved {nearest} with bound {bound}"
+            );
         }
     }
 

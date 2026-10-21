@@ -1,0 +1,82 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-14-002-01",
+  "l3_id": "OM9-L3-03-14-002",
+  "l3_title": "Current Layer And Assignment UI",
+  "owner_module_id": "OM9-L2-03-14",
+  "milestone": "M01",
+  "stage": "E02",
+  "gate": "M01-UI",
+  "goal": "choose active layer and move selection onto layer",
+  "positive_oracle": "Select current layer Metals, assign object A, panel and model both reflect same LayerId",
+  "negative_oracle": "Assign onto locked/unavailable layer must refuse explicitly",
+  "behaviour_reference": {
+    "source": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/reference/text/m8book1__p54-57__the-layers-menu.md",
+    "quote": "It also organizes things by turning off or hiding those parts you don't need to see right at the moment; selecting things you need to use all at once, and \"locking\" layers you don't wish to change with a certain operation.",
+    "decision": "The manual says locking protects a layer from certain operations. Moving objects onto a locked layer is such an operation, so it is refused, explicitly and without a transaction."
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "The behavioural source is the extracted Matrix9 manual section shipped with the milestone; QymCAD is consulted only for panel technique.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:354 comment: THE ONE DOORWAY OF THE FEATURE TREE"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "One doorway for a user action: the idea OM9 keeps. QymCAD has no layer and therefore no lock rule for it.",
+      "om9_owner": "crates/om9-app/src/session/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:59 pub struct Place { … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No layers.",
+      "om9_owner": "crates/om9-app/src/ui/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No layer state.",
+      "om9_owner": "crates/om9-app/src/session/layers.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "session/layers.rs: set_current_layer (creates the missing preset group and makes the preset current), assign_layer (creates missing presets then assigns), set_layer_property (visible/locked), layer_id(slot), select_layer(slot)",
+    "layer_command.rs: LayerChoice { None, Slot, Existing } and parse() with ambiguous-label refusal",
+    "ui/layers.rs: the palette paints the current row through layer_id(slot) == document.current_layer"
+  ],
+  "gap_found_by_this_task": [
+    "assign_layer never read the target layer's lock: moving geometry ONTO a locked layer succeeded, which is exactly the operation the manual says locking prevents (negative oracle). The fixture L1 caught it (RED: 1 passed; 2 failed).",
+    "Fixed in the controller: the lock is checked after the target is resolved and BEFORE any LayerAction is applied, so the refusal costs no transaction and leaves the selection where it was (Error::Permission(\"layer is locked\")).",
+    "Pinned, unchanged because they already held: create+current in one batch; assignment does not steal the current layer; an empty selection is a no-op; the panel reads the same LayerId the document holds."
+  ],
+  "reuse_decision": "ADAPT the single doorway of gui.rs; ADD the lock rule for assignment in the controller.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-03-14-002/positive.json",
+    "implementation/fixtures/M01/OM9-L3-03-14-002/negative.json",
+    "crates/om9-app/tests/layer_current_and_assign.rs"
+  ]
+}

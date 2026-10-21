@@ -1,0 +1,425 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Live icon resize on Windows maximize/restore while retaining reference palette counts, row order, ten-column Main Menu and 360-point default dock.",
+  "before_failure": "Same-context pre-fix regression: at 1280x900 -> 1920x1080 Main Menu was 31 -> 31 and Display/Snaps/Info were each 27.59375 -> 27.59375 points.",
+  "fix": "Scale the actual geometric Main Menu slot capacity and the reference palettes by a bounded 0.9..1.0 factor derived every frame from the existing window scale. Keep minimum fit/width and vertical caps.",
+  "sources": [
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "sha256": "eb705f1bec6740153f881d44da2d654c0924787232d71b6ad07509e249d10e81"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "sha256": "af1d2e230fc973dd744ecccaef64f3a8f38e794e91b311dfbaa452a978dbcd84"
+    },
+    {
+      "path": "crates/om9-app/src/ui/sidebar_palettes.rs",
+      "sha256": "23f2f6ecfc8f62d0a24572767017632426006e11722b823a0374f2dc8c989826"
+    },
+    {
+      "path": "crates/om9-app/src/ui/icon_resize_audit.rs",
+      "sha256": "f17e9576eb58988ea8e3b8710a5922cbd013605e66072ad3199159f54ccf60e4"
+    },
+    {
+      "path": "crates/om9-app/src/ui/icon_size_audit.rs",
+      "sha256": "3984c72567fac837a9002ba8d464e2f20aecc18434a32b6e62a582a850bc33ed"
+    },
+    {
+      "path": "tools/validate_icon_live_resize.py",
+      "sha256": "fa1c581bab440ce408589991b07fd8b2621d3f25fd6f789fcbd7766e85d3d374"
+    }
+  ],
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-responsive-icons.exe",
+    "sha256": "c1304abb9003931dc5878031d600aa0601c23c02150ef086e4e4fd7a2a3c4b1e"
+  },
+  "build": {
+    "result": "PASS",
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-responsive-icons.exe"
+  },
+  "tests": {
+    "result": "PASS",
+    "total": 16,
+    "suites": {
+      "icon_size_audit": 2,
+      "sidebar_palettes": 2,
+      "chrome_tests": 4,
+      "left_stack_layers": 8
+    },
+    "matrix_cases": 12,
+    "pages_per_case": 22,
+    "toolbar_tabs_per_case": 20,
+    "live_resize_scales": [
+      1,
+      1.25,
+      1.5
+    ],
+    "log": "build/fullscreen-icon-tests.log",
+    "log_sha256": "d54e92811401e137130c481fa3a3c20788a167cb18bd28d75ba045d751a868dd",
+    "integration_execution": "Fresh L:/om9-target/debug/deps/left_stack_layers-a7e5e2c5565b7534.exe --test-threads=1 after cargo hit a running om9.exe access-denied lock."
+  },
+  "measurements": [
+    {
+      "client_points": [
+        1280.0,
+        720.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 28.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 21.8125,
+      "fixed_slot_device_px": 24.8125,
+      "fixed_slot_pt": 24.8125,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 28.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "scale": 1.0,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 23.0,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        1024.0,
+        576.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 35.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 21.78125,
+      "fixed_slot_device_px": 30.9765625,
+      "fixed_slot_pt": 24.78125,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 35.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "scale": 1.25,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 28.75,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        853.3333129882812,
+        480.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 42.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 21.8125,
+      "fixed_slot_device_px": 37.21875,
+      "fixed_slot_pt": 24.8125,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 42.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "scale": 1.5,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 34.5,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        1366.0,
+        768.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 28.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 21.84375,
+      "fixed_slot_device_px": 24.84375,
+      "fixed_slot_pt": 24.84375,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 28.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1366.0,
+        768.0
+      ],
+      "scale": 1.0,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 23.0,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        1092.800048828125,
+        614.4000244140625
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 35.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 21.78125,
+      "fixed_slot_device_px": 30.9765625,
+      "fixed_slot_pt": 24.78125,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 35.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1366.0,
+        768.0
+      ],
+      "scale": 1.25,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 28.75,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        910.6666870117188,
+        512.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 42.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 21.8125,
+      "fixed_slot_device_px": 37.21875,
+      "fixed_slot_pt": 24.8125,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 42.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1366.0,
+        768.0
+      ],
+      "scale": 1.5,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 34.5,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        1920.0,
+        1080.0
+      ],
+      "dock_art_pt": 37.0,
+      "dock_slot_device_px": 40.0,
+      "dock_slot_pt": 40.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 27.59375,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 40.0,
+      "main_art_pt": 28.0,
+      "main_slot_device_px": 31.0,
+      "main_slot_pt": 31.0,
+      "resolution": [
+        1920.0,
+        1080.0
+      ],
+      "scale": 1.0,
+      "toolbar_art_pt": 29.0,
+      "toolbar_slot_device_px": 32.0,
+      "toolbar_slot_pt": 32.0
+    },
+    {
+      "client_points": [
+        1536.0,
+        864.0
+      ],
+      "dock_art_pt": 29.0,
+      "dock_slot_device_px": 40.0,
+      "dock_slot_pt": 32.0,
+      "fixed_art_pt": 22.65625,
+      "fixed_slot_device_px": 32.0703125,
+      "fixed_slot_pt": 25.65625,
+      "history_slot_pt": 32.0,
+      "main_art_pt": 26.0,
+      "main_slot_device_px": 36.25,
+      "main_slot_pt": 29.0,
+      "resolution": [
+        1920.0,
+        1080.0
+      ],
+      "scale": 1.25,
+      "toolbar_art_pt": 23.0,
+      "toolbar_slot_device_px": 32.5,
+      "toolbar_slot_pt": 26.0
+    },
+    {
+      "client_points": [
+        1280.0,
+        720.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 42.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 21.8125,
+      "fixed_slot_device_px": 37.21875,
+      "fixed_slot_pt": 24.8125,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 42.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1920.0,
+        1080.0
+      ],
+      "scale": 1.5,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 34.5,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        2560.0,
+        1440.0
+      ],
+      "dock_art_pt": 37.0,
+      "dock_slot_device_px": 40.0,
+      "dock_slot_pt": 40.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 27.59375,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 40.0,
+      "main_art_pt": 28.0,
+      "main_slot_device_px": 31.0,
+      "main_slot_pt": 31.0,
+      "resolution": [
+        2560.0,
+        1440.0
+      ],
+      "scale": 1.0,
+      "toolbar_art_pt": 29.0,
+      "toolbar_slot_device_px": 32.0,
+      "toolbar_slot_pt": 32.0
+    },
+    {
+      "client_points": [
+        2048.0,
+        1152.0
+      ],
+      "dock_art_pt": 37.0,
+      "dock_slot_device_px": 50.0,
+      "dock_slot_pt": 40.0,
+      "fixed_art_pt": 24.53125,
+      "fixed_slot_device_px": 34.4140625,
+      "fixed_slot_pt": 27.53125,
+      "history_slot_pt": 40.0,
+      "main_art_pt": 28.0,
+      "main_slot_device_px": 38.75,
+      "main_slot_pt": 31.0,
+      "resolution": [
+        2560.0,
+        1440.0
+      ],
+      "scale": 1.25,
+      "toolbar_art_pt": 29.0,
+      "toolbar_slot_device_px": 40.0,
+      "toolbar_slot_pt": 32.0
+    },
+    {
+      "client_points": [
+        1706.6666259765625,
+        960.0
+      ],
+      "dock_art_pt": 32.0,
+      "dock_slot_device_px": 52.5,
+      "dock_slot_pt": 35.0,
+      "fixed_art_pt": 23.53125,
+      "fixed_slot_device_px": 39.796875,
+      "fixed_slot_pt": 26.53125,
+      "history_slot_pt": 35.0,
+      "main_art_pt": 27.0,
+      "main_slot_device_px": 45.0,
+      "main_slot_pt": 30.0,
+      "resolution": [
+        2560.0,
+        1440.0
+      ],
+      "scale": 1.5,
+      "toolbar_art_pt": 26.0,
+      "toolbar_slot_device_px": 43.5,
+      "toolbar_slot_pt": 29.0
+    }
+  ],
+  "live_headless": [
+    "ppp=1 small=[23.0, 28.0, 24.8125, 24.8125, 24.8125] restored=[28.0, 29.0, 26.0, 26.0, 26.0] fullscreen=[32.0, 31.0, 27.59375, 27.59375, 27.59375] returned=[23.0, 28.0, 24.8125, 24.8125, 24.8125]",
+    "ppp=1.25 small=[23.0, 28.0, 24.78125, 24.78125, 24.78125] restored=[28.0, 29.0, 25.96875, 25.96875, 25.96875] fullscreen=[32.0, 31.0, 27.53125, 27.53125, 27.53125] returned=[23.0, 28.0, 24.78125, 24.78125, 24.78125]",
+    "ppp=1.5 small=[23.0, 28.0, 24.8125, 24.8125, 24.8125] restored=[28.0, 29.0, 26.0, 26.0, 26.0] fullscreen=[32.0, 31.0, 27.59375, 27.59375, 27.59375] returned=[23.0, 28.0, 24.8125, 24.8125, 24.8125]"
+  ],
+  "native": {
+    "result": "PASS",
+    "summary": "build/standalone-validation/ui-artifacts/2026-10-20-fullscreen-icons-native-v3/live-resize-summary.json",
+    "summary_sha256": "e02961b5272bac6c74d7e1183331c2bbbafe130cea54c3ea6a816d2f63c1ab20",
+    "window_points": [
+      [
+        1280.0,
+        720.0
+      ],
+      [
+        2560.0,
+        1369.0
+      ],
+      [
+        1280.0,
+        720.0
+      ]
+    ],
+    "edge_order": [
+      "toolbar",
+      "main",
+      "display",
+      "snaps",
+      "info"
+    ],
+    "initial_edges": [
+      23.0,
+      28.0,
+      24.8125,
+      24.8125,
+      24.8125
+    ],
+    "maximized_edges": [
+      32.0,
+      31.0,
+      27.59375,
+      27.59375,
+      27.59375
+    ],
+    "restored_edges": [
+      23.0,
+      28.0,
+      24.8125,
+      24.8125,
+      24.8125
+    ],
+    "screenshots": [
+      "build/standalone-validation/ui-artifacts/2026-10-20-fullscreen-icons-native-v3/resize-1280x720.png",
+      "build/standalone-validation/ui-artifacts/2026-10-20-fullscreen-icons-native-v3/resize-2560x1369.png"
+    ],
+    "visual_review": "Both native GPU captures inspected: retained reference counts/rows and readable icons; visible growth within the unchanged dock width.",
+    "failed_harness_attempts": [
+      "v1/v2 selected a visible untitled helper window. Fixed selection to require a titled window with client area at least 800x400."
+    ],
+    "real_windows_scale": 1.0
+  },
+  "public_source_audit": {
+    "status": "FAIL",
+    "existing_findings": 11740,
+    "log": "build/fullscreen-icon-source-audit.json"
+  },
+  "limitations": [
+    "Actual Windows maximize/restore verified; borderless fullscreen not exercised.",
+    "Simulated 125/150% do not establish physical per-monitor DPI transitions.",
+    "Formal M01-UI manual acceptance remains pending.",
+    "Runtime business behavior unchanged; presentation resize bug fixed; no skill rule changed."
+  ],
+  "report": "docs/validation/2026-10-20-fullscreen-icon-resize.md"
+}

@@ -203,5 +203,27 @@
       "id": "OM9-L4-03-14-001-05",
       "file": "M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/L3-001 - Matrix Layer Category Palette/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "text_readability": {
+      "date": "2026-10-20",
+      "status": "TEXT_APPEARANCE_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Dock text presentation: headings, body, secondary/disabled labels, category colours, project labels, floating titles and layer names/tooltips.",
+      "colours": {
+        "heading": "#FDD880",
+        "body": "#FFF4D6",
+        "secondary": "#CDE2D2",
+        "disabled_alpha": 0.78,
+        "category_white_mix": {
+          "darker_accents": 0.65,
+          "other_accents": 0.4
+        },
+        "current_layer_text_on_blue": "#05180E"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-dock-text-readability.json"
+      ]
+    }
+  }
 }

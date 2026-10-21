@@ -1,0 +1,30 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.31s
+     Running tests\layer_visible_locked.rs (L:\om9-target\debug\deps\layer_visible_locked-48feca455f3b3d47.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... FAILED
+test t1_to_t4_a_locked_edit_is_refused_without_mutation ... FAILED
+test s1_to_s5_visible_and_locked_change_the_model_the_viewport_and_picking ... ok
+
+failures:
+
+---- fixture_design_pair_is_present stdout ----
+
+thread 'fixture_design_pair_is_present' (19424) panicked at crates\om9-app\tests\layer_visible_locked.rs:169:5:
+H:\OpenMatrix9\crates\om9-app\../../implementation/design/M01/OM9-L3-03-14-003/api.md
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- t1_to_t4_a_locked_edit_is_refused_without_mutation stdout ----
+
+thread 't1_to_t4_a_locked_edit_is_refused_without_mutation' (1600) panicked at crates\om9-app\tests\layer_visible_locked.rs:140:9:
+permission denied: assigned source
+
+
+failures:
+    fixture_design_pair_is_present
+    t1_to_t4_a_locked_edit_is_refused_without_mutation
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p om9-app --test layer_visible_locked`

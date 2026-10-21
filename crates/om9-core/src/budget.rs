@@ -21,7 +21,7 @@ impl Default for Limits {
         Self {
             max_bytes: 256 * 1024 * 1024,
             max_objects: 100_000,
-            max_nodes: 2_000_000,
+            max_nodes: 4_000_000,
             max_points: 2_000_000,
             max_history: 10_000,
             max_outputs: 100_000,

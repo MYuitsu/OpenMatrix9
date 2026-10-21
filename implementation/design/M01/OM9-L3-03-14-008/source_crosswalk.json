@@ -1,0 +1,82 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-14-008-01",
+  "l3_id": "OM9-L3-03-14-008",
+  "l3_title": "Layer State Persistence Visual Check",
+  "owner_module_id": "OM9-L2-03-14",
+  "milestone": "M01",
+  "stage": "E02",
+  "gate": "M01-UI",
+  "goal": "re-open document and verify palette state",
+  "positive_oracle": "Save/reopen 2 layers incl lock and visibility and compare palette icons and picked IDs",
+  "negative_oracle": "Palette must not show cached unsaved state after reopen",
+  "behaviour_reference": {
+    "source": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/reference/text/m8book1__p54-57__the-layers-menu.md",
+    "quote": "We recommend you keep Profiles … on the Creation yellow layer …",
+    "decision": "Layer state is document state: whatever the file holds is what the palette shows after a reopen, with the flags and colours preserved and nothing cached from before."
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "Behavioural source: the extracted Matrix9 manual shipped with the milestone. QymCAD only for panel technique.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:118 comment: only the nodes that depend on a datum are marked dirty"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "Interface state follows the document instead of being cached: the rule OM9 keeps for the palette. QymCAD has no layer file state.",
+      "om9_owner": "crates/om9-archive + crates/om9-app/src/ui/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:59 pub struct Place { … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No persistence surface.",
+      "om9_owner": "crates/om9-archive"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No layer state.",
+      "om9_owner": "crates/om9-core/src/model.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "om9-archive: Archive::save / Archive::open round-trip the Document (layers included), used by the cold_* tests",
+    "the palette reads document.layers through Controller::layer_id; there is no second copy of the flags"
+  ],
+  "gap_found_by_this_task": [
+    "No test tied the palette to a save/reopen: the persistence of the lock/visibility flags and of the picked ids was unverified for this module.",
+    "Added the fixture-driven round trip: K1..K3 prove slots, flags, colours, object ids and the selectable policy survive a reopen; L1..L3 prove the palette never shows another document's slots, that a failed open changes nothing, and that an unsaved in-memory flag is not in the reopened file.",
+    "Finding worth recording: touching one preset slot creates its whole four-slot group (the controller's documented rule), so a document with Gems locked and Metals hidden stores slots 1..8, not just 1 and 5. The fixture says so instead of assuming two rows.",
+    "RED is API-level for the new fixture file; the round trip itself already worked, which is the honest result."
+  ],
+  "reuse_decision": "ADAPT the 'the interface follows the document' rule; ADD the round-trip fixtures that hold it.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-03-14-008/positive.json",
+    "implementation/fixtures/M01/OM9-L3-03-14-008/negative.json",
+    "crates/om9-app/tests/layer_state_persistence.rs"
+  ]
+}

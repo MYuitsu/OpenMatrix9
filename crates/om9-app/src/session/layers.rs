@@ -182,6 +182,35 @@ impl Controller {
                 make_current: false,
             })
             .collect();
+        // The SOURCE side of the move is protected too: an object living on a
+        // locked layer must not be moved off it, or the lock would only guard the
+        // target (OM9-L3-03-14-003, oracle am: no mutation, informative status).
+        for source in &sources {
+            let entity = self
+                .document()
+                .entities
+                .get(&source.object)
+                .ok_or(Error::Missing("assigned source"))?;
+            let locked_layer = entity
+                .attributes
+                .layer
+                .and_then(|id| self.document().layers.get(&id))
+                .is_some_and(|layer| layer.locked);
+            if entity.attributes.locked || locked_layer {
+                return Err(Error::Permission("object is on a locked layer"));
+            }
+        }
+        // A locked layer is locked against exactly this: moving geometry onto it.
+        // Refuse before anything is applied, so the refusal costs no transaction
+        // and the user reads why (OM9-L3-03-14-002, oracle am).
+        if self
+            .document()
+            .layers
+            .get(&id)
+            .is_some_and(|layer| layer.locked)
+        {
+            return Err(Error::Permission("layer is locked"));
+        }
         actions.push(LayerAction::Assign { layer: id, sources });
         self.apply_layer_actions(actions)
     }
@@ -199,9 +228,17 @@ impl Controller {
     }
     pub(super) fn auxiliary_usage(&self) -> Result<om9_core::budget::Usage> {
         let mut usage = om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len())?;
-        usage.add(om9_core::budget::Usage::array::<super::SelectedSubobject>(self.subselection.capacity())?, self.coordinator.limits())?;
+        usage.add(
+            om9_core::budget::Usage::array::<super::SelectedSubobject>(
+                self.subselection.capacity(),
+            )?,
+            self.coordinator.limits(),
+        )?;
         for picked in &self.subselection {
-            usage.add(om9_core::budget::Usage::array::<ObjectId>(picked.path.capacity())?, self.coordinator.limits())?;
+            usage.add(
+                om9_core::budget::Usage::array::<ObjectId>(picked.path.capacity())?,
+                self.coordinator.limits(),
+            )?;
         }
         usage.add(self.workspace.storage_usage()?, self.coordinator.limits())?;
         usage.add(
@@ -272,7 +309,10 @@ impl Controller {
         if ids.is_empty() && !add {
             return Ok(());
         }
-        let scene = self.scene.as_ref().ok_or(Error::Missing("selection scene"))?;
+        let scene = self
+            .scene
+            .as_ref()
+            .ok_or(Error::Missing("selection scene"))?;
         if scene.epoch != self.coordinator.epoch() {
             return Err(Error::Stale("selection scene"));
         }
@@ -286,7 +326,10 @@ impl Controller {
             }
         }
         let mut held = self.scene_cache_usage()?;
-        let added = ids.iter().filter(|id| !self.selection.contains(*id)).count();
+        let added = ids
+            .iter()
+            .filter(|id| !self.selection.contains(*id))
+            .count();
         held.add(
             om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len() + added)?,
             self.coordinator.limits(),
@@ -306,7 +349,10 @@ impl Controller {
             self.selection_revision = self.selection_revision.saturating_add(1);
             return Ok(());
         }
-        let scene = self.scene.as_ref().ok_or(Error::Missing("selection scene"))?;
+        let scene = self
+            .scene
+            .as_ref()
+            .ok_or(Error::Missing("selection scene"))?;
         if scene.epoch != self.coordinator.epoch() {
             return Err(Error::Stale("selection scene"));
         }
@@ -333,7 +379,10 @@ impl Controller {
     /// Every id must be a selectable root of the current scene; one bad id refuses the whole band, so a
     /// stale pick can never leave a half-updated selection behind.
     pub fn select_objects(&mut self, ids: &[ObjectId]) -> Result<()> {
-        let scene = self.scene.as_ref().ok_or(Error::Missing("selection scene"))?;
+        let scene = self
+            .scene
+            .as_ref()
+            .ok_or(Error::Missing("selection scene"))?;
         if scene.epoch != self.coordinator.epoch() {
             return Err(Error::Stale("selection scene"));
         }
@@ -343,10 +392,9 @@ impl Controller {
         let mut next = std::collections::BTreeSet::new();
         for id in ids {
             if id.is_nil()
-                || !scene
-                    .objects
-                    .iter()
-                    .any(|object| object.root == *id && object.selectable && object.has_pick_geometry())
+                || !scene.objects.iter().any(|object| {
+                    object.root == *id && object.selectable && object.has_pick_geometry()
+                })
             {
                 return Err(Error::Permission("selected root"));
             }

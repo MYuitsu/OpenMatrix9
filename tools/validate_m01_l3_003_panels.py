@@ -153,6 +153,26 @@ SCENARIOS: dict[str, dict] = {
             "limitations": "the X of the floating window is not scripted (a 16 px target): closing it is p7 plus the owner's item M3",
         },
     },
+    "object-info": {
+        "drag": None,
+        "label": "draw one line and select it: the Object Info label the receipt carries",
+        "fixture": "positive.json I1..I5 (L3-005): type, size and validity from the model",
+        "expect": {
+            "preview": None,
+            "indicator_line": None,
+            "left_order": DOCUMENTED_LEFT,
+            "right_order": [],
+            "floating": [],
+            "status": None,
+            "op": None,
+            "draws": {"entities": 1, "undo_len": 1},
+            "extra": [
+                ("object_info_kind", "Line"),
+                ("object_info_label", "Line \u00b7 10.000 \u00d7 4.000 \u00d7 0.000 \u00b7 valid"),
+                ("selected", 1),
+            ],
+        },
+    },
     "readback-recover": {
         "drag": "display",
         "label": "float DISPLAY, then let the real window report a rectangle that cannot fit",
@@ -165,8 +185,14 @@ SCENARIOS: dict[str, dict] = {
             "floating": ["display"],
             "status": "Display was moved back inside the window",
             "op": {"SetFloatRect": {"section": "display"}},
-            "extra": [("float_after_readback.2", 300.0), ("float_after_readback.3", 120.0)],
-            "notes_include": "Recovered",
+            # The forced readback of a 300x40 rectangle is the thing that must clamp:
+            # the state one frame later is the REAL window's own 132 px height, which
+            # is above the 120 px minimum and legitimately accepted (round 14).
+            "extra": [
+                ("float_after_force.2", 300.0),
+                ("float_after_force.3", 120.0),
+                ("message_after_force", "Display was moved back inside the window"),
+            ],
             "limitations": "the window keeps its audit size, so the repair comes from the rectangle the real window reports; the shrinking-window case is the owner's item M5",
         },
     },
@@ -254,23 +280,40 @@ def run_scenario(binary: Path, output: Path, name: str, timeout: float) -> dict:
     # piped stdio under the harness sandbox is a documented failure mode.
     stdout_path = audit / "app-stdout.txt"
     stderr_path = audit / "app-stderr.txt"
-    with stdout_path.open("w", encoding="utf-8") as stdout, stderr_path.open(
-        "w", encoding="utf-8"
-    ) as stderr:
-        completed = subprocess.run(
-            [str(binary), "--ui-audit", str(audit)],
-            cwd=str(ROOT / "standalone"),
-            env=environment,
-            stdout=stdout,
-            stderr=stderr,
-            timeout=timeout,
-            check=False,
-        )
+    attempts: list[int] = []
+    for _attempt in range(2):
+        with stdout_path.open("w", encoding="utf-8") as stdout, stderr_path.open(
+            "w", encoding="utf-8"
+        ) as stderr:
+            completed = subprocess.run(
+                [str(binary), "--ui-audit", str(audit)],
+                # The tree was merged to the repository root (AGENTS.md, 2026-10-17):
+                # the old standalone/ directory no longer exists.
+                cwd=str(ROOT),
+                env=environment,
+                stdout=stdout,
+                stderr=stderr,
+                timeout=timeout,
+                check=False,
+            )
+        attempts.append(completed.returncode)
+        if completed.returncode == 0 or (audit / "ui-receipt.json").exists():
+            break
+        # Windows occasionally kills a freshly launched audit process (seen twice
+        # on this host, never reproducible alone): one retry, recorded in the
+        # summary so the evidence says it happened.
+        shutil.rmtree(audit, ignore_errors=True)
+        audit.mkdir(parents=True, exist_ok=True)
     elapsed = round(time.time() - started, 2)
     stderr_text = stderr_path.read_text(encoding="utf-8", errors="replace").strip()
     receipt_path = audit / "ui-receipt.json"
     png_path = audit / "workspace.png"
-    observed: dict = {"exit_code": completed.returncode, "elapsed_seconds": elapsed}
+    observed: dict = {
+        "exit_code": completed.returncode,
+        "elapsed_seconds": elapsed,
+        "attempts": attempts,
+        "retried": len(attempts) > 1,
+    }
     if completed.returncode != 0:
         problems.append(f"exit code {completed.returncode}")
     if stderr_text:
@@ -287,7 +330,9 @@ def run_scenario(binary: Path, output: Path, name: str, timeout: float) -> dict:
         }
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     panels = receipt.get("panels") or {}
-    checks = (panels.get("checks") or [None])[0]
+    entries = panels.get("checks") or []
+    # The audit may record more than one entry; take the one this scenario wrote.
+    checks = next((entry for entry in entries if entry.get("scenario") == name), entries[0] if entries else None)
     if not checks:
         problems.append("the receipt carries no panel checks")
         checks = {}
@@ -334,10 +379,23 @@ def run_scenario(binary: Path, output: Path, name: str, timeout: float) -> dict:
         problems.append(
             f"status {checks.get('status_message')!r} != {expect['status']!r}"
         )
-    if checks.get("entities") not in (0, None):
-        problems.append("a menu drag changed document entities")
-    if checks.get("undo_len") not in (0, None):
-        problems.append("a menu drag changed the undo journal")
+    # A panel drag must not touch the document. The one scenario that draws on
+    # purpose (object-info) declares `draws` and is exempt, with the exact counts
+    # it expects instead.
+    if not expect.get("draws"):
+        if checks.get("entities") not in (0, None):
+            problems.append("a menu drag changed document entities")
+        if checks.get("undo_len") not in (0, None):
+            problems.append("a menu drag changed the undo journal")
+    else:
+        if checks.get("entities") != expect["draws"].get("entities"):
+            problems.append(
+                f"drew {checks.get('entities')!r} entities, expected {expect['draws'].get('entities')!r}"
+            )
+        if checks.get("undo_len") != expect["draws"].get("undo_len"):
+            problems.append(
+                f"journal {checks.get('undo_len')!r} != {expect['draws'].get('undo_len')!r}"
+            )
     if checks.get("work_area") != WORK_AREA:
         problems.append(f"work area {checks.get('work_area')} != {WORK_AREA}")
     if not receipt.get("screenshot_saved"):
@@ -414,7 +472,13 @@ def main() -> int:
     if args.self_test:
         return self_test()
 
-    binary = Path(args.binary) if args.binary else ROOT / "target/debug/om9.exe"
+    # The workspace builds with CARGO_TARGET_DIR outside the checkout (AGENTS.md,
+    # 2026-10-17): honour it, then fall back to the in-tree target.
+    if args.binary:
+        binary = Path(args.binary)
+    else:
+        target = os.environ.get("CARGO_TARGET_DIR")
+        binary = Path(target) / "debug/om9.exe" if target else ROOT / "target/debug/om9.exe"
     binary = binary.resolve()
     if not binary.exists():
         print(f"binary not found: {binary}", file=sys.stderr)

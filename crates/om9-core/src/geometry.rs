@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 use crate::{
     Error, Result,
-    budget::{Limits, Usage},
+    budget::{Limits, Usage, name},
     identity::DefinitionId,
 };
 use serde::{Deserialize, Serialize};
@@ -498,6 +498,8 @@ pub enum GeometryKind {
     Mesh,
     Cloud,
     Instance,
+    Hatch,
+    Light,
 }
 impl GeometryKind {
     pub fn tag(self) -> &'static str {
@@ -509,6 +511,8 @@ impl GeometryKind {
             Self::Mesh => "Mesh",
             Self::Cloud => "Cloud",
             Self::Instance => "Instance",
+            Self::Hatch => "Hatch",
+            Self::Light => "Light",
         }
     }
     /// Entity envelope decoding preserves BRep as its own canonical kind.
@@ -520,6 +524,8 @@ impl GeometryKind {
             "Mesh" => Ok(Self::Mesh),
             "Cloud" => Ok(Self::Cloud),
             "Instance" => Ok(Self::Instance),
+            "Hatch" => Ok(Self::Hatch),
+            "Light" => Ok(Self::Light),
             "Brep" | "BRep" | "B-rep" => Ok(Self::Brep),
             _ => Err(Error::Unsupported("geometry kind")),
         }
@@ -570,6 +576,39 @@ impl NativeBrep {
     }
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Light {
+    pub display: Point3,
+    pub location: Point3,
+    pub direction: Point3,
+    pub diffuse: [u8; 4],
+    pub intensity: f64,
+    pub style: u32,
+}
+impl Light {
+    pub fn validate(&self, _l: &Limits) -> Result<Usage> {
+        finite(self.display)?;
+        finite(self.location)?;
+        finite(self.direction)?;
+        if !self.intensity.is_finite() || self.intensity < 0. {
+            return Err(Error::Invalid("light intensity"));
+        }
+        Ok(Usage {
+            bytes: std::mem::size_of::<Self>() as u64,
+            nodes: 1,
+            ..Usage::default()
+        })
+    }
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Hatch {
+    pub display: Mesh,
+    pub loops: Vec<Vec<Point3>>,
+    pub pattern: Option<String>,
+    pub color: [u8; 4],
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Geometry {
     #[serde(alias = "BRep", alias = "B-rep")]
     Brep(crate::brep::Brep),
@@ -580,6 +619,8 @@ pub enum Geometry {
     Mesh(Mesh),
     Cloud(Cloud),
     Instance(DefinitionId),
+    Hatch(Hatch),
+    Light(Light),
 }
 fn channels(
     points: &[Point3],
@@ -611,6 +652,8 @@ impl Geometry {
             Self::Mesh(_) => GeometryKind::Mesh,
             Self::Cloud(_) => GeometryKind::Cloud,
             Self::Instance(_) => GeometryKind::Instance,
+            Self::Hatch(_) => GeometryKind::Hatch,
+            Self::Light(_) => GeometryKind::Light,
         }
     }
     pub fn validate(&self, l: &Limits) -> Result<Usage> {
@@ -650,6 +693,24 @@ impl Geometry {
                     l,
                 )?;
                 total.add(Usage::array::<bool>(c.hidden.capacity())?, l)?;
+            }
+            Self::Light(light) => {
+                total.add(light.validate(l)?, l)?;
+            }
+            Self::Hatch(h) => {
+                total.add(Geometry::Mesh(h.display.clone()).validate(l)?, l)?;
+                for loop_ in &h.loops {
+                    if loop_.len() < 3 {
+                        return Err(Error::Invalid("hatch loop"));
+                    }
+                    for point in loop_ {
+                        finite(*point)?;
+                    }
+                    total.add(Usage::array::<Point3>(loop_.capacity())?, l)?;
+                }
+                if let Some(pattern) = &h.pattern {
+                    name(pattern, l)?;
+                }
             }
             Self::Mesh(m) => {
                 total.add(channels(&m.vertices, &m.normals, &m.colors, l)?, l)?;
@@ -691,3 +752,8 @@ impl Geometry {
         Ok(total)
     }
 }
+
+
+
+
+

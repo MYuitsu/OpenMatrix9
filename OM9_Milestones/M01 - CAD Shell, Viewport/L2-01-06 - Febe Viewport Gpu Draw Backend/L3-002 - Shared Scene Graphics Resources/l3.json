@@ -209,10 +209,75 @@
   ],
   "execution_evidence": {
     "crate": "crates/om9-render",
-    "state": "automated slice done; manual test pending",
+    "state": "1k, 8k and 27k gates measured; 500k removed by user as theoretical",
     "api": "implementation/design/M01/OM9-L3-01-06-002/api.md",
     "evidence": "implementation/evidence/M01/OM9-L3-01-06-002/",
     "manual_pending": "visual confirmation that all four viewports share the same buffers",
-    "next": "surface/swapchain integration through eframe, then the wireframe and highlight passes"
+    "next": "cluster shader multi-level errors selection; instance path; image-diff/zoom matrix"
+  },
+  "runtime_implementation": {
+    "performance": {
+      "plan": "implementation/design/M01/VIEWPORT-INTERACTION-PERFORMANCE.md",
+      "p1a": {
+        "state": "done",
+        "evidence": "implementation/evidence/M01/OM9-L3-01-06-002/2026-10-20-p1a.json",
+        "open_s": 20,
+        "vram_gb": 7.05
+      },
+      "p1b": {
+        "state": "done",
+        "open_s": 10,
+        "vram_gb": 2.05,
+        "vram_gb_lod1200": 1.05,
+        "private_mb": 1356
+      },
+      "auto_lod": {
+        "state": "done",
+        "open_s": 3,
+        "vram_gb": 0.55,
+        "private_mb": 1031,
+        "p95_ms": [
+          17.4,
+          17.0,
+          17.1
+        ]
+      },
+      "eight_k": {
+        "state": "done",
+        "open_s": 10,
+        "vram_gb": 1.05,
+        "private_mb": 1917,
+        "p95_ms": [
+          21.4,
+          16.8,
+          16.8
+        ]
+      },
+      "twenty_seven_k": {
+        "state": "done",
+        "open_s": 3,
+        "vram_gb": 0.55,
+        "private_mb": 984,
+        "p95_ms": [
+          18.8,
+          17.1,
+          17.0
+        ]
+      }
+    },
+    "navigation_checkpoint_2026_10_21": {
+      "date": "2026-10-21",
+      "status": "implemented_automated_checks_passed_performance_acceptance_open",
+      "plan": "implementation/design/M01/VIEWPORT-NAVIGATION-IMPLEMENTATION-PLAN.md",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-21-navigation-implementation.md"
+      ],
+      "ledger_key": "viewport-navigation-runtime-2026-10-21",
+      "navigation_owner": "OM9-L2-03-02",
+      "render_owner": "OM9-L2-01-06",
+      "manual_gate_promoted": false,
+      "preview_mesh_policy": "LOD0 for all occurrences; resolution/MSAA adapt; certified decimation not integrated",
+      "presentation_acceptance": "NOT_PROVED"
+    }
   }
 }

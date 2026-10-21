@@ -36,19 +36,28 @@ fn ids(controller: &Controller) -> Vec<ObjectId> {
 fn click_a_then_ctrl_click_b_gives_both_and_toggling_a_leaves_b() {
     let mut controller = Controller::new(points(2), Limits::default()).expect("controller");
     let ids = ids(&controller);
-    controller.select_root(Some(ids[0]), false).expect("click A");
+    controller
+        .select_root(Some(ids[0]), false)
+        .expect("click A");
     assert_eq!(controller.selection_state().objects.len(), 1);
     controller.toggle_selection(ids[1]).expect("ctrl click B");
     assert_eq!(
         controller.selection_state().objects.clone(),
-        ids.iter().copied().collect::<std::collections::BTreeSet<_>>(),
+        ids.iter()
+            .copied()
+            .collect::<std::collections::BTreeSet<_>>(),
         "the set is exactly A and B"
     );
     controller.toggle_selection(ids[0]).expect("toggle A off");
     assert_eq!(controller.selection_state().objects.len(), 1);
     assert!(controller.selected().contains(&ids[1]));
     // Deterministic ordering: the set reads in identifier order, not insertion order.
-    let listed: Vec<ObjectId> = controller.selection_state().objects.iter().copied().collect();
+    let listed: Vec<ObjectId> = controller
+        .selection_state()
+        .objects
+        .iter()
+        .copied()
+        .collect();
     let mut sorted = listed.clone();
     sorted.sort();
     assert_eq!(listed, sorted);
@@ -64,8 +73,16 @@ fn selecting_never_writes_document_history() {
     controller.toggle_selection(ids[1]).expect("add");
     controller.select_objects(&ids).expect("replace");
     controller.clear_selection();
-    assert_eq!(controller.coordinator().undo_len(), undo_before, "no journal entry");
-    assert_eq!(controller.document().revision, before, "no document revision change");
+    assert_eq!(
+        controller.coordinator().undo_len(),
+        undo_before,
+        "no journal entry"
+    );
+    assert_eq!(
+        controller.document().revision,
+        before,
+        "no document revision change"
+    );
 }
 
 #[test]
@@ -81,9 +98,18 @@ fn a_locked_or_hidden_object_is_refused_and_not_stored() {
     document.entities.insert(hidden_id, hidden);
     let mut controller = Controller::new(document, Limits::default()).expect("controller");
     let undo_before = controller.coordinator().undo_len();
-    assert!(controller.select_root(Some(locked_id), false).is_err(), "locked is refused");
-    assert!(controller.select_objects(&[locked_id]).is_err(), "a locked batch is refused whole");
-    assert!(controller.toggle_selection(hidden_id).is_err(), "hidden is refused");
+    assert!(
+        controller.select_root(Some(locked_id), false).is_err(),
+        "locked is refused"
+    );
+    assert!(
+        controller.select_objects(&[locked_id]).is_err(),
+        "a locked batch is refused whole"
+    );
+    assert!(
+        controller.toggle_selection(hidden_id).is_err(),
+        "hidden is refused"
+    );
     assert!(controller.selected().is_empty(), "no stale id is stored");
     assert_eq!(controller.coordinator().undo_len(), undo_before);
 }
@@ -105,9 +131,15 @@ fn a_batch_with_one_bad_id_is_refused_whole() {
     let mut controller = Controller::new(points(2), Limits::default()).expect("controller");
     let ids = ids(&controller);
     // Select one object first, then ask for a batch that mixes it with an unknown id.
-    controller.select_root(Some(ids[0]), false).expect("select one");
+    controller
+        .select_root(Some(ids[0]), false)
+        .expect("select one");
     let before = controller.selection_state().objects.clone();
-    assert!(controller.select_objects(&[ids[1], ObjectId::new()]).is_err());
+    assert!(
+        controller
+            .select_objects(&[ids[1], ObjectId::new()])
+            .is_err()
+    );
     assert_eq!(
         controller.selection_state().objects,
         before,
@@ -126,7 +158,12 @@ fn twenty_selection_round_trips_are_identical() {
         controller.toggle_selection(ids[1]).expect("B");
         controller.toggle_selection(ids[2]).expect("C");
         controller.toggle_selection(ids[1]).expect("toggle B off");
-        let listed: Vec<ObjectId> = controller.selection_state().objects.iter().copied().collect();
+        let listed: Vec<ObjectId> = controller
+            .selection_state()
+            .objects
+            .iter()
+            .copied()
+            .collect();
         assert_eq!(listed, vec![ids[0], ids[2]], "run {run}");
     }
 }

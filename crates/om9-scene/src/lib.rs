@@ -6,6 +6,8 @@ pub mod camera;
 pub mod grid;
 pub mod gumball_view;
 mod picking;
-pub mod selection;
 pub mod scene;
+pub mod selection;
 pub mod workspace;
+
+pub mod spatial;

@@ -8,13 +8,20 @@ use om9_kernel::{
 fn a_kernel_handle_reference_count_returns_to_baseline() {
     let (before, copied, after) = handle_refcount().expect("refcount");
     assert!(before >= 1, "a live handle must have a positive count");
-    assert_eq!(copied, before + 1, "copying a handle must add one reference");
-    assert_eq!(after, before, "nullifying the copy must restore the baseline");
+    assert_eq!(
+        copied,
+        before + 1,
+        "copying a handle must add one reference"
+    );
+    assert_eq!(
+        after, before,
+        "nullifying the copy must restore the baseline"
+    );
 }
 
 #[test]
 fn every_invalid_input_is_rejected_with_a_message() {
-    let cases: [( &str, Result<f64, KernelError>); 9] = [
+    let cases: [(&str, Result<f64, KernelError>); 9] = [
         ("box_zero_width", box_volume(0.0, 1.0, 1.0)),
         ("box_negative_depth", box_volume(1.0, 1.0, -1.0)),
         ("box_nan", box_volume(f64::NAN, 1.0, 1.0)),
@@ -49,7 +56,10 @@ fn ten_thousand_create_destroy_cycles_do_not_grow_the_working_set() {
     let growth_mb = (after - before) / (1024.0 * 1024.0);
     // Allocator caches and the kernel's pools settle well below this; a real leak over 10k shapes
     // would be far larger.
-    assert!(growth_mb < 8.0, "working set grew {growth_mb} MiB over 10k cycles");
+    assert!(
+        growth_mb < 8.0,
+        "working set grew {growth_mb} MiB over 10k cycles"
+    );
 }
 
 #[test]

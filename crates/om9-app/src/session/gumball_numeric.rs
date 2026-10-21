@@ -77,7 +77,13 @@ impl Controller {
         let pivot = self.gumball_pivot().ok_or(Error::Missing("selection"))?;
         let mut transform = Transform::identity();
         match axis {
-            Some(axis) => transform = transform.compose(gumball::scaling_along(pivot.origin, pivot.axis(axis), factor)?)?,
+            Some(axis) => {
+                transform = transform.compose(gumball::scaling_along(
+                    pivot.origin,
+                    pivot.axis(axis),
+                    factor,
+                )?)?
+            }
             None => {
                 // One matrix about the pivot: composing three axis scalings would multiply the pivot
                 // offset three times.
@@ -163,13 +169,34 @@ mod tests {
 
     #[test]
     fn the_parser_reads_each_form() {
-        assert!(matches!(parse("Move 1,2,3"), Some(NumericEdit::Move([1.0, 2.0, 3.0]))));
-        assert!(matches!(parse("MoveX 5"), Some(NumericEdit::Move([5.0, 0.0, 0.0]))));
-        assert!(matches!(parse("MoveZ -2.5"), Some(NumericEdit::Move([0.0, 0.0, -2.5]))));
-        assert!(matches!(parse("RotateZ 30"), Some(NumericEdit::Rotate(Axis::Z, 30.0))));
-        assert!(matches!(parse("RotateX -90"), Some(NumericEdit::Rotate(Axis::X, -90.0))));
-        assert!(matches!(parse("Scale 2"), Some(NumericEdit::Scale(None, 2.0))));
-        assert!(matches!(parse("ScaleY 1.5"), Some(NumericEdit::Scale(Some(Axis::Y), 1.5))));
+        assert!(matches!(
+            parse("Move 1,2,3"),
+            Some(NumericEdit::Move([1.0, 2.0, 3.0]))
+        ));
+        assert!(matches!(
+            parse("MoveX 5"),
+            Some(NumericEdit::Move([5.0, 0.0, 0.0]))
+        ));
+        assert!(matches!(
+            parse("MoveZ -2.5"),
+            Some(NumericEdit::Move([0.0, 0.0, -2.5]))
+        ));
+        assert!(matches!(
+            parse("RotateZ 30"),
+            Some(NumericEdit::Rotate(Axis::Z, 30.0))
+        ));
+        assert!(matches!(
+            parse("RotateX -90"),
+            Some(NumericEdit::Rotate(Axis::X, -90.0))
+        ));
+        assert!(matches!(
+            parse("Scale 2"),
+            Some(NumericEdit::Scale(None, 2.0))
+        ));
+        assert!(matches!(
+            parse("ScaleY 1.5"),
+            Some(NumericEdit::Scale(Some(Axis::Y), 1.5))
+        ));
         assert!(parse("Move 1,2").is_none());
         assert!(parse("MoveX").is_none());
         assert!(parse("Scale abc").is_none());

@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Dock text presentation: headings, body, secondary/disabled labels, category colours, project labels, floating titles and layer names/tooltips.",
+  "before": "Cold gray/white body labels, low-opacity disabled labels and a category label overprinted behind each layer name.",
+  "after": {
+    "heading": "#FDD880",
+    "body": "#FFF4D6",
+    "secondary": "#CDE2D2",
+    "disabled_alpha": 0.78,
+    "category_white_mix": {
+      "darker_accents": 0.65,
+      "other_accents": 0.4
+    },
+    "current_layer_text_on_blue": "#05180E"
+  },
+  "layer_overlap_fix": "Paint one layer name in the compact name region. Retain its category in each control tooltip alongside its original action hint. Model category/slot/current/assignment semantics and swatches unchanged.",
+  "floating_header": "Dark green title on cream inactive header or framework pale active header; green body uses cream/gold text.",
+  "nominal_solid_colour_contrast_ratios": {
+    "body_on_dock": 11.95,
+    "heading_on_section": 6.94,
+    "secondary_on_dock": 9.61,
+    "layer_name_on_gray": 7.84,
+    "current_layer_name_on_blue": 4.86
+  },
+  "contrast_limits": "Ratios describe solid foreground/background colour pairs, not antialiased edge pixels or a broad accessibility certification.",
+  "sources": [
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "sha256": "b3bfc0c14f752f68944590590ff727b3689ecb3fce034801dc5eb43a5e5fc373"
+    },
+    {
+      "path": "crates/om9-app/src/ui/layers.rs",
+      "sha256": "0d31eec684c8e7d2066cc834192e9cec0df96bb956f7ff5abbec8bc330039b3b"
+    }
+  ],
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-dock-text.exe",
+    "sha256": "045d6c8e20ebcce90c5803fb5754bfc078277529516bff2313f962c9094b352c"
+  },
+  "build": {
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-dock-text.exe",
+    "result": "PASS; expected custom-output warnings"
+  },
+  "tests": {
+    "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --test chrome_actions --test shell_docking --test layer_category_palette --test layer_current_and_assign -- --test-threads=1",
+    "result": "PASS",
+    "suites": {
+      "chrome_actions": 13,
+      "shell_docking": 10,
+      "layer_category_palette": 6,
+      "layer_current_and_assign": 3
+    },
+    "total": 32
+  },
+  "runtime": {
+    "command": "python tools/validate_m01_l3_003_panels.py --binary L:/om9-target/debug/om9-dock-text.exe --output build/standalone-validation/ui-artifacts/2026-10-20-dock-text-final --only escape,float,dock-right",
+    "result": "PASS: three native GPU scenarios",
+    "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-dock-text-final/panels-summary.json",
+    "screenshots": [
+      "build/standalone-validation/ui-artifacts/2026-10-20-dock-text-final/escape/workspace.png",
+      "build/standalone-validation/ui-artifacts/2026-10-20-dock-text-final/float/workspace.png",
+      "build/standalone-validation/ui-artifacts/2026-10-20-dock-text-final/dock-right/workspace.png"
+    ]
+  },
+  "visual_review": "Native screenshots inspected. Gold headings, warm cream body, clearer disabled controls and separated layer names are readable on the green dock. Existing light toolbar/menu and Command colours retained.",
+  "public_source_audit": {
+    "status": "FAIL",
+    "existing_tree_findings": 11740,
+    "note": "Existing private/reference/binary/raster artifacts; no asset added by this text change.",
+    "examples": [
+      "Private/binary artifact: brep-fixture.obj",
+      "Private/binary artifact: native_exchange.obj",
+      "Unreviewed raster artifact: om9-window.png"
+    ]
+  },
+  "limitations": [
+    "Formal manual M01-UI acceptance remains pending.",
+    "Other chats have concurrent changes in the same files; this receipt covers text presentation and the named tests only.",
+    "No model/command semantics or reusable skill business rules changed."
+  ]
+}

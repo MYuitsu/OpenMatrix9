@@ -5,7 +5,7 @@ use crate::{
     Error, Result,
     budget::{Limits, Usage, name},
     identity::*,
-    model::{Definition, Document, Entity, Layer},
+    model::{Definition, Document, Entity, Group, Layer},
     resource::{Resource, ResourceKind},
 };
 use serde::{Deserialize, Serialize};
@@ -911,6 +911,8 @@ pub struct ImportBundle {
     pub entities: Vec<Entity>,
     pub layers: Vec<Layer>,
     pub definitions: Vec<Definition>,
+    pub groups: Vec<Group>,
+    pub exchange: crate::exchange::ExchangeMetadata,
 }
 impl ImportBundle {
     pub(crate) fn storage_usage(&self, l: &Limits) -> Result<Usage> {
@@ -928,6 +930,7 @@ impl ImportBundle {
             .layers
             .len()
             .checked_add(self.definitions.len())
+            .and_then(|n| n.checked_add(self.groups.len()))
             .and_then(|n| n.checked_add(2))
             .ok_or(Error::Overflow("import components"))?;
         u.add(
@@ -943,6 +946,8 @@ impl ImportBundle {
         u.add(Usage::array::<Entity>(self.entities.capacity())?, l)?;
         u.add(Usage::array::<Layer>(self.layers.capacity())?, l)?;
         u.add(Usage::array::<Definition>(self.definitions.capacity())?, l)?;
+        u.add(Usage::array::<Group>(self.groups.capacity())?, l)?;
+        u.add(self.exchange.validate(l)?, l)?;
         for e in self
             .entities
             .iter()
@@ -971,6 +976,16 @@ impl ImportBundle {
             u.add(
                 Usage {
                     bytes: definition.label.capacity() as u64,
+                    ..Usage::default()
+                },
+                l,
+            )?;
+        }
+        for group in &self.groups {
+            u.add(Usage::array::<ObjectId>(group.members.capacity())?, l)?;
+            u.add(
+                Usage {
+                    bytes: group.name.capacity() as u64,
                     ..Usage::default()
                 },
                 l,
@@ -1006,6 +1021,7 @@ impl ImportBundle {
             Usage::btree::<LayerId, Layer>(self.layers.len())?,
             Usage::array::<LayerId>(self.layers.len())?,
             Usage::btree::<DefinitionId, Definition>(self.definitions.len())?,
+            Usage::btree::<GroupId, Group>(self.groups.len())?,
             Usage::btree::<ResourceId, Resource>(1)?,
             Usage::btree::<SourceId, RetainedSource>(1)?,
             Usage::btree::<ImportNamespaceId, ImportNamespace>(1)?,
@@ -1058,6 +1074,29 @@ impl ImportBundle {
         }
         for definition in self.definitions {
             insert!(d.definitions, definition.id, definition);
+        }
+        for group in self.groups {
+            insert!(d.groups, group.id, group);
+        }
+        if !self.exchange.is_empty() {
+            for (id, pattern) in self.exchange.line_patterns {
+                insert!(d.exchange.line_patterns, id, pattern);
+            }
+            for (id, style) in self.exchange.text_styles {
+                insert!(d.exchange.text_styles, id, style);
+            }
+            for (id, material) in self.exchange.materials {
+                insert!(d.exchange.materials, id, material);
+            }
+            for (id, style) in self.exchange.dim_styles {
+                insert!(d.exchange.dim_styles, id, style);
+            }
+            for (id, pattern) in self.exchange.hatch_patterns {
+                insert!(d.exchange.hatch_patterns, id, pattern);
+            }
+            for (id, light) in self.exchange.lights {
+                insert!(d.exchange.lights, id, light);
+            }
         }
         insert!(d.resources, self.resource.id, self.resource);
         insert!(d.retained_sources, self.source.id, self.source);

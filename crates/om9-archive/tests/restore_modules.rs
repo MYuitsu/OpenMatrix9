@@ -113,12 +113,14 @@ fn schema_one_legacy_owner_fields_migrate_without_promoting_stale_source_stamps(
     let restored = Archive::restore(&bytes, &Limits::default(), &BTreeSet::new()).unwrap();
     assert!(!restored.document.owner_session.is_nil());
     assert!(restored.document.resolve(&old).is_err());
-    assert!(restored
-        .document
-        .history
-        .recipes
-        .values()
-        .all(|r| matches!(r.state, EvaluationState::Unresolved(_))));
+    assert!(
+        restored
+            .document
+            .history
+            .recipes
+            .values()
+            .all(|r| matches!(r.state, EvaluationState::Unresolved(_)))
+    );
 }
 #[test]
 fn missing_replay_module_keeps_geometry_but_marks_recipe_and_result_unresolved_stale() {
@@ -126,17 +128,21 @@ fn missing_replay_module_keeps_geometry_but_marks_recipe_and_result_unresolved_s
     let bytes = Archive::encode(&d, &Limits::default()).unwrap();
     let restored = Archive::restore(&bytes, &Limits::default(), &BTreeSet::new()).unwrap();
     assert_eq!(restored.diagnostics.len(), 1);
-    assert!(restored
-        .document
-        .history
-        .recipes
-        .values()
-        .all(|r| matches!(r.state, EvaluationState::Unresolved(_))));
-    assert!(restored
-        .document
-        .results
-        .values()
-        .all(|r| r.status == ResultStatus::Stale));
+    assert!(
+        restored
+            .document
+            .history
+            .recipes
+            .values()
+            .all(|r| matches!(r.state, EvaluationState::Unresolved(_)))
+    );
+    assert!(
+        restored
+            .document
+            .results
+            .values()
+            .all(|r| r.status == ResultStatus::Stale)
+    );
     assert_eq!(restored.document.entities, d.entities);
     assert!(restored.document.session_generation > d.session_generation);
 }
@@ -155,12 +161,14 @@ fn matching_registered_replay_key_rebinds_only_verified_current_session_stamps()
     let restored = Archive::restore(&bytes, &Limits::default(), &keys).unwrap();
     assert!(restored.diagnostics.is_empty());
     assert!(restored.document.resolve(&old).is_err());
-    assert!(restored
-        .document
-        .history
-        .recipes
-        .values()
-        .all(|r| r.state == EvaluationState::Clean));
+    assert!(
+        restored
+            .document
+            .history
+            .recipes
+            .values()
+            .all(|r| r.state == EvaluationState::Clean)
+    );
     restored.document.validate(&Limits::default()).unwrap();
 }
 #[test]
@@ -176,12 +184,14 @@ fn solver_version_mismatch_never_acquires_clean_replay_from_similar_name() {
     }]);
     let restored = Archive::restore(&bytes, &Limits::default(), &keys).unwrap();
     assert_eq!(restored.diagnostics.len(), 1);
-    assert!(restored
-        .document
-        .history
-        .recipes
-        .values()
-        .all(|r| matches!(r.state, EvaluationState::Unresolved(_))));
+    assert!(
+        restored
+            .document
+            .history
+            .recipes
+            .values()
+            .all(|r| matches!(r.state, EvaluationState::Unresolved(_)))
+    );
 }
 
 #[test]

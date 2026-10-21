@@ -15,7 +15,10 @@ fn screen_rect() -> Rect {
 fn frames(app: &mut MatrixApp, context: &egui::Context, frames: usize) {
     for _ in 0..frames {
         let mut output = context.run_ui(
-            egui::RawInput { screen_rect: Some(screen_rect()), ..Default::default() },
+            egui::RawInput {
+                screen_rect: Some(screen_rect()),
+                ..Default::default()
+            },
             |ui| app.show(ui),
         );
         output.textures_delta.clear();
@@ -26,13 +29,22 @@ fn events(app: &mut MatrixApp, context: &egui::Context, events: Vec<Event>) {
     events_with(app, context, Modifiers::NONE, events);
 }
 
-fn events_with(app: &mut MatrixApp, context: &egui::Context, modifiers: Modifiers, events: Vec<Event>) {
+fn events_with(
+    app: &mut MatrixApp,
+    context: &egui::Context,
+    modifiers: Modifiers,
+    events: Vec<Event>,
+) {
     // egui 0.36 carries held modifiers as an event, not as a field of `RawInput`.
     let mut all = Vec::with_capacity(events.len() + 1);
     all.push(Event::ModifiersChanged(modifiers));
     all.extend(events);
     let mut output = context.run_ui(
-        egui::RawInput { screen_rect: Some(screen_rect()), events: all, ..Default::default() },
+        egui::RawInput {
+            screen_rect: Some(screen_rect()),
+            events: all,
+            ..Default::default()
+        },
         |ui| app.show(ui),
     );
     output.textures_delta.clear();
@@ -57,7 +69,10 @@ fn viewport_of(app: &MatrixApp, view: ViewId) -> Viewport {
 fn screen_point(app: &MatrixApp, view: ViewId, point: [f64; 3]) -> Pos2 {
     let viewport = viewport_of(app, view);
     let camera = &app.controller.workspace.views[&view].camera;
-    let projected = camera.project(point, viewport).expect("projection").expect("in front of the camera");
+    let projected = camera
+        .project(point, viewport)
+        .expect("projection")
+        .expect("in front of the camera");
     Pos2::new(projected.screen[0] as f32, projected.screen[1] as f32)
 }
 
@@ -78,8 +93,17 @@ fn a_click_selects_and_a_gumball_drag_moves_the_line() {
     let mut app = MatrixApp::new(Document::new("gumball ui")).expect("app");
     line(&mut app);
     frames(&mut app, &context, 4);
-    let id = *app.controller.document().entities.keys().next().expect("one line");
-    assert!(app.controller.selection_state().objects.is_empty(), "nothing is selected yet");
+    let id = *app
+        .controller
+        .document()
+        .entities
+        .keys()
+        .next()
+        .expect("one line");
+    assert!(
+        app.controller.selection_state().objects.is_empty(),
+        "nothing is selected yet"
+    );
 
     // Click the middle of the line in the Perspective viewport.
     let (target, pressed_at) = left(&app, ViewId::Perspective, [10.0, 0.0, 0.0]);
@@ -89,8 +113,18 @@ fn a_click_selects_and_a_gumball_drag_moves_the_line() {
         &mut app,
         &context,
         vec![
-            Event::PointerButton { pos: pressed_at, button: egui::PointerButton::Primary, pressed: true, modifiers: Modifiers::NONE },
-            Event::PointerButton { pos: pressed_at, button: egui::PointerButton::Primary, pressed: false, modifiers: Modifiers::NONE },
+            Event::PointerButton {
+                pos: pressed_at,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: Modifiers::NONE,
+            },
+            Event::PointerButton {
+                pos: pressed_at,
+                button: egui::PointerButton::Primary,
+                pressed: false,
+                modifiers: Modifiers::NONE,
+            },
         ],
     );
     frames(&mut app, &context, 2);
@@ -98,8 +132,15 @@ fn a_click_selects_and_a_gumball_drag_moves_the_line() {
         app.controller.selection_state().objects.contains(&id),
         "a click in the viewport must select the line"
     );
-    let pivot = app.controller.gumball_pivot().expect("the gumball has a pivot once something is selected");
-    assert!((pivot.origin[0] - 10.0).abs() < 1e-6, "the pivot sits at the line centre: {:?}", pivot.origin);
+    let pivot = app
+        .controller
+        .gumball_pivot()
+        .expect("the gumball has a pivot once something is selected");
+    assert!(
+        (pivot.origin[0] - 10.0).abs() < 1e-6,
+        "the pivot sits at the line centre: {:?}",
+        pivot.origin
+    );
 
     // Drag a gumball handle: press on the pivot, move, release.
     let undo_before = app.controller.coordinator().undo_len();
@@ -108,7 +149,12 @@ fn a_click_selects_and_a_gumball_drag_moves_the_line() {
     events(
         &mut app,
         &context,
-        vec![Event::PointerButton { pos: anchor, button: egui::PointerButton::Primary, pressed: true, modifiers: Modifiers::NONE }],
+        vec![Event::PointerButton {
+            pos: anchor,
+            button: egui::PointerButton::Primary,
+            pressed: true,
+            modifiers: Modifiers::NONE,
+        }],
     );
     for step in 1..=4 {
         let moved = anchor + Vec2::new(12.0 * step as f32, 0.0);
@@ -118,11 +164,20 @@ fn a_click_selects_and_a_gumball_drag_moves_the_line() {
     events(
         &mut app,
         &context,
-        vec![Event::PointerButton { pos: released, button: egui::PointerButton::Primary, pressed: false, modifiers: Modifiers::NONE }],
+        vec![Event::PointerButton {
+            pos: released,
+            button: egui::PointerButton::Primary,
+            pressed: false,
+            modifiers: Modifiers::NONE,
+        }],
     );
     frames(&mut app, &context, 2);
 
-    let after = app.controller.gumball_pivot().expect("still selected").origin;
+    let after = app
+        .controller
+        .gumball_pivot()
+        .expect("still selected")
+        .origin;
     assert!(
         (after[0] - pivot.origin[0]).abs() > 0.5,
         "dragging the gumball must move the line: {:?} -> {:?}",
@@ -130,8 +185,10 @@ fn a_click_selects_and_a_gumball_drag_moves_the_line() {
         after
     );
     let drawn = screen_point(&app, ViewId::Perspective, after);
-    assert!((drawn.x-released.x).abs()<0.001 && (drawn.y-released.y).abs()<0.001,
-        "free move follows the pointer in the screen plane: {drawn:?} vs {released:?}");
+    assert!(
+        (drawn.x - released.x).abs() < 0.001 && (drawn.y - released.y).abs() < 0.001,
+        "free move follows the pointer in the screen plane: {drawn:?} vs {released:?}"
+    );
     assert!(
         app.controller.coordinator().undo_len() > undo_before,
         "the drag must be one journal entry"
@@ -139,7 +196,11 @@ fn a_click_selects_and_a_gumball_drag_moves_the_line() {
 
     app.controller.undo().expect("undo");
     frames(&mut app, &context, 1);
-    let restored = app.controller.gumball_pivot().expect("selected after undo").origin;
+    let restored = app
+        .controller
+        .gumball_pivot()
+        .expect("selected after undo")
+        .origin;
     assert!(
         (restored[0] - 10.0).abs() < 1e-6,
         "undo restores the line centre: {restored:?}"
@@ -175,7 +236,13 @@ fn placement_of(app: &MatrixApp, id: om9_core::identity::ObjectId) -> [[f64; 4];
 
 /// Presses at `start`, moves to `end` in steps, releases. Every event carries the modifiers, so the UI
 /// picks the same gumball mode a held Shift or Alt would.
-fn drag(app: &mut MatrixApp, context: &egui::Context, modifiers: Modifiers, start: Pos2, end: Pos2) {
+fn drag(
+    app: &mut MatrixApp,
+    context: &egui::Context,
+    modifiers: Modifiers,
+    start: Pos2,
+    end: Pos2,
+) {
     // A real keyboard sends the modifier change on its own frame, before the pointer press; sending both in
     // one frame makes egui treat the press as a new interaction and the drag never starts.
     events_with(app, context, modifiers, Vec::new());
@@ -216,19 +283,38 @@ fn shift_dragging_a_ring_rotates_the_selection() {
     let mut app = MatrixApp::new(Document::new("gumball rotate")).expect("app");
     line(&mut app);
     frames(&mut app, &context, 4);
-    let id = *app.controller.document().entities.keys().next().expect("one line");
+    let id = *app
+        .controller
+        .document()
+        .entities
+        .keys()
+        .next()
+        .expect("one line");
     let (_, pressed_at) = left(&app, ViewId::Perspective, [10.0, 0.0, 0.0]);
     events(&mut app, &context, vec![Event::PointerMoved(pressed_at)]);
     events(
         &mut app,
         &context,
         vec![
-            Event::PointerButton { pos: pressed_at, button: egui::PointerButton::Primary, pressed: true, modifiers: Modifiers::NONE },
-            Event::PointerButton { pos: pressed_at, button: egui::PointerButton::Primary, pressed: false, modifiers: Modifiers::NONE },
+            Event::PointerButton {
+                pos: pressed_at,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: Modifiers::NONE,
+            },
+            Event::PointerButton {
+                pos: pressed_at,
+                button: egui::PointerButton::Primary,
+                pressed: false,
+                modifiers: Modifiers::NONE,
+            },
         ],
     );
     frames(&mut app, &context, 2);
-    assert!(app.controller.selection_state().objects.contains(&id), "the line must be selected");
+    assert!(
+        app.controller.selection_state().objects.contains(&id),
+        "the line must be selected"
+    );
 
     let pivot = app.controller.gumball_pivot().expect("pivot").origin;
     let size = handle_size(&app, ViewId::Perspective);
@@ -245,7 +331,9 @@ fn shift_dragging_a_ring_rotates_the_selection() {
     {
         use om9_scene::gumball_view::{GumballView, Mode};
         let viewport = viewport_of(&app, ViewId::Perspective);
-        let camera = app.controller.workspace.views[&ViewId::Perspective].camera.clone();
+        let camera = app.controller.workspace.views[&ViewId::Perspective]
+            .camera
+            .clone();
         let frame = om9_core::gumball::Frame {
             origin: pivot,
             x: [1.0, 0.0, 0.0],
@@ -254,17 +342,32 @@ fn shift_dragging_a_ring_rotates_the_selection() {
         };
         let gumball = GumballView::with_size(frame, Mode::Rotate, size);
         let hit = gumball
-            .hit(&camera, viewport, [f64::from(start.x), f64::from(start.y)], 8.0)
+            .hit(
+                &camera,
+                viewport,
+                [f64::from(start.x), f64::from(start.y)],
+                8.0,
+            )
             .expect("hit test");
         eprintln!("rotate: ring point {ring:?} screen {start:?} hit {hit:?}");
     }
-    let end = screen_point(&app, ViewId::Perspective, [pivot[0], pivot[1] - radius, pivot[2]]);
+    let end = screen_point(
+        &app,
+        ViewId::Perspective,
+        [pivot[0], pivot[1] - radius, pivot[2]],
+    );
     {
         let rect = app.view_rects[&ViewId::Perspective];
         eprintln!(
             "rect {rect:?} start {start:?} end {end:?} inside canvas {} {}",
-            start.x > rect.left() && start.x < rect.right() && start.y > rect.top() + 26.0 && start.y < rect.bottom(),
-            end.x > rect.left() && end.x < rect.right() && end.y > rect.top() + 26.0 && end.y < rect.bottom()
+            start.x > rect.left()
+                && start.x < rect.right()
+                && start.y > rect.top() + 26.0
+                && start.y < rect.bottom(),
+            end.x > rect.left()
+                && end.x < rect.right()
+                && end.y > rect.top() + 26.0
+                && end.y < rect.bottom()
         );
     }
     let before = placement_of(&app, id);
@@ -272,21 +375,32 @@ fn shift_dragging_a_ring_rotates_the_selection() {
     drag(&mut app, &context, Modifiers::NONE, start, end);
 
     let after = placement_of(&app, id);
-    assert_ne!(before, after, "a Shift drag on the ring must change the placement");
+    assert_ne!(
+        before, after,
+        "a Shift drag on the ring must change the placement"
+    );
     let (cosine, sine) = (after[0][0], after[1][0]);
     assert!(
         (cosine * cosine + sine * sine - 1.0).abs() < 1e-6,
         "the placement must hold a rotation, not a shear: {after:?}"
     );
     // Rotation about the pivot leaves the pivot point where it was.
-    let moved_pivot = app.controller.gumball_pivot().expect("pivot after rotation").origin;
+    let moved_pivot = app
+        .controller
+        .gumball_pivot()
+        .expect("pivot after rotation")
+        .origin;
     assert!(
         (moved_pivot[0] - pivot[0]).abs() < 1e-6 && (moved_pivot[1] - pivot[1]).abs() < 1e-6,
         "rotation keeps the pivot: {:?} -> {moved_pivot:?}",
         pivot
     );
     app.controller.undo().expect("undo");
-    assert_eq!(placement_of(&app, id), before, "undo restores the placement");
+    assert_eq!(
+        placement_of(&app, id),
+        before,
+        "undo restores the placement"
+    );
 }
 
 #[test]
@@ -295,29 +409,54 @@ fn dragging_the_scale_square_scales_the_selection() {
     let mut app = MatrixApp::new(Document::new("gumball scale")).expect("app");
     line(&mut app);
     frames(&mut app, &context, 4);
-    let id = *app.controller.document().entities.keys().next().expect("one line");
+    let id = *app
+        .controller
+        .document()
+        .entities
+        .keys()
+        .next()
+        .expect("one line");
     let (_, pressed_at) = left(&app, ViewId::Perspective, [10.0, 0.0, 0.0]);
     events(&mut app, &context, vec![Event::PointerMoved(pressed_at)]);
     events(
         &mut app,
         &context,
         vec![
-            Event::PointerButton { pos: pressed_at, button: egui::PointerButton::Primary, pressed: true, modifiers: Modifiers::NONE },
-            Event::PointerButton { pos: pressed_at, button: egui::PointerButton::Primary, pressed: false, modifiers: Modifiers::NONE },
+            Event::PointerButton {
+                pos: pressed_at,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: Modifiers::NONE,
+            },
+            Event::PointerButton {
+                pos: pressed_at,
+                button: egui::PointerButton::Primary,
+                pressed: false,
+                modifiers: Modifiers::NONE,
+            },
         ],
     );
     frames(&mut app, &context, 2);
-    assert!(app.controller.selection_state().objects.contains(&id), "the line must be selected");
+    assert!(
+        app.controller.selection_state().objects.contains(&id),
+        "the line must be selected"
+    );
 
     let pivot = app.controller.gumball_pivot().expect("pivot").origin;
     let size = handle_size(&app, ViewId::Perspective);
     // The Y axis, so the press is not near the viewport edge; the scale box sits on the negative side, as in
     // the manual figure, so the press is at -1 and the drag goes to -2 for a factor of two.
-    let start = screen_point(&app, ViewId::Perspective, [pivot[0], pivot[1] - size, pivot[2]]);
+    let start = screen_point(
+        &app,
+        ViewId::Perspective,
+        [pivot[0], pivot[1] - size, pivot[2]],
+    );
     {
         use om9_scene::gumball_view::{GumballView, Mode};
         let viewport = viewport_of(&app, ViewId::Perspective);
-        let camera = app.controller.workspace.views[&ViewId::Perspective].camera.clone();
+        let camera = app.controller.workspace.views[&ViewId::Perspective]
+            .camera
+            .clone();
         let frame = om9_core::gumball::Frame {
             origin: pivot,
             x: [1.0, 0.0, 0.0],
@@ -326,22 +465,40 @@ fn dragging_the_scale_square_scales_the_selection() {
         };
         let gumball = GumballView::with_size(frame, Mode::Scale, size);
         let hit = gumball
-            .hit(&camera, viewport, [f64::from(start.x), f64::from(start.y)], 8.0)
+            .hit(
+                &camera,
+                viewport,
+                [f64::from(start.x), f64::from(start.y)],
+                8.0,
+            )
             .expect("hit test");
-        assert_eq!(hit, Some(om9_core::gumball::Handle::Scale(om9_core::gumball::Axis::Y)));
+        assert_eq!(
+            hit,
+            Some(om9_core::gumball::Handle::Scale(om9_core::gumball::Axis::Y))
+        );
     }
-    let end = screen_point(&app, ViewId::Perspective, [pivot[0], pivot[1] - size * 2.0, pivot[2]]);
+    let end = screen_point(
+        &app,
+        ViewId::Perspective,
+        [pivot[0], pivot[1] - size * 2.0, pivot[2]],
+    );
     let before = placement_of(&app, id);
     app.set_gumball_mode(om9_scene::gumball_view::Mode::Scale);
     drag(&mut app, &context, Modifiers::NONE, start, end);
 
     let after = placement_of(&app, id);
-    assert!((after[1][1] - 2.0).abs() < 1e-3, "a factor of two on Y: {after:?}");
+    assert!(
+        (after[1][1] - 2.0).abs() < 1e-3,
+        "a factor of two on Y: {after:?}"
+    );
     assert!(
         (after[0][0] - 1.0).abs() < 1e-6 && (after[2][2] - 1.0).abs() < 1e-6,
         "the other axes are untouched: {after:?}"
     );
     app.controller.undo().expect("undo");
-    assert_eq!(placement_of(&app, id), before, "undo restores the placement");
+    assert_eq!(
+        placement_of(&app, id),
+        before,
+        "undo restores the placement"
+    );
 }
-

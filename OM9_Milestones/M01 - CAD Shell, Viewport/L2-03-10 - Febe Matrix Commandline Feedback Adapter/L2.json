@@ -74,5 +74,32 @@
       "id": "OM9-L3-03-10-006",
       "file": "M01 - CAD Shell, Viewport/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-006 - Commandline Escape Repeat Shortcuts/l3.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "appearance_update": {
+      "date": "2026-10-20",
+      "target": "standalone Rust OM9",
+      "status": "COMMAND_THEME_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Command appearance only: history, prompt, input, caret, selection, IME underline, option tokens and scrollbar widget colours.",
+      "colours": {
+        "history_background": "#01391C",
+        "input_background": "#005126",
+        "text_caret_ime": "#FDD880",
+        "selection": "#186C41"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-command-green-gold.json"
+      ],
+      "limitation": "Appearance evidence only; no full L2/L3 command-completion promotion."
+    },
+    "typography": {
+      "date": "2026-10-20",
+      "status": "TYPOGRAPHY_TESTED_NATIVE_CAPTURED_LAYOUT_ORACLE_MISMATCH",
+      "scope": "UI font rendering and category-label glyph quality; no colour or command behavior changes.",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-smooth-fonts.json"
+      ],
+      "limitation": "All three native app processes exited successfully and each completed five command checks. Full layout oracle remains FAIL because its 22pt icon expectation disagrees with the captured 24pt executable. Concurrent icon-size work is outside this font change."
+    }
+  }
 }

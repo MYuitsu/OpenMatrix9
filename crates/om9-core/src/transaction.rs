@@ -155,6 +155,7 @@ impl Cancellation {
 }
 
 #[derive(Debug, Clone)]
+#[allow(clippy::large_enum_variant)]
 pub enum Mutation {
     Layers(Box<crate::layers::LayerPlan>),
     Publish(Box<crate::result::PreparedResult>),
@@ -191,6 +192,12 @@ pub enum Mutation {
     Attributes {
         source: SourceStamp,
         attributes: Attributes,
+    },
+    /// Rename one object (OM9-L3-03-14-007). The label is document state, so it
+    /// goes through a transaction like every other attribute and Undo restores it.
+    Label {
+        source: SourceStamp,
+        label: String,
     },
     Move {
         source: SourceStamp,
@@ -248,6 +255,7 @@ impl Mutation {
             | Self::Placement { source, .. }
             | Self::Geometry { source, .. }
             | Self::Attributes { source, .. }
+            | Self::Label { source, .. }
             | Self::Move { source, .. }
             | Self::Extension { source, .. } => Some(*source),
             _ => None,
@@ -1341,6 +1349,8 @@ impl TransactionCoordinator {
                     .checked_add(members)
                     .and_then(|n| n.checked_add(bundle.layers.len()))
                     .and_then(|n| n.checked_add(bundle.definitions.len()))
+                    .and_then(|n| n.checked_add(bundle.groups.len()))
+                    .and_then(|n| n.checked_add(bundle.exchange.line_patterns.len()))
                     .and_then(|n| n.checked_add(3))
                     .ok_or(Error::Overflow("import scratch"))?;
                 identities_bound = identities_bound
@@ -1727,6 +1737,15 @@ impl TransactionCoordinator {
                         .editable
                     {
                         return Err(Error::Permission("assigned layer"));
+                    }
+                }
+                Mutation::Label { label, .. } => {
+                    if label.is_empty()
+                        || label.len() > 128
+                        || label.trim() != label
+                        || label.chars().any(char::is_control)
+                    {
+                        return Err(Error::Invalid("object label"));
                     }
                 }
                 Mutation::Move {
@@ -2216,6 +2235,18 @@ impl TransactionCoordinator {
                         .ok_or(Error::Missing("source"))?;
                     e.attributes_revision = bump(e.attributes_revision, "attributes revision")?;
                     e.attributes = attributes;
+                }
+                Mutation::Label { source, label } => {
+                    staged
+                        .document_mut(source.document)?
+                        .invalidate_dependents(source.object, false)?;
+                    let e = staged
+                        .document_mut(source.document)?
+                        .entities
+                        .get_mut(&source.object)
+                        .ok_or(Error::Missing("source"))?;
+                    e.attributes_revision = bump(e.attributes_revision, "attributes revision")?;
+                    e.label = label;
                 }
                 Mutation::Move {
                     source,

@@ -1,0 +1,63 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-001",
+  "l4": "OM9-L4-03-14-001-02",
+  "case": "matrix-layer-category-palette-negative",
+  "negative_oracle": "Duplicate display label must not cause ID collision",
+  "cases": [
+    {
+      "id": "N1-two-slots-may-show-the-same-text-and-stay-different-layers",
+      "slots": [
+        1,
+        17
+      ],
+      "expect": {
+        "distinct_numbers": true,
+        "distinct_identity": true
+      }
+    },
+    {
+      "id": "N2-a-custom-slot-cannot-take-a-reserved-label",
+      "slot": 17,
+      "label": "Metal 01",
+      "expect": {
+        "refused": true,
+        "error": "Invalid"
+      }
+    },
+    {
+      "id": "N3-a-custom-label-manual-check",
+      "slot": 17,
+      "label": "My Yellow",
+      "expect": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "N4-the-identity-is-the-slot-number-not-the-label",
+      "expect": {
+        "serde_round_trip": true,
+        "detail": "PresetSlot serialises as its number, so a renamed row cannot become another layer"
+      }
+    },
+    {
+      "id": "N5-a-slot-outside-1-33-is-refused",
+      "numbers": [
+        0,
+        34,
+        255
+      ],
+      "expect": {
+        "refused": true
+      }
+    },
+    {
+      "id": "N6-lights-is-labelled-but-is-not-one-of-the-seven",
+      "slot": 33,
+      "expect": {
+        "label": "Lights",
+        "category": null
+      }
+    }
+  ]
+}

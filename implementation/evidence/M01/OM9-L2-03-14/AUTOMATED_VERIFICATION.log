@@ -1,0 +1,33 @@
+
+OM9-L2-03-14 — automated verification
+OM9-L3-03-14-001  ok      Matrix Layer Category Palette
+                          test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+OM9-L3-03-14-002  ok      Current Layer And Assignment UI
+                          test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+OM9-L3-03-14-003  ok      Layer Visible And Locked Controls
+                          test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+OM9-L3-03-14-004  ok      Select All Objects By Layer
+                          test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+OM9-L3-03-14-005  ok      Matrix Object Info Overlay
+                          test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+OM9-L3-03-14-006  ok      Superselect By Jewelry Object Type
+                          test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+OM9-L3-03-14-007  ok      Object Property Editor Adapter
+                          test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+OM9-L3-03-14-008  ok      Layer State Persistence Visual Check
+                          test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+L3-006 UI         ok      Tools menu picks the semantic gem
+                          test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+L3-007 UI         ok      Edit menu edits one property in one transaction
+                          test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+lib               ok      
+                          test result: ok. 104 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.55s
+core              ok      
+                          test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+fmt               ok      
+clippy            ok      
+                          Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.35s
+real-window       ok      
+                          panels-summary: H:\OpenMatrix9\build\standalone-validation\ui-artifacts\l2-03-14-verify\pa
+
+15/15 groups ok

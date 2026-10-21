@@ -466,14 +466,20 @@ impl MatrixApp {
                 let result = if export {
                     self.controller.export_3dm(&path).map(|diagnostics| {
                         (
-                            format!("Exported Rhino 3DM: {}", path.display()),
+                            format!(
+                                "Exported Rhino 3DM: {}",
+                                crate::transcript::redact_paths(&path.display().to_string())
+                            ),
                             diagnostics,
                         )
                     })
                 } else {
                     self.controller.import_3dm(&path).map(|diagnostics| {
                         (
-                            format!("Imported Rhino 3DM: {}", path.display()),
+                            format!(
+                                "Imported Rhino 3DM: {}",
+                                crate::transcript::redact_paths(&path.display().to_string())
+                            ),
                             diagnostics,
                         )
                     })
@@ -491,7 +497,7 @@ impl MatrixApp {
                         }
                     }
                     Err(error) => {
-                        let message = format!("{error}");
+                        let message = crate::transcript::redact_paths(&format!("{error}"));
                         self.transcript.append_history(&message);
                         self.status.error(&message);
                     }
@@ -501,7 +507,7 @@ impl MatrixApp {
             }
             Ok(None) => {}
             Err(error) => {
-                let message = format!("{error}");
+                let message = crate::transcript::redact_paths(&format!("{error}"));
                 self.transcript.append_history(&message);
                 self.status.error(&message);
                 self.focus_cmd = true;

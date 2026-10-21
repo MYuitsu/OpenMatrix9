@@ -1,0 +1,40 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-003",
+  "l4": "OM9-L4-03-14-003-02",
+  "case": "layer-visible-and-locked-controls-negative",
+  "negative_oracle": "Locked object edit attempt must have no mutation and informative status",
+  "cases": [
+    {
+      "id": "T1-editing-an-object-of-a-locked-layer-is-refused",
+      "expect": {
+        "refused": true,
+        "error": "Permission",
+        "entities_unchanged": true,
+        "journal_unchanged": true
+      }
+    },
+    {
+      "id": "T2-the-refusal-says-the-layer-is-locked",
+      "expect": {
+        "message_contains": [
+          "locked"
+        ]
+      }
+    },
+    {
+      "id": "T3-hiding-does-not-touch-the-document",
+      "expect": {
+        "journal_unchanged": true,
+        "revision_unchanged": true
+      }
+    },
+    {
+      "id": "T4-a-locked-layer-still-lists-its-objects-for-inspection",
+      "expect": {
+        "display_attributes_available": true,
+        "name_kept": true
+      }
+    }
+  ]
+}

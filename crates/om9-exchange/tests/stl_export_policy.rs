@@ -6,7 +6,7 @@
 //! The real document-to-mesh STL command is M07 (`OM9-L3-01-12-008` is deferred
 //! to M07); this test only pins the codec policy the command will call.
 
-use om9_exchange::stl::{open_edges, write_binary_stl, StlError, StlOptions, TriangleSoup};
+use om9_exchange::stl::{StlError, StlOptions, TriangleSoup, open_edges, write_binary_stl};
 
 /// A closed 10 mm cube, wound counter-clockwise seen from outside.
 fn cube() -> TriangleSoup {

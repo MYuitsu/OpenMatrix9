@@ -137,7 +137,10 @@ fn source_and_topology_survive_cold_archive_and_transform_undo_without_reviving_
     let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(report["objects"][0]["id"], id.to_string());
     let restored = Controller::from_file(&path, l).unwrap();
-    assert_eq!(restored.document().entities[&id].placement, Transform::translation([5.,2.,1.]));
+    assert_eq!(
+        restored.document().entities[&id].placement,
+        Transform::translation([5., 2., 1.])
+    );
     let Geometry::Brep(loaded) = &restored.document().entities[&id].geometry else {
         panic!("BRep downgraded")
     };

@@ -1,0 +1,86 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-14-006-01",
+  "l3_id": "OM9-L3-03-14-006",
+  "l3_title": "Superselect By Jewelry Object Type",
+  "owner_module_id": "OM9-L2-03-14",
+  "milestone": "M01",
+  "stage": "E02",
+  "gate": "M01-UI",
+  "goal": "filter/select bad/open/duplicate/gem entities",
+  "positive_oracle": "Select Gems filter matches jewelry-semantic GemRef, bad/open filter uses typed kernel verdict",
+  "negative_oracle": "Do not classify ordinary mesh as valid gemstone by color/name alone",
+  "behaviour_reference": {
+    "source": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/reference/text/m8book1__p32-34__using-info-settings-menu.md",
+    "quote": "Super Select — This tool determines what types of objects you …",
+    "images": [
+      "reference/images/m8book1_p32_img02.png",
+      "reference/images/m8book1_p34_img01.png"
+    ],
+    "decision": "A gem is a jewellery-semantic object (the om9.gem slot), not a shape that merely looks like one; bad/open verdicts must come from the model, and a missing verdict is reported as missing."
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "Behavioural source: the extracted Matrix9 manual shipped with the milestone. QymCAD only for menu technique.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:118 comment: only the nodes that depend on a datum are marked dirty"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "A tool that walks the model and gathers what a datum-shaped question selects: the idea OM9 keeps. QymCAD has no jewellery semantics.",
+      "om9_owner": "crates/om9-app/src/superselect.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No selection surface.",
+      "om9_owner": "crates/om9-app/src/superselect.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No semantic filters.",
+      "om9_owner": "crates/om9-core/src/model.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "om9-core model: Entity.extensions (BTreeMap<slot, Extension>), GEM_EXTENSION_SLOT = \"om9.gem\", slot_name_valid, Extension::new with payload-shape validation",
+    "om9-core geometry: Geometry::validate(&Limits) is the typed verdict for whether a geometry is usable",
+    "nothing selected by a typed property: the palette and the layer gesture only knew geometry"
+  ],
+  "gap_found_by_this_task": [
+    "There was no SuperSelect at all: no filter vocabulary and no way to ask 'which objects are gems' other than looking at names or colours — exactly what the negative oracle forbids.",
+    "Added superselect.rs: SelectFilter (Gems/BadGeometry/OpenGeometry/Duplicate), SkipReason for every object that does not match, classify() and Controller::superselect/apply_superselect. Gems match only the typed om9.gem slot; bad geometry matches only the model's own validate verdict; the open filter reports NoOpenVerdict instead of guessing.",
+    "RED is API-level and stated as such: the module did not exist. The fixtures (G1..G5, H1..H5) pin the rule, and H1/H2 are the exact trap the plan names (same label, gem-like look, no semantics)."
+  ],
+  "reuse_decision": "ADAPT the 'walk the model and gather' technique; ADD the typed filter vocabulary and the explicit skip reasons.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-03-14-006/positive.json",
+    "implementation/fixtures/M01/OM9-L3-03-14-006/negative.json",
+    "crates/om9-app/tests/superselect_jewelry.rs"
+  ]
+}

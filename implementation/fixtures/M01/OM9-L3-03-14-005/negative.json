@@ -1,0 +1,37 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-005",
+  "l4": "OM9-L4-03-14-005-02",
+  "case": "matrix-object-info-overlay-negative",
+  "negative_oracle": "Missing BRep must show unavailable measurement, not zero volume claim",
+  "cases": [
+    {
+      "id": "J1-an-unavailable-measurement-is-never-a-zero-size",
+      "expect": {
+        "not_size": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "J2-an-unknown-object-is-refused",
+      "expect": {
+        "error": "Missing"
+      }
+    },
+    {
+      "id": "J3-the-info-does-not-mutate-the-document",
+      "expect": {
+        "journal_unchanged": true
+      }
+    },
+    {
+      "id": "J4-validity-is-absent-only-when-it-cannot-be-judged",
+      "expect": {
+        "detail": "Some(true) for a valid empty mesh; None is reserved for geometry the model cannot judge"
+      }
+    }
+  ]
+}

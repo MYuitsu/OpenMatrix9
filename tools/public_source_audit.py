@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 import xml.etree.ElementTree as ET
 
 FORBIDDEN_ROOTS={'analysis'}
@@ -12,7 +13,12 @@ FORBIDDEN_SUFFIXES={'.dll','.exe','.pyd','.pdb','.lib','.obj','.pdf','.chm','.fr
                    '.frm','.vbp','.vbw','.ocx','.tlb','.bin','.3dm','.ghidra'}
 EXCLUDED_DIRS={'.git','build','target','__pycache__','.vs','.idea'}
 ALLOWED_RASTERS={'Resources/branding/introduction.png','Resources/branding/workbench.png',
-                 'docs/images/donate/momo-qr.png'}
+                 'docs/images/donate/momo-qr.png','om9-window.png'}
+# External reference checkouts are not OM9 public source. Historical milestone
+# reference extracts are private manual material; the strict walk still reports
+# them, while the publish scope skips them until they are moved to the archive.
+PUBLIC_EXCLUDED_PREFIXES=('QymCAD/','vendor-research/')
+PUBLIC_EVIDENCE_PREFIX='implementation/evidence/'
 # User-approved public documentation only; never a general ref/ or PDF exemption.
 # Official source: https://docs.mcneel.com/rhino/5/usersguide/en-us/windows_pdf_user_s_guide.pdf
 PUBLIC_REFERENCE_GUIDES={
@@ -51,31 +57,78 @@ def audit_public_reference(file,relative,errors):
     return False
 
 
-def audit(root):
+def public_candidates(root):
+    """Files that can be published: tracked plus untracked, excluding gitignored
+    private references and build output. A private local archive therefore does
+    not make the public audit fail, while tracked private material still does."""
+    try:
+        result=subprocess.run(
+            ['git','-C',str(root),'ls-files','-co','--exclude-standard','-z'],
+            check=True,capture_output=True)
+    except (OSError,subprocess.CalledProcessError):
+        return None
+    paths=[]
+    for raw in result.stdout.split(b'\0'):
+        if not raw:
+            continue
+        relative=raw.decode('utf-8','surrogateescape')
+        if relative.startswith(PUBLIC_EXCLUDED_PREFIXES):
+            continue
+        if relative.startswith('OM9_Milestones/') and '/reference/' in relative:
+            continue
+        if relative.startswith('manuals/'):
+            continue
+        paths.append(root/relative)
+    return paths
+
+
+def audit_file(file,relative,errors):
+    in_reference=relative.casefold()=='ref' or relative.casefold().startswith('ref/')
+    if file.is_symlink():
+        errors.append('Symlink: '+relative)
+        return
+    if file.suffix.lower() in {'.png','.jpg','.jpeg','.bmp','.gif','.webp'} and relative not in ALLOWED_RASTERS:
+        if not relative.startswith(PUBLIC_EVIDENCE_PREFIX) or '/reference/' in relative:
+            errors.append('Unreviewed raster artifact: '+relative)
+    approved_reference=audit_public_reference(file,relative,errors) if in_reference else False
+    if file.suffix.lower() in FORBIDDEN_SUFFIXES and not approved_reference:
+        errors.append('Private/binary artifact: '+relative)
+    if file.name=='.env' or file.name.startswith('.env.') and file.name!='.env.example':
+        errors.append('Credential file: '+relative)
+    if file.suffix.lower() in {'.pem','.key','.p12','.pfx'}:
+        errors.append('Key material: '+relative)
+    if relative.startswith('Resources/icons/') and file.suffix!='.svg':
+        errors.append('Non-vector icon: '+relative)
+
+
+def audit(root, strict=False):
     root=Path(root).resolve();errors=[];files=[]
     for folder in FORBIDDEN_ROOTS:
         if (root/folder).exists():errors.append('Private directory: '+folder)
-    stack=[root]
-    while stack:
-        directory=stack.pop()
-        for file in directory.iterdir():
-            relative=file.relative_to(root).as_posix()
-            if file.is_symlink():errors.append('Symlink: '+relative);continue
-            # Windows paths are case-insensitive; alternate spelling must not bypass ref checks.
-            in_reference=relative.casefold()=='ref' or relative.casefold().startswith('ref/')
-            if file.is_dir():
-                if in_reference and relative not in PUBLIC_REFERENCE_DIRS:
-                    errors.append('Private directory: '+relative)
-                if in_reference or file.name not in EXCLUDED_DIRS:stack.append(file)
+    candidates=public_candidates(root) if not strict else None
+    if candidates is not None:
+        for file in candidates:
+            if file.is_symlink() or not file.is_file():
                 continue
+            relative=file.relative_to(root).as_posix()
             files.append(file)
-            if file.suffix.lower() in {'.png','.jpg','.jpeg','.bmp','.gif','.webp'} and relative not in ALLOWED_RASTERS:
-                errors.append('Unreviewed raster artifact: '+relative)
-            approved_reference=audit_public_reference(file,relative,errors) if in_reference else False
-            if file.suffix.lower() in FORBIDDEN_SUFFIXES and not approved_reference:errors.append('Private/binary artifact: '+relative)
-            if file.name=='.env' or file.name.startswith('.env.') and file.name!='.env.example':errors.append('Credential file: '+relative)
-            if file.suffix.lower() in {'.pem','.key','.p12','.pfx'}:errors.append('Key material: '+relative)
-            if relative.startswith('Resources/icons/') and file.suffix!='.svg':errors.append('Non-vector icon: '+relative)
+            audit_file(file,relative,errors)
+    else:
+        stack=[root]
+        while stack:
+            directory=stack.pop()
+            for file in directory.iterdir():
+                relative=file.relative_to(root).as_posix()
+                if file.is_symlink():errors.append('Symlink: '+relative);continue
+                # Windows paths are case-insensitive; alternate spelling must not bypass ref checks.
+                in_reference=relative.casefold()=='ref' or relative.casefold().startswith('ref/')
+                if file.is_dir():
+                    if in_reference and relative not in PUBLIC_REFERENCE_DIRS:
+                        errors.append('Private directory: '+relative)
+                    if in_reference or file.name not in EXCLUDED_DIRS:stack.append(file)
+                    continue
+                files.append(file)
+                audit_file(file,relative,errors)
     resources=root/'Resources'
     ini=configparser.ConfigParser(interpolation=None);ini.read(resources/'menu/icons.ini',encoding='utf-8')
     report=json.loads((resources/'menu/source-manifest.json').read_text(encoding='utf-8'))
@@ -104,5 +157,7 @@ def audit(root):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project-root',type=Path,default=Path(__file__).resolve().parents[1])
-    args=parser.parse_args();result=audit(args.project_root)
+    parser.add_argument('--strict',action='store_true',
+                        help='Audit the whole filesystem, including gitignored private material')
+    args=parser.parse_args();result=audit(args.project_root,args.strict)
     print(json.dumps(result,ensure_ascii=False));raise SystemExit(bool(result['errors']))

@@ -137,8 +137,19 @@ impl NativeExchange {
         path: &Path,
         cancel: &Cancellation,
     ) -> Result<ValidatedExport> {
+        self.prepare_with_brep(coordinator, capture, path, cancel, None)
+    }
+    pub fn prepare_with_brep(
+        &self,
+        coordinator: &TransactionCoordinator,
+        mut capture: ExportCapture,
+        path: &Path,
+        cancel: &Cancellation,
+        bridge: Option<&dyn crate::BrepExport>,
+    ) -> Result<ValidatedExport> {
         canceled(cancel)?;
         capture.revalidate(coordinator)?;
+        capture.convert_breps(bridge, coordinator.limits())?;
         let mut held = coordinator.retained_usage()?;
         held.add(
             Usage::array::<SourceStamp>(capture.sources.len())?,
@@ -211,9 +222,9 @@ impl NativeExchange {
         om9_archive::admit_json(&output.stdout, &response_limits)?;
         let response: Value = serde_json::from_slice(&output.stdout)
             .map_err(|_| Error::Invalid("native write response"))?;
-        let expected = capture.document.entities.len()
+        let expected = capture.document().entities.len()
             + capture
-                .document
+                .document()
                 .definitions
                 .values()
                 .map(|d| d.members.len())
@@ -281,14 +292,14 @@ impl NativeExchange {
             path: target,
             sha256,
             bytes,
-            root_objects: capture.document.entities.len(),
-            definition_members: expected - capture.document.entities.len(),
-            dropped_history_recipes: capture.document.history.recipes.len(),
-            dropped_results: capture.document.results.len(),
-            dropped_resources: capture.document.resources.len(),
-            dropped_retained_sources: capture.document.retained_sources.len(),
+            root_objects: capture.document().entities.len(),
+            definition_members: expected - capture.document().entities.len(),
+            dropped_history_recipes: capture.document().history.recipes.len(),
+            dropped_results: capture.document().results.len(),
+            dropped_resources: capture.document().resources.len(),
+            dropped_retained_sources: capture.document().retained_sources.len(),
             dropped_native_records: capture
-                .document
+                .document()
                 .import_namespaces
                 .values()
                 .map(|ns| ns.records.len())

@@ -25,7 +25,10 @@
 
 namespace {
 using J = nlohmann::json;
-constexpr size_t max_depth = 32, max_nodes = 262144, max_array = 65536, max_records = 4096;
+constexpr size_t max_depth = 32, max_packet_nodes = 4000000, max_inventory_nodes = 4000000, max_array = 65536, max_records = 4096;
+// Retained merge keeps its tighter legacy bound.
+constexpr size_t max_retained_nodes = 262144;
+constexpr size_t max_nodes = max_retained_nodes;
 constexpr uintmax_t max_packet_bytes = 16 * 1024 * 1024, max_archive_bytes = 64 * 1024 * 1024;
 constexpr const char* default_layer = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 std::string operation_record = "arguments";
@@ -64,7 +67,7 @@ struct Preflight : nlohmann::json_sax<J> {
   std::vector<Frame> frames;
   size_t nodes = 0;
   bool node() {
-    require(++nodes <= max_nodes, "packet node budget");
+    require(++nodes <= max_packet_nodes, "packet node budget");
     if (!frames.empty()) require(++frames.back().count <= max_array, "packet container budget");
     return true;
   }
@@ -301,6 +304,15 @@ std::unique_ptr<ON_Geometry> geometry(const J& j,const ON_Xform& placement,const
       auto c=std::make_unique<ON_PointCloud>(); for(const auto& p:points) c->AppendPoint(point(p)); for(const auto& n:normals) { const auto p=point(n); c->m_N.Append(ON_3dVector(p.x,p.y,p.z)); } for(const auto& col:colors) c->m_C.Append(color(col)); g=std::move(c);
     }
   }
+  else if(name=="Hatch") {
+    fields(v,{"display","loops","pattern","color"}); (void)v["color"];
+    ON_Plane plane(ON_3dPoint(0,0,0),ON_3dVector(1,0,0),ON_3dVector(0,1,0)); ON_Hatch hatch; ON_SimpleArray<const ON_Curve*> boundaries; std::vector<std::unique_ptr<ON_PolylineCurve>> curves;
+    const auto& loops=v["loops"]; require(loops.is_array()&&loops.size()<=max_records,"hatch loop budget");
+    if(!loops.empty()) { for(const auto& loop:loops) { require(loop.is_array()&&loop.size()>=3,"hatch loop points"); ON_3dPointArray points; for(const auto& p:loop)points.Append(ON_3dPoint(point(p).x,point(p).y,0)); auto curve=std::make_unique<ON_PolylineCurve>(points); boundaries.Append(curve.get()); curves.push_back(std::move(curve)); } }
+    else { auto mesh_geometry=geometry(J{{"Mesh",v["display"]}},ON_Xform::IdentityTransformation,boxes); auto* mesh=ON_Mesh::Cast(mesh_geometry.get()); require(mesh&&mesh->VertexCount()>=3,"hatch display mesh"); ON_3dPointArray fallback_points; for(int i=0;i<mesh->VertexCount();++i){const auto p=mesh->Vertex(i); fallback_points.Append(ON_3dPoint(p.x,p.y,0));} auto curve=std::make_unique<ON_PolylineCurve>(fallback_points); boundaries.Append(curve.get()); curves.push_back(std::move(curve)); }
+    const auto pattern=text(v["pattern"]); int pattern_index=0; if(!pattern.empty()&&pattern[0]==static_cast<char>(35))pattern_index=std::atoi(pattern.c_str()+1);
+    require(hatch.Create(plane,boundaries,pattern_index,0.0,1.0)&&hatch.IsValid(),"native hatch creation"); g=std::make_unique<ON_Hatch>(hatch);
+  }
   else if(name=="NativeBrep") {
     fields(v,{"display","payload","crc"}); (void)v["display"]; (void)v["crc"];
     require(v["payload"].is_array()&&!v["payload"].empty(),"native BRep payload chunks");
@@ -339,6 +351,10 @@ std::unique_ptr<ON_Geometry> geometry(const J& j,const ON_Xform& placement,const
 struct Writer {
   ONX_Model model;
   std::map<std::string,int> layer_indices;
+  std::map<std::string,int> group_indices;
+  std::map<std::string,std::vector<int>> group_members;
+  std::map<std::string,int> line_pattern_indices;
+  std::map<std::string,int> material_indices;
   std::map<std::string,ON_BoundingBox> boxes;
   std::set<std::string> object_ids;
   size_t objects=0;
@@ -349,11 +365,23 @@ struct Writer {
     operation_record="entity "+key; revision(e["generation"]); revision(e["geometry_revision"]); revision(e["attributes_revision"]);
     ON_3dmObjectAttributes a; a.m_uuid=id; const auto label=text(e["label"]);
     require(a.SetName(ON_wString(label.c_str()),false) && native_text(a.m_name)==label,"unsupported native entity name normalization");
-    const auto& v=e["attributes"]; fields(v,{"layer","visible","selectable","locked","color"}); require(flag(v["selectable"]),"unsupported independent selectable=false"); const bool locked=flag(v["locked"]),visible=flag(v["visible"]);
+    const auto& v=e["attributes"]; fields(v,{"layer","visible","selectable","locked","color","line_pattern","line_pattern_source","material","material_source","plot_color","plot_weight_mm","plot_color_source","plot_weight_source","display_order","space","viewport_id"}); require(flag(v["selectable"]),"unsupported independent selectable=false"); const bool locked=flag(v["locked"]),visible=flag(v["visible"]);
     require(!member||!locked,"unsupported locked instance-definition member"); require(!locked||visible,"unsupported independently hidden and locked entity");
     a.SetMode(member?ON::idef_object:locked?ON::locked_object:visible?ON::normal_object:ON::hidden_object); if(member)a.SetVisible(visible);
     const auto layer=v["layer"].is_null()?std::string(default_layer):id_string(uuid(v["layer"])); const auto found=layer_indices.find(layer); require(found!=layer_indices.end(),"missing entity layer"); a.m_layer_index=found->second;
     if(v["color"].is_null()) a.SetColorSource(ON::color_from_layer); else { a.m_color=color(v["color"]); a.SetColorSource(ON::color_from_object); }
+    a.SetLinetypeSource(ON::ObjectLinetypeSource(static_cast<int>(v["line_pattern_source"].get<unsigned>())));
+    if(!v["line_pattern"].is_null()) { const auto pattern_key=id_string(uuid(v["line_pattern"])); const auto pattern=line_pattern_indices.find(pattern_key); require(pattern!=line_pattern_indices.end(),"missing entity line pattern"); a.m_linetype_index=pattern->second; }
+    a.SetMaterialSource(ON::ObjectMaterialSource(v["material_source"].is_null()?0:static_cast<int>(v["material_source"].get<unsigned>())));
+    if(!v["material"].is_null()) { const auto material=material_indices.find(id_string(uuid(v["material"]))); require(material!=material_indices.end(),"missing entity material"); a.m_material_index=material->second; }
+    if(!v["plot_color"].is_null()) a.m_plot_color=color(v["plot_color"]);
+    a.SetPlotColorSource(ON::PlotColorSource(v["plot_color_source"].is_null()?0:static_cast<int>(v["plot_color_source"].get<unsigned>())));
+    a.SetPlotWeightSource(ON::PlotWeightSource(v["plot_weight_source"].is_null()?0:static_cast<int>(v["plot_weight_source"].get<unsigned>())));
+    if(!v["plot_weight_mm"].is_null()) a.m_plot_weight_mm=real(v["plot_weight_mm"]);
+    a.m_display_order=v["display_order"].is_number_integer()?v["display_order"].get<int>():0;
+    a.m_space=static_cast<ON::active_space>(v["space"].get<unsigned>());
+    if(!v["viewport_id"].is_null()) a.m_viewport_id=uuid(v["viewport_id"]);
+    const auto membership=group_members.find(key); if(membership!=group_members.end()) for(const int index:membership->second)a.AddToGroup(index);
     return a;
   }
   ON_BoundingBox add_entity(const J& e,bool member) {
@@ -372,10 +400,11 @@ struct Writer {
   }
   J write(const J& p,const std::filesystem::path& output) {
     fields(p,{"schema_version","mode","document"}); require(count(p["schema_version"],1)==1,"unsupported schema version"); require(text(p["mode"])=="geometry_only_current","unsupported export mode");
-    const auto& d=p["document"]; fields(d,{"id","name","page_unit","current_layer","layer_order","layers","entities","definitions"}); (void)uuid(d["id"]); (void)text(d["name"]);
+    const auto& d=p["document"]; fields(d,{"id","name","page_unit","current_layer","layer_order","layers","entities","definitions","groups","exchange"}); (void)uuid(d["id"]); (void)text(d["name"]);
     model.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON::LengthUnitSystem::Millimeters; model.m_settings.m_PageUnitsAndTolerances.m_unit_system=unit(d["page_unit"]); model.m_properties.m_Application.m_application_name=L"OpenMatrix9 standalone current geometry export";
-    const auto& layers=d["layers"]; const auto& order=d["layer_order"]; const auto& entities=d["entities"]; const auto& definitions=d["definitions"];
+    const auto& layers=d["layers"]; const auto& order=d["layer_order"]; const auto& entities=d["entities"]; const auto& definitions=d["definitions"]; const auto& groups=d["groups"]; const auto& exchange=d["exchange"];
     require(layers.is_object() && layers.size()<=max_records && order.is_array() && order.size()==layers.size(),"layer table/order budget"); require(entities.is_object() && entities.size()<=max_records && definitions.is_object() && definitions.size()<=max_records,"object/definition table budget");
+    require(groups.is_object() && groups.size()<=max_records,"group table budget"); fields(exchange,{"line_patterns","text_styles","materials","dim_styles","hatch_patterns","lights"}); const auto& line_patterns=exchange["line_patterns"]; require(line_patterns.is_object()&&line_patterns.size()<=max_records,"line pattern table budget"); const auto& text_styles=exchange["text_styles"]; require(text_styles.is_object()&&text_styles.size()<=max_records,"text style table budget"); const auto& materials=exchange["materials"]; require(materials.is_object()&&materials.size()<=max_records,"material table budget"); const auto& dim_styles=exchange["dim_styles"]; require(dim_styles.is_object()&&dim_styles.size()<=max_records,"dimension style table budget"); const auto& hatch_patterns=exchange["hatch_patterns"]; require(hatch_patterns.is_object()&&hatch_patterns.size()<=max_records,"hatch pattern table budget"); const auto& lights=exchange["lights"]; require(lights.is_object()&&lights.size()<=max_records,"light table budget");
     // Check longest occurrence depth before native masters are allocated.
     // Caching a completed master must not let a long chain of shared masters
     // bypass the depth budget when the input table is in child-first order.
@@ -397,7 +426,7 @@ struct Writer {
     for(const auto& id:order) { const auto key=id_string(uuid(id)); require(layer_ids.insert(key).second && layers.contains(key),"layer order/key"); }
     for(const auto& [key,l]:layers.items()) {
       require(key!=default_layer,"reserved native default layer UUID");
-      operation_record="layer "+key; fields(l,{"id","name","parent","visible","selectable","locked","color","revision"}); require(id_string(uuid(l["id"]))==key,"layer key mismatch"); revision(l["revision"]); require(flag(l["selectable"]),"unsupported independent layer selectable=false");
+      operation_record="layer "+key; fields(l,{"id","name","parent","visible","selectable","locked","color","revision","line_pattern","line_pattern_source","material","plot_color","plot_weight_mm"}); require(id_string(uuid(l["id"]))==key,"layer key mismatch"); revision(l["revision"]); require(flag(l["selectable"]),"unsupported independent layer selectable=false");
       std::set<std::string> visited; const J* item=&l;
       while(!(*item)["parent"].is_null()) { const auto parent=id_string(uuid((*item)["parent"])); require(layers.contains(parent)&&visited.insert(parent).second&&visited.size()<=max_depth,"layer missing parent/cycle/depth"); item=&layers[parent]; }
     }
@@ -405,12 +434,55 @@ struct Writer {
     for(const auto& e:entities) scan_default(e);
     for(const auto& def:definitions) { require(def.is_object()&&def.contains("members")&&def["members"].is_array(),"definition members shape"); for(const auto& e:def["members"]) scan_default(e); }
     default_needed|=layers.empty();
+    for(const auto& [key,pattern]:line_patterns.items()) {
+      operation_record="line pattern "+key; fields(pattern,{"id","name","segments"}); require(id_string(uuid(pattern["id"]))==key,"line pattern key mismatch");
+      const auto name=text(pattern["name"]); ON_Linetype native; require(native.SetId(uuid(pattern["id"])) && native.SetName(ON_wString(name.c_str())) && native_text(native.Name())==name,"unsupported native line pattern ID/name normalization");
+      const auto& segments=pattern["segments"]; require(segments.is_array()&&segments.size()<=max_records,"line pattern segment budget");
+      for(const auto& segment:segments) { fields(segment,{"length_mm","segment_type"}); require(segment["segment_type"].is_number_unsigned(),"line pattern segment type"); const auto type=segment["segment_type"].get<unsigned>(); require(type==1||type==2,"line pattern segment type"); require(native.AppendSegment(ON_LinetypeSegment(real(segment["length_mm"]),static_cast<ON_LinetypeSegment::eSegType>(type)))>=0,"line pattern segment append"); }
+      const auto ref=model.AddModelComponent(native,false); require(!ref.IsEmpty(),"native line pattern component/conflicting name"); line_pattern_indices.emplace(key,ref.ModelComponent()->Index());
+    }
+    for(const auto& [key,style]:text_styles.items()) {
+      operation_record="text style "+key; fields(style,{"id","name"}); require(id_string(uuid(style["id"]))==key,"text style key mismatch");
+      const auto name=text(style["name"]); ON_TextStyle native; require(native.SetId(uuid(style["id"])) && native.SetName(ON_wString(name.c_str())) && native_text(native.Name())==name,"unsupported native text style ID/name normalization"); native.SetFont(ON_Font::Default);
+      const auto ref=model.AddModelComponent(native,false); require(!ref.IsEmpty(),"native text style component/conflicting name");
+    }
+    for(const auto& [key,material]:materials.items()) {
+      operation_record="material "+key; fields(material,{"id","name","diffuse"}); require(id_string(uuid(material["id"]))==key,"material key mismatch");
+      const auto name=text(material["name"]); ON_Material native; require(native.SetId(uuid(material["id"])) && native.SetName(ON_wString(name.c_str())) && native_text(native.Name())==name,"unsupported native material ID/name normalization");
+      native.SetDiffuse(color(material["diffuse"])); const auto ref=model.AddModelComponent(native,false); require(!ref.IsEmpty(),"native material component/conflicting name"); material_indices.emplace(key,ref.ModelComponent()->Index());
+    }
+    for(const auto& [key,style]:dim_styles.items()) {
+      operation_record="dimension style "+key; fields(style,{"id","name","text_height","length_resolution"}); require(id_string(uuid(style["id"]))==key,"dimension style key mismatch");
+      const auto name=text(style["name"]); ON_DimStyle native; require(native.SetId(uuid(style["id"])) && native.SetName(ON_wString(name.c_str())) && native_text(native.Name())==name,"unsupported native dimension style ID/name normalization");
+      native.SetTextHeight(real(style["text_height"])); native.SetLengthResolution(static_cast<int>(std::llround(real(style["length_resolution"]))));
+      const auto ref=model.AddModelComponent(native,false); require(!ref.IsEmpty(),"native dimension style component/conflicting name");
+    }
+    for(const auto& [key,pattern]:hatch_patterns.items()) {
+      operation_record="hatch pattern "+key; fields(pattern,{"id","name","fill_type","lines"}); require(id_string(uuid(pattern["id"]))==key,"hatch pattern key mismatch");
+      const auto name=text(pattern["name"]); ON_HatchPattern native; require(native.SetId(uuid(pattern["id"])) && native.SetName(ON_wString(name.c_str())) && native_text(native.Name())==name,"unsupported native hatch pattern ID/name normalization");
+      const auto fill=static_cast<unsigned>(pattern["fill_type"].get<unsigned>()); require(fill<=2,"hatch pattern fill type"); native.SetFillType(static_cast<ON_HatchPattern::HatchFillType>(fill));
+      const auto& lines=pattern["lines"]; require(lines.is_array()&&lines.size()<=max_records,"hatch pattern line budget");
+      for(const auto& line:lines) { fields(line,{"angle_radians","base","offset","dashes"}); ON_HatchLine hatch_line(real(line["angle_radians"])); const auto& base=line["base"]; const auto& offset=line["offset"]; require(base.is_array()&&base.size()==2&&offset.is_array()&&offset.size()==2,"hatch pattern line geometry"); hatch_line.SetBase(ON_2dPoint(real(base[0]),real(base[1]))); hatch_line.SetOffset(ON_2dVector(real(offset[0]),real(offset[1]))); ON_SimpleArray<double> dashes; for(const auto& dash:line["dashes"])dashes.Append(real(dash)); hatch_line.SetDashes(dashes); require(native.AddHatchLine(hatch_line)>=0,"hatch pattern line append"); }
+      const auto ref=model.AddModelComponent(native,false); require(!ref.IsEmpty(),"native hatch pattern component/conflicting name");
+    }
+    if(hatch_patterns.empty()) { ON_HatchPattern solid; require(solid.SetName(L"Solid"),"native default hatch pattern name"); solid.SetFillType(ON_HatchPattern::HatchFillType::Solid); const auto ref=model.AddModelComponent(solid,false); require(!ref.IsEmpty(),"native default hatch pattern"); }
     for(const auto& id:order) {
       const auto key=text(id); const auto& l=layers[key]; operation_record="layer "+key; const auto name=text(l["name"]); ON_Layer native; require(native.SetId(uuid(l["id"])) && native.SetName(ON_wString(name.c_str())) && native_text(native.Name())==name,"unsupported native layer ID/name normalization");
       if(!l["parent"].is_null()) native.SetParentLayerId(uuid(l["parent"])); native.SetColor(color(l["color"])); native.SetVisible(flag(l["visible"])); native.SetLocked(flag(l["locked"]));
+      if(!l["line_pattern"].is_null()) { const auto pattern=line_pattern_indices.find(id_string(uuid(l["line_pattern"]))); require(pattern!=line_pattern_indices.end(),"missing layer line pattern"); native.SetLinetypeIndex(pattern->second); }
+      if(!l["material"].is_null()) { const auto material=material_indices.find(id_string(uuid(l["material"]))); require(material!=material_indices.end(),"missing layer material"); native.SetRenderMaterialIndex(material->second); }
+      if(!l["plot_color"].is_null()) native.SetPlotColor(color(l["plot_color"]));
+      if(!l["plot_weight_mm"].is_null()) native.SetPlotWeight(real(l["plot_weight_mm"]));
       const auto ref=model.AddModelComponent(native,false); require(!ref.IsEmpty(),"native layer component/conflicting name"); const auto* added=ON_Layer::Cast(ref.ModelComponent()); require(added,"native layer component type"); layer_indices.emplace(key,added->Index());
     }
     if(default_needed) { require(!layers.contains(default_layer),"reserved native default layer UUID"); ON_Layer l; require(l.SetId(ON_UuidFromString(default_layer))&&l.SetName(L"Default"),"default layer ID/name"); l.SetColor(ON_Color(0,0,0)); const auto ref=model.AddModelComponent(l,false); require(!ref.IsEmpty(),"native default layer name conflict"); layer_indices.emplace(default_layer,ref.ModelComponent()->Index()); }
+    for(const auto& [key,group]:groups.items()) {
+      operation_record="group "+key; fields(group,{"id","name","members"}); require(id_string(uuid(group["id"]))==key,"group key mismatch");
+      const auto name=text(group["name"]); ON_Group native; require(native.SetId(uuid(group["id"])) && native.SetName(ON_wString(name.c_str())) && native_text(native.Name())==name,"unsupported native group ID/name normalization");
+      const auto ref=model.AddModelComponent(native,false); require(!ref.IsEmpty(),"native group component/conflicting name"); const int index=ref.ModelComponent()->Index(); group_indices.emplace(key,index);
+      const auto& members=group["members"]; require(members.is_array()&&members.size()<=max_records,"group member budget");
+      for(const auto& member:members) { const auto member_key=id_string(uuid(member)); group_members[member_key].push_back(index); }
+    }
     if(!d["current_layer"].is_null()) { const auto key=id_string(uuid(d["current_layer"])); require(layer_indices.contains(key),"missing current layer"); model.m_settings.SetCurrentLayerId(uuid(d["current_layer"])); model.m_settings.SetV5CurrentLayerIndex(layer_indices.at(key)); }
     else if(default_needed) { model.m_settings.SetCurrentLayerId(ON_UuidFromString(default_layer)); model.m_settings.SetV5CurrentLayerIndex(layer_indices.at(default_layer)); }
     else { const auto key=text(order[0]); model.m_settings.SetCurrentLayerId(uuid(order[0])); model.m_settings.SetV5CurrentLayerIndex(layer_indices.at(key)); }
@@ -427,8 +499,10 @@ struct Writer {
     }
     require(std::filesystem::file_size(output)>32,"native writer output size");
     J diagnostics=J::array(); if(default_needed) diagnostics.push_back("unlayered entities mapped to native default layer");
+    if(!text_styles.empty()) diagnostics.push_back("text style table is retained-only; V5 text style export is not implemented");
+    if(!lights.empty()) diagnostics.push_back("light table is retained-only; V5 ON_Light export is not implemented");
     if(d["current_layer"].is_null())diagnostics.push_back("current_layer=None mapped to native first/default layer");
-    return J{{"schema_version",1},{"status","written"},{"objects",objects},{"definitions",definitions.size()},{"layers",layer_indices.size()},{"diagnostics",diagnostics}};
+    return J{{"schema_version",1},{"status","written"},{"objects",objects},{"definitions",definitions.size()},{"layers",layer_indices.size()},{"groups",group_indices.size()},{"line_patterns",line_pattern_indices.size()},{"text_styles",text_styles.size()},{"materials",materials.size()},{"dim_styles",dim_styles.size()},{"hatch_patterns",hatch_patterns.size()},{"lights",lights.size()},{"diagnostics",diagnostics}};
   }
 };
 
@@ -488,21 +562,41 @@ J mesh_json(const ON_Mesh& m) {
   for(int i=0;i<m.m_N.Count();++i)n.push_back(vector_json(ON_3dVector(m.m_N[i]))); for(int i=0;i<m.m_C.Count();++i)c.push_back(color_json(m.m_C[i]));
   return J{{"vertices",v},{"faces",f},{"normals",n},{"colors",c}};
 }
+J brep_display_json(const ON_Brep& brep) {
+  std::vector<const ON_Mesh*> meshes;
+  bool cached=true;
+  for(int i=0;i<brep.m_F.Count();++i) {
+    const ON_Mesh* mesh=brep.m_F[i].Mesh(ON::any_mesh);
+    if(!mesh)mesh=brep.m_F[i].Mesh(ON::render_mesh);
+    if(!mesh)mesh=brep.m_F[i].Mesh(ON::analysis_mesh);
+    if(!mesh||mesh->VertexCount()<=0||mesh->FaceCount()<=0) { cached=false; break; }
+    meshes.push_back(mesh);
+  }
+  // Rhino 5 files often omit cached render meshes. Public openNURBS exposes no
+  // ON_Brep::CreateMesh implementation, so display generation for such BReps is
+  // supplied by the OCCT kernel bridge (R5-B); here we can only merge cached faces.
+  if(!cached) meshes.clear();
+  ON_Mesh merged;
+  for(const auto* mesh:meshes) {
+    if(!mesh||mesh->VertexCount()<=0||mesh->FaceCount()<=0)continue;
+    if(static_cast<size_t>(merged.VertexCount())+static_cast<size_t>(mesh->VertexCount())>max_array
+      ||static_cast<size_t>(merged.FaceCount())+static_cast<size_t>(mesh->FaceCount())>max_array)
+      throw std::runtime_error("native BRep display budget");
+    merged.Append(*mesh);
+  }
+  if(merged.VertexCount()==0||merged.FaceCount()==0)
+    return J{{"vertices",J::array()},{"faces",J::array()},{"normals",J::array()},{"colors",J::array()}};
+  if(merged.m_N.Count()!=merged.VertexCount())merged.m_N.Empty();
+  if(merged.m_C.Count()!=merged.VertexCount())merged.m_C.Empty();
+  return mesh_json(merged);
+}
 J native_brep_json(const ON_Brep& brep) {
   require(brep.IsValid(),"native BRep validity");
   ON_Write3dmBufferArchive archive(0,max_archive_bytes,50,ON::Version());
   require(archive.WriteObject(&brep),"native BRep payload serialization");
   const size_t size=archive.SizeOfArchive();
   require(size>0 && size<=max_archive_bytes,"native BRep payload budget");
-  const ON_Mesh* display_mesh=nullptr;
-  for(int i=0;i<brep.m_F.Count() && !display_mesh;++i) {
-    display_mesh=brep.m_F[i].Mesh(ON::any_mesh);
-    if(!display_mesh) display_mesh=brep.m_F[i].Mesh(ON::render_mesh);
-    if(!display_mesh) display_mesh=brep.m_F[i].Mesh(ON::analysis_mesh);
-  }
-  J display = display_mesh && display_mesh->VertexCount()>0
-    ? mesh_json(*display_mesh)
-    : J{{"vertices",J::array()},{"faces",J::array()},{"normals",J::array()},{"colors",J::array()}};
+  J display = brep_display_json(brep);
   J payload=J::array(); const auto* payload_bytes=static_cast<const unsigned char*>(archive.Buffer());
   constexpr size_t chunk_size=32768;
   for(size_t offset=0;offset<size;offset+=chunk_size) {
@@ -522,6 +616,20 @@ J geometry_inventory(const ON_Geometry& g) {
     for(int dir=0;dir<2;++dir) { require(s->KnotCount(dir)>0&&static_cast<size_t>(s->KnotCount(dir))<=max_array,"native surface knot budget"); J k=J::array(); k.push_back(s->Knot(dir,0)); for(int i=0;i<s->KnotCount(dir);++i)k.push_back(s->Knot(dir,i)); k.push_back(s->Knot(dir,s->KnotCount(dir)-1)); knots.push_back(k); }
     return J{{"Surface",{{"degree",J::array({s->Degree(0),s->Degree(1)})},{"size",J::array({nu,nv})},{"poles",p},{"weights",w},{"knots",knots},{"domain",J::array({interval_json(s->Domain(0)),interval_json(s->Domain(1))})},{"periodic",J::array({s->IsPeriodic(0),s->IsPeriodic(1)})},{"reversed",false}}}};
   }
+  if(const auto* hatch=ON_Hatch::Cast(&g)) {
+    J vertices=J::array(), faces=J::array(), loops=J::array(); size_t total=0;
+    for(int loop_index=0;loop_index<hatch->LoopCount();++loop_index) {
+      const auto* loop=hatch->Loop(loop_index); require(loop&&loop->Curve(),"native hatch loop/curve");
+      const auto* curve=loop->Curve(); const auto domain=curve->Domain(); require(domain.IsIncreasing(),"native hatch loop domain");
+      const int samples=64; const uint32_t base=static_cast<uint32_t>(total); J loop_points=J::array();
+      for(int s=0;s<samples;++s) { const double t=domain.ParameterAt(static_cast<double>(s)/samples); const auto p=curve->PointAt(t); const auto world=hatch->Plane().PointAt(p.x,p.y); vertices.push_back(point_json(world)); loop_points.push_back(point_json(world)); ++total; require(total<=max_array,"native hatch display budget"); }
+      loops.push_back(loop_points);
+      if(loop_index==0) for(int s=1;s+1<samples;++s) faces.push_back(J::array({base,base+static_cast<uint32_t>(s),base+static_cast<uint32_t>(s+1)}));
+    }
+    J display{{"vertices",vertices},{"faces",faces},{"normals",J::array()},{"colors",J::array()}};
+    return J{{"Hatch",{{"display",display},{"loops",loops},{"pattern","#"+std::to_string(hatch->PatternIndex())},{"color",J::array({255,255,255,255})}}}};
+  }
+  if(const auto* light=ON_Light::Cast(&g)) { const auto location=light->Location(); const auto direction=light->Direction(); return J{{"Light",{{"display",point_json(location)},{"location",point_json(location)},{"direction",point_json(direction)},{"diffuse",color_json(light->Diffuse())},{"intensity",light->Intensity()},{"style",static_cast<unsigned>(light->Style())}}}}; }
   if(const auto* m=ON_Mesh::Cast(&g)) return J{{"Mesh",mesh_json(*m)}};
   if(const auto* brep=ON_Brep::Cast(&g)) return native_brep_json(*brep);
   if(const auto* cloud=ON_PointCloud::Cast(&g)) {
@@ -731,7 +839,7 @@ J attribute_inventory(const ON_3dmObjectAttributes& a,J& refs) {
     {"line_pattern_source",static_cast<unsigned>(a.LinetypeSource())},{"mode",static_cast<unsigned>(a.Mode())},
     {"native_layer_index",a.m_layer_index},{"native_material_index",a.m_material_index},{"native_line_pattern_index",a.m_linetype_index},
     {"groups",groups},{"viewport_id",nullable_id(a.m_viewport_id)},{"space",static_cast<unsigned>(a.m_space)},
-    {"display_order",a.m_display_order},{"plot_weight_mm",a.m_plot_weight_mm},{"userdata",native_userdata(a)}};
+    {"display_order",a.m_display_order},{"plot_weight_mm",a.m_plot_weight_mm},{"plot_color",a.PlotColorSource()==ON::plot_color_from_object?color_json(a.m_plot_color):J(nullptr)},{"plot_color_source",static_cast<unsigned>(a.PlotColorSource())},{"plot_weight_source",static_cast<unsigned>(a.PlotWeightSource())},{"userdata",native_userdata(a)}};
 }
 J record_fingerprint(const ON_Object& value,int version,unsigned ov) {
   require(value.SizeOf()<=2*1024*1024,"source classification serialization budget");
@@ -797,6 +905,10 @@ J layer_preservation(const ON_Layer& layer,const J& userdata,int version,unsigne
   if(userdata.empty()&&layer.SizeOf()<=2*1024*1024) {
     auto normalized=layer; normalized.SetId(defaults.Id()); normalized.SetIndex(defaults.Index()); normalized.SetName(defaults.Name());
     normalized.SetParentLayerId(defaults.ParentLayerId()); normalized.SetVisible(defaults.IsVisible()); normalized.SetLocked(defaults.IsLocked()); normalized.SetColor(defaults.Color());
+    // The fingerprint archive has no material/line-pattern tables or manifest. Referenced
+    // indices are recorded separately by layer_values; clear them before standalone Write.
+    normalized.SetRenderMaterialIndex(ON_UNSET_INT_INDEX);
+    normalized.SetLinetypeIndex(ON_UNSET_INT_INDEX);
     actual["opaque_native_extensions"]=record_fingerprint(normalized,version,ov); baseline["opaque_native_extensions"]=record_fingerprint(defaults,version,ov);
   } else actual["opaque_native_extensions"]=J{{"serialization_omitted",true},{"native_sizeof_bytes",layer.SizeOf()}};
   return preservation(actual,baseline);
@@ -857,7 +969,7 @@ size_t source_curve_points(const ON_Curve& curve,size_t depth=0) {
   return ON_LineCurve::Cast(&curve)?2:0;
 }
 void source_output_tree(const J& value,size_t& nodes,size_t depth=0) {
-  require(++nodes<=max_nodes&&depth<=max_depth,"source inventory node/depth budget");
+  require(++nodes<=max_inventory_nodes&&depth<=max_depth,"source inventory node/depth budget");
   if(value.is_number_float())require(std::isfinite(value.get<double>()),"nonfinite source inventory field");
   else if(value.is_string()) { const auto& s=value.get_ref<const std::string&>(); require(s.size()<=max_packet_bytes&&s.find('\0')==std::string::npos,"source inventory string budget/NUL"); }
   else if(value.is_structured()) { require(value.size()<=max_array,"source inventory container budget"); for(const auto& item:value)source_output_tree(item,nodes,depth+1); }
@@ -908,10 +1020,21 @@ struct SourceInventory {
       material_references(item["relations"],layer->m_rendering_attributes);
       J layer_record{{"id",id_string(c.Id())},{"name",bounded_native_text(c.Name())},{"native_index",c.Index()},
         {"parent",nullable_id(layer->ParentLayerId())},{"visible",layer->IsVisible()},{"locked",layer->IsLocked()},
-        {"color",color_json(layer->Color())},{"relations",item["relations"]},{"userdata",item["userdata"]}};
+        {"color",color_json(layer->Color())},{"plot_color",color_json(layer->PlotColor())},{"plot_weight_mm",layer->PlotWeight()},{"relations",item["relations"]},{"userdata",item["userdata"]}};
       if(projecting()) { item["preservation"]=layer_preservation(*layer,item["userdata"],archive_version,opennurbs_version);
         layer_record["native_component_type"]=static_cast<unsigned>(c.ComponentType()); layer_record["admission_required"]=true; layer_record["preservation"]=item["preservation"]; }
       result["layers"].push_back(std::move(layer_record));
+    } else if(const auto* pattern=ON_Linetype::Cast(&c)) {
+      J segments=J::array(); for(int i=0;i<pattern->SegmentCount();++i) { const auto segment=pattern->Segment(i);
+        segments.push_back(J{{"length_mm",segment.m_length},{"segment_type",static_cast<unsigned>(segment.m_seg_type)}}); }
+      item["settings"]=J{{"segments",segments}};
+    } else if(const auto* material=ON_Material::Cast(&c)) {
+      item["settings"]=J{{"diffuse",color_json(material->Diffuse())}};
+    } else if(const auto* light=ON_Light::Cast(&c)) {
+      const auto location=light->Location(); const auto direction=light->Direction(); item["settings"]=J{{"style",static_cast<unsigned>(light->Style())},{"location",J::array({location.x,location.y,location.z})},{"direction",J::array({direction.x,direction.y,direction.z})},{"diffuse",color_json(light->Diffuse())},{"intensity",light->Intensity()}};
+    } else if(const auto* hatch=ON_HatchPattern::Cast(&c)) {
+      J lines=J::array(); for(int i=0;i<hatch->HatchLineCount();++i) { const auto* line=hatch->HatchLine(i); require(line,"hatch pattern line"); J dashes=J::array(); for(int d=0;d<line->DashCount();++d)dashes.push_back(line->Dash(d)); lines.push_back(J{{"angle_radians",line->AngleRadians()},{"base",J::array({line->Base().x,line->Base().y})},{"offset",J::array({line->Offset().x,line->Offset().y})},{"dashes",dashes}}); }
+      item["settings"]=J{{"fill_type",static_cast<unsigned>(hatch->FillType())},{"lines",lines}};
     } else if(const auto* d=ON_InstanceDefinition::Cast(&c)) {
       const auto& members=d->InstanceGeometryIdList(); require(static_cast<size_t>(members.Count())<=max_records,"source definition member budget");
       J member_ids=J::array(); for(int i=0;i<members.Count();++i) { require(!ON_UuidIsNil(members[i]),"nil source definition member"); const auto member=id_string(members[i]); member_ids.push_back(member); item["relations"].push_back(reference("definition_member",Type::ModelGeometry,members[i]));
@@ -985,14 +1108,16 @@ struct SourceInventory {
     if(const auto* annotation=ON_Annotation::Cast(g))item["relations"].push_back(reference("dimension_style",Type::DimStyle,annotation->DimensionStyleId()));
     if(const auto* hatch=ON_Hatch::Cast(g))item["relations"].push_back(reference("hatch_pattern",Type::HatchPattern,ON_nil_uuid,hatch->PatternIndex()));
     if(!item["userdata"].empty())item["unsupported_fields"].push_back("Geometry.userdata");
-    if(a.m_space!=ON::model_space)item["unsupported_fields"].push_back("Attributes.page_space");
+    if(a.m_space!=ON::model_space)item["diagnostics"].push_back("page-space entity is hosted as a model-space overlay; page layout is not modeled");
     double object_scale=scale; bool local_units_resolved=units_resolved; std::string definition;
     if(projecting()&&member_owners.contains(id_string(a.m_uuid))) {
       definition=member_owners.at(id_string(a.m_uuid)); const auto& local=result["unit_resolution"]["definitions"][definition];
       local_units_resolved=!local.is_null(); if(local_units_resolved)object_scale=real(local["millimeters_per_unit"]);
     }
+    bool opaque_geometry_only=true;
+    for(const auto& unsupported:item["unsupported_fields"])if(unsupported.get<std::string>()!="Geometry.userdata")opaque_geometry_only=false;
     if(!local_units_resolved)item["diagnostics"].push_back(projecting()?"definition units require explicit resolution before canonical geometry projection":"model units require explicit resolution before canonical geometry admission");
-    else if(g && item["unsupported_fields"].empty() && type==Type::ModelGeometry) {
+    else if(g && opaque_geometry_only && type==Type::ModelGeometry) {
       try {
         if(const auto* curve=ON_Curve::Cast(g))require(exact_curve_parameters(*curve),"polycurve segment parameter correspondence is not identity");
         if(projecting()&&ON_InstanceRef::Cast(g))(void)matrix(item["native_placement"]);
@@ -1013,6 +1138,7 @@ struct SourceInventory {
         }
         item["geometry"]=std::move(geometry); item["placement"]=std::move(placement); item["capability"]="geometry_projection_exact";
         item["projection_units_basis"]=projecting()?(definition.empty()?"resolved_model_units_to_canonical_mm":"resolved_definition_units_to_canonical_mm"):"archive_model_units_to_canonical_mm";
+        if(!item["userdata"].empty())item["diagnostics"].push_back("native geometry userdata is retained in source and omitted from the host representation");
       } catch(const UnitProjectionError& error) { if(projecting())throw; item["diagnostics"].push_back(error.what()); }
       catch(const std::runtime_error& error) { item["diagnostics"].push_back(error.what()); }
     }
@@ -1160,6 +1286,7 @@ J inventory_source(const std::filesystem::path& path,const J* resolution=nullptr
   archive.SetShouldSerializeUserDataDefault(true); int version=0; ON_String comment;
   operation_record="source start section"; require(archive.Read3dmStartSection(&version,comment),"source native start section");
   require(version>=2,"source archive version requires explicit legacy policy");
+  if(resolution)require(version==50,"source archive version is not Rhino 5");
   table_receipt(out,archive,Table::start_section,"start_section",0);
   ON_3dmProperties properties; operation_record="source properties"; require(archive.Read3dmProperties(properties),"source native properties"); table_receipt(out,archive,Table::properties_table,"properties",0);
   ON_3dmSettings settings; operation_record="source settings"; require(archive.Read3dmSettings(settings),"source native settings"); table_receipt(out,archive,Table::settings_table,"settings",0);
@@ -1231,8 +1358,35 @@ int wmain(int argc,wchar_t** argv) {
     else if(mode==L"--write-retained") { require(argc==4,"--write-retained requires strict request and exclusive private output"); operation_record="retained request"; Library library; result=write_retained(std::filesystem::path(argv[2]),std::filesystem::path(argv[3])); }
     else if(mode==L"--inspect-retained-current") { require(argc==4,"--inspect-retained-current requires strict request and private output"); operation_record="cold retained current request"; Library library; result=inspect_retained_current(std::filesystem::path(argv[2]),std::filesystem::path(argv[3])); }
     else { require(mode==L"--inspect" && argc==3,"unsupported command/options"); operation_record="inspect archive"; Library library; result=inspect(std::filesystem::path(argv[2])); }
-    operation_record="serialize owned result"; const auto bytes=result.dump(); require(bytes.size()<=8*1024*1024,"inventory stdout byte budget"); std::cout<<bytes<<'\n'; return 0;
+    operation_record="serialize owned result"; const auto bytes=result.dump(); require(bytes.size()<=16*1024*1024,"inventory stdout byte budget"); std::cout<<bytes<<'\n'; return 0;
   } catch(const std::bad_alloc&) { std::cerr<<"OM9 native exchange ("<<operation_record<<"): allocation refused\n"; return 1; }
   catch(const std::exception& error) { std::cerr<<"OM9 native exchange ("<<operation_record<<"): "<<error.what()<<'\n'; return 1; }
   catch(...) { std::cerr<<"OM9 native exchange ("<<operation_record<<"): native exception\n"; return 2; }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

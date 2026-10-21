@@ -2,9 +2,9 @@
 //! Owned standalone OM9 foundation. No native host or UI dependency.
 #![forbid(unsafe_code)]
 
+pub mod brep;
 pub mod brep_kernel;
 pub mod budget;
-pub mod brep;
 pub mod cage;
 pub mod capability;
 pub mod changes;
@@ -22,15 +22,17 @@ pub mod jobs;
 pub mod layer_ops;
 pub mod layers;
 pub mod measure;
+pub mod exchange;
 pub mod model;
 pub mod modeling_capability;
+pub mod object_info;
 pub mod offset_curve;
 pub mod provenance;
 pub mod request;
 pub mod resource;
 pub mod result;
-pub mod rhino_semantics;
 pub mod retained;
+pub mod rhino_semantics;
 mod scope;
 pub mod selection;
 pub mod surface_kernel;
@@ -39,3 +41,4 @@ pub mod transaction;
 pub mod units;
 
 pub use error::{Error, Result};
+

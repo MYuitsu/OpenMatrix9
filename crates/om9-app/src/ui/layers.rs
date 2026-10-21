@@ -182,6 +182,8 @@ impl MatrixApp {
             .is_some_and(|l| Some(l.id) == self.controller.document().current_layer);
         let (rect, _) = ui.allocate_exact_size(Vec2::new(width, 14.), Sense::hover());
         ui.painter().rect_filled(rect, 0, Color32::from_gray(76));
+        // The compact name region has room for one label. Keep the category in
+        // the tooltip rather than overprinting the layer's own name.
         let x = rect.right() - 64.;
         let controls = [
             (
@@ -287,7 +289,11 @@ impl MatrixApp {
                 anchor,
                 label,
                 FontId::proportional(10.),
-                Color32::WHITE,
+                if current && control == LayerControl::Name {
+                    Color32::from_rgb(5, 24, 14)
+                } else {
+                    chrome::PANEL_INK
+                },
             );
             let response = ui.interact(
                 region,
@@ -349,7 +355,8 @@ impl MatrixApp {
             if let Some(result) = action {
                 self.feedback(result);
             }
-            response.on_hover_text(match control {LayerControl::Name=>"Left: current layer. Advanced Shift+right: rename",LayerControl::Arrow=>"Assign selection; keep current layer",LayerControl::Swatch=>"Left: current. Right: select visible selectable members. Advanced Shift+right: color",LayerControl::Lock=>"Lock prevents pick/edit/output; keeps display",LayerControl::Visibility=>"Toggle layer visibility; preserve object Hidden/preferences",_=>""});
+            let help = match control {LayerControl::Name=>"Left: current layer. Advanced Shift+right: rename",LayerControl::Arrow=>"Assign selection; keep current layer",LayerControl::Swatch=>"Left: current. Right: select visible selectable members. Advanced Shift+right: color",LayerControl::Lock=>"Lock prevents pick/edit/output; keeps display",LayerControl::Visibility=>"Toggle layer visibility; preserve object Hidden/preferences",_=>""};
+            response.on_hover_text(format!("{name} — {}\n{help}", slot.category_label()));
         }
     }
 }

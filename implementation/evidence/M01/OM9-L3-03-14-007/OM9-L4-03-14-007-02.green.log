@@ -1,0 +1,10 @@
+
+running 2 tests
+test f1_to_f4_read_only_fields_are_disabled_and_a_locked_layer_refuses_the_edit ... ok
+test e1_to_e4_an_edit_is_one_command_and_undo_restores_it ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.65s
+     Running tests\property_editor_adapter.rs (L:\om9-target\debug\deps\property_editor_adapter-b3118c88c12b96b7.exe)

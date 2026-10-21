@@ -6,9 +6,9 @@
 //! up here.
 use om9_render::Projection;
 
-use om9_3dm::{flatten, read_meshes, read_meshes_with, write_fixture, ImportBudget};
-use om9_render::scene::SceneBatch;
+use om9_3dm::{ImportBudget, flatten, read_meshes, read_meshes_with, write_fixture};
 use om9_render::Camera;
+use om9_render::scene::SceneBatch;
 use std::time::Instant;
 
 fn temp_path(name: &str) -> std::path::PathBuf {
@@ -24,7 +24,11 @@ fn an_archive_round_trips_into_om9_meshes() {
     let mut total = 0;
     for mesh in &meshes {
         assert_eq!(mesh.vertices.len(), 8, "a cube keeps its eight vertices");
-        assert_eq!(mesh.faces.len(), 12, "the twelve triangles survive the round trip");
+        assert_eq!(
+            mesh.faces.len(),
+            12,
+            "the twelve triangles survive the round trip"
+        );
         assert!(mesh.faces.iter().all(|face| face.len() == 3));
         total += mesh.faces.len();
     }
@@ -54,7 +58,10 @@ fn an_archive_round_trips_into_om9_meshes() {
 #[test]
 fn the_import_rejects_a_missing_archive() {
     let meshes = read_meshes(&temp_path("does-not-exist"));
-    assert!(meshes.is_err(), "a missing file must be an error, not an empty import");
+    assert!(
+        meshes.is_err(),
+        "a missing file must be an error, not an empty import"
+    );
 }
 
 #[test]
@@ -66,13 +73,15 @@ fn five_hundred_imported_meshes_render_in_one_pass() {
         backend_options: Default::default(),
         display: Default::default(),
     });
-    let Some(adapter) = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::HighPerformance,
-        force_fallback_adapter: false,
-        compatible_surface: None,
-        apply_limit_buckets: false,
-    }))
-    .ok() else {
+    let Some(adapter) =
+        pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::HighPerformance,
+            force_fallback_adapter: false,
+            compatible_surface: None,
+            apply_limit_buckets: false,
+        }))
+        .ok()
+    else {
         eprintln!("no adapter; the manual viewport check covers this machine");
         return;
     };
@@ -99,7 +108,11 @@ fn five_hundred_imported_meshes_render_in_one_pass() {
     let height = 540u32;
     let colour = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("colour"),
-        size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+        size: wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers: 1,
+        },
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
@@ -109,7 +122,11 @@ fn five_hundred_imported_meshes_render_in_one_pass() {
     });
     let depth = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("depth"),
-        size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+        size: wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers: 1,
+        },
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
@@ -144,18 +161,34 @@ fn five_hundred_imported_meshes_render_in_one_pass() {
         eye: [0., -260., 210.],
         target: [0., 0., 0.],
         up: [0., 0., 1.],
-        projection: Projection::Perspective { vertical_fov_rad: 40f32.to_radians() },
+        projection: Projection::Perspective {
+            vertical_fov_rad: 40f32.to_radians(),
+        },
         near: 0.1,
         far: 2000.0,
     };
-    batch.render_into(&colour_view, &depth_view, camera, width, height).expect("warmup");
-    device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("poll");
+    batch
+        .render_into(&colour_view, &depth_view, camera, width, height)
+        .expect("warmup");
+    device
+        .poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        })
+        .expect("poll");
     let started = Instant::now();
     let frames = 20;
     for _ in 0..frames {
-        batch.render_into(&colour_view, &depth_view, camera, width, height).expect("frame");
+        batch
+            .render_into(&colour_view, &depth_view, camera, width, height)
+            .expect("frame");
     }
-    device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("poll");
+    device
+        .poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        })
+        .expect("poll");
     let per_frame = started.elapsed().as_secs_f64() / frames as f64 * 1000.0;
     let stats = batch.stats();
     eprintln!(
@@ -166,7 +199,10 @@ fn five_hundred_imported_meshes_render_in_one_pass() {
         stats.draw_calls
     );
     assert!(stats.visible > 0);
-    assert!(per_frame < 16.0, "the imported scene must fit a frame, got {per_frame} ms");
+    assert!(
+        per_frame < 16.0,
+        "the imported scene must fit a frame, got {per_frame} ms"
+    );
 }
 
 #[test]
@@ -178,16 +214,29 @@ fn the_budget_is_derived_from_memory_and_rejects_an_oversized_import() {
     assert_eq!(small.max_bytes, 108 * 100);
 
     let document = ImportBudget::document();
-    assert_eq!(document.max_bytes, 256 * 1024 * 1024, "the document budget is the repository limit");
-    assert!(document.max_vertices > 2_000_000, "256 MiB allows more than two million vertices");
+    assert_eq!(
+        document.max_bytes,
+        256 * 1024 * 1024,
+        "the document budget is the repository limit"
+    );
+    assert!(
+        document.max_vertices > 2_000_000,
+        "256 MiB allows more than two million vertices"
+    );
     assert_eq!(document.max_corners, document.max_vertices * 6);
     let sculpt = ImportBudget::sculpt();
-    assert!(sculpt.max_vertices > document.max_vertices, "sculpt asks for a larger budget explicitly");
+    assert!(
+        sculpt.max_vertices > document.max_vertices,
+        "sculpt asks for a larger budget explicitly"
+    );
 
     // The four-mesh fixture fits the document budget but not a budget of a hundred vertices.
     let path = temp_path("budget");
     write_fixture(&path, 4).expect("write fixture");
-    assert!(read_meshes(&path).is_ok(), "the default budget accepts the fixture");
+    assert!(
+        read_meshes(&path).is_ok(),
+        "the default budget accepts the fixture"
+    );
     let tight = read_meshes_with(&path, ImportBudget::from_memory(108 * 16));
     assert!(tight.is_err(), "a 16-vertex budget must reject 32 vertices");
     let _ = std::fs::remove_file(&path);
@@ -204,14 +253,20 @@ fn a_file_larger_than_the_budget_is_refused_before_reading() {
         max_vertices: 1_000_000,
         max_corners: 6_000_000,
     };
-    assert!(read_meshes_with(&path, budget).is_err(), "the file byte cap must apply");
+    assert!(
+        read_meshes_with(&path, budget).is_err(),
+        "the file byte cap must apply"
+    );
     let _ = std::fs::remove_file(&path);
 }
 
 #[test]
 fn the_default_budget_takes_three_quarters_of_the_free_physical_memory() {
     let budget = ImportBudget::detect();
-    assert!(budget.max_bytes >= 64 * 1024 * 1024, "the floor keeps small imports possible");
+    assert!(
+        budget.max_bytes >= 64 * 1024 * 1024,
+        "the floor keeps small imports possible"
+    );
     if let Some(available) = ImportBudget::available_bytes() {
         // Free memory moves between the two reads, so the check is a bracket rather than an equality.
         let ceiling = (available / 4 * 3).max(64 * 1024 * 1024);
@@ -245,9 +300,18 @@ fn a_refused_import_names_both_limits_for_the_user() {
     };
     let error = read_meshes_with(&path, geometry_budget).expect_err("must refuse");
     let text = error.to_string();
-    assert!(text.contains("3DM import refused"), "the message must say what happened: {text}");
-    assert!(text.contains("vertices"), "the message must name the vertex limit: {text}");
-    assert!(text.contains("corners"), "the message must name the corner limit: {text}");
+    assert!(
+        text.contains("3DM import refused"),
+        "the message must say what happened: {text}"
+    );
+    assert!(
+        text.contains("vertices"),
+        "the message must name the vertex limit: {text}"
+    );
+    assert!(
+        text.contains("corners"),
+        "the message must name the corner limit: {text}"
+    );
     assert!(
         text.contains("32") && text.contains("16"),
         "the message must carry both numbers: {text}"
@@ -259,10 +323,17 @@ fn a_refused_import_names_both_limits_for_the_user() {
     let size = std::fs::metadata(&path).expect("metadata").len();
     let error = read_meshes_with(
         &path,
-        ImportBudget { max_bytes: size - 1, max_vertices: 1_000_000, max_corners: 6_000_000 },
+        ImportBudget {
+            max_bytes: size - 1,
+            max_vertices: 1_000_000,
+            max_corners: 6_000_000,
+        },
     )
     .expect_err("must refuse");
     let text = error.to_string();
-    assert!(text.contains("import budget"), "the byte refusal names the budget: {text}");
+    assert!(
+        text.contains("import budget"),
+        "the byte refusal names the budget: {text}"
+    );
     let _ = std::fs::remove_file(&path);
 }

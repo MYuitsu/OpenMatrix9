@@ -3,10 +3,15 @@
 use crate::{ImportCapture, NativeExchange, import_dto as dto, staged::native};
 use om9_core::{
     Error, Result,
+    brep::Brep,
     budget::{Limits, Usage, name},
+    exchange::{
+        DimStyle, ExchangeMetadata, HatchPattern, HatchPatternLine, LinePattern,
+        LinePatternSegment, RenderLight, RenderMaterial, TextStyle,
+    },
     geometry::Geometry,
     identity::*,
-    model::{Definition, Entity, Layer},
+    model::{Definition, Entity, Group, Layer},
     resource::{Resource, ResourceKind},
     retained::{
         HostRef, ImportBundle, ImportNamespace, NativeRecordKey, NativeRelation, RetainedSource,
@@ -31,6 +36,38 @@ pub enum ImportMode {
     Preserve,
     Geometry,
 }
+/// BRep policy for a native import. `EditableStrict` is the release path when
+/// an OCCT bridge is admitted; `RetainOpaque` keeps the current NativeBrep path.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum BrepMode {
+    #[default]
+    RetainOpaque,
+    EditableStrict,
+    EditableBestEffort,
+}
+impl BrepMode {
+    fn editable(self) -> bool {
+        !matches!(self, Self::RetainOpaque)
+    }
+    fn strict(self) -> bool {
+        matches!(self, Self::EditableStrict)
+    }
+}
+/// Complete conversion operation for a projected 3DM BRep. The exchange layer
+/// owns the transaction and budget; the implementation owns only OCCT.
+pub trait BrepBridge {
+    fn import(
+        &self,
+        payload: &[u8],
+        tolerance_mm: f64,
+        deflection_mm: f64,
+        limits: &Limits,
+    ) -> Result<Brep>;
+}
+/// Complete OCCT -> 3DM payload operation used only for an export copy.
+pub trait BrepExport {
+    fn export(&self, brep: &Brep, limits: &Limits) -> Result<om9_core::geometry::NativeBrep>;
+}
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UnitResolution {
     pub model_mm_per_unit: Option<f64>,
@@ -40,6 +77,7 @@ pub struct UnitResolution {
 #[derive(Debug, Clone)]
 pub struct ImportOptions {
     pub mode: ImportMode,
+    pub brep: BrepMode,
     pub units: UnitResolution,
     pub max_file_bytes: u64,
 }
@@ -47,6 +85,7 @@ impl Default for ImportOptions {
     fn default() -> Self {
         Self {
             mode: ImportMode::Preserve,
+            brep: BrepMode::RetainOpaque,
             units: UnitResolution::default(),
             max_file_bytes: 64 * 1024 * 1024,
         }
@@ -86,6 +125,20 @@ pub struct ImportReceipt {
     pub definition_members: usize,
     pub definitions: usize,
     pub layers: usize,
+    pub groups: usize,
+    pub line_patterns: usize,
+    pub page_space_objects: usize,
+    pub text_styles: usize,
+    pub materials: usize,
+    pub dim_styles: usize,
+    pub hatch_patterns: usize,
+    pub breps_editable: usize,
+    pub breps_opaque: usize,
+    pub breps_displayable: usize,
+    pub breps_display_unavailable: usize,
+    pub annotations: usize,
+    pub hatches: usize,
+    pub lights: usize,
     pub retained_records: usize,
     pub diagnostics: Vec<String>,
     pub native: ProcessStats,
@@ -355,6 +408,19 @@ impl NativeExchange {
         options: &ImportOptions,
         cancel: &Cancellation,
     ) -> Result<PreparedNativeImport> {
+        self.prepare_import_with_brep(c, capture, path, staging_parent, options, None, cancel)
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn prepare_import_with_brep(
+        &self,
+        c: &TransactionCoordinator,
+        capture: ImportCapture,
+        path: &Path,
+        staging_parent: &Path,
+        options: &ImportOptions,
+        bridge: Option<&dyn BrepBridge>,
+        cancel: &Cancellation,
+    ) -> Result<PreparedNativeImport> {
         check(cancel)?;
         capture.revalidate(c)?;
         let options_usage = options.validate(c.limits())?;
@@ -420,8 +486,15 @@ impl NativeExchange {
             inventory.owned_usage(&c.limits().remaining_after(held)?)?,
             c.limits(),
         )?;
-        let (bundle, mut receipt) =
-            convert(inventory, &snapshot, options, held, c.limits(), cancel)?;
+        let (bundle, mut receipt) = convert(
+            inventory,
+            &snapshot,
+            options,
+            bridge,
+            held,
+            c.limits(),
+            cancel,
+        )?;
         receipt.native = output.stats;
         drop(output.stdout);
         drop(output.stderr);
@@ -637,26 +710,117 @@ fn loss(
     diagnostics.push(message);
 }
 fn eligible_object(o: &dto::Object, mode: ImportMode, layers: &BTreeMap<Uuid, LayerId>) -> bool {
+    let page_space = o.attributes.space == 2;
     o.admission_required
-        && o.preservation.admission_required
+        && (o.preservation.admission_required || page_space)
         && o.native_component_type == 12
         && o.capability == "geometry_projection_exact"
         && o.geometry.is_some()
-        && o.attributes.space == 1
+        && (o.attributes.space == 1 || page_space)
         && o.attributes
             .layer
             .is_some_and(|id| layers.contains_key(&id))
-        && (mode == ImportMode::Geometry
+        && (page_space
+            || mode == ImportMode::Geometry
             || (o.userdata.is_empty()
                 && o.unsupported_fields.is_empty()
                 && o.attributes.color_source <= 1
                 && default_preservation(&o.preservation, &["color_source", "native_color"])))
 }
+#[derive(Default)]
+struct BrepCounters {
+    editable: usize,
+    opaque: usize,
+    displayable: usize,
+    display_unavailable: usize,
+}
+fn native_display_available(native: &om9_core::geometry::NativeBrep) -> bool {
+    !native.display.vertices.is_empty() && !native.display.faces.is_empty()
+}
+#[allow(clippy::too_many_arguments)]
 fn entity(
     mut object: dto::Object,
     layers: &BTreeMap<Uuid, LayerId>,
+    line_patterns: &BTreeMap<i32, LinePatternId>,
+    materials: &BTreeMap<i32, MaterialId>,
     defs: &BTreeMap<Uuid, DefinitionId>,
+    bridge: Option<&dyn BrepBridge>,
+    brep_mode: BrepMode,
+    tolerance_mm: f64,
+    deflection_mm: f64,
+    limits: &Limits,
+    counters: &mut BrepCounters,
+    diagnostics: &mut Vec<String>,
 ) -> Result<Entity> {
+    if brep_mode.editable() {
+        let conversion = if let Some(Geometry::NativeBrep(native)) = &object.geometry {
+            let payload = native.payload.clone();
+            Some((payload, object.id))
+        } else {
+            None
+        };
+        if let Some((payload, id)) = conversion {
+            let Some(bridge) = bridge else {
+                return Err(Error::Missing("BRep conversion backend"));
+            };
+            match bridge.import(&payload, tolerance_mm, deflection_mm, limits) {
+                Ok(brep) => {
+                    object.geometry = Some(Geometry::Brep(brep));
+                    counters.editable = counters
+                        .editable
+                        .checked_add(1)
+                        .ok_or(Error::Overflow("editable BRep count"))?;
+                    counters.displayable = counters
+                        .displayable
+                        .checked_add(1)
+                        .ok_or(Error::Overflow("displayable BRep count"))?;
+                }
+                Err(error) if brep_mode.strict() => {
+                    return Err(Error::Io(format!("3DM BRep {id}: {error}")));
+                }
+                Err(error) => {
+                    counters.opaque = counters
+                        .opaque
+                        .checked_add(1)
+                        .ok_or(Error::Overflow("opaque BRep count"))?;
+                    if let Some(Geometry::NativeBrep(native)) = &object.geometry
+                        && native_display_available(native)
+                    {
+                        counters.displayable = counters
+                            .displayable
+                            .checked_add(1)
+                            .ok_or(Error::Overflow("displayable BRep count"))?;
+                    } else {
+                        counters.display_unavailable = counters
+                            .display_unavailable
+                            .checked_add(1)
+                            .ok_or(Error::Overflow("display-unavailable BRep count"))?;
+                    }
+                    diagnostics.push(format!("{id}: BREP_CONVERSION_FAILED: {error}"));
+                }
+            }
+        }
+    } else if let Some(Geometry::NativeBrep(native)) = &object.geometry {
+        counters.opaque = counters
+            .opaque
+            .checked_add(1)
+            .ok_or(Error::Overflow("opaque BRep count"))?;
+        if native_display_available(native) {
+            counters.displayable = counters
+                .displayable
+                .checked_add(1)
+                .ok_or(Error::Overflow("displayable BRep count"))?;
+        } else {
+            counters.display_unavailable = counters
+                .display_unavailable
+                .checked_add(1)
+                .ok_or(Error::Overflow("display-unavailable BRep count"))?;
+            diagnostics.push(format!(
+                "{}: BREP_DISPLAY_UNAVAILABLE: retained BRep has no display mesh; use a build with occt-brep",
+                object.id
+            ));
+        }
+    }
     let mut geometry = object
         .geometry
         .take()
@@ -688,12 +852,29 @@ fn entity(
     } else {
         None
     };
+    e.attributes.line_pattern = line_patterns
+        .get(&object.attributes.native_line_pattern_index)
+        .copied();
+    e.attributes.line_pattern_source = object.attributes.line_pattern_source;
+    e.attributes.material = materials
+        .get(&object.attributes.native_material_index)
+        .copied();
+    e.attributes.material_source = object.attributes.material_source;
+    e.attributes.plot_color = object.attributes.plot_color;
+    e.attributes.plot_weight_mm =
+        (object.attributes.plot_weight_mm >= 0.).then_some(object.attributes.plot_weight_mm);
+    e.attributes.plot_color_source = Some(object.attributes.plot_color_source);
+    e.attributes.plot_weight_source = Some(object.attributes.plot_weight_source);
+    e.attributes.display_order = object.attributes.display_order;
+    e.attributes.space = object.attributes.space;
+    e.attributes.viewport_id = object.attributes.viewport_id.map(ViewportId);
     Ok(e)
 }
 fn convert(
     mut d: dto::Inventory,
     snapshot: &Snapshot,
     options: &ImportOptions,
+    bridge: Option<&dyn BrepBridge>,
     mut held: Usage,
     l: &Limits,
     cancel: &Cancellation,
@@ -703,6 +884,29 @@ fn convert(
         .len()
         .checked_add(d.objects.len())
         .ok_or(Error::Overflow("source record count"))?;
+    let annotation_count = d
+        .objects
+        .iter()
+        .filter(|object| {
+            object.native_kind.contains("Annotation")
+                || object.native_kind.contains("Dimension")
+                || object.native_kind.contains("Text")
+        })
+        .count();
+    let hatch_count = d
+        .objects
+        .iter()
+        .filter(|object| object.native_kind.contains("Hatch"))
+        .count();
+    let light_count = d
+        .components
+        .iter()
+        .filter(|record| record.native_kind.contains("Light"))
+        .count()
+        + d.objects
+            .iter()
+            .filter(|record| record.native_kind.contains("Light"))
+            .count();
     // Preflight conservative simultaneous DTO/conversion/map/resource copies.
     held.add(
         Usage {
@@ -808,6 +1012,13 @@ fn convert(
         if source_units.definitions.insert(def.id, units).is_some() {
             return Err(Error::Invalid("duplicate native definition unit context"));
         }
+    }
+    let brep_tolerance_mm =
+        (source_units.model.absolute_tolerance * source_units.model.millimeters_per_unit).max(1e-7);
+    let brep_deflection_mm = 0.02_f64.max(brep_tolerance_mm * 2.);
+    let mut brep_counters = BrepCounters::default();
+    if options.brep.editable() && bridge.is_none() {
+        return Err(Error::Missing("BRep conversion backend"));
     }
     let mut catalog = Catalog {
         records: Vec::new(),
@@ -998,6 +1209,22 @@ fn convert(
             layer_ids.insert(*id, LayerId::new());
         }
     }
+    let mut line_patterns_by_index = BTreeMap::new();
+    for component in &d.components {
+        if component.native_component_type == 4
+            && let Some(index) = component.native_index
+        {
+            line_patterns_by_index.insert(index, LinePatternId(component.id));
+        }
+    }
+    let mut materials_by_index = BTreeMap::new();
+    for component in &d.components {
+        if component.native_component_type == 3
+            && let Some(index) = component.native_index
+        {
+            materials_by_index.insert(index, MaterialId(component.id));
+        }
+    }
     let mut layers = Vec::new();
     layers
         .try_reserve_exact(layer_ids.len())
@@ -1010,6 +1237,20 @@ fn convert(
             l_.parent = layer.parent.map(|p| layer_ids[&p]);
             l_.visible = layer.visible;
             l_.locked = layer.locked;
+            l_.plot_color = Some(layer.plot_color);
+            l_.plot_weight_mm = Some(layer.plot_weight_mm);
+            for relation in &layer.relations {
+                if relation.role == "line_pattern"
+                    && let Some(index) = relation.native_index
+                {
+                    l_.line_pattern = line_patterns_by_index.get(&index).copied();
+                }
+                if relation.role == "material"
+                    && let Some(index) = relation.native_index
+                {
+                    l_.material = materials_by_index.get(&index).copied();
+                }
+            }
             catalog.bind(
                 catalog.key(5, id)?,
                 HostRef::Layer(*host),
@@ -1213,7 +1454,20 @@ fn convert(
                     },
                 );
             }
-            let e = entity(o, &layer_ids, &def_ids)?;
+            let e = entity(
+                o,
+                &layer_ids,
+                &line_patterns_by_index,
+                &materials_by_index,
+                &def_ids,
+                bridge,
+                options.brep,
+                brep_tolerance_mm,
+                brep_deflection_mm,
+                l,
+                &mut brep_counters,
+                &mut diagnostics,
+            )?;
             catalog.bind_entity(
                 key,
                 HostRef::DefinitionMember {
@@ -1236,10 +1490,290 @@ fn convert(
             loss(&mut diagnostics, *id, "definition", &def.preservation, &[]);
         }
     }
+    let mut exchange = ExchangeMetadata::default();
+    for component in &d.components {
+        if component.native_component_type != 4 {
+            continue;
+        }
+        let mut segments = Vec::new();
+        if let Some(values) = component
+            .settings
+            .as_ref()
+            .and_then(|settings| settings.get("segments"))
+            .and_then(serde_json::Value::as_array)
+        {
+            segments
+                .try_reserve_exact(values.len())
+                .map_err(|_| Error::Budget("line pattern segments"))?;
+            for value in values {
+                let length_mm = value
+                    .get("length_mm")
+                    .and_then(serde_json::Value::as_f64)
+                    .ok_or(Error::Invalid("line pattern segment length"))?;
+                let segment_type = value
+                    .get("segment_type")
+                    .and_then(serde_json::Value::as_u64)
+                    .and_then(|value| u32::try_from(value).ok())
+                    .ok_or(Error::Invalid("line pattern segment type"))?;
+                segments.push(LinePatternSegment {
+                    length_mm,
+                    segment_type,
+                });
+            }
+        }
+        let id = LinePatternId(component.id);
+        if let Some(index) = component.native_index {
+            line_patterns_by_index.insert(index, id);
+        }
+        if exchange
+            .line_patterns
+            .insert(
+                id,
+                LinePattern {
+                    id,
+                    name: component.name.clone(),
+                    segments,
+                },
+            )
+            .is_some()
+        {
+            return Err(Error::Invalid("duplicate native line pattern id"));
+        }
+    }
     let mut entities = Vec::new();
+    let mut page_space_objects = 0usize;
     entities
         .try_reserve_exact(objects.len())
         .map_err(|_| Error::Budget("import root objects"))?;
+    for component in &d.components {
+        if component.native_component_type != 7 {
+            continue;
+        }
+        let id = TextStyleId(component.id);
+        if exchange
+            .text_styles
+            .insert(
+                id,
+                TextStyle {
+                    id,
+                    name: component.name.clone(),
+                },
+            )
+            .is_some()
+        {
+            return Err(Error::Invalid("duplicate native text style id"));
+        }
+    }
+    for component in &d.components {
+        if component.native_component_type != 3 {
+            continue;
+        }
+        let diffuse = component
+            .settings
+            .as_ref()
+            .and_then(|settings| settings.get("diffuse"))
+            .cloned()
+            .ok_or(Error::Invalid("native material diffuse"))?;
+        let diffuse: [u8; 4] =
+            serde_json::from_value(diffuse).map_err(|_| Error::Invalid("material diffuse"))?;
+        let id = MaterialId(component.id);
+        if exchange
+            .materials
+            .insert(
+                id,
+                RenderMaterial {
+                    id,
+                    name: component.name.clone(),
+                    diffuse,
+                },
+            )
+            .is_some()
+        {
+            return Err(Error::Invalid("duplicate native material id"));
+        }
+    }
+    for component in &d.components {
+        if component.native_component_type != 8 {
+            continue;
+        }
+        let settings = component
+            .settings
+            .as_ref()
+            .ok_or(Error::Invalid("native dimension style settings"))?;
+        let text_height = settings
+            .get("text_height")
+            .and_then(serde_json::Value::as_f64)
+            .ok_or(Error::Invalid("dimension style height"))?;
+        let length_resolution = settings
+            .get("length_resolution")
+            .and_then(serde_json::Value::as_f64)
+            .ok_or(Error::Invalid("dimension style resolution"))?;
+        let id = DimStyleId(component.id);
+        if exchange
+            .dim_styles
+            .insert(
+                id,
+                DimStyle {
+                    id,
+                    name: component.name.clone(),
+                    text_height,
+                    length_resolution,
+                },
+            )
+            .is_some()
+        {
+            return Err(Error::Invalid("duplicate native dimension style id"));
+        }
+    }
+    for component in &d.components {
+        if component.native_component_type != 10 {
+            continue;
+        }
+        let fill_type = component
+            .settings
+            .as_ref()
+            .and_then(|settings| settings.get("fill_type"))
+            .and_then(serde_json::Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok())
+            .ok_or(Error::Invalid("hatch pattern fill type"))?;
+        let mut lines = Vec::new();
+        if let Some(values) = component
+            .settings
+            .as_ref()
+            .and_then(|settings| settings.get("lines"))
+            .and_then(serde_json::Value::as_array)
+        {
+            lines
+                .try_reserve_exact(values.len())
+                .map_err(|_| Error::Budget("hatch pattern lines"))?;
+            for value in values {
+                let angle_radians = value
+                    .get("angle_radians")
+                    .and_then(serde_json::Value::as_f64)
+                    .ok_or(Error::Invalid("hatch line angle"))?;
+                let base = serde_json::from_value::<[f64; 2]>(
+                    value
+                        .get("base")
+                        .cloned()
+                        .ok_or(Error::Invalid("hatch line base"))?,
+                )
+                .map_err(|_| Error::Invalid("hatch line base"))?;
+                let offset = serde_json::from_value::<[f64; 2]>(
+                    value
+                        .get("offset")
+                        .cloned()
+                        .ok_or(Error::Invalid("hatch line offset"))?,
+                )
+                .map_err(|_| Error::Invalid("hatch line offset"))?;
+                let dashes = serde_json::from_value::<Vec<f64>>(
+                    value
+                        .get("dashes")
+                        .cloned()
+                        .ok_or(Error::Invalid("hatch line dashes"))?,
+                )
+                .map_err(|_| Error::Invalid("hatch line dashes"))?;
+                lines.push(HatchPatternLine {
+                    angle_radians,
+                    base,
+                    offset,
+                    dashes,
+                });
+            }
+        }
+        let id = HatchPatternId(component.id);
+        if exchange
+            .hatch_patterns
+            .insert(
+                id,
+                HatchPattern {
+                    id,
+                    name: component.name.clone(),
+                    fill_type,
+                    lines,
+                },
+            )
+            .is_some()
+        {
+            return Err(Error::Invalid("duplicate native hatch pattern id"));
+        }
+    }
+    for component in &d.components {
+        if component.native_component_type != 9 {
+            continue;
+        }
+        let settings = component
+            .settings
+            .as_ref()
+            .ok_or(Error::Invalid("native light settings"))?;
+        let style = settings
+            .get("style")
+            .and_then(serde_json::Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok())
+            .ok_or(Error::Invalid("light style"))?;
+        let location = serde_json::from_value::<[f64; 3]>(
+            settings
+                .get("location")
+                .cloned()
+                .ok_or(Error::Invalid("light location"))?,
+        )
+        .map_err(|_| Error::Invalid("light location"))?;
+        let direction = serde_json::from_value::<[f64; 3]>(
+            settings
+                .get("direction")
+                .cloned()
+                .ok_or(Error::Invalid("light direction"))?,
+        )
+        .map_err(|_| Error::Invalid("light direction"))?;
+        let diffuse = serde_json::from_value::<[u8; 4]>(
+            settings
+                .get("diffuse")
+                .cloned()
+                .ok_or(Error::Invalid("light diffuse"))?,
+        )
+        .map_err(|_| Error::Invalid("light diffuse"))?;
+        let intensity = settings
+            .get("intensity")
+            .and_then(serde_json::Value::as_f64)
+            .ok_or(Error::Invalid("light intensity"))?;
+        let id = LightId(component.id);
+        if exchange
+            .lights
+            .insert(
+                id,
+                RenderLight {
+                    id,
+                    name: component.name.clone(),
+                    style,
+                    location,
+                    direction,
+                    diffuse,
+                    intensity,
+                },
+            )
+            .is_some()
+        {
+            return Err(Error::Invalid("duplicate native light id"));
+        }
+    }
+    let mut groups = Vec::new();
+    let mut group_positions = BTreeMap::new();
+    for component in &d.components {
+        if component.native_component_type != 6 {
+            continue;
+        }
+        let native_index = component
+            .native_index
+            .ok_or(Error::Invalid("native group index"))?;
+        if group_positions.insert(native_index, groups.len()).is_some() {
+            return Err(Error::Invalid("duplicate native group index"));
+        }
+        groups.push(Group {
+            id: GroupId(component.id),
+            name: component.name.clone(),
+            members: Vec::new(),
+            revision: 1,
+        });
+    }
     for o in objects.into_iter().flatten() {
         check(cancel)?;
         if o.is_definition_member
@@ -1248,6 +1782,7 @@ fn convert(
         {
             continue;
         }
+        let native_group_indices = o.attributes.groups.clone();
         if options.mode == ImportMode::Geometry {
             loss(
                 &mut diagnostics,
@@ -1261,9 +1796,33 @@ fn convert(
                 },
             );
         }
+        let page_space = o.attributes.space == 2;
         let key = catalog.key(o.native_component_type, o.id)?;
-        let e = entity(o, &layer_ids, &def_ids)?;
+        let e = entity(
+            o,
+            &layer_ids,
+            &line_patterns_by_index,
+            &materials_by_index,
+            &def_ids,
+            bridge,
+            options.brep,
+            brep_tolerance_mm,
+            brep_deflection_mm,
+            l,
+            &mut brep_counters,
+            &mut diagnostics,
+        )?;
         catalog.bind_entity(key, HostRef::Object(e.id), &e)?;
+        if page_space {
+            page_space_objects = page_space_objects
+                .checked_add(1)
+                .ok_or(Error::Overflow("page-space object count"))?;
+        }
+        for index in native_group_indices {
+            if let Some(position) = group_positions.get(&index) {
+                groups[*position].members.push(e.id);
+            }
+        }
         entities.push(e);
     }
     let retained_records = catalog.records.iter().filter(|r| r.host.is_none()).count();
@@ -1303,6 +1862,20 @@ fn convert(
         definition_members: host_defs.iter().map(|d| d.members.len()).sum(),
         definitions: host_defs.len(),
         layers: layers.len(),
+        groups: groups.len(),
+        line_patterns: exchange.line_patterns.len(),
+        page_space_objects,
+        text_styles: exchange.text_styles.len(),
+        materials: exchange.materials.len(),
+        dim_styles: exchange.dim_styles.len(),
+        hatch_patterns: exchange.hatch_patterns.len(),
+        breps_editable: brep_counters.editable,
+        breps_opaque: brep_counters.opaque,
+        breps_displayable: brep_counters.displayable,
+        breps_display_unavailable: brep_counters.display_unavailable,
+        annotations: annotation_count,
+        hatches: hatch_count,
+        lights: light_count + exchange.lights.len(),
         retained_records,
         diagnostics,
         native: ProcessStats {
@@ -1321,6 +1894,8 @@ fn convert(
             entities,
             layers,
             definitions: host_defs,
+            groups,
+            exchange,
         },
         receipt,
     ))

@@ -53,7 +53,10 @@ impl ClusterStream {
             resident: HashMap::new(),
             resident_bytes: 0,
             clock: 0,
-            stats: StreamStats { budget_bytes, ..StreamStats::default() },
+            stats: StreamStats {
+                budget_bytes,
+                ..StreamStats::default()
+            },
         }
     }
 
@@ -66,7 +69,10 @@ impl ClusterStream {
         }
         if bytes > self.budget_bytes {
             self.stats.refused += bytes;
-            return Err(StreamError::TooLarge { bytes, budget: self.budget_bytes });
+            return Err(StreamError::TooLarge {
+                bytes,
+                budget: self.budget_bytes,
+            });
         }
         self.clock += 1;
         if let Some(entry) = self.resident.get_mut(&id) {
@@ -88,7 +94,13 @@ impl ClusterStream {
                 self.stats.evictions += 1;
             }
         }
-        self.resident.insert(id, Resident { bytes, last_used: self.clock });
+        self.resident.insert(
+            id,
+            Resident {
+                bytes,
+                last_used: self.clock,
+            },
+        );
         self.resident_bytes += bytes;
         self.stats.uploads += 1;
         self.stats.resident = self.resident.len();
@@ -136,7 +148,11 @@ mod tests {
             stream.request(id, 100).expect("fits");
         }
         assert!(stream.resident_bytes() <= 300);
-        assert_eq!(stream.resident_count(), 3, "only three hundred-byte clusters fit");
+        assert_eq!(
+            stream.resident_count(),
+            3,
+            "only three hundred-byte clusters fit"
+        );
         assert_eq!(stream.stats().evictions, 2);
         assert_eq!(stream.stats().uploads, 5);
     }
@@ -154,7 +170,13 @@ mod tests {
     fn a_cluster_larger_than_the_budget_is_refused() {
         let mut stream = ClusterStream::new(100);
         let error = stream.request(1, 400).expect_err("must refuse");
-        assert_eq!(error, StreamError::TooLarge { bytes: 400, budget: 100 });
+        assert_eq!(
+            error,
+            StreamError::TooLarge {
+                bytes: 400,
+                budget: 100
+            }
+        );
         assert_eq!(stream.resident_count(), 0);
         assert!(stream.stats().refused >= 400);
     }
@@ -162,15 +184,24 @@ mod tests {
     #[test]
     fn a_two_gigabyte_archive_never_needs_two_gigabytes_of_vram() {
         // 2 GiB of clusters at 30 KiB each, streamed through a 512 MiB budget.
-        let total_clusters = (2u64 * 1024 * 1024 * 1024) / (30 * 1024) ;
+        let total_clusters = (2u64 * 1024 * 1024 * 1024) / (30 * 1024);
         let budget = 512 * 1024 * 1024;
         let mut stream = ClusterStream::new(budget);
         for id in 0..total_clusters {
-            stream.request(id as u32, 30 * 1024).expect("every cluster fits alone");
+            stream
+                .request(id as u32, 30 * 1024)
+                .expect("every cluster fits alone");
         }
         let stats = stream.stats();
-        assert!(stats.resident_bytes <= budget, "resident {} > budget {budget}", stats.resident_bytes);
-        assert_eq!(stats.uploads, total_clusters, "each cluster uploaded once in a linear walk");
+        assert!(
+            stats.resident_bytes <= budget,
+            "resident {} > budget {budget}",
+            stats.resident_bytes
+        );
+        assert_eq!(
+            stats.uploads, total_clusters,
+            "each cluster uploaded once in a linear walk"
+        );
         assert!(stats.evictions > 0, "the walk must evict older clusters");
         assert!(
             stats.resident_bytes < 2 * 1024 * 1024 * 1024 / 4,

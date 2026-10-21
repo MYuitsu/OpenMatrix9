@@ -14,7 +14,10 @@ fn the_linked_kernel_is_the_pinned_version() {
 #[test]
 fn a_box_volume_is_exact_from_rust() {
     let volume = om9_kernel::box_volume(10.0, 10.0, 4.0).expect("box");
-    assert!((volume - 400.0).abs() < 1e-9, "box volume {volume} != 400.0");
+    assert!(
+        (volume - 400.0).abs() < 1e-9,
+        "box volume {volume} != 400.0"
+    );
 }
 
 #[test]

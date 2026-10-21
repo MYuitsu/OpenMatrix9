@@ -24,7 +24,11 @@ fn document_with_two_points() -> Document {
     document
 }
 
-fn frames(app: &mut MatrixApp, context: &egui::Context, count: usize) -> Vec<egui::epaint::ClippedShape> {
+fn frames(
+    app: &mut MatrixApp,
+    context: &egui::Context,
+    count: usize,
+) -> Vec<egui::epaint::ClippedShape> {
     let mut shapes = Vec::new();
     for _ in 0..count {
         let mut output = context.run_ui(
@@ -48,7 +52,8 @@ fn white_frames(shapes: &[egui::epaint::ClippedShape], clip: Rect) -> usize {
         .filter(|clipped| clipped.clip_rect == clip)
         .filter(|clipped| match &clipped.shape {
             Shape::Rect(rect) => {
-                (rect.stroke.color == Color32::WHITE || rect.stroke.color == Color32::from_white_alpha(255))
+                (rect.stroke.color == Color32::WHITE
+                    || rect.stroke.color == Color32::from_white_alpha(255))
                     && rect.rect.width() > 12.0
                     && rect.rect.height() > 12.0
             }
@@ -64,7 +69,8 @@ fn white_rects(shapes: &[egui::epaint::ClippedShape], clip: Rect) -> usize {
         .filter(|clipped| clipped.clip_rect == clip)
         .filter(|clipped| match &clipped.shape {
             Shape::Rect(rect) => {
-                rect.stroke.color == Color32::WHITE || rect.stroke.color == Color32::from_white_alpha(255)
+                rect.stroke.color == Color32::WHITE
+                    || rect.stroke.color == Color32::from_white_alpha(255)
             }
             _ => false,
         })
@@ -142,7 +148,8 @@ fn clearing_the_selection_removes_the_frame_and_the_gumball() {
 
 #[test]
 fn ctrl_click_toggles_one_object_in_and_out_of_the_selection() {
-    let mut controller = Controller::new(Document::new("toggle"), Limits::default()).expect("controller");
+    let mut controller =
+        Controller::new(Document::new("toggle"), Limits::default()).expect("controller");
     // A Point command gives the scene selectable pick geometry; the two document points above bypass the
     // command path, so build the scene through the controller instead.
     controller.submit("Point").expect("Point");
@@ -187,7 +194,10 @@ fn screen_of(app: &MatrixApp, point: [f64; 3]) -> Pos2 {
         size: [clip.width() as f64, clip.height() as f64],
     };
     let camera = &app.controller.workspace.views[&om9_scene::workspace::ViewId::Perspective].camera;
-    let projected = camera.project(point, viewport).expect("projection").expect("in front");
+    let projected = camera
+        .project(point, viewport)
+        .expect("projection")
+        .expect("in front");
     Pos2::new(projected.screen[0] as f32, projected.screen[1] as f32)
 }
 
@@ -197,23 +207,41 @@ fn pointer_drag(app: &mut MatrixApp, context: &egui::Context, start: Pos2, end: 
     events(
         app,
         context,
-        vec![Event::PointerButton { pos: start, button: egui::PointerButton::Primary, pressed: true, modifiers: Modifiers::NONE }],
+        vec![Event::PointerButton {
+            pos: start,
+            button: egui::PointerButton::Primary,
+            pressed: true,
+            modifiers: Modifiers::NONE,
+        }],
     );
     for step in 1..=4 {
         let t = step as f32 / 4.0;
-        events(app, context, vec![Event::PointerMoved(start + (end - start) * t)]);
+        events(
+            app,
+            context,
+            vec![Event::PointerMoved(start + (end - start) * t)],
+        );
     }
     events(
         app,
         context,
-        vec![Event::PointerButton { pos: end, button: egui::PointerButton::Primary, pressed: false, modifiers: Modifiers::NONE }],
+        vec![Event::PointerButton {
+            pos: end,
+            button: egui::PointerButton::Primary,
+            pressed: false,
+            modifiers: Modifiers::NONE,
+        }],
     );
     frames(app, context, 2);
 }
 
 fn events(app: &mut MatrixApp, context: &egui::Context, events: Vec<Event>) {
     let mut output = context.run_ui(
-        egui::RawInput { screen_rect: Some(screen_rect()), events, ..Default::default() },
+        egui::RawInput {
+            screen_rect: Some(screen_rect()),
+            events,
+            ..Default::default()
+        },
         |ui| app.show(ui),
     );
     output.textures_delta.clear();
@@ -248,7 +276,13 @@ fn escape_cancels_a_gumball_drag_without_committing() {
     let context = egui::Context::default();
     let mut app = MatrixApp::new(document_with_line()).expect("app");
     frames(&mut app, &context, 4);
-    let id = *app.controller.document().entities.keys().next().expect("line");
+    let id = *app
+        .controller
+        .document()
+        .entities
+        .keys()
+        .next()
+        .expect("line");
     app.controller.select_objects(&[id]).expect("select");
     frames(&mut app, &context, 2);
     let pivot = app.controller.gumball_pivot().expect("pivot").origin;
@@ -267,7 +301,11 @@ fn escape_cancels_a_gumball_drag_without_committing() {
             modifiers: Modifiers::NONE,
         }],
     );
-    events(&mut app, &context, vec![Event::PointerMoved(anchor + Vec2::new(40.0, 0.0))]);
+    events(
+        &mut app,
+        &context,
+        vec![Event::PointerMoved(anchor + Vec2::new(40.0, 0.0))],
+    );
     // Esc during the gesture must drop it.
     events(
         &mut app,
@@ -321,7 +359,11 @@ fn hovering_an_object_shows_a_frame_that_follows_the_pointer() {
     let away = Pos2::new(clip.left() + 4.0, clip.bottom() - 4.0);
     events(&mut app, &context, vec![Event::PointerMoved(away)]);
     let shapes = frames(&mut app, &context, 2);
-    assert_eq!(white_rects(&shapes, clip), 0, "the frame goes away with the pointer");
+    assert_eq!(
+        white_rects(&shapes, clip),
+        0,
+        "the frame goes away with the pointer"
+    );
 }
 
 #[test]
@@ -340,5 +382,8 @@ fn a_single_selection_has_no_frame_but_two_do() {
     );
     app.controller.select_objects(&ids).expect("two");
     let shapes = frames(&mut app, &context, 2);
-    assert!(white_frames(&shapes, clip) >= 1, "two selected objects get the set frame");
+    assert!(
+        white_frames(&shapes, clip) >= 1,
+        "two selected objects get the set frame"
+    );
 }

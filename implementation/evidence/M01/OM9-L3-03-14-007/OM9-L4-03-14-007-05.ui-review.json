@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-03-14-007-05",
+  "l3_id": "OM9-L3-03-14-007",
+  "title": "Object Property Editor Adapter",
+  "oracle": {
+    "positive": "Edit color/name/property through document command once; undo restores previous value",
+    "negative": "Editing derived read-only BRep field must be disabled"
+  },
+  "manual_test_gate": "M01-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) at the running application",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: none behavioural (the module is new); stated as API-level. F1/F2 hold the negative oracle.",
+    "GREEN: cargo test -p om9-app --test property_editor_adapter -> test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "cargo test -p om9-core -p om9-app -j 2: every group passes except the pre-existing, unrelated chrome_actions::icons_scale_with_the_screen_size.",
+    "cargo fmt --check: exit 0; cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0",
+    "Rename: cargo test -p om9-app --test property_editor_adapter -> 3 passed (E5: one command, journal +1, Undo restores the old name; F1: an empty/padded label is refused with Invalid and writes nothing; F2: Geometry remains read-only).",
+    "App adapter: MatrixApp::edit_selected_property(edit) turns one field edit of the single selected object into one document command (it refuses with no single selection), plus MatrixApp::undo_len(). cargo test -p om9-app --test property_editor_adapter -> 4 passed (the new case proves the refusal and the single Undo step).",
+    "UI panel: the property editor lives in the Edit menu popup. For the single selected object it offers six items (Visible/Hidden/Selectable/Locked toggles with their state in the label, Colour: red, Colour: layer) and each click goes through MatrixApp::edit_selected_property, so one toggle is one transaction. cargo test -p om9-app --test property_menu_ui -> 1 passed: click Edit, click 'Locked: off', the Undo journal grows by exactly one. This also proves that a menu-popup item click is delivered, which the Super Select attempt of round 26-28 did not demonstrate (that test selected nothing, most likely because its fixture's gem payload is not what the Gems filter classifies as a gem).",
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
+  ],
+  "code_change": [
+    "crates/om9-app/src/session/properties.rs (new): FIELDS table, PropertyField/FieldState, PropertyEdit (editable fields only) and Controller::edit_object_property (one transaction for all edited objects).",
+    "crates/om9-core/src/transaction.rs: Mutation::Label { source, label } with its validation, its apply (attributes_revision bump + dependents invalidation) and its source() arm; crates/om9-app/src/session/properties.rs: PropertyEdit::Label and the FIELDS Name row is editable.",
+    "crates/om9-app/src/ui.rs: MatrixApp::edit_selected_property (the adapter) and undo_len().",
+    "crates/om9-app/src/ui/chrome.rs: the Edit menu carries the property editor items (six, one per editable field: the four toggles, two colour presets)."
+  ],
+  "artefacts": [
+    "OM9-L4-03-14-007-02.red.log",
+    "OM9-L4-03-14-007-02.green.log",
+    "OM9-L4-03-14-007-03.diffstat.txt",
+    "OM9-L4-03-14-007-03.target-test.log",
+    "OM9-L4-03-14-007-05.regression.log",
+    "tests/property_menu_ui.rs"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The edit path is machine-proven; the panel that shows the fields is the next UI slice.",
+    "items": [
+      {
+        "id": "N1",
+        "step": "Change the colour of a selected object.",
+        "machine_proven": "E1: one journal entry, and Undo restores the previous colour.",
+        "human_must_verify": "The object changes colour at once and one Undo returns the old colour.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "N2",
+        "step": "Hide the object through the editor, then Undo.",
+        "machine_proven": "E2: same one-command rule.",
+        "human_must_verify": "One Undo brings the object back.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "N3",
+        "step": "Look at the field list: which are editable, which are greyed out and why.",
+        "machine_proven": "E3/F2: six editable fields (Name, Color, Visible, Hidden, Selectable, Locked); Geometry is disabled with its reason.",
+        "human_must_verify": "Rename a row and confirm one Undo brings the old name back; confirm Geometry cannot be typed into.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "N4",
+        "step": "Try to edit an object whose layer is locked.",
+        "machine_proven": "F3/F4: refused with Permission, no journal entry, value unchanged.",
+        "human_must_verify": "The editor explains the refusal instead of silently doing nothing.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_l2_03_14_l3_007_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

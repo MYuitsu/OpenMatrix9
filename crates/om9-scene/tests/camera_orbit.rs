@@ -24,7 +24,10 @@ fn orbit_keeps_the_target_and_the_distance() {
     let before = distance(&camera);
     camera.orbit(0.4, 0.2).expect("orbit");
     assert_eq!(camera.target, [0., 0., 0.], "the target must not move");
-    assert!((distance(&camera) - before).abs() < 1e-9, "the distance changed");
+    assert!(
+        (distance(&camera) - before).abs() < 1e-9,
+        "the distance changed"
+    );
     assert!(camera.revision > 1, "an orbit bumps the revision");
 }
 
@@ -39,7 +42,10 @@ fn orbit_clamps_the_elevation_below_the_pole() {
     ];
     let radius = (offset[0] * offset[0] + offset[1] * offset[1] + offset[2] * offset[2]).sqrt();
     let elevation = (offset[2] / radius).clamp(-1., 1.).asin();
-    assert!(elevation < std::f64::consts::FRAC_PI_2 - 0.01, "the eye reached the up axis: {elevation}");
+    assert!(
+        elevation < std::f64::consts::FRAC_PI_2 - 0.01,
+        "the eye reached the up axis: {elevation}"
+    );
     camera.orbit(0., -20.).expect("pitch down");
     let offset = [
         camera.eye[0] - camera.target[0],
@@ -48,7 +54,10 @@ fn orbit_clamps_the_elevation_below_the_pole() {
     ];
     let radius = (offset[0] * offset[0] + offset[1] * offset[1] + offset[2] * offset[2]).sqrt();
     let elevation = (offset[2] / radius).clamp(-1., 1.).asin();
-    assert!(elevation > -std::f64::consts::FRAC_PI_2 + 0.01, "the eye reached the down axis: {elevation}");
+    assert!(
+        elevation > -std::f64::consts::FRAC_PI_2 + 0.01,
+        "the eye reached the down axis: {elevation}"
+    );
 }
 
 #[test]
@@ -57,16 +66,26 @@ fn pan_moves_eye_and_target_together() {
     let eye_before = camera.eye;
     let target_before = camera.target;
     camera.pan([2., -1.]).expect("pan");
-    let eye_shift = [camera.eye[0] - eye_before[0], camera.eye[1] - eye_before[1], camera.eye[2] - eye_before[2]];
+    let eye_shift = [
+        camera.eye[0] - eye_before[0],
+        camera.eye[1] - eye_before[1],
+        camera.eye[2] - eye_before[2],
+    ];
     let target_shift = [
         camera.target[0] - target_before[0],
         camera.target[1] - target_before[1],
         camera.target[2] - target_before[2],
     ];
     for axis in 0..3 {
-        assert!((eye_shift[axis] - target_shift[axis]).abs() < 1e-12, "eye and target must shift equally");
+        assert!(
+            (eye_shift[axis] - target_shift[axis]).abs() < 1e-12,
+            "eye and target must shift equally"
+        );
     }
-    assert!(eye_shift.iter().any(|value| value.abs() > 0.), "the pan must move the camera");
+    assert!(
+        eye_shift.iter().any(|value| value.abs() > 0.),
+        "the pan must move the camera"
+    );
 }
 
 #[test]
@@ -81,16 +100,24 @@ fn zoom_scales_the_distance_in_perspective() {
 
 #[test]
 fn an_orthographic_view_zooms_its_span_and_keeps_the_eye() {
-    let mut camera = Camera::orthographic([0., 0., 50.], [0., 0., 0.], [0., 1., 0.], 100.).expect("ortho");
+    let mut camera =
+        Camera::orthographic([0., 0., 50.], [0., 0., 0.], [0., 1., 0.], 100.).expect("ortho");
     let eye = camera.eye;
     match camera.projection {
-        Projection::Orthographic { vertical_span_mm } => assert!((vertical_span_mm - 100.).abs() < 1e-9),
+        Projection::Orthographic { vertical_span_mm } => {
+            assert!((vertical_span_mm - 100.).abs() < 1e-9)
+        }
         _ => panic!("expected an orthographic projection"),
     }
     camera.zoom(0.5).expect("zoom");
     match camera.projection {
-        Projection::Orthographic { vertical_span_mm } => assert!((vertical_span_mm - 50.).abs() < 1e-9),
+        Projection::Orthographic { vertical_span_mm } => {
+            assert!((vertical_span_mm - 50.).abs() < 1e-9)
+        }
         _ => panic!("expected an orthographic projection"),
     }
-    assert_eq!(camera.eye, eye, "an orthographic zoom must not move the eye");
+    assert_eq!(
+        camera.eye, eye,
+        "an orthographic zoom must not move the eye"
+    );
 }

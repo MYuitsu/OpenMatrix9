@@ -20,7 +20,12 @@ fn the_command_creates_the_requested_meshes_in_one_entry() {
         "one command, one journal entry"
     );
     // The objects are real entities: they can be selected.
-    let first = *controller.document().entities.keys().next().expect("one mesh");
+    let first = *controller
+        .document()
+        .entities
+        .keys()
+        .next()
+        .expect("one mesh");
     controller.select_root(Some(first), false).expect("select");
     assert!(controller.selected().contains(&first));
     controller.undo().expect("undo");

@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-002",
+  "l4": "OM9-L4-03-14-002-02",
+  "case": "current-layer-and-assignment-ui-negative",
+  "negative_oracle": "Assign onto locked/unavailable layer must refuse explicitly",
+  "cases": [
+    {
+      "id": "L1-assigning-onto-a-locked-layer-is-refused",
+      "lock_slot": 5,
+      "assign_slot": 5,
+      "expect": {
+        "refused": true,
+        "error": "Permission",
+        "object_layer_unchanged": true,
+        "journal_unchanged": true
+      }
+    },
+    {
+      "id": "L2-a-refused-assignment-says-which-layer",
+      "lock_slot": 5,
+      "assign_slot": 5,
+      "expect": {
+        "message_contains": [
+          "locked"
+        ],
+        "detail": "Error::Permission carries a static reason; which layer it is stays visible in the panel (its lock icon) and the status line shows the reason"
+      }
+    },
+    {
+      "id": "L3-assigning-with-nothing-selected-is-a-no-op",
+      "expect": {
+        "ok": true,
+        "journal_unchanged": true
+      }
+    },
+    {
+      "id": "L4-an-unavailable-preset-is-created-only-as-a-group",
+      "expect": {
+        "detail": "the palette creates a preset together with its group, never a loose one"
+      }
+    }
+  ],
+  "note": "Making a LOCKED layer current is refused by the existing layer rule. It is not this item's oracle and this item does not change it; the owner should confirm whether Matrix9 allows it (recorded as an open question in the ledger and api.md)."
+}

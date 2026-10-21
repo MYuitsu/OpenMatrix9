@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "UI font rendering and category-label glyph quality; no colour or command behavior changes.",
+  "before": "Bundled Ubuntu Light/Hack; global font hinting disabled; category labels painted twice with a 0.35pt offset.",
+  "after": "Load installed Segoe UI regular, Segoe UI Semibold and Consolas once. Smooth/light hinting plus subpixel glyph positioning enabled. Paint category text once with real semibold. Keep native DPI and existing logical font sizes; retain bundled fallback families.",
+  "font_resources": [
+    {
+      "file": "segoeui.ttf",
+      "sha256": "704eada12961a27fd271f7d3b09e2066520e758390c1776744eff430fee30f6e",
+      "source": "Installed Windows font, loaded at runtime; not copied or redistributed"
+    },
+    {
+      "file": "seguisb.ttf",
+      "sha256": "6c3fd894b19950b10c34bf64069ef821eaf2f58f959146306fee5b367472e501",
+      "source": "Installed Windows font, loaded at runtime; not copied or redistributed"
+    },
+    {
+      "file": "consola.ttf",
+      "sha256": "cf00b507b3286870cc5064ebd0633c303f70b491a4af25eec2d32df413db0179",
+      "source": "Installed Windows font, loaded at runtime; not copied or redistributed"
+    }
+  ],
+  "first_frame_guard": "Egui applies set_fonts at a frame boundary. First-frame widget hosts temporarily use the existing proportional family until the named semibold family is available; fixes the cold-frame panic reproduced by existing chrome_actions tests.",
+  "sources": [
+    {
+      "path": "crates/om9-app/src/ui/typography.rs",
+      "sha256": "3dcaae9979ae278b7b629111c1fc9254bae47cc5a2e880b4996f6a4e9a290327"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "sha256": "7356c43b16ee3e95ca81016388e2f9108db09114c7790b88c952e15e7c3ec302"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "sha256": "d390b6d551290f123ccf94f70d46b8cfee238e2d65bc73d7037cb012422bfa03"
+    }
+  ],
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-smooth-fonts.exe",
+    "sha256": "ae8218730df141eb5b075d1c14f4c1543dfe50b1d1d19d6083f25c2a44c572cf"
+  },
+  "build": {
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-smooth-fonts.exe",
+    "result": "PASS; expected custom-output warnings"
+  },
+  "tests": {
+    "suites": {
+      "chrome_actions": 13,
+      "pinned_command": 7,
+      "left_stack_layers": 8
+    },
+    "total": 28,
+    "result": "PASS",
+    "execution": "Fresh om9-smooth-chrome-tests-fc8a739a4923b38d.exe and latest L:/om9-target/debug/deps/pinned_command + left_stack_layers executables, each --test-threads=1. Cargo integration build hit locked running om9.exe; generated test executables were run directly.",
+    "log_copy": "build/smooth-font-tests.log"
+  },
+  "native_observations": [
+    {
+      "scale": "100",
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-100/matrix-summary.json",
+      "native_exit_code": 0,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-100/default/min-1280x720/workspace.png",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-100/default/min-1280x720/ui-receipt.json",
+      "layout_passed": false,
+      "layout_problems": [
+        "left_icon_edge_px is 24.0, expected 22.0"
+      ]
+    },
+    {
+      "scale": "125",
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-125/matrix-summary.json",
+      "native_exit_code": 0,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-125/default/lap125-1366x680/workspace.png",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-125/default/lap125-1366x680/ui-receipt.json",
+      "layout_passed": false,
+      "layout_problems": [
+        "left_icon_edge_px is 24.0, expected 22.0"
+      ]
+    },
+    {
+      "scale": "150",
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-150/matrix-summary.json",
+      "native_exit_code": 0,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-150/default/lap150-1366x700/workspace.png",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-smooth-fonts-150/default/lap150-1366x700/ui-receipt.json",
+      "layout_passed": false,
+      "layout_problems": [
+        "left_icon_edge_px is 24.0, expected 22.0"
+      ]
+    }
+  ],
+  "visual_review": "All three actual screenshots inspected at native image resolution. Single-pass category glyphs and regular UI text show smooth antialiased coverage. 125/150 are simulated egui zoom, not real OS per-monitor DPI tests.",
+  "edge_observations": [
+    {
+      "scale": "100",
+      "case": "min-1280x720",
+      "summary": "build\\standalone-validation\\ui-artifacts\\2026-10-20-smooth-fonts-100\\matrix-summary.json",
+      "title_rgb_colours": 181
+    },
+    {
+      "scale": "125",
+      "case": "lap125-1366x680",
+      "summary": "build\\standalone-validation\\ui-artifacts\\2026-10-20-smooth-fonts-125\\matrix-summary.json",
+      "title_rgb_colours": 242
+    },
+    {
+      "scale": "150",
+      "case": "lap150-1366x700",
+      "summary": "build\\standalone-validation\\ui-artifacts\\2026-10-20-smooth-fonts-150\\matrix-summary.json",
+      "title_rgb_colours": 246
+    }
+  ],
+  "edge_observation_limit": "Many intermediate RGB values in the solid heading region demonstrate coverage blending; they are not a perceptual quality score or a claim that every pixel edge disappears.",
+  "validation_tool_fix": "tools/validate_m01_l3_002_ui_matrix.py now records external build binary paths, honoring the mandatory out-of-checkout target directory. Self-test passed: 5 known-good receipts accepted, 18 doctored receipts rejected.",
+  "public_source_audit": {
+    "status": "FAIL",
+    "existing_tree_findings": 11740,
+    "note": "Existing reference/binary/raster artifacts; no font or reference-image assets added."
+  },
+  "limitations": [
+    "Formal human M01-UI acceptance remains pending.",
+    "All three native app processes exited successfully and each completed five command checks. Full layout oracle remains FAIL because its 22pt icon expectation disagrees with the captured 24pt executable. Concurrent icon-size work is outside this font change.",
+    "Current checkout continues to receive unrelated icon/menu changes; this preview binary is the measured typography snapshot.",
+    "Bundled fonts remain the fallback if installed Windows fonts are unavailable; visual quality depends on font availability and physical DPI."
+  ]
+}

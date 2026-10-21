@@ -77,6 +77,8 @@ fn imported() -> (Document, ObjectId, SourceId, ImportNamespaceId) {
         entities: vec![entity],
         layers: vec![],
         definitions: vec![],
+        groups: vec![],
+        exchange: Default::default(),
     };
     let document_id = doc.id;
     let mut c = TransactionCoordinator::new(
@@ -245,3 +247,4 @@ fn the_summary_is_a_single_pass_over_a_large_import() {
     assert!(doc.has_source_proof(bound[0]));
     assert!(!doc.has_source_proof(ObjectId::new()));
 }
+

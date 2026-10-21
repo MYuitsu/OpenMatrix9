@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Fix left-sidebar scrollbar covering buttons: always-visible solid 4pt bar, 2pt gap, no hover expansion and actual retained scroll offset.",
+  "before": "Default floating/auto-visibility scrollbar overlaid rightmost buttons. An unwritten temporary offset key also reset scrolling on subsequent frames.",
+  "after": {
+    "bar_width_pt": 4,
+    "gap_pt": 2,
+    "reserved_gutter_pt": 6,
+    "visibility": "AlwaysVisible",
+    "floating": false,
+    "hover_expansion": false,
+    "offset": "ScrollAreaOutput.state.offset.y",
+    "default_dock_outer_pt": 360,
+    "default_content_width_pt": 349,
+    "narrow_content_width_pt": 229
+  },
+  "sources": [
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "sha256": "19b801d828eaa34c4513bbdcdd98d3e464335b3687bfda92fe3bb0abe6495ce9"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "sha256": "4b693820d3b6a8349ab5fae52be27e5fa14f4abb09f5aca4a3f34978f8f2ec8b"
+    },
+    {
+      "path": "crates/om9-app/src/ui/sidebar_scroll_audit.rs",
+      "sha256": "94ed983d497d7acefee38a1144d38f556d7abf5e938ef5307fe1ea89917a8a6b"
+    }
+  ],
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-slim-scroll.exe",
+    "sha256": "313f3961f8688dda1688b75768a415e014a06bdbc52ca36c177d6523499e6a9f"
+  },
+  "build": {
+    "result": "PASS",
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-slim-scroll.exe"
+  },
+  "tests": {
+    "result": "PASS",
+    "total": 11,
+    "suites": {
+      "sidebar_scroll_audit": 3,
+      "icon_size_audit": 2,
+      "chrome_tests": 4,
+      "sidebar_palettes": 2
+    },
+    "scrollbar_combinations": 9,
+    "widths": [
+      240,
+      360,
+      460
+    ],
+    "simulated_scales": [
+      1,
+      1.25,
+      1.5
+    ],
+    "checks": [
+      "solid bar painted even with collapsed content that fits",
+      "4pt bar and 2pt gap",
+      "no hover expansion",
+      "all sidebar content width fits viewport and icons left of bar",
+      "wheel offset retained on following frames",
+      "12-case icon matrix and reversible resize still pass"
+    ],
+    "logs": [
+      "build/slim-scroll-tests.log",
+      "build/slim-scroll-resize-tests.log"
+    ]
+  },
+  "native": [
+    {
+      "kind": "maximize/restore",
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-20-slim-scroll-native/live-resize-summary.json",
+      "passed": true,
+      "bar_receipts": [
+        [
+          353.0,
+          23.0,
+          4.0,
+          695.0
+        ],
+        [
+          353.0,
+          23.0,
+          4.0,
+          1344.0
+        ],
+        [
+          353.0,
+          23.0,
+          4.0,
+          695.0
+        ]
+      ]
+    },
+    {
+      "kind": "narrow 240pt dock",
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-20-slim-scroll-narrow/matrix-summary.json",
+      "passed": true,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-slim-scroll-narrow/default/rail240-1280x720/workspace.png",
+      "visual_review": "Native narrow screenshot inspected; page controls, Grid Snap and layer buttons remain left of the narrow scrollbar."
+    }
+  ],
+  "public_source_audit": {
+    "status": "FAIL",
+    "existing_findings": 11740,
+    "log": "build/slim-scroll-source-audit.json"
+  },
+  "limitations": [
+    "DPI matrix simulated; physical per-monitor DPI acceptance pending.",
+    "Formal manual M01-UI gate remains pending.",
+    "Appearance/scroll-position bug fix only; no new command/business rule or skill change."
+  ],
+  "report": "docs/validation/2026-10-20-slim-sidebar-scrollbar.md"
+}

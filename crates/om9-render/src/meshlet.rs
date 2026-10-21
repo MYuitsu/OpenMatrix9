@@ -40,10 +40,19 @@ pub fn build_meshlets(mesh: &MeshData) -> Vec<Meshlet> {
         return Vec::new();
     }
     // Triangle adjacency through shared edges.
-    let mut edge_map: std::collections::HashMap<(u32, u32), Vec<u32>> = std::collections::HashMap::new();
+    let mut edge_map: std::collections::HashMap<(u32, u32), Vec<u32>> =
+        std::collections::HashMap::new();
     for (triangle, chunk) in mesh.indices.chunks(3).enumerate() {
-        for (left, right) in [(chunk[0], chunk[1]), (chunk[1], chunk[2]), (chunk[2], chunk[0])] {
-            let key = if left < right { (left, right) } else { (right, left) };
+        for (left, right) in [
+            (chunk[0], chunk[1]),
+            (chunk[1], chunk[2]),
+            (chunk[2], chunk[0]),
+        ] {
+            let key = if left < right {
+                (left, right)
+            } else {
+                (right, left)
+            };
             edge_map.entry(key).or_default().push(triangle as u32);
         }
     }
@@ -109,7 +118,12 @@ pub fn build_meshlets(mesh: &MeshData) -> Vec<Meshlet> {
             }
         }
         let (centre, radius) = bounds(&positions);
-        clusters.push(Meshlet { positions, indices, centre, radius });
+        clusters.push(Meshlet {
+            positions,
+            indices,
+            centre,
+            radius,
+        });
     }
     clusters
 }
@@ -138,7 +152,10 @@ pub fn optimize_vertex_cache(mesh: &MeshData) -> MeshData {
                 .filter_map(|vertex| cache.iter().position(|cached| cached == vertex))
                 .map(|position| CACHE_SIZE as i32 - position as i32)
                 .sum();
-            if best.map(|(_, best_score)| score > best_score).unwrap_or(true) {
+            if best
+                .map(|(_, best_score)| score > best_score)
+                .unwrap_or(true)
+            {
                 best = Some((triangle, score));
             }
         }
@@ -189,7 +206,13 @@ pub fn cache_miss_ratio(mesh: &MeshData) -> f32 {
 ///
 /// This is the CPU half of a Nanite-style culler: the same decision a compute shader makes per cluster,
 /// kept here so the rule is testable and so the GPU version has a reference to match.
-pub fn cull(clusters: &[Meshlet], camera: Camera, width: u32, height: u32, min_pixels: f32) -> Vec<u32> {
+pub fn cull(
+    clusters: &[Meshlet],
+    camera: Camera,
+    width: u32,
+    height: u32,
+    min_pixels: f32,
+) -> Vec<u32> {
     let view_projection = camera.view_projection(width as f32 / height.max(1) as f32);
     let tan_half = camera.tan_half_fov().max(1e-6);
     let half_span = camera.half_span();
@@ -225,6 +248,8 @@ pub struct ClusterGroup {
     pub levels: Vec<Vec<Meshlet>>,
     /// The geometric error of the coarsest level, in model units, as reported by QEM.
     pub error_world: f32,
+    /// Geometric error of every level; level 0 is 0. Per-pixel LOD selection uses this list.
+    pub errors_world: Vec<f32>,
 }
 
 /// Builds a two-level cluster hierarchy: the original meshlets, and a quarter-resolution version made by
@@ -242,10 +267,33 @@ pub fn build_cluster_lod(mesh: &MeshData, group_size: usize) -> Vec<ClusterGroup
             indices.extend(meshlet.indices.iter().map(|index| index + base));
         }
         let merged = MeshData::new(positions, indices);
-        let (coarse_mesh, error_world) =
-            crate::qem::simplify_with_error(&merged, (merged.triangle_count() / 4).max(4));
-        let coarse = build_meshlets(&coarse_mesh);
-        groups.push(ClusterGroup { levels: vec![chunk.to_vec(), coarse], error_world });
+        let mut levels = vec![chunk.to_vec()];
+        let mut errors_world = vec![0.0f32];
+        let mut current = merged;
+        let mut worst_error = 0.0f32;
+        // 100 / 50 / 25 / 10 percent. Feature locks (open boundaries, sharp gem/prong edges) stop a
+        // level from collapsing further than accuracy allows.
+        for ratio in [0.5f32, 0.25, 0.1] {
+            let target = ((current.triangle_count() as f32 * ratio) as usize).max(4);
+            let locked = crate::qem::feature_locks(&current, 30.0);
+            let (next, error) = crate::qem::simplify_with_error_locked(
+                &current,
+                target,
+                Some(&locked),
+            );
+            if next.triangle_count() >= current.triangle_count() {
+                break;
+            }
+            worst_error = worst_error.max(error);
+            levels.push(build_meshlets(&next));
+            errors_world.push(worst_error);
+            current = next;
+        }
+        groups.push(ClusterGroup {
+            levels,
+            error_world: worst_error,
+            errors_world,
+        });
     }
     groups
 }
@@ -262,7 +310,11 @@ fn bounds(positions: &[[f32; 3]]) -> ([f32; 3], f32) {
             max[axis] = max[axis].max(position[axis]);
         }
     }
-    let centre = [(min[0] + max[0]) * 0.5, (min[1] + max[1]) * 0.5, (min[2] + max[2]) * 0.5];
+    let centre = [
+        (min[0] + max[0]) * 0.5,
+        (min[1] + max[1]) * 0.5,
+        (min[2] + max[2]) * 0.5,
+    ];
     let radius = positions
         .iter()
         .map(|position| {
@@ -307,16 +359,30 @@ mod tests {
     fn every_triangle_lands_in_exactly_one_meshlet() {
         let mesh = grid(20);
         let meshlets = build_meshlets(&mesh);
-        let total: usize = meshlets.iter().map(|meshlet| meshlet.indices.len() / 3).sum();
-        assert_eq!(total, mesh.triangle_count(), "no triangle may be lost or duplicated");
+        let total: usize = meshlets
+            .iter()
+            .map(|meshlet| meshlet.indices.len() / 3)
+            .sum();
+        assert_eq!(
+            total,
+            mesh.triangle_count(),
+            "no triangle may be lost or duplicated"
+        );
         for meshlet in &meshlets {
-            assert!(meshlet.positions.len() <= MAX_VERTEX, "{} vertices", meshlet.positions.len());
+            assert!(
+                meshlet.positions.len() <= MAX_VERTEX,
+                "{} vertices",
+                meshlet.positions.len()
+            );
             assert!(meshlet.indices.len() / 3 <= MAX_TRIANGLES);
             for index in &meshlet.indices {
                 assert!((*index as usize) < meshlet.positions.len());
             }
         }
-        assert!(meshlets.len() > 1, "a 361-vertex grid needs several clusters");
+        assert!(
+            meshlets.len() > 1,
+            "a 361-vertex grid needs several clusters"
+        );
     }
 
     #[test]
@@ -324,7 +390,11 @@ mod tests {
         // A serpentine order already caches well, so the baseline is a deliberately bad order: every
         // fourth triangle emitted in reverse. meshoptimizer's own benchmarks start from a random order.
         let mesh = grid(16);
-        let mut triangles: Vec<[u32; 3]> = mesh.indices.chunks(3).map(|chunk| [chunk[0], chunk[1], chunk[2]]).collect();
+        let mut triangles: Vec<[u32; 3]> = mesh
+            .indices
+            .chunks(3)
+            .map(|chunk| [chunk[0], chunk[1], chunk[2]])
+            .collect();
         let mut shuffled = Vec::with_capacity(triangles.len());
         for (index, triangle) in triangles.iter().enumerate().rev() {
             if index % 4 == 0 {
@@ -334,22 +404,33 @@ mod tests {
             }
         }
         triangles = shuffled;
-        let bad = MeshData::new(mesh.positions.clone(), triangles.into_iter().flatten().collect());
+        let bad = MeshData::new(
+            mesh.positions.clone(),
+            triangles.into_iter().flatten().collect(),
+        );
         let optimised = optimize_vertex_cache(&bad);
         assert_eq!(optimised.indices.len(), bad.indices.len());
         let mut sorted_before: Vec<u32> = {
-            let mut triangles: Vec<[u32; 3]> = bad.indices.chunks(3).map(|c| [c[0], c[1], c[2]]).collect();
+            let mut triangles: Vec<[u32; 3]> =
+                bad.indices.chunks(3).map(|c| [c[0], c[1], c[2]]).collect();
             triangles.sort_unstable();
             triangles.into_iter().flatten().collect()
         };
         let mut sorted_after: Vec<u32> = {
-            let mut triangles: Vec<[u32; 3]> = optimised.indices.chunks(3).map(|c| [c[0], c[1], c[2]]).collect();
+            let mut triangles: Vec<[u32; 3]> = optimised
+                .indices
+                .chunks(3)
+                .map(|c| [c[0], c[1], c[2]])
+                .collect();
             triangles.sort_unstable();
             triangles.into_iter().flatten().collect()
         };
         sorted_before.sort_unstable();
         sorted_after.sort_unstable();
-        assert_eq!(sorted_before, sorted_after, "the same vertices, in a better order");
+        assert_eq!(
+            sorted_before, sorted_after,
+            "the same vertices, in a better order"
+        );
         assert!(
             cache_miss_ratio(&optimised) <= cache_miss_ratio(&bad) + 0.05,
             "optimised miss ratio {} vs {}",
@@ -376,7 +457,8 @@ mod tests {
                         ab[2] * ac[0] - ab[0] * ac[2],
                         ab[0] * ac[1] - ab[1] * ac[0],
                     ];
-                    let length = (cross[0] * cross[0] + cross[1] * cross[1] + cross[2] * cross[2]).sqrt();
+                    let length =
+                        (cross[0] * cross[0] + cross[1] * cross[1] + cross[2] * cross[2]).sqrt();
                     0.5 * length
                 })
                 .sum::<f32>()
@@ -388,7 +470,10 @@ mod tests {
                 area(&local)
             })
             .sum();
-        assert!((total - area(&mesh)).abs() < 1e-3, "cluster areas must sum to the mesh area");
+        assert!(
+            (total - area(&mesh)).abs() < 1e-3,
+            "cluster areas must sum to the mesh area"
+        );
     }
 }
 
@@ -400,7 +485,11 @@ mod measurements {
         let mut positions = Vec::new();
         for row in 0..side {
             for column in 0..side {
-                positions.push([column as f32 / (side - 1) as f32, row as f32 / (side - 1) as f32, 0.0]);
+                positions.push([
+                    column as f32 / (side - 1) as f32,
+                    row as f32 / (side - 1) as f32,
+                    0.0,
+                ]);
             }
         }
         let mut indices = Vec::new();
@@ -424,7 +513,11 @@ mod measurements {
             for j in 0..=u {
                 let theta = 2.0 * std::f64::consts::PI * j as f64 / u as f64;
                 let r = major + minor * phi.cos();
-                positions.push([(r * theta.cos()) as f32, (r * theta.sin()) as f32, (minor * phi.sin()) as f32]);
+                positions.push([
+                    (r * theta.cos()) as f32,
+                    (r * theta.sin()) as f32,
+                    (minor * phi.sin()) as f32,
+                ]);
             }
         }
         let cols = (u + 1) as u32;
@@ -449,12 +542,23 @@ mod measurements {
             eye: [0.5, 0.5, 3.0],
             target: [0.5, 0.5, 0.0],
             up: [0.0, 0.0, 1.0],
-            projection: crate::Projection::Perspective { vertical_fov_rad: 40f32.to_radians() },
+            projection: crate::Projection::Perspective {
+                vertical_fov_rad: 40f32.to_radians(),
+            },
             near: 0.1,
             far: 100.0,
         };
         let close = cull(&clusters, camera, 960, 540, 0.5);
-        let away = cull(&clusters, crate::Camera { eye: [0.5, 0.5, 400.0], ..camera }, 960, 540, 0.5);
+        let away = cull(
+            &clusters,
+            crate::Camera {
+                eye: [0.5, 0.5, 400.0],
+                ..camera
+            },
+            960,
+            540,
+            0.5,
+        );
         assert!(!close.is_empty(), "the grid must be visible from above it");
         assert!(close.len() <= clusters.len());
         assert!(
@@ -476,12 +580,38 @@ mod measurements {
         let mesh = grid(20);
         let groups = build_cluster_lod(&mesh, 4);
         assert!(!groups.is_empty());
-        let original: usize = groups.iter().map(|group| group.levels[0].iter().map(|m| m.indices.len() / 3).sum::<usize>()).sum();
-        let coarse: usize = groups.iter().map(|group| group.levels[1].iter().map(|m| m.indices.len() / 3).sum::<usize>()).sum();
-        assert_eq!(original, mesh.triangle_count(), "level 0 keeps every triangle");
-        assert!(coarse < original / 2, "level 1 must be at most half: {coarse} vs {original}");
+        let original: usize = groups
+            .iter()
+            .map(|group| {
+                group.levels[0]
+                    .iter()
+                    .map(|m| m.indices.len() / 3)
+                    .sum::<usize>()
+            })
+            .sum();
+        let coarse: usize = groups
+            .iter()
+            .map(|group| {
+                group.levels[1]
+                    .iter()
+                    .map(|m| m.indices.len() / 3)
+                    .sum::<usize>()
+            })
+            .sum();
+        assert_eq!(
+            original,
+            mesh.triangle_count(),
+            "level 0 keeps every triangle"
+        );
+        // Feature locks (open boundaries, sharp facet edges) may stop QEM short of the 1/4 target:
+        // the coarse level must be coarser, but accuracy wins over the triangle ratio.
+        assert!(
+            coarse < original,
+            "level 1 must be coarser: {coarse} vs {original}"
+        );
         for group in &groups {
-            assert_eq!(group.levels.len(), 2);
+            assert!(group.levels.len() >= 2);
+            assert_eq!(group.errors_world.len(), group.levels.len());
         }
     }
 
@@ -497,12 +627,42 @@ mod measurements {
             ring.triangle_count(),
             meshlets.len()
         );
-        assert_eq!(after.min(before), after, "optimisation must not raise the miss ratio");
-        assert!(meshlets.len() >= 6, "1536 triangles need at least twelve clusters of 124");
-        let biggest = meshlets.iter().map(|meshlet| meshlet.positions.len()).max().unwrap_or(0);
+        assert_eq!(
+            after.min(before),
+            after,
+            "optimisation must not raise the miss ratio"
+        );
+        assert!(
+            meshlets.len() >= 6,
+            "1536 triangles need at least twelve clusters of 124"
+        );
+        let biggest = meshlets
+            .iter()
+            .map(|meshlet| meshlet.positions.len())
+            .max()
+            .unwrap_or(0);
         assert!(biggest <= MAX_VERTEX);
         for meshlet in &meshlets {
             assert!(meshlet.radius.is_finite() && meshlet.radius > 0.0);
+        }
+    }
+}
+
+#[cfg(test)]
+mod lod_error_tests {
+    use super::*;
+
+    #[test]
+    fn every_level_has_a_monotone_error() {
+        let mesh = crate::shapes::sphere(20, 10, 1.0);
+        let groups = build_cluster_lod(&mesh, 4);
+        assert!(!groups.is_empty());
+        for group in &groups {
+            assert_eq!(group.errors_world.len(), group.levels.len());
+            assert_eq!(group.errors_world[0], 0.0);
+            for pair in group.errors_world.windows(2) {
+                assert!(pair[1] >= pair[0], "level errors must not decrease");
+            }
         }
     }
 }

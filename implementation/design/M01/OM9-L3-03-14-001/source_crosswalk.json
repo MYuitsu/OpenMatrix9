@@ -1,0 +1,88 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-14-001-01",
+  "l3_id": "OM9-L3-03-14-001",
+  "l3_title": "Matrix Layer Category Palette",
+  "owner_module_id": "OM9-L2-03-14",
+  "milestone": "M01",
+  "stage": "E02",
+  "gate": "M01-UI",
+  "goal": "Metals, Gems, User, Heads, Finger, Cutting, Creation palette",
+  "positive_oracle": "Palette has Metals/Gems/User/Heads/Finger/Cutting/Creation semantic categories",
+  "negative_oracle": "Duplicate display label must not cause ID collision",
+  "behaviour_reference": {
+    "source": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/reference/text/m8book1__p54-57__the-layers-menu.md",
+    "quote": "grouping colors into four: \"Metals\", \"Gems\", \"User\" colors, and layer colors on which the parts are typically created by Matrix builders (\"Heads\", \"Finger\" or ring size, \"Cutting\", and \"Creation\")",
+    "images": [
+      "reference/images/m8book1_p54_img01.png",
+      "reference/images/m8book1_p54_img02.png",
+      "reference/images/m8book1_p55_img01.png"
+    ],
+    "decision": "The manual gives four groups and names the four builder colours; the plan asks the palette for seven categories. Both are kept: PaletteGroup (4) and LayerCategory (7), with the builder group carrying Heads/Finger/Cutting/Creation."
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "The behavioural source for this L3 is the extracted Matrix9 manual section shipped with the milestone (reference/), not QymCAD: the palette is a Matrix interface. QymCAD is consulted only for the UI technique of a colour palette.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:34 report: crate::gui::report_problem::ReportDraft::default()"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "QymCAD has no layer palette and no colour category: it is consulted only for how a panel paints rows.",
+      "om9_owner": "crates/om9-core/src/layers/category.rs + crates/om9-app/src/ui/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No palette surface.",
+      "om9_owner": "crates/om9-app/src/ui/layers.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Interface state only.",
+      "om9_owner": "crates/om9-core/src/layers/category.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "om9-core/src/layers/preset.rs: PresetSlot 1..=33 with fixed names and colours (Metal 01-04, Gem 01-04, User 01-04, Heads, Finger, Cutting, Creation, 16 custom colours, Lights), label validation and serde as u8",
+    "om9-app/src/layer_command.rs: group(slot) returned the 4-row VISUAL block of a slot (13..=16 for the builder row) and CMD parsing by number/name with ambiguity refusal",
+    "om9-app/src/ui/layers.rs: the palette painted two columns of 4-row blocks with group toggles, name/swatch/lock/visibility controls and the current-layer highlight"
+  ],
+  "gap_found_by_this_task": [
+    "There was no semantic category at all: the palette drew anonymous 4-row blocks, so the seven names the plan and the manual use (Metals/Gems/User/Heads/Finger/Cutting/Creation) existed nowhere in code or on screen.",
+    "The manual's FOUR groups were not modelled either: group(slot) is a visual block, not a group, and the four builder colours were indistinguishable from the Metals/Gems/User blocks.",
+    "Added: layers/category.rs (PaletteGroup with the manual's four groups, LayerCategory with the plan's seven, slot→category for 1..=33 including the custom colours 17..=32 as User and 33 Lights as uncategorised), PresetSlot::category/palette_group/category_label, the category label painted on every palette row, and the palette block in the audit receipt (palette.categories + palette.slots) so a real window can prove it.",
+    "Identity stayed the slot number: a renamed custom row shows its own text but is still slot 17, and a custom slot may not take a reserved label (preset::valid_label), so a duplicate display label cannot collide with a preset id."
+  ],
+  "reuse_decision": "ADD the semantic categories over the existing PresetSlot model; the palette technique stays in ui/layers.rs.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-03-14-001/positive.json",
+    "implementation/fixtures/M01/OM9-L3-03-14-001/negative.json",
+    "crates/om9-app/tests/layer_category_palette.rs"
+  ]
+}

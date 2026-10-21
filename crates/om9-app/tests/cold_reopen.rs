@@ -508,6 +508,8 @@ fn schema4_cold_process_preserves_namespaces_current_edits_tombstones_and_origin
         entities: vec![a, b],
         layers: vec![],
         definitions: vec![],
+        groups: vec![],
+        exchange: Default::default(),
     };
     let doc = Document::new("owned cold source ledger");
     let did = doc.id;
@@ -592,3 +594,6 @@ fn schema4_cold_process_preserves_namespaces_current_edits_tombstones_and_origin
     );
     fs::remove_file(path).unwrap();
 }
+
+
+

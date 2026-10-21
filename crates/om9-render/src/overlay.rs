@@ -30,11 +30,12 @@ pub struct OverlayBatch {
     device: wgpu::Device,
     queue: wgpu::Queue,
     pipeline: wgpu::RenderPipeline,
-    bind_group: wgpu::BindGroup,
-    uniform: wgpu::Buffer,
+    bind_layout: wgpu::BindGroupLayout,
+    upload_cursor: usize,
     batch: LineBatch,
-    buffer: Option<wgpu::Buffer>,
-    capacity: usize,
+    /// Line vertices split across buffers; a single large scene overflowed the 256 MB buffer cap.
+    buffers: Vec<wgpu::Buffer>,
+    counts: Vec<u32>,
     model: [[f32; 4]; 4],
 }
 
@@ -107,8 +108,16 @@ impl OverlayBatch {
                     array_stride: std::mem::size_of::<LineVertex>() as u64,
                     step_mode: wgpu::VertexStepMode::Vertex,
                     attributes: &[
-                        wgpu::VertexAttribute { format: wgpu::VertexFormat::Float32x3, offset: 0, shader_location: 0 },
-                        wgpu::VertexAttribute { format: wgpu::VertexFormat::Float32x4, offset: 12, shader_location: 1 },
+                        wgpu::VertexAttribute {
+                            format: wgpu::VertexFormat::Float32x3,
+                            offset: 0,
+                            shader_location: 0,
+                        },
+                        wgpu::VertexAttribute {
+                            format: wgpu::VertexFormat::Float32x4,
+                            offset: 12,
+                            shader_location: 1,
+                        },
                     ],
                 })],
             },
@@ -142,27 +151,21 @@ impl OverlayBatch {
             multiview_mask: None,
             cache: None,
         });
-        let uniform = device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("overlay uniform"),
-            size: std::mem::size_of::<Uniforms>() as u64,
-            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("overlay"),
-            layout: &layout,
-            entries: &[wgpu::BindGroupEntry { binding: 0, resource: uniform.as_entire_binding() }],
-        });
         Self {
             device,
             queue,
             pipeline,
-            bind_group,
-            uniform,
+            bind_layout: layout,
+            upload_cursor: 0,
             batch: LineBatch::default(),
-            buffer: None,
-            capacity: 0,
-            model: [[1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,0.,1.]],
+            buffers: Vec::new(),
+            counts: Vec::new(),
+            model: [
+                [1., 0., 0., 0.],
+                [0., 1., 0., 0.],
+                [0., 0., 1., 0.],
+                [0., 0., 0., 1.],
+            ],
         }
     }
 
@@ -185,38 +188,98 @@ impl OverlayBatch {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.batch.is_empty()
+        self.batch.is_empty() && self.counts.iter().all(|n| *n == 0)
     }
 
     pub fn line_count(&self) -> usize {
         self.batch.line_count()
     }
+    /// Share resident vertex buffers with a different MSAA pipeline. CPU staging is not duplicated.
+    pub fn fork_samples(&self, samples: u32) -> Self {
+        self.fork_samples_task(samples)()
+    }
+    pub fn fork_samples_task(&self, samples: u32) -> Box<dyn FnOnce() -> Self + Send> {
+        assert_eq!(
+            self.pending_upload_bytes(),
+            0,
+            "fork requires resident source"
+        );
+        let device = self.device.clone();
+        let queue = self.queue.clone();
+        let buffers = self.buffers.clone();
+        let counts = self.counts.clone();
+        let model = self.model;
+        Box::new(move || {
+            let mut fork = Self::with_samples(device, queue, samples);
+            fork.buffers = buffers;
+            fork.counts = counts;
+            fork.model = model;
+            fork
+        })
+    }
     /// An affine drag updates uniforms while retaining the uploaded line geometry.
-    pub fn set_transform(&mut self, row_major: [[f32;4];4]) {
-        self.model=std::array::from_fn(|column| std::array::from_fn(|row| row_major[row][column]));
+    pub fn set_transform(&mut self, row_major: [[f32; 4]; 4]) {
+        self.model =
+            std::array::from_fn(|column| std::array::from_fn(|row| row_major[row][column]));
     }
 
-    /// Uploads the current lines. Reuses the buffer until it has to grow.
+    /// Uploads the current lines, split into buffers of at most 4M vertices (48 MB).
     pub fn upload(&mut self) {
-        if self.batch.vertices.is_empty() {
-            return;
+        self.upload_deferred();
+        self.flush_uploads_budget(
+            usize::MAX,
+            std::time::Instant::now() + std::time::Duration::from_secs(3600),
+        );
+    }
+    pub fn upload_deferred(&mut self) {
+        self.buffers.clear();
+        self.counts.clear();
+        self.upload_cursor = 0;
+        for chunk in self.batch.vertices.chunks(262_144) {
+            self.buffers
+                .push(self.device.create_buffer(&wgpu::BufferDescriptor {
+                    label: Some("overlay vertices"),
+                    size: (std::mem::size_of_val(chunk) as u64).max(48),
+                    usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                    mapped_at_creation: false,
+                }));
+            self.counts.push(chunk.len() as u32);
         }
-        let bytes: Vec<u8> = bytemuck::cast_slice(&self.batch.vertices).to_vec();
-        let needed = self.batch.vertices.len();
-        if self.buffer.is_none() || self.capacity < needed {
-            let capacity = needed.next_power_of_two();
-            let buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
-                label: Some("overlay vertices"),
-                size: (capacity * std::mem::size_of::<LineVertex>()) as u64,
-                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-                mapped_at_creation: false,
-            });
-            self.queue.write_buffer(&buffer, 0, &bytes);
-            self.buffer = Some(buffer);
-            self.capacity = capacity;
-        } else if let Some(buffer) = &self.buffer {
-            self.queue.write_buffer(buffer, 0, &bytes);
+    }
+    pub fn pending_upload_bytes(&self) -> usize {
+        std::mem::size_of_val(self.batch.vertices.as_slice()).saturating_sub(self.upload_cursor)
+    }
+    pub fn flush_uploads_budget(
+        &mut self,
+        max_bytes: usize,
+        deadline: std::time::Instant,
+    ) -> usize {
+        let bytes: &[u8] = bytemuck::cast_slice(&self.batch.vertices);
+        let initial = self.upload_cursor;
+        let chunk_bytes = 262_144 * std::mem::size_of::<crate::overlay::LineVertex>();
+        while self.upload_cursor < bytes.len()
+            && self.upload_cursor - initial + 4 <= max_bytes
+            && std::time::Instant::now() < deadline
+        {
+            let index = self.upload_cursor / chunk_bytes;
+            let offset = self.upload_cursor % chunk_bytes;
+            let n = (bytes.len() - self.upload_cursor)
+                .min(chunk_bytes - offset)
+                .min(max_bytes - (self.upload_cursor - initial))
+                .min(1 << 20)
+                / 4
+                * 4;
+            if n == 0 {
+                break;
+            }
+            self.queue.write_buffer(
+                &self.buffers[index],
+                offset as u64,
+                &bytes[self.upload_cursor..self.upload_cursor + n],
+            );
+            self.upload_cursor += n;
         }
+        self.upload_cursor - initial
     }
 
     /// Draws the lines into an existing pass that already holds the meshes' depth.
@@ -242,7 +305,14 @@ impl OverlayBatch {
         width: u32,
         height: u32,
     ) {
-        self.render_pass(colour_view, Some(resolve_view), depth_view, camera, width, height);
+        self.render_pass(
+            colour_view,
+            Some(resolve_view),
+            depth_view,
+            camera,
+            width,
+            height,
+        );
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -255,12 +325,62 @@ impl OverlayBatch {
         width: u32,
         height: u32,
     ) {
-        let Some(buffer) = self.buffer.as_ref() else {
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("overlay wrapper"),
+            });
+        self.encode_pass(
+            &mut encoder,
+            colour_view,
+            resolve_view,
+            depth_view,
+            camera,
+            width,
+            height,
+        );
+        self.queue.submit([encoder.finish()]);
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn encode_pass(
+        &mut self,
+        encoder: &mut wgpu::CommandEncoder,
+        colour_view: &wgpu::TextureView,
+        resolve_view: Option<&wgpu::TextureView>,
+        depth_view: &wgpu::TextureView,
+        camera: Camera,
+        width: u32,
+        height: u32,
+    ) {
+        self.flush_uploads_budget(
+            usize::MAX,
+            std::time::Instant::now() + std::time::Duration::from_secs(3600),
+        );
+        if self.buffers.is_empty() {
             return;
+        }
+        let uniforms = Uniforms {
+            view_projection: matrix_to_columns(
+                camera.view_projection(width as f32 / height.max(1) as f32),
+            ),
+            model: self.model,
         };
-        let uniforms = Uniforms { view_projection: matrix_to_columns(camera.view_projection(width as f32 / height.max(1) as f32)), model:self.model };
-        self.queue.write_buffer(&self.uniform, 0, bytemuck::bytes_of(&uniforms));
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("overlay") });
+        use wgpu::util::DeviceExt;
+        let buffer = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("view overlay snapshot"),
+                contents: bytemuck::bytes_of(&uniforms),
+                usage: wgpu::BufferUsages::UNIFORM,
+            });
+        let bind_group = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("view overlay snapshot"),
+            layout: &self.bind_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: buffer.as_entire_binding(),
+            }],
+        });
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("overlay"),
@@ -268,11 +388,17 @@ impl OverlayBatch {
                     view: colour_view,
                     depth_slice: None,
                     resolve_target: resolve_view,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    },
                 })],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                     view: depth_view,
-                    depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store }),
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    }),
                     stencil_ops: None,
                 }),
                 timestamp_writes: None,
@@ -280,14 +406,13 @@ impl OverlayBatch {
                 multiview_mask: None,
             });
             pass.set_pipeline(&self.pipeline);
-            pass.set_bind_group(0, &self.bind_group, &[]);
-            pass.set_vertex_buffer(0, buffer.slice(..));
-            pass.draw(0..(self.batch.vertices.len() as u32), 0..1);
+            pass.set_bind_group(0, &bind_group, &[]);
+            for (buffer, count) in self.buffers.iter().zip(self.counts.iter()) {
+                pass.set_vertex_buffer(0, buffer.slice(..));
+                pass.draw(0..*count, 0..1);
+            }
         }
-        self.queue.submit(std::iter::once(encoder.finish()));
     }
-
-
 }
 
 fn matrix_to_columns(matrix: [f32; 16]) -> [[f32; 4]; 4] {
@@ -311,8 +436,14 @@ impl LineBatch {
     }
 
     pub fn line(&mut self, a: [f64; 3], b: [f64; 3], colour: [f32; 4]) {
-        self.vertices.push(LineVertex { position: [a[0] as f32, a[1] as f32, a[2] as f32], colour });
-        self.vertices.push(LineVertex { position: [b[0] as f32, b[1] as f32, b[2] as f32], colour });
+        self.vertices.push(LineVertex {
+            position: [a[0] as f32, a[1] as f32, a[2] as f32],
+            colour,
+        });
+        self.vertices.push(LineVertex {
+            position: [b[0] as f32, b[1] as f32, b[2] as f32],
+            colour,
+        });
     }
 
     /// A point marker: three short crosses around `point`.

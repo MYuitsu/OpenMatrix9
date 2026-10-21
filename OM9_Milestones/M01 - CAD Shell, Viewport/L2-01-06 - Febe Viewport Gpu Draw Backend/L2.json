@@ -90,6 +90,13 @@
     }
   ],
   "runtime_implementation": {
+    "navigation_analysis_review_2026_10_21": {
+      "status": "ANALYSIS_ONLY_NO_NEW_RUNTIME_VALIDATION",
+      "review": "implementation/design/M01/VIEWPORT-NAVIGATION-FORENSICS-REVIEW-2026-10-21.md",
+      "evidence": "implementation/evidence/M01/2026-10-21-navigation-forensics-review.json",
+      "checks": "implementation/evidence/M01/2026-10-21-navigation-forensics-review-checks.json",
+      "qualification": "Existing dt/frame counters do not establish continuous-frame or GPU/present timing. Per-view state with a single nonblocking window scheduler is proposed; no new implementation or manual gate promotion. Navigation behavior owner remains M02 OM9-L2-03-02."
+    },
     "desktop_viewport_backend": "GPU_ONLY",
     "gpu_only_evidence": [
       "implementation/evidence/M02/2026-10-19-gpu-only.md",
@@ -97,6 +104,142 @@
       "implementation/evidence/M02/2026-10-19-gpu-only-native.json"
     ],
     "software_fallback": false,
-    "human_approval": null
+    "human_approval": null,
+    "performance": {
+      "plan": "implementation/design/M01/VIEWPORT-INTERACTION-PERFORMANCE.md",
+      "targets": {
+        "1000_earrings": "open<=10s, vram<=1.5GB, p95<=16.7ms",
+        "8000_earrings": "open<=30s, vram<=6GB, p95<=33ms",
+        "27000_objects": "open<=10s, vram<=1.5GB, p95<=33ms (practical ceiling)"
+      },
+      "baseline_2026_10_20": {
+        "scene": "1000 earrings / 42000 scene objects / 72.5M triangles",
+        "open_s": 55,
+        "vram_gb": 8.06,
+        "orbit_ms": 19.3
+      },
+      "after_p1a_2026_10_20": {
+        "changes": "chunk size classes + batched uploads",
+        "open_s": 20,
+        "vram_gb": 7.05,
+        "note": "one GpuScene per viewport remains; P1b shared scene next"
+      },
+      "after_p1b_2026_10_20": {
+        "changes": "one shared GpuScene for four viewports",
+        "open_s": 10,
+        "vram_gb": 2.05,
+        "vram_gb_lod1200": 1.05,
+        "private_mb": 1356,
+        "orbit_zoom_pan_ms": [
+          16.7,
+          16.6,
+          16.7
+        ]
+      },
+      "after_p2_auto_lod_2026_10_20": {
+        "changes": "automatic display LOD by triangle budget OM9_VIEWPORT_TRI_BUDGET=12M, per unique mesh, occurrence-aware",
+        "open_s": 3,
+        "vram_gb": 0.55,
+        "private_mb": 1031,
+        "orbit_zoom_pan_p95_ms": [
+          17.4,
+          17.0,
+          17.1
+        ],
+        "note": "instancing not yet implemented; 8k still to measure"
+      },
+      "after_8k_2026_10_20": {
+        "scene": "8000 earrings / 336000 objects / 580M triangles",
+        "changes": "automatic LOD + overlay vertex chunking (4M vertices per buffer)",
+        "open_s": 10,
+        "vram_gb": 1.05,
+        "private_mb": 1917,
+        "orbit_zoom_pan_p95_ms": [
+          21.4,
+          16.8,
+          16.8
+        ]
+      },
+      "scope_decision_2026_10_20": "500000 is a theoretical ceiling for the budget, not a tested target; user asked to stop at 27000.",
+      "after_27k_2026_10_20": {
+        "scene": "27000 copies of a 2160-triangle BRep",
+        "open_s": 3,
+        "vram_gb": 0.55,
+        "private_mb": 984,
+        "orbit_zoom_pan_p95_ms": [
+          18.8,
+          17.1,
+          17.0
+        ]
+      },
+      "accuracy_policy": {
+        "gem_prong_px": 0.5,
+        "shank_px": 1.0,
+        "selected_lod": "0",
+        "locks": [
+          "open_boundary",
+          "cluster_boundary",
+          "sharp_edge_30deg",
+          "thin_component_0.5mm"
+        ],
+        "state": "partially_implemented: locked QEM, feature locks, selected LOD0, per-level errors, configurable pixel/sharp thresholds",
+        "implemented": [
+          "qem::simplify_with_error_locked + feature_locks(boundary + sharp)",
+          "meshlet ClusterGroup.errors_world; display LOD uses feature locks",
+          "display_lod_target: selected always LOD0; cache keyed by (leaf,target)",
+          "cluster coarse_pixels wired to shader; OM9_CLUSTER_PIXELS",
+          "OM9_LOD_SHARP_DEGREES knob"
+        ],
+        "evidence_2026_10_20": {
+          "fixture_area_worst_percent": 0.49,
+          "prong_bbox_mm": 0.0001,
+          "image_diff_75pct_worst_percent": 0.34,
+          "image_diff_50pct_worst_percent": 3.07,
+          "tests": [
+            "qem::accuracy_tests",
+            "qem::prong_accuracy_tests",
+            "om9-app tests/accuracy_fixture.rs"
+          ],
+          "decision": "near/selected use LOD 0-75%; 50% only for far small projections"
+        }
+      },
+      "cpu_gpu_split_27k_2026_10_20": {
+        "frame_ms_median": 16.6,
+        "prepare_ms_median": 0.0,
+        "draw_submit_ms_median": 0.4,
+        "note": "CPU submit is below 1 ms; frame time is GPU/vsync bound, so the next gains are GPU cull/LOD and overdraw, not more CPU work."
+      },
+      "camera_smoothing_2026_10_20": {
+        "tau_ms": 60,
+        "env": "OM9_CAMERA_SMOOTH_MS",
+        "hover_pick_paused_while_moving": true,
+        "tests": "camera_motion 5/5; om9-app lib 122/122",
+        "zoom_wheel_clamp_steps": 2.0,
+        "log_evidence": "smooth-final-729.jsonl: 15 slow zoom frames 998-2309 ms with wheel 108-648; after clamp 5-44 ms, wheel 2-26"
+      },
+      "frame_pacing_2026_10_20": {
+        "target_hz": 30,
+        "env": "OM9_FRAME_HZ",
+        "hold_drag_keeps_loop": true,
+        "dt_median_ms": 33.7,
+        "dt_p95_ms": 33.8,
+        "dt_max_ms": 33.8,
+        "sixty_hz_floor_ms": 31.2
+      }
+    },
+    "navigation_checkpoint_2026_10_21": {
+      "date": "2026-10-21",
+      "status": "implemented_automated_checks_passed_performance_acceptance_open",
+      "plan": "implementation/design/M01/VIEWPORT-NAVIGATION-IMPLEMENTATION-PLAN.md",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-21-navigation-implementation.md"
+      ],
+      "ledger_key": "viewport-navigation-runtime-2026-10-21",
+      "navigation_owner": "OM9-L2-03-02",
+      "render_owner": "OM9-L2-01-06",
+      "manual_gate_promoted": false,
+      "preview_mesh_policy": "LOD0 for all occurrences; resolution/MSAA adapt; certified decimation not integrated",
+      "presentation_acceptance": "NOT_PROVED"
+    }
   }
 }

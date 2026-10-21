@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-008",
+  "l4": "OM9-L4-03-14-008-02",
+  "case": "layer-state-persistence-visual-check-negative",
+  "negative_oracle": "Palette must not show cached unsaved state after reopen",
+  "cases": [
+    {
+      "id": "L1-opening-another-document-shows-its-own-palette",
+      "expect": {
+        "gems_layer_present": false,
+        "metals_layer_present": false,
+        "selects": 0
+      }
+    },
+    {
+      "id": "L2-a-failed-open-leaves-the-current-palette-alone",
+      "expect": {
+        "layers_unchanged": true,
+        "flags_unchanged": true
+      }
+    },
+    {
+      "id": "L3-nothing-unsaved-leaks-into-the-reopened-palette",
+      "expect": {
+        "unsaved_lock_not_present": true,
+        "detail": "the reopened document's flags come from the file, not from memory"
+      }
+    }
+  ]
+}

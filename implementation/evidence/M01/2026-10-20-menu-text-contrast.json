@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Main Menu category label readability only",
+  "change": "12pt instead of 11pt; brighter hue-preserving white mix; 0.35pt same-colour overprint replaces dark label shadow; existing 18pt card height retained.",
+  "source": {
+    "path": "crates/om9-app/src/ui/chrome.rs",
+    "sha256": "5b03f2ad13f955a014b342f2053b3c2993985b8b2d72d795c90db130b0dfac3b",
+    "measurement_scope": "Fingerprint at receipt-recording time; concurrent unrelated palette arrow work changed this file after the measured preview build. The category-label edits remain intact.",
+    "current_sha256": "bc3e9dc98c0189e09ff1cb71a57268a3446c4ac9a261d02abd91396d54429fd6"
+  },
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-menu-contrast.exe",
+    "sha256": "2617abf263f4a020b6cc0f73cb33ce3759afd496610dc76df6fc0fcc5c40194a"
+  },
+  "build": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-menu-contrast.exe",
+  "build_result": "PASS; two expected warnings for custom output path",
+  "tests": [
+    {
+      "suite": "chrome_actions",
+      "passed": 11
+    },
+    {
+      "suite": "left_stack_layers",
+      "passed": 8
+    },
+    {
+      "suite": "panel_ops",
+      "passed": 33
+    },
+    {
+      "suite": "shell_docking",
+      "passed": 10
+    },
+    {
+      "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib chrome_tests -- --test-threads=1",
+      "passed": 4
+    }
+  ],
+  "test_execution": "Four integration executables freshly built in L:/om9-target/debug/deps were run directly with --test-threads=1 after cargo test could not replace the running user om9.exe. All 62 integration tests and 4 chrome unit tests passed.",
+  "runtime": {
+    "command": "python tools/validate_m01_l3_003_panels.py --binary L:/om9-target/debug/om9-menu-contrast.exe --output build/standalone-validation/ui-artifacts/2026-10-20-menu-text-contrast --only escape",
+    "result": "PASS, one native GPU replay, 1600x1000 screenshot, zero entities/undo changes",
+    "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-menu-text-contrast/panels-summary.json",
+    "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-menu-text-contrast/escape/workspace.png"
+  },
+  "visual_inspection": "Actual app screenshot inspected: all twelve labels readable, coloured and contained in the left rail.",
+  "public_source_audit": "FAIL: existing private/binary/reference/raster artifacts across the working tree (including manuals, vendor-research and milestone reference images). No reference assets added by this text styling change.",
+  "limitations": [
+    "Formal manual M01-UI approval remains pending.",
+    "Existing running user app remains on its loaded binary; preview executable is separate.",
+    "Initial 21pt card height clipped Layers at 911x480; reverted to 18pt and all eight left_stack_layers tests passed.",
+    "An initial shell environment assignment failed and one test build used the existing checkout target directory; final build and verification use L:/om9-target.",
+    "Concurrent unrelated palette arrow controls in chrome.rs were preserved.",
+    "Concurrent palette arrow rendering changed after validation; the preview binary and 66-test result cover the captured earlier composition, not a whole-checkout completion claim."
+  ]
+}

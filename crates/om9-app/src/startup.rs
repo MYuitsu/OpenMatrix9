@@ -240,11 +240,16 @@ impl StartupFailure {
 }
 
 /// A desktop viewport requires a hardware GPU. Preserve its actual identity in receipts.
-pub fn gpu_adapter_identity(adapter: Option<(&str,eframe::wgpu::DeviceType)>) -> Result<String> {
+pub fn gpu_adapter_identity(adapter: Option<(&str, eframe::wgpu::DeviceType)>) -> Result<String> {
     use eframe::wgpu::DeviceType;
     match adapter {
-        Some((info,DeviceType::DiscreteGpu|DeviceType::IntegratedGpu|DeviceType::VirtualGpu)) if !info.trim().is_empty()=>Ok(info.to_owned()),
-        _=>Err(Error::Unsupported("hardware GPU adapter required; CPU/software rendering is disabled")),
+        Some((
+            info,
+            DeviceType::DiscreteGpu | DeviceType::IntegratedGpu | DeviceType::VirtualGpu,
+        )) if !info.trim().is_empty() => Ok(info.to_owned()),
+        _ => Err(Error::Unsupported(
+            "hardware GPU adapter required; CPU/software rendering is disabled",
+        )),
     }
 }
 
@@ -330,13 +335,26 @@ mod tests {
     #[test]
     fn hardware_gpu_is_required_without_a_software_fallback() {
         use eframe::wgpu::DeviceType;
-        for kind in [DeviceType::DiscreteGpu,DeviceType::IntegratedGpu,DeviceType::VirtualGpu] {
-            assert_eq!(gpu_adapter_identity(Some(("hardware",kind))).unwrap(),"hardware");
+        for kind in [
+            DeviceType::DiscreteGpu,
+            DeviceType::IntegratedGpu,
+            DeviceType::VirtualGpu,
+        ] {
+            assert_eq!(
+                gpu_adapter_identity(Some(("hardware", kind))).unwrap(),
+                "hardware"
+            );
         }
-        for missing in [None,Some(("",DeviceType::DiscreteGpu)),Some(("  ",DeviceType::IntegratedGpu)),Some(("WARP",DeviceType::Cpu)),Some(("unknown",DeviceType::Other))] {
-            let error=gpu_adapter_identity(missing).unwrap_err();
-            let failure=StartupFailure::from_error(StartupStage::Renderer,&error);
-            assert_eq!(failure.stage,StartupStage::Renderer);
+        for missing in [
+            None,
+            Some(("", DeviceType::DiscreteGpu)),
+            Some(("  ", DeviceType::IntegratedGpu)),
+            Some(("WARP", DeviceType::Cpu)),
+            Some(("unknown", DeviceType::Other)),
+        ] {
+            let error = gpu_adapter_identity(missing).unwrap_err();
+            let failure = StartupFailure::from_error(StartupStage::Renderer, &error);
+            assert_eq!(failure.stage, StartupStage::Renderer);
             assert!(failure.detail().contains("hardware GPU adapter required"));
         }
     }

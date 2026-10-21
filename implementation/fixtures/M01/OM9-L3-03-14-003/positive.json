@@ -1,0 +1,49 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-003",
+  "l4": "OM9-L4-03-14-003-02",
+  "case": "layer-visible-and-locked-controls-positive",
+  "positive_oracle": "Toggle visible/locked on Gems affects viewport and picking immediately",
+  "layer": {
+    "slot": 5,
+    "category": "Gems"
+  },
+  "cases": [
+    {
+      "id": "S1-hiding-a-layer-hides-its-objects-at-once",
+      "expect": {
+        "display_visible": false,
+        "scene_visible": false,
+        "other_layer_visible": true
+      }
+    },
+    {
+      "id": "S2-a-hidden-layer-offers-nothing-to-pick",
+      "expect": {
+        "pick_capable": false,
+        "select_layer_selects": 0
+      }
+    },
+    {
+      "id": "S3-showing-the-layer-brings-the-objects-back",
+      "expect": {
+        "display_visible": true,
+        "scene_visible": true,
+        "pick_capable": true
+      }
+    },
+    {
+      "id": "S4-locking-a-layer-leaves-it-visible-but-not-editable",
+      "expect": {
+        "display_visible": true,
+        "editable": false
+      }
+    },
+    {
+      "id": "S5-unlocking-restores-editability",
+      "expect": {
+        "editable": true
+      }
+    }
+  ]
+}

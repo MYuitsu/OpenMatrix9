@@ -195,6 +195,20 @@
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending."
-    ]
+    ],
+    "dock_theme": {
+      "date": "2026-10-20",
+      "status": "DOCK_APPEARANCE_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Dock background presentation only: left/right column surfaces, section bars and floating menu content.",
+      "colours": {
+        "dock_background": "#01391C",
+        "section_background": "#005126",
+        "edges_hover": "#236B48"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-green-docks.json"
+      ]
+    }
   }
 }

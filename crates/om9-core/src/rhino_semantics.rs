@@ -56,6 +56,8 @@ pub fn geometry_semantic_kind(geometry: &Geometry) -> SemanticKind {
         Geometry::Mesh(_) => SemanticKind::Mesh,
         Geometry::Cloud(_) => SemanticKind::PointCloud,
         Geometry::Instance(_) => SemanticKind::Instance,
+        Geometry::Hatch(_) => SemanticKind::Mesh,
+        Geometry::Light(_) => SemanticKind::Point,
     }
 }
 
@@ -1056,3 +1058,4 @@ pub fn curve_endpoints(curve: &Curve, limits: &Limits) -> Result<[Point3; 2]> {
         *end.first().ok_or(Error::Invalid("curve endpoint"))?,
     ])
 }
+

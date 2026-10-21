@@ -37,3 +37,11 @@ procedure and necessary context from the private archive. Record the source,
 page or procedure identity, verified behavior and remaining uncertainty for
 that work. Archive preservation and a local source audit do not establish
 license clearance or complete command implementation.
+
+`tools/public_source_audit.py` has two scopes. The default audits the git-public
+working set (tracked plus untracked non-ignored files), so a private local archive
+that is gitignored does not make the public audit fail. `--strict` walks the whole
+filesystem and reports private local material; use it for a local hygiene check,
+not as the public-release receipt. Tracked private reference files still fail the
+default audit and must be moved out of the repository rather than allowlisted
+broadly.

@@ -1,0 +1,86 @@
+{
+  "schema": "om9.m01.source_crosswalk.v1",
+  "task_id": "OM9-L4-03-14-005-01",
+  "l3_id": "OM9-L3-03-14-005",
+  "l3_title": "Matrix Object Info Overlay",
+  "owner_module_id": "OM9-L2-03-14",
+  "milestone": "M01",
+  "stage": "E02",
+  "gate": "M01-UI",
+  "goal": "show selected object type, validity and dimensions",
+  "positive_oracle": "Select box shows type, bounding box dimensions, geometry validity sourced from model",
+  "negative_oracle": "Missing BRep must show unavailable measurement, not zero volume claim",
+  "behaviour_reference": {
+    "source": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/reference/text/m8book1__p32-34__using-info-settings-menu.md",
+    "quote": "It displays the type of object and important information about it: surface or polysurface … closed or open … valid or invalid … and point count (for curves), or surface count (for polysurfaces).",
+    "images": [
+      "reference/images/m8book1_p32_img01.png",
+      "reference/images/m8book1_p33_img01.png"
+    ],
+    "decision": "The label is drawn in the object's layer colour and names the type, the size and the validity; a measurement the model does not have is written as unavailable, never as zero."
+  },
+  "source_revision": "746a17f127897e921a57118b6caad08968602bf5",
+  "checkout": "QymCAD",
+  "verified_head": "746a17f127897e921a57118b6caad08968602bf5",
+  "verified_clean": true,
+  "verified_utc": "2026-10-16",
+  "method": "Behavioural source: the extracted Matrix9 manual shipped with the milestone. QymCAD only for label technique.",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "present": true,
+      "observed_symbols": [
+        "gui.rs:34 report: crate::gui::report_problem::ReportDraft::default()"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "QymCAD has no object information label.",
+      "om9_owner": "crates/om9-core/src/object_info.rs"
+    },
+    {
+      "path": "crates/qymcad-shell/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "qymcad-shell/src/lib.rs:21 pub enum Slot { … }"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No overlay surface.",
+      "om9_owner": "crates/om9-app/src/ui.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/lib.rs",
+      "present": true,
+      "observed_symbols": [
+        "ui-state/src/lib.rs:206 pub fn set_measure(…)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "No measurement model.",
+      "om9_owner": "crates/om9-core/src/object_info.rs"
+    },
+    {
+      "path": "crates/qymcad/Cargo.toml",
+      "present": true,
+      "observed_symbols": [
+        "qymcad/Cargo.toml:24 eframe 0.35 (persistence, wgpu)"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "Dependency shape only.",
+      "om9_owner": "crates/om9-core/Cargo.toml"
+    }
+  ],
+  "implemented_api_before_this_task": [
+    "om9-core: Geometry { Brep, NativeBrep, Point, Curve, Surface, Mesh, Cloud, Instance }, Bounds { Unknown, Empty, Finite } and Geometry::validate(&Limits)",
+    "no object-information type existed: nothing could say the type, the size or the validity of a selected object"
+  ],
+  "gap_found_by_this_task": [
+    "There was no object-information model at all, so the overlay the manual describes could not be opened without inventing its fields.",
+    "Added object_info.rs: Measurement (Size or Unavailable(reason)), ObjectInfo (kind, dimensions, valid: Option<bool>, detail, colour) and Document::object_info(id, limits). The negative oracle is structural: a geometry whose bounds are not computed is Unavailable, and validity is None when it cannot be judged, so no zero and no invented pass can be shown.",
+    "RED is API-level and stated as such: the model did not exist, so no earlier behaviour could fail; the fixtures (I1..I5, J1..J4) pin the rules, including J1 'an unavailable measurement is never a zero size'.",
+    "The painted in-viewport label is NOT done: it is recorded in api.md §3 and in the manual checklist as the next slice."
+  ],
+  "reuse_decision": "ADD the object-information model from the manual's field list; the label painting reuses the existing viewport painting when it is done.",
+  "evidence": [
+    "implementation/fixtures/M01/OM9-L3-03-14-005/positive.json",
+    "implementation/fixtures/M01/OM9-L3-03-14-005/negative.json",
+    "crates/om9-app/tests/object_info_overlay.rs"
+  ]
+}

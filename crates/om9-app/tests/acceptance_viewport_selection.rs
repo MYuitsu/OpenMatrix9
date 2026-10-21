@@ -87,7 +87,11 @@ fn frames(app: &mut MatrixApp, context: &egui::Context, count: usize) {
 }
 
 /// Runs frames and returns the painter shapes, for tests that count what was drawn.
-fn shapes(app: &mut MatrixApp, context: &egui::Context, count: usize) -> Vec<egui::epaint::ClippedShape> {
+fn shapes(
+    app: &mut MatrixApp,
+    context: &egui::Context,
+    count: usize,
+) -> Vec<egui::epaint::ClippedShape> {
     let mut last = Vec::new();
     for _ in 0..count {
         let mut output = context.run_ui(
@@ -106,7 +110,11 @@ fn shapes(app: &mut MatrixApp, context: &egui::Context, count: usize) -> Vec<egu
 
 fn events(app: &mut MatrixApp, context: &egui::Context, events: Vec<Event>) {
     let mut output = context.run_ui(
-        egui::RawInput { screen_rect: Some(screen_rect()), events, ..Default::default() },
+        egui::RawInput {
+            screen_rect: Some(screen_rect()),
+            events,
+            ..Default::default()
+        },
         |ui| app.show(ui),
     );
     output.textures_delta.clear();
@@ -123,11 +131,20 @@ fn screen_of(app: &MatrixApp, point: [f64; 3]) -> Pos2 {
         size: [rect.width() as f64, rect.height() as f64],
     };
     let camera = &app.controller.workspace.views[&ViewId::Perspective].camera;
-    let projected = camera.project(point, viewport).expect("project").expect("front");
+    let projected = camera
+        .project(point, viewport)
+        .expect("project")
+        .expect("front");
     Pos2::new(projected.screen[0] as f32, projected.screen[1] as f32)
 }
 
-fn pointer(app: &mut MatrixApp, context: &egui::Context, at: Pos2, modifiers: Modifiers, click: bool) {
+fn pointer(
+    app: &mut MatrixApp,
+    context: &egui::Context,
+    at: Pos2,
+    modifiers: Modifiers,
+    click: bool,
+) {
     // A standalone modifiers frame first, then the pointer frames, mirroring the working band tests.
     events(app, context, vec![Event::ModifiersChanged(modifiers)]);
     events(app, context, vec![Event::PointerMoved(at)]);
@@ -160,7 +177,13 @@ fn pointer(app: &mut MatrixApp, context: &egui::Context, at: Pos2, modifiers: Mo
 }
 
 /// Press, drag through four intermediate positions, release, with `modifiers` held throughout.
-fn band(app: &mut MatrixApp, context: &egui::Context, start: Pos2, end: Pos2, modifiers: Modifiers) {
+fn band(
+    app: &mut MatrixApp,
+    context: &egui::Context,
+    start: Pos2,
+    end: Pos2,
+    modifiers: Modifiers,
+) {
     events(app, context, vec![Event::ModifiersChanged(modifiers)]);
     events(app, context, vec![Event::PointerMoved(start)]);
     events(
@@ -175,7 +198,11 @@ fn band(app: &mut MatrixApp, context: &egui::Context, start: Pos2, end: Pos2, mo
     );
     for step in 1..=4 {
         let t = step as f32 / 4.0;
-        events(app, context, vec![Event::PointerMoved(start + (end - start) * t)]);
+        events(
+            app,
+            context,
+            vec![Event::PointerMoved(start + (end - start) * t)],
+        );
     }
     events(
         app,
@@ -201,16 +228,25 @@ fn ctrl_shift_click_picks_the_face_under_the_pointer() {
     frames(&mut app, &context, 4);
     // Inside one triangle of the top face: the exact centre lies on the shared diagonal.
     let at = screen_of(&app, [0.3, 0.1, 1.0]);
-    pointer(&mut app, &context, at, Modifiers::CTRL | Modifiers::SHIFT, true);
+    pointer(
+        &mut app,
+        &context,
+        at,
+        Modifiers::CTRL | Modifiers::SHIFT,
+        true,
+    );
     let reference = app.sub_object().expect("a subobject is picked");
-    let (picked_root,subset)=(reference.root,reference.subset);
+    let (picked_root, subset) = (reference.root, reference.subset);
     assert_eq!(picked_root, root);
     assert_eq!(
         subset,
         om9_scene::scene::Subelement::MeshFace(2),
         "the top face, as a document face key"
     );
-    assert!(app.controller.selected().contains(&root), "the owning object is selected");
+    assert!(
+        app.controller.selected().contains(&root),
+        "the owning object is selected"
+    );
 }
 
 #[test]
@@ -219,7 +255,9 @@ fn shift_adds_with_a_band_and_ctrl_removes() {
     let mut app = MatrixApp::new(points_document()).expect("app");
     frames(&mut app, &context, 4);
     let ids: Vec<_> = app.controller.document().entities.keys().copied().collect();
-    app.controller.select_objects(&[ids[0]]).expect("select one");
+    app.controller
+        .select_objects(&[ids[0]])
+        .expect("select one");
     frames(&mut app, &context, 2);
     // Start away from the gumball's handles: a press on a handle is a transform, not a band, which is the
     // correct Matrix9 behaviour and would make this test measure the wrong thing.
@@ -297,9 +335,13 @@ fn pick_tolerance_stays_in_logical_points_at_high_dpi() {
         0,
         "ten logical points stays outside six points at 2x; DPI must not be applied twice"
     );
-    let close = screen_of(&app, [-3.0,0.0,0.0]) + Vec2::new(4.0,0.0);
+    let close = screen_of(&app, [-3.0, 0.0, 0.0]) + Vec2::new(4.0, 0.0);
     pointer(&mut app, &context, close, Modifiers::NONE, true);
-    assert_eq!(app.controller.selected().len(), 1, "four logical points hits at 2x");
+    assert_eq!(
+        app.controller.selected().len(),
+        1,
+        "four logical points hits at 2x"
+    );
 }
 
 #[test]
@@ -367,7 +409,11 @@ fn shift_click_adds_and_keeps_an_already_selected_object() {
     pointer(&mut app, &context, first, Modifiers::NONE, true);
     assert_eq!(app.controller.selected().len(), 1, "plain click replaces");
     pointer(&mut app, &context, second, Modifiers::SHIFT, true);
-    assert_eq!(app.controller.selected().len(), 2, "Shift adds the second object");
+    assert_eq!(
+        app.controller.selected().len(),
+        2,
+        "Shift adds the second object"
+    );
     // Shift again on the same object: still selected, not toggled off.
     pointer(&mut app, &context, second, Modifiers::SHIFT, true);
     assert_eq!(
@@ -378,10 +424,16 @@ fn shift_click_adds_and_keeps_an_already_selected_object() {
     // Ctrl toggles the second one off again.
     pointer(&mut app, &context, second, Modifiers::CTRL, true);
     assert_eq!(app.controller.selected().len(), 1, "Ctrl removes");
-    assert!(app.controller.selected().contains(&ids[0]) || app.controller.selected().contains(&ids[1]));
+    assert!(
+        app.controller.selected().contains(&ids[0]) || app.controller.selected().contains(&ids[1])
+    );
     // Plain click on the second object replaces the whole selection with it.
     pointer(&mut app, &context, second, Modifiers::NONE, true);
-    assert_eq!(app.controller.selected().len(), 1, "plain click replaces the set");
+    assert_eq!(
+        app.controller.selected().len(),
+        1,
+        "plain click replaces the set"
+    );
 }
 
 #[test]
@@ -405,9 +457,16 @@ fn a_drag_that_starts_on_the_dock_draws_no_selection_marquee() {
     );
     for step in 1..=4 {
         let t = step as f32 / 4.0;
-        events(&mut app, &context, vec![Event::PointerMoved(start + (end - start) * t)]);
+        events(
+            &mut app,
+            &context,
+            vec![Event::PointerMoved(start + (end - start) * t)],
+        );
     }
-    assert!(!app.band_active(), "a dock drag must not start a viewport marquee");
+    assert!(
+        !app.band_active(),
+        "a dock drag must not start a viewport marquee"
+    );
     events(
         &mut app,
         &context,
@@ -419,6 +478,9 @@ fn a_drag_that_starts_on_the_dock_draws_no_selection_marquee() {
         }],
     );
     frames(&mut app, &context, 2);
-    assert!(app.controller.selected().is_empty(), "and it selects nothing");
+    assert!(
+        app.controller.selected().is_empty(),
+        "and it selects nothing"
+    );
     assert!(!app.band_active());
 }

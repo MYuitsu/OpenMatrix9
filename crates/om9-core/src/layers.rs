@@ -10,7 +10,9 @@ use crate::{
     transaction::{Cancellation, OperationContext, ScopeToken, TransactionCoordinator},
 };
 use std::collections::BTreeSet;
+mod category;
 mod preset;
+pub use category::{LayerCategory, PaletteGroup};
 pub use preset::PresetSlot;
 pub(crate) use preset::same_name;
 pub(crate) use preset::valid_label;

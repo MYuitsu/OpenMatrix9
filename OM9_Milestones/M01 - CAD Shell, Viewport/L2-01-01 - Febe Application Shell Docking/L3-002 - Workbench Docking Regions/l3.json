@@ -198,5 +198,17 @@
       "id": "OM9-L4-01-01-002-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-01 - Febe Application Shell Docking/L3-002 - Workbench Docking Regions/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "left_default_width": {
+      "date": "2026-10-20",
+      "status": "DEFAULT_WIDTH_VALIDATED_MANUAL_UI_PENDING",
+      "before": 300,
+      "after": 360,
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-left-dock-360.json"
+      ],
+      "scope": "Fresh/factory layout and Reset Menus use 360 outer logical pixels. Existing persisted custom sizes still reload. Right dock remains 300. Existing icon scale at a given width retained by separating its 300-point reference width from the startup default."
+    }
+  }
 }

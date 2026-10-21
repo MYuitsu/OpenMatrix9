@@ -4,9 +4,10 @@ use crate::KernelError;
 use om9_core::{
     brep::{Brep, BrepDisplay},
     budget::Limits,
+    geometry::{Mesh, NativeBrep},
 };
 use std::{
-    ffi::{c_char, c_int, c_void},
+    ffi::{CStr, c_char, c_int, c_void},
     panic::{AssertUnwindSafe, catch_unwind},
 };
 use uuid::Uuid;
@@ -30,6 +31,30 @@ struct Snapshot {
 }
 unsafe extern "C" {
     fn om9_occt_brep_volume(source: *const u8, length: usize, volume: *mut f64) -> c_int;
+    fn om9_occt_brep_from_3dm_snapshot(
+        payload: *const u8,
+        length: usize,
+        tolerance: f64,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: unsafe extern "C" fn(*mut c_void, *const Snapshot) -> c_int,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
+    fn om9_occt_brep_to_3dm(
+        source: *const u8,
+        length: usize,
+        tolerance: f64,
+        max_bytes: usize,
+        crc: *mut u32,
+        sink: unsafe extern "C" fn(*mut c_void, *const u8, usize) -> c_int,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
     fn om9_occt_brep_snapshot(
         source: *const u8,
         source_len: usize,
@@ -196,4 +221,143 @@ pub fn source_volume(shape: &Brep, limits: &Limits) -> Result<f64, KernelError> 
     } else {
         Err(KernelError::Failure("invalid canonical BRep source".into()))
     }
+}
+
+struct BytesContext {
+    bytes: Vec<u8>,
+    limit: usize,
+}
+
+unsafe extern "C" fn receive_bytes(context: *mut c_void, bytes: *const u8, length: usize) -> c_int {
+    // SAFETY: the callback is synchronous and the context lives for the whole call.
+    let context = unsafe { &mut *context.cast::<BytesContext>() };
+    if length > context.limit.saturating_sub(context.bytes.len()) {
+        return 1;
+    }
+    if length > 0 {
+        if bytes.is_null() {
+            return 1;
+        }
+        // SAFETY: native guarantees a live buffer for this synchronous callback.
+        context
+            .bytes
+            .extend_from_slice(unsafe { std::slice::from_raw_parts(bytes, length) });
+    }
+    0
+}
+
+fn native_message(message: &[c_char; 512]) -> String {
+    // SAFETY: the native bridge always NUL-terminates within the provided buffer.
+    unsafe { CStr::from_ptr(message.as_ptr()) }
+        .to_string_lossy()
+        .into_owned()
+}
+
+fn byte_bound(limits: &Limits) -> usize {
+    usize::try_from(limits.max_bytes)
+        .unwrap_or(usize::MAX)
+        .min(isize::MAX as usize)
+}
+
+/// Convert a 3DM `NativeBrep` payload into an owned editable OCCT `Brep`.
+/// The native side converts the shape and returns the complete snapshot in one
+/// call; the OCCT text is not reparsed a second time.
+pub fn from_3dm(
+    payload: &[u8],
+    tolerance_mm: f64,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, KernelError> {
+    if payload.is_empty()
+        || payload.len() as u64 > limits.max_bytes
+        || !tolerance_mm.is_finite()
+        || tolerance_mm <= 0.
+        || !deflection_mm.is_finite()
+        || deflection_mm <= 0.
+    {
+        return Err(KernelError::InvalidInput("3DM BRep input budget".into()));
+    }
+    let mut context = Context {
+        limits,
+        deflection: deflection_mm,
+        result: None,
+    };
+    let mut message = [0i8; 512];
+    // SAFETY: input and callback context live through this synchronous complete call.
+    let status = unsafe {
+        om9_occt_brep_from_3dm_snapshot(
+            payload.as_ptr(),
+            payload.len(),
+            tolerance_mm,
+            deflection_mm,
+            usize::try_from(limits.max_points).unwrap_or(usize::MAX),
+            usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+            byte_bound(limits),
+            receive,
+            (&mut context as *mut Context<'_>).cast(),
+            message.as_mut_ptr(),
+            512,
+        )
+    };
+    if status != 0 {
+        return Err(KernelError::InvalidInput(native_message(&message)));
+    }
+    let result = context
+        .result
+        .ok_or_else(|| KernelError::Failure("3DM BRep snapshot missing".into()))?;
+    result.map_err(|error| KernelError::InvalidInput(error.to_string()))
+}
+
+/// Convert an editable OCCT `Brep` into a 3DM `NativeBrep` payload. The display
+/// mesh is derived from the already admitted Brep display, never from native
+/// export bytes.
+pub fn to_3dm(brep: &Brep, tolerance_mm: f64, limits: &Limits) -> Result<NativeBrep, KernelError> {
+    brep.validate(limits)
+        .map_err(|error| KernelError::InvalidInput(error.to_string()))?;
+    if !tolerance_mm.is_finite() || tolerance_mm <= 0. {
+        return Err(KernelError::InvalidInput("BRep export tolerance".into()));
+    }
+    let mut context = BytesContext {
+        bytes: Vec::new(),
+        limit: byte_bound(limits),
+    };
+    let mut crc = 0u32;
+    let mut message = [0i8; 512];
+    // SAFETY: source, scalar output and callback context live through this synchronous call.
+    let status = unsafe {
+        om9_occt_brep_to_3dm(
+            brep.source().as_ptr(),
+            brep.source().len(),
+            tolerance_mm,
+            byte_bound(limits),
+            &mut crc,
+            receive_bytes,
+            (&mut context as *mut BytesContext).cast(),
+            message.as_mut_ptr(),
+            512,
+        )
+    };
+    if status != 0 {
+        return Err(KernelError::InvalidInput(native_message(&message)));
+    }
+    if context.bytes.is_empty() {
+        return Err(KernelError::Failure("empty ON_Brep payload".into()));
+    }
+    let faces = brep
+        .display
+        .triangles
+        .iter()
+        .map(|triangle| vec![triangle[0], triangle[1], triangle[2]])
+        .collect();
+    let display = Mesh {
+        vertices: brep.display.points.clone(),
+        faces,
+        normals: Vec::new(),
+        colors: Vec::new(),
+    };
+    Ok(NativeBrep {
+        display,
+        payload: context.bytes,
+        crc,
+    })
 }

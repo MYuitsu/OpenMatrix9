@@ -1,0 +1,137 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-001",
+  "l4": "OM9-L4-03-14-001-02",
+  "case": "matrix-layer-category-palette-positive",
+  "positive_oracle": "Palette has Metals/Gems/User/Heads/Finger/Cutting/Creation semantic categories",
+  "reference": "m8book1 p54-57 The Layers Menu (reference/text/m8book1__p54-57__the-layers-menu.md)",
+  "categories": [
+    "Metals",
+    "Gems",
+    "User",
+    "Heads",
+    "Finger",
+    "Cutting",
+    "Creation"
+  ],
+  "groups": [
+    "Metals",
+    "Gems",
+    "User",
+    "Builders"
+  ],
+  "cases": [
+    {
+      "id": "P1-the-seven-categories-in-palette-order",
+      "expect": {
+        "labels": [
+          "Metals",
+          "Gems",
+          "User",
+          "Heads",
+          "Finger",
+          "Cutting",
+          "Creation"
+        ]
+      }
+    },
+    {
+      "id": "P2-the-four-groups-of-the-manual",
+      "expect": {
+        "labels": [
+          "Metals",
+          "Gems",
+          "User",
+          "Builders"
+        ],
+        "builders": [
+          "Heads",
+          "Finger",
+          "Cutting",
+          "Creation"
+        ]
+      }
+    },
+    {
+      "id": "P3-slot-to-category-mapping",
+      "slots": {
+        "1": "Metals",
+        "2": "Metals",
+        "3": "Metals",
+        "4": "Metals",
+        "5": "Gems",
+        "6": "Gems",
+        "7": "Gems",
+        "8": "Gems",
+        "9": "User",
+        "10": "User",
+        "11": "User",
+        "12": "User",
+        "13": "Heads",
+        "14": "Finger",
+        "15": "Cutting",
+        "16": "Creation",
+        "17": "User",
+        "24": "User",
+        "25": "User",
+        "32": "User",
+        "33": "Lights"
+      },
+      "expect": {
+        "unmapped_numbers": [
+          0,
+          34
+        ]
+      }
+    },
+    {
+      "id": "P4-a-category-lists-the-slots-it-shows",
+      "expect": {
+        "Metals": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "Gems": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "User": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "Heads": [
+          13
+        ],
+        "Finger": [
+          14
+        ],
+        "Cutting": [
+          15
+        ],
+        "Creation": [
+          16
+        ]
+      }
+    },
+    {
+      "id": "P5-the-model-reaches-the-app",
+      "expect": {
+        "app_categories": [
+          "Metals",
+          "Gems",
+          "User",
+          "Heads",
+          "Finger",
+          "Cutting",
+          "Creation"
+        ]
+      }
+    }
+  ]
+}

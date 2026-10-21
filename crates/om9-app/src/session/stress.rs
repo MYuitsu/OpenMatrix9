@@ -43,7 +43,12 @@ fn stress_cube() -> Mesh {
         vec![0, 4, 7],
         vec![0, 7, 3],
     ];
-    Mesh { vertices, faces, normals: Vec::new(), colors: Vec::new() }
+    Mesh {
+        vertices,
+        faces,
+        normals: Vec::new(),
+        colors: Vec::new(),
+    }
 }
 
 impl Controller {
@@ -60,9 +65,16 @@ impl Controller {
             let x = (index as i32 % side) as f64 - f64::from(side) * 0.5;
             let y = ((index as i32 / side) % side) as f64 - f64::from(side) * 0.5;
             let z = (index as i32 / (side * side)) as f64 - f64::from(side) * 0.5;
-            let mut entity = Entity::new("Mesh", Geometry::Mesh(cube.clone()), self.document().current_layer);
+            let mut entity = Entity::new(
+                "Mesh",
+                Geometry::Mesh(cube.clone()),
+                self.document().current_layer,
+            );
             entity.placement = Transform::translation([x * spacing, y * spacing, z * spacing]);
-            mutations.push(Mutation::Insert { document: self.document, entity });
+            mutations.push(Mutation::Insert {
+                document: self.document,
+                entity,
+            });
         }
         if self.scene.is_none() {
             return Err(Error::Missing("stress scene"));

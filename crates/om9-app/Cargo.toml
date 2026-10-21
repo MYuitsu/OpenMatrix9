@@ -6,8 +6,12 @@ license.workspace = true
 rust-version = "1.95"
 
 [features]
+default = ["occt-brep"]
 # Optional native BRep fixtures. Viewport rendering always uses the GPU and needs no OCCT runtime.
 gpu-sphere = ["dep:om9-kernel"]
+# Editable 3DM BRep import through the pinned OCCT 8.0.1 kernel. This is the default
+# product build; --no-default-features is a developer fallback that cannot display BReps.
+occt-brep = ["dep:om9-kernel", "om9-kernel/3dm-brep"]
 
 [dependencies]
 om9-core = { path = "../om9-core" }

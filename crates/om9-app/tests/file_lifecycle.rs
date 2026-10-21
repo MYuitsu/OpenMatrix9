@@ -4,7 +4,7 @@ use om9_app::{
     session::Controller,
 };
 use om9_archive::Archive;
-use om9_core::{budget::Limits, model::Document, Error};
+use om9_core::{Error, budget::Limits, model::Document};
 use std::path::{Path, PathBuf};
 struct Fixture(PathBuf);
 impl Fixture {
@@ -124,9 +124,10 @@ fn close_cancel_save_failure_and_stale_consent_cannot_approve_shutdown() {
     c.begin_window_close().unwrap();
     c.decide_unsaved(token(&c), UnsavedDecision::Save).unwrap();
     let before = c.coordinator().snapshot();
-    assert!(c
-        .accept_file_path(token(&c), &f.path("missing/close.om9"))
-        .is_err());
+    assert!(
+        c.accept_file_path(token(&c), &f.path("missing/close.om9"))
+            .is_err()
+    );
     assert_eq!(c.file_operation().unwrap().phase(), FilePhase::SavePath);
     assert!(c.is_dirty().unwrap());
     assert_eq!(c.coordinator().snapshot(), before);
@@ -215,9 +216,10 @@ fn save_as_cancel_failure_and_unsupported_format_preserve_identity_and_target() 
     ));
     assert_eq!(std::fs::read(&target).unwrap(), b"old target");
     let t = token(&c);
-    assert!(c
-        .accept_file_path(t, &f.path("missing-parent/file.om9"))
-        .is_err());
+    assert!(
+        c.accept_file_path(t, &f.path("missing-parent/file.om9"))
+            .is_err()
+    );
     assert_eq!(c.active_file_path(), Some(path.as_path()));
     assert!(c.is_dirty().unwrap());
     assert_eq!(c.coordinator().snapshot(), before);
@@ -332,9 +334,10 @@ fn open_invalid_or_missing_candidate_keeps_document_scene_command_and_redo() {
     let target = f.path("corrupt.om9");
     std::fs::write(&target, b"bad bytes").unwrap();
     assert!(c.accept_file_path(t, &target).is_err());
-    assert!(c
-        .accept_file_path(token(&c), &f.path("missing.om9"))
-        .is_err());
+    assert!(
+        c.accept_file_path(token(&c), &f.path("missing.om9"))
+            .is_err()
+    );
     assert_eq!(c.coordinator().snapshot(), before);
     assert_eq!(c.scene().unwrap().objects.len(), scene);
     assert!(c.is_running());
@@ -515,10 +518,11 @@ fn missing_replay_module_is_diagnostic_and_not_a_clean_restore() {
         c.accept_file_path(token(&c), &path).unwrap(),
         FileOutcome::Replaced
     );
-    assert!(c
-        .file_diagnostics()
-        .iter()
-        .any(|line| line.contains("Missing replay module missing-solver@1")));
+    assert!(
+        c.file_diagnostics()
+            .iter()
+            .any(|line| line.contains("Missing replay module missing-solver@1"))
+    );
     assert!(c.is_dirty().unwrap());
     assert_eq!(c.coordinator().undo_len(), 0);
     assert_eq!(c.document().entities.len(), 1);
@@ -549,13 +553,14 @@ fn save_keeps_hidden_locked_off_layers_and_explicit_preferences_in_complete_docu
         Archive::open(&path, &Limits::default()).unwrap(),
         *c.document()
     );
-    assert!(c
-        .document()
-        .entities
-        .values()
-        .all(|entity| entity.attributes.hidden
-            && entity.attributes.visible
-            && entity.attributes.selectable));
+    assert!(
+        c.document()
+            .entities
+            .values()
+            .all(|entity| entity.attributes.hidden
+                && entity.attributes.visible
+                && entity.attributes.selectable)
+    );
 }
 #[test]
 fn consumed_save_picker_reply_cannot_become_a_later_open_selection() {

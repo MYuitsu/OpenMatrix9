@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Command appearance only: history, prompt, input, caret, selection, IME underline, option tokens and scrollbar widget colours.",
+  "before": "History/input background #82B48C, black text; blue selection.",
+  "after": {
+    "history_background": "#01391C",
+    "input_background": "#005126",
+    "text_caret_ime": "#FDD880",
+    "selection": "#186C41"
+  },
+  "reference": {
+    "source": "User-attached green/gold image, 2026-10-20",
+    "sha256": "cf6232e0afc2b779faca00fa6fa95b7a818f52ce00bfda15a577daa60ea947f9",
+    "sampling": "Pillow RGB histogram: most frequent background (1,57,28); secondary background (0,81,38); most frequent interior gold candidate (253,216,128). Image used only for colour sampling, not copied into repository."
+  },
+  "sources": [
+    {
+      "path": "crates/om9-app/src/ui/command.rs",
+      "sha256": "18e0a7ac0b9ebf2ce1d9168204cdd79edb5d94c636f562fdba481ef724e58295"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "sha256": "dcf9e00bb040ecf392f0eb369b6e54181273c132c9798760f25e267104d320fc"
+    }
+  ],
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-command-gold.exe",
+    "sha256": "0f7a3c4d23468d31d25af886c56c70c2b6d3a2a9816f70ae9aebdc8f92368a62"
+  },
+  "build": {
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-command-gold.exe",
+    "result": "PASS; two expected warnings for custom output path"
+  },
+  "tests": [
+    {
+      "suite": "pinned_command",
+      "passed": 7,
+      "execution": "Fresh om9-gold-pinned-tests-e0dc81e8478431bc.exe --test-threads=1",
+      "scope": "Shared copy/selection, protected transcript, pinned input, Unicode, IME, scrolling, viewport focus."
+    },
+    {
+      "suite": "command_tokens",
+      "passed": 1,
+      "execution": "Fresh om9-gold-token-tests-6b0e3f7d86042029.exe --test-threads=1",
+      "scope": "Existing BothSides option click path."
+    }
+  ],
+  "runtime": {
+    "command": "python tools/validate_m01_l3_003_panels.py --binary L:/om9-target/debug/om9-command-gold.exe --output build/standalone-validation/ui-artifacts/2026-10-20-command-green-gold --only escape",
+    "result": "PASS; one native GPU replay, 1600x1000 screenshot; zero entity/Undo changes",
+    "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-command-green-gold/panels-summary.json",
+    "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-command-green-gold/escape/workspace.png"
+  },
+  "visual_review": "Actual screenshot inspected: gold history/prompt/caret, deep green history and brighter green input. Existing menu, icons and viewports keep their own colours.",
+  "public_source_audit": {
+    "status": "FAIL",
+    "existing_tree_findings": 11740,
+    "examples": [
+      "Private/binary artifact: brep-fixture.obj",
+      "Private/binary artifact: native_exchange.obj",
+      "Unreviewed raster artifact: om9-window.png"
+    ],
+    "note": "Existing private/reference/binary/raster artifacts remain; no reference imagery added by this change."
+  },
+  "limitations": [
+    "Formal manual M01-UI approval pending.",
+    "Existing running om9.exe is locked. Separate preview compiled; user session remains running.",
+    "cargo rustc --test produced fresh custom-output test executables but returned failure while also trying to replace the locked main om9.exe. Both test executables were run directly and passed.",
+    "No command behavior or reusable skill rule changed."
+  ]
+}

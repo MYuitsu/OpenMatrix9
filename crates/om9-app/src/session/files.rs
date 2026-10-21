@@ -508,7 +508,21 @@ impl Controller {
             .selection_revision
             .checked_add(1)
             .ok_or(Error::Overflow("selection revision"))?;
-        Ok(receipt.diagnostics)
+        let mut diagnostics = receipt.diagnostics;
+        diagnostics.push(format!(
+            "3DM import summary: {} editable BRep, {} opaque, {} displayable, {} display unavailable, {} annotation, {} hatch, {} light, {} group, {} line pattern, {} page-space",
+            receipt.breps_editable,
+            receipt.breps_opaque,
+            receipt.breps_displayable,
+            receipt.breps_display_unavailable,
+            receipt.annotations,
+            receipt.hatches,
+            receipt.lights,
+            receipt.groups,
+            receipt.line_patterns,
+            receipt.page_space_objects
+        ));
+        Ok(diagnostics)
     }
     /// Export the current document to Rhino 3DM without changing the document, selection or Undo.
     pub fn export_3dm(&self, target: &std::path::Path) -> Result<Vec<String>> {
@@ -519,7 +533,14 @@ impl Controller {
             target,
             &om9_core::transaction::Cancellation::default(),
         )?;
-        Ok(receipt.diagnostics)
+        let mut diagnostics = receipt.diagnostics;
+        if receipt.dropped_native_records > 0 {
+            diagnostics.push(format!(
+                "EXPORT_RETAINED_OMITTED: {} retained native records were not written to the 3DM; original source bytes remain in the project",
+                receipt.dropped_native_records
+            ));
+        }
+        Ok(diagnostics)
     }
 }
 fn subtract_usage(total: Usage, owner: Usage) -> Result<Usage> {

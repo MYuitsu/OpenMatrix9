@@ -1,0 +1,82 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-03-14-002-05",
+  "l3_id": "OM9-L3-03-14-002",
+  "title": "Current Layer And Assignment UI",
+  "oracle": {
+    "positive": "Select current layer Metals, assign object A, panel and model both reflect same LayerId",
+    "negative": "Assign onto locked/unavailable layer must refuse explicitly"
+  },
+  "manual_test_gate": "M01-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) at the running application",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: cargo test -p om9-app --test layer_current_and_assign -> 1 passed; 2 failed. Product defect: assign_layer never read the target layer's lock, so moving geometry ONTO a locked layer succeeded (the operation the manual says locking prevents).",
+    "GREEN: 3 passed; 0 failed (C1..C4, L1..L4).",
+    "cargo test -p om9-core -p om9-app -j 2: every group passes except chrome_actions::icons_scale_with_the_screen_size, which belongs to the in-flight screen_icon_scale work already uncommitted in this tree and is unrelated (noted in the -05 log for L3-001 as well).",
+    "cargo fmt --check: exit 0; cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0",
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
+  ],
+  "code_change": [
+    "crates/om9-app/src/session/layers.rs::assign_layer: after resolving the target layer and before applying any LayerAction, a locked target is refused with Error::Permission(\"layer is locked\"); the refusal costs no transaction and leaves the objects where they were.",
+    "No other behaviour changed: create+current in one batch, assignment not stealing the current layer and the empty-selection no-op already held."
+  ],
+  "artefacts": [
+    "OM9-L4-03-14-002-02.red.log",
+    "OM9-L4-03-14-002-02.green.log",
+    "OM9-L4-03-14-002-03.diffstat.txt",
+    "OM9-L4-03-14-002-03.target-test.log",
+    "OM9-L4-03-14-002-05.regression.log"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The rules are machine-proven; the panel reading and the feel of the assignment are yours to confirm. One open question is recorded in api.md: making a LOCKED layer current is currently refused; this item does not change that rule and its oracle does not mention it.",
+    "items": [
+      {
+        "id": "W1",
+        "step": "Click a Metals row to make it current.",
+        "machine_proven": "C1/C3: the preset layer is created and made current in one call, and the panel's current id equals document.current_layer.",
+        "human_must_verify": "The clicked row is highlighted, the status line names it, and clicking another row moves the highlight.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "W2",
+        "step": "Select an object and assign it to another layer (e.g. Gems).",
+        "machine_proven": "C2: one transaction moves the objects, and the current layer does not move with them.",
+        "human_must_verify": "The object's colour/row changes to the target layer, Undo reverses it in one step, and the current layer stays where it was.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "W3",
+        "step": "Lock Gems, then try to assign an object to it.",
+        "machine_proven": "L1/L2: the assignment is refused before anything is applied, with 'layer is locked', and the journal does not move.",
+        "human_must_verify": "Nothing moves, the status explains the refusal, and Undo is not needed to get back.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "W4",
+        "step": "Assign with nothing selected.",
+        "machine_proven": "L3: it is a no-op that succeeds and adds no journal entry.",
+        "human_must_verify": "No error dialog, no phantom undo entry.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "W5",
+        "step": "Create a layer through the CMD line (Layer 5 / Layer Gems) and look at the palette.",
+        "machine_proven": "the CMD path resolves a slot number, a preset name and a quoted label to one slot, refusing an ambiguous quoted label.",
+        "human_must_verify": "The new row appears in the right group with the manual's colour, and a repeated name is refused rather than guessed.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_l2_03_14_l3_002_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

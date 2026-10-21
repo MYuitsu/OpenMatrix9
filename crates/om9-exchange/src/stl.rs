@@ -19,7 +19,10 @@ pub struct TriangleSoup {
 
 impl TriangleSoup {
     pub fn new(positions: Vec<[f32; 3]>, triangles: Vec<[u32; 3]>) -> Self {
-        Self { positions, triangles }
+        Self {
+            positions,
+            triangles,
+        }
     }
 }
 
@@ -48,13 +51,24 @@ impl std::fmt::Display for StlError {
         match self {
             Self::Empty => write!(formatter, "the mesh has no triangles"),
             Self::IndexOutOfRange { triangle, index } => {
-                write!(formatter, "triangle {triangle} indexes vertex {index}, which does not exist")
+                write!(
+                    formatter,
+                    "triangle {triangle} indexes vertex {index}, which does not exist"
+                )
             }
-            Self::NonFinite { vertex } => write!(formatter, "vertex {vertex} is not a finite coordinate"),
-            Self::BadScale => write!(formatter, "the export scale must be finite and greater than zero"),
+            Self::NonFinite { vertex } => {
+                write!(formatter, "vertex {vertex} is not a finite coordinate")
+            }
+            Self::BadScale => write!(
+                formatter,
+                "the export scale must be finite and greater than zero"
+            ),
             Self::Degenerate { triangle } => write!(formatter, "triangle {triangle} has no area"),
             Self::OpenSurface { open_edges } => {
-                write!(formatter, "the surface is not watertight: {open_edges} open edges")
+                write!(
+                    formatter,
+                    "the surface is not watertight: {open_edges} open edges"
+                )
             }
             Self::TooManyTriangles { count } => {
                 write!(formatter, "binary STL cannot hold {count} triangles")
@@ -92,7 +106,11 @@ pub struct StlOptions {
 
 impl Default for StlOptions {
     fn default() -> Self {
-        Self { scale: 1.0, flip_winding: false, strict: true }
+        Self {
+            scale: 1.0,
+            flip_winding: false,
+            strict: true,
+        }
     }
 }
 
@@ -138,7 +156,10 @@ pub fn open_edges(soup: &TriangleSoup) -> usize {
 
 /// Writes a binary STL. `strict` refuses open surfaces, degenerate triangles and bad indices; the lenient
 /// path still refuses non-finite coordinates because no reader can use them.
-pub fn write_binary_stl(soup: &TriangleSoup, options: StlOptions) -> std::result::Result<Vec<u8>, StlError> {
+pub fn write_binary_stl(
+    soup: &TriangleSoup,
+    options: StlOptions,
+) -> std::result::Result<Vec<u8>, StlError> {
     if soup.triangles.is_empty() {
         return Err(StlError::Empty);
     }
@@ -146,7 +167,9 @@ pub fn write_binary_stl(soup: &TriangleSoup, options: StlOptions) -> std::result
         return Err(StlError::BadScale);
     }
     if soup.triangles.len() > u32::MAX as usize {
-        return Err(StlError::TooManyTriangles { count: soup.triangles.len() });
+        return Err(StlError::TooManyTriangles {
+            count: soup.triangles.len(),
+        });
     }
     for (index, position) in soup.positions.iter().enumerate() {
         if position.iter().any(|value| !value.is_finite()) {
@@ -157,7 +180,10 @@ pub fn write_binary_stl(soup: &TriangleSoup, options: StlOptions) -> std::result
     for (index, triangle) in soup.triangles.iter().enumerate() {
         for vertex_index in triangle {
             if *vertex_index as usize >= soup.positions.len() {
-                return Err(StlError::IndexOutOfRange { triangle: index, index: *vertex_index });
+                return Err(StlError::IndexOutOfRange {
+                    triangle: index,
+                    index: *vertex_index,
+                });
             }
         }
     }
@@ -176,16 +202,20 @@ pub fn write_binary_stl(soup: &TriangleSoup, options: StlOptions) -> std::result
     );
     let mut header_bytes = [0u8; 80];
     let header_bytes_written = header.len().min(80);
-    header_bytes[..header_bytes_written].copy_from_slice(&header.as_bytes()[..header_bytes_written]);
+    header_bytes[..header_bytes_written]
+        .copy_from_slice(&header.as_bytes()[..header_bytes_written]);
     bytes.extend_from_slice(&header_bytes);
     bytes.extend_from_slice(&(soup.triangles.len() as u32).to_le_bytes());
     for (index, triangle) in soup.triangles.iter().enumerate() {
         let mut vertices = [[0.0f64; 3]; 3];
         for (slot, vertex_index) in triangle.iter().enumerate() {
-            let position = soup
-                .positions
-                .get(*vertex_index as usize)
-                .ok_or(StlError::IndexOutOfRange { triangle: index, index: *vertex_index })?;
+            let position =
+                soup.positions
+                    .get(*vertex_index as usize)
+                    .ok_or(StlError::IndexOutOfRange {
+                        triangle: index,
+                        index: *vertex_index,
+                    })?;
             for axis in 0..3 {
                 vertices[slot][axis] = f64::from(position[axis]) * options.scale;
             }
@@ -226,12 +256,18 @@ mod tests {
             [-0.5, 0.5, 0.5],
         ];
         let triangles = vec![
-            [0, 2, 1], [0, 3, 2], // -Z
-            [4, 5, 6], [4, 6, 7], // +Z
-            [0, 1, 5], [0, 5, 4], // -Y
-            [2, 3, 7], [2, 7, 6], // +Y
-            [1, 2, 6], [1, 6, 5], // +X
-            [0, 4, 7], [0, 7, 3], // -X
+            [0, 2, 1],
+            [0, 3, 2], // -Z
+            [4, 5, 6],
+            [4, 6, 7], // +Z
+            [0, 1, 5],
+            [0, 5, 4], // -Y
+            [2, 3, 7],
+            [2, 7, 6], // +Y
+            [1, 2, 6],
+            [1, 6, 5], // +X
+            [0, 4, 7],
+            [0, 7, 3], // -X
         ];
         TriangleSoup::new(positions, triangles)
     }
@@ -242,7 +278,11 @@ mod tests {
         for index in 0..count {
             let start = 84 + index * 50;
             let float = |offset: usize| {
-                f32::from_le_bytes(bytes[start + offset..start + offset + 4].try_into().expect("float"))
+                f32::from_le_bytes(
+                    bytes[start + offset..start + offset + 4]
+                        .try_into()
+                        .expect("float"),
+                )
             };
             let normal = [float(0), float(4), float(8)];
             let vertices = [
@@ -265,8 +305,12 @@ mod tests {
         let triangles = triangles_of(&bytes);
         assert_eq!(triangles.len(), 12);
         for (normal, _) in &triangles {
-            let length = (normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]).sqrt();
-            assert!((length - 1.0).abs() < 1e-5, "normals must be unit: {length}");
+            let length =
+                (normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]).sqrt();
+            assert!(
+                (length - 1.0).abs() < 1e-5,
+                "normals must be unit: {length}"
+            );
         }
     }
 
@@ -279,28 +323,47 @@ mod tests {
             .into_iter()
             .find(|(_, vertices)| vertices.iter().all(|vertex| vertex[2] > 0.49))
             .expect("top face");
-        assert!(top.0[2] > 0.99, "the +Z face normal must point up: {:?}", top.0);
+        assert!(
+            top.0[2] > 0.99,
+            "the +Z face normal must point up: {:?}",
+            top.0
+        );
     }
 
     #[test]
     fn flipping_the_winding_reverses_the_normals() {
         let soup = cube();
         let straight = write_binary_stl(&soup, StlOptions::default()).expect("cube exports");
-        let flipped = write_binary_stl(&soup, StlOptions { flip_winding: true, ..StlOptions::default() })
-            .expect("cube exports");
+        let flipped = write_binary_stl(
+            &soup,
+            StlOptions {
+                flip_winding: true,
+                ..StlOptions::default()
+            },
+        )
+        .expect("cube exports");
         let a = triangles_of(&straight)[0].0;
         let b = triangles_of(&flipped)[0].0;
-        assert!((a[0] + b[0]).abs() < 1e-5 && (a[1] + b[1]).abs() < 1e-5 && (a[2] + b[2]).abs() < 1e-5);
+        assert!(
+            (a[0] + b[0]).abs() < 1e-5 && (a[1] + b[1]).abs() < 1e-5 && (a[2] + b[2]).abs() < 1e-5
+        );
     }
 
     #[test]
     fn the_scale_is_applied_to_every_coordinate() {
         let soup = cube();
-        let options = StlOptions { scale: 1.0 / 25.4, ..StlOptions::default() };
+        let options = StlOptions {
+            scale: 1.0 / 25.4,
+            ..StlOptions::default()
+        };
         let bytes = write_binary_stl(&soup, options).expect("cube exports");
         let (_, vertices) = triangles_of(&bytes)[0];
         let expected = (-0.5f64 / 25.4) as f32;
-        assert!((vertices[0][0] - expected).abs() < 1e-6, "{:?} vs {expected}", vertices[0]);
+        assert!(
+            (vertices[0][0] - expected).abs() < 1e-6,
+            "{:?} vs {expected}",
+            vertices[0]
+        );
     }
 
     #[test]
@@ -310,8 +373,14 @@ mod tests {
         assert_eq!(open_edges(&soup), 4, "removing one face opens four edges");
         let error = write_binary_stl(&soup, StlOptions::default()).expect_err("must refuse");
         assert_eq!(error, StlError::OpenSurface { open_edges: 4 });
-        let bytes = write_binary_stl(&soup, StlOptions { strict: false, ..StlOptions::default() })
-            .expect("lenient export writes it");
+        let bytes = write_binary_stl(
+            &soup,
+            StlOptions {
+                strict: false,
+                ..StlOptions::default()
+            },
+        )
+        .expect("lenient export writes it");
         assert_eq!(bytes.len(), 84 + 10 * 50);
     }
 
@@ -321,8 +390,14 @@ mod tests {
             vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]],
             vec![[0, 1, 2]],
         );
-        let error = write_binary_stl(&soup, StlOptions { strict: false, ..StlOptions::default() })
-            .expect_err("no area");
+        let error = write_binary_stl(
+            &soup,
+            StlOptions {
+                strict: false,
+                ..StlOptions::default()
+            },
+        )
+        .expect_err("no area");
         assert_eq!(error, StlError::Degenerate { triangle: 0 });
     }
 
@@ -331,7 +406,10 @@ mod tests {
         let soup = TriangleSoup::new(vec![[0.0, 0.0, 0.0]], vec![[0, 1, 2]]);
         assert_eq!(
             write_binary_stl(&soup, StlOptions::default()),
-            Err(StlError::IndexOutOfRange { triangle: 0, index: 1 })
+            Err(StlError::IndexOutOfRange {
+                triangle: 0,
+                index: 1
+            })
         );
         let not_finite = TriangleSoup::new(
             vec![[f32::NAN, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
@@ -342,11 +420,20 @@ mod tests {
             Err(StlError::NonFinite { vertex: 0 })
         );
         assert_eq!(
-            write_binary_stl(&cube(), StlOptions { scale: 0.0, ..StlOptions::default() }),
+            write_binary_stl(
+                &cube(),
+                StlOptions {
+                    scale: 0.0,
+                    ..StlOptions::default()
+                }
+            ),
             Err(StlError::BadScale)
         );
         assert_eq!(
-            write_binary_stl(&TriangleSoup::new(vec![[0.0; 3]], Vec::new()), StlOptions::default()),
+            write_binary_stl(
+                &TriangleSoup::new(vec![[0.0; 3]], Vec::new()),
+                StlOptions::default()
+            ),
             Err(StlError::Empty)
         );
     }

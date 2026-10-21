@@ -1,0 +1,11 @@
+
+running 3 tests
+test fixture_design_pair_is_present ... ok
+test a1_to_a4_selecting_the_layer_selects_exactly_its_editable_objects ... ok
+test b1_to_b5_hidden_and_locked_objects_respect_the_selectable_policy ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.54s
+     Running tests\layer_select_by_layer.rs (L:\om9-target\debug\deps\layer_select_by_layer-67dd7b702b04a529.exe)

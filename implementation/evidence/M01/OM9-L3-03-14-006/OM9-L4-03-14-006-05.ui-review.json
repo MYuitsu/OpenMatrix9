@@ -1,0 +1,84 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-03-14-006-05",
+  "l3_id": "OM9-L3-03-14-006",
+  "title": "Superselect By Jewelry Object Type",
+  "oracle": {
+    "positive": "Select Gems filter matches jewelry-semantic GemRef, bad/open filter uses typed kernel verdict",
+    "negative": "Do not classify ordinary mesh as valid gemstone by color/name alone"
+  },
+  "manual_test_gate": "M01-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) at the running application",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: none behavioural (the module is new); stated as API-level, with the plan's trap encoded in H1/H2.",
+    "GREEN: cargo test -p om9-app --test superselect_jewelry -> test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "cargo test -p om9-core -p om9-app -j 2: every group passes except the pre-existing, unrelated chrome_actions::icons_scale_with_the_screen_size.",
+    "cargo fmt --check: exit 0; cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0",
+    "REAL UI PROOF: the Tools -> Super Select: Gems item works end to end. The click test opens the Tools menu, clicks the item, and asserts status 'Super Select: Gems: 1 selected' with exactly the semantic gem selected (the same-named plain 'Line' stays unselected). The earlier failures were the TEST FIXTURE, not the feature: the gem mesh carried one normal for three vertices, so MatrixApp::new refused the document (the panic pointed at construction, not at the menu). With a valid mesh the item is delivered through the popup. tests/super_select_ui.rs -> 1 passed.",
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
+  ],
+  "code_change": [
+    "crates/om9-app/src/superselect.rs (new): SelectFilter, SkipReason, SuperselectOutcome, classify() and Controller::superselect/apply_superselect.",
+    "crates/om9-app/src/ui/chrome.rs: Tools menu carries three Super Select items; the menu bar records its buttons and items in MatrixApp::menu_rects (ui.rs), cleared each frame, so a future test can address them."
+  ],
+  "artefacts": [
+    "OM9-L4-03-14-006-02.red.log",
+    "OM9-L4-03-14-006-02.green.log",
+    "OM9-L4-03-14-006-03.diffstat.txt",
+    "OM9-L4-03-14-006-03.target-test.log",
+    "OM9-L4-03-14-006-05.regression.log",
+    "tests/super_select_ui.rs"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The filters are machine-proven; whether they are reachable from the menu/panel is the next UI slice (the manual's Super Select tool button).",
+    "items": [
+      {
+        "id": "U1",
+        "step": "Open Tools → Super Select: Gems on a model that has one semantic gem and one mesh named 'Gem'.",
+        "machine_proven": "tests/super_select_ui.rs: the menu item selects the gem and nothing else (real frame + click).",
+        "human_must_verify": "The lookalike mesh is not selected, even though its name says Gem; the status line reads 'Super Select: Gems: 1 selected'.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "U2",
+        "step": "Run the bad-geometry filter on a clean model.",
+        "machine_proven": "G3: it matches only geometry the model's own validate rejects.",
+        "human_must_verify": "A clean model selects nothing and the status says why.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "U3",
+        "step": "Run the open-surface filter.",
+        "machine_proven": "G4: every object is skipped with NoOpenVerdict — the verdict is not invented.",
+        "human_must_verify": "You agree that showing 'no verdict yet' is better than guessing, and confirm when the kernel verdict lands (it is a later item).",
+        "reviewer_decision": null
+      },
+      {
+        "id": "U4",
+        "step": "Run the duplicate filter on repeated labels.",
+        "machine_proven": "G5: the repeated labels match and the first occurrence keeps its claim.",
+        "human_must_verify": "The duplicates you expect are the ones selected.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "U5",
+        "step": "Undo after a SuperSelect gesture.",
+        "machine_proven": "H5: the gesture writes no transaction.",
+        "human_must_verify": "Undo has nothing to undo from selecting.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_l2_03_14_l3_006_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

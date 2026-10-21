@@ -1096,6 +1096,8 @@ fn declared(u: &PreparedNativeUnits, unit: Unit) -> bool {
 }
 fn geometry_class(g: &Geometry) -> Result<(&'static str, &'static str)> {
     let pair = match g {
+        Geometry::Hatch(_) => return Err(Error::Unsupported("hatch wire class")),
+        Geometry::Light(_) => return Err(Error::Unsupported("light wire class")),
         Geometry::Point(_) => ("ON_Point", "c3101a1d-f157-11d3-bfe7-0010830122f0"),
         Geometry::Curve(Curve::Line { .. }) => {
             ("ON_LineCurve", "4ed7d4db-e947-11d3-bfe5-0010830122f0")
@@ -1929,6 +1931,12 @@ fn captured_hull(
                 Geometry::Cloud(c) => {
                     points_hull(&c.points, t, &|| w.inputs().check_cancel(cancel))
                 }
+                Geometry::Hatch(h) => {
+                    points_hull(&h.display.vertices, t, &|| w.inputs().check_cancel(cancel))
+                }
+                Geometry::Light(light) => {
+                    points_hull(&[light.display], t, &|| w.inputs().check_cancel(cancel))
+                }
             }
         }
         HostValue::Layer(_) => Err(invalid()),
@@ -1960,3 +1968,4 @@ mod strict_metadata_tests {
         }
     }
 }
+

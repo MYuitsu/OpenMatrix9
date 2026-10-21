@@ -226,6 +226,20 @@
       "implementation/evidence/M02/2026-10-19-gpu-only-native.json"
     ],
     "software_fallback": false,
-    "human_approval": null
+    "human_approval": null,
+    "navigation_checkpoint_2026_10_21": {
+      "date": "2026-10-21",
+      "status": "implemented_automated_checks_passed_performance_acceptance_open",
+      "plan": "implementation/design/M01/VIEWPORT-NAVIGATION-IMPLEMENTATION-PLAN.md",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-21-navigation-implementation.md"
+      ],
+      "ledger_key": "viewport-navigation-runtime-2026-10-21",
+      "navigation_owner": "OM9-L2-03-02",
+      "render_owner": "OM9-L2-01-06",
+      "manual_gate_promoted": false,
+      "preview_mesh_policy": "LOD0 for all occurrences; resolution/MSAA adapt; certified decimation not integrated",
+      "presentation_acceptance": "NOT_PROVED"
+    }
   }
 }

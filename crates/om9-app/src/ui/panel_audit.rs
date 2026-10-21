@@ -469,6 +469,12 @@ impl MatrixApp {
                 self.panel_audit_float_drop(ctx, raw, step);
                 return;
             }
+            "object-info" => {
+                self.panel_audit_object_info(ctx, step);
+                // Without this the default drag script would run as well and
+                // record its own entry under the same name (round 20).
+                return;
+            }
             "readback-recover" => {
                 self.panel_audit_readback(ctx, raw, step);
                 return;
@@ -604,7 +610,14 @@ impl MatrixApp {
             // scenario that then reports "the click did nothing" would be lying
             // about the interface. Focusing first makes the two real clicks land.
             0 => {
-                if let Some(status) = self.status_rect {
+                // Do not burn the step while the status row is not drawn yet: the
+                // focus click must actually happen, or the first real click is lost
+                // intermittently (round 21).
+                let Some(status) = self.status_rect else {
+                    ctx.request_repaint();
+                    return;
+                };
+                {
                     let pos = status.center();
                     raw.events.push(egui::Event::PointerMoved(pos));
                     raw.events.push(egui::Event::PointerButton {
@@ -744,6 +757,56 @@ impl MatrixApp {
         ctx.request_repaint();
     }
 
+    /// The Object Info scenario (OM9-L3-03-14-005): draw one line, select it, and
+    /// record the label the overlay paints.
+    fn panel_audit_object_info(&mut self, ctx: &egui::Context, step: usize) {
+        if step == 0 {
+            let _ = self
+                .controller
+                .dispatch(crate::session::LINE, crate::session::InvocationOrigin::Cmd);
+            let _ = self.controller.accept_world_point([0., 0., 0.]);
+            let _ = self.controller.accept_world_point([10., 4., 0.]);
+            let ids: Vec<_> = self
+                .controller
+                .document()
+                .entities
+                .keys()
+                .copied()
+                .collect();
+            if let Some(id) = ids.first() {
+                let _ = self.controller.select_objects(&[*id]);
+            }
+        }
+        if step == 3 {
+            let limits = *self.controller.coordinator().limits();
+            let extra = self
+                .controller
+                .document()
+                .entities
+                .keys()
+                .copied()
+                .next()
+                .and_then(|id| self.controller.document().object_info(id, &limits).ok())
+                .map(|info| {
+                    serde_json::json!({
+                        "object_info_kind": info.kind,
+                        "object_info_label": om9_core::object_info::label_text(&info),
+                        "selected": self.controller.selected().len(),
+                    })
+                })
+                .unwrap_or_else(|| serde_json::json!({ "object_info_kind": null }));
+            self.record_panel_checks("object-info", extra);
+            self.request_panel_shot(ctx);
+        }
+        self.audit.as_mut().expect("audit").step += 1;
+        // Keep stepping until the shot is requested: once it is, the input hook
+        // repaints for us. Without this the window can go idle before step 3 and
+        // the receipt is never written (the intermittent timeout, round 21).
+        if step < 4 {
+            ctx.request_repaint();
+        }
+    }
+
     /// The readback-recovery scenario (M5): float DISPLAY, then let the real
     /// window report a rectangle that no longer fits, so the model pulls it back
     /// inside and says so.
@@ -785,12 +848,6 @@ impl MatrixApp {
                 });
             }
         };
-        let float_now = || {
-            self.dock
-                .section(SectionId::Display)
-                .float
-                .map(|rect| [rect.x, rect.y, rect.width, rect.height])
-        };
         match step {
             0 | 1 => {
                 if let Some(bar) = bar {
@@ -809,10 +866,41 @@ impl MatrixApp {
             2 => event(raw, target, None),
             3 => event(raw, target, Some(false)),
             4 => {
-                self.audit.as_mut().expect("audit").panel_drag_observed = Some(serde_json::json!({
-                    "float_after_drop": float_now(),
-                    "work_area": self.work_area.map(|work| [work.x, work.y, work.width, work.height]),
-                }));
+                // Diagnostics for the M5 investigation: what this step really sees,
+                // then a forced readback of a rectangle below the minimum, then the
+                // state right after it (not a frame later).
+                let before = self
+                    .dock
+                    .section(SectionId::Display)
+                    .float
+                    .map(|rect| [rect.x, rect.y, rect.width, rect.height]);
+                let work = self.work_area;
+                let mut diag = serde_json::json!({
+                    "float_after_drop": before,
+                    "work_area": work.map(|w| [w.x, w.y, w.width, w.height]),
+                    "call": "skipped",
+                });
+                if let Some(work) = work {
+                    self.readback_float(
+                        SectionId::Display,
+                        crate::dock_layout::FloatRect {
+                            x: work.x + 20.,
+                            y: work.y + 20.,
+                            width: 300.,
+                            height: 40.,
+                        },
+                    );
+                    diag["call"] = serde_json::json!("called");
+                }
+                diag["message_after_force"] = serde_json::json!(self.status.message());
+                diag["float_after_force"] =
+                    serde_json::json!(self.dock.section(SectionId::Display).float.map(|rect| [
+                        rect.x,
+                        rect.y,
+                        rect.width,
+                        rect.height
+                    ]));
+                self.audit.as_mut().expect("audit").panel_drag_observed = Some(diag);
             }
             5 => {
                 // The window keeps its size here: the audit window size is fixed
@@ -825,7 +913,13 @@ impl MatrixApp {
                     .and_then(|audit| audit.panel_drag_observed.clone())
                     .unwrap_or(serde_json::Value::Null);
                 let mut extra = extra;
-                extra["float_after_readback"] = serde_json::json!(float_now());
+                extra["float_after_readback"] =
+                    serde_json::json!(self.dock.section(SectionId::Display).float.map(|rect| [
+                        rect.x,
+                        rect.y,
+                        rect.width,
+                        rect.height
+                    ]));
                 extra["notes"] =
                     serde_json::json!(self.last_panel_op.as_ref().and_then(|record| {
                         record.report.as_ref().map(|report| report.notes.clone())

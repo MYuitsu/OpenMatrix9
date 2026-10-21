@@ -1,0 +1,31 @@
+task: OM9-L4-03-14-005-03 (implementation) Matrix Object Info Overlay
+
+== RED ==
+API-level and stated as such: no ObjectInfo model existed, so no earlier behaviour could fail. The fixture J1 encodes the negative oracle ('an unavailable measurement is never a zero size') and I3/I4 hold it for a mesh and a native B-rep without a payload.
+
+== GREEN ==
+
+running 2 tests
+test j1_to_j4_an_unavailable_measurement_is_never_a_zero ... ok
+test i1_to_i5_the_info_is_sourced_from_the_model ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+   Compiling om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+   Compiling om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.04s
+     Running tests\object_info_overlay.rs (L:\om9-target\debug\deps\object_info_overlay-d882034764d99f79.exe)
+
+== cargo fmt --check: exit 0 ==
+== cargo clippy: exit 0 ==
+om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.12s
+

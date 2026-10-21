@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Dock background presentation only: left/right column surfaces, section bars and floating menu content.",
+  "before": "Dark blue/black dock backgrounds #0A0E13 and #10171F.",
+  "after": {
+    "dock_background": "#01391C",
+    "section_background": "#005126",
+    "edges_hover": "#236B48"
+  },
+  "reference": "Same user-selected green sampled for Command; see 2026-10-20-command-green-gold.json. Dock base shares Command background constant.",
+  "preserved": [
+    "Group text colour families and authored SVG colours",
+    "Layer swatches and their semantic colours",
+    "Document, viewport, command, docking and layout behavior"
+  ],
+  "sources": [
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "sha256": "46bd8eeaea920de00432480db2b3c32ad6ec5c81fab377e2a6cef44fb4d33653"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "sha256": "e8b7d2c3f0022216133732ce3001dc260596dc6ca805803a958f66812e27510e"
+    }
+  ],
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-green-docks.exe",
+    "sha256": "65c3a653f187c93604a0904ec52318a9ebc77859789b3422882ef05b3c6fe9a5"
+  },
+  "build": {
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-green-docks.exe",
+    "result": "PASS; expected custom-output path warnings"
+  },
+  "tests": [
+    {
+      "suite": "shell_docking",
+      "passed": 10,
+      "execution": "Fresh om9-green-dock-tests-4da189f538e9f690.exe --test-threads=1"
+    },
+    {
+      "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib chrome_tests -- --test-threads=1",
+      "passed": 4
+    }
+  ],
+  "runtime": {
+    "command": "python tools/validate_m01_l3_003_panels.py --binary L:/om9-target/debug/om9-green-docks.exe --output build/standalone-validation/ui-artifacts/2026-10-20-green-docks --only escape,float,dock-right",
+    "result": "PASS: all three native GPU scenarios; each produces a 1600x1000 screenshot.",
+    "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-green-docks/panels-summary.json",
+    "screenshots": [
+      "build/standalone-validation/ui-artifacts/2026-10-20-green-docks/escape/workspace.png",
+      "build/standalone-validation/ui-artifacts/2026-10-20-green-docks/float/workspace.png",
+      "build/standalone-validation/ui-artifacts/2026-10-20-green-docks/dock-right/workspace.png"
+    ]
+  },
+  "visual_review": "All three actual screenshots inspected. Left/right column backgrounds are green, floating body is green, group labels/icons and layer swatches remain distinct. The floating window title retains the normal framework header treatment.",
+  "public_source_audit": {
+    "status": "FAIL",
+    "existing_tree_findings": 11740,
+    "examples": [
+      "Private/binary artifact: brep-fixture.obj",
+      "Private/binary artifact: native_exchange.obj",
+      "Unreviewed raster artifact: om9-window.png"
+    ],
+    "note": "Existing private/reference/binary/raster artifacts remain; no new reference assets added."
+  },
+  "limitations": [
+    "Formal manual M01-UI approval remains pending.",
+    "Source files also contain concurrent unrelated menu/command work; this evidence covers dock appearance and the executed regression scenarios only.",
+    "Visual styling does not complete any new command capability; no reusable skill business rules changed."
+  ]
+}

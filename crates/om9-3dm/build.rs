@@ -5,7 +5,10 @@ use std::{env, path::PathBuf};
 fn main() {
     println!("cargo::rerun-if-changed=src/bridge.cpp");
     let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("manifest dir"));
-    let root = manifest.parent().and_then(|path| path.parent()).expect("workspace root");
+    let root = manifest
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("workspace root");
     let include = env::var("OM9_OPENNURBS_INCLUDE")
         .map(PathBuf::from)
         .unwrap_or_else(|_| root.join("build/standalone-deps/opennurbs"));

@@ -71,8 +71,9 @@ DOCUMENTED_LEFT = [
     "info-settings", "layers", "projects", "builder-slot",
 ]
 RIGHT_DOCK_FIXTURE = "snaps"
-LEFT_RAIL_DEFAULT = 300.0
-ICON_BASE_EDGE, ICON_MIN_EDGE, ICON_MAX_EDGE = 22.0, 18.0, 34.0
+LEFT_RAIL_DEFAULT = 360.0
+ICON_REFERENCE_RAIL_WIDTH = 300.0
+ICON_BASE_EDGE, ICON_MIN_EDGE, ICON_MAX_EDGE = 27.5, 23.0, 42.0
 OUTER_TOLERANCE = 1.0
 REQUIRED_CHECKS = [
     "audit CMD focus ready",
@@ -112,7 +113,7 @@ def effective_min(monitor_points: list[float] | None) -> list[float]:
 
 def rail_icon_edge(outer_width: float) -> float:
     """Mirror of `dock_layout::rail_icon_edge` (clamped, rounded half away from zero)."""
-    raw = ICON_BASE_EDGE * outer_width / LEFT_RAIL_DEFAULT
+    raw = ICON_BASE_EDGE * outer_width / ICON_REFERENCE_RAIL_WIDTH
     return float(int(min(max(raw, ICON_MIN_EDGE), ICON_MAX_EDGE) + 0.5))
 
 
@@ -221,6 +222,12 @@ def check_layers(dock: dict, regions: dict) -> list[str]:
     return problems
 
 
+def displayed_icon_edge(outer: float, width: float, height: float) -> float:
+    """Apply the existing screen-size scale after the rail-width scale."""
+    scale = max(0.85, min(1.2, width / 1280.0, height / 900.0))
+    return float(int(max(ICON_MIN_EDGE, min(ICON_MAX_EDGE, rail_icon_edge(outer) * scale)) + 0.5))
+
+
 def check_dock(case: dict, receipt: dict, regions: dict) -> list[str]:
     """Layout-mode, left-column and rail-width invariants of `receipt['dock']`."""
     problems: list[str] = []
@@ -263,7 +270,8 @@ def check_dock(case: dict, receipt: dict, regions: dict) -> list[str]:
     outer = dock.get("left_rail_outer_px")
     if not isinstance(outer, (int, float)) or abs(outer - case["expect_outer"]) > OUTER_TOLERANCE:
         problems.append(f"left_rail_outer_px is {outer!r}, expected {case['expect_outer']} +-{OUTER_TOLERANCE}")
-    expected_edge = rail_icon_edge(case["expect_outer"])
+    zoom = case["zoom"] or 1.0
+    expected_edge = displayed_icon_edge(case["expect_outer"], case["window"][0] / zoom, case["window"][1] / zoom)
     if dock.get("left_icon_edge_px") != expected_edge:
         problems.append(f"left_icon_edge_px is {dock.get('left_icon_edge_px')!r}, expected {expected_edge}")
     if dock.get("left_icon_rects_in_sidebar") is not True:
@@ -547,7 +555,7 @@ def good_receipt(case: dict) -> dict:
             "right_dock_visible": case["expect_right_dock"],
             "left_rail_outer_px": outer,
             "left_rail_inner_px": outer - 5.0,
-            "left_icon_edge_px": rail_icon_edge(outer),
+            "left_icon_edge_px": displayed_icon_edge(outer, width, height),
             "left_icon_count": 51,
             "left_icon_rects_in_sidebar": True,
             "sidebar_scroll_offset": 0.0,
@@ -707,7 +715,7 @@ def main() -> int:
     summary = {
         "schema": "om9.m01.l3-002.ui-matrix.v2",
         "label": LABEL,
-        "binary": {"path": binary.relative_to(ROOT).as_posix(), "sha256": sha256(binary)},
+        "binary": {"path": binary.relative_to(ROOT).as_posix() if binary.is_relative_to(ROOT) else binary.as_posix(), "sha256": sha256(binary)},
         "runner": {"path": Path(__file__).resolve().relative_to(ROOT).as_posix(), "sha256": sha256(Path(__file__).resolve())},
         "rust_first_exception": "Python launcher only: needs a real GPU window, cannot run inside cargo test, holds no business logic.",
         "modes": MODE_LABELS,

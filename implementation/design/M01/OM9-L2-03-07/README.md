@@ -21,8 +21,9 @@ The visual language is modernized without changing hit targets or layout geometr
   yellow-green Art, red Builder, indigo Tools, blue Gems, magenta Setting, orange Cutters, teal
   Render. Each is a raised dark card showing only the category name in a brightened reference hue (no
   leading square/dot), with a soft drop shadow, a lit top edge and a dark text shadow; the selected
-  category uses a dark-green fill (`#123A2A`) and a matching accent border. Categories flow on one horizontal row
-  and wrap naturally when they reach the rail edge; the documented category order is preserved.
+  category uses a dark-green fill (`#123A2A`) and a matching accent border. At the 300 px dock the
+  twelve categories use six columns and two rows (five columns below 280 px); the documented
+  category order is preserved.
 - Toolbar row uses a soft light gradient and keeps the existing 67-point allocation.
 - Icon tooltips keep the command name and append an optional registered right-click command. If no
   alternative is registered, the secondary click is inert and never replays the primary command.
@@ -68,7 +69,7 @@ a two-button page column (drawn triangles, not font glyphs) steps the rows witho
 - `startup_contract` — **3**: failed start leaves layout untouched.
 - `om9-app --lib` — **106 passed**, including `menu_catalog` full-list and feature-mapping tests.
 - Automated UI audit `om9 --ui-audit` at 1280x900 — exit 0, 21 passes, screenshot
-  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `c791228a…`). The screenshot shows the modern
+  `build/ui-audit-l2-03-07/workspace.png` (SHA-256 `5c877978…`). The screenshot shows the modern
   near-black rail, reference-coloured category cards, rounded icon tiles and the unchanged four-viewport
   placement.
   This is automated evidence, not human sign-off.

@@ -1,0 +1,42 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-006",
+  "l4": "OM9-L4-03-14-006-02",
+  "case": "superselect-by-jewelry-object-type-negative",
+  "negative_oracle": "Do not classify ordinary mesh as valid gemstone by color/name alone",
+  "cases": [
+    {
+      "id": "H1-a-name-is-not-a-gem",
+      "expect": {
+        "matched": 0,
+        "skip": "NoGemExtension"
+      }
+    },
+    {
+      "id": "H2-a-colour-is-not-a-gem",
+      "expect": {
+        "matched": 0,
+        "skip": "NoGemExtension"
+      }
+    },
+    {
+      "id": "H3-a-bare-word-slot-is-refused-by-the-model",
+      "slot": "Gem",
+      "expect": {
+        "valid_slot": false
+      }
+    },
+    {
+      "id": "H4-a-gem-extension-without-a-payload-is-not-a-gem",
+      "expect": {
+        "matched": 0
+      }
+    },
+    {
+      "id": "H5-superselect-does-not-write-the-document",
+      "expect": {
+        "journal_unchanged": true
+      }
+    }
+  ]
+}

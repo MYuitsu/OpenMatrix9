@@ -48,7 +48,11 @@ fn frames(app: &mut MatrixApp, context: &egui::Context, count: usize) {
 
 fn events(app: &mut MatrixApp, context: &egui::Context, events: Vec<Event>) {
     let mut output = context.run_ui(
-        egui::RawInput { screen_rect: Some(screen_rect()), events, ..Default::default() },
+        egui::RawInput {
+            screen_rect: Some(screen_rect()),
+            events,
+            ..Default::default()
+        },
         |ui| app.show(ui),
     );
     output.textures_delta.clear();
@@ -65,7 +69,10 @@ fn screen_of(app: &MatrixApp, point: [f64; 3]) -> Pos2 {
         size: [rect.width() as f64, rect.height() as f64],
     };
     let camera = &app.controller.workspace.views[&ViewId::Perspective].camera;
-    let projected = camera.project(point, viewport).expect("project").expect("front");
+    let projected = camera
+        .project(point, viewport)
+        .expect("project")
+        .expect("front");
     Pos2::new(projected.screen[0] as f32, projected.screen[1] as f32)
 }
 
@@ -92,7 +99,10 @@ fn the_preview_moves_the_selected_objects_without_touching_the_document() {
     controller
         .preview_gumball(Transform::translation([4.0, 0.0, 0.0]))
         .expect("preview");
-    assert!(controller.preview_revision() > before, "the revision tells viewports to repaint");
+    assert!(
+        controller.preview_revision() > before,
+        "the revision tells viewports to repaint"
+    );
     let displayed = controller
         .scene()
         .expect("scene")
@@ -102,8 +112,15 @@ fn the_preview_moves_the_selected_objects_without_touching_the_document() {
         .expect("object")
         .display_transform()
         .expect("display transform");
-    assert!((displayed.0[0][3] - 4.0).abs() < 1e-9, "the drawn transform moved: {displayed:?}");
-    assert_eq!(controller.document().revision, document_revision, "the document is untouched");
+    assert!(
+        (displayed.0[0][3] - 4.0).abs() < 1e-9,
+        "the drawn transform moved: {displayed:?}"
+    );
+    assert_eq!(
+        controller.document().revision,
+        document_revision,
+        "the document is untouched"
+    );
     assert!(
         (controller.document().entities[&id].placement.0[0][3]).abs() < 1e-9,
         "the stored placement is untouched"
@@ -118,7 +135,10 @@ fn the_preview_moves_the_selected_objects_without_touching_the_document() {
         .expect("object")
         .display_transform()
         .expect("display transform");
-    assert!(displayed.0[0][3].abs() < 1e-9, "clearing restores the drawn transform");
+    assert!(
+        displayed.0[0][3].abs() < 1e-9,
+        "clearing restores the drawn transform"
+    );
 }
 
 #[test]
@@ -178,7 +198,11 @@ fn dragging_a_handle_updates_the_preview_then_commits_on_release() {
     );
     for step in 1..=4 {
         let t = step as f32 / 4.0;
-        events(&mut app, &context, vec![Event::PointerMoved(start + (end - start) * t)]);
+        events(
+            &mut app,
+            &context,
+            vec![Event::PointerMoved(start + (end - start) * t)],
+        );
         frames(&mut app, &context, 1);
     }
     assert!(
@@ -213,7 +237,10 @@ fn dragging_a_handle_updates_the_preview_then_commits_on_release() {
     );
     let committed = app.controller.document().entities[&id].placement.0[0][3];
     let drawn = displayed(&app, id).0[0][3];
-    assert!((committed - drawn).abs() < 1e-6, "the preview and the committed transform agree");
+    assert!(
+        (committed - drawn).abs() < 1e-6,
+        "the preview and the committed transform agree"
+    );
 }
 
 #[test]
@@ -234,7 +261,10 @@ fn the_drag_leaves_the_placement_untouched_so_the_ghost_can_stay_at_the_old_spot
         .expect("object");
     // The ghost is drawn from `transform`; it must still describe the starting position while the preview
     // moves the live object.
-    assert_eq!(object.transform, placement, "the placement stays where the drag started");
+    assert_eq!(
+        object.transform, placement,
+        "the placement stays where the drag started"
+    );
     assert_ne!(
         object.display_transform().expect("display").0,
         placement.0,

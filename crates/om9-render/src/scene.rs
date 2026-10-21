@@ -13,7 +13,6 @@
 
 use crate::{Camera, MeshData, RenderError};
 
-const UNIFORM_STRIDE: u64 = 256;
 const SORT_THRESHOLD: usize = 256;
 
 /// One object in the batch.
@@ -54,6 +53,7 @@ struct StaticRange {
 
 /// One GPU buffer pair. wgpu caps a single buffer size, so a large scene is split into several chunks;
 /// every object remembers which chunk owns its range.
+#[derive(Clone)]
 struct Chunk {
     vertices: wgpu::Buffer,
     indices: wgpu::Buffer,
@@ -63,20 +63,47 @@ struct Chunk {
     index_capacity: u64,
 }
 
+/// Chunk capacities. A scene used to open a new chunk at the device's maximum buffer size (about 2 GB),
+/// so four viewports could reserve 8 GB of VRAM for a few hundred megabytes of geometry. Grow in classes
+/// instead and only ever allocate the smallest class that holds the next mesh.
+const CHUNK_CLASSES: [u64; 5] = [2 << 20, 8 << 20, 32 << 20, 128 << 20, 256 << 20];
+
+fn chunk_capacity_for(needed: u64, device_max: u64) -> u64 {
+    let needed = needed.max(2 << 20);
+    CHUNK_CLASSES
+        .iter()
+        .copied()
+        .find(|class| *class >= needed)
+        .unwrap_or_else(|| needed.next_power_of_two().min(device_max.max(needed)))
+        .max(needed)
+        .min(device_max.max(needed))
+}
+
 fn new_chunk(device: &wgpu::Device, capacity: u64) -> Chunk {
     let vertices = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("scene vertices"),
         size: capacity,
-        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,
+        usage: wgpu::BufferUsages::VERTEX
+            | wgpu::BufferUsages::COPY_DST
+            | wgpu::BufferUsages::COPY_SRC,
         mapped_at_creation: false,
     });
     let indices = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("scene indices"),
         size: capacity,
-        usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,
+        usage: wgpu::BufferUsages::INDEX
+            | wgpu::BufferUsages::COPY_DST
+            | wgpu::BufferUsages::COPY_SRC,
         mapped_at_creation: false,
     });
-    Chunk { vertices, indices, vertex_bytes: 0, index_bytes: 0, vertex_capacity: capacity, index_capacity: capacity }
+    Chunk {
+        vertices,
+        indices,
+        vertex_bytes: 0,
+        index_bytes: 0,
+        vertex_capacity: capacity,
+        index_capacity: capacity,
+    }
 }
 
 /// The batch: arena, objects and the pipelines that draw them.
@@ -86,12 +113,9 @@ pub struct SceneBatch {
     pipeline: wgpu::RenderPipeline,
     overlay_pipeline: wgpu::RenderPipeline,
     bind_layout: wgpu::BindGroupLayout,
-    uniforms: wgpu::Buffer,
-    uniform_capacity: usize,
-    bind_group: wgpu::BindGroup,
     chunks: Vec<Chunk>,
     max_buffer_size: u64,
-    objects: Vec<SceneObject>,
+    objects: std::sync::Arc<Vec<SceneObject>>,
     static_ranges: Vec<StaticRange>,
     /// Colour of every merged static range: the merge keeps one draw, so it keeps one tint too.
     static_tint: [f32; 4],
@@ -99,6 +123,17 @@ pub struct SceneBatch {
     culling: bool,
     min_pixel_radius: f32,
     last_stats: FrameStats,
+    /// Vertex/index bytes appended since the last flush. One write per chunk instead of two per object,
+    /// which is what made a 42,000-object scene spend most of its open time in queue submissions.
+    pending_vertices: Vec<PendingWrite>,
+    pending_indices: Vec<PendingWrite>,
+}
+
+struct PendingWrite {
+    chunk: usize,
+    offset: u64,
+    bytes: Vec<u8>,
+    consumed: usize,
 }
 
 impl SceneBatch {
@@ -120,15 +155,19 @@ impl SceneBatch {
                 struct VertexOut {
                     @builtin(position) clip: vec4<f32>,
                     @location(0) world: vec3<f32>,
+                    @location(1) tint: vec4<f32>,
                 };
 
                 @vertex
-                fn vs_main(@location(0) position: vec3<f32>) -> VertexOut {
+                fn vs_main(@location(0) position: vec3<f32>,
+                    @location(1) m0:vec4<f32>, @location(2) m1:vec4<f32>,
+                    @location(3) m2:vec4<f32>, @location(4) m3:vec4<f32>,
+                    @location(5) tint:vec4<f32>) -> VertexOut {
                     var out: VertexOut;
-                    out.clip = object.mvp * vec4<f32>(position, 1.0);
-                    // The object-space position is enough for a face normal: the model matrix is a rigid
-                    // placement per object, so the lit result is identical and no extra buffer is needed.
-                    out.world = position;
+                    let world=mat4x4<f32>(m0,m1,m2,m3)*vec4<f32>(position,1.0);
+                    out.clip=object.mvp*world;
+                    out.world=world.xyz;
+                    out.tint=tint;
                     return out;
                 }
 
@@ -137,7 +176,7 @@ impl SceneBatch {
                     let normal = normalize(cross(dpdx(input.world), dpdy(input.world)));
                     let light = normalize(vec3<f32>(0.4, -0.7, 0.6));
                     let lambert = clamp(abs(dot(normal, light)), 0.0, 1.0);
-                    return vec4<f32>(object.tint.rgb * (0.3 + 0.7 * lambert), object.tint.a);
+                    return vec4<f32>(input.tint.rgb * (0.3 + 0.7 * lambert), input.tint.a);
                 }
                 "#
                 .into(),
@@ -161,93 +200,84 @@ impl SceneBatch {
             bind_group_layouts: &[Some(&bind_layout)],
             immediate_size: 0,
         });
-        let make_pipeline = |overlay:bool| device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("scene batch"),
-            layout: Some(&layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: Some("vs_main"),
-                compilation_options: Default::default(),
-                buffers: &[Some(wgpu::VertexBufferLayout {
-                    array_stride: 12,
-                    step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: &[wgpu::VertexAttribute {
-                        format: wgpu::VertexFormat::Float32x3,
-                        offset: 0,
-                        shader_location: 0,
-                    }],
-                })],
-            },
-            primitive: wgpu::PrimitiveState { cull_mode: None, ..Default::default() },
-            depth_stencil: Some(wgpu::DepthStencilState {
-                format: wgpu::TextureFormat::Depth32Float,
-                depth_write_enabled: Some(!overlay),
-                depth_compare: Some(if overlay {wgpu::CompareFunction::LessEqual} else {wgpu::CompareFunction::Less}),
-                stencil: wgpu::StencilState::default(),
-                bias: wgpu::DepthBiasState::default(),
-            }),
-            multisample: wgpu::MultisampleState {
-                count: samples,
-                mask: !0,
-                alpha_to_coverage_enabled: false,
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: Some("fs_main"),
-                compilation_options: Default::default(),
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: wgpu::TextureFormat::Rgba8Unorm,
-                    // Alpha blending lets a selection highlight be drawn over the object it belongs to;
-                    // opaque objects have alpha 1 and are unaffected.
-                    blend: Some(wgpu::BlendState::ALPHA_BLENDING),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-            }),
-            multiview_mask: None,
-            cache: None,
-        });
-        let pipeline=make_pipeline(false);
-        let overlay_pipeline=make_pipeline(true);
-        let uniform_capacity = 64;
-        let uniforms = device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("scene uniforms"),
-            size: UNIFORM_STRIDE * uniform_capacity as u64,
-            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("scene uniforms"),
-            layout: &bind_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                // A dynamic offset shifts within the buffer, so the binding itself covers one slot.
-                resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                    buffer: &uniforms,
-                    offset: 0,
-                    size: wgpu::BufferSize::new(64 + 16),
+        let make_pipeline = |overlay: bool| {
+            device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("scene batch"),
+                layout: Some(&layout),
+                vertex: wgpu::VertexState {
+                    module: &shader,
+                    entry_point: Some("vs_main"),
+                    compilation_options: Default::default(),
+                    buffers: &[Some(wgpu::VertexBufferLayout {
+                        array_stride: 12,
+                        step_mode: wgpu::VertexStepMode::Vertex,
+                        attributes: &[wgpu::VertexAttribute {
+                            format: wgpu::VertexFormat::Float32x3,
+                            offset: 0,
+                            shader_location: 0,
+                        }],
+                    }), Some(wgpu::VertexBufferLayout {
+                        array_stride:80, step_mode:wgpu::VertexStepMode::Instance,
+                        attributes:&wgpu::vertex_attr_array![1=>Float32x4,2=>Float32x4,3=>Float32x4,4=>Float32x4,5=>Float32x4],
+                    })],
+                },
+                primitive: wgpu::PrimitiveState {
+                    cull_mode: None,
+                    ..Default::default()
+                },
+                depth_stencil: Some(wgpu::DepthStencilState {
+                    format: wgpu::TextureFormat::Depth32Float,
+                    depth_write_enabled: Some(!overlay),
+                    depth_compare: Some(if overlay {
+                        wgpu::CompareFunction::LessEqual
+                    } else {
+                        wgpu::CompareFunction::Less
+                    }),
+                    stencil: wgpu::StencilState::default(),
+                    bias: wgpu::DepthBiasState::default(),
                 }),
-            }],
-        });
+                multisample: wgpu::MultisampleState {
+                    count: samples,
+                    mask: !0,
+                    alpha_to_coverage_enabled: false,
+                },
+                fragment: Some(wgpu::FragmentState {
+                    module: &shader,
+                    entry_point: Some("fs_main"),
+                    compilation_options: Default::default(),
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format: wgpu::TextureFormat::Rgba8Unorm,
+                        // Alpha blending lets a selection highlight be drawn over the object it belongs to;
+                        // opaque objects have alpha 1 and are unaffected.
+                        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                        write_mask: wgpu::ColorWrites::ALL,
+                    })],
+                }),
+                multiview_mask: None,
+                cache: None,
+            })
+        };
+        let pipeline = make_pipeline(false);
+        let overlay_pipeline = make_pipeline(true);
         let max_buffer_size = device.limits().max_buffer_size.max(1 << 20);
-        let chunks = vec![new_chunk(&device, max_buffer_size.min(1 << 20))];
+        let chunks = vec![new_chunk(&device, chunk_capacity_for(0, max_buffer_size))];
         Self {
             device,
             queue,
             pipeline,
             overlay_pipeline,
             bind_layout,
-            uniforms,
-            uniform_capacity,
-            bind_group,
             chunks,
             max_buffer_size,
-            objects: Vec::new(),
+            objects: std::sync::Arc::new(Vec::new()),
             static_ranges: Vec::new(),
             static_tint: [0.8, 0.6, 0.4, 1.0],
             static_meshes: 0,
             culling: true,
             min_pixel_radius: 0.5,
             last_stats: FrameStats::default(),
+            pending_vertices: Vec::new(),
+            pending_indices: Vec::new(),
         }
     }
 
@@ -258,9 +288,18 @@ impl SceneBatch {
         let (centre, radius) = place_bounds(local_centre, local_radius, &model);
         let mut bytes = Vec::with_capacity(mesh.positions.len() * 12);
         for position in &mesh.positions {
-            let x = model[0][0] * position[0] + model[1][0] * position[1] + model[2][0] * position[2] + model[3][0];
-            let y = model[0][1] * position[0] + model[1][1] * position[1] + model[2][1] * position[2] + model[3][1];
-            let z = model[0][2] * position[0] + model[1][2] * position[1] + model[2][2] * position[2] + model[3][2];
+            let x = model[0][0] * position[0]
+                + model[1][0] * position[1]
+                + model[2][0] * position[2]
+                + model[3][0];
+            let y = model[0][1] * position[0]
+                + model[1][1] * position[1]
+                + model[2][1] * position[2]
+                + model[3][1];
+            let z = model[0][2] * position[0]
+                + model[1][2] * position[1]
+                + model[2][2] * position[2]
+                + model[3][2];
             bytes.extend_from_slice(&x.to_le_bytes());
             bytes.extend_from_slice(&y.to_le_bytes());
             bytes.extend_from_slice(&z.to_le_bytes());
@@ -273,29 +312,45 @@ impl SceneBatch {
         }) {
             Some(index) => index,
             None => {
-                self.chunks.push(new_chunk(&self.device, self.max_buffer_size));
+                self.chunks.push(new_chunk(
+                    &self.device,
+                    chunk_capacity_for(needed_v.max(needed_i), self.max_buffer_size),
+                ));
                 self.chunks.len() - 1
             }
         };
         let chunk = &mut self.chunks[chunk_index];
         let base_vertex = (chunk.vertex_bytes / 12) as u32;
+        let vertex_offset = chunk.vertex_bytes;
+        let index_offset = chunk.index_bytes;
         let index_bytes: Vec<u8> = mesh
             .indices
             .iter()
             .flat_map(|index| (index + base_vertex).to_le_bytes())
             .collect();
-        self.queue.write_buffer(&chunk.vertices, chunk.vertex_bytes, &bytes);
-        self.queue.write_buffer(&chunk.indices, chunk.index_bytes, &index_bytes);
         chunk.vertex_bytes += needed_v;
         chunk.index_bytes += needed_i;
-        let index_start = ((chunk.index_bytes - needed_i) / 4) as u32;
+        self.pending_vertices.push(PendingWrite {
+            chunk: chunk_index,
+            offset: vertex_offset,
+            bytes,
+            consumed: 0,
+        });
+        self.pending_indices.push(PendingWrite {
+            chunk: chunk_index,
+            offset: index_offset,
+            bytes: index_bytes,
+            consumed: 0,
+        });
+        let index_start = (index_offset / 4) as u32;
         self.static_meshes += 1;
         if let Some(last) = self.static_ranges.last_mut()
             && last.chunk == chunk_index
             && last.index_start + last.index_count == index_start
         {
             last.index_count += mesh.indices.len() as u32;
-            let (merged_centre, merged_radius) = union_sphere(last.centre, last.radius, centre, radius);
+            let (merged_centre, merged_radius) =
+                union_sphere(last.centre, last.radius, centre, radius);
             last.centre = merged_centre;
             last.radius = merged_radius;
             return self.static_ranges.len() - 1;
@@ -308,6 +363,20 @@ impl SceneBatch {
             radius,
         });
         self.static_ranges.len() - 1
+    }
+
+    /// Adds an occurrence of already uploaded geometry, without duplicating vertex/index bytes.
+    pub fn add_instance(
+        &mut self,
+        source: usize,
+        model: [[f32; 4]; 4],
+        tint: [f32; 4],
+    ) -> Option<usize> {
+        let mut object = self.objects.get(source)?.clone();
+        object.model = model;
+        object.tint = tint;
+        std::sync::Arc::make_mut(&mut self.objects).push(object);
+        Some(self.objects.len() - 1)
     }
 
     /// Sets the tint used by merged static ranges, so a merged group can keep the colour of the objects it
@@ -337,20 +406,56 @@ impl SceneBatch {
         self.last_stats
     }
 
+    /// A different MSAA pipeline over the same resident geometry and occurrence records.
+    /// Call only after pending uploads are drained; no mesh bytes are copied or uploaded.
+    pub fn fork_samples(&self, samples: u32) -> Self {
+        self.fork_samples_task(samples)()
+    }
+    pub fn fork_samples_task(&self, samples: u32) -> Box<dyn FnOnce() -> Self + Send> {
+        assert_eq!(
+            self.pending_upload_bytes(),
+            0,
+            "fork requires resident source"
+        );
+        let device = self.device.clone();
+        let queue = self.queue.clone();
+        let chunks = self.chunks.clone();
+        let objects = self.objects.clone();
+        let ranges = self.static_ranges.clone();
+        let tint = self.static_tint;
+        let meshes = self.static_meshes;
+        let culling = self.culling;
+        let pixels = self.min_pixel_radius;
+        Box::new(move || {
+            let mut fork = Self::with_samples(device, queue, samples);
+            fork.chunks = chunks;
+            fork.objects = objects;
+            fork.static_ranges = ranges;
+            fork.static_tint = tint;
+            fork.static_meshes = meshes;
+            fork.culling = culling;
+            fork.min_pixel_radius = pixels;
+            fork
+        })
+    }
+
     pub fn clear(&mut self) {
-        self.objects.clear();
+        std::sync::Arc::make_mut(&mut self.objects).clear();
         self.static_ranges.clear();
         self.static_meshes = 0;
         for chunk in &mut self.chunks {
             chunk.vertex_bytes = 0;
             chunk.index_bytes = 0;
         }
+        self.pending_vertices.clear();
+        self.pending_indices.clear();
     }
 
     /// Uploads a mesh into the arena and returns the object index.
     ///
     /// The arena is split into chunks because wgpu caps one buffer size; a mesh goes into the first chunk
     /// that still has room, and a new chunk is opened when none does.
+    /// Adds local geometry with a row-major core-style model transform.
     pub fn add_mesh(&mut self, mesh: &MeshData, model: [[f32; 4]; 4], tint: [f32; 4]) -> usize {
         let (centre, radius) = bounds(mesh);
         let mut bytes = Vec::with_capacity(mesh.positions.len() * 12);
@@ -359,7 +464,11 @@ impl SceneBatch {
                 bytes.extend_from_slice(&value.to_le_bytes());
             }
         }
-        let index_bytes: Vec<u8> = mesh.indices.iter().flat_map(|value| value.to_le_bytes()).collect();
+        let index_bytes: Vec<u8> = mesh
+            .indices
+            .iter()
+            .flat_map(|value| value.to_le_bytes())
+            .collect();
         let needed_v = bytes.len() as u64;
         let needed_i = index_bytes.len() as u64;
         let chunk_index = match self.chunks.iter().position(|chunk| {
@@ -368,19 +477,34 @@ impl SceneBatch {
         }) {
             Some(index) => index,
             None => {
-                let chunk = new_chunk(&self.device, self.max_buffer_size);
+                let chunk = new_chunk(
+                    &self.device,
+                    chunk_capacity_for(needed_v.max(needed_i), self.max_buffer_size),
+                );
                 self.chunks.push(chunk);
                 self.chunks.len() - 1
             }
         };
         let chunk = &mut self.chunks[chunk_index];
-        self.queue.write_buffer(&chunk.vertices, chunk.vertex_bytes, &bytes);
-        self.queue.write_buffer(&chunk.indices, chunk.index_bytes, &index_bytes);
         let base_vertex = (chunk.vertex_bytes / 12) as u32;
         let index_start = (chunk.index_bytes / 4) as u32;
+        let vertex_offset = chunk.vertex_bytes;
+        let index_offset = chunk.index_bytes;
         chunk.vertex_bytes += needed_v;
         chunk.index_bytes += needed_i;
-        self.objects.push(SceneObject {
+        self.pending_vertices.push(PendingWrite {
+            chunk: chunk_index,
+            offset: vertex_offset,
+            bytes,
+            consumed: 0,
+        });
+        self.pending_indices.push(PendingWrite {
+            chunk: chunk_index,
+            offset: index_offset,
+            bytes: index_bytes,
+            consumed: 0,
+        });
+        std::sync::Arc::make_mut(&mut self.objects).push(SceneObject {
             base_vertex,
             index_start,
             index_count: mesh.indices.len() as u32,
@@ -415,8 +539,72 @@ impl SceneBatch {
     }
 
     pub fn set_transform(&mut self, object: usize, model: [[f32; 4]; 4]) {
-        if let Some(entry) = self.objects.get_mut(object) {
+        if self.objects.get(object).is_none_or(|o| o.model == model) {
+            return;
+        }
+        if let Some(entry) = std::sync::Arc::make_mut(&mut self.objects).get_mut(object) {
             entry.model = model;
+        }
+    }
+
+    pub fn pending_upload_bytes(&self) -> usize {
+        self.pending_vertices
+            .iter()
+            .chain(self.pending_indices.iter())
+            .map(|w| w.bytes.len() - w.consumed)
+            .sum()
+    }
+    /// Service a shared window upload allowance; each write is at most 1MiB and aligned to four bytes.
+    pub fn flush_uploads_budget(
+        &mut self,
+        max_bytes: usize,
+        deadline: std::time::Instant,
+    ) -> usize {
+        let mut written = 0;
+        for (vertices, writes) in [
+            (true, &mut self.pending_vertices),
+            (false, &mut self.pending_indices),
+        ] {
+            for w in writes.iter_mut() {
+                while w.consumed < w.bytes.len()
+                    && written + 4 <= max_bytes
+                    && std::time::Instant::now() < deadline
+                {
+                    let n = (w.bytes.len() - w.consumed)
+                        .min(max_bytes - written)
+                        .min(1 << 20)
+                        / 4
+                        * 4;
+                    if n == 0 {
+                        break;
+                    }
+                    let buffer = if vertices {
+                        &self.chunks[w.chunk].vertices
+                    } else {
+                        &self.chunks[w.chunk].indices
+                    };
+                    self.queue.write_buffer(
+                        buffer,
+                        w.offset + w.consumed as u64,
+                        &w.bytes[w.consumed..w.consumed + n],
+                    );
+                    w.consumed += n;
+                    written += n;
+                }
+            }
+            writes.retain(|w| w.consumed < w.bytes.len());
+        }
+        written
+    }
+
+    /// Uploads every geometry byte appended since the last flush. Consecutive appends to one chunk are
+    /// merged into a single `write_buffer`, so opening a 42,000-object scene is no longer 84,000 submits.
+    pub fn flush_uploads(&mut self) {
+        while self.pending_upload_bytes() > 0 {
+            self.flush_uploads_budget(
+                usize::MAX,
+                std::time::Instant::now() + std::time::Duration::from_secs(3600),
+            );
         }
     }
 
@@ -442,7 +630,15 @@ impl SceneBatch {
         width: u32,
         height: u32,
     ) -> Result<(), RenderError> {
-        self.render_pass(colour_view, Some(resolve_view), depth_view, camera, width, height, true)
+        self.render_pass(
+            colour_view,
+            Some(resolve_view),
+            depth_view,
+            camera,
+            width,
+            height,
+            true,
+        )
     }
 
     /// Draws over what is already in the targets instead of clearing them.
@@ -471,7 +667,15 @@ impl SceneBatch {
         width: u32,
         height: u32,
     ) -> Result<(), RenderError> {
-        self.render_pass(colour_view, Some(resolve_view), depth_view, camera, width, height, false)
+        self.render_pass(
+            colour_view,
+            Some(resolve_view),
+            depth_view,
+            camera,
+            width,
+            height,
+            false,
+        )
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -485,6 +689,40 @@ impl SceneBatch {
         height: u32,
         clear: bool,
     ) -> Result<(), RenderError> {
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("scene wrapper"),
+            });
+        self.encode_pass(
+            &mut encoder,
+            colour_view,
+            resolve_view,
+            depth_view,
+            camera,
+            width,
+            height,
+            clear,
+        )?;
+        self.queue.submit([encoder.finish()]);
+        Ok(())
+    }
+
+    /// Encodes into the window's encoder. Every pass owns immutable camera and instance buffers;
+    /// encoding another view before submission cannot overwrite this view's uniforms.
+    #[allow(clippy::too_many_arguments)]
+    pub fn encode_pass(
+        &mut self,
+        encoder: &mut wgpu::CommandEncoder,
+        colour_view: &wgpu::TextureView,
+        resolve_view: Option<&wgpu::TextureView>,
+        depth_view: &wgpu::TextureView,
+        camera: Camera,
+        width: u32,
+        height: u32,
+        clear: bool,
+    ) -> Result<(), RenderError> {
+        self.flush_uploads();
         let view_projection = camera.view_projection(width as f32 / height as f32);
         let frustum = Frustum::from_view_projection(view_projection);
         let mut visible: Vec<usize> = Vec::with_capacity(self.objects.len());
@@ -534,41 +772,71 @@ impl SceneBatch {
                 distance2(&camera.eye, a).total_cmp(&distance2(&camera.eye, b))
             });
         }
-        // Slot 0 holds the view-projection with an identity placement, which is what a merged static
-        // range needs; dynamic objects use the slots after it.
-        self.ensure_uniform_capacity(visible.len() + 1);
-        let mut uniforms = vec![0u8; UNIFORM_STRIDE as usize * (visible.len() + 1)];
-        for (position, value) in view_projection.iter().enumerate() {
-            uniforms[position * 4..position * 4 + 4].copy_from_slice(&value.to_le_bytes());
+        use wgpu::util::DeviceExt;
+        // Opaque occurrences group by shared geometry. Transparent overlays retain input order.
+        if clear {
+            visible.sort_by_key(|i| {
+                let o = &self.objects[*i];
+                (o.chunk, o.index_start, o.index_count, o.base_vertex)
+            });
         }
-        for (position, value) in self.static_tint.iter().enumerate() {
-            uniforms[64 + position * 4..64 + position * 4 + 4].copy_from_slice(&value.to_le_bytes());
+        let mut camera_bytes = Vec::with_capacity(80);
+        for value in view_projection {
+            camera_bytes.extend_from_slice(&value.to_le_bytes());
         }
-        for (slot, index) in visible.iter().enumerate() {
-            let object = &self.objects[*index];
-            let model = [
-                object.model[0][0], object.model[1][0], object.model[2][0], object.model[3][0],
-                object.model[0][1], object.model[1][1], object.model[2][1], object.model[3][1],
-                object.model[0][2], object.model[1][2], object.model[2][2], object.model[3][2],
-                object.model[0][3], object.model[1][3], object.model[2][3], object.model[3][3],
-            ];
-            let mvp = multiply(view_projection, model);
-            let offset = (slot + 1) * UNIFORM_STRIDE as usize;
-            for (position, value) in mvp.iter().enumerate() {
-                uniforms[offset + position * 4..offset + position * 4 + 4].copy_from_slice(&value.to_le_bytes());
+        camera_bytes.extend_from_slice(&[0u8; 16]);
+        let camera_buffer = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("view camera snapshot"),
+                contents: &camera_bytes,
+                usage: wgpu::BufferUsages::UNIFORM,
+            });
+        let camera_group = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("view camera snapshot"),
+            layout: &self.bind_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                    buffer: &camera_buffer,
+                    offset: 0,
+                    size: wgpu::BufferSize::new(80),
+                }),
+            }],
+        });
+        let mut instance_bytes = Vec::with_capacity((visible.len() + 1) * 80);
+        let append = |bytes: &mut Vec<u8>, model: [[f32; 4]; 4], tint: [f32; 4]| {
+            for col in 0..4 {
+                for row in 0..4 {
+                    bytes.extend_from_slice(&model[row][col].to_le_bytes());
+                }
             }
-            for (position, value) in object.tint.iter().enumerate() {
-                uniforms[offset + 64 + position * 4..offset + 64 + position * 4 + 4]
-                    .copy_from_slice(&value.to_le_bytes());
+            for value in tint {
+                bytes.extend_from_slice(&value.to_le_bytes());
             }
+        };
+        append(
+            &mut instance_bytes,
+            [
+                [1., 0., 0., 0.],
+                [0., 1., 0., 0.],
+                [0., 0., 1., 0.],
+                [0., 0., 0., 1.],
+            ],
+            self.static_tint,
+        );
+        for index in &visible {
+            let o = &self.objects[*index];
+            append(&mut instance_bytes, o.model, o.tint);
         }
-        // Slot 0 is always written: a scene that is entirely merged static has no other object, and its
-        // ranges read that slot. Writing only when `visible` was non-empty left the matrix stale and the
-        // merged meshes invisible.
-        if !uniforms.is_empty() {
-            self.queue.write_buffer(&self.uniforms, 0, &uniforms);
-        }
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("scene") });
+        let instances = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("view occurrence snapshot"),
+                contents: &instance_bytes,
+                usage: wgpu::BufferUsages::VERTEX,
+            });
+        let mut draw_calls = 0;
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("scene"),
@@ -578,7 +846,12 @@ impl SceneBatch {
                     resolve_target: resolve_view,
                     ops: wgpu::Operations {
                         load: if clear {
-                            wgpu::LoadOp::Clear(wgpu::Color { r: 0.05, g: 0.05, b: 0.08, a: 1.0 })
+                            wgpu::LoadOp::Clear(wgpu::Color {
+                                r: 0.05,
+                                g: 0.05,
+                                b: 0.08,
+                                a: 1.0,
+                            })
                         } else {
                             wgpu::LoadOp::Load
                         },
@@ -588,7 +861,11 @@ impl SceneBatch {
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                     view: depth_view,
                     depth_ops: Some(wgpu::Operations {
-                        load: if clear { wgpu::LoadOp::Clear(1.0) } else { wgpu::LoadOp::Load },
+                        load: if clear {
+                            wgpu::LoadOp::Clear(1.0)
+                        } else {
+                            wgpu::LoadOp::Load
+                        },
                         store: wgpu::StoreOp::Store,
                     }),
                     stencil_ops: None,
@@ -597,74 +874,69 @@ impl SceneBatch {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            pass.set_pipeline(if clear {&self.pipeline} else {&self.overlay_pipeline});
+            pass.set_pipeline(if clear {
+                &self.pipeline
+            } else {
+                &self.overlay_pipeline
+            });
+            pass.set_bind_group(0, &camera_group, &[0]);
+            pass.set_vertex_buffer(1, instances.slice(..));
             for (chunk_index, chunk) in self.chunks.iter().enumerate() {
                 pass.set_vertex_buffer(0, chunk.vertices.slice(..));
                 pass.set_index_buffer(chunk.indices.slice(..), wgpu::IndexFormat::Uint32);
-                for (slot, index) in visible.iter().enumerate() {
-                    let object = &self.objects[*index];
-                    if object.chunk != chunk_index {
-                        continue;
+                let mut slot = 0;
+                while slot < visible.len() {
+                    let object = &self.objects[visible[slot]];
+                    let mut end = slot + 1;
+                    while end < visible.len() {
+                        let next = &self.objects[visible[end]];
+                        if (
+                            next.chunk,
+                            next.index_start,
+                            next.index_count,
+                            next.base_vertex,
+                        ) != (
+                            object.chunk,
+                            object.index_start,
+                            object.index_count,
+                            object.base_vertex,
+                        ) {
+                            break;
+                        }
+                        end += 1;
                     }
-                    pass.set_bind_group(0, &self.bind_group, &[((slot + 1) as u64 * UNIFORM_STRIDE) as u32]);
-                    pass.draw_indexed(
-                        object.index_start..object.index_start + object.index_count,
-                        object.base_vertex as i32,
-                        0..1,
-                    );
-                }
-                if !static_visible.is_empty() {
-                    pass.set_bind_group(0, &self.bind_group, &[0]);
-                }
-                for range_index in &static_visible {
-                    let range = &self.static_ranges[*range_index];
-                    if range.chunk != chunk_index {
-                        continue;
+                    if object.chunk == chunk_index {
+                        pass.draw_indexed(
+                            object.index_start..object.index_start + object.index_count,
+                            object.base_vertex as i32,
+                            (slot as u32 + 1)..(end as u32 + 1),
+                        );
+                        draw_calls += 1;
                     }
-                    // A static range has identity placement baked into its vertices, so it reuses the
-                    // first uniform slot with an identity matrix written once per frame.
-                    pass.draw_indexed(range.index_start..range.index_start + range.index_count, 0, 0..1);
+                    slot = end;
+                }
+                for &index in &static_visible {
+                    let range = &self.static_ranges[index];
+                    if range.chunk == chunk_index {
+                        pass.draw_indexed(
+                            range.index_start..range.index_start + range.index_count,
+                            0,
+                            0..1,
+                        );
+                        draw_calls += 1;
+                    }
                 }
             }
         }
-        self.queue.submit(std::iter::once(encoder.finish()));
+
         self.last_stats = FrameStats {
             objects: self.objects.len() + self.static_meshes,
             visible: visible.len() + static_visible.len(),
             culled,
             culled_small,
-            draw_calls: visible.len() + static_visible.len(),
+            draw_calls,
         };
         Ok(())
-    }
-
-    fn ensure_uniform_capacity(&mut self, objects: usize) {
-        if objects <= self.uniform_capacity {
-            return;
-        }
-        let mut capacity = self.uniform_capacity;
-        while capacity < objects {
-            capacity *= 2;
-        }
-        self.uniforms = self.device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("scene uniforms"),
-            size: UNIFORM_STRIDE * capacity as u64,
-            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
-        self.bind_group = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("scene uniforms"),
-            layout: &self.bind_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                    buffer: &self.uniforms,
-                    offset: 0,
-                    size: wgpu::BufferSize::new(64 + 16),
-                }),
-            }],
-        });
-        self.uniform_capacity = capacity;
     }
 }
 
@@ -676,11 +948,27 @@ struct Frustum {
 impl Frustum {
     fn from_view_projection(matrix: [f32; 16]) -> Self {
         // Rows of a column-major matrix.
-        let row = |index: usize| [matrix[index], matrix[4 + index], matrix[8 + index], matrix[12 + index]];
+        let row = |index: usize| {
+            [
+                matrix[index],
+                matrix[4 + index],
+                matrix[8 + index],
+                matrix[12 + index],
+            ]
+        };
         let [r0, r1, r2, r3] = [row(0), row(1), row(2), row(3)];
-        let combine = |a: [f32; 4], b: [f32; 4], sign: f32| [a[0] + sign * b[0], a[1] + sign * b[1], a[2] + sign * b[2], a[3] + sign * b[3]];
+        let combine = |a: [f32; 4], b: [f32; 4], sign: f32| {
+            [
+                a[0] + sign * b[0],
+                a[1] + sign * b[1],
+                a[2] + sign * b[2],
+                a[3] + sign * b[3],
+            ]
+        };
         let normalise = |mut plane: [f32; 4]| {
-            let length = (plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]).sqrt().max(1e-9);
+            let length = (plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2])
+                .sqrt()
+                .max(1e-9);
             for value in &mut plane {
                 *value /= length;
             }
@@ -705,6 +993,7 @@ impl Frustum {
     }
 }
 
+#[allow(dead_code)]
 fn multiply(a: [f32; 16], b: [f32; 16]) -> [f32; 16] {
     let mut out = [0.0f32; 16];
     for column in 0..4 {
@@ -719,7 +1008,6 @@ fn multiply(a: [f32; 16], b: [f32; 16]) -> [f32; 16] {
     out
 }
 
-
 /// Frustum test for any caller that has the view-projection: true when the sphere may be visible.
 pub fn frustum_contains(view_projection: [f32; 16], centre: [f32; 3], radius: f32) -> bool {
     Frustum::from_view_projection(view_projection).contains(centre, radius)
@@ -733,15 +1021,27 @@ fn place_bounds(centre: [f32; 3], radius: f32, model: &[[f32; 4]; 4]) -> ([f32; 
         model[0][1] * x + model[1][1] * y + model[2][1] * z + model[3][1],
         model[0][2] * x + model[1][2] * y + model[2][2] * z + model[3][2],
     ];
-    let axis = |column: usize| {
-        let length = (model[column][0] * model[column][0] + model[column][1] * model[column][1] + model[column][2] * model[column][2]).sqrt();
-        length.max(1e-9)
-    };
-    (placed, radius * axis(0).max(axis(1)).max(axis(2)))
+    // sqrt(||A||1 * ||A||infinity) bounds the spectral norm, including affine shear.
+    let columns = (0..3)
+        .map(|col| (0..3).map(|row| model[col][row].abs()).sum::<f32>())
+        .fold(0., f32::max);
+    let rows = (0..3)
+        .map(|row| (0..3).map(|col| model[col][row].abs()).sum::<f32>())
+        .fold(0., f32::max);
+    let frobenius = (0..3)
+        .flat_map(|col| (0..3).map(move |row| model[col][row].powi(2)))
+        .sum::<f32>()
+        .sqrt();
+    (placed, radius * (columns * rows).sqrt().min(frobenius))
 }
 
 /// Smallest sphere covering both inputs.
-fn union_sphere(a_centre: [f32; 3], a_radius: f32, b_centre: [f32; 3], b_radius: f32) -> ([f32; 3], f32) {
+fn union_sphere(
+    a_centre: [f32; 3],
+    a_radius: f32,
+    b_centre: [f32; 3],
+    b_radius: f32,
+) -> ([f32; 3], f32) {
     let mut centre = [0.0f32; 3];
     for axis in 0..3 {
         let low = (a_centre[axis] - a_radius).min(b_centre[axis] - b_radius);
@@ -757,7 +1057,9 @@ fn union_sphere(a_centre: [f32; 3], a_radius: f32, b_centre: [f32; 3], b_radius:
 
 /// Places the local bounding sphere in world space and scales the radius by the model's largest axis.
 fn world_bounds(object: &SceneObject) -> ([f32; 3], f32) {
-    place_bounds(object.centre, object.radius, &object.model)
+    // Dynamic models are row-major (as in core Transform); add_static's legacy API is column-major.
+    let columns = std::array::from_fn(|col| std::array::from_fn(|row| object.model[row][col]));
+    place_bounds(object.centre, object.radius, &columns)
 }
 
 fn distance2(from: &[f32; 3], to: [f32; 3]) -> f32 {
@@ -805,13 +1107,14 @@ mod tests {
             backend_options: Default::default(),
             display: Default::default(),
         });
-        let Some(adapter) = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::HighPerformance,
-            force_fallback_adapter: false,
-            compatible_surface: None,
-            apply_limit_buckets: false,
-        }))
-        .ok()
+        let Some(adapter) =
+            pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+                power_preference: wgpu::PowerPreference::HighPerformance,
+                force_fallback_adapter: false,
+                compatible_surface: None,
+                apply_limit_buckets: false,
+            }))
+            .ok()
         else {
             return;
         };
@@ -826,7 +1129,11 @@ mod tests {
         .expect("device");
         let colour = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("colour"),
-            size: wgpu::Extent3d { width: 64, height: 64, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width: 64,
+                height: 64,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -836,7 +1143,11 @@ mod tests {
         });
         let depth = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("depth"),
-            size: wgpu::Extent3d { width: 64, height: 64, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width: 64,
+                height: 64,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -849,33 +1160,61 @@ mod tests {
         let mut batch = SceneBatch::new(device, queue);
         let cube = MeshData::new(
             vec![
-                [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, -0.5],
-                [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5], [-0.5, 0.5, 0.5],
+                [-0.5, -0.5, -0.5],
+                [0.5, -0.5, -0.5],
+                [0.5, 0.5, -0.5],
+                [-0.5, 0.5, -0.5],
+                [-0.5, -0.5, 0.5],
+                [0.5, -0.5, 0.5],
+                [0.5, 0.5, 0.5],
+                [-0.5, 0.5, 0.5],
             ],
-            vec![0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 2, 3, 7, 2, 7, 6, 1, 2, 6, 1, 6, 5, 0, 4, 7, 0, 7, 3],
+            vec![
+                0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 2, 3, 7, 2, 7, 6, 1, 2, 6, 1,
+                6, 5, 0, 4, 7, 0, 7, 3,
+            ],
         );
         let camera = Camera {
             eye: [0., -260., 210.],
             target: [0., 0., 0.],
             up: [0., 0., 1.],
-            projection: crate::Projection::Perspective { vertical_fov_rad: 40f32.to_radians() },
+            projection: crate::Projection::Perspective {
+                vertical_fov_rad: 40f32.to_radians(),
+            },
             near: 0.1,
             far: 2000.0,
         };
         // A 64x64 target puts these cubes under half a pixel, so the pixel test is disabled here: this
         // test is about the frustum alone.
         batch.set_min_pixel_radius(0.0);
-        let corners = [(0.0, 0.0), (38.4, 32.0), (-38.4, -32.0), (38.4, -32.0), (-38.4, 32.0)];
+        let corners = [
+            (0.0, 0.0),
+            (38.4, 32.0),
+            (-38.4, -32.0),
+            (38.4, -32.0),
+            (-38.4, 32.0),
+        ];
         for (x, y) in corners {
             batch.clear();
             batch.add_mesh(
                 &cube,
-                [[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [x, y, 0., 1.]],
+                [
+                    [1., 0., 0., 0.],
+                    [0., 1., 0., 0.],
+                    [0., 0., 1., 0.],
+                    [x, y, 0., 1.],
+                ],
                 [1., 1., 1., 1.],
             );
-            batch.render_into(&colour_view, &depth_view, camera, 64, 64).expect("frame");
+            batch
+                .render_into(&colour_view, &depth_view, camera, 64, 64)
+                .expect("frame");
             let stats = batch.stats();
-            assert_eq!(stats.visible, 1, "corner ({x}, {y}) should be visible, culled {}", stats.culled);
+            assert_eq!(
+                stats.visible, 1,
+                "corner ({x}, {y}) should be visible, culled {}",
+                stats.culled
+            );
         }
     }
 }
@@ -893,13 +1232,14 @@ mod grid_tests {
             backend_options: Default::default(),
             display: Default::default(),
         });
-        let Some(adapter) = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::HighPerformance,
-            force_fallback_adapter: false,
-            compatible_surface: None,
-            apply_limit_buckets: false,
-        }))
-        .ok()
+        let Some(adapter) =
+            pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+                power_preference: wgpu::PowerPreference::HighPerformance,
+                force_fallback_adapter: false,
+                compatible_surface: None,
+                apply_limit_buckets: false,
+            }))
+            .ok()
         else {
             return;
         };
@@ -914,7 +1254,11 @@ mod grid_tests {
         .expect("device");
         let colour = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("colour"),
-            size: wgpu::Extent3d { width: 960, height: 540, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width: 960,
+                height: 540,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -924,7 +1268,11 @@ mod grid_tests {
         });
         let depth = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("depth"),
-            size: wgpu::Extent3d { width: 960, height: 540, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width: 960,
+                height: 540,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -937,17 +1285,31 @@ mod grid_tests {
         let mut batch = SceneBatch::new(device, queue);
         let cube = MeshData::new(
             vec![
-                [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, -0.5],
-                [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5], [-0.5, 0.5, 0.5],
+                [-0.5, -0.5, -0.5],
+                [0.5, -0.5, -0.5],
+                [0.5, 0.5, -0.5],
+                [-0.5, 0.5, -0.5],
+                [-0.5, -0.5, 0.5],
+                [0.5, -0.5, 0.5],
+                [0.5, 0.5, 0.5],
+                [-0.5, 0.5, 0.5],
             ],
-            vec![0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 2, 3, 7, 2, 7, 6, 1, 2, 6, 1, 6, 5, 0, 4, 7, 0, 7, 3],
+            vec![
+                0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 2, 3, 7, 2, 7, 6, 1, 2, 6, 1,
+                6, 5, 0, 4, 7, 0, 7, 3,
+            ],
         );
         for index in 0..500usize {
             let x = (index % 25) as f32 - 12.0;
             let y = (index / 25) as f32 - 10.0;
             batch.add_mesh(
                 &cube,
-                [[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [x * 3.2, y * 3.2, 0., 1.]],
+                [
+                    [1., 0., 0., 0.],
+                    [0., 1., 0., 0.],
+                    [0., 0., 1., 0.],
+                    [x * 3.2, y * 3.2, 0., 1.],
+                ],
                 [1., 1., 1., 1.],
             );
         }
@@ -955,13 +1317,21 @@ mod grid_tests {
             eye: [0., -260., 210.],
             target: [0., 0., 0.],
             up: [0., 0., 1.],
-            projection: crate::Projection::Perspective { vertical_fov_rad: 40f32.to_radians() },
+            projection: crate::Projection::Perspective {
+                vertical_fov_rad: 40f32.to_radians(),
+            },
             near: 0.1,
             far: 2000.0,
         };
-        batch.render_into(&colour_view, &depth_view, camera, 960, 540).expect("frame");
+        batch
+            .render_into(&colour_view, &depth_view, camera, 960, 540)
+            .expect("frame");
         let stats = batch.stats();
         assert_eq!(stats.objects, 500);
-        assert_eq!(stats.culled, 0, "the whole grid is in front of this camera, culled {}", stats.culled);
+        assert_eq!(
+            stats.culled, 0,
+            "the whole grid is in front of this camera, culled {}",
+            stats.culled
+        );
     }
 }

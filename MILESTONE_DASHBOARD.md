@@ -1,10 +1,10 @@
 # OM9 Milestone Dashboard
 
-> Sinh tự động lúc **2026-10-19T04:48:37Z** · mã nguồn `b5a15dae` · nguồn: `OM9_Milestones/` + `implementation/{evidence,design,fixtures}/`
+> Sinh tự động lúc **2026-10-20T01:37:29Z** · mã nguồn `813c2b00` · nguồn: `OM9_Milestones/` + `implementation/{evidence,design,fixtures}/`
 >
 > Cập nhật: chạy lại `python tools/om9_milestone_dashboard.py` sau mỗi mục hoàn thành.
 >
-> **53** L3 đã nghiệm thu · **41** có bằng chứng chưa ký · **697** mới ở mức kế hoạch (tổng 791 L3).
+> **53** L3 đã nghiệm thu · **49** có bằng chứng chưa ký · **689** mới ở mức kế hoạch (tổng 791 L3).
 >
 > Dashboard chỉ đọc bằng chứng thật; cây kế hoạch vẫn giữ `SPEC_ONLY_NOT_IMPLEMENTED` và không trạng thái nào được nâng thay cho nghiệm thu.
 >
@@ -17,7 +17,7 @@ Chú giải: ✅ đã nghiệm thu · 🟡 có bằng chứng, chưa ký · ⬜ 
 | Milestone | Thư mục | L2 | L3 | ✅ | 🟡 | ⬜ | Phụ thuộc |
 |---|---|---:|---:|---:|---:|---:|---|
 | **M00** Feasibility, QymCAD source, OCCT, legal and environment | `M00 - Feasibility, Legal` | 7 | 19 | 8 | 7 | 4 | — |
-| **M01** CAD shell, OCCT bridge, document, undo, GPU and viewport foundation | `M01 - CAD Shell, Viewport` | 13 | 117 | 45 | 33 | 39 | M00 |
+| **M01** CAD shell, OCCT bridge, document, undo, GPU and viewport foundation | `M01 - CAD Shell, Viewport` | 13 | 117 | 45 | 41 | 31 | M00 |
 | **M02** Viewport picking, snapping, navigation, gumball and Matrix interaction | `M02 - Viewport, Gumball` | 9 | 59 | 0 | 1 | 58 | M00, M01 |
 | **M03** Curve, Surface, Solid và trao đổi 3DM | `M03 - Geometry 3DM` | 14 | 243 | 0 | 0 | 243 | M01 |
 | **M04** Builder, History và Ring | `M04 - Builder and History` | 7 | 51 | 0 | 0 | 51 | M01 |
@@ -92,11 +92,11 @@ Bằng chứng cấp milestone: `G00-01`, `G00-02`, `G00-03`, `G00-04`, `G00-05`
 
 </details>
 
-<details><summary><b>M01 — CAD shell, OCCT bridge, document, undo, GPU and viewport foundation</b> · ✅45 🟡33 ⬜39 · `OM9-M01` · NOT_STARTED</summary>
+<details><summary><b>M01 — CAD shell, OCCT bridge, document, undo, GPU and viewport foundation</b> · ✅45 🟡41 ⬜31 · `OM9-M01` · NOT_STARTED</summary>
 
 **L1** — CAD shell, OCCT bridge, document, undo, GPU and viewport foundation · phụ thuộc: M00
 
-Bằng chứng cấp milestone: `OM9-L2-01-01`, `OM9-L2-01-02`, `OM9-L2-01-03`, `OM9-L2-01-05`
+Bằng chứng cấp milestone: `OM9-L2-01-01`, `OM9-L2-01-02`, `OM9-L2-01-03`, `OM9-L2-01-05`, `OM9-L2-03-14`
 
 **OM9-L2-01-01 — Febe Application Shell Docking** · ✅3 🟡5 ⬜0
 
@@ -275,20 +275,20 @@ _Command Line kiểu Rhino/Matrix, prompt, options/history_
 | `OM9-L3-03-10-005` | Command History Readable Panel *(thủ công)* | E02 | HIGH | 0/5 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-03-10-006` | Commandline Escape Repeat Shortcuts *(thủ công)* | E02 | HIGH | 0/5 | ⬜ mới ở mức kế hoạch | — |
 
-**OM9-L2-03-14 — Febe Matrix Layers Objectinfo Superselect** · ✅0 🟡0 ⬜8
+**OM9-L2-03-14 — Febe Matrix Layers Objectinfo Superselect** · ✅0 🟡8 ⬜0
 
 _Layers palette, Object Info, SuperSelect cần modeling_
 
 | L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-14-001` | Matrix Layer Category Palette *(thủ công)* | E02 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-14-002` | Current Layer And Assignment UI *(thủ công)* | E02 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-14-003` | Layer Visible And Locked Controls *(thủ công)* | E02 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-14-004` | Select All Objects By Layer *(thủ công)* | E02 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-14-005` | Matrix Object Info Overlay *(thủ công)* | E02 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-14-006` | Superselect By Jewelry Object Type *(thủ công)* | E02 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-14-007` | Object Property Editor Adapter *(thủ công)* | E02 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-14-008` | Layer State Persistence Visual Check *(thủ công)* | E02 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-03-14-001` | Matrix Layer Category Palette *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-14-002` | Current Layer And Assignment UI *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-14-003` | Layer Visible And Locked Controls *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-14-004` | Select All Objects By Layer *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-14-005` | Matrix Object Info Overlay *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-14-006` | Superselect By Jewelry Object Type *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-14-007` | Object Property Editor Adapter *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-14-008` | Layer State Persistence Visual Check *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 **OM9-L2-03-15 — Febe Matrix File Project And Jobbags** · ✅0 🟡0 ⬜9
 
@@ -1595,15 +1595,15 @@ _Supports, sprues and manufacturing aids for casting/printing jewelry._
 
 | Ngày | Mục | Trạng thái | Phạm vi |
 |---|---|---|---|
-| 2026-10-19 | `m01-l2-02-01-rhino-nurbs-semantics-2026-10-19` | all_10_l3_verified_with_automated_evidence_gold_standard_semantics | Rhino-like NURBS object semantics: curve kinds/closed/planar, NURBS cardinality, surface UV/seam/periodicity, trimmed su |
-| 2026-10-19 | `m01-l2-01-12-native-project-codec-2026-10-19` | all_9_active_l3_verified_with_automated_evidence_l3_008_deferred_to_m07 | Audit and acceptance of the native project codec (schema-4 container, atomic save, validated load, restoration, migratio |
-| 2026-10-19 | `m02-l2-03-03-audit-2026-10-19` | all_six_l3_of_l2_03_03_pass_with_documentation_first_audit |  |
-| 2026-10-19 | `m01-viewport-grid-antialiasing-2026-10-19` | verified_automated_and_visual; release_relaunched |  |
-| 2026-10-19 | `m02-l4-03-03-001-01-documentation-first-2026-10-19` | pass_against_documentation_oracle_qymcad_downgraded_to_reference |  |
-| 2026-10-19 | `m02-l4-03-03-001-01-source-audit-2026-10-19` | source_audit_recorded_blocked_source_pinned_revision_unavailable_and_shift_click_fixed_to_add |  |
-| 2026-10-19T01:46:53.268121+00:00 | `` | validated | Delete CPU scene renderer; always use GPU in desktop viewport, with typed startup refusal of software adapters |
-| 2026-10-19 | `m02-exchange-brep-exhaustiveness-2026-10-19` | workspace_clippy_green_after_adding_brep_arms_to_om9_exchange |  |
+| 2026-10-20 | `m01-l3-03-14-008-layer-state-persistence-visual-check-2026-10-20` | standalone_implementation_verified_awaiting_manual_review | OM9-L3-03-14-008 (Layer State Persistence Visual Check) - 4 L4 tasks of module OM9-L2-03-14 |
+| 2026-10-20 | `m01-l3-03-14-007-object-property-editor-adapter-2026-10-20` | standalone_implementation_verified_awaiting_manual_review | OM9-L3-03-14-007 (Object Property Editor Adapter) - 4 L4 tasks of module OM9-L2-03-14 |
+| 2026-10-20 | `m01-l3-03-14-006-superselect-by-jewelry-object-type-2026-10-20` | standalone_implementation_verified_awaiting_manual_review | OM9-L3-03-14-006 (Superselect By Jewelry Object Type) - 4 L4 tasks of module OM9-L2-03-14 |
+| 2026-10-20 | `m01-l3-03-14-005-matrix-object-info-overlay-2026-10-20` | standalone_implementation_verified_awaiting_manual_review | OM9-L3-03-14-005 (Matrix Object Info Overlay) - 4 L4 tasks of module OM9-L2-03-14 |
+| 2026-10-20 | `m01-l3-03-14-004-select-all-objects-by-layer-2026-10-20` | standalone_implementation_verified_awaiting_manual_review | OM9-L3-03-14-004 (Select All Objects By Layer) - 4 L4 tasks of module OM9-L2-03-14 |
+| 2026-10-20 | `m01-l3-03-14-003-layer-visible-and-locked-controls-2026-10-20` | standalone_implementation_verified_awaiting_manual_review | OM9-L3-03-14-003 (Layer Visible And Locked Controls) - 4 L4 tasks of module OM9-L2-03-14 |
+| 2026-10-20 | `m01-l3-03-14-002-current-layer-and-assignment-ui-2026-10-20` | standalone_implementation_verified_awaiting_manual_review | OM9-L3-03-14-002 (Current Layer And Assignment UI) - 4 L4 tasks of module OM9-L2-03-14 |
+| 2026-10-20 | `m01-l3-03-14-001-matrix-layer-category-palette-2026-10-20` | standalone_implementation_verified_awaiting_manual_review | OM9-L3-03-14-001 (Matrix Layer Category Palette) - 4 L4 tasks of module OM9-L2-03-14 |
 
 ## Việc kế tiếp
 
-Review the preserved GPU-only default executable on the user hardware; record human M01/M02 acceptance separately
+Gom MOT checklist test cho ca 8 L3 va bao cao tong ket module OM9-L2-03-14.

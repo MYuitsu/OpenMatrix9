@@ -72,7 +72,12 @@ fn normalise(a: Point3) -> Option<Point3> {
 ///
 /// The two lines are usually skew, so this is the least-squares solution; when they are parallel the ray
 /// origin is projected instead, which keeps a drag usable rather than returning `None`.
-fn axis_parameter(origin: Point3, direction: Point3, ray_origin: Point3, ray_direction: Point3) -> Option<f64> {
+fn axis_parameter(
+    origin: Point3,
+    direction: Point3,
+    ray_origin: Point3,
+    ray_direction: Point3,
+) -> Option<f64> {
     let a = dot(direction, direction);
     if a <= 1e-12 {
         return None;
@@ -91,7 +96,12 @@ fn axis_parameter(origin: Point3, direction: Point3, ray_origin: Point3, ray_dir
 }
 
 /// Intersection of a ray with the plane through `origin` with `normal`.
-fn plane_hit(origin: Point3, normal: Point3, ray_origin: Point3, ray_direction: Point3) -> Option<Point3> {
+fn plane_hit(
+    origin: Point3,
+    normal: Point3,
+    ray_origin: Point3,
+    ray_direction: Point3,
+) -> Option<Point3> {
     let denominator = dot(normal, ray_direction);
     if denominator.abs() <= 1e-12 {
         return None;
@@ -114,11 +124,19 @@ pub struct GumballView {
 
 impl GumballView {
     pub fn new(frame: Frame, mode: Mode) -> Self {
-        Self { frame, mode, size: 1.0 }
+        Self {
+            frame,
+            mode,
+            size: 1.0,
+        }
     }
 
     pub fn with_size(frame: Frame, mode: Mode, size: f64) -> Self {
-        Self { frame, mode, size: size.max(1e-6) }
+        Self {
+            frame,
+            mode,
+            size: size.max(1e-6),
+        }
     }
 
     /// Handles this mode shows, in a stable order.
@@ -162,14 +180,21 @@ impl GumballView {
                     // from the arrow tip through the pivot to the box on the negative side, which is how the
                     // Matrix 8 figure draws it.
                     let (from, to) = if self.mode == Mode::Move {
-                        (self.frame.origin, add(self.frame.origin, scale(direction, self.size)))
+                        (
+                            self.frame.origin,
+                            add(self.frame.origin, scale(direction, self.size)),
+                        )
                     } else {
                         (
                             add(self.frame.origin, scale(direction, self.size)),
                             add(self.frame.origin, scale(direction, -self.size)),
                         )
                     };
-                    segments.push(Segment { handle, start: from, end: to });
+                    segments.push(Segment {
+                        handle,
+                        start: from,
+                        end: to,
+                    });
                 }
                 if self.mode == Mode::Move {
                     for plane in [Plane::XY, Plane::YZ, Plane::ZX] {
@@ -179,7 +204,11 @@ impl GumballView {
                             self.frame.origin,
                             add(scale(u, self.size * 0.32), scale(v, self.size * 0.32)),
                         );
-                        segments.push(Segment { handle: Handle::MovePlane(plane), start: corner, end: corner });
+                        segments.push(Segment {
+                            handle: Handle::MovePlane(plane),
+                            start: corner,
+                            end: corner,
+                        });
                     }
                 }
             }
@@ -201,7 +230,10 @@ impl GumballView {
                         let point = |angle: f64| {
                             add(
                                 self.frame.origin,
-                                add(scale(u, radius * angle.cos()), scale(v, radius * angle.sin())),
+                                add(
+                                    scale(u, radius * angle.cos()),
+                                    scale(v, radius * angle.sin()),
+                                ),
                             )
                         };
                         segments.push(Segment {
@@ -243,7 +275,11 @@ impl GumballView {
                             .screen_point(camera, viewport, segment.start)
                             .ok()
                             .flatten()
-                            .zip(self.screen_point(camera, viewport, segment.end).ok().flatten())
+                            .zip(
+                                self.screen_point(camera, viewport, segment.end)
+                                    .ok()
+                                    .flatten(),
+                            )
                             .is_some_and(|(start, end)| {
                                 (start[0] - end[0]).hypot(start[1] - end[1]) >= 1.0
                             })
@@ -297,7 +333,9 @@ impl GumballView {
             && let Some(centre) = self.screen_point(camera, viewport, self.frame.origin)?
         {
             let d = (pointer[0] - centre[0]).hypot(pointer[1] - centre[1]);
-            if d <= tolerance_px.min(5.0) { return Ok(Some((d, Handle::MoveFree))); }
+            if d <= tolerance_px.min(5.0) {
+                return Ok(Some((d, Handle::MoveFree)));
+            }
         }
         for segment in self.visible_segments(camera, viewport) {
             let Some(start) = self.screen_point(camera, viewport, segment.start)? else {
@@ -308,7 +346,9 @@ impl GumballView {
             };
             let distance = if matches!(segment.handle, Handle::Scale(_)) {
                 (pointer[0] - end[0]).hypot(pointer[1] - end[1])
-            } else { point_to_segment(pointer, start, end) };
+            } else {
+                point_to_segment(pointer, start, end)
+            };
             if distance <= tolerance_px && best.is_none_or(|(best, _)| distance < best) {
                 best = Some((distance, segment.handle));
             }
@@ -318,12 +358,20 @@ impl GumballView {
 
     /// Unit vector from the camera towards the pivot, the direction a handle pointing at the viewer has.
     fn view_direction(&self, camera: &Camera) -> Option<Point3> {
-        normalise(sub(self.frame.origin, camera.eye)).or_else(|| normalise(sub(camera.target, camera.eye)))
+        normalise(sub(self.frame.origin, camera.eye))
+            .or_else(|| normalise(sub(camera.target, camera.eye)))
     }
 
     /// Projects a handle to screen space; `None` when it is behind the camera.
-    pub fn screen_point(&self, camera: &Camera, viewport: Viewport, point: Point3) -> Result<Option<[f64; 2]>> {
-        Ok(camera.project(point, viewport)?.map(|projected| projected.screen))
+    pub fn screen_point(
+        &self,
+        camera: &Camera,
+        viewport: Viewport,
+        point: Point3,
+    ) -> Result<Option<[f64; 2]>> {
+        Ok(camera
+            .project(point, viewport)?
+            .map(|projected| projected.screen))
     }
 
     /// Distance from the pointer to the nearest of this view's handles, with the handle itself.
@@ -346,7 +394,9 @@ impl GumballView {
                 continue;
             };
             let distance = point_to_segment(pointer, start, end);
-            if distance <= tolerance_px && best.is_none_or(|(best_distance, _)| distance < best_distance) {
+            if distance <= tolerance_px
+                && best.is_none_or(|(best_distance, _)| distance < best_distance)
+            {
                 best = Some((distance, segment.handle));
             }
         }
@@ -371,7 +421,9 @@ impl GumballView {
                 continue;
             };
             let distance = point_to_segment(pointer, start, end);
-            if distance <= tolerance_px && best.is_none_or(|(best_distance, _)| distance < best_distance) {
+            if distance <= tolerance_px
+                && best.is_none_or(|(best_distance, _)| distance < best_distance)
+            {
                 best = Some((distance, segment.handle));
             }
         }
@@ -393,17 +445,22 @@ impl GumballView {
         let drag = match handle {
             Handle::MoveAxis(axis) => {
                 let direction = self.frame.axis(axis);
-                let Some(start) = axis_parameter(origin, direction, start_ray.origin, start_ray.direction) else {
+                let Some(start) =
+                    axis_parameter(origin, direction, start_ray.origin, start_ray.direction)
+                else {
                     return Ok(None);
                 };
-                let Some(end) = axis_parameter(origin, direction, end_ray.origin, end_ray.direction) else {
+                let Some(end) =
+                    axis_parameter(origin, direction, end_ray.origin, end_ray.direction)
+                else {
                     return Ok(None);
                 };
                 Drag::WorldDelta(scale(direction, end - start))
             }
             Handle::MovePlane(plane) => {
                 let normal = self.frame.plane_normal(plane);
-                let Some(start) = plane_hit(origin, normal, start_ray.origin, start_ray.direction) else {
+                let Some(start) = plane_hit(origin, normal, start_ray.origin, start_ray.direction)
+                else {
                     return Ok(None);
                 };
                 let Some(end) = plane_hit(origin, normal, end_ray.origin, end_ray.direction) else {
@@ -416,17 +473,20 @@ impl GumballView {
                 let Some(forward) = normalise(sub(camera.target, camera.eye)) else {
                     return Ok(None);
                 };
-                let Some(start) = plane_hit(origin, forward, start_ray.origin, start_ray.direction) else {
+                let Some(start) = plane_hit(origin, forward, start_ray.origin, start_ray.direction)
+                else {
                     return Ok(None);
                 };
-                let Some(end) = plane_hit(origin, forward, end_ray.origin, end_ray.direction) else {
+                let Some(end) = plane_hit(origin, forward, end_ray.origin, end_ray.direction)
+                else {
                     return Ok(None);
                 };
                 Drag::WorldDelta(sub(end, start))
             }
             Handle::Rotate(axis) => {
                 let normal = self.frame.axis(axis);
-                let Some(start) = plane_hit(origin, normal, start_ray.origin, start_ray.direction) else {
+                let Some(start) = plane_hit(origin, normal, start_ray.origin, start_ray.direction)
+                else {
                     return Ok(None);
                 };
                 let Some(end) = plane_hit(origin, normal, end_ray.origin, end_ray.direction) else {
@@ -442,13 +502,17 @@ impl GumballView {
             }
             Handle::Scale(axis) => {
                 let direction = self.frame.axis(axis);
-                let Some(start) = axis_parameter(origin, direction, start_ray.origin, start_ray.direction) else {
+                let Some(start) =
+                    axis_parameter(origin, direction, start_ray.origin, start_ray.direction)
+                else {
                     return Ok(None);
                 };
                 if start.abs() <= 1e-9 {
                     return Ok(None);
                 }
-                let Some(end) = axis_parameter(origin, direction, end_ray.origin, end_ray.direction) else {
+                let Some(end) =
+                    axis_parameter(origin, direction, end_ray.origin, end_ray.direction)
+                else {
                     return Ok(None);
                 };
                 let factor = end / start;
@@ -465,7 +529,11 @@ impl GumballView {
 /// Any orthonormal pair spanning the plane with `normal`. Kept for callers that need a ring basis.
 #[allow(dead_code)]
 fn basis_for(normal: Point3) -> (Point3, Point3) {
-    let helper = if normal[0].abs() < 0.9 { [1.0, 0.0, 0.0] } else { [0.0, 1.0, 0.0] };
+    let helper = if normal[0].abs() < 0.9 {
+        [1.0, 0.0, 0.0]
+    } else {
+        [0.0, 1.0, 0.0]
+    };
     let u = normalise(cross(normal, helper)).unwrap_or([0.0, 1.0, 0.0]);
     let v = normalise(cross(normal, u)).unwrap_or([1.0, 0.0, 0.0]);
     (u, v)
@@ -490,15 +558,28 @@ mod tests {
     use crate::camera::{Camera, Viewport};
 
     fn viewport() -> Viewport {
-        Viewport { origin: [0.0, 0.0], size: [800.0, 600.0] }
+        Viewport {
+            origin: [0.0, 0.0],
+            size: [800.0, 600.0],
+        }
     }
 
     fn camera() -> Camera {
-        Camera::perspective([0.0, 0.0, 10.0], [0.0; 3], [0.0, 1.0, 0.0], 45f64.to_radians()).expect("camera")
+        Camera::perspective(
+            [0.0, 0.0, 10.0],
+            [0.0; 3],
+            [0.0, 1.0, 0.0],
+            45f64.to_radians(),
+        )
+        .expect("camera")
     }
 
     fn screen_of(camera: &Camera, point: Point3) -> [f64; 2] {
-        camera.project(point, viewport()).expect("project").expect("in front").screen
+        camera
+            .project(point, viewport())
+            .expect("project")
+            .expect("in front")
+            .screen
     }
 
     #[test]
@@ -506,7 +587,9 @@ mod tests {
         let view = GumballView::new(Frame::world(), Mode::Move);
         let camera = camera();
         let pointer = screen_of(&camera, [0.5, 0.0, 0.0]);
-        let hit = view.hit(&camera, viewport(), pointer, 6.0).expect("hit test");
+        let hit = view
+            .hit(&camera, viewport(), pointer, 6.0)
+            .expect("hit test");
         assert_eq!(hit, Some(Handle::MoveAxis(Axis::X)));
     }
 
@@ -514,7 +597,9 @@ mod tests {
     fn empty_space_is_not_a_handle() {
         let view = GumballView::new(Frame::world(), Mode::Move);
         let camera = camera();
-        let hit = view.hit(&camera, viewport(), [790.0, 590.0], 6.0).expect("hit test");
+        let hit = view
+            .hit(&camera, viewport(), [790.0, 590.0], 6.0)
+            .expect("hit test");
         assert_eq!(hit, None);
     }
 
@@ -528,9 +613,14 @@ mod tests {
             .drag(&camera, viewport(), Handle::MoveAxis(Axis::X), from, to)
             .expect("drag")
             .expect("some drag");
-        let Drag::WorldDelta(delta) = drag else { panic!("expected a translation, got {drag:?}") };
+        let Drag::WorldDelta(delta) = drag else {
+            panic!("expected a translation, got {drag:?}")
+        };
         assert!((delta[0] - 1.0).abs() < 1e-6, "x {delta:?}");
-        assert!(delta[1].abs() < 1e-6 && delta[2].abs() < 1e-6, "no side motion: {delta:?}");
+        assert!(
+            delta[1].abs() < 1e-6 && delta[2].abs() < 1e-6,
+            "no side motion: {delta:?}"
+        );
     }
 
     #[test]
@@ -543,9 +633,17 @@ mod tests {
             .drag(&camera, viewport(), Handle::MovePlane(Plane::XY), from, to)
             .expect("drag")
             .expect("some drag");
-        let Drag::WorldDelta(delta) = drag else { panic!("expected a translation") };
-        assert!(delta[2].abs() < 1e-6, "no z motion out of the plane: {delta:?}");
-        assert!(delta[0] > 0.4 && delta[1] > 0.1, "in-plane motion: {delta:?}");
+        let Drag::WorldDelta(delta) = drag else {
+            panic!("expected a translation")
+        };
+        assert!(
+            delta[2].abs() < 1e-6,
+            "no z motion out of the plane: {delta:?}"
+        );
+        assert!(
+            delta[0] > 0.4 && delta[1] > 0.1,
+            "in-plane motion: {delta:?}"
+        );
     }
 
     #[test]
@@ -558,8 +656,13 @@ mod tests {
             .drag(&camera, viewport(), Handle::Rotate(Axis::Z), from, to)
             .expect("drag")
             .expect("some drag");
-        let Drag::Angle(angle) = drag else { panic!("expected an angle") };
-        assert!((angle - std::f64::consts::FRAC_PI_2).abs() < 1e-6, "angle {angle}");
+        let Drag::Angle(angle) = drag else {
+            panic!("expected an angle")
+        };
+        assert!(
+            (angle - std::f64::consts::FRAC_PI_2).abs() < 1e-6,
+            "angle {angle}"
+        );
     }
 
     #[test]
@@ -572,26 +675,48 @@ mod tests {
             .drag(&camera, viewport(), Handle::Scale(Axis::X), from, to)
             .expect("drag")
             .expect("some drag");
-        let Drag::Factor(factor) = drag else { panic!("expected a factor") };
+        let Drag::Factor(factor) = drag else {
+            panic!("expected a factor")
+        };
         assert!((factor - 2.0).abs() < 1e-6, "factor {factor}");
     }
 
     #[test]
     fn an_orthographic_viewport_hits_the_same_handles() {
         let view = GumballView::new(Frame::world(), Mode::Move);
-        let camera = Camera::orthographic([0.0, 0.0, 10.0], [0.0; 3], [0.0, 1.0, 0.0], 10.0).expect("camera");
+        let camera = Camera::orthographic([0.0, 0.0, 10.0], [0.0; 3], [0.0, 1.0, 0.0], 10.0)
+            .expect("camera");
         let pointer = screen_of(&camera, [0.5, 0.0, 0.0]);
-        let hit = view.hit(&camera, viewport(), pointer, 6.0).expect("hit test");
+        let hit = view
+            .hit(&camera, viewport(), pointer, 6.0)
+            .expect("hit test");
         assert_eq!(hit, Some(Handle::MoveAxis(Axis::X)));
     }
 
     #[test]
     fn every_mode_exposes_the_handles_it_draws() {
-        assert_eq!(GumballView::new(Frame::world(), Mode::Move).handles().len(), 7);
-        assert_eq!(GumballView::new(Frame::world(), Mode::Rotate).handles().len(), 3);
-        assert_eq!(GumballView::new(Frame::world(), Mode::Scale).handles().len(), 3);
+        assert_eq!(
+            GumballView::new(Frame::world(), Mode::Move).handles().len(),
+            7
+        );
+        assert_eq!(
+            GumballView::new(Frame::world(), Mode::Rotate)
+                .handles()
+                .len(),
+            3
+        );
+        assert_eq!(
+            GumballView::new(Frame::world(), Mode::Scale)
+                .handles()
+                .len(),
+            3
+        );
         let segments = GumballView::new(Frame::world(), Mode::Rotate).segments();
-        assert_eq!(segments.len(), 3 * 24, "three quarter arcs of twenty-four segments each");
+        assert_eq!(
+            segments.len(),
+            3 * 24,
+            "three quarter arcs of twenty-four segments each"
+        );
     }
 }
 
@@ -609,7 +734,10 @@ mod view_tests {
     }
 
     fn viewport() -> Viewport {
-        Viewport { origin: [0.0, 0.0], size: [400.0, 400.0] }
+        Viewport {
+            origin: [0.0, 0.0],
+            size: [400.0, 400.0],
+        }
     }
 
     /// Looking straight down the Z axis, as the top view does.
@@ -618,8 +746,13 @@ mod view_tests {
     }
 
     fn perspective() -> Camera {
-        Camera::perspective([35.0, -35.0, 35.0], [0.0; 3], [0.0, 0.0, 1.0], 35f64.to_radians())
-            .expect("camera")
+        Camera::perspective(
+            [35.0, -35.0, 35.0],
+            [0.0; 3],
+            [0.0, 0.0, 1.0],
+            35f64.to_radians(),
+        )
+        .expect("camera")
     }
 
     #[test]
@@ -633,7 +766,11 @@ mod view_tests {
                 _ => None,
             })
             .collect();
-        assert_eq!(axes, vec![Axis::X, Axis::Y], "no Z arrow when looking down Z");
+        assert_eq!(
+            axes,
+            vec![Axis::X, Axis::Y],
+            "no Z arrow when looking down Z"
+        );
         let planes: Vec<Plane> = kept
             .iter()
             .filter_map(|segment| match segment.handle {
@@ -641,7 +778,11 @@ mod view_tests {
                 _ => None,
             })
             .collect();
-        assert_eq!(planes, vec![Plane::XY], "only the plane that faces the camera");
+        assert_eq!(
+            planes,
+            vec![Plane::XY],
+            "only the plane that faces the camera"
+        );
     }
 
     #[test]
@@ -701,18 +842,28 @@ mod box_tests {
             eye: [35.0, -35.0, 35.0],
             target: [0.0; 3],
             up: [0.0, 0.0, 1.0],
-            projection: Projection::Perspective { vertical_fov_rad: 35f64.to_radians() },
+            projection: Projection::Perspective {
+                vertical_fov_rad: 35f64.to_radians(),
+            },
             near_mm: 0.1,
             far_mm: 1000.0,
             revision: 1,
         };
-        let viewport = Viewport { origin: [0.0, 0.0], size: [480.0, 260.0] };
+        let viewport = Viewport {
+            origin: [0.0, 0.0],
+            size: [480.0, 260.0],
+        };
         let gumball = GumballView::with_size(frame, Mode::Scale, 10.0);
         let box_screen = gumball
             .visible_segments(&camera, viewport)
             .into_iter()
             .find(|segment| segment.handle == Handle::Scale(Axis::X))
-            .and_then(|segment| gumball.screen_point(&camera, viewport, segment.end).ok().flatten())
+            .and_then(|segment| {
+                gumball
+                    .screen_point(&camera, viewport, segment.end)
+                    .ok()
+                    .flatten()
+            })
             .expect("the X box is drawn");
         let hit = gumball
             .box_at(&camera, viewport, box_screen, 8.0)

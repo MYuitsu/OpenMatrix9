@@ -102,6 +102,7 @@ identifier!(
     OccurrenceId,
     LayerId,
     MaterialId,
+    LinePatternId,
     ResourceId,
     SourceId,
     ImportNamespaceId,
@@ -109,7 +110,12 @@ identifier!(
     TransactionId,
     JobId,
     FeatureId,
-    GroupId
+    GroupId,
+    ViewportId,
+    TextStyleId,
+    DimStyleId,
+    HatchPatternId,
+    LightId
 );
 identifier!(SessionId);
 impl SessionId {
@@ -134,3 +140,5 @@ pub struct SourceStamp {
     pub geometry_revision: u64,
     pub attributes_revision: u64,
 }
+
+

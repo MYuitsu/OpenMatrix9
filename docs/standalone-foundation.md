@@ -53,3 +53,55 @@ QymCAD remains reference-only; no code has been copied. The bounded rational eva
 ## Native File selection and startup — 2026-10-14
 
 [Scoped native File evidence](../docs/validation/2026-10-14-owned-file-selection.md): 498 workspace/119 focused subset;3 real Windows Show/GetResult selections, alternate SaveAs/owned Replace adopts path only after acceptance with original/seed SHA256 preservation. Native actual --ui path clean startup3checks and cold report match. Success5/close11/File8/Layers10+13/viewport6 are separate overlapping replays;7 Job-owned cold children plus2 bounded CLI inspections. Missing-module native startup, native success/Discard shutdown, complete persistence/.3dm/async/budgets/disposal and all full gates remain open.
+
+## Rhino 5 editable BRep — 2026-10-20
+
+`om9-kernel` has an optional `3dm-brep` feature that links the pinned openNURBS
+library and converts a 3DM ON_Brep payload to an owned OCCT `Geometry::Brep`.
+`om9-app` enables it by default through the `occt-brep` feature; the same feature
+wires the conversion into `ThreeDmHost` import and export. `--no-default-features`
+is a developer fallback: BReps stay `NativeBrep` and cannot be displayed without
+the OCCT kernel.
+
+```powershell
+$env:CARGO_TARGET_DIR='L:\om9-target'
+cargo build --release -p om9-app -j 2
+```
+
+The process needs the OCCT 8.0.1 `bin` directory, `tbb12.dll` and
+`jemalloc.dll` on `PATH` (or in the application layout). The native exchange
+helper stays openNURBS-only.
+
+Measured on the local Rhino 5 jewelry fixture (`bong 5X7.3dm`, SHA-256
+`573bb8b0b1523424c95cf0dfa2b26500c71e5add06b57462421a2ffc697f1218`): import
+bound 44/44 source objects, 34 layers, 30/30 BReps became editable
+`Geometry::Brep`, `.om9` was 8,566,153 bytes and release import took 5.37 s.
+Export produced a 2,195,121-byte V5 3DM that native `--inspect` read as 44
+objects / 34 layers / 1 definition / 30 `ON_Brep` / 0 diagnostics in 4.83 s;
+reimport returned 43 root objects (29 BRep + 13 curve + 1 instance) and 34
+layers. Evidence is in
+[`implementation/evidence/M03/2026-10-20-rhino5-editable-brep.json`](../implementation/evidence/M03/2026-10-20-rhino5-editable-brep.json).
+
+Current limits: public openNURBS has no `ON_Brep::CreateMesh` implementation, so
+the R5-A fallback cannot tessellate BReps without OCCT; V6–V8 are deferred and
+V4 legacy policy is not implemented; manual four-view/selection smoke and
+extended V5 annotation/hatch/light host types remain open. The 5.37 s/4.83 s
+release timings are close to, but still above, the proposed 5 s target.
+
+`tools/public_source_audit.py` defaults to the git-public set and passes with
+0 errors; `--strict` still reports private local/reference material.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

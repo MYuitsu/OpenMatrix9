@@ -89,13 +89,118 @@
       "crates/om9-app/tests/chrome_actions.rs",
       "crates/om9-app/tests/left_stack_layers.rs",
       "crates/om9-app/tests/panel_ops.rs",
-      "crates/om9-app/tests/shell_docking.rs"
+      "crates/om9-app/tests/shell_docking.rs",
+      "implementation/evidence/M01/2026-10-20-menu-text-contrast.json",
+      "implementation/evidence/M01/2026-10-20-menu-icon-emphasis.json"
     ],
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending.",
       "No right-click alternative is registered yet."
-    ]
+    ],
+    "label_readability": {
+      "date": "2026-10-20",
+      "status": "AUTOMATED_AND_NATIVE_REPLAY_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "12pt instead of 11pt; brighter hue-preserving white mix; 0.35pt same-colour overprint replaces dark label shadow; existing 18pt card height retained.",
+      "evidence": "implementation/evidence/M01/2026-10-20-menu-text-contrast.json"
+    },
+    "icon_readability": {
+      "date": "2026-10-20",
+      "status": "AUTOMATED_AND_NATIVE_REPLAY_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Icon inset reduced from 3pt to 1.5pt (3pt larger painted square in the same slot), brighter enabled card/hover/outline, subtle top-edge highlight. Disabled cards retain a darker fill and non-invoking interaction.",
+      "evidence": "implementation/evidence/M01/2026-10-20-menu-icon-emphasis.json"
+    },
+    "dock_theme": {
+      "date": "2026-10-20",
+      "status": "DOCK_APPEARANCE_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Dock background presentation only: left/right column surfaces, section bars and floating menu content.",
+      "colours": {
+        "dock_background": "#01391C",
+        "section_background": "#005126",
+        "edges_hover": "#236B48"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-green-docks.json"
+      ]
+    },
+    "text_readability": {
+      "date": "2026-10-20",
+      "status": "TEXT_APPEARANCE_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Dock text presentation: headings, body, secondary/disabled labels, category colours, project labels, floating titles and layer names/tooltips.",
+      "colours": {
+        "heading": "#FDD880",
+        "body": "#FFF4D6",
+        "secondary": "#CDE2D2",
+        "disabled_alpha": 0.78,
+        "category_white_mix": {
+          "darker_accents": 0.65,
+          "other_accents": 0.4
+        },
+        "current_layer_text_on_blue": "#05180E"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-dock-text-readability.json"
+      ]
+    },
+    "typography": {
+      "date": "2026-10-20",
+      "status": "TYPOGRAPHY_TESTED_NATIVE_CAPTURED_LAYOUT_ORACLE_MISMATCH",
+      "scope": "UI font rendering and category-label glyph quality; no colour or command behavior changes.",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-smooth-fonts.json"
+      ],
+      "limitation": "All three native app processes exited successfully and each completed five command checks. Full layout oracle remains FAIL because its 22pt icon expectation disagrees with the captured 24pt executable. Concurrent icon-size work is outside this font change."
+    },
+    "auxiliary_palettes": {
+      "date": "2026-10-20",
+      "status": "REFERENCE_SLOTS_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Restore the user-supplied Display/Snaps/Info & Settings icon counts, row order, group gaps and auxiliary control positions using existing authored vectors.",
+      "counts": {
+        "Display": 11,
+        "Snaps_command_icons": 16,
+        "InfoSettings": 22
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-fixed-sidebar-palettes.json"
+      ],
+      "availability": "All three palettes remain non-invoking presentation adapters with unavailable-operation tooltips. No geometry/backend capability enabled."
+    },
+    "icon_size_audit": {
+      "date": "2026-10-20",
+      "status": "HEADLESS_LAYOUT_MEASURED_MANUAL_UI_PENDING",
+      "scope": "Measure actual icon slots at default 360 logical-point dock across four client resolutions and three simulated scales. No runtime sizing or command behavior changed by this audit.",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-icon-screen-sizes.json",
+        "docs/validation/2026-10-20-icon-screen-sizes.md"
+      ],
+      "matrix_combinations": 12,
+      "tests": 5,
+      "runtime_sizing_changed": false,
+      "human_approval": null
+    },
+    "live_icon_resize": {
+      "date": "2026-10-20",
+      "status": "NATIVE_MAXIMIZE_RESTORE_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Live icon resize on Windows maximize/restore while retaining reference palette counts, row order, ten-column Main Menu and 360-point default dock.",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-fullscreen-icon-resize.json",
+        "docs/validation/2026-10-20-fullscreen-icon-resize.md"
+      ],
+      "human_approval": null
+    },
+    "sidebar_scrollbar": {
+      "date": "2026-10-20",
+      "status": "NATIVE_AND_AUTOMATED_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Fix left-sidebar scrollbar covering buttons: always-visible solid 4pt bar, 2pt gap, no hover expansion and actual retained scroll offset.",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-slim-sidebar-scrollbar.json",
+        "docs/validation/2026-10-20-slim-sidebar-scrollbar.md"
+      ],
+      "human_approval": null
+    }
   },
   "execution_state": "RUNTIME_IMPLEMENTED",
   "readiness_state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"

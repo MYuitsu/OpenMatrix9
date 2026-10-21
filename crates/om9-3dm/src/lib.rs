@@ -142,7 +142,12 @@ impl BudgetReport {
         }
     }
 
-    fn geometry(needed_vertices: usize, allowed_vertices: usize, needed_corners: usize, allowed_corners: usize) -> Self {
+    fn geometry(
+        needed_vertices: usize,
+        allowed_vertices: usize,
+        needed_corners: usize,
+        allowed_corners: usize,
+    ) -> Self {
         Self {
             needed_bytes: 0,
             allowed_bytes: 0,
@@ -247,7 +252,9 @@ unsafe extern "C" {
 
 fn message_of(buffer: &[c_char; 512]) -> String {
     // SAFETY: the bridge always NUL-terminates within the buffer it was given.
-    unsafe { CStr::from_ptr(buffer.as_ptr()) }.to_string_lossy().into_owned()
+    unsafe { CStr::from_ptr(buffer.as_ptr()) }
+        .to_string_lossy()
+        .into_owned()
 }
 
 fn status(code: c_int, buffer: &[c_char; 512]) -> std::result::Result<(), ImportError> {
@@ -309,10 +316,16 @@ pub fn read_meshes(path: &Path) -> std::result::Result<Vec<Mesh>, ImportError> {
 }
 
 /// Reads every mesh of a `.3dm` file under an explicit budget.
-pub fn read_meshes_with(path: &Path, budget: ImportBudget) -> std::result::Result<Vec<Mesh>, ImportError> {
+pub fn read_meshes_with(
+    path: &Path,
+    budget: ImportBudget,
+) -> std::result::Result<Vec<Mesh>, ImportError> {
     let file_bytes = std::fs::metadata(path).map(|meta| meta.len()).unwrap_or(0);
     if file_bytes > budget.max_bytes {
-        return Err(ImportError::Budget(BudgetReport::bytes(file_bytes, budget.max_bytes)));
+        return Err(ImportError::Budget(BudgetReport::bytes(
+            file_bytes,
+            budget.max_bytes,
+        )));
     }
     let text = path.to_string_lossy().into_owned();
     let c_path = std::ffi::CString::new(text).map_err(|_| ImportError::Invalid("path"))?;

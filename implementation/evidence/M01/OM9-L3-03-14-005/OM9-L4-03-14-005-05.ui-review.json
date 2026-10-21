@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-03-14-005-05",
+  "l3_id": "OM9-L3-03-14-005",
+  "title": "Matrix Object Info Overlay",
+  "oracle": {
+    "positive": "Select box shows type, bounding box dimensions, geometry validity sourced from model",
+    "negative": "Missing BRep must show unavailable measurement, not zero volume claim"
+  },
+  "manual_test_gate": "M01-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) at the running application",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: none behavioural (the model is new); stated as API-level. J1 encodes the negative oracle as a fixture.",
+    "GREEN: cargo test -p om9-app --test object_info_overlay -> test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "cargo test -p om9-core -p om9-app -j 2: every group passes except the pre-existing, unrelated chrome_actions::icons_scale_with_the_screen_size.",
+    "cargo fmt --check: exit 0; cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0",
+    "RESOLVED AND GREEN: the harness expectation was stale and is corrected. The scenario now forces the window-readback path with a 300x40 rectangle; the app clamps it to [28,49,300,120] (FLOAT_MIN_HEIGHT) and says 'Display was moved back inside the window'; one frame later the REAL window reports its own 132 px height, above the minimum and inside the work area, which the readback legitimately accepts. The harness asserts on the forced clamp and the message (float_after_force.2/3, message_after_force) instead of the frame-later state. Full harness: 7/7 PASS.",
+    "Receipt block: cargo test -p om9-app --test object_info_overlay -> 3 passed (a new test asserts the receipt block is None with no selection and carries exactly the painted line 'Line · 10.000 × 4.000 × 0.000 · valid' with one selected object).",
+    "FINAL: the real-window harness has EIGHT scenarios now (the seventh was object-info) and passes 8/8; the single verification point tools/verify_m01_l2_03_14.py is 13/13 groups ok (exit 0), saved as implementation/evidence/M01/OM9-L2-03-14/AUTOMATED_VERIFICATION.log. Fixes that made it stable: the scenario name in PANEL_AUDIT_SCENARIOS, the missing `return` in the dispatch arm, a repaint until the shot is requested (otherwise the window idles before the record step), the focus step waiting for the status row (roll-up's intermittent lost first click), a one-retry for a killed launch, and the harness picking the check entry by scenario name.",
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
+  ],
+  "code_change": [
+    "crates/om9-core/src/object_info.rs (new): Measurement { Size, Unavailable } and ObjectInfo { kind, dimensions, valid: Option<bool>, detail, color } with Document::object_info(id, limits).",
+    "crates/om9-core/src/object_info.rs: label_text(info) -> String (type · size|unavailable · valid|invalid|validity unavailable) with a unit test; crates/om9-app/src/ui.rs: object_info_label paints it beside a single selected object in the layer colour, and the audit receipt carries object_info { kind, label }.",
+    "crates/om9-app/src/ui.rs: MatrixApp::object_info_block() (the receipt block, tested) and MatrixApp::select_objects() (the same selection door the CMD path uses, needed by the palette and the Super Select tool)."
+  ],
+  "artefacts": [
+    "OM9-L4-03-14-005-02.red.log",
+    "OM9-L4-03-14-005-02.green.log",
+    "OM9-L4-03-14-005-03.diffstat.txt",
+    "OM9-L4-03-14-005-03.target-test.log",
+    "OM9-L4-03-14-005-05.regression.log",
+    "object-info-label-in-a-real-window.png",
+    "object-info-label-in-a-real-window.png"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The fields, the rules AND the painted label are delivered; the look, the position and the colour match are yours to confirm.",
+    "items": [
+      {
+        "id": "Z1",
+        "step": "Check the fields the overlay will show for a point and a line (type, size, validity, length).",
+        "machine_proven": "I1/I2: kind, bounding size and validity come from the model; a line reports its length.",
+        "human_must_verify": "The wording and units match what you expect the label to read.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "Z2",
+        "step": "Check the rule for geometry without a measurement (mesh, native B-rep without a payload).",
+        "machine_proven": "I3/I4/J1: the size is Unavailable with a reason and never 0,0,0.",
+        "human_must_verify": "You agree the overlay should say 'unavailable' rather than showing a zero.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "Z3",
+        "step": "Check the colour: the label is drawn in the object's layer colour.",
+        "machine_proven": "I5: the info carries the colour when the object/layer has one.",
+        "human_must_verify": "The colour you expect is the colour you would see on the label.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "Z4",
+        "step": "Select ONE object and look at the label beside it.",
+        "machine_proven": "the label text is unit-tested and the receipt carries the same line; the label is painted at the projected object centre in the layer colour.",
+        "human_must_verify": "The label sits beside the object without covering it, reads type · size · validity, and disappears when nothing (or more than one object) is selected.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_l2_03_14_l3_005_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

@@ -27,9 +27,13 @@ fn gpu() -> Option<(wgpu::Device, wgpu::Queue)> {
         apply_limit_buckets: false,
     }))
     .ok()?;
-    let flags = adapter.get_texture_format_features(wgpu::TextureFormat::Rgba8Unorm).flags;
+    let flags = adapter
+        .get_texture_format_features(wgpu::TextureFormat::Rgba8Unorm)
+        .flags;
     if !flags.contains(wgpu::TextureFormatFeatureFlags::MULTISAMPLE_X4) {
-        eprintln!("the adapter has no 4x multisampling; the manual viewport check covers this machine");
+        eprintln!(
+            "the adapter has no 4x multisampling; the manual viewport check covers this machine"
+        );
         return None;
     }
     let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
@@ -44,10 +48,19 @@ fn gpu() -> Option<(wgpu::Device, wgpu::Queue)> {
     Some((device, queue))
 }
 
-fn texture(device: &wgpu::Device, label: &str, format: wgpu::TextureFormat, samples: u32) -> wgpu::Texture {
+fn texture(
+    device: &wgpu::Device,
+    label: &str,
+    format: wgpu::TextureFormat,
+    samples: u32,
+) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some(label),
-        size: wgpu::Extent3d { width: WIDTH, height: HEIGHT, depth_or_array_layers: 1 },
+        size: wgpu::Extent3d {
+            width: WIDTH,
+            height: HEIGHT,
+            depth_or_array_layers: 1,
+        },
         mip_level_count: 1,
         sample_count: samples,
         dimension: wgpu::TextureDimension::D2,
@@ -67,13 +80,25 @@ fn render_line(samples: u32) -> Option<Vec<u8>> {
     let (device, queue) = gpu()?;
     let resolve = texture(&device, "AA resolve", wgpu::TextureFormat::Rgba8Unorm, 1);
     let resolve_view = resolve.create_view(&wgpu::TextureViewDescriptor::default());
-    let colour = texture(&device, "AA colour", wgpu::TextureFormat::Rgba8Unorm, samples);
+    let colour = texture(
+        &device,
+        "AA colour",
+        wgpu::TextureFormat::Rgba8Unorm,
+        samples,
+    );
     let colour_view = colour.create_view(&wgpu::TextureViewDescriptor::default());
-    let depth = texture(&device, "AA depth", wgpu::TextureFormat::Depth32Float, samples);
+    let depth = texture(
+        &device,
+        "AA depth",
+        wgpu::TextureFormat::Depth32Float,
+        samples,
+    );
     let depth_view = depth.create_view(&wgpu::TextureViewDescriptor::default());
 
     // A render pass cannot mix sample counts, so clear the colour and depth attachments the same way.
-    let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("AA clear") });
+    let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+        label: Some("AA clear"),
+    });
     {
         let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("AA clear"),
@@ -105,7 +130,9 @@ fn render_line(samples: u32) -> Option<Vec<u8>> {
         eye: [0.0, 0.0, 10.0],
         target: [0.0, 0.0, 0.0],
         up: [0.0, 1.0, 0.0],
-        projection: Projection::Orthographic { vertical_span: 10.0 },
+        projection: Projection::Orthographic {
+            vertical_span: 10.0,
+        },
         near: 0.1,
         far: 100.0,
     };
@@ -114,7 +141,14 @@ fn render_line(samples: u32) -> Option<Vec<u8>> {
     overlay.upload();
     // A single-sample attachment cannot have a resolve target; it is read back directly.
     let readback_texture = if samples > 1 {
-        overlay.render_resolved(&colour_view, &resolve_view, &depth_view, camera, WIDTH, HEIGHT);
+        overlay.render_resolved(
+            &colour_view,
+            &resolve_view,
+            &depth_view,
+            camera,
+            WIDTH,
+            HEIGHT,
+        );
         &resolve
     } else {
         overlay.render(&colour_view, &depth_view, camera, WIDTH, HEIGHT);
@@ -130,7 +164,9 @@ fn render_line(samples: u32) -> Option<Vec<u8>> {
         usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
         mapped_at_creation: false,
     });
-    let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("AA readback") });
+    let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+        label: Some("AA readback"),
+    });
     encoder.copy_texture_to_buffer(
         wgpu::TexelCopyTextureInfo {
             texture: readback_texture,
@@ -146,13 +182,27 @@ fn render_line(samples: u32) -> Option<Vec<u8>> {
                 rows_per_image: Some(HEIGHT),
             },
         },
-        wgpu::Extent3d { width: WIDTH, height: HEIGHT, depth_or_array_layers: 1 },
+        wgpu::Extent3d {
+            width: WIDTH,
+            height: HEIGHT,
+            depth_or_array_layers: 1,
+        },
     );
     queue.submit(std::iter::once(encoder.finish()));
-    device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("poll");
+    device
+        .poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        })
+        .expect("poll");
     let slice = readback.slice(..);
     slice.map_async(wgpu::MapMode::Read, |_| {});
-    device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None }).expect("map");
+    device
+        .poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        })
+        .expect("map");
     let data = slice.get_mapped_range().expect("mapped range");
     let mut pixels = Vec::with_capacity((row_bytes * HEIGHT) as usize);
     for row in 0..HEIGHT {

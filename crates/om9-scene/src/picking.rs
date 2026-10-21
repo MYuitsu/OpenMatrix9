@@ -30,7 +30,10 @@ fn edge_point(
     end: om9_core::geometry::Point3,
     depths: [f64; 2],
 ) -> Option<om9_core::geometry::Point3> {
-    let ab = [end_screen[0] - start_screen[0], end_screen[1] - start_screen[1]];
+    let ab = [
+        end_screen[0] - start_screen[0],
+        end_screen[1] - start_screen[1],
+    ];
     let ap = [pointer[0] - start_screen[0], pointer[1] - start_screen[1]];
     let length2 = ab[0] * ab[0] + ab[1] * ab[1];
     let t = if length2 <= 1e-18 {
@@ -245,13 +248,23 @@ pub(crate) fn pick(
     tolerance: f64,
     intent: PickIntent,
 ) -> Result<Option<PickHit>> {
-    Ok(pick_candidates(scene, screen, camera, viewport, tolerance, intent, PickKind::Object)?
-        .into_iter()
-        .next())
+    Ok(pick_candidates(
+        scene,
+        screen,
+        camera,
+        viewport,
+        tolerance,
+        intent,
+        PickKind::Object,
+        true,
+    )?
+    .into_iter()
+    .next())
 }
 
 /// Every object under the pointer, nearest first. One hit per object: the ambiguity popup offers objects,
 /// not individual faces of the same object.
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn pick_candidates(
     scene: &Scene,
     screen: [f64; 2],
@@ -260,13 +273,33 @@ pub(crate) fn pick_candidates(
     tolerance: f64,
     intent: PickIntent,
     kind: PickKind,
+    nearest_only: bool,
 ) -> Result<Vec<PickHit>> {
     if !tolerance.is_finite() || tolerance < 0. {
         return Err(Error::Invalid("pixel pick tolerance"));
     }
     let ray = camera.ray(screen, viewport)?;
+    let world_per_pixel = match camera.projection {
+        crate::camera::Projection::Perspective { vertical_fov_rad } => {
+            let distance = ((camera.eye[0] - camera.target[0]).powi(2)
+                + (camera.eye[1] - camera.target[1]).powi(2)
+                + (camera.eye[2] - camera.target[2]).powi(2))
+            .sqrt();
+            2.0 * (vertical_fov_rad * 0.5).tan() * distance / viewport.size[1].max(1.0)
+        }
+        crate::camera::Projection::Orthographic { vertical_span_mm } => {
+            vertical_span_mm / viewport.size[1].max(1.0)
+        }
+    };
+    let padding = tolerance.max(0.0) * world_per_pixel;
+    let candidates = scene
+        .spatial_index()
+        .ray_candidates_fat(ray.origin, ray.direction, padding);
     let mut hits: Vec<PickHit> = Vec::new();
-    for object in &scene.objects {
+    let mut best_depth = f64::INFINITY;
+    let _ = nearest_only;
+    for index in candidates {
+        let object = &scene.objects[index];
         let mut best: Option<PickHit> = None;
         let allowed = object.visible
             && match intent {
@@ -277,6 +310,29 @@ pub(crate) fn pick_candidates(
         if !allowed {
             continue;
         }
+        let (centre, radius) = scene.object_spheres()[index];
+        let mut sphere_depth = f64::INFINITY;
+        if radius > 0.0
+            && let Some(projected) = camera.project(centre, viewport)?
+        {
+            sphere_depth = projected.depth;
+            let height = viewport.size[1].max(1.0);
+            let wpp = match camera.projection {
+                crate::camera::Projection::Perspective { vertical_fov_rad } => {
+                    2.0 * (vertical_fov_rad * 0.5).tan() * projected.depth / height
+                }
+                crate::camera::Projection::Orthographic { vertical_span_mm } => vertical_span_mm / height,
+            };
+            let pixel_radius = radius / wpp.max(1e-9) * 1.1;
+            let dx = projected.screen[0] - screen[0];
+            let dy = projected.screen[1] - screen[1];
+            if (dx * dx + dy * dy).sqrt() > pixel_radius + tolerance {
+                continue;
+            }
+        }
+        if sphere_depth - radius > best_depth {
+            continue;
+        }
         let transform = object.display_transform()?;
         let mut candidates = vec![];
         match object.buffers.as_ref() {
@@ -284,7 +340,9 @@ pub(crate) fn pick_candidates(
                 points,
                 native_indices,
             } => {
-                if matches!(kind, PickKind::Face | PickKind::Edge) { continue; }
+                if matches!(kind, PickKind::Face | PickKind::Edge) {
+                    continue;
+                }
                 for (i, p) in points.iter().enumerate() {
                     let subset = if matches!(scene.entity_for(object)?.geometry, Geometry::Cloud(_))
                     {
@@ -307,7 +365,9 @@ pub(crate) fn pick_candidates(
                 }
             }
             RenderBuffers::Curve { points, parameters } => {
-                if matches!(kind, PickKind::Face | PickKind::Vertex) { continue; }
+                if matches!(kind, PickKind::Face | PickKind::Vertex) {
+                    continue;
+                }
                 let Geometry::Curve(curve) = &scene.entity_for(object)?.geometry else {
                     return Err(Error::Invalid("curve cache source"));
                 };
@@ -353,41 +413,57 @@ pub(crate) fn pick_candidates(
                 } else if kind == PickKind::Edge {
                     // Use document polygon boundaries, never tessellation diagonals.
                     for [first, second] in edges {
-                            let (a, b) = ((*first).min(*second) as usize, (*first).max(*second) as usize);
-                            let Some([world_start,world_end])=camera.clip_segment(transform.point(vertices[a])?,transform.point(vertices[b])?)? else { continue; };
-                            let (Ok(Some(start)), Ok(Some(end))) = (
-                                camera.project(world_start, viewport),
-                                camera.project(world_end, viewport),
-                            ) else {
-                                continue;
-                            };
-                            // The edge is picked at the point on it nearest the pointer.
-                            let Some(midpoint) = edge_point(
-                                screen, start.screen, end.screen,
-                                world_start,
-                                world_end,
-                                match camera.projection {
-                                    crate::camera::Projection::Perspective {..} => [start.depth,end.depth],
-                                    crate::camera::Projection::Orthographic {..} => [1.,1.],
-                                },
-                            ) else {
-                                continue;
-                            };
-                            if segment_distance(screen, start.screen, end.screen) > tolerance {
-                                continue;
-                            }
-                            if let Some(h) = hit(
-                                scene,
-                                object,
-                                camera,
-                                viewport,
-                                screen,
-                                midpoint,
-                                Subelement::MeshEdge { a: a as u32, b: b as u32 },
-                                tolerance,
-                            )? {
-                                candidates.push(h);
-                            }
+                        let (a, b) = (
+                            (*first).min(*second) as usize,
+                            (*first).max(*second) as usize,
+                        );
+                        let Some([world_start, world_end]) = camera.clip_segment(
+                            transform.point(vertices[a])?,
+                            transform.point(vertices[b])?,
+                        )?
+                        else {
+                            continue;
+                        };
+                        let (Ok(Some(start)), Ok(Some(end))) = (
+                            camera.project(world_start, viewport),
+                            camera.project(world_end, viewport),
+                        ) else {
+                            continue;
+                        };
+                        // The edge is picked at the point on it nearest the pointer.
+                        let Some(midpoint) = edge_point(
+                            screen,
+                            start.screen,
+                            end.screen,
+                            world_start,
+                            world_end,
+                            match camera.projection {
+                                crate::camera::Projection::Perspective { .. } => {
+                                    [start.depth, end.depth]
+                                }
+                                crate::camera::Projection::Orthographic { .. } => [1., 1.],
+                            },
+                        ) else {
+                            continue;
+                        };
+                        if segment_distance(screen, start.screen, end.screen) > tolerance {
+                            continue;
+                        }
+                        if let Some(h) = hit(
+                            scene,
+                            object,
+                            camera,
+                            viewport,
+                            screen,
+                            midpoint,
+                            Subelement::MeshEdge {
+                                a: a as u32,
+                                b: b as u32,
+                            },
+                            tolerance,
+                        )? {
+                            candidates.push(h);
+                        }
                     }
                 }
                 // A vertex or edge pick never falls back to the whole face test.
@@ -427,16 +503,23 @@ pub(crate) fn pick_candidates(
                             ) else {
                                 continue;
                             };
-                            let Some((u, v)) = closest_on_triangle_2d(screen, pa.screen, pb.screen, pc.screen)
+                            let Some((u, v)) =
+                                closest_on_triangle_2d(screen, pa.screen, pb.screen, pc.screen)
                             else {
                                 continue;
                             };
                             let weights = match camera.projection {
-                                crate::camera::Projection::Perspective {..} => [(1.0 - u - v) / pa.depth, u / pb.depth, v / pc.depth],
-                                crate::camera::Projection::Orthographic {..} => [1.0-u-v,u,v],
+                                crate::camera::Projection::Perspective { .. } => {
+                                    [(1.0 - u - v) / pa.depth, u / pb.depth, v / pc.depth]
+                                }
+                                crate::camera::Projection::Orthographic { .. } => {
+                                    [1.0 - u - v, u, v]
+                                }
                             };
                             let sum: f64 = weights.iter().sum();
-                            let world = std::array::from_fn(|i| (a[i]*weights[0] + b[i]*weights[1] + c[i]*weights[2]) / sum);
+                            let world = std::array::from_fn(|i| {
+                                (a[i] * weights[0] + b[i] * weights[1] + c[i] * weights[2]) / sum
+                            });
                             if !world.iter().all(|value| value.is_finite()) {
                                 continue;
                             }
@@ -463,18 +546,37 @@ pub(crate) fn pick_candidates(
                 }
             }
         }
-        if let Geometry::Brep(shape)=&scene.entity_for(object)?.geometry {
-            let display=&shape.display;
+        if let Geometry::Brep(shape) = &scene.entity_for(object)?.geometry {
+            let display = &shape.display;
             candidates.retain_mut(|candidate| {
-                let mapped=match candidate.subset {
-                    Subelement::MeshFace(face)=>display.faces.get(face as usize).copied().map(Subelement::BrepFace),
-                    Subelement::MeshVertex(vertex)=>display.vertices.iter().position(|offset|*offset==vertex)
-                        .and_then(|index|display.vertex_ids.get(index)).copied().map(Subelement::BrepVertex),
-                    Subelement::MeshEdge{a,b}=>display.segments.iter().find(|[x,y,_]|(*x==a && *y==b)||(*x==b && *y==a))
-                        .and_then(|[_,_,edge]|display.edges.get(*edge as usize)).copied().map(Subelement::BrepEdge),
-                    _=>None,
+                let mapped = match candidate.subset {
+                    Subelement::MeshFace(face) => display
+                        .faces
+                        .get(face as usize)
+                        .copied()
+                        .map(Subelement::BrepFace),
+                    Subelement::MeshVertex(vertex) => display
+                        .vertices
+                        .iter()
+                        .position(|offset| *offset == vertex)
+                        .and_then(|index| display.vertex_ids.get(index))
+                        .copied()
+                        .map(Subelement::BrepVertex),
+                    Subelement::MeshEdge { a, b } => display
+                        .segments
+                        .iter()
+                        .find(|[x, y, _]| (*x == a && *y == b) || (*x == b && *y == a))
+                        .and_then(|[_, _, edge]| display.edges.get(*edge as usize))
+                        .copied()
+                        .map(Subelement::BrepEdge),
+                    _ => None,
                 };
-                if let Some(subset)=mapped {candidate.subset=subset;true} else {false}
+                if let Some(subset) = mapped {
+                    candidate.subset = subset;
+                    true
+                } else {
+                    false
+                }
             });
         }
         for candidate in candidates {
@@ -487,11 +589,18 @@ pub(crate) fn pick_candidates(
             }
         }
         if let Some(best) = best {
+            best_depth = best_depth.min(best.depth);
             hits.push(best);
         }
     }
-    hits.sort_by(|left, right| left.depth.total_cmp(&right.depth).then(left.root.cmp(&right.root)).then(left.path.cmp(&right.path)));
+    hits.sort_by(|left, right| {
+        left.depth
+            .total_cmp(&right.depth)
+            .then(left.root.cmp(&right.root))
+            .then(left.path.cmp(&right.path))
+    });
     let mut roots = std::collections::BTreeSet::new();
     hits.retain(|hit| roots.insert(hit.root));
     Ok(hits)
 }
+

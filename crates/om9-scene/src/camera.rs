@@ -312,22 +312,33 @@ impl Camera {
         self.validate()?;
         finite(a)?;
         finite(b)?;
-        let [_,_,forward]=self.basis()?;
-        let za=dot(sub(a,self.eye),forward);
-        let zb=dot(sub(b,self.eye),forward);
-        let dz=zb-za;
-        if dz==0. { return Ok((za>=self.near_mm && za<=self.far_mm).then_some([a,b])); }
-        let t0=(self.near_mm-za)/dz;
-        let t1=(self.far_mm-za)/dz;
-        let mut lo=t0.min(t1).max(0.);
-        let mut hi=t0.max(t1).min(1.);
-        if lo>hi { return Ok(None); }
+        let [_, _, forward] = self.basis()?;
+        let za = dot(sub(a, self.eye), forward);
+        let zb = dot(sub(b, self.eye), forward);
+        let dz = zb - za;
+        if dz == 0. {
+            return Ok((za >= self.near_mm && za <= self.far_mm).then_some([a, b]));
+        }
+        let t0 = (self.near_mm - za) / dz;
+        let t1 = (self.far_mm - za) / dz;
+        let mut lo = t0.min(t1).max(0.);
+        let mut hi = t0.max(t1).min(1.);
+        if lo > hi {
+            return Ok(None);
+        }
         // Keep computed intersections a few parameter ULPs inside the depth slab. This avoids
         // subtractive roundoff projecting an exact near-plane intersection outside the slab.
-        let slack=(hi-lo).min(f64::EPSILON*32.);
-        if lo>0. { lo+=slack; }
-        if hi<1. { hi=(hi-slack).max(lo); }
-        Ok(Some([std::array::from_fn(|i|a[i]+(b[i]-a[i])*lo),std::array::from_fn(|i|a[i]+(b[i]-a[i])*hi)]))
+        let slack = (hi - lo).min(f64::EPSILON * 32.);
+        if lo > 0. {
+            lo += slack;
+        }
+        if hi < 1. {
+            hi = (hi - slack).max(lo);
+        }
+        Ok(Some([
+            std::array::from_fn(|i| a[i] + (b[i] - a[i]) * lo),
+            std::array::from_fn(|i| a[i] + (b[i] - a[i]) * hi),
+        ]))
     }
     pub fn pan(&mut self, delta: [f64; 2]) -> Result<()> {
         if !delta.iter().all(|v| v.is_finite()) {
@@ -377,6 +388,16 @@ impl Camera {
         next.validate()?;
         *self = next;
         Ok(())
+    }
+
+    /// Fits the clip planes to the current orbit radius so a deep zoom does not clip the model.
+    pub fn fit_clip(&mut self, radius: f64) -> Result<()> {
+        if !radius.is_finite() || radius <= 0. {
+            return Err(Error::Invalid("clip radius"));
+        }
+        self.near_mm = (radius * 0.002).clamp(1e-5, 0.01);
+        self.far_mm = (radius * 8.0).max(10.0);
+        self.validate()
     }
 
     pub fn zoom(&mut self, factor: f64) -> Result<()> {

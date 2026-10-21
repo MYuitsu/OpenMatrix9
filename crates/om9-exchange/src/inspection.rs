@@ -248,6 +248,19 @@ pub(crate) fn geometry(v: &Value, g: &Geometry, t: Transform) -> Result<()> {
             }
             Ok(())
         }
+        Geometry::Hatch(_) => {
+            fields(v, &["Hatch"])?;
+            let v = &v["Hatch"];
+            fields(v, &["display", "loops", "pattern", "color"])?;
+            Ok(())
+        }
+        Geometry::Light(light) => {
+            fields(v, &["Light"])?;
+            let v = &v["Light"];
+            fields(v, &["display", "location", "direction", "diffuse", "intensity", "style"])?;
+            point(&v["display"], light.display, 1e-10)?;
+            Ok(())
+        }
         Geometry::Brep(_) => {
             // Native source validation belongs to om9-core; the JSON contract only requires the leaf key.
             fields(v, &["Brep"])?;
@@ -369,6 +382,8 @@ fn native_kind(g: &Geometry) -> &'static str {
         Geometry::Brep(_) | Geometry::NativeBrep(_) => "ON_Brep",
         Geometry::Cloud(_) => "ON_PointCloud",
         Geometry::Instance(_) => "ON_InstanceRef",
+        Geometry::Hatch(_) => "ON_Hatch",
+        Geometry::Light(_) => "ON_Light",
     }
 }
 fn entity(v: &Value, e: &Entity, member: bool) -> Result<()> {
@@ -788,6 +803,20 @@ mod tests {
         );
     }
     #[test]
+    fn light_packet_matches_inspection() {
+        let light = Geometry::Light(om9_core::geometry::Light {
+            display: [1., 2., 3.],
+            location: [1., 2., 3.],
+            direction: [0., 0., -1.],
+            diffuse: [200, 180, 160, 255],
+            intensity: 0.75,
+            style: 8,
+        });
+        let value = serde_json::to_value(&light).unwrap();
+        geometry(&value, &light, Transform::identity()).unwrap();
+    }
+
+    #[test]
     fn inspection_rejects_duplicate_keys_unknown_status_and_echoed_untransformed_geometry() {
         let d = Document::new("document");
         let limits = Limits::default();
@@ -817,3 +846,6 @@ mod tests {
         assert!((n[1] - 2. / 5f64.sqrt()).abs() < 1e-12);
     }
 }
+
+
+

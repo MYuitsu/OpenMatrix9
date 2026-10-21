@@ -45,7 +45,12 @@ fn mesh_document() -> Document {
     ];
     let entity = Entity::new(
         "cube",
-        Geometry::Mesh(Mesh { vertices, faces, normals: Vec::new(), colors: Vec::new() }),
+        Geometry::Mesh(Mesh {
+            vertices,
+            faces,
+            normals: Vec::new(),
+            colors: Vec::new(),
+        }),
         None,
     );
     let id = entity.id;
@@ -53,7 +58,11 @@ fn mesh_document() -> Document {
     document
 }
 
-fn run(app: &mut MatrixApp, context: &egui::Context, frames: usize) -> Vec<egui::epaint::ClippedShape> {
+fn run(
+    app: &mut MatrixApp,
+    context: &egui::Context,
+    frames: usize,
+) -> Vec<egui::epaint::ClippedShape> {
     let mut shapes = Vec::new();
     for _ in 0..frames {
         let mut output = context.run_ui(

@@ -88,5 +88,27 @@
       "file": "M01 - CAD Shell, Viewport/L2-03-14 - Febe Matrix Layers Objectinfo Superselect/L3-008 - Layer State Persistence Visual Check/l3.json"
     }
   ],
-  "gap_note": "Layer clipboard/exchange has no L3 owner in this tree while the portable kernel exists (implementation/design/M01/W5-LAYER-CLIPBOARD.md, 10 tests). This L2 is the nearest owner; authoring the owning L3 (and its L4 queue) needs an explicit plan decision."
+  "gap_note": "Layer clipboard/exchange has no L3 owner in this tree while the portable kernel exists (implementation/design/M01/W5-LAYER-CLIPBOARD.md, 10 tests). This L2 is the nearest owner; authoring the owning L3 (and its L4 queue) needs an explicit plan decision.",
+  "runtime_implementation": {
+    "text_readability": {
+      "date": "2026-10-20",
+      "status": "TEXT_APPEARANCE_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Dock text presentation: headings, body, secondary/disabled labels, category colours, project labels, floating titles and layer names/tooltips.",
+      "colours": {
+        "heading": "#FDD880",
+        "body": "#FFF4D6",
+        "secondary": "#CDE2D2",
+        "disabled_alpha": 0.78,
+        "category_white_mix": {
+          "darker_accents": 0.65,
+          "other_accents": 0.4
+        },
+        "current_layer_text_on_blue": "#05180E"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-dock-text-readability.json"
+      ]
+    }
+  }
 }

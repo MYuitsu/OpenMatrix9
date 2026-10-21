@@ -86,6 +86,8 @@ fn bundle(mode: Option<ImportMode>) -> ImportBundle {
         entities: vec![a, b],
         layers: vec![],
         definitions: vec![],
+        groups: vec![],
+        exchange: Default::default(),
     }
 }
 fn fixture(
@@ -685,3 +687,6 @@ fn source_object_table_light_has_no_decoded_component_index_in_both_import_modes
         }
     }
 }
+
+
+

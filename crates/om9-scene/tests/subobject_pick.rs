@@ -39,7 +39,11 @@ fn cube() -> Mesh {
     }
 }
 
-fn fixture() -> (TransactionCoordinator, om9_core::identity::DocumentId, om9_core::identity::ObjectId) {
+fn fixture() -> (
+    TransactionCoordinator,
+    om9_core::identity::DocumentId,
+    om9_core::identity::ObjectId,
+) {
     let mut document = Document::new("subobject");
     let entity = Entity::new("cube", Geometry::Mesh(cube()), document.current_layer);
     let id = entity.id;
@@ -62,11 +66,15 @@ fn camera() -> Camera {
 }
 
 fn viewport() -> Viewport {
-    Viewport { origin: [0., 0.], size: [400., 400.] }
+    Viewport {
+        origin: [0., 0.],
+        size: [400., 400.],
+    }
 }
 
 fn scene(coordinator: &TransactionCoordinator, document: om9_core::identity::DocumentId) -> Scene {
-    Scene::capture_in_world(coordinator, document, om9_core::budget::Usage::default()).expect("scene")
+    Scene::capture_in_world(coordinator, document, om9_core::budget::Usage::default())
+        .expect("scene")
 }
 
 fn screen_of(point: [f64; 3]) -> [f64; 2] {
@@ -83,12 +91,27 @@ fn a_vertex_pick_returns_the_vertex_index() {
     let scene = scene(&coordinator, document);
     let corner = [-1.0, -1.0, 1.0];
     let hit = scene
-        .pick_kind(screen_of(corner), &camera(), viewport(), 6.0, PickIntent::Select, PickKind::Vertex)
+        .pick_kind(
+            screen_of(corner),
+            &camera(),
+            viewport(),
+            6.0,
+            PickIntent::Select,
+            PickKind::Vertex,
+        )
         .expect("pick")
         .expect("a vertex is under the pointer");
     assert_eq!(hit.root, root);
-    assert_eq!(hit.subset, Subelement::MeshVertex(4), "the top-front-left corner");
-    assert!((hit.world_point[0] + 1.0).abs() < 1e-9, "{:?}", hit.world_point);
+    assert_eq!(
+        hit.subset,
+        Subelement::MeshVertex(4),
+        "the top-front-left corner"
+    );
+    assert!(
+        (hit.world_point[0] + 1.0).abs() < 1e-9,
+        "{:?}",
+        hit.world_point
+    );
     assert!(world_matches(&coordinator, document, &hit));
 }
 
@@ -99,7 +122,14 @@ fn an_edge_pick_returns_both_vertex_indices_and_a_point_on_the_edge() {
     // Midpoint of the top edge between corners 4 and 5.
     let midpoint = [0.0, -1.0, 1.0];
     let hit = scene
-        .pick_kind(screen_of(midpoint), &camera(), viewport(), 6.0, PickIntent::Select, PickKind::Edge)
+        .pick_kind(
+            screen_of(midpoint),
+            &camera(),
+            viewport(),
+            6.0,
+            PickIntent::Select,
+            PickKind::Edge,
+        )
         .expect("pick")
         .expect("an edge is under the pointer");
     let Subelement::MeshEdge { a, b } = hit.subset else {
@@ -109,7 +139,11 @@ fn an_edge_pick_returns_both_vertex_indices_and_a_point_on_the_edge() {
         (a == 4 && b == 5) || (a == 5 && b == 4),
         "the edge joins the two front top corners: {a} {b}"
     );
-    assert!((hit.world_point[1] + 1.0).abs() < 1e-9, "on the edge: {:?}", hit.world_point);
+    assert!(
+        (hit.world_point[1] + 1.0).abs() < 1e-9,
+        "on the edge: {:?}",
+        hit.world_point
+    );
 }
 
 #[test]
@@ -118,7 +152,14 @@ fn a_face_pick_returns_the_face_and_never_a_vertex() {
     let scene = scene(&coordinator, document);
     // Centre of the view: inside the top face, away from every vertex and edge.
     let hit = scene
-        .pick_kind(screen_of([0.2, 0.2, 1.0]), &camera(), viewport(), 6.0, PickIntent::Select, PickKind::Face)
+        .pick_kind(
+            screen_of([0.2, 0.2, 1.0]),
+            &camera(),
+            viewport(),
+            6.0,
+            PickIntent::Select,
+            PickKind::Face,
+        )
         .expect("pick")
         .expect("a face is under the pointer");
     assert!(

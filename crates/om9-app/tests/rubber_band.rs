@@ -31,7 +31,10 @@ fn document_with_points() -> Document {
 fn frames(app: &mut MatrixApp, context: &egui::Context, frames: usize) {
     for _ in 0..frames {
         let mut output = context.run_ui(
-            egui::RawInput { screen_rect: Some(screen_rect()), ..Default::default() },
+            egui::RawInput {
+                screen_rect: Some(screen_rect()),
+                ..Default::default()
+            },
             |ui| app.show(ui),
         );
         output.textures_delta.clear();
@@ -40,7 +43,11 @@ fn frames(app: &mut MatrixApp, context: &egui::Context, frames: usize) {
 
 fn events(app: &mut MatrixApp, context: &egui::Context, events: Vec<Event>) {
     let mut output = context.run_ui(
-        egui::RawInput { screen_rect: Some(screen_rect()), events, ..Default::default() },
+        egui::RawInput {
+            screen_rect: Some(screen_rect()),
+            events,
+            ..Default::default()
+        },
         |ui| app.show(ui),
     );
     output.textures_delta.clear();
@@ -57,7 +64,10 @@ fn viewport_of(app: &MatrixApp, view: ViewId) -> Viewport {
 fn screen_of(app: &MatrixApp, view: ViewId, point: [f64; 3]) -> Pos2 {
     let viewport = viewport_of(app, view);
     let camera = &app.controller.workspace.views[&view].camera;
-    let projected = camera.project(point, viewport).expect("projection").expect("in front");
+    let projected = camera
+        .project(point, viewport)
+        .expect("projection")
+        .expect("in front");
     Pos2::new(projected.screen[0] as f32, projected.screen[1] as f32)
 }
 
@@ -77,7 +87,11 @@ fn drag(app: &mut MatrixApp, context: &egui::Context, start: Pos2, end: Pos2) {
     );
     for step in 1..=4 {
         let t = step as f32 / 4.0;
-        events(app, context, vec![Event::PointerMoved(start + (end - start) * t)]);
+        events(
+            app,
+            context,
+            vec![Event::PointerMoved(start + (end - start) * t)],
+        );
     }
     events(
         app,
@@ -101,12 +115,19 @@ fn a_band_over_two_points_selects_both() {
     assert_eq!(ids.len(), 2);
     let left = screen_of(&app, ViewId::Perspective, [-8.0, 0.0, 0.0]);
     let right = screen_of(&app, ViewId::Perspective, [8.0, 0.0, 0.0]);
-    eprintln!("left {left:?} right {right:?} rect {:?}", app.view_rects[&ViewId::Perspective]);
+    eprintln!(
+        "left {left:?} right {right:?} rect {:?}",
+        app.view_rects[&ViewId::Perspective]
+    );
     let start = Pos2::new(left.x.min(right.x) - 25.0, left.y.min(right.y) - 25.0);
     let end = Pos2::new(left.x.max(right.x) + 25.0, left.y.max(right.y) + 25.0);
     drag(&mut app, &context, start, end);
     let selected = app.controller.selection_state().objects;
-    assert_eq!(selected.len(), 2, "both points are inside the band: {selected:?}");
+    assert_eq!(
+        selected.len(),
+        2,
+        "both points are inside the band: {selected:?}"
+    );
     for id in &ids {
         assert!(selected.contains(id));
     }
@@ -123,6 +144,10 @@ fn a_band_around_one_point_selects_only_that_one() {
     let end = Pos2::new(left.x + 20.0, left.y + 20.0);
     drag(&mut app, &context, start, end);
     let selected = app.controller.selection_state().objects;
-    assert_eq!(selected.len(), 1, "only the left point is inside: {selected:?}");
+    assert_eq!(
+        selected.len(),
+        1,
+        "only the left point is inside: {selected:?}"
+    );
     assert!(!ids.is_empty());
 }

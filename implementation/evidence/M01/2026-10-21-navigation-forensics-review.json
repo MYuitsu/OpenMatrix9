@@ -1,0 +1,1807 @@
+{
+  "schema_version": 1,
+  "scope": "Existing-log analysis and source review only; no new application/runtime benchmark",
+  "recorded_at": "2026-10-21T07:23:32.416945+07:00",
+  "input": {
+    "path": "build/stress-27000/nav-pointer-125.jsonl",
+    "sha256": "cabd7f9ebc815732a0f961c277ff0656df1f49213a33db4692a63bca5f0a4af9",
+    "bytes": 156947,
+    "modified_at": "2026-10-21T05:43:55.058161+07:00",
+    "lines": 327,
+    "parse_errors": [],
+    "event_types": {
+      "session_start": 1,
+      "camera": 326
+    },
+    "first": {
+      "document": "bong-125-whole-stone.om9",
+      "event": "session_start",
+      "max_bytes": 268435456,
+      "max_objects": 500000,
+      "max_points": 500000000,
+      "objects": 125,
+      "t_ms": 0,
+      "_line": 1
+    },
+    "last_t_ms": 77569
+  },
+  "inventory_scope": {
+    "root": "H:\\OpenMatrix9",
+    "excluded_directory_names": [
+      ".git",
+      ".venv",
+      "QymCAD",
+      "__pycache__",
+      "node_modules",
+      "ref",
+      "target"
+    ],
+    "note": "JSONL inventory in checkout; no claim about external AppData or other drives"
+  },
+  "jsonl_files_found": 72,
+  "newest_jsonl": [
+    {
+      "path": "build/stress-27000/nav-pointer-125.jsonl",
+      "bytes": 156947,
+      "mtime_ns": 1792536235058161400,
+      "modified_at": "2026-10-21T05:43:55.058161+07:00"
+    },
+    {
+      "path": "build/stress-27000/nav-hold-125.jsonl",
+      "bytes": 55753,
+      "mtime_ns": 1792535949601957300,
+      "modified_at": "2026-10-21T05:39:09.601957+07:00"
+    },
+    {
+      "path": "build/stress-27000/nav-rig-125.jsonl",
+      "bytes": 273364,
+      "mtime_ns": 1792535629886369400,
+      "modified_at": "2026-10-21T05:33:49.886369+07:00"
+    },
+    {
+      "path": "build/stress-27000/nav125.jsonl",
+      "bytes": 153,
+      "mtime_ns": 1792535071104228600,
+      "modified_at": "2026-10-21T05:24:31.104228+07:00"
+    },
+    {
+      "path": "build/stress-27000/stone125-acc.jsonl",
+      "bytes": 119467,
+      "mtime_ns": 1792533844973344900,
+      "modified_at": "2026-10-21T05:04:04.973345+07:00"
+    },
+    {
+      "path": "build/stress-27000/stone125-30.jsonl",
+      "bytes": 42886,
+      "mtime_ns": 1792533478473402800,
+      "modified_at": "2026-10-21T04:57:58.473403+07:00"
+    },
+    {
+      "path": "build/stress-27000/goal30-final.jsonl",
+      "bytes": 94953,
+      "mtime_ns": 1792532786401182000,
+      "modified_at": "2026-10-21T04:46:26.401182+07:00"
+    },
+    {
+      "path": "build/stress-27000/audit-deep4.jsonl",
+      "bytes": 37690,
+      "mtime_ns": 1792530474732162700,
+      "modified_at": "2026-10-21T04:07:54.732163+07:00"
+    },
+    {
+      "path": "build/stress-27000/goal-final.jsonl",
+      "bytes": 147,
+      "mtime_ns": 1792530226376591000,
+      "modified_at": "2026-10-21T04:03:46.376591+07:00"
+    },
+    {
+      "path": "build/stress-27000/audit-deep3.jsonl",
+      "bytes": 34428,
+      "mtime_ns": 1792530216707639800,
+      "modified_at": "2026-10-21T04:03:36.707640+07:00"
+    },
+    {
+      "path": "build/stress-27000/audit-deep2.jsonl",
+      "bytes": 31008,
+      "mtime_ns": 1792530022154205100,
+      "modified_at": "2026-10-21T04:00:22.154205+07:00"
+    },
+    {
+      "path": "build/stress-27000/audit-deep.jsonl",
+      "bytes": 27393,
+      "mtime_ns": 1792529820559801100,
+      "modified_at": "2026-10-21T03:57:00.559801+07:00"
+    },
+    {
+      "path": "build/stress-27000/final30-729.jsonl",
+      "bytes": 147,
+      "mtime_ns": 1792529602817183800,
+      "modified_at": "2026-10-21T03:53:22.817184+07:00"
+    },
+    {
+      "path": "build/stress-27000/perfzoom-729.jsonl",
+      "bytes": 147,
+      "mtime_ns": 1792529386042317300,
+      "modified_at": "2026-10-21T03:49:46.042317+07:00"
+    },
+    {
+      "path": "build/stress-27000/overlay30-729.jsonl",
+      "bytes": 3503,
+      "mtime_ns": 1792529228541836500,
+      "modified_at": "2026-10-21T03:47:08.541837+07:00"
+    },
+    {
+      "path": "build/stress-27000/nomerge30-729.jsonl",
+      "bytes": 2687,
+      "mtime_ns": 1792529039633586100,
+      "modified_at": "2026-10-21T03:43:59.633586+07:00"
+    },
+    {
+      "path": "build/stress-27000/deep30-final.jsonl",
+      "bytes": 2663,
+      "mtime_ns": 1792529016825469500,
+      "modified_at": "2026-10-21T03:43:36.825469+07:00"
+    },
+    {
+      "path": "build/stress-27000/deepzoom2-729.jsonl",
+      "bytes": 9000,
+      "mtime_ns": 1792528822022834800,
+      "modified_at": "2026-10-21T03:40:22.022835+07:00"
+    },
+    {
+      "path": "build/stress-27000/deepzoom-729.jsonl",
+      "bytes": 23253,
+      "mtime_ns": 1792508654812653200,
+      "modified_at": "2026-10-20T22:04:14.812653+07:00"
+    },
+    {
+      "path": "build/stress-27000/paced-final.jsonl",
+      "bytes": 47575,
+      "mtime_ns": 1792508239596524000,
+      "modified_at": "2026-10-20T21:57:19.596524+07:00"
+    }
+  ],
+  "all_camera": {
+    "dt_ms": {
+      "n": 326,
+      "min": 33.333333,
+      "median": 33.515100000000004,
+      "p95_linear": 725.285925,
+      "p95_floor_rank": 724.1900999999999,
+      "p99_linear": 1340.4927000000002,
+      "max": 2001.3386999999998
+    },
+    "frame_ms": {
+      "n": 326,
+      "min": 5.306699778884649,
+      "median": 33.44869986176491,
+      "p95_linear": 690.9952461719513,
+      "p95_floor_rank": 591.3761258125305,
+      "p99_linear": 1201.9375562667847,
+      "max": 1631.0832500457764
+    },
+    "gap_ms": {
+      "n": 325,
+      "min": 5,
+      "median": 34,
+      "p95_linear": 758.6000000000001,
+      "p95_floor_rank": 749,
+      "p99_linear": 1566.6799999999976,
+      "max": 3536
+    },
+    "prepare_ms": {
+      "n": 326,
+      "min": 0.0026,
+      "median": 0.016349999999999996,
+      "p95_linear": 0.0194,
+      "p95_floor_rank": 0.0194,
+      "p99_linear": 0.020824999999999996,
+      "max": 0.0216
+    },
+    "draw_ms": {
+      "n": 326,
+      "min": 0.22790000000000002,
+      "median": 0.39335,
+      "p95_linear": 0.4679,
+      "p95_floor_rank": 0.46759999999999996,
+      "p99_linear": 0.61305,
+      "max": 1.1543
+    },
+    "wheel": {
+      "n": 326,
+      "min": -276.5264892578125,
+      "median": 0.0,
+      "p95_linear": 23.950583934783936,
+      "p95_floor_rank": 22.065237045288086,
+      "p99_linear": 162.93550872802734,
+      "max": 252.0
+    },
+    "radius_mm": {
+      "n": 326,
+      "min": 8.98659287674822,
+      "median": 74.84170231362538,
+      "p95_linear": 100.00000000000004,
+      "p95_floor_rank": 100.00000000000004,
+      "p99_linear": 100.00000000000004,
+      "max": 100.00000000000004
+    },
+    "dt_exact_target": 95,
+    "pace_late_true": 47
+  },
+  "by_action": {
+    "orbit": {
+      "dt_ms": {
+        "n": 201,
+        "min": 33.3848,
+        "median": 33.5221,
+        "p95_linear": 78.2645,
+        "p95_floor_rank": 72.16210000000001,
+        "p99_linear": 1275.1302,
+        "max": 1631.1205
+      },
+      "frame_ms": {
+        "n": 201,
+        "min": 5.306699778884649,
+        "median": 33.541399985551834,
+        "p95_linear": 97.82849997282028,
+        "p95_floor_rank": 91.31129831075668,
+        "p99_linear": 1302.5195598602295,
+        "max": 1631.0832500457764
+      },
+      "gap_ms": {
+        "n": 201,
+        "min": 33,
+        "median": 34,
+        "p95_linear": 402.0,
+        "p95_floor_rank": 343,
+        "p99_linear": 1363.0,
+        "max": 3536
+      },
+      "prepare_ms": {
+        "n": 201,
+        "min": 0.0040999999999999995,
+        "median": 0.0176,
+        "p95_linear": 0.0196,
+        "p95_floor_rank": 0.0196,
+        "p99_linear": 0.0212,
+        "max": 0.0216
+      },
+      "draw_ms": {
+        "n": 201,
+        "min": 0.2448,
+        "median": 0.417,
+        "p95_linear": 0.4744,
+        "p95_floor_rank": 0.4736,
+        "p99_linear": 0.5098,
+        "max": 0.629
+      },
+      "wheel": {
+        "n": 201,
+        "min": 0.0,
+        "median": 0.0,
+        "p95_linear": 0.0,
+        "p95_floor_rank": 0.0,
+        "p99_linear": 0.0,
+        "max": 0.0
+      },
+      "radius_mm": {
+        "n": 201,
+        "min": 74.84170231362472,
+        "median": 74.84170231362528,
+        "p95_linear": 74.84170231362549,
+        "p95_floor_rank": 74.84170231362546,
+        "p99_linear": 74.84170231362552,
+        "max": 74.84170231362552
+      },
+      "dt_exact_target": 0,
+      "pace_late_true": 17
+    },
+    "pan": {
+      "dt_ms": {
+        "n": 12,
+        "min": 33.333333,
+        "median": 33.333333,
+        "p95_linear": 33.333333,
+        "p95_floor_rank": 33.333333,
+        "p99_linear": 33.333333,
+        "max": 33.333333
+      },
+      "frame_ms": {
+        "n": 12,
+        "min": 16.66666753590107,
+        "median": 33.73329900205135,
+        "p95_linear": 34.313660115003586,
+        "p95_floor_rank": 34.217000007629395,
+        "p99_linear": 34.408172219991684,
+        "max": 34.43180024623871
+      },
+      "gap_ms": {
+        "n": 12,
+        "min": 33,
+        "median": 34.0,
+        "p95_linear": 318.79999999999967,
+        "p95_floor_rank": 101,
+        "p99_linear": 531.7600000000002,
+        "max": 585
+      },
+      "prepare_ms": {
+        "n": 12,
+        "min": 0.0031999999999999997,
+        "median": 0.0043,
+        "p95_linear": 0.008454999999999999,
+        "p95_floor_rank": 0.0076,
+        "p99_linear": 0.009291,
+        "max": 0.0095
+      },
+      "draw_ms": {
+        "n": 12,
+        "min": 0.2662,
+        "median": 0.40965,
+        "p95_linear": 0.5904199999999997,
+        "p95_floor_rank": 0.4421,
+        "p99_linear": 0.7354440000000002,
+        "max": 0.7716999999999999
+      },
+      "wheel": {
+        "n": 12,
+        "min": 0.0,
+        "median": 0.0,
+        "p95_linear": 0.0,
+        "p95_floor_rank": 0.0,
+        "p99_linear": 0.0,
+        "max": 0.0
+      },
+      "radius_mm": {
+        "n": 12,
+        "min": 100.0,
+        "median": 100.0,
+        "p95_linear": 100.0,
+        "p95_floor_rank": 100.0,
+        "p99_linear": 100.0,
+        "max": 100.0
+      },
+      "dt_exact_target": 12,
+      "pace_late_true": 0
+    },
+    "zoom": {
+      "dt_ms": {
+        "n": 113,
+        "min": 33.333333,
+        "median": 33.333333,
+        "p95_linear": 883.41158,
+        "p95_floor_rank": 877.9941,
+        "p99_linear": 1750.865907999997,
+        "max": 2001.3386999999998
+      },
+      "frame_ms": {
+        "n": 113,
+        "min": 5.352099891752005,
+        "median": 16.701100394129753,
+        "p95_linear": 850.5405306816097,
+        "p95_floor_rank": 831.9115042686462,
+        "p99_linear": 1145.7928276062007,
+        "max": 1216.2914276123047
+      },
+      "gap_ms": {
+        "n": 112,
+        "min": 5,
+        "median": 17.0,
+        "p95_linear": 889.25,
+        "p95_floor_rank": 887,
+        "p99_linear": 1757.1200000000003,
+        "max": 2662
+      },
+      "prepare_ms": {
+        "n": 113,
+        "min": 0.0026,
+        "median": 0.0045000000000000005,
+        "p95_linear": 0.015739999999999994,
+        "p95_floor_rank": 0.0155,
+        "p99_linear": 0.01704,
+        "max": 0.0192
+      },
+      "draw_ms": {
+        "n": 113,
+        "min": 0.22790000000000002,
+        "median": 0.2616,
+        "p95_linear": 0.41239999999999993,
+        "p95_floor_rank": 0.4092,
+        "p99_linear": 0.9782479999999973,
+        "max": 1.1543
+      },
+      "wheel": {
+        "n": 113,
+        "min": -276.5264892578125,
+        "median": 0.6631231307983398,
+        "p95_linear": 71.95234756469674,
+        "p95_floor_rank": 46.946163177490234,
+        "p99_linear": 247.7102398681639,
+        "max": 252.0
+      },
+      "radius_mm": {
+        "n": 113,
+        "min": 8.98659287674822,
+        "median": 100.00000000000004,
+        "p95_linear": 100.00000000000004,
+        "p95_floor_rank": 100.00000000000004,
+        "p99_linear": 100.00000000000004,
+        "max": 100.00000000000004
+      },
+      "dt_exact_target": 83,
+      "pace_late_true": 30
+    }
+  },
+  "by_view_action": {
+    "Perspective / orbit": {
+      "dt_ms": {
+        "n": 201,
+        "min": 33.3848,
+        "median": 33.5221,
+        "p95_linear": 78.2645,
+        "p95_floor_rank": 72.16210000000001,
+        "p99_linear": 1275.1302,
+        "max": 1631.1205
+      },
+      "frame_ms": {
+        "n": 201,
+        "min": 5.306699778884649,
+        "median": 33.541399985551834,
+        "p95_linear": 97.82849997282028,
+        "p95_floor_rank": 91.31129831075668,
+        "p99_linear": 1302.5195598602295,
+        "max": 1631.0832500457764
+      },
+      "gap_ms": {
+        "n": 201,
+        "min": 33,
+        "median": 34,
+        "p95_linear": 402.0,
+        "p95_floor_rank": 343,
+        "p99_linear": 1363.0,
+        "max": 3536
+      },
+      "prepare_ms": {
+        "n": 201,
+        "min": 0.0040999999999999995,
+        "median": 0.0176,
+        "p95_linear": 0.0196,
+        "p95_floor_rank": 0.0196,
+        "p99_linear": 0.0212,
+        "max": 0.0216
+      },
+      "draw_ms": {
+        "n": 201,
+        "min": 0.2448,
+        "median": 0.417,
+        "p95_linear": 0.4744,
+        "p95_floor_rank": 0.4736,
+        "p99_linear": 0.5098,
+        "max": 0.629
+      },
+      "wheel": {
+        "n": 201,
+        "min": 0.0,
+        "median": 0.0,
+        "p95_linear": 0.0,
+        "p95_floor_rank": 0.0,
+        "p99_linear": 0.0,
+        "max": 0.0
+      },
+      "radius_mm": {
+        "n": 201,
+        "min": 74.84170231362472,
+        "median": 74.84170231362528,
+        "p95_linear": 74.84170231362549,
+        "p95_floor_rank": 74.84170231362546,
+        "p99_linear": 74.84170231362552,
+        "max": 74.84170231362552
+      },
+      "dt_exact_target": 0,
+      "pace_late_true": 17
+    },
+    "Perspective / zoom": {
+      "dt_ms": {
+        "n": 30,
+        "min": 301.8248,
+        "median": 676.02,
+        "p95_linear": 1550.4382299999982,
+        "p95_floor_rank": 1216.3921,
+        "p99_linear": 1949.8376,
+        "max": 2001.3386999999998
+      },
+      "frame_ms": {
+        "n": 30,
+        "min": 16.66666753590107,
+        "median": 401.63208544254303,
+        "p95_linear": 1109.8142623901365,
+        "p95_floor_rank": 1049.8499870300293,
+        "p99_linear": 1199.6409368515015,
+        "max": 1216.2914276123047
+      },
+      "gap_ms": {
+        "n": 30,
+        "min": 301,
+        "median": 732.0,
+        "p95_linear": 1550.3999999999983,
+        "p95_floor_rank": 1216,
+        "p99_linear": 2418.9800000000005,
+        "max": 2662
+      },
+      "prepare_ms": {
+        "n": 30,
+        "min": 0.0029000000000000002,
+        "median": 0.0051,
+        "p95_linear": 0.016874999999999998,
+        "p95_floor_rank": 0.0166,
+        "p99_linear": 0.018591,
+        "max": 0.0192
+      },
+      "draw_ms": {
+        "n": 30,
+        "min": 0.2366,
+        "median": 0.28025,
+        "p95_linear": 0.40950499999999995,
+        "p95_floor_rank": 0.4001,
+        "p99_linear": 0.9405410000000007,
+        "max": 1.1543
+      },
+      "wheel": {
+        "n": 30,
+        "min": -276.5264892578125,
+        "median": 2.52000093460083,
+        "p95_linear": 235.91339950561513,
+        "p95_floor_rank": 216.2519989013672,
+        "p99_linear": 252.0,
+        "max": 252.0
+      },
+      "radius_mm": {
+        "n": 30,
+        "min": 8.98659287674822,
+        "median": 30.153173774894782,
+        "p95_linear": 69.82334589220285,
+        "p95_floor_rank": 65.93599410998644,
+        "p99_linear": 74.28226740926213,
+        "max": 74.80441484688494
+      },
+      "dt_exact_target": 0,
+      "pace_late_true": 30
+    },
+    "Side View / pan": {
+      "dt_ms": {
+        "n": 12,
+        "min": 33.333333,
+        "median": 33.333333,
+        "p95_linear": 33.333333,
+        "p95_floor_rank": 33.333333,
+        "p99_linear": 33.333333,
+        "max": 33.333333
+      },
+      "frame_ms": {
+        "n": 12,
+        "min": 16.66666753590107,
+        "median": 33.73329900205135,
+        "p95_linear": 34.313660115003586,
+        "p95_floor_rank": 34.217000007629395,
+        "p99_linear": 34.408172219991684,
+        "max": 34.43180024623871
+      },
+      "gap_ms": {
+        "n": 12,
+        "min": 33,
+        "median": 34.0,
+        "p95_linear": 318.79999999999967,
+        "p95_floor_rank": 101,
+        "p99_linear": 531.7600000000002,
+        "max": 585
+      },
+      "prepare_ms": {
+        "n": 12,
+        "min": 0.0031999999999999997,
+        "median": 0.0043,
+        "p95_linear": 0.008454999999999999,
+        "p95_floor_rank": 0.0076,
+        "p99_linear": 0.009291,
+        "max": 0.0095
+      },
+      "draw_ms": {
+        "n": 12,
+        "min": 0.2662,
+        "median": 0.40965,
+        "p95_linear": 0.5904199999999997,
+        "p95_floor_rank": 0.4421,
+        "p99_linear": 0.7354440000000002,
+        "max": 0.7716999999999999
+      },
+      "wheel": {
+        "n": 12,
+        "min": 0.0,
+        "median": 0.0,
+        "p95_linear": 0.0,
+        "p95_floor_rank": 0.0,
+        "p99_linear": 0.0,
+        "max": 0.0
+      },
+      "radius_mm": {
+        "n": 12,
+        "min": 100.0,
+        "median": 100.0,
+        "p95_linear": 100.0,
+        "p95_floor_rank": 100.0,
+        "p99_linear": 100.0,
+        "max": 100.0
+      },
+      "dt_exact_target": 12,
+      "pace_late_true": 0
+    },
+    "Side View / zoom": {
+      "dt_ms": {
+        "n": 83,
+        "min": 33.333333,
+        "median": 33.333333,
+        "p95_linear": 33.333333,
+        "p95_floor_rank": 33.333333,
+        "p99_linear": 33.333333,
+        "max": 33.333333
+      },
+      "frame_ms": {
+        "n": 83,
+        "min": 5.352099891752005,
+        "median": 16.66666753590107,
+        "p95_linear": 18.210500478744496,
+        "p95_floor_rank": 17.15479977428913,
+        "p99_linear": 27.361286431550948,
+        "max": 30.81979975104332
+      },
+      "gap_ms": {
+        "n": 82,
+        "min": 5,
+        "median": 17.0,
+        "p95_linear": 25.950000000000003,
+        "p95_floor_rank": 25,
+        "p99_linear": 367.17999999999995,
+        "max": 385
+      },
+      "prepare_ms": {
+        "n": 83,
+        "min": 0.0026,
+        "median": 0.0042,
+        "p95_linear": 0.007159999999999996,
+        "p95_floor_rank": 0.0068000000000000005,
+        "p99_linear": 0.010535999999999997,
+        "max": 0.0107
+      },
+      "draw_ms": {
+        "n": 83,
+        "min": 0.22790000000000002,
+        "median": 0.2594,
+        "p95_linear": 0.4079399999999999,
+        "p95_floor_rank": 0.3966,
+        "p99_linear": 0.5690279999999956,
+        "max": 1.0484
+      },
+      "wheel": {
+        "n": 83,
+        "min": -35.217613220214844,
+        "median": 0.4520743787288666,
+        "p95_linear": 30.5535871505737,
+        "p95_floor_rank": 27.40703582763672,
+        "p99_linear": 40.348594512939435,
+        "max": 42.41489791870117
+      },
+      "radius_mm": {
+        "n": 83,
+        "min": 100.00000000000004,
+        "median": 100.00000000000004,
+        "p95_linear": 100.00000000000004,
+        "p95_floor_rank": 100.00000000000004,
+        "p99_linear": 100.00000000000004,
+        "max": 100.00000000000004
+      },
+      "dt_exact_target": 83,
+      "pace_late_true": 0
+    }
+  },
+  "inter_camera_log_gaps": {
+    "n": 325,
+    "min": 5,
+    "median": 34,
+    "p95_linear": 758.6000000000001,
+    "p95_floor_rank": 749,
+    "p99_linear": 1566.6799999999976,
+    "max": 3536
+  },
+  "gaps_gt_100_ms": 59,
+  "dt_gap_within_2ms_for_large_gaps": 36,
+  "gap_le_100_proxy": {
+    "warning": "Adjacent camera records <=100 ms, NOT confirmed continuous input/frame capture",
+    "metrics": {
+      "dt_ms": {
+        "n": 266,
+        "min": 33.333333,
+        "median": 33.51205,
+        "p95_linear": 33.710274999999996,
+        "p95_floor_rank": 33.7,
+        "p99_linear": 67.36445000000016,
+        "max": 81.6979
+      },
+      "frame_ms": {
+        "n": 266,
+        "min": 5.306699778884649,
+        "median": 33.410750329494476,
+        "p95_linear": 38.20412419736385,
+        "p95_floor_rank": 37.50130161643028,
+        "p99_linear": 85.82334965467473,
+        "max": 105.79659789800644
+      },
+      "gap_ms": {
+        "n": 266,
+        "min": 5,
+        "median": 33.0,
+        "p95_linear": 51.25,
+        "p95_floor_rank": 40,
+        "p99_linear": 100.0,
+        "max": 100
+      },
+      "prepare_ms": {
+        "n": 266,
+        "min": 0.0031,
+        "median": 0.0166,
+        "p95_linear": 0.0195,
+        "p95_floor_rank": 0.0195,
+        "p99_linear": 0.021070000000000002,
+        "max": 0.0216
+      },
+      "draw_ms": {
+        "n": 266,
+        "min": 0.22790000000000002,
+        "median": 0.40349999999999997,
+        "p95_linear": 0.467475,
+        "p95_floor_rank": 0.4671,
+        "p99_linear": 0.5001150000000004,
+        "max": 0.629
+      },
+      "wheel": {
+        "n": 266,
+        "min": -35.217613220214844,
+        "median": 0.0,
+        "p95_linear": 16.110574960708618,
+        "p95_floor_rank": 14.377150535583496,
+        "p99_linear": 38.97363071441652,
+        "max": 42.41489791870117
+      },
+      "radius_mm": {
+        "n": 266,
+        "min": 74.84170231362472,
+        "median": 74.84170231362538,
+        "p95_linear": 100.00000000000004,
+        "p95_floor_rank": 100.00000000000004,
+        "p99_linear": 100.00000000000004,
+        "max": 100.00000000000004
+      },
+      "dt_exact_target": 89,
+      "pace_late_true": 7
+    },
+    "outliers_dt_gt_40": [
+      {
+        "action": "orbit",
+        "culled": 0,
+        "draw_calls": 272,
+        "draw_ms": 0.3715,
+        "dt_ms": 78.2645,
+        "dx": 36.0,
+        "dy": -22.0,
+        "event": "camera",
+        "eye": [
+          -39.96699838263727,
+          -52.70381829950709,
+          -9.662705696380657
+        ],
+        "frame_ms": 105.79659789800644,
+        "jitter_ms": 44.931166999999995,
+        "pace_late": true,
+        "prepare_ms": 0.0157,
+        "revision": 51,
+        "scene_objects": 3750,
+        "speed": 1.0,
+        "t_ms": 50806,
+        "target": [
+          6.471918604347744,
+          5.361384343807144,
+          -1.1105342605405912
+        ],
+        "target_ms": 33.333333,
+        "view": "Perspective",
+        "visible": 272,
+        "wheel": 0.0,
+        "_line": 138,
+        "radius_mm": 74.8417023136248,
+        "gap_ms": 78
+      },
+      {
+        "action": "orbit",
+        "culled": 0,
+        "draw_calls": 272,
+        "draw_ms": 0.3527,
+        "dt_ms": 72.16210000000001,
+        "dx": 16.0,
+        "dy": -19.0,
+        "event": "camera",
+        "eye": [
+          -45.24047018958179,
+          -37.8600270659188,
+          -33.653104014295295
+        ],
+        "frame_ms": 91.31129831075668,
+        "jitter_ms": 38.828767000000006,
+        "pace_late": true,
+        "prepare_ms": 0.0141,
+        "revision": 132,
+        "scene_objects": 3750,
+        "speed": 1.0,
+        "t_ms": 57979,
+        "target": [
+          6.471918604347744,
+          5.361384343807144,
+          -1.1105342605405912
+        ],
+        "target_ms": 33.333333,
+        "view": "Perspective",
+        "visible": 272,
+        "wheel": 0.0,
+        "_line": 219,
+        "radius_mm": 74.8417023136253,
+        "gap_ms": 72
+      },
+      {
+        "action": "orbit",
+        "culled": 0,
+        "draw_calls": 272,
+        "draw_ms": 0.39530000000000004,
+        "dt_ms": 40.1519,
+        "dx": -13.0,
+        "dy": 8.0,
+        "event": "camera",
+        "eye": [
+          17.33589710763504,
+          60.022584966868976,
+          48.84351985648595
+        ],
+        "frame_ms": 47.34349995851517,
+        "jitter_ms": 6.8185669999999945,
+        "pace_late": true,
+        "prepare_ms": 0.018000000000000002,
+        "revision": 178,
+        "scene_objects": 3750,
+        "speed": 1.0,
+        "t_ms": 66913,
+        "target": [
+          6.471918604347744,
+          5.361384343807144,
+          -1.1105342605405912
+        ],
+        "target_ms": 33.333333,
+        "view": "Perspective",
+        "visible": 272,
+        "wheel": 0.0,
+        "_line": 265,
+        "radius_mm": 74.84170231362539,
+        "gap_ms": 40
+      },
+      {
+        "action": "orbit",
+        "culled": 0,
+        "draw_calls": 272,
+        "draw_ms": 0.2448,
+        "dt_ms": 64.7811,
+        "dx": -1.0,
+        "dy": 0.0,
+        "event": "camera",
+        "eye": [
+          17.881956809312584,
+          59.911213955234395,
+          48.84351985648595
+        ],
+        "frame_ms": 64.84030187129974,
+        "jitter_ms": 31.447766999999992,
+        "pace_late": true,
+        "prepare_ms": 0.0161,
+        "revision": 179,
+        "scene_objects": 3750,
+        "speed": 1.0,
+        "t_ms": 66977,
+        "target": [
+          6.471918604347744,
+          5.361384343807144,
+          -1.1105342605405912
+        ],
+        "target_ms": 33.333333,
+        "view": "Perspective",
+        "visible": 272,
+        "wheel": 0.0,
+        "_line": 266,
+        "radius_mm": 74.84170231362538,
+        "gap_ms": 64
+      },
+      {
+        "action": "orbit",
+        "culled": 0,
+        "draw_calls": 272,
+        "draw_ms": 0.3771,
+        "dt_ms": 54.6609,
+        "dx": -128.0,
+        "dy": -15.0,
+        "event": "camera",
+        "eye": [
+          71.32625480284734,
+          -2.156085993820115,
+          35.47748455950753
+        ],
+        "frame_ms": 82.8683003783226,
+        "jitter_ms": 21.327566999999995,
+        "pace_late": true,
+        "prepare_ms": 0.0183,
+        "revision": 181,
+        "scene_objects": 3750,
+        "speed": 1.0,
+        "t_ms": 67163,
+        "target": [
+          6.471918604347744,
+          5.361384343807144,
+          -1.1105342605405912
+        ],
+        "target_ms": 33.333333,
+        "view": "Perspective",
+        "visible": 272,
+        "wheel": 0.0,
+        "_line": 268,
+        "radius_mm": 74.84170231362536,
+        "gap_ms": 55
+      },
+      {
+        "action": "orbit",
+        "culled": 0,
+        "draw_calls": 272,
+        "draw_ms": 0.4469,
+        "dt_ms": 81.6979,
+        "dx": 57.0,
+        "dy": -45.0,
+        "event": "camera",
+        "eye": [
+          24.223627694322154,
+          -15.067328122986419,
+          68.66643139815876
+        ],
+        "frame_ms": 97.82849997282028,
+        "jitter_ms": 48.364567,
+        "pace_late": true,
+        "prepare_ms": 0.018099999999999998,
+        "revision": 202,
+        "scene_objects": 3750,
+        "speed": 1.0,
+        "t_ms": 67949,
+        "target": [
+          6.471918604347744,
+          5.361384343807144,
+          -1.1105342605405912
+        ],
+        "target_ms": 33.333333,
+        "view": "Perspective",
+        "visible": 272,
+        "wheel": 0.0,
+        "_line": 289,
+        "radius_mm": 74.84170231362536,
+        "gap_ms": 82
+      }
+    ]
+  },
+  "largest_dt": [
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 272,
+      "draw_ms": 0.3436,
+      "dt_ms": 2001.3386999999998,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        15.860614346107663,
+        -17.750885005458027,
+        16.411097269795277
+      ],
+      "frame_ms": 16.66666753590107,
+      "jitter_ms": 1968.0053669999998,
+      "pace_late": true,
+      "prepare_ms": 0.0031,
+      "revision": 7,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 42235,
+      "target": [
+        -0.8135845276793241,
+        -1.0766861316710312,
+        -0.2631016039917034
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 272,
+      "wheel": 12.748315811157227,
+      "_line": 101,
+      "radius_mm": 28.880559624906816,
+      "gap_ms": 2662
+    },
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 226,
+      "draw_ms": 1.1543,
+      "dt_ms": 1823.7486999999999,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        34.113156555073076,
+        -34.16494907430003,
+        34.143538178424194
+      ],
+      "frame_ms": 1158.8759422302246,
+      "jitter_ms": 1790.4153669999998,
+      "pace_late": true,
+      "prepare_ms": 0.003,
+      "revision": 2,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 36309,
+      "target": [
+        -0.02739138085936157,
+        -0.024401138367592487,
+        0.002990242491769083
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 226,
+      "wheel": 252.0,
+      "_line": 97,
+      "radius_mm": 59.13316362327574,
+      "gap_ms": 1824
+    },
+    {
+      "action": "orbit",
+      "culled": 0,
+      "draw_calls": 272,
+      "draw_ms": 0.2902,
+      "dt_ms": 1631.1205,
+      "dx": -46.0,
+      "dy": 163.0,
+      "event": "camera",
+      "eye": [
+        3.15907281992995,
+        3.524831696313485,
+        73.63525179046671
+      ],
+      "frame_ms": 1631.0832500457764,
+      "jitter_ms": 1597.787167,
+      "pace_late": true,
+      "prepare_ms": 0.008199999999999999,
+      "revision": 134,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 59953,
+      "target": [
+        6.471918604347744,
+        5.361384343807144,
+        -1.1105342605405912
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 272,
+      "wheel": 0.0,
+      "_line": 221,
+      "radius_mm": 74.8417023136253,
+      "gap_ms": 1631
+    },
+    {
+      "action": "orbit",
+      "culled": 0,
+      "draw_calls": 272,
+      "draw_ms": 0.3147,
+      "dt_ms": 1362.2802000000001,
+      "dx": 147.0,
+      "dy": 141.0,
+      "event": "camera",
+      "eye": [
+        21.001745024868164,
+        -8.88071324558905,
+        70.9125676279847
+      ],
+      "frame_ms": 1362.2676134109497,
+      "jitter_ms": 1328.946867,
+      "pace_late": true,
+      "prepare_ms": 0.0053,
+      "revision": 52,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 52169,
+      "target": [
+        6.471918604347744,
+        5.361384343807144,
+        -1.1105342605405912
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 272,
+      "wheel": 0.0,
+      "_line": 139,
+      "radius_mm": 74.84170231362481,
+      "gap_ms": 1363
+    },
+    {
+      "action": "orbit",
+      "culled": 0,
+      "draw_calls": 272,
+      "draw_ms": 0.4317,
+      "dt_ms": 1275.1302,
+      "dx": -171.0,
+      "dy": 23.0,
+      "event": "camera",
+      "eye": [
+        -49.41832405505273,
+        39.15342792884102,
+        35.43613413784829
+      ],
+      "frame_ms": 1302.5195598602295,
+      "jitter_ms": 1241.796867,
+      "pace_late": true,
+      "prepare_ms": 0.018199999999999997,
+      "revision": 112,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 56059,
+      "target": [
+        6.471918604347744,
+        5.361384343807144,
+        -1.1105342605405912
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 272,
+      "wheel": 0.0,
+      "_line": 199,
+      "radius_mm": 74.84170231362522,
+      "gap_ms": 1275
+    },
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 272,
+      "draw_ms": 0.2695,
+      "dt_ms": 1216.3921,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        17.886238179228304,
+        -19.093691044046956,
+        18.13199530814644
+      ],
+      "frame_ms": 1216.2914276123047,
+      "jitter_ms": 1183.058767,
+      "pace_late": true,
+      "prepare_ms": 0.0034000000000000002,
+      "revision": 5,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 39573,
+      "target": [
+        -0.4844033312455967,
+        -0.7230495335730549,
+        -0.23864620232745623
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 272,
+      "wheel": 0.2800002098083496,
+      "_line": 100,
+      "radius_mm": 31.81888446377466,
+      "gap_ms": 1216
+    },
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 272,
+      "draw_ms": 0.2551,
+      "dt_ms": 1049.8226,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        27.399559011624113,
+        -27.880369063309487,
+        27.681603409382234
+      ],
+      "frame_ms": 1049.8499870300293,
+      "jitter_ms": 1016.4892669999999,
+      "pace_late": true,
+      "prepare_ms": 0.0033,
+      "revision": 3,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 37359,
+      "target": [
+        -0.2542848164811689,
+        -0.2265252352042062,
+        0.027759581276962885
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 272,
+      "wheel": 25.19999885559082,
+      "_line": 98,
+      "radius_mm": 47.89786253485336,
+      "gap_ms": 1050
+    },
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 272,
+      "draw_ms": 0.2546,
+      "dt_ms": 998.5203,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        21.977185536051945,
+        -22.80936722911839,
+        22.41228773712549
+      ],
+      "frame_ms": 998.3294010162354,
+      "jitter_ms": 965.186967,
+      "pace_late": true,
+      "prepare_ms": 0.0034000000000000002,
+      "revision": 4,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 38357,
+      "target": [
+        -0.4224279647133318,
+        -0.40975372835311263,
+        0.012674236360220602
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 272,
+      "wheel": 2.52000093460083,
+      "_line": 99,
+      "radius_mm": 38.79726865323122,
+      "gap_ms": 998
+    },
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 217,
+      "draw_ms": 0.3178,
+      "dt_ms": 891.5378000000001,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        1.4818901821207404,
+        -10.507471652935761,
+        7.3284305866878725
+      ],
+      "frame_ms": 891.3279175758362,
+      "jitter_ms": 858.204467,
+      "pace_late": true,
+      "prepare_ms": 0.0155,
+      "revision": 237,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 75086,
+      "target": [
+        -1.1361007152966984,
+        5.176343227217572,
+        2.2209970299633137
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 217,
+      "wheel": 109.46162414550781,
+      "_line": 324,
+      "radius_mm": 16.700952160587605,
+      "gap_ms": 892
+    },
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 250,
+      "draw_ms": 0.2948,
+      "dt_ms": 877.9941,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        2.0429942425621714,
+        -14.285387268356477,
+        8.24963835858601
+      ],
+      "frame_ms": 878.4840703010559,
+      "jitter_ms": 844.660767,
+      "pace_late": true,
+      "prepare_ms": 0.0165,
+      "revision": 236,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 74194,
+      "target": [
+        -1.1890932851136793,
+        5.077347151585911,
+        1.9441648317655649
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 250,
+      "wheel": 14.616251945495605,
+      "_line": 323,
+      "radius_mm": 20.618459457515563,
+      "gap_ms": 878
+    },
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 153,
+      "draw_ms": 0.25989999999999996,
+      "dt_ms": 831.9333,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        0.7029420206666672,
+        -4.960076605284532,
+        5.981841970549992
+      ],
+      "frame_ms": 831.9115042686462,
+      "jitter_ms": 798.599967,
+      "pace_late": true,
+      "prepare_ms": 0.015099999999999999,
+      "revision": 239,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 76748,
+      "target": [
+        -1.014721807128915,
+        5.330074337584075,
+        2.6308548139830066
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 153,
+      "wheel": 4.694619178771973,
+      "_line": 326,
+      "radius_mm": 10.957494712561532,
+      "gap_ms": 832
+    },
+    {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 191,
+      "draw_ms": 0.279,
+      "dt_ms": 830.6980000000001,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        1.053994795029634,
+        -7.442128104546696,
+        6.584684132485755
+      ],
+      "frame_ms": 831.0490846633911,
+      "jitter_ms": 797.364667,
+      "pace_late": true,
+      "prepare_ms": 0.0192,
+      "revision": 238,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 75916,
+      "target": [
+        -1.0665778318784924,
+        5.261761948377511,
+        2.447662951538861
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 191,
+      "wheel": 46.946163177490234,
+      "_line": 325,
+      "radius_mm": 13.527771250075967,
+      "gap_ms": 830
+    }
+  ],
+  "last_rows_by_action_view": {
+    "Perspective / orbit": {
+      "action": "orbit",
+      "culled": 0,
+      "draw_calls": 272,
+      "draw_ms": 0.38989999999999997,
+      "dt_ms": 33.5274,
+      "dx": -14.0,
+      "dy": 2.0,
+      "event": "camera",
+      "eye": [
+        18.203878166909803,
+        -64.92223739917897,
+        21.77732375878039
+      ],
+      "frame_ms": 33.46389904618263,
+      "jitter_ms": 0.19406699999999688,
+      "pace_late": false,
+      "prepare_ms": 0.0178,
+      "revision": 229,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 68988,
+      "target": [
+        6.471918604347744,
+        5.361384343807144,
+        -1.1105342605405912
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 272,
+      "wheel": 0.0,
+      "_line": 316,
+      "radius_mm": 74.8417023136255,
+      "gap_ms": 33
+    },
+    "Perspective / zoom": {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 111,
+      "draw_ms": 0.24420000000000003,
+      "dt_ms": 820.7303,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        0.4347674195962895,
+        -3.0562962543449883,
+        5.5206866787887545
+      ],
+      "frame_ms": 820.7429051399231,
+      "jitter_ms": 787.396967,
+      "pace_late": true,
+      "prepare_ms": 0.0161,
+      "revision": 240,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 77569,
+      "target": [
+        -0.9739437798551956,
+        5.382986591745431,
+        2.7724346283672854
+      ],
+      "target_ms": 33.333333,
+      "view": "Perspective",
+      "visible": 111,
+      "wheel": 0.5216245651245117,
+      "_line": 327,
+      "radius_mm": 8.98659287674822,
+      "gap_ms": 821
+    },
+    "Side View / pan": {
+      "action": "pan",
+      "culled": 0,
+      "draw_calls": 226,
+      "draw_ms": 0.40299999999999997,
+      "dt_ms": 33.333333,
+      "dx": 0.0,
+      "dy": -8.0,
+      "event": "camera",
+      "eye": [
+        100.0,
+        1.8415450016235735,
+        2.895801110436858
+      ],
+      "frame_ms": 34.217000007629395,
+      "jitter_ms": 0.0,
+      "pace_late": false,
+      "prepare_ms": 0.0043,
+      "revision": 132,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 34485,
+      "target": [
+        0.0,
+        1.8415450016235735,
+        2.895801110436858
+      ],
+      "target_ms": 33.333333,
+      "view": "Side View",
+      "visible": 226,
+      "wheel": 0.0,
+      "_line": 96,
+      "radius_mm": 100.0,
+      "gap_ms": 33
+    },
+    "Side View / zoom": {
+      "action": "zoom",
+      "culled": 0,
+      "draw_calls": 226,
+      "draw_ms": 0.2368,
+      "dt_ms": 33.333333,
+      "dx": 0.0,
+      "dy": 0.0,
+      "event": "camera",
+      "eye": [
+        100.00000000000004,
+        1.3953905505344284,
+        0.0431035892323731
+      ],
+      "frame_ms": 16.64699986577034,
+      "jitter_ms": 0.0,
+      "pace_late": false,
+      "prepare_ms": 0.0052,
+      "revision": 111,
+      "scene_objects": 3750,
+      "speed": 1.0,
+      "t_ms": 33397,
+      "target": [
+        0.0,
+        1.3953905505344284,
+        0.0431035892323731
+      ],
+      "target_ms": 33.333333,
+      "view": "Side View",
+      "visible": 226,
+      "wheel": -0.7543362379074097,
+      "_line": 84,
+      "radius_mm": 100.00000000000004,
+      "gap_ms": 17
+    }
+  },
+  "counter_values": {
+    "view": [
+      "Perspective",
+      "Side View"
+    ],
+    "scene_objects": [
+      3750
+    ],
+    "visible": [
+      111,
+      153,
+      191,
+      217,
+      226,
+      249,
+      250,
+      251,
+      257,
+      267,
+      270,
+      271,
+      272
+    ],
+    "culled": [
+      0
+    ],
+    "draw_calls": [
+      111,
+      153,
+      191,
+      217,
+      226,
+      249,
+      250,
+      251,
+      257,
+      267,
+      270,
+      271,
+      272
+    ],
+    "speed": [
+      1.0
+    ],
+    "target_ms": [
+      33.333333
+    ]
+  },
+  "source_fingerprints": [
+    {
+      "path": "implementation/design/M01/VIEWPORT-NAVIGATION-FORENSICS.md",
+      "bytes": 9325,
+      "sha256": "951e31bda83c4e91206e27151a44c81dd757147a97e8c75eb4ef331e106b525c"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "bytes": 194600,
+      "sha256": "2916ec5e9a0600d8568717e4e0a76f0bc6c54bbad9e3aa917cad01778c57f934"
+    },
+    {
+      "path": "crates/om9-app/src/frame_pace.rs",
+      "bytes": 3025,
+      "sha256": "e682182e2383a15cb7fcb1eb7a57b50c0759bc629eedd23ccd451632ea76d7b6"
+    },
+    {
+      "path": "crates/om9-app/src/camera_rig.rs",
+      "bytes": 13527,
+      "sha256": "dc61e7e97e34c8ff8241d8ad6c92c42666ce72ba931da30c3ee6632b4e6d51a3"
+    },
+    {
+      "path": "crates/om9-app/src/camera_transition.rs",
+      "bytes": 6380,
+      "sha256": "c32379752c9b80c9fca356b62ba72ec6ba7675a693e303bd0706937fa4c311e6"
+    },
+    {
+      "path": "crates/om9-app/src/interaction_log.rs",
+      "bytes": 3542,
+      "sha256": "d06a22fc05556bb030f945a0741a9f5c1809cb4b93b48512d4640a8867bf515f"
+    },
+    {
+      "path": "crates/om9-app/src/gpu_viewport.rs",
+      "bytes": 56346,
+      "sha256": "19dbcfe95d77c39799d6d9614282953a34d61ea6cb3c9ae31874598054b2b9da"
+    },
+    {
+      "path": "crates/om9-scene/src/camera.rs",
+      "bytes": 14624,
+      "sha256": "beb973a2a49b6f3b5b3c01c26027b68ca2c123e25f40cef440ddf9e742a56271"
+    },
+    {
+      "path": "crates/om9-app/tests/navigation_input.rs",
+      "bytes": 2340,
+      "sha256": "3368672638d4ffb7b234acbd9e0d33999a46c06478ccab6a307db68009f15d89"
+    },
+    {
+      "path": "ref/matrix/decompiled-ui/Matrix/Commands/SetCameraTargetCommand.cs",
+      "bytes": 4134,
+      "sha256": "f75a3947ae03a330246641458a4fdabf1a8ca157959ffcaa9687d0847a4378e9"
+    },
+    {
+      "path": "ref/matrix/decompiled-ui/Matrix/Commands/MouseCallBackHandler.cs",
+      "bytes": 1877,
+      "sha256": "87e1187adc18ec1d74106cd2de409c780775e5c324a8da1c7d44b46616684afd"
+    },
+    {
+      "path": "ref/matrix/decompiled-ui/Matrix/Commands/Test/TestVRayDisplay.cs",
+      "bytes": 5007,
+      "sha256": "692301da3afd525ae4bec4e7377f652c15802683dbbd1e1049718245f558f139"
+    },
+    {
+      "path": "ref/rhino5/dnspy/RhinoCommon/RhinoCommon/Display/RhinoViewport.cs",
+      "bytes": 70829,
+      "sha256": "1b325b32b11937ac6c162226997a64b9332e54062944913d8b7d8c8e1e844e92"
+    },
+    {
+      "path": "ref/rhino5/ghidra/rhcommon_c.dll.c",
+      "bytes": 3603082,
+      "sha256": "f7829de54216fbe11a02e8207349436f5ff62f9265f558865ca6111bd3397e18"
+    },
+    {
+      "path": "ref/rhino5/ghidra/Rhino.exe.c",
+      "bytes": 96060696,
+      "sha256": "7a4a9d4fe3cdb94b9c42b71b3ed8468bd7fdbbe2d49da5f78063d72ef5b7711e"
+    },
+    {
+      "path": "QymCAD/crates/qymcad-ui-state/src/navigation.rs",
+      "bytes": 27060,
+      "sha256": "2cffa3f8dbb9a03faa543a33c056fa4033f7aa16dc3e9400fced45feda553228"
+    }
+  ],
+  "analytic_checks": {
+    "label": "Independent algebra for current interpolation equations; not an application render test",
+    "midpoint_eased_fraction": 0.5,
+    "zoom_factor": 0.81,
+    "cursor_initial_offset_px": 200,
+    "linear_pivot_log_distance_midpoint_drift_px": 1.1111111111111072,
+    "scale_consistent_pivot_midpoint_drift_px": 0.0,
+    "wheel_252_points_at_40_points_per_step": 6.3,
+    "min_drain_frames_at_2_steps": 4,
+    "nominal_drain_time_at_30hz_ms": 133.33333333333334,
+    "ease_initial_derivative": 0.4
+  },
+  "preceding_logs": [
+    {
+      "path": "build/stress-27000/nav-hold-125.jsonl",
+      "sha256": "3a9ecdd1b8ae54ff0ba3614a970afdde9f95c09a8bcdc1d57d73fe987553dfd5",
+      "modified_at": "2026-10-21T05:39:09.601957+07:00",
+      "camera_events": 114,
+      "by_view_action": {
+        "Perspective / orbit": {
+          "dt_ms": {
+            "n": 62,
+            "min": 33.410500000000006,
+            "median": 33.5249,
+            "p95_linear": 778.6468749999979,
+            "p95_floor_rank": 302.1245,
+            "p99_linear": 1358.38497,
+            "max": 1484.4982
+          },
+          "dt_exact_target": 0
+        },
+        "Perspective / zoom": {
+          "dt_ms": {
+            "n": 52,
+            "min": 33.333333,
+            "median": 33.5452,
+            "p95_linear": 1838.138,
+            "p95_floor_rank": 1819.4207,
+            "p99_linear": 1997.5333120000005,
+            "max": 2125.2571
+          },
+          "dt_exact_target": 1
+        }
+      },
+      "comparability": "Different captures; no controlled paired A/B or build identity"
+    },
+    {
+      "path": "build/stress-27000/nav-rig-125.jsonl",
+      "sha256": "dce94a28635cb400eedc8b770dcd6ca0e63b2e9672cfeacc8a8c1947287eac0f",
+      "modified_at": "2026-10-21T05:33:49.886369+07:00",
+      "camera_events": 583,
+      "by_view_action": {
+        "Perspective / orbit": {
+          "dt_ms": {
+            "n": 63,
+            "min": 33.465799999999994,
+            "median": 33.5678,
+            "p95_linear": 492.61799999999994,
+            "p95_floor_rank": 477.59430000000003,
+            "p99_linear": 633.7908900000004,
+            "max": 754.4711
+          },
+          "dt_exact_target": 0
+        },
+        "Perspective / zoom": {
+          "dt_ms": {
+            "n": 17,
+            "min": 33.333333,
+            "median": 33.565,
+            "p95_linear": 1565.4024999999958,
+            "p95_floor_rank": 393.3801,
+            "p99_linear": 5315.874179999999,
+            "max": 6253.4920999999995
+          },
+          "dt_exact_target": 1
+        },
+        "Side View / pan": {
+          "dt_ms": {
+            "n": 93,
+            "min": 33.333333,
+            "median": 33.333333,
+            "p95_linear": 33.333333,
+            "p95_floor_rank": 33.333333,
+            "p99_linear": 33.333333,
+            "max": 33.333333
+          },
+          "dt_exact_target": 93
+        },
+        "Side View / zoom": {
+          "dt_ms": {
+            "n": 356,
+            "min": 33.333333,
+            "median": 33.333333,
+            "p95_linear": 33.333333,
+            "p95_floor_rank": 33.333333,
+            "p99_linear": 33.333333,
+            "max": 33.333333
+          },
+          "dt_exact_target": 356
+        },
+        "Through Finger / zoom": {
+          "dt_ms": {
+            "n": 54,
+            "min": 33.333333,
+            "median": 33.333333,
+            "p95_linear": 33.333333,
+            "p95_floor_rank": 33.333333,
+            "p99_linear": 33.333333,
+            "max": 33.333333
+          },
+          "dt_exact_target": 54
+        }
+      },
+      "comparability": "Different captures; no controlled paired A/B or build identity"
+    }
+  ]
+}

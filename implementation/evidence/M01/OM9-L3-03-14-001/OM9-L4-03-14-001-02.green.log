@@ -1,0 +1,21 @@
+GREEN: the documented mapping restored.
+
+
+running 6 tests
+test p4_a_category_lists_the_slots_it_shows ... ok
+test p3_every_slot_maps_to_its_documented_category ... ok
+test p1_and_p2_the_palette_has_the_seven_categories_and_the_four_groups ... ok
+test fixture_design_pair_is_present ... ok
+test n1_to_n6_a_display_label_is_not_an_identity ... ok
+test p5_the_palette_model_reaches_the_application ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+   Compiling om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+   Compiling om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.15s
+     Running tests\layer_category_palette.rs (L:\om9-target\debug\deps\layer_category_palette-6e349b807b003a13.exe)

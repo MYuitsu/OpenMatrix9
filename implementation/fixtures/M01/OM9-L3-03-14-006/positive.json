@@ -1,0 +1,46 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-006",
+  "l4": "OM9-L4-03-14-006-02",
+  "case": "superselect-by-jewelry-object-type-positive",
+  "positive_oracle": "Select Gems filter matches jewelry-semantic GemRef, bad/open filter uses typed kernel verdict",
+  "cases": [
+    {
+      "id": "G1-the-gems-filter-matches-the-semantic-gem",
+      "expect": {
+        "matched": 1,
+        "kind": "semantic om9.gem extension"
+      }
+    },
+    {
+      "id": "G2-a-mesh-that-only-looks-like-a-gem-is-not-matched",
+      "expect": {
+        "matched": 0,
+        "skip": "NoGemExtension",
+        "detail": "the same label and the same Gems layer colour, but no om9.gem extension"
+      }
+    },
+    {
+      "id": "G3-the-bad-geometry-filter-uses-the-model-verdict",
+      "expect": {
+        "matched_kind": "invalid geometry only",
+        "valid_is_skipped": true
+      }
+    },
+    {
+      "id": "G4-the-open-filter-never-invents-a-verdict",
+      "expect": {
+        "matched": 0,
+        "skip": "NoOpenVerdict",
+        "detail": "no typed open/closed verdict exists yet, so nothing is claimed"
+      }
+    },
+    {
+      "id": "G5-the-duplicate-filter-keeps-the-first-labelled-object",
+      "expect": {
+        "matched": 1,
+        "first_is_skipped": true
+      }
+    }
+  ]
+}

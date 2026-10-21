@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-008",
+  "l4": "OM9-L4-03-14-008-02",
+  "case": "layer-state-persistence-visual-check-positive",
+  "positive_oracle": "Save/reopen 2 layers incl lock and visibility and compare palette icons and picked IDs",
+  "layers": [
+    {
+      "slot": 5,
+      "locked": true,
+      "visible": true,
+      "note": "created with its group 5..8"
+    },
+    {
+      "slot": 1,
+      "locked": false,
+      "visible": false,
+      "note": "created with its group 1..4"
+    }
+  ],
+  "cases": [
+    {
+      "id": "K1-the-two-layers-come-back-with-their-flags",
+      "expect": {
+        "slots": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "gems_locked": true,
+        "metals_visible": false,
+        "colours_kept": true
+      }
+    },
+    {
+      "id": "K2-the-objects-keep-their-ids-and-layers",
+      "expect": {
+        "same_ids": true,
+        "same_layers": true
+      }
+    },
+    {
+      "id": "K3-the-palette-offers-the-same-locked-and-hidden-rows",
+      "expect": {
+        "gems_selects": 0,
+        "metals_selects": 0,
+        "picked_ids_equal": true
+      }
+    }
+  ]
+}

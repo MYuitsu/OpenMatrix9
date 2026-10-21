@@ -156,7 +156,14 @@ impl<'de> Visitor<'de> for Node<'_, '_> {
         Ok(())
     }
     fn visit_str<E: de::Error>(self, value: &str) -> std::result::Result<(), E> {
-        if value.len() > self.budget.limits.max_name_bytes {
+        // A canonical BRep source is an owned OCCT text document, not a name.
+        // It is already bounded by the document byte budget; names remain tight.
+        let limit = if self.field.as_deref() == Some("source") {
+            self.budget.limits.max_bytes
+        } else {
+            self.budget.limits.max_name_bytes as u64
+        };
+        if value.len() as u64 > limit {
             return Err(self.budget.fail(Error::Budget("JSON string bytes")));
         }
         self.budget.reserve(Usage {

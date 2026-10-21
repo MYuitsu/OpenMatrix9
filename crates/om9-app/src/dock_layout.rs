@@ -48,8 +48,10 @@ pub const LEFT_RAIL_DEFAULT: f32 = 300.;
 /// Outer minus inner width of the left rail (frame margin and panel stroke),
 /// measured from a real frame (see `left-dock-measurements.md`).
 pub const LEFT_RAIL_CHROME_PX: f32 = 5.;
-/// Icon box edge (points) in the left column at the default rail width.
+/// Icon box edge (points) at the established 300-point reference width.
 pub const ICON_BASE_EDGE: f32 = 27.5;
+/// Keep icon scaling independent of changes to the startup dock width.
+pub const ICON_REFERENCE_RAIL_WIDTH: f32 = 300.;
 /// Smallest icon box edge a narrow rail uses.
 pub const ICON_MIN_EDGE: f32 = 23.;
 /// Largest icon box edge a widened rail uses.
@@ -63,13 +65,13 @@ pub const RIGHT_DOCK_FIXTURE: SectionId = SectionId::Snaps;
 // It stays the rightmost strip of the views' union, not a fixed edge overlay.
 
 /// Icon box edge for a column of the given OUTER width: proportional to the
-/// default 300 px rail, clamped to 23..42 and rounded to whole points.
+/// reference 300 px rail, clamped to 23..42 and rounded to whole points.
 /// Non-finite widths give the base edge.
 pub fn rail_icon_edge(outer_width: f32) -> f32 {
     if !outer_width.is_finite() {
         return ICON_BASE_EDGE;
     }
-    (ICON_BASE_EDGE * outer_width / LEFT_RAIL_DEFAULT)
+    (ICON_BASE_EDGE * outer_width / ICON_REFERENCE_RAIL_WIDTH)
         .clamp(ICON_MIN_EDGE, ICON_MAX_EDGE)
         .round()
 }

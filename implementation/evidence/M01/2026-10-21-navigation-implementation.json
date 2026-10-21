@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-21",
+  "status": "implementation_verified_final_matrix_pending",
+  "record": "implementation/evidence/M01/2026-10-21-navigation-implementation.md",
+  "plan": "implementation/design/M01/VIEWPORT-NAVIGATION-IMPLEMENTATION-PLAN.md",
+  "source_files": {
+    "crates/om9-app/src/navigation.rs": "e260c428849f1b3f8cd811c5e2b138e931f86e8b7d16bf03cac8f5d6d0246d5f",
+    "crates/om9-app/src/frame_scheduler.rs": "1c73ee2fc39cceebd909d02c94c6aad94353476eb8ee796e43a9b310c9c67949",
+    "crates/om9-app/src/navigation_audit.rs": "404cd493564b7ca1655fe85a125ca1f3716332d9d4493e0b839b50b723957cde",
+    "crates/om9-app/src/ui.rs": "dfdbd1fbc6532a70bc54dc7fac05890db96de0a58806874514ad527b7ffaf4cd",
+    "crates/om9-app/src/gpu_viewport.rs": "dae0de67a54bc4bd6a6ff18a74e6b57b36ab24088c1aa90e86897ff10291580d",
+    "crates/om9-app/src/camera_rig.rs": "225822dafab23d37255881e94aa953f5e5b7120d93b16fd40de4d07cf5bf152b",
+    "crates/om9-app/src/interaction_log.rs": "c05f3b2fceba42160ad96a49594d01b42d2a2ffd1ec5fc92eefe9bba91c94a4f",
+    "crates/om9-render/src/scene.rs": "c7f5ad158a9664c8e6b6568c5df4b9a47bd213568f945c89bd0627280b07fb6b",
+    "crates/om9-render/src/overlay.rs": "d9ba3760397833f529d5b2fe5c74f346158268891e08b808c1321cd25bc98aee",
+    "crates/om9-render/src/timing.rs": "5b3f467951fe850c6e650dbd99a901163ef0f339ce6433928801a784fb4d830a",
+    "crates/om9-scene/src/scene.rs": "01d2371178504b39b15797cad948880c97d2a48df23bc5f38d480f1613d598e0"
+  },
+  "initial_matrix": {
+    "summary": "build/standalone-validation/ui-artifacts/navigation-final-20261021/summary.json",
+    "runs": 108,
+    "clean_exits": 72,
+    "oversized_target_panics": 36,
+    "accepted": false
+  },
+  "final_matrix": null,
+  "manual_gate_promoted": false,
+  "business_skill_changed": false,
+  "automated_checks": {
+    "app_regression_checkpoint": {
+      "passed": 180,
+      "suites": 10,
+      "overlap_notice": "Latest focused tests are not added blindly to this checkpoint"
+    },
+    "latest_navigation": {
+      "passed": 12,
+      "suites": 3
+    },
+    "scene": {
+      "passed": 30,
+      "suites": 6
+    },
+    "render_core": {
+      "passed": 15,
+      "suites": 3
+    },
+    "scene_bench": {
+      "passed": 15,
+      "ignored": 4
+    },
+    "public_source_audit": {
+      "errors": 0,
+      "source_files": 8726,
+      "icon_bindings": 511,
+      "svg_files": 510
+    },
+    "gpu_publication_bridge": {
+      "passed": 2,
+      "suites": 1,
+      "timestamp_feature_enabled": false
+    },
+    "diagnostic_replay_clock": {
+      "passed": 1,
+      "suites": 1,
+      "cadences_hz": [
+        30,
+        60
+      ],
+      "slots_per_cadence": 120
+    }
+  },
+  "binary_sha256": "50fcf53bbf368dca78e21163b439dbaeaab82348d95687d7d205a88c0b0591ee",
+  "corrected_matrix_status": "RUNNING",
+  "corrected_matrix_summary": "build/standalone-validation/ui-artifacts/navigation-final-r3-20261021/summary.json",
+  "replay_cadence_checkpoint": {
+    "summary": "build/standalone-validation/ui-artifacts/navigation-final-r2-20261021/summary.json",
+    "checks": "implementation/evidence/M01/2026-10-21-navigation-r2-checks.json",
+    "runs": 108,
+    "clean_exits": 108,
+    "integrity_errors": 0,
+    "literal_geometry_interval_failures": 216,
+    "limitation": "Relative replay timer suppressed samples on fractionally early callbacks; not a conclusive renderer throughput measurement. All outliers retained."
+  },
+  "source_hash_algorithm": "SHA256 of exact working-tree bytes; runtime fingerprint covers its explicitly named four files"
+}

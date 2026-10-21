@@ -1,0 +1,52 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-007",
+  "l4": "OM9-L4-03-14-007-02",
+  "case": "object-property-editor-adapter-positive",
+  "positive_oracle": "Edit color/name/property through document command once; undo restores previous value",
+  "cases": [
+    {
+      "id": "E1-a-colour-edit-is-one-command-and-undo-restores-it",
+      "expect": {
+        "journal_delta": 1,
+        "undo_restores": true
+      }
+    },
+    {
+      "id": "E2-a-hidden-flag-edit-follows-the-same-rule",
+      "expect": {
+        "journal_delta": 1,
+        "undo_restores": true
+      }
+    },
+    {
+      "id": "E3-the-editor-shows-six-editable-fields-and-one-read-only-one",
+      "expect": {
+        "editable": [
+          "Name",
+          "Color",
+          "Visible",
+          "Hidden",
+          "Selectable",
+          "Locked"
+        ],
+        "read_only": [
+          "Geometry"
+        ]
+      }
+    },
+    {
+      "id": "E4-a-no-op-edit-writes-nothing",
+      "expect": {
+        "journal_delta": 0
+      }
+    },
+    {
+      "id": "E5-renaming-is-one-command-and-undo-restores-the-name",
+      "expect": {
+        "journal_delta": 1,
+        "undo_restores": true
+      }
+    }
+  ]
+}

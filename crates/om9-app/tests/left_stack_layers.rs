@@ -289,10 +289,7 @@ fn rail_outer_width_is_300_and_inner_is_chrome_less() {
         let (app, _context) = fresh(Vec2::new(width, height), None, None, false);
         let outer = app.left_rail_outer_px;
         let inner = app.sidebar_rect.expect("sidebar rect").width();
-        assert!(
-            (outer - LEFT_RAIL_DEFAULT).abs() <= 0.5,
-            "{label}: outer {outer}"
-        );
+        assert!((outer - 300.).abs() <= 0.5, "{label}: outer {outer}");
         assert!(
             (inner - (outer - LEFT_RAIL_CHROME_PX)).abs() <= 0.5,
             "{label}: inner {inner} vs outer {outer} - {LEFT_RAIL_CHROME_PX}"

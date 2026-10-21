@@ -1,0 +1,188 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Restore the user-supplied Display/Snaps/Info & Settings icon counts, row order, group gaps and auxiliary control positions using existing authored vectors.",
+  "reference": {
+    "source": "User-attached screenshot of the three sections",
+    "sha256": "64b11d69569b608826027649e627f8f9f6502daffc63df11d5375ead956a2881",
+    "copied_to_repository": false
+  },
+  "before": "Generic flowing lists: 12 Display icons, 8 Snaps icons and 12 Info/Settings icons. Rows changed with dock width and unrelated text controls were present.",
+  "after": {
+    "Display": {
+      "icons": 11,
+      "rows": [
+        6,
+        5
+      ],
+      "same_row": true,
+      "controls": [
+        "Coarse Mesh",
+        "Shaded",
+        "vertical adjustment track"
+      ]
+    },
+    "Snaps": {
+      "command_icons": 16,
+      "top_row": 9,
+      "bottom_row": "6 icons + four step buttons + Grid Snap",
+      "controls": [
+        "Osnap master I",
+        "0.1",
+        "0.25",
+        "0.5",
+        "1.0"
+      ]
+    },
+    "InfoSettings": {
+      "icons": 22,
+      "rows": [
+        11,
+        11
+      ],
+      "grouping_each_row": [
+        7,
+        4
+      ],
+      "top_right": "History controls",
+      "bottom_right": "Manipulator controls"
+    }
+  },
+  "slot_command_order": {
+    "DISPLAY": [
+      "GridON",
+      "PreviewCutterON",
+      "PreviewShadeON",
+      "ShadeSelectedOnlyON",
+      "GVGemView_1",
+      "GVSurfaceView_1",
+      "Dial_Wireframe",
+      "Dial_Shaded",
+      "Dial_Ghosted",
+      "Dial_Tech Shade",
+      "Dial_Working Render"
+    ],
+    "SNAP_TOP": [
+      "ToolsObjectSnapPerpendicularTo",
+      "ToolsObjectSnapTangentTo",
+      "ToolsObjectSnapIntersection",
+      "ToolsObjectSnapPoint",
+      "ToolsObjectSnapNear",
+      "ToolsObjectSnapQuadrant",
+      "ToolsObjectSnapCenter",
+      "ToolsObjectSnapMidpoint",
+      "ToolsObjectSnapEnd"
+    ],
+    "SNAP_BOTTOM": [
+      "SnapOnSurface",
+      "SnapOnPolysurface",
+      "SnapBetween",
+      "OrthoSnapON",
+      "PlanarSnapON",
+      "ProjectSnapON"
+    ],
+    "INFO_TOP": [
+      "RhinoOptions",
+      "ObjectProperties",
+      "GVObjectInfo",
+      "AllObjectInfo",
+      "CommandHistory",
+      "ProjectNotes",
+      "SuperSelect",
+      "RhinoHistoryON",
+      "GVHistoryUpdateON",
+      "GVHistoryRecordON",
+      "InfoSettingsGVClearHistory"
+    ],
+    "INFO_BOTTOM": [
+      "InfoSettingsViewportTabsToggle",
+      "InfoSettingsDisplayProperties",
+      "InfoSettingsBoxEdit",
+      "InfoSettingsLibraries",
+      "InfoSettingsSelectionFilter",
+      "RhinoSmartTrackON",
+      "InfoSettingsDesignReport",
+      "InfoSettingsSmartTargetsGumballON",
+      "InfoSettingsGumballAlignment",
+      "InfoSettingsRelocateGumball",
+      "InfoSettingsGumballON"
+    ]
+  },
+  "rendering": "296-unit reference canvas, fixed slots with no wrapping. Horizontal positions scale with dock width; icon and row height growth is capped at the 360px default dock, so wide docks do not push Layers below short-window bounds. Existing green/gold style and smooth typography retained. Dropdown chevrons are vector triangles.",
+  "assets": "37 previously unembedded existing authored SVG bindings added to the runtime palette; no bitmap extracted, no new icon artwork and no source assets modified. Existing aliases resolve the other slots.",
+  "availability": "All three palettes remain non-invoking presentation adapters with unavailable-operation tooltips. No geometry/backend capability enabled.",
+  "sources": [
+    {
+      "path": "crates/om9-app/src/ui/sidebar_palettes.rs",
+      "sha256": "29dc2dc5fddf2a7cc4807341fff42eae7359c3a59b39158f588ceced4c45f0ae"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "sha256": "ee122ff1ad1a920d6417f83b2d9800607d0fe934fac91c35933a196eb2669aa3"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "sha256": "4a0ab9ab83c0e89bf5d20f091f4e81c5b39a7cf5710831d74feb7cf5aa4f43ca"
+    },
+    {
+      "path": "crates/om9-app/src/icons.rs",
+      "sha256": "6be0c00d796ef83a145a10b154520511f032fd9dc36189623b690dfd9e5190f5"
+    }
+  ],
+  "binary": {
+    "path": "L:\\om9-target\\debug\\om9-fixed-sidebar.exe",
+    "sha256": "2bcbd600670e00249f99b1cc3d613a9575c87ccce06ec263f01b25779daedcb9"
+  },
+  "build": {
+    "command": "cargo rustc -p om9-app --bin om9 --target-dir L:/om9-target -j 2 -- -o L:/om9-target/debug/om9-fixed-sidebar.exe",
+    "result": "PASS"
+  },
+  "tests": {
+    "total": 35,
+    "result": "PASS",
+    "suites": {
+      "sidebar_palettes_unit": 2,
+      "icons_unit": 2,
+      "chrome_actions": 13,
+      "left_stack_layers": 8,
+      "shell_docking": 10
+    },
+    "coverage": "Slot tests render 3 sections at 4 widths (12 combinations); asset test rasterizes all embedded base/menu/sidebar vectors. Integration tests cover non-invoking Snaps, layout, reset, persistence and resizing.",
+    "execution": "cargo test --lib sidebar_palettes; cargo test --lib icons::tests (both with --target-dir L:/om9-target -j 2). Fresh integration binaries in L:/om9-target/debug/deps run directly with --test-threads=1 after cargo hit a locked running om9.exe."
+  },
+  "runtime": [
+    {
+      "scale": "100",
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-100/matrix-summary.json",
+      "passed": true,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-100/default/min-1280x720/workspace.png",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-100/default/min-1280x720/ui-receipt.json"
+    },
+    {
+      "scale": "125",
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-125/matrix-summary.json",
+      "passed": true,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-125/default/lap125-1366x680/workspace.png",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-125/default/lap125-1366x680/ui-receipt.json"
+    },
+    {
+      "scale": "150",
+      "summary": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-150/matrix-summary.json",
+      "passed": true,
+      "screenshot": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-150/default/lap150-1366x700/workspace.png",
+      "receipt": "build/standalone-validation/ui-artifacts/2026-10-20-fixed-sidebar-final-150/default/lap150-1366x700/ui-receipt.json"
+    }
+  ],
+  "visual_review": "All three final screenshots inspected. Display has 11 icons in 6+5 groups; Snaps has 9 top icons plus master, 6 bottom icons plus four step controls and grid; Info has two 7+4 rows, history top right and manipulators bottom right. No glyph placeholders among the command icons.",
+  "public_source_audit": {
+    "status": "FAIL",
+    "existing_tree_findings": 11740,
+    "note": "Existing private/reference/binary/raster artifacts remain. No screenshot artwork or font assets added."
+  },
+  "limitations": [
+    "125/150% are simulated egui zoom on one monitor; formal manual M01-UI acceptance remains pending.",
+    "Authored vector artwork is retained; this is count/order/slot fidelity, not a pixel copy of commercial artwork.",
+    "Commands and auxiliary controls that lack a verified owner remain disabled.",
+    "No reusable skill rule changed; this restores the selected reference layout."
+  ]
+}

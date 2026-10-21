@@ -284,9 +284,8 @@ pub fn drilled_volume(
 /// contract: a kernel fault must arrive as an error, never as a crash.
 pub fn reject_invalid_cylinder(radius: f64) -> Result<(), KernelError> {
     let mut message = [0 as c_char; 512];
-    let code = unsafe {
-        om9_occt_invalid_cylinder(radius, message.as_mut_ptr(), message.len() as c_int)
-    };
+    let code =
+        unsafe { om9_occt_invalid_cylinder(radius, message.as_mut_ptr(), message.len() as c_int) };
     if code == OK {
         Ok(())
     } else {
@@ -330,7 +329,12 @@ pub fn create_destroy(count: i64) -> Result<f64, KernelError> {
     let mut elapsed = 0.0f64;
     let mut message = [0 as c_char; 512];
     let code = unsafe {
-        om9_occt_create_destroy(count, &mut elapsed, message.as_mut_ptr(), message.len() as c_int)
+        om9_occt_create_destroy(
+            count,
+            &mut elapsed,
+            message.as_mut_ptr(),
+            message.len() as c_int,
+        )
     };
     if code == OK {
         Ok(elapsed)
@@ -422,14 +426,21 @@ pub fn fillet_volume(width: f64, height: f64, depth: f64, radius: f64) -> Result
     if code == OK && valid == 1 {
         Ok(volume)
     } else if code == OK {
-        Err(KernelError::Failure("fillet result is not a valid solid".to_string()))
+        Err(KernelError::Failure(
+            "fillet result is not a valid solid".to_string(),
+        ))
     } else {
         Err(status_message(code, &message))
     }
 }
 
 /// Volume of a box after an inward offset.
-pub fn offset_volume(width: f64, height: f64, depth: f64, distance: f64) -> Result<f64, KernelError> {
+pub fn offset_volume(
+    width: f64,
+    height: f64,
+    depth: f64,
+    distance: f64,
+) -> Result<f64, KernelError> {
     let mut volume = 0.0f64;
     let mut valid = 0i32;
     let mut message = [0 as c_char; 512];
@@ -448,7 +459,9 @@ pub fn offset_volume(width: f64, height: f64, depth: f64, distance: f64) -> Resu
     if code == OK && valid == 1 {
         Ok(volume)
     } else if code == OK {
-        Err(KernelError::Failure("offset result is not a valid solid".to_string()))
+        Err(KernelError::Failure(
+            "offset result is not a valid solid".to_string(),
+        ))
     } else {
         Err(status_message(code, &message))
     }
@@ -534,8 +547,13 @@ pub fn degenerate(kind: i32) -> Result<DegenerateReport, KernelError> {
 }
 
 /// Writes the OCCT tessellation of a sphere to a text mesh file and reports its size.
-pub fn sphere_mesh_dump(radius: f64, tolerance: f64, path: &str) -> Result<(i64, i64), KernelError> {
-    let c_path = std::ffi::CString::new(path).map_err(|_| KernelError::InvalidInput("path".to_string()))?;
+pub fn sphere_mesh_dump(
+    radius: f64,
+    tolerance: f64,
+    path: &str,
+) -> Result<(i64, i64), KernelError> {
+    let c_path =
+        std::ffi::CString::new(path).map_err(|_| KernelError::InvalidInput("path".to_string()))?;
     let mut vertices = 0i64;
     let mut triangles = 0i64;
     let mut message = [0 as c_char; 512];
@@ -584,7 +602,13 @@ pub fn topology(kind: i32) -> Result<Topology, KernelError> {
         )
     };
     if code == OK {
-        Ok(Topology { vertices, edges, faces, wires, valid: valid == 1 })
+        Ok(Topology {
+            vertices,
+            edges,
+            faces,
+            wires,
+            valid: valid == 1,
+        })
     } else {
         Err(status_message(code, &message))
     }
@@ -630,7 +654,14 @@ pub fn transform_box(
         )
     };
     if code == OK {
-        Ok(TransformReport { min_x, max_x, min_z, max_z, volume, valid: valid == 1 })
+        Ok(TransformReport {
+            min_x,
+            max_x,
+            min_z,
+            max_z,
+            volume,
+            valid: valid == 1,
+        })
     } else {
         Err(status_message(code, &message))
     }

@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-005",
+  "l4": "OM9-L4-03-14-005-02",
+  "case": "matrix-object-info-overlay-positive",
+  "positive_oracle": "Select box shows type, bounding box dimensions, geometry validity sourced from model",
+  "cases": [
+    {
+      "id": "I1-a-point-reports-its-kind-and-a-zero-size",
+      "expect": {
+        "kind": "Point",
+        "size": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "valid": true
+      }
+    },
+    {
+      "id": "I2-a-line-reports-its-bounding-size-and-length",
+      "expect": {
+        "kind": "Line",
+        "size": [
+          10.0,
+          4.0,
+          0.0
+        ],
+        "detail_contains": "length",
+        "valid": true
+      }
+    },
+    {
+      "id": "I3-a-mesh-reports-unavailable-dimensions-not-zero",
+      "expect": {
+        "kind": "Mesh",
+        "measurement": "Unavailable",
+        "detail": "mesh",
+        "valid_present": true
+      }
+    },
+    {
+      "id": "I4-a-native-brep-without-a-payload-reports-unavailable",
+      "expect": {
+        "kind": "Native B-rep",
+        "measurement": "Unavailable"
+      }
+    },
+    {
+      "id": "I5-the-info-carries-the-layer-colour-when-the-object-has-one",
+      "expect": {
+        "color_present": true
+      }
+    }
+  ]
+}

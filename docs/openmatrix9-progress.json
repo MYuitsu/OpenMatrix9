@@ -1,9 +1,424 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-20",
+  "updated_at": "2026-10-21",
   "implementation_target": "Standalone Rust OM9 owns model/session/UI/scene; selected native adapters only. Older FreeCAD entries are historical scoped evidence.",
-  "active_item": "desktop-gpu-only-renderer-2026-10-19",
+  "active_item": "viewport-navigation-runtime-2026-10-21",
   "items": [
+    {
+      "key": "viewport-navigation-runtime-2026-10-21",
+      "date": "2026-10-21",
+      "stage": "ui-viewports",
+      "feature_ids": [
+        "OM9-L3-03-02-001",
+        "OM9-L3-03-02-002",
+        "OM9-L3-03-02-003",
+        "OM9-L3-03-02-004",
+        "OM9-L3-01-06-001",
+        "OM9-L3-01-06-002",
+        "OM9-L3-01-06-008"
+      ],
+      "procedure_va": null,
+      "status": "implemented_automated_checks_passed_performance_acceptance_open",
+      "target": "standalone Rust OM9; M02 owns navigation, M01 owns renderer/resources",
+      "outputs": [
+        "implementation/design/M01/VIEWPORT-NAVIGATION-IMPLEMENTATION-PLAN.md",
+        "implementation/evidence/M01/2026-10-21-navigation-implementation.md",
+        "implementation/tools/benchmark_viewport_navigation.py",
+        "implementation/evidence/M01/2026-10-21-navigation-implementation.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-21-navigation-implementation.md"
+      ],
+      "tests": [
+        "App/controller/widget regression checkpoint: 180 passed / 10 suites; newest lifecycle + f64 precision: 9 passed / 2 suites (overlap, not additive).",
+        "Scene camera/grid/picking/selection/snapshot: 30 passed / 6 suites.",
+        "GPU retained cameras/timestamps/fallback, AA and render loop: 15 passed / 3 suites.",
+        "Scene bench + retained GPU: 17 passed / 4 ignored before adding timestamp fallback; all original assertions retained.",
+        "Public source audit: 0 errors; release build uses L:/om9-target and -j 2."
+      ],
+      "uncertainties": [
+        "Presentation acceptance not established: PresentMon clock/capture pilots are not a trusted active-frame certification.",
+        "Current native session protocol not independently classified; egui DPI simulations do not certify physical monitors or RDP.",
+        "Preview uses conservative LOD0 for every mesh; certified screen-error decimation is not integrated.",
+        "GPU draw/encode chunks are not proven bounded under every heavy scene or memory-pressure condition.",
+        "F64 camera/picking precision is tested at 1e9; general GPU floating-origin rebasing remains absent.",
+        "Manual OS focus/outside-window capture, maximize/restore and full display-mode/geometry acceptance remain open."
+      ],
+      "next_document": "implementation/evidence/M01/2026-10-21-navigation-implementation.md",
+      "next_action": "Finish fixed-binary warm navigation matrix, preserve all outliers and compare frame-latency 1/2; close presentation/local/RDP/manual gates only with matching runtime evidence.",
+      "manual_gate_promoted": false,
+      "business_skill_rules_changed": false
+    },
+    {
+      "key": "viewport-navigation-forensics-review-2026-10-21",
+      "stage": "ui-viewports",
+      "feature_ids": [
+        "OM9-L3-01-06-001",
+        "OM9-L3-01-06-008",
+        "OM9-L3-03-01-003",
+        "OM9-L3-03-02-001",
+        "OM9-L3-03-02-002",
+        "OM9-L3-03-02-003",
+        "OM9-L3-03-02-004"
+      ],
+      "procedure_va": null,
+      "status": "documentation_validated",
+      "target": "standalone Rust OM9; existing-log analysis and source review only",
+      "outputs": [
+        "implementation/design/M01/VIEWPORT-NAVIGATION-FORENSICS-REVIEW-2026-10-21.md",
+        "implementation/tools/analyze_viewport_navigation_review.py",
+        "implementation/evidence/M01/2026-10-21-navigation-forensics-review.json",
+        "implementation/evidence/M01/2026-10-21-navigation-forensics-review-checks.json"
+      ],
+      "evidence": [
+        "build/stress-27000/nav-pointer-125.jsonl",
+        "implementation/evidence/M01/2026-10-21-navigation-forensics-review.json",
+        "implementation/evidence/M01/2026-10-21-navigation-forensics-review-checks.json"
+      ],
+      "tests": [
+        "Existing JSONL reanalysis: 327 valid records, 326 camera events, 72 JSONL files inventoried; no new runtime benchmark.",
+        "Independent statistics/algebra, source fingerprints and authored-document links verified; see review-checks receipt.",
+        "python tools/public_source_audit.py: PASS; no Rust/application code changed or rebuilt."
+      ],
+      "uncertainties": [
+        "Original capture has no executable/build identity, raw input stream, complete settle frames or GPU/presentation timing.",
+        "Exact 33.333333 ms in all 95 Side View camera events matches source fallback timing; binary/source equivalence is unproven.",
+        "Input gaps, capture loss and GPU exclusion are not established by camera-event gaps alone.",
+        "Native decompiler symbol definitions read; export offsets/RVAs are not certified absolute VAs; assembly correspondence not verified.",
+        "Proposed scheduler/gesture/zoom changes are not implemented; 729, deep 0.2 mm, controlled A/B and manual gates remain pending."
+      ],
+      "next_document": "implementation/design/M01/VIEWPORT-NAVIGATION-FORENSICS-REVIEW-2026-10-21.md",
+      "next_action": "Revise original plan using the review, then implement N0 telemetry and N1/N2 ownership/lifecycle reproduction before nonblocking scheduler and wheel-anchor changes. Preserve business rules and manual gates."
+    },
+    {
+      "key": "slim-reserved-sidebar-scrollbar-2026-10-20",
+      "stage": "ui-menu",
+      "feature_ids": [
+        "OM9-L3-03-07-001"
+      ],
+      "status": "native_and_automated_validated_manual_pending",
+      "outputs": [
+        "crates/om9-app/src/ui.rs",
+        "crates/om9-app/src/ui/chrome.rs",
+        "crates/om9-app/src/ui/sidebar_scroll_audit.rs",
+        "implementation/evidence/M01/2026-10-20-slim-sidebar-scrollbar.json",
+        "docs/validation/2026-10-20-slim-sidebar-scrollbar.md"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-slim-sidebar-scrollbar.json",
+        "docs/validation/2026-10-20-slim-sidebar-scrollbar.md"
+      ],
+      "tests": [
+        {
+          "result": "PASS",
+          "total": 11,
+          "suites": {
+            "sidebar_scroll_audit": 3,
+            "icon_size_audit": 2,
+            "chrome_tests": 4,
+            "sidebar_palettes": 2
+          },
+          "scrollbar_combinations": 9,
+          "widths": [
+            240,
+            360,
+            460
+          ],
+          "simulated_scales": [
+            1,
+            1.25,
+            1.5
+          ],
+          "checks": [
+            "solid bar painted even with collapsed content that fits",
+            "4pt bar and 2pt gap",
+            "no hover expansion",
+            "all sidebar content width fits viewport and icons left of bar",
+            "wheel offset retained on following frames",
+            "12-case icon matrix and reversible resize still pass"
+          ],
+          "logs": [
+            "build/slim-scroll-tests.log",
+            "build/slim-scroll-resize-tests.log"
+          ]
+        }
+      ],
+      "uncertainties": [
+        "DPI matrix simulated; physical per-monitor DPI acceptance pending.",
+        "Formal manual M01-UI gate remains pending.",
+        "Appearance/scroll-position bug fix only; no new command/business rule or skill change.",
+        "Public-source audit still flags existing tree artifacts."
+      ],
+      "next_document": "docs/validation/2026-10-20-slim-sidebar-scrollbar.md",
+      "next_action": "User reviews slim always-visible scrollbar in the new binary; preserve formal M01-UI gate."
+    },
+    {
+      "key": "live-fullscreen-icon-resize-2026-10-20",
+      "stage": "ui-menu",
+      "feature_ids": [
+        "OM9-L3-03-07-001",
+        "OM9-L3-03-07-003"
+      ],
+      "status": "native_maximize_restore_validated_manual_pending",
+      "outputs": [
+        "crates/om9-app/src/ui.rs",
+        "crates/om9-app/src/ui/chrome.rs",
+        "crates/om9-app/src/ui/sidebar_palettes.rs",
+        "crates/om9-app/src/ui/icon_resize_audit.rs",
+        "crates/om9-app/src/ui/icon_size_audit.rs",
+        "tools/validate_icon_live_resize.py",
+        "implementation/evidence/M01/2026-10-20-fullscreen-icon-resize.json",
+        "docs/validation/2026-10-20-fullscreen-icon-resize.md"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-fullscreen-icon-resize.json",
+        "docs/validation/2026-10-20-fullscreen-icon-resize.md"
+      ],
+      "tests": [
+        {
+          "result": "PASS",
+          "total": 16,
+          "suites": {
+            "icon_size_audit": 2,
+            "sidebar_palettes": 2,
+            "chrome_tests": 4,
+            "left_stack_layers": 8
+          },
+          "matrix_cases": 12,
+          "pages_per_case": 22,
+          "toolbar_tabs_per_case": 20,
+          "live_resize_scales": [
+            1,
+            1.25,
+            1.5
+          ],
+          "log": "build/fullscreen-icon-tests.log",
+          "log_sha256": "d54e92811401e137130c481fa3a3c20788a167cb18bd28d75ba045d751a868dd",
+          "integration_execution": "Fresh L:/om9-target/debug/deps/left_stack_layers-a7e5e2c5565b7534.exe --test-threads=1 after cargo hit a running om9.exe access-denied lock."
+        }
+      ],
+      "uncertainties": [
+        "Actual Windows maximize/restore verified; borderless fullscreen not exercised.",
+        "Simulated 125/150% do not establish physical per-monitor DPI transitions.",
+        "Formal M01-UI manual acceptance remains pending.",
+        "Runtime business behavior unchanged; presentation resize bug fixed; no skill rule changed.",
+        "Public-source audit still flags existing tree artifacts."
+      ],
+      "next_document": "docs/validation/2026-10-20-fullscreen-icon-resize.md",
+      "next_action": "User opens the new responsive-icons executable and reviews maximize/restore. Physical multi-monitor DPI and formal M01-UI gate remain pending."
+    },
+    {
+      "key": "icon-screen-size-audit-2026-10-20",
+      "stage": "ui-menu",
+      "feature_ids": [
+        "OM9-L3-03-07-003"
+      ],
+      "status": "validated_headless_layout_manual_pending",
+      "outputs": [
+        "crates/om9-app/src/ui/icon_size_audit.rs",
+        "implementation/evidence/M01/2026-10-20-icon-screen-sizes.json",
+        "docs/validation/2026-10-20-icon-screen-sizes.md"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-icon-screen-sizes.json",
+        "docs/validation/2026-10-20-icon-screen-sizes.md"
+      ],
+      "tests": [
+        {
+          "result": "PASS",
+          "total": 5,
+          "suites": {
+            "icon_size_audit": 1,
+            "sidebar_palettes": 2,
+            "icons": 2
+          },
+          "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib <filter> -- --test-threads=1",
+          "measurement_filter": "icon_size_audit -- --nocapture --test-threads=1",
+          "log": "build/icon-screen-sizes-tests.log",
+          "log_sha256": "cf181b842a34488d9efbb88dff0ac391d5583e6fd6dd6417235e5693e10ecfbd",
+          "assertions": [
+            "actual rendered Main Menu slots measured separately from generic dock anchor",
+            "every Main Menu category page retains its expected visible count",
+            "sidebar icons square, >=18pt and without horizontal overflow or mutual overlap at default dock",
+            "fixed palette counts and rows",
+            "toolbar fits its allocated height",
+            "four viewports, unchanged empty document, no command running"
+          ]
+        }
+      ],
+      "uncertainties": [
+        "Headless egui layout measurements only in this batch; no new native screenshots.",
+        "Previous native fixed-sidebar captures predate a concurrent Main Menu paging change and are not reused as current full-app acceptance.",
+        "Real Windows per-monitor DPI and physical Full HD/QHD screens remain unverified; manual M01-UI approval pending.",
+        "Saved dock widths and smaller actual client areas can produce different values.",
+        "No skill business rule changed.",
+        "Public-source audit still flags existing tree findings."
+      ],
+      "next_document": "docs/validation/2026-10-20-icon-screen-sizes.md",
+      "next_action": "Review measured sizes with the user; physical DPI/fullscreen and formal M01-UI acceptance remain separate gates."
+    },
+    {
+      "key": "fixed-sidebar-reference-slots-2026-10-20",
+      "stage": "ui-menu",
+      "feature_ids": [
+        "OM9-L3-03-07-001",
+        "OM9-L3-03-07-003"
+      ],
+      "status": "validated",
+      "outputs": [
+        "crates/om9-app/src/ui/sidebar_palettes.rs",
+        "crates/om9-app/src/ui/chrome.rs",
+        "crates/om9-app/src/ui.rs",
+        "crates/om9-app/src/icons.rs",
+        "implementation/evidence/M01/2026-10-20-fixed-sidebar-palettes.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-fixed-sidebar-palettes.json"
+      ],
+      "tests": [
+        {
+          "total": 35,
+          "result": "PASS",
+          "suites": {
+            "sidebar_palettes_unit": 2,
+            "icons_unit": 2,
+            "chrome_actions": 13,
+            "left_stack_layers": 8,
+            "shell_docking": 10
+          },
+          "coverage": "Slot tests render 3 sections at 4 widths (12 combinations); asset test rasterizes all embedded base/menu/sidebar vectors. Integration tests cover non-invoking Snaps, layout, reset, persistence and resizing.",
+          "execution": "cargo test --lib sidebar_palettes; cargo test --lib icons::tests (both with --target-dir L:/om9-target -j 2). Fresh integration binaries in L:/om9-target/debug/deps run directly with --test-threads=1 after cargo hit a locked running om9.exe."
+        }
+      ],
+      "uncertainties": [
+        "125/150% are simulated egui zoom on one monitor; formal manual M01-UI acceptance remains pending.",
+        "Authored vector artwork is retained; this is count/order/slot fidelity, not a pixel copy of commercial artwork.",
+        "Commands and auxiliary controls that lack a verified owner remain disabled.",
+        "No reusable skill rule changed; this restores the selected reference layout.",
+        "Public source audit still flags existing tree artifacts."
+      ],
+      "next_document": "implementation/evidence/M01/2026-10-20-fixed-sidebar-palettes.json",
+      "next_action": "User reviews count/order/group gaps against the supplied screenshot; implementation owners must validate commands separately before enabling them."
+    },
+    {
+      "key": "left-dock-default-360-2026-10-20",
+      "stage": "ui-menu",
+      "feature_ids": [
+        "OM9-L3-01-01-002",
+        "OM9-L3-01-01-004"
+      ],
+      "status": "validated",
+      "outputs": [
+        "crates/om9-app/src/dock_layout.rs",
+        "crates/om9-app/tests/left_stack_layers.rs",
+        "tools/validate_m01_l3_002_ui_matrix.py",
+        "implementation/fixtures/M01/OM9-L3-01-01-004/positive.json",
+        "implementation/fixtures/M01/OM9-L3-01-01-004/negative.json",
+        "implementation/evidence/M01/2026-10-20-left-dock-360.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-left-dock-360.json"
+      ],
+      "tests": [
+        {
+          "left_stack_layers": 8,
+          "dock_layout_default": 7,
+          "dock_layout_persistence": 6,
+          "shell_docking": 10,
+          "dock_layout_library": 16,
+          "total": 47,
+          "result": "PASS",
+          "execution": "Fresh integration executables in L:/om9-target/debug/deps were run directly after cargo test hit the running om9.exe lock; default-restore suite rerun after changing the two fixture oracles. cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib dock_layout -- --test-threads=1 passed all 16 library cases."
+        }
+      ],
+      "uncertainties": [
+        "Manual M01-UI acceptance remains pending.",
+        "Saved custom layouts retain their widths until Reset Menus or a manual resize.",
+        "Reusable skill update awaits user consent; no skill was modified.",
+        "Public source audit still flags existing tree artifacts."
+      ],
+      "next_document": "implementation/evidence/M01/2026-10-20-left-dock-360.json",
+      "next_action": "User reviews the 360px preview and decides whether to record this exact default in the workspace skill."
+    },
+    {
+      "key": "smooth-ui-fonts-2026-10-20",
+      "stage": "ui-menu",
+      "feature_ids": [
+        "OM9-L3-03-07-002"
+      ],
+      "status": "validated",
+      "outputs": [
+        "crates/om9-app/src/ui/typography.rs",
+        "crates/om9-app/src/ui/chrome.rs",
+        "crates/om9-app/src/ui.rs",
+        "tools/validate_m01_l3_002_ui_matrix.py",
+        "implementation/evidence/M01/2026-10-20-smooth-fonts.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-smooth-fonts.json"
+      ],
+      "tests": [
+        {
+          "suites": {
+            "chrome_actions": 13,
+            "pinned_command": 7,
+            "left_stack_layers": 8
+          },
+          "total": 28,
+          "result": "PASS",
+          "execution": "Fresh om9-smooth-chrome-tests-fc8a739a4923b38d.exe and latest L:/om9-target/debug/deps/pinned_command + left_stack_layers executables, each --test-threads=1. Cargo integration build hit locked running om9.exe; generated test executables were run directly.",
+          "log_copy": "build/smooth-font-tests.log"
+        }
+      ],
+      "uncertainties": [
+        "Formal human M01-UI acceptance remains pending.",
+        "All three native app processes exited successfully and each completed five command checks. Full layout oracle remains FAIL because its 22pt icon expectation disagrees with the captured 24pt executable. Concurrent icon-size work is outside this font change.",
+        "Current checkout continues to receive unrelated icon/menu changes; this preview binary is the measured typography snapshot.",
+        "Bundled fonts remain the fallback if installed Windows fonts are unavailable; visual quality depends on font availability and physical DPI.",
+        "Public source audit still flags existing tree artifacts."
+      ],
+      "next_document": "implementation/evidence/M01/2026-10-20-smooth-fonts.json",
+      "next_action": "User reviews smooth-font preview; reconcile icon-size layout oracle in the concurrent icon work before promoting full DPI/layout acceptance."
+    },
+    {
+      "key": "dock-text-readability-2026-10-20",
+      "stage": "ui-menu",
+      "feature_ids": [
+        "OM9-L3-03-07-001",
+        "OM9-L3-03-07-002",
+        "OM9-L3-03-14-001"
+      ],
+      "status": "validated",
+      "outputs": [
+        "crates/om9-app/src/ui/chrome.rs",
+        "crates/om9-app/src/ui/layers.rs",
+        "implementation/evidence/M01/2026-10-20-dock-text-readability.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-dock-text-readability.json"
+      ],
+      "tests": [
+        {
+          "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --test chrome_actions --test shell_docking --test layer_category_palette --test layer_current_and_assign -- --test-threads=1",
+          "result": "PASS",
+          "suites": {
+            "chrome_actions": 13,
+            "shell_docking": 10,
+            "layer_category_palette": 6,
+            "layer_current_and_assign": 3
+          },
+          "total": 32
+        }
+      ],
+      "uncertainties": [
+        "Formal manual M01-UI acceptance remains pending.",
+        "Other chats have concurrent changes in the same files; this receipt covers text presentation and the named tests only.",
+        "No model/command semantics or reusable skill business rules changed.",
+        "Public source audit still flags existing tree artifacts."
+      ],
+      "next_document": "implementation/evidence/M01/2026-10-20-dock-text-readability.json",
+      "next_action": "User reviews dock typography and clean layer names in the preview; formal M01-UI review remains pending."
+    },
     {
       "key": "green-dock-backgrounds-2026-10-20",
       "stage": "ui-menu",
@@ -13346,9 +13761,8 @@
         "Menu page arrows (drawn triangles) step the long palette without drag/wheel.",
         "Top File/View/Utilities/Measure/Custom menus are interactive and open their full reference palettes.",
         "Menu palettes use reference-style page rectangles (two rows per page) instead of arrows.",
-        "Menu palette uses ten icons per row, a fixed right page column, | for selected page and circles otherwise.",
-        "Page indicators use framed beveled buttons (blue | selected, gray circles otherwise).",
-        "Page indicators use green beveled frames: selected dark-green |, unselected light-green circles."
+        "Page indicators use green beveled frames: selected dark-green |, unselected light-green circles.",
+        "Category grid compacted to six columns and two rows at the 300 px dock."
       ],
       "tests": {
         "chrome_actions": "13 passed",
@@ -13880,6 +14294,161 @@
         "Ca 8 L3 cua OM9-L2-03-14 da co bang chung; con checklist test gop + cac open item UI (nhan Object Info, nut Super Select, panel property editor, rename)."
       ],
       "next_action": "Gom MOT checklist test cho ca 8 L3 va bao cao tong ket module OM9-L2-03-14."
+    },
+    {
+      "key": "rhino5-editable-brep-2026-10-20",
+      "date": "2026-10-20",
+      "stage": "feature-port",
+      "milestone": "M03",
+      "area": "3DM Rhino 5 import, editable BRep, export/reimport (OM9-L3-01-13-006/007/009/012)",
+      "status": "r5_b_core_e2e_green_p0_contract_p1_tables_attrs_page_overlay_done; p2_hatch_display_proxy_done; p3_explicit_omission_done; text_export_pending; light_table_scaffold",
+      "scope": "Rhino 5 archive version 50 only: 44/44 object binding, 30/30 BRep editable through OCCT, block member, V5 export and reimport.",
+      "code_added": [
+        "native/native_exchange.cpp: V5 project-source gate, layer material/linetype fingerprint reset, opaque Geometry.userdata projection, inventory/packet node split, cached BRep face display merge",
+        "crates/om9-kernel: optional 3dm-brep feature, openNURBS link, ported ON_Brep <-> OCCT conversion, from_3dm/to_3dm FFI",
+        "crates/om9-exchange: BrepMode/BrepBridge/BrepExport, strict editable import, private converted export document, receipt counts",
+        "crates/om9-app: occt-brep feature and OcctBrepBridge wired into ThreeDmHost",
+        "crates/om9-archive: canonical BRep source string admission above the 16 KiB name cap",
+        "crates/om9-core: max_nodes default 4,000,000",
+        "crates/om9-core/src/exchange.rs + model.rs: typed line-pattern/material tables and layer/object refs, plot color/weight/source, display order and model-space; native round-trip. Text-style export remains retained-only with explicit diagnostic.",
+        "crates/om9-core/src/retained.rs + crates/om9-exchange/src/imported.rs: host group table/membership import and export",
+        "implementation/design/M03/THREEDM-V5-EXCHANGE-COMPLETION.md: P0 contract + P1 groups/line patterns; materials and attributes pending"
+      ],
+      "evidence": [
+        "implementation/evidence/M03/2026-10-20-rhino5-editable-brep.json",
+        "implementation/design/M03/THREEDM-FULL-OBJECT-IMPORT.md",
+        "implementation/design/M03/THREEDM-V5-EXCHANGE-COMPLETION.md"
+      ],
+      "measured": {
+        "fixture_sha256": "573bb8b0b1523424c95cf0dfa2b26500c71e5add06b57462421a2ffc697f1218",
+        "fixture_bytes": 2643916,
+        "native_sha256": "923caba857b4f738b6641f3dfe1abd68705c33e32c5aab0de3f21e9069b1d1be",
+        "import_release_seconds": 5.37,
+        "import_om9_bytes": 8566153,
+        "root_objects": 43,
+        "breps_editable": 30,
+        "breps_opaque": 0,
+        "layers": 34,
+        "export_release_seconds": 4.83,
+        "export_3dm_bytes": 2182344,
+        "native_inspect_objects": 44,
+        "native_inspect_breps": 30,
+        "native_inspect_diagnostics": 0,
+        "reimport_root_objects": 43
+      },
+      "tests": [
+        {
+          "command": "cargo test -p om9-exchange -j 2",
+          "result": "exit 0"
+        },
+        {
+          "command": "cargo test -p om9-archive -j 2",
+          "result": "exit 0"
+        },
+        {
+          "command": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+          "result": "exit 0"
+        },
+        {
+          "command": "cargo test -p om9-app --features occt-brep --lib -j 2",
+          "result": "117 passed; 0 failed"
+        },
+        {
+          "command": "cargo clippy -p om9-kernel --features 3dm-brep --all-targets -- -D warnings",
+          "result": "exit 0"
+        },
+        {
+          "command": "cargo clippy -p om9-exchange -p om9-archive --all-targets -- -D warnings",
+          "result": "exit 0"
+        },
+        {
+          "command": "cargo clippy -p om9-app --features occt-brep --lib -- -D warnings",
+          "result": "exit 0"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "exit 0; public scope 0 errors; --strict still reports private material"
+        }
+      ],
+      "uncertainties": [
+        "R5-A fallback cannot display BRep without OCCT; it now emits BREP_DISPLAY_UNAVAILABLE instead of claiming editable/visible BRep",
+        "Four-view UI startup smoke is automated; manual face/edge selection and warning-summary review remain",
+        "Extended V5 annotation/hatch/light remain retained-only",
+        "Strict editable mode aborts the whole import on the first unconvertible BRep",
+        "Release import 5.09 s / export 5.23 s improved from 8.62/7.21 s but remain slightly above the proposed <=5 s target",
+        "V6/V7/V8 deferred; V4 legacy policy not implemented",
+        "Public audit passes in git-public scope; tracked OM9_Milestones reference images still require the planned private-archive move for --strict"
+      ],
+      "next_action": "Record manual UI import/select smoke; decide whether to move tracked private milestone references and whether 5.09/5.23 s is acceptable or further conversion optimization is required."
+    },
+    {
+      "id": "m01-500k-object-level-and-interaction-log-2026-10-20",
+      "date": "2026-10-20",
+      "source": "direct user request 2026-10-20: 500k object level for 1000 earrings and rotate/zoom/move logs for optimization",
+      "active_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
+      "owner": "OM9-L2-01-06 viewport GPU backend / interaction performance",
+      "status": "verified_measured; interaction smooth at 1000 earrings",
+      "result": "Named 500k object level (OM9_STRESS_LEVEL=500k) added without changing defaults. 1000 whole-earring instances (42,000 objects, 72.5M triangles) open in a normal OM9 document and settle at 138 fps / 7.3 ms on the RTX 3060. 8000 instances (336,000 objects, 580M triangles) load as a document but the document scene upload ends in wgpu Out of Memory, which identifies GPU instancing/LOD as the next optimization. Interaction log (OM9_INTERACTION_LOG) records orbit/pan/zoom and gumball move/rotate/scale with frame time, camera and scene counters.",
+      "changes": [
+        "crates/om9-app/src/lib.rs: document_limits() and OM9_STRESS_LEVEL=500k / OM9_MAX_OBJECTS / OM9_MAX_POINTS / OM9_MAX_BYTES",
+        "crates/om9-app/src/interaction_log.rs: JSONL interaction log",
+        "crates/om9-app/src/ui.rs: camera and gumball logging, limits on from_file/new",
+        "crates/om9-app/src/gpu_viewport.rs: frame_stats()",
+        "crates/om9-app/tests/stress_instances.rs: whole-definition mode for 1000/8000 earring scenes",
+        "crates/om9-app/tests/interaction_log.rs: orbit and pan records through the widget path"
+      ],
+      "tests": {
+        "om9_app_lib": 116,
+        "interaction_log": 1
+      },
+      "evidence": [
+        "docs/validation/2026-10-20-500k-objects-and-interaction-log.md",
+        "build/stress-27000/bong-1000-whole.om9",
+        "build/stress-27000/bong-8000-whole.om9",
+        "build/stress-27000/bong-1000-500k-view.png",
+        "build/stress-27000/whole.stderr.log"
+      ],
+      "not_yet_done": [
+        "8000 whole earrings need GPU instancing or a display LOD; a larger document budget does not fix the 580M-triangle upload.",
+        "Native mouse automation from the agent session was not reliable (foreground window conflict); the orbit/pan log is proven by the widget-path test, native drag logging is a manual step.",
+        "Clippy --all-targets is blocked by an unrelated needless_range_loop in ui/icon_size_audit.rs; the app library and the new tests compile clean."
+      ],
+      "memory_measurement": "1000-earring scene: 8,456,536,064 B (8.06 GB) dedicated VRAM measured by GPU Process Memory counter on the 12 GB RTX 3060; 9,289 MB Windows private commit (CPU), 1,188 MB working set. The 8000 scene OOM is VRAM, and the per-viewport GpuScene duplication makes it ~4x the single-copy geometry.",
+      "optimizations": [
+        "OM9_VIEWPORT_LOD decimates each unique source mesh once (QEM) and reuses it; 1000-earring scene VRAM 8.06 -> 4.55 GB, private 9.3 -> 5.2 GB.",
+        "Camera fast path no longer rebuilds the line overlay when only the point size changes: zoom 707.2 -> 16.6 ms median at 1000 earrings.",
+        "OM9_CAMERA_AUDIT=<frames> measures orbit/zoom/pan without OS input and logs frame times."
+      ],
+      "interaction_medians_ms": {
+        "orbit": 16.7,
+        "zoom": 16.6,
+        "pan": 16.7,
+        "configuration": "LOD 1200, 1000 earrings, 120-frame camera audit"
+      }
+    },
+    {
+      "id": "m01-viewport-interaction-p1-2026-10-20",
+      "date": "2026-10-20",
+      "source": "approved plan: deep viewport optimization for many objects",
+      "active_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
+      "owner": "OM9-L2-01-06 / L3-002 shared scene resources",
+      "status": "1k_8k_27k_gates_met; 500k_removed_by_user",
+      "result": "1k earrings: 3 s / 0.55 GB / p95 17.4 ms; 8k earrings (336k objects): 10 s / 1.05 GB / p95 21.4 ms; 27k copies: 3 s / 0.55 GB / p95 18.8 ms. 500k removed as theoretical.",
+      "changes": [
+        "crates/om9-render/src/scene.rs: chunk_capacity_for + pending vertex/index writes flushed once per chunk"
+      ],
+      "tests": {
+        "om9_render_scene_bench": "15 passed / 4 ignored (serial run)",
+        "om9_render_lib": "pass"
+      },
+      "evidence": [
+        "implementation/design/M01/VIEWPORT-INTERACTION-PERFORMANCE.md",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L2.json",
+        "OM9_Milestones/M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-002 - Shared Scene Graphics Resources/l3.json"
+      ],
+      "not_yet_done": [
+        "P2b instancing and P3 off-thread build only if a real workload exceeds 27k"
+      ]
     }
   ],
   "merge_context": {

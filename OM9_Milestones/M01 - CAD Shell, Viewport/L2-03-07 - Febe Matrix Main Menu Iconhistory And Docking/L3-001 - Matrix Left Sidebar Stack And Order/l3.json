@@ -195,6 +195,75 @@
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending."
-    ]
+    ],
+    "dock_theme": {
+      "date": "2026-10-20",
+      "status": "DOCK_APPEARANCE_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Dock background presentation only: left/right column surfaces, section bars and floating menu content.",
+      "colours": {
+        "dock_background": "#01391C",
+        "section_background": "#005126",
+        "edges_hover": "#236B48"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-green-docks.json"
+      ]
+    },
+    "text_readability": {
+      "date": "2026-10-20",
+      "status": "TEXT_APPEARANCE_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Dock text presentation: headings, body, secondary/disabled labels, category colours, project labels, floating titles and layer names/tooltips.",
+      "colours": {
+        "heading": "#FDD880",
+        "body": "#FFF4D6",
+        "secondary": "#CDE2D2",
+        "disabled_alpha": 0.78,
+        "category_white_mix": {
+          "darker_accents": 0.65,
+          "other_accents": 0.4
+        },
+        "current_layer_text_on_blue": "#05180E"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-dock-text-readability.json"
+      ]
+    },
+    "auxiliary_palettes": {
+      "date": "2026-10-20",
+      "status": "REFERENCE_SLOTS_VALIDATED_MANUAL_UI_PENDING",
+      "target": "standalone Rust OM9",
+      "scope": "Restore the user-supplied Display/Snaps/Info & Settings icon counts, row order, group gaps and auxiliary control positions using existing authored vectors.",
+      "counts": {
+        "Display": 11,
+        "Snaps_command_icons": 16,
+        "InfoSettings": 22
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-fixed-sidebar-palettes.json"
+      ],
+      "availability": "All three palettes remain non-invoking presentation adapters with unavailable-operation tooltips. No geometry/backend capability enabled."
+    },
+    "live_icon_resize": {
+      "date": "2026-10-20",
+      "status": "NATIVE_MAXIMIZE_RESTORE_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Live icon resize on Windows maximize/restore while retaining reference palette counts, row order, ten-column Main Menu and 360-point default dock.",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-fullscreen-icon-resize.json",
+        "docs/validation/2026-10-20-fullscreen-icon-resize.md"
+      ],
+      "human_approval": null
+    },
+    "sidebar_scrollbar": {
+      "date": "2026-10-20",
+      "status": "NATIVE_AND_AUTOMATED_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Fix left-sidebar scrollbar covering buttons: always-visible solid 4pt bar, 2pt gap, no hover expansion and actual retained scroll offset.",
+      "evidence": [
+        "implementation/evidence/M01/2026-10-20-slim-sidebar-scrollbar.json",
+        "docs/validation/2026-10-20-slim-sidebar-scrollbar.md"
+      ],
+      "human_approval": null
+    }
   }
 }

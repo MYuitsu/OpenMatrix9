@@ -1,0 +1,387 @@
+{
+  "date": "2026-10-20",
+  "target": "standalone Rust OM9",
+  "scope": "Measure actual icon slots at default 360 logical-point dock across four client resolutions and three simulated scales. No runtime sizing or command behavior changed by this audit.",
+  "interpretation": {
+    "2K": "QHD 2560x1440",
+    "nominal_minimum_client": [
+      1280,
+      720
+    ],
+    "scale": "egui pixels per point, simulated; not real Windows per-monitor DPI",
+    "drawing_square": "slot edge minus 3 logical points",
+    "window_area": "Full client rectangles; actual maximized client area is smaller than desktop resolution and depends on OS chrome/taskbar."
+  },
+  "measurements": [
+    {
+      "client_points": [
+        1280.0,
+        720.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 28.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 27.59375,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 28.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "scale": 1.0,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 23.0,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        1024.0,
+        576.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 35.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 24.53125,
+      "fixed_slot_device_px": 34.4140625,
+      "fixed_slot_pt": 27.53125,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 35.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "scale": 1.25,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 28.75,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        853.3333129882812,
+        480.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 42.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 41.390625,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 42.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "scale": 1.5,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 34.5,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        1366.0,
+        768.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 28.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 27.59375,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 28.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1366.0,
+        768.0
+      ],
+      "scale": 1.0,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 23.0,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        1092.800048828125,
+        614.4000244140625
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 35.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 24.53125,
+      "fixed_slot_device_px": 34.4140625,
+      "fixed_slot_pt": 27.53125,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 35.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1366.0,
+        768.0
+      ],
+      "scale": 1.25,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 28.75,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        910.6666870117188,
+        512.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 42.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 41.390625,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 42.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1366.0,
+        768.0
+      ],
+      "scale": 1.5,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 34.5,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        1920.0,
+        1080.0
+      ],
+      "dock_art_pt": 37.0,
+      "dock_slot_device_px": 40.0,
+      "dock_slot_pt": 40.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 27.59375,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 40.0,
+      "main_art_pt": 28.0,
+      "main_slot_device_px": 31.0,
+      "main_slot_pt": 31.0,
+      "resolution": [
+        1920.0,
+        1080.0
+      ],
+      "scale": 1.0,
+      "toolbar_art_pt": 29.0,
+      "toolbar_slot_device_px": 32.0,
+      "toolbar_slot_pt": 32.0
+    },
+    {
+      "client_points": [
+        1536.0,
+        864.0
+      ],
+      "dock_art_pt": 29.0,
+      "dock_slot_device_px": 40.0,
+      "dock_slot_pt": 32.0,
+      "fixed_art_pt": 24.53125,
+      "fixed_slot_device_px": 34.4140625,
+      "fixed_slot_pt": 27.53125,
+      "history_slot_pt": 32.0,
+      "main_art_pt": 28.0,
+      "main_slot_device_px": 38.75,
+      "main_slot_pt": 31.0,
+      "resolution": [
+        1920.0,
+        1080.0
+      ],
+      "scale": 1.25,
+      "toolbar_art_pt": 23.0,
+      "toolbar_slot_device_px": 32.5,
+      "toolbar_slot_pt": 26.0
+    },
+    {
+      "client_points": [
+        1280.0,
+        720.0
+      ],
+      "dock_art_pt": 25.0,
+      "dock_slot_device_px": 42.0,
+      "dock_slot_pt": 28.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 41.390625,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 28.0,
+      "main_art_pt": 25.0,
+      "main_slot_device_px": 42.0,
+      "main_slot_pt": 28.0,
+      "resolution": [
+        1920.0,
+        1080.0
+      ],
+      "scale": 1.5,
+      "toolbar_art_pt": 20.0,
+      "toolbar_slot_device_px": 34.5,
+      "toolbar_slot_pt": 23.0
+    },
+    {
+      "client_points": [
+        2560.0,
+        1440.0
+      ],
+      "dock_art_pt": 37.0,
+      "dock_slot_device_px": 40.0,
+      "dock_slot_pt": 40.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 27.59375,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 40.0,
+      "main_art_pt": 28.0,
+      "main_slot_device_px": 31.0,
+      "main_slot_pt": 31.0,
+      "resolution": [
+        2560.0,
+        1440.0
+      ],
+      "scale": 1.0,
+      "toolbar_art_pt": 29.0,
+      "toolbar_slot_device_px": 32.0,
+      "toolbar_slot_pt": 32.0
+    },
+    {
+      "client_points": [
+        2048.0,
+        1152.0
+      ],
+      "dock_art_pt": 37.0,
+      "dock_slot_device_px": 50.0,
+      "dock_slot_pt": 40.0,
+      "fixed_art_pt": 24.53125,
+      "fixed_slot_device_px": 34.4140625,
+      "fixed_slot_pt": 27.53125,
+      "history_slot_pt": 40.0,
+      "main_art_pt": 28.0,
+      "main_slot_device_px": 38.75,
+      "main_slot_pt": 31.0,
+      "resolution": [
+        2560.0,
+        1440.0
+      ],
+      "scale": 1.25,
+      "toolbar_art_pt": 29.0,
+      "toolbar_slot_device_px": 40.0,
+      "toolbar_slot_pt": 32.0
+    },
+    {
+      "client_points": [
+        1706.6666259765625,
+        960.0
+      ],
+      "dock_art_pt": 32.0,
+      "dock_slot_device_px": 52.5,
+      "dock_slot_pt": 35.0,
+      "fixed_art_pt": 24.59375,
+      "fixed_slot_device_px": 41.390625,
+      "fixed_slot_pt": 27.59375,
+      "history_slot_pt": 35.0,
+      "main_art_pt": 28.0,
+      "main_slot_device_px": 46.5,
+      "main_slot_pt": 31.0,
+      "resolution": [
+        2560.0,
+        1440.0
+      ],
+      "scale": 1.5,
+      "toolbar_art_pt": 26.0,
+      "toolbar_slot_device_px": 43.5,
+      "toolbar_slot_pt": 29.0
+    }
+  ],
+  "coverage": {
+    "resolutions": 4,
+    "scales": [
+      1.0,
+      1.25,
+      1.5
+    ],
+    "matrix_combinations": 12,
+    "categories_per_case": 12,
+    "category_pages_per_case": 22,
+    "toolbar_tabs_per_case": 20,
+    "page_and_tab_selections": 504,
+    "fixed_palette_counts": [
+      11,
+      16,
+      22
+    ]
+  },
+  "tests": {
+    "result": "PASS",
+    "total": 5,
+    "suites": {
+      "icon_size_audit": 1,
+      "sidebar_palettes": 2,
+      "icons": 2
+    },
+    "command": "cargo test -p om9-app --target-dir L:/om9-target -j 2 --lib <filter> -- --test-threads=1",
+    "measurement_filter": "icon_size_audit -- --nocapture --test-threads=1",
+    "log": "build/icon-screen-sizes-tests.log",
+    "log_sha256": "cf181b842a34488d9efbb88dff0ac391d5583e6fd6dd6417235e5693e10ecfbd",
+    "assertions": [
+      "actual rendered Main Menu slots measured separately from generic dock anchor",
+      "every Main Menu category page retains its expected visible count",
+      "sidebar icons square, >=18pt and without horizontal overflow or mutual overlap at default dock",
+      "fixed palette counts and rows",
+      "toolbar fits its allocated height",
+      "four viewports, unchanged empty document, no command running"
+    ]
+  },
+  "sources": [
+    {
+      "path": "crates/om9-app/src/ui/icon_size_audit.rs",
+      "sha256": "3e8fd37f12d33fde2895ad2839fd8ba9456e7d0e6485b89641b9b6c2e800cc52"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "sha256": "638fe298e3fb746cba382259b5e8b548371094aacf5d731bd49e9399055f5e3a"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "sha256": "ee122ff1ad1a920d6417f83b2d9800607d0fe934fac91c35933a196eb2669aa3"
+    },
+    {
+      "path": "crates/om9-app/src/ui/sidebar_palettes.rs",
+      "sha256": "29dc2dc5fddf2a7cc4807341fff42eae7359c3a59b39158f588ceced4c45f0ae"
+    },
+    {
+      "path": "crates/om9-app/src/dock_layout.rs",
+      "sha256": "7d6ff1c2e24bfc0f3d04cd1ee73531c978ce04f703c1ac0f6c88ffaeb48f6a8f"
+    },
+    {
+      "path": "crates/om9-app/src/icons.rs",
+      "sha256": "6be0c00d796ef83a145a10b154520511f032fd9dc36189623b690dfd9e5190f5"
+    }
+  ],
+  "test_binary": {
+    "path": "L:/om9-target/debug/deps/om9_app-b8dbdaa50ed616d0.exe",
+    "sha256": "be5280dfc5fb2bbdffbab2f12db424e1812450754961f8a7bba2bd0cdcbde1c6"
+  },
+  "public_source_audit": {
+    "exit_code": 1,
+    "existing_findings": 11740,
+    "raw_log": "build/icon-size-source-audit.json"
+  },
+  "limitations": [
+    "Headless egui layout measurements only in this batch; no new native screenshots.",
+    "Previous native fixed-sidebar captures predate a concurrent Main Menu paging change and are not reused as current full-app acceptance.",
+    "Real Windows per-monitor DPI and physical Full HD/QHD screens remain unverified; manual M01-UI approval pending.",
+    "Saved dock widths and smaller actual client areas can produce different values.",
+    "No skill business rule changed."
+  ],
+  "report": "docs/validation/2026-10-20-icon-screen-sizes.md"
+}

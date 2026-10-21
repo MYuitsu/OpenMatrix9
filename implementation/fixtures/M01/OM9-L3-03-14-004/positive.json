@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m01.fixture.v1",
+  "l3": "OM9-L3-03-14-004",
+  "l4": "OM9-L4-03-14-004-02",
+  "case": "select-all-objects-by-layer-positive",
+  "positive_oracle": "Select all objects in active layer returns exactly its editable objects",
+  "cases": [
+    {
+      "id": "A1-two-objects-on-the-current-layer-are-both-selected",
+      "expect": {
+        "selected": 2,
+        "selection_replaces_previous": true
+      }
+    },
+    {
+      "id": "A2-an-object-on-another-layer-is-not-selected",
+      "expect": {
+        "other_layer_object_selected": false
+      }
+    },
+    {
+      "id": "A3-a-hidden-object-on-the-layer-stays-out",
+      "expect": {
+        "selected_after_hiding_one": 1
+      }
+    },
+    {
+      "id": "A4-the-group-gesture-selects-only-what-is-selectable",
+      "expect": {
+        "select_group_uses_the_same_policy": true
+      }
+    }
+  ]
+}

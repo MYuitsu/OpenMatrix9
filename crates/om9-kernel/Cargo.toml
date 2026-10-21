@@ -6,6 +6,11 @@ license.workspace = true
 rust-version.workspace = true
 description = "OCCT 8.0.1 bridge: one C ABI of complete operations per capability, promoted from the M00 gate proof"
 
+[features]
+# Optional 3DM ON_Brep <-> OCCT conversion. Requires the pinned openNURBS static
+# library in addition to the OCCT SDK.
+3dm-brep = []
+
 [build-dependencies]
 cc = "1"
 

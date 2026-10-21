@@ -1,0 +1,74 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-03-14-008-05",
+  "l3_id": "OM9-L3-03-14-008",
+  "title": "Layer State Persistence Visual Check",
+  "oracle": {
+    "positive": "Save/reopen 2 layers incl lock and visibility and compare palette icons and picked IDs",
+    "negative": "Palette must not show cached unsaved state after reopen"
+  },
+  "manual_test_gate": "M01-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) at the running application",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "RED: API-level for the new fixture file; the round trip already worked. K1's first run recorded the real finding (slots 1..8, not 1 and 5).",
+    "GREEN: cargo test -p om9-app --test layer_state_persistence -> test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s",
+    "cargo test -p om9-core -p om9-app -j 2: every group passes except the pre-existing, unrelated chrome_actions::icons_scale_with_the_screen_size.",
+    "cargo fmt --check: exit 0; cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0",
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
+  ],
+  "code_change": [
+    "No product change: persistence already round-tripped; the item adds the fixture-driven check that ties the palette to the file (K1..K3, L1..L3)."
+  ],
+  "artefacts": [
+    "OM9-L4-03-14-008-02.red.log",
+    "OM9-L4-03-14-008-02.green.log",
+    "OM9-L4-03-14-008-03.diffstat.txt",
+    "OM9-L4-03-14-008-03.target-test.log",
+    "OM9-L4-03-14-008-05.regression.log"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The round trip is machine-proven; the palette icons on screen after a real Save/Reopen are yours to confirm.",
+    "items": [
+      {
+        "id": "P1",
+        "step": "Lock Gems, hide Metals, Save, close and reopen the file.",
+        "machine_proven": "K1: both groups' slots come back with locked/visible and the slot colours.",
+        "human_must_verify": "The palette shows the same lock and visibility icons as before saving.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "P2",
+        "step": "After the reopen, click the locked Gems row and the hidden Metals row.",
+        "machine_proven": "K3: nothing is selected from either row, and the object ids are the same as before saving.",
+        "human_must_verify": "No objects jump into the selection, and the ids/colours you had are still there.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "P3",
+        "step": "Open a different file in the same session.",
+        "machine_proven": "L1: the previous slots are absent and select nothing.",
+        "human_must_verify": "The palette shows the new file's layers only — no leftover rows.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "P4",
+        "step": "Try to open a file that does not exist.",
+        "machine_proven": "L2: the current document and its flags are untouched.",
+        "human_must_verify": "The palette keeps the current state and the error is explained.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_l2_03_14_l3_008_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

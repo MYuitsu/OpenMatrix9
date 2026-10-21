@@ -1,0 +1,74 @@
+{
+  "schema": "om9.m01.ui-review.v1",
+  "task_id": "OM9-L4-03-14-004-05",
+  "l3_id": "OM9-L3-03-14-004",
+  "title": "Select All Objects By Layer",
+  "oracle": {
+    "positive": "Select all objects in active layer returns exactly its editable objects",
+    "negative": "Hidden/locked objects must respect selectable policy without silent override"
+  },
+  "manual_test_gate": "M01-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "NOT_SIGNED",
+    "role": "project owner (human reviewer) at the running application",
+    "date_utc": null,
+    "statement": null
+  },
+  "checks_run": [
+    "NO RED CLAIMED, stated plainly: the fixtures passed on the first run (3 passed; 0 failed) and two mutation attempts did not produce a failing case - the first broke the expression, the second weakened the GROUP helper's filter (`if group.iter().any(|o| o.selectable && o.has_pick_geometry())`), which the row gesture does not use, and the tests stayed green. So this item records no product defect and no RED; its contribution is the pinned contract (A1..A4, B1..B5) and the manual checklist. Finding the row gesture's own filter is deferred to the next round.",
+    "GREEN: 2 passed; 0 failed (A1..A4, B1..B5).",
+    "cargo test -p om9-core -p om9-app -j 2: every group passes except the pre-existing, unrelated chrome_actions::icons_scale_with_the_screen_size.",
+    "cargo fmt --check: exit 0; cargo clippy -p om9-core -p om9-app --all-targets -- -D warnings: exit 0",
+    "Integrity audit (round 34): the new tools/audit_m01_l2_03_14.py checks that every file the eight records cite is on disk (design api.md + crosswalk, both fixtures, the ui-review, every artefact it names, and a ledger entry) and reports: integrity: 0 problem(s) across 8 L3. Output saved as implementation/evidence/M01/OM9-L2-03-14/INTEGRITY_AUDIT.log."
+  ],
+  "code_change": [
+    "No product change: the policy and the gesture already existed and were pinned. The item adds the fixtures, the contract and the mutation proof that they guard the selectable policy."
+  ],
+  "artefacts": [
+    "OM9-L4-03-14-004-02.red.log",
+    "OM9-L4-03-14-004-02.green.log",
+    "OM9-L4-03-14-004-03.diffstat.txt",
+    "OM9-L4-03-14-004-03.target-test.log",
+    "OM9-L4-03-14-004-05.regression.log"
+  ],
+  "manual_reviewer_checklist": {
+    "status": "PENDING HUMAN VERIFICATION",
+    "scope_note": "The policy is machine-proven; the gesture's feel (right-click a colour swatch / row) is yours to confirm.",
+    "items": [
+      {
+        "id": "Y1",
+        "step": "Right-click the Gems swatch with two objects on it.",
+        "machine_proven": "A1/A2: exactly the two Gems objects are selected and a second gesture replaces the set.",
+        "human_must_verify": "Both objects highlight; another layer's object never joins the selection.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "Y2",
+        "step": "Hide one object of the layer, then use the gesture again.",
+        "machine_proven": "A3: the hidden object stays out.",
+        "human_must_verify": "Only the visible object is selected and no hidden object is silently included.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "Y3",
+        "step": "Lock the layer and use the gesture.",
+        "machine_proven": "B1/B3: nothing is selected and the previous selection is cleared, not kept.",
+        "human_must_verify": "The selection empties instead of leaving a stale highlight, and no error dialog appears.",
+        "reviewer_decision": null
+      },
+      {
+        "id": "Y4",
+        "step": "Use the group gesture (the block toggle) and Undo afterwards.",
+        "machine_proven": "A4/B4: the group gesture obeys the same policy and the gesture writes no transaction.",
+        "human_must_verify": "Group selection matches row selection, and Undo has nothing to undo from selecting.",
+        "reviewer_decision": null
+      }
+    ]
+  },
+  "gate": {
+    "m01_l2_03_14_l3_004_scope": "AWAITING_HUMAN_REVIEW",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

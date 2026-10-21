@@ -57,7 +57,7 @@
       "expect": {
         "equals_matrix_default_bytes": true,
         "left_rail_visible": true,
-        "left_rail_size": 300.0,
+        "left_rail_size": 360.0,
         "projects_visible": true,
         "projects_collapsed": false,
         "projects_dock": "left",

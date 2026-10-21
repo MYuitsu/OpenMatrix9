@@ -9,7 +9,8 @@ use om9_core::{
 };
 
 fn controller_with_points() -> (Controller, Vec<om9_core::identity::ObjectId>) {
-    let mut controller = Controller::new(Document::new("placement"), Limits::default()).expect("controller");
+    let mut controller =
+        Controller::new(Document::new("placement"), Limits::default()).expect("controller");
     for x in ["0,0,0", "10,0,0"] {
         controller.submit("Point").expect("Point");
         controller.submit(x).expect("coordinates");
@@ -42,7 +43,10 @@ fn a_relocated_gumball_turns_about_the_new_origin() {
     let (left, right) = ends(&controller, &ids);
     // About the world origin: (0,0,0) stays put and (10,0,0) goes to (0,10,0).
     assert!(left[0].abs() < 1e-9 && left[1].abs() < 1e-9, "{left:?}");
-    assert!(right[0].abs() < 1e-9 && (right[1] - 10.0).abs() < 1e-9, "{right:?}");
+    assert!(
+        right[0].abs() < 1e-9 && (right[1] - 10.0).abs() < 1e-9,
+        "{right:?}"
+    );
 }
 
 #[test]
@@ -57,7 +61,10 @@ fn resetting_the_gumball_puts_the_pivot_back_at_the_selection_centre() {
     controller.submit("RotateZ 90").expect("rotate");
     let mut points: Vec<[f64; 3]> = ids.iter().map(|id| world(&controller, *id)).collect();
     points.sort_by(|left, right| left[1].total_cmp(&right[1]));
-    assert!((points[0][0] - 5.0).abs() < 1e-9 && (points[0][1] + 5.0).abs() < 1e-9, "{points:?}");
+    assert!(
+        (points[0][0] - 5.0).abs() < 1e-9 && (points[0][1] + 5.0).abs() < 1e-9,
+        "{points:?}"
+    );
 }
 
 #[test]
@@ -65,8 +72,8 @@ fn object_alignment_follows_the_selected_objects_axes() {
     // The entity goes into the document before the controller builds its scene from it.
     let mut document = Document::new("aligned");
     let mut entity = Entity::new("turned", Geometry::Point([0.0, 0.0, 0.0]), None);
-    entity.placement = gumball::rotation_about([0.0; 3], [0.0, 0.0, 1.0], 45f64.to_radians())
-        .expect("rotation");
+    entity.placement =
+        gumball::rotation_about([0.0; 3], [0.0, 0.0, 1.0], 45f64.to_radians()).expect("rotation");
     let id = entity.id;
     document.entities.insert(id, entity);
     let mut controller = Controller::new(document, Limits::default()).expect("controller");
@@ -74,7 +81,10 @@ fn object_alignment_follows_the_selected_objects_axes() {
     controller.submit("GumballObject").expect("align");
     let pivot = controller.gumball_pivot().expect("pivot");
     let diagonal = 45f64.to_radians().cos();
-    assert!((pivot.x[0] - diagonal).abs() < 1e-9, "x axis turned with the object: {pivot:?}");
+    assert!(
+        (pivot.x[0] - diagonal).abs() < 1e-9,
+        "x axis turned with the object: {pivot:?}"
+    );
     assert!((pivot.x[1] - diagonal).abs() < 1e-9, "{pivot:?}");
     // World alignment puts them back.
     controller.submit("GumballWorld").expect("world");
@@ -95,11 +105,18 @@ fn cplane_alignment_follows_the_active_construction_plane_without_moving_the_obj
     controller.set_cplane(plane).expect("set cplane");
     controller.submit("GumballCPlane").expect("align to cplane");
     let pivot = controller.gumball_pivot().expect("pivot");
-    assert!((pivot.x[1] - 1.0).abs() < 1e-9, "the x handle follows the cplane: {pivot:?}");
-    assert!((pivot.y[0] + 1.0).abs() < 1e-9, "the y handle follows the cplane: {pivot:?}");
+    assert!(
+        (pivot.x[1] - 1.0).abs() < 1e-9,
+        "the x handle follows the cplane: {pivot:?}"
+    );
+    assert!(
+        (pivot.y[0] + 1.0).abs() < 1e-9,
+        "the y handle follows the cplane: {pivot:?}"
+    );
     assert!((pivot.z[2] - 1.0).abs() < 1e-9, "z is x cross y: {pivot:?}");
     assert_eq!(
-        controller.document().entities[&ids[0]].placement, placement,
+        controller.document().entities[&ids[0]].placement,
+        placement,
         "changing the alignment does not touch the object"
     );
     controller.submit("GumballWorld").expect("back to world");
