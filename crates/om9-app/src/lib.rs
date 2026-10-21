@@ -52,11 +52,7 @@ pub fn document_limits() -> om9_core::budget::Limits {
     limits
 }
 
-pub mod camera_motion;
 pub mod camera_rig;
-pub mod camera_transition;
-
-pub mod frame_pace;
 pub mod navigation;
 pub mod frame_scheduler;
 mod navigation_audit;
