@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+env:
+  CARGO_BUILD_JOBS: '2'
+  CMAKE_BUILD_PARALLEL_LEVEL: '2'
+
 concurrency:
   group: om9-windows-${{ github.ref }}
   cancel-in-progress: false
@@ -39,13 +43,6 @@ jobs:
           if($env:GITHUB_REF_NAME -cne ('v'+$metadata.version)){throw 'Release tag does not match source version'}
           git merge-base --is-ancestor HEAD origin/main
           if($LASTEXITCODE -ne 0){throw 'Release commit must be reviewed on main'}
-      - uses: prefix-dev/setup-pixi@194d461b21b6c5717c722ffc597fa91ed2ff29fa # v0.9.1
-        with:
-          pixi-version: v0.81.0
-          manifest-path: tools/ci/pixi.toml
-          locked: true
-          activate-environment: true
-          cache: true
       - name: Pin Rust toolchain
         shell: pwsh
         run: |
@@ -53,25 +50,25 @@ jobs:
           if($LASTEXITCODE -ne 0){throw 'Rust installation failed'}
           rustup override set 1.98.1
           if($LASTEXITCODE -ne 0){throw 'Rust override failed'}
-      - name: Compile plugin, Rust core, openNURBS and worker against stock FreeCAD
+      - name: Build standalone Rust OM9, pinned native adapters and portable ZIP
         shell: pwsh
-        run: ./tools/ci/build-windows.ps1
-      - name: Record build identity and binary SHA256 (tests run locally)
-        shell: pwsh
-        run: python tools/ci/record-build.py --root "$env:OM9_CI_ROOT"
-      - name: Produce two ZIPs and shared SHA256SUMS
-        shell: pwsh
-        run: python tools/ci/package_release.py --root "$env:OM9_CI_ROOT" --build-only
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
+        run: |
+          New-Item -ItemType Directory -Force build/ci/standalone | Out-Null
+          Start-Transcript -Path build/ci/standalone/build.log
+          try { ./tools/ci/build-standalone-windows.ps1 }
+          finally { Stop-Transcript }
       - name: Attest ZIP provenance
         if: github.event_name != 'pull_request'
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
-          subject-path: build/ci/packages/*.zip
+          subject-path: build/ci/standalone/packages/*.zip
       - name: Keep built release files
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: om9-release-files
-          path: build/ci/packages/*
+          path: build/ci/standalone/packages/*
           if-no-files-found: error
           retention-days: 30
       - name: Keep build provenance
@@ -80,9 +77,12 @@ jobs:
         with:
           name: om9-build-evidence
           path: |
-            build/ci/evidence/**
-            build/ci/build-paths.json
-            build/ci/runtime/Mod/OpenMatrix9/release-validation.json
+            build/ci/standalone/evidence/**
+            build/ci/standalone/build-paths.json
+            build/ci/standalone/build.log
+            build/ci/standalone/occt-offset-d3/*.log
+            build/ci/standalone/occt-offset-d3/build-receipt.json
+            build/ci/opennurbs-msvc/CMakeFiles/CMakeConfigureLog.yaml
           if-no-files-found: warn
           retention-days: 30
 
@@ -108,7 +108,7 @@ jobs:
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
-    needs: build
+    needs: [build, native-exchange]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -126,5 +126,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd dist && sha256sum --check SHA256SUMS.txt && cd ..
-          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 3
-          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --verify-tag --prerelease --title "OpenMatrix9 $GITHUB_REF_NAME" --notes-file RELEASE-NOTES.md
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 2
+          test "$(find dist -maxdepth 1 -name '*-Standalone-Windows-x64.zip' | wc -l)" -eq 1
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --verify-tag --prerelease --title "OpenMatrix9 $GITHUB_REF_NAME" --notes "Standalone Rust OM9 for Windows x64 with pinned OCCT/openNURBS adapters. Extract the complete ZIP and run Start-OM9.cmd. CI provenance covers build and payload integrity; UI and geometry acceptance are separate."

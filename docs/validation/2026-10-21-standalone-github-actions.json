@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-21",
+  "status": "local_build_package_verified_github_run_pending",
+  "failed_run": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/39539757459",
+  "failed_jobs": {
+    "native_exchange": 119026042707,
+    "legacy_product": 119026043043
+  },
+  "source_commit": "f77ec97d1c104a230a539d530077c97929c8a95f",
+  "source_dirty": true,
+  "source_sha256": {
+    ".github/workflows/release-windows.yml": "bc13685de9a364c93c3d80110bb831290e76513e7cbe8fd2f52efcac0b8b694d",
+    "tools/ci/msvc.ps1": "1fa444fcb9f81271b5e1725f618a4c2c2b4dfa1b7ad93ccfa17e1f11c56257b6",
+    "tools/ci/build-native-exchange.ps1": "f88f5e9764ebdf0fa330d0590e6b74882b07ce1210ac5cd9d2842efe4bb883f7",
+    "tools/ci/build-standalone-windows.ps1": "3e96dabbced73cc0c73adbfdf9a30440f69d3429d8b07ce22bfde461f972cbc7",
+    "tools/ci/package_standalone.py": "67cf3f06c7bcc7605a2d62d9eb056c11907d1bccd960a832caca72669006fb0f",
+    "tools/tests/test_standalone_ci_package.py": "9f24a37d028ea953f686075d311b5a678a6ea935dbafca9cdf916198565d77ea"
+  },
+  "local_build_root": "build/ci/standalone-local-r2-20261021",
+  "archive": {
+    "name": "OpenMatrix9-0.3.5-202610121520-Standalone-Windows-x64.zip",
+    "bytes": 21787474,
+    "sha256": "9d61e5b4c7b20ffcff8da8fe9c93481e91dc4d1af52fb58edbe539740139efa8"
+  },
+  "executable_sha256": "30f5fe6c76a75e025a9eb6f23f8d4cc41465f7288960ae699cea26fb11ab140a",
+  "rustc": [
+    "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "binary: rustc",
+    "commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985",
+    "commit-date: 2026-09-01",
+    "host: x86_64-pc-windows-msvc",
+    "release: 1.98.1",
+    "LLVM version: 22.1.8"
+  ],
+  "cargo_lock_sha256": "8ad95f9a2d999f907ed8af05190295e8cdcc9b27d30a7405e5bd4d201676e55f",
+  "actionlint": {
+    "version": "1.7.12",
+    "exit_code": 0,
+    "asset_sha256": "6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9"
+  },
+  "powershell_parser": {
+    "scripts": 3,
+    "errors": 0
+  },
+  "packaging_tests": {
+    "passed": 14,
+    "suites": 2
+  },
+  "standalone_product_build": {
+    "exit_code": 0,
+    "workers": 2,
+    "default_features": [
+      "occt-brep"
+    ],
+    "target_dir": "L:/om9-target"
+  },
+  "fresh_msvc_configure": {
+    "compiler": "MSVC 19.44.35208.0",
+    "platform": "x64",
+    "zlib_build_exit_code": 0,
+    "opennurbs_build_exit_code": 0,
+    "opennurbs_library_sha256": "602e24bc12600b54bcc76b1cac9a9f0a3cfe716c45ef81eea5136b8c133f0d0a",
+    "native_adapter_link_exit_code": 0,
+    "native_adapter_sha256": "213552a21e05f30ca35d55d28f02e90efaca9e3e14e34aead35b5f0aff324796"
+  },
+  "clean_path_smoke": {
+    "ok": true,
+    "scope": "ZIP payload integrity and CLI/native loader with only System32 on PATH; not UI or geometry acceptance",
+    "files_verified": 432,
+    "checks": [
+      {
+        "arguments": [
+          "--create-fixture"
+        ],
+        "exit_code": 0
+      },
+      {
+        "arguments": [
+          "--inspect"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": "native adapter usage/loader (no geometry operation)",
+        "exit_code": 1,
+        "expected_exit": 1
+      }
+    ],
+    "dlls": [
+      "MSVCP140.dll",
+      "TKBRep.dll",
+      "TKG2d.dll",
+      "TKG3d.dll",
+      "TKGeomAlgo.dll",
+      "TKGeomBase.dll",
+      "TKMath.dll",
+      "TKMesh.dll",
+      "TKShHealing.dll",
+      "TKTopAlgo.dll",
+      "TKernel.dll",
+      "VCRUNTIME140.dll",
+      "VCRUNTIME140_1.dll",
+      "jemalloc.dll",
+      "tbb12.dll"
+    ]
+  },
+  "public_source_audit": {
+    "source_files": 8742,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "ci_tests_executed": false,
+  "github_modified_workflow_run": "PENDING_NOT_PUSHED",
+  "manual_gate_promoted": false,
+  "business_rules_changed": false,
+  "release_published": false
+}

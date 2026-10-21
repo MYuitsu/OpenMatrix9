@@ -2,8 +2,48 @@
   "schema_version": 1,
   "updated_at": "2026-10-21",
   "implementation_target": "Standalone Rust OM9 owns model/session/UI/scene; selected native adapters only. Older FreeCAD entries are historical scoped evidence.",
-  "active_item": "viewport-navigation-runtime-2026-10-21",
+  "active_item": "standalone-github-actions-2026-10-21",
   "items": [
+    {
+      "key": "standalone-github-actions-2026-10-21",
+      "date": "2026-10-21",
+      "stage": "build-validation",
+      "feature_ids": [
+        "OM9-L3-01-01-001"
+      ],
+      "status": "local_build_package_verified_github_run_pending",
+      "target": "Standalone Rust Windows product and selected MSVC native adapters",
+      "outputs": [
+        ".github/workflows/release-windows.yml",
+        "tools/ci/msvc.ps1",
+        "tools/ci/build-native-exchange.ps1",
+        "tools/ci/build-standalone-windows.ps1",
+        "tools/ci/package_standalone.py",
+        "tools/tests/test_standalone_ci_package.py",
+        "docs/validation/2026-10-21-standalone-github-actions.md",
+        "docs/validation/2026-10-21-standalone-github-actions.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-standalone-github-actions.md",
+        "docs/validation/2026-10-21-standalone-github-actions.json"
+      ],
+      "tests": [
+        "Actionlint 1.7.12 and PowerShell AST parsing: PASS.",
+        "14 standalone/legacy packaging tests: PASS.",
+        "Full default-feature product build and portable package: exit 0; 432 payload hashes verified.",
+        "Fresh MSVC x64 configure, zlib/openNURBS build, adapter link and clean-PATH CLI/native loader checks: PASS.",
+        "Public source audit: 0 errors."
+      ],
+      "uncertainties": [
+        "Modified workflow has not run on GitHub; no push/tag/release performed.",
+        "Local build used existing verified SDK/Cargo caches; runner downloads/attestation/upload need hosted evidence.",
+        "CI remains build-only; UI/manual and native geometry conformance are separate gates."
+      ],
+      "next_document": "docs/validation/2026-10-21-standalone-github-actions.md",
+      "next_action": "After an authorized push, inspect both GitHub-hosted build jobs and their artifact manifests; do not rerun the old failing commit as evidence for this fix.",
+      "manual_gate_promoted": false,
+      "business_skill_rules_changed": false
+    },
     {
       "key": "viewport-navigation-runtime-2026-10-21",
       "date": "2026-10-21",

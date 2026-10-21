@@ -1,6 +1,51 @@
-# Windows release build
+# Windows standalone release build
 
-`.github/workflows/release-windows.yml` builds native OM9 from the checked-out
+`.github/workflows/release-windows.yml` builds the root Rust workspace on Windows 2022
+with Rust 1.98.1 and the default `occt-brep` feature. `build-standalone-windows.ps1`
+uses `cargo build --locked --release -p om9-app --bin om9 -j 2`; Cargo output is
+outside the checkout (`runner.temp/om9-target` on Actions). MSVC x64 is initialized
+for every native build. The openNURBS CMake generator is explicitly Visual Studio
+2022/x64, so MinGW on the runner PATH cannot be selected.
+
+OCCT 8.0.1 archives are SHA256-verified against `native/occt/pin.json`; only the
+approved TKG3d accuracy patch is rebuilt, with two workers and the original SDK
+kept intact. The native 3DM executable and Rust BRep adapter use pinned openNURBS.
+No FreeCAD, Qt/Python host, Pixi environment or previous OM9 binary is a product
+build input. The old plugin scripts below remain available for explicit legacy work.
+
+`package_standalone.py` builds one portable `*-Standalone-Windows-x64.zip` and
+`SHA256SUMS.txt`. The ZIP contains `om9.exe`, `Start-OM9.cmd`, the native 3DM
+executable/digest/manifest, the recursive PE dependency closure, app-local MSVC
+CRT, licenses and patched TKG3d source/build recipe. Missing DLLs, stale Cargo.lock,
+wrong native fingerprints or a mismatched patch receipt fail packaging. OS DLLs
+and Windows API sets are not redistributed. No third-party DLL is copied from
+a developer machine's PATH or System32.
+
+CI continues to audit/build/package only: its manifest explicitly records
+`validation_kind: build_only` and `tests_executed: false`. Source commit, executable
+and every payload SHA256, Rust version, SDK/patch and Cargo.lock are recorded.
+Local regression and clean-PATH loader checks are separate evidence.
+
+Both the product and standalone-native jobs must succeed before tagged publication.
+Branch/PR/manual runs retain Actions artifacts; they do not create releases. A
+matching version tag on main is still required. The publish job verifies the
+same-run ZIP checksum and expected portable asset name before creating a release.
+The older FreeCAD updater does not receive a renamed standalone package.
+
+For a local product build (preserve existing build output; choose a fresh root):
+
+```powershell
+$env:CARGO_TARGET_DIR = 'L:/om9-target'
+./tools/ci/build-standalone-windows.ps1 -Root H:/OpenMatrix9/build/ci/my-new-run
+```
+
+[2026-10-21 correction and verification](../../docs/validation/2026-10-21-standalone-github-actions.md).
+
+## Historical FreeCAD plugin build (not used by the active workflow)
+
+The following describes the previous release path and its retained maintenance tools.
+
+The previous workflow built native OM9 from the checked-out
 public source on a GitHub-hosted Windows 2022 runner. FreeCAD itself is never
 compiled: the official 1.1.4 Windows archive is verified with its pinned SHA256,
 then matching source headers/bindings and import libraries are generated from

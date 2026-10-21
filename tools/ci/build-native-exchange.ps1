@@ -8,6 +8,8 @@ param(
     [string]$JsonDir = ""
 )
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot 'msvc.ps1')
+Initialize-OM9Msvc
 $root = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
 if (-not $OutDir) { $OutDir = Join-Path $root "build/ci/native-exchange" }
 $openSource = Join-Path $root "build/standalone-deps/opennurbs"
@@ -29,17 +31,17 @@ if (-not $OpenNurbsLib) {
             Where-Object { $_.FullName -match 'Release' } | Select-Object -First 1
     }
     if (-not $built) {
-        $binary = Join-Path $root "build/ci/opennurbs"
-        & cmake -S $openSource -B $binary -G Ninja -DCMAKE_BUILD_TYPE=Release -DON_BUILD_EXAMPLES=OFF -DON_BUILD_TESTS=OFF
+        $binary = Join-Path $root "build/ci/opennurbs-msvc"
+        & cmake -S $openSource -B $binary -G 'Visual Studio 17 2022' -A x64 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL
         if ($LASTEXITCODE -ne 0) { throw "openNURBS configure failed" }
-        & cmake --build $binary --target opennurbsStatic --parallel
+        & cmake --build $binary --config Release --target opennurbsStatic --parallel 2
         if ($LASTEXITCODE -ne 0) { throw "openNURBS build failed" }
         $built = Get-ChildItem $binary -Recurse -Filter opennurbsStatic.lib | Select-Object -First 1
     }
     if (-not $built) { throw "opennurbsStatic.lib not found after build" }
     $OpenNurbsLib = $built.DirectoryName
-    $zlib = Get-ChildItem $root -Recurse -Filter zlib.lib -ErrorAction SilentlyContinue |
-        Where-Object { $_.FullName -match 'opennurbs' } | Select-Object -First 1
+    $zlib = Get-ChildItem $built.Directory.Parent.FullName -Recurse -Filter zlib.lib -ErrorAction SilentlyContinue |
+        Select-Object -First 1
     if (-not $zlib) { throw "openNURBS zlib.lib not found" }
     $OpenNurbsZlib = $zlib.DirectoryName
 }

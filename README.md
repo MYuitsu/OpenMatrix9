@@ -2,6 +2,8 @@ Development main integration (2026-10-12): selected local native SDK proof, 1218
 
 # OpenMatrix9
 
+Windows CI (2026-10-21): the active workflow builds the standalone Rust application with pinned OCCT/openNURBS adapters, MSVC x64, `--locked` and `-j 2`, and packages a portable ZIP with its DLL closure and SHA256 manifest. Local build/package/loader checks pass; the modified GitHub-hosted workflow still needs a run after push. [Build instructions](tools/ci/README.md) · [Verification](docs/validation/2026-10-21-standalone-github-actions.md).
+
 Viewport navigation runtime (2026-10-21): direct drag, analytic wheel zoom, one nonblocking window scheduler, adaptive resolution/MSAA, retained GPU occurrences, per-pass camera snapshots and generation-checked full-quality publication after GPU completion are implemented. Automated regressions pass; presentation, physical DPI/RDP and full performance acceptance remain open. Preview conservatively retains LOD0. [Approved plan](implementation/design/M01/VIEWPORT-NAVIGATION-IMPLEMENTATION-PLAN.md) · [Evidence and limitations](implementation/evidence/M01/2026-10-21-navigation-implementation.md).
 
 Navigation forensics review (historical analysis checkpoint, 2026-10-21): `nav-pointer-125.jsonl` was the latest navigation capture in that inspected checkout; 326 camera records were reanalyzed. Per-pane timing defaults, incomplete frame telemetry and wheel interpolation need correction before accepting the proposed navigation refactor. [Review and proposed architecture](implementation/design/M01/VIEWPORT-NAVIGATION-FORENSICS-REVIEW-2026-10-21.md); [measured log summary](implementation/evidence/M01/2026-10-21-navigation-forensics-review.json). Analysis only; no new runtime or UI acceptance.
