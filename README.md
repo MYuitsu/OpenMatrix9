@@ -18,6 +18,7 @@
 <a id="contributors"></a>
 ## Contributors
 
+- CrimsonJCAD
 - [nguyenthaiduy277](https://www.facebook.com/nguyenthaiduy277)
 - [Jayhuynh](https://linktr.ee/Jayhuynh)
 
