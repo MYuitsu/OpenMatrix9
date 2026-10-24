@@ -213,5 +213,43 @@
     },
     "algorithm_and_coverage": "Giao chính xác trong plane rồi map world; near solve t; typed no-solution",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Near is a clamped segment solve with a finite t; Intersection is an exact 3D segment/segment solve over distinct roots, skipping parallel pairs.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-02-03-002/api.md",
+      "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-05-regression.json",
+      "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-scene osnap: 11 passed",
+      "om9-app osnap UI: 3 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-02-03-002/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-02-03-002/positive.json",
+        "implementation/fixtures/M02/OM9-L3-02-03-002/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-05-regression.json",
+        "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-06-acceptance.md"
+      ],
+      "acceptance": "Crossing segments return (5,0); parallel segments return no intersection; a point beyond a segment clamps to its endpoint with t=1."
+    }
   }
 }

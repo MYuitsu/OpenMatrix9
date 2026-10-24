@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m03.l2-01-13.fixture.v1",
+  "l3_id": "OM9-L3-01-13-003",
+  "fixture_id": "OM9-L3-01-13-003-POSITIVE",
+  "generator": {
+    "source": "native/source_inventory_fixture.cpp",
+    "source_sha256": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+    "binary": "build/source-fixture.exe",
+    "binary_sha256": "d315c6d35a94bad0d05cb4aeaff8a90ac6fd5437646ee6d006463c73386dc0d7",
+    "opennurbs_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "note": "The authored writer embeds openNURBS-generated component UUIDs, so regenerated archives are structurally identical but not byte-identical; each receipt records the SHA-256 of the archive actually read."
+  },
+  "input": {
+    "modes": [
+      "inch",
+      "unitless",
+      "mm"
+    ],
+    "units": "declared by the archive (mm or inch) and converted to canonical mm",
+    "archive": "authored binary 3DM, Rhino 5 archive version 50"
+  },
+  "expect": {
+    "inch_model_unit": "Inch",
+    "inch_point_mm": [
+      25.4,
+      50.8,
+      76.2
+    ],
+    "unitless_without_resolution": "refused",
+    "conflicting_factor": "refused"
+  },
+  "tolerances": {
+    "inch_point_mm": "1e-12 per coordinate (z measured 76.19999999999999)"
+  },
+  "measured_on_2026_10_22": {
+    "inch_model_unit": "Inch",
+    "inch_point_mm": [
+      25.4,
+      50.8,
+      76.2
+    ],
+    "unitless_without_resolution": "refused",
+    "conflicting_factor": "refused"
+  }
+}

@@ -50,6 +50,8 @@ fn mesh_document() -> Document {
             faces,
             normals: Vec::new(),
             colors: Vec::new(),
+
+            corner_uvs: Vec::new(),
         }),
         None,
     );

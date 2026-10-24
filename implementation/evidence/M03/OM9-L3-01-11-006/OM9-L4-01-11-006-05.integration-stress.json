@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-01-11.l4.receipt.v1",
+  "l4": "OM9-L4-01-11-006-05",
+  "role": "INTEGRATION_STRESS",
+  "l3": "OM9-L3-01-11-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "fixture": "200 UV samples on a cylinder plus a 40-instance baked linear pattern",
+  "invariants": [
+    "every sampled surface frame is orthonormal and right-handed",
+    "every baked body is a valid closed solid at its own placement",
+    "the baked pattern keeps 40 independent bodies without geometry sharing"
+  ],
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 m03_01_11_stress_surface_frames_and_baked_pattern -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-11-006/OM9-L4-01-11-006-05.stress.log",
+      "stdout_log_sha256": "49bf1f4d14fb76f5a0c9e2d7843a9d13de2bdbd51eeec5be2644559cb76871a3"
+    }
+  ]
+}

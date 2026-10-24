@@ -1,0 +1,139 @@
+{
+  "schema": "om9.m02.checks.v1",
+  "work_item": "m02-l2-02-02-cplanes-coordinate-input-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-02-02",
+  "title": "Febe Cplanes And Coordinate Input",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "The existing per-view CPlane and typed local/world input did not satisfy all seven L3 oracles. Implemented named Top/Front/Right presets, validated origin/rotation/three-point frames, W and @ relative text entry, F4 world-origin insertion, and Ortho/Planar cursor constraints; added 22 focused tests across core, scene and app.",
+  "audit_result": {
+    "existing_implementation": "PARTIAL",
+    "gaps_found": [
+      "No CPlanePreset/Top/Front/Right contract; workspace carried ad-hoc axes.",
+      "No origin/rotation/three-point frame constructor or typed rejection of collinear points.",
+      "Typed input accepted local coordinates only; W and @ prefixes were not parsed.",
+      "F4 toggled the world datum instead of inserting the world origin in a point prompt.",
+      "No Ortho/Planar cursor constraint state or viewport wiring.",
+      "No cross-view test proving the stored point remains world-space."
+    ],
+    "gaps_closed": "all"
+  },
+  "code_changes": [
+    "crates/om9-core/src/coords.rs: CoordinateInput::Relative, parse_input for W/@, resolve_with_base, frame delta_to_world",
+    "crates/om9-scene/src/camera.rs: CPlanePreset, CPlane::preset, with_origin, rotated, from_three_points",
+    "crates/om9-scene/src/workspace.rs: the four default views use the preset constructors",
+    "crates/om9-app/src/session.rs: last_point, ortho/planar state, constrain_point, submit_world_origin, set_cplane_preset/from_three_points/origin_rotation, revision-bumped set_cplane, W/@ submission",
+    "crates/om9-app/src/ui.rs: F4 origin insertion during a point prompt; constrained hover/click point",
+    "crates/om9-app/src/viewport_menu.rs + src/session.rs: Set CPlane Top/Front/Right actions",
+    "crates/om9-app/src/ui/chrome.rs + src/ui/sidebar_palettes.rs: Ortho/Planar toggle icons",
+    "crates/om9-core/tests/coordinate_input.rs, crates/om9-scene/tests/cplane_presets.rs, crates/om9-app/tests/cplane_coordinate_input.rs, cplane_f4_ui.rs, cplane_menu.rs"
+  ],
+  "checks": [
+    {
+      "name": "coordinate_input",
+      "command": "cargo test -p om9-core --test coordinate_input -j 2",
+      "result": "4 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-core.log",
+      "sha256": "d2f4d88c18b40496bc06f2ff696cfb2473bf7f43c1401c3bad57f9d87f00cc4c"
+    },
+    {
+      "name": "cplane_presets",
+      "command": "cargo test -p om9-scene --test cplane_presets -j 2",
+      "result": "6 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-scene.log",
+      "sha256": "b2a627747145b38438b93a3fbe59ca77281394a02b62d8df15b23283f42f5dfd"
+    },
+    {
+      "name": "CPlane focused targets",
+      "command": "cargo test -p om9-app --test cplane_coordinate_input --test cplane_f4_ui --test cplane_menu -j 2",
+      "result": "12 passed (10 coordinate + 1 F4 UI + 1 menu); 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-app.log",
+      "sha256": "40510e64879e5a68b108f98a0f645dac5b9c1b9cd93b067023604e5dcd14f581"
+    },
+    {
+      "name": "cplane regressions",
+      "command": "cargo test -p om9-app --test viewport_title_menu --test chrome_actions --test command_sessions --test gumball_placement --test cplane_coordinate_input --test cplane_f4_ui --test cplane_menu -j 2",
+      "result": "51 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-regressions.log",
+      "sha256": "c0366bf0ba9d2f7fb979de0c16644464d281787700fcd89d3b463ea49b30e756"
+    },
+    {
+      "name": "om9-core full",
+      "command": "cargo test -p om9-core -j 2",
+      "result": "407 passed; 0 failed; 48 suites",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-core-full.log",
+      "sha256": "1c0ea3d83b2350a9582a6301e91149c945d67233b52401f90c33f1fc356005aa"
+    },
+    {
+      "name": "om9-scene full",
+      "command": "cargo test -p om9-scene -j 2",
+      "result": "88 passed; 0 failed; 19 suites",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-scene-full.log",
+      "sha256": "854ab2cfc665ae4523e88d0f0bc783530203eba0c16ce10c2b3a78cb187c2b63"
+    },
+    {
+      "name": "om9-app library with GPU feature",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib -j 2",
+      "result": "148 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-app-lib.log",
+      "sha256": "30fc69b585e56121eaec7068798fe358d328a12c9bcd9d29e4ae6e834cd3a048"
+    },
+    {
+      "name": "clippy core target",
+      "command": "cargo clippy -p om9-core --lib --test coordinate_input -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-clippy-core.log",
+      "sha256": "2524dab78bb81dfb41477ab127c1372b54c649d2de6a085382c314c61291fb98"
+    },
+    {
+      "name": "clippy scene target",
+      "command": "cargo clippy -p om9-scene --lib --test cplane_presets --test camera_grid --test coordinate_frame -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-clippy-scene.log",
+      "sha256": "d5335d3bca065a98f1ad5f29886b51b7f3ca0cae8b83761c06a69ce98665db33"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M02/2026-10-22-cplane-public-source-audit-final.log",
+      "sha256": "7f7a9a1de10a7aef1f8a8f38c4e6815320284d8e1ba5df0e259213f3e947920d"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-02-02-001": "5/5",
+    "OM9-L3-02-02-002": "5/5",
+    "OM9-L3-02-02-003": "5/5",
+    "OM9-L3-02-02-004": "5/5",
+    "OM9-L3-02-02-005": "5/5",
+    "OM9-L3-02-02-006": "5/5",
+    "OM9-L3-02-02-007": "5/5"
+  },
+  "artifacts": [
+    "implementation/design/M02/OM9-L2-02-02/README.md",
+    "implementation/design/M02/OM9-L3-02-02-001/api.md",
+    "implementation/design/M02/OM9-L3-02-02-002/api.md",
+    "implementation/design/M02/OM9-L3-02-02-003/api.md",
+    "implementation/design/M02/OM9-L3-02-02-004/api.md",
+    "implementation/design/M02/OM9-L3-02-02-005/api.md",
+    "implementation/design/M02/OM9-L3-02-02-006/api.md",
+    "implementation/design/M02/OM9-L3-02-02-007/api.md"
+  ],
+  "manual_gate": "M02-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M02-UI visual review of CPlane presets, W/@ entry, F4 origin insertion, Ortho/Planar feedback and cross-view drawing.",
+    "macOS runtime is unverified.",
+    "Grid and object snapping are outside this L2 and remain disabled.",
+    "cargo clippy -p om9-app --lib --no-deps -D warnings is blocked by pre-existing lints in gpu_viewport.rs, ui.rs, camera_rig.rs and navigation.rs, outside this module.",
+    "cargo fmt --check still reports pre-existing differences outside this module."
+  ],
+  "not_claimed": [
+    "Human approval or M02-UI sign-off",
+    "macOS execution",
+    "QymCAD pinned-source reuse or a build-time QymCAD dependency",
+    "Grid/object/trim snapping beyond Ortho and Planar"
+  ]
+}

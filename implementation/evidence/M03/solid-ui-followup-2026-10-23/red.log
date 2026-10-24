@@ -1,0 +1,36 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.13s
+     Running tests\solid_workflows.rs (L:/om9-target\debug\deps\solid_workflows-398d44b418c911f2.exe)
+
+running 4 tests
+
+thread 'text_menu_has_content_height_retry_and_cancel' (22952) panicked at crates\om9-app\tests\solid_workflows.rs:29:57:
+called `Result::unwrap()` on an `Err` value: Missing("run Text <text> <height>")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test text_menu_has_content_height_retry_and_cancel ... FAILED
+
+thread 'boolean_two_objects_menu_has_operation_prompt' (65624) panicked at crates\om9-app\tests\solid_workflows.rs:56:61:
+called `Result::unwrap()` on an `Err` value: Missing("select two B-Rep solids; run Boolean2Objects U|D|I")
+test boolean_two_objects_menu_has_operation_prompt ... FAILED
+
+thread 'circle_extrusion_preserves_exact_geometry' (65084) panicked at crates\om9-app\tests\solid_workflows.rs:71:5:
+141.31400467922657 vs 141.3716694115407
+test circle_extrusion_preserves_exact_geometry ... FAILED
+
+thread 'extrude_all_is_one_atomic_transaction' (67268) panicked at crates\om9-app\tests\solid_workflows.rs:77:5:
+assertion `left == right` failed
+  left: 2
+ right: 1
+test extrude_all_is_one_atomic_transaction ... FAILED
+
+failures:
+
+failures:
+    boolean_two_objects_menu_has_operation_prompt
+    circle_extrusion_preserves_exact_geometry
+    extrude_all_is_one_atomic_transaction
+    text_menu_has_content_height_retry_and_cancel
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.84s
+
+error: test failed, to rerun pass `-p om9-app --test solid_workflows`

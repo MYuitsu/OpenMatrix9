@@ -1,0 +1,15 @@
+{
+  "fixture_id": "G02-A-01-07-004",
+  "l3_id": "OM9-L3-01-07-004",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Object nằm ngoài không được chọn; locked/hidden đều bỏ qua",
+  "expected": "An explicit miss/error or unchanged state; no stale selection and no nearby-geometry rematch.",
+  "evidence": [
+    "om9-scene selection_regressions: 7 passed",
+    "om9-app rubber_band: 2 passed",
+    "om9-app acceptance_viewport_selection: 8 passed",
+    "om9-app selection_overlay: 8 passed"
+  ],
+  "status": "PASS"
+}

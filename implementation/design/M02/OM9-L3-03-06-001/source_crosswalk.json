@@ -1,0 +1,18 @@
+{
+  "l3": "OM9-L3-03-06-001",
+  "title": "Pictureframe Image Import",
+  "date": "2026-10-22",
+  "decision": "NEW_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-app/src/pictureframe.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "om9-app pictureframe unit: 6 passed",
+    "om9-app pictureframe persistence: 3 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.87-94 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-06-001-01"
+}

@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G03-B-03-03-004",
+  "l3_id": "OM9-L3-03-03-004",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Kéo cancel giữ transform, snapshot, journal unchanged",
+  "expected": "No locked/stale selection, no marquee from the dock, and no journal write on cancel/invalid input.",
+  "evidence": [
+    "om9-app gumball_interaction: 6 passed",
+    "om9-app gumball_viewport: 3 passed",
+    "om9-core gumball: 15 passed"
+  ],
+  "status": "PASS"
+}

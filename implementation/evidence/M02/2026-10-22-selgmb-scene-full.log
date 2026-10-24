@@ -1,0 +1,231 @@
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.02s
+     Running unittests src\lib.rs (L:/om9-target\debug\deps\om9_scene-19541b66f5ee4ba4.exe)
+
+running 17 tests
+test gumball_view::tests::dragging_an_axis_handle_moves_only_along_that_axis ... ok
+test gumball_view::tests::an_orthographic_viewport_hits_the_same_handles ... ok
+test gumball_view::box_tests::a_scale_box_is_hit_and_a_drag_of_it_scales ... ok
+test gumball_view::tests::every_mode_exposes_the_handles_it_draws ... ok
+test gumball_view::tests::scaling_reports_the_ratio_along_the_axis ... ok
+test gumball_view::view_tests::a_single_view_hides_the_axis_pointing_at_the_camera ... ok
+test gumball_view::tests::dragging_a_plane_handle_keeps_the_normal_component ... ok
+test gumball_view::tests::an_axis_handle_is_hit_where_it_is_drawn ... ok
+test gumball_view::view_tests::a_perspective_view_keeps_all_three_axes ... ok
+test gumball_view::tests::empty_space_is_not_a_handle ... ok
+test gumball_view::tests::rotating_about_z_reports_the_screen_angle ... ok
+test spatial::tests::the_fat_ray_includes_pixel_tolerance_hits ... ok
+test gumball_view::view_tests::a_hidden_handle_cannot_be_grabbed ... ok
+test spatial::tests::a_ray_only_returns_objects_near_its_path ... ok
+test gumball_view::view_tests::a_single_view_keeps_two_scale_boxes_not_three ... ok
+test workspace::tests::layout_overflow_rejects_before_active_maximized_or_view_state_changes ... ok
+test spatial::tests::a_27k_object_index_matches_brute_force_and_stays_fast ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests\acceptance_l2_01_07.rs (L:/om9-target\debug\deps\acceptance_l2_01_07-f142e501afdfdeca.exe)
+
+running 9 tests
+test a_hidden_or_unselectable_object_never_picks ... ok
+test a_ray_through_the_box_returns_its_body_id_and_an_empty_ray_returns_nothing ... ok
+test a_face_hit_is_the_document_face_not_the_triangle_index ... ok
+test a_click_on_the_shared_diagonal_still_hits_the_face ... ok
+test the_three_subobject_kinds_report_their_own_identifiers ... ok
+test a_face_that_disappears_after_a_rebuild_is_a_stale_miss ... ok
+test twenty_identical_picks_return_the_same_hit ... ok
+test two_objects_on_one_ray_are_both_candidates_in_every_publication ... ok
+test twenty_face_edge_vertex_picks_are_identical ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\affine_gesture.rs (L:/om9-target\debug\deps\affine_gesture-0e60f9234cf4a876.exe)
+
+running 5 tests
+test preview_and_pick_proxy_use_the_same_gesture_matrix ... ok
+test warm_affine_updates_reuse_buffers_and_cancel_keeps_geometry_and_undo ... ok
+test stale_gesture_is_rejected_without_touching_public_redo ... ok
+test commit_updates_exact_placement_in_one_undo_and_redo ... ok
+test unchanged_gesture_accepts_no_document_write_or_undo_and_keeps_redo ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\camera_fit.rs (L:/om9-target\debug\deps\camera_fit-c7f9a576164e10f9.exe)
+
+running 4 tests
+test center_preserves_rotation_zoom_and_projection ... ok
+test invalid_fit_inputs_and_zoom_factors_are_refused ... ok
+test orthographic_fit_contains_a_10_by_20_by_30_box_with_margin ... ok
+test perspective_fit_contains_the_same_box ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\camera_grid.rs (L:/om9-target\debug\deps\camera_grid-70dd08e7e87bc301.exe)
+
+running 5 tests
+test invalid_camera_frame_clipping_and_viewport_ranges_reject ... ok
+test cplane_coordinate_resolution_is_independent_from_camera_navigation ... ok
+test orthographic_projection_and_ray_share_world_frame_after_pan ... ok
+test maximize_restore_preserves_each_view_and_original_titles ... ok
+test finite_grid_is_world_geometry_for_display_only_with_exact_subdivision ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\camera_orbit.rs (L:/om9-target\debug\deps\camera_orbit-c3b305da90863ad7.exe)
+
+running 5 tests
+test pan_moves_eye_and_target_together ... ok
+test an_orthographic_view_zooms_its_span_and_keeps_the_eye ... ok
+test orbit_keeps_the_target_and_the_distance ... ok
+test orbit_clamps_the_elevation_below_the_pole ... ok
+test zoom_scales_the_distance_in_perspective ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\coordinate_frame.rs (L:/om9-target\debug\deps\coordinate_frame-63a05c784574d478.exe)
+
+running 4 tests
+test a_local_point_without_a_frame_is_refused_by_the_typed_door ... ok
+test the_world_xy_plane_keeps_millimetre_coordinates_unchanged ... ok
+test to_local_is_the_inverse_of_to_world_for_a_shifted_and_rotated_plane ... ok
+test a_shifted_cplane_maps_local_coordinates_to_world ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\cplane_presets.rs (L:/om9-target\debug\deps\cplane_presets-2351f377395762e8.exe)
+
+running 6 tests
+test rotation_about_the_normal_keeps_the_frame_right_handed ... ok
+test invalid_presets_and_collinear_points_are_typed_errors ... ok
+test three_point_frame_uses_the_first_axis_and_orthonormalizes_the_second ... ok
+test moving_the_origin_does_not_change_the_axes_or_existing_world_geometry ... ok
+test the_four_default_views_use_the_documented_construction_planes ... ok
+test top_front_and_right_presets_have_the_documented_axes_and_handedness ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\instance_admission.rs (L:/om9-target\debug\deps\instance_admission-ac8d3d567cbf6ecc.exe)
+
+running 1 test
+test empty_shared_instances_charge_each_occurrence_before_descent ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests\layer_colors.rs (L:/om9-target\debug\deps\layer_colors-e7bc82ff19d4b7d8.exe)
+
+running 2 tests
+test hidden_root_and_definition_member_mask_scene_display_pick_edit_and_reference ... ok
+test assigned_root_uses_layer_color_and_later_swatch_changes_without_geometry_edits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\metadata_cache.rs (L:/om9-target\debug\deps\metadata_cache-fbd59932222387c7.exe)
+
+running 2 tests
+test metadata_refresh_reuses_buffers_and_updates_instance_masks_color_and_stamps ... ok
+test cache_refresh_refuses_changed_geometry_owner_and_unreserved_metadata_clone ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\navigation_snapshot.rs (L:/om9-target\debug\deps\navigation_snapshot-75441b4671762ba3.exe)
+
+running 2 tests
+test conservative_pick_bounds_enclose_scaled_sheared_vertices_at_large_coordinates ... ok
+test worker_snapshot_and_canonical_scene_pick_the_same_face_and_corners ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\osnap.rs (L:/om9-target\debug\deps\osnap-02749d3a1d5811da.exe)
+
+running 11 tests
+test surface_snap_uses_the_tessellated_trimmed_face ... ok
+test a_point_entity_is_a_point_snap ... ok
+test two_crossing_segments_produce_an_intersection_but_parallel_segments_do_not ... ok
+test parallel_segments_never_produce_a_fake_intersection ... ok
+test disabled_kinds_are_not_offered_and_marker_text_is_exact ... ok
+test candidates_outside_the_radius_and_zero_radius_return_nothing ... ok
+test smarttrack_guides_are_transient_and_infer_an_ephemeral_point ... ok
+test near_clamps_to_the_segment_and_carries_a_valid_parameter ... ok
+test tangent_and_perpendicular_are_only_offered_with_a_real_solution ... ok
+test end_mid_center_quadrant_are_ranked_inside_the_screen_radius ... ok
+test one_shot_override_wins_one_pick_and_then_resets ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\plugin_polyline.rs (L:/om9-target\debug\deps\plugin_polyline-2c73cc1b7fea7d43.exe)
+
+running 5 tests
+test sdk_profile_keeps_every_corner_closure_and_world_bounds ... ok
+test polyline_display_admission_charges_its_exact_vertex_count ... ok
+test unsupported_polycurves_report_precise_diagnostics ... ok
+test sdk_example_line_circle_and_profile_all_enter_the_scene ... ok
+test placed_polyline_picks_exact_segments_without_adding_diagonals_or_native_bindings ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\plugin_polyline_perspective.rs (L:/om9-target\debug\deps\plugin_polyline_perspective-c98b99b5bbc99150.exe)
+
+running 2 tests
+test near_plane_clipped_segment_preserves_analytic_world_point ... ok
+test unequal_endpoint_depths_preserve_analytic_segment_point ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\reference_workspace.rs (L:/om9-target\debug\deps\reference_workspace-d60ee3a0b8b34391.exe)
+
+running 1 test
+test through_finger_reference_projects_world_xz_and_side_reference_projects_world_yz ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\selection_regressions.rs (L:/om9-target\debug\deps\selection_regressions-11e62a65f62ff07f.exe)
+
+running 7 tests
+test hidden_and_locked_primitives_are_excluded_from_both_band_modes ... ok
+test a_clipped_segment_still_crosses_but_cannot_be_window_selected ... ok
+test crossing_takes_a_line_with_both_endpoints_outside_but_window_does_not ... ok
+test an_edge_with_one_clipped_endpoint_keeps_its_document_key ... ok
+test a_quad_diagonal_is_a_face_hit_but_never_a_document_edge ... ok
+test crossing_inside_a_large_face_does_not_need_a_vertex_or_edge_inside ... ok
+test perspective_edge_hit_reports_a_world_point_on_the_pointer_ray ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\shared_instances.rs (L:/om9-target\debug\deps\shared_instances-cf03b4d83cbab5a9.exe)
+
+running 4 tests
+test shared_definition_captures_both_occurrences_without_duplicating_members_as_roots ... ok
+test one_definition_insert_and_one_undo_remove_definition_both_occurrences_and_their_objects ... ok
+test each_occurrence_picks_its_own_root_and_reports_the_definition_member_path ... ok
+test occurrence_placements_are_independent_and_member_transform_equals_the_placement ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\subobject_pick.rs (L:/om9-target\debug\deps\subobject_pick-8cf95d65ba068c57.exe)
+
+running 4 tests
+test an_object_pick_still_returns_the_nearest_faces ... ok
+test a_vertex_pick_returns_the_vertex_index ... ok
+test a_face_pick_returns_the_face_and_never_a_vertex ... ok
+test an_edge_pick_returns_both_vertex_indices_and_a_point_on_the_edge ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\world_picking.rs (L:/om9-target\debug\deps\world_picking-ad6890815650615d.exe)
+
+running 7 tests
+test mesh_triangle_pick_maps_to_original_polygon_face ... ok
+test nested_mirrored_instance_pick_keeps_root_member_path_and_single_world_transform ... ok
+test mapped_circle_sampling_uses_angular_span_and_keeps_native_parameters ... ok
+test rendered_curve_picking_resolves_source_parameter_and_never_creates_mesh_master ... ok
+test hidden_locked_and_unselectable_stay_distinct_for_reference_picking ... ok
+test stale_camera_or_source_invalidates_held_pick_before_dispatch ... ok
+test mapped_circle_extreme_domains_preserve_native_samples_or_disclose_unrepresentable_bindings ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests om9_scene
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

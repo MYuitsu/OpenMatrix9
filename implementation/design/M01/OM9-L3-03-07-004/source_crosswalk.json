@@ -1,0 +1,16 @@
+{
+  "l3": "OM9-L3-03-07-004",
+  "title": "Menu Scrolling And Icon Grid",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs"
+  ],
+  "api": "Main Menu paged grid (10 columns x 2 rows) + fixed page column",
+  "tests": [
+    "chrome_actions",
+    "left_stack_layers"
+  ],
+  "manual_reference": "Matrix8 Book 1, pp11-13 and reference menu icon catalog",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

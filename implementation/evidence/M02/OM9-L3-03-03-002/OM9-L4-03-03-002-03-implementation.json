@@ -1,0 +1,14 @@
+{
+  "l4": "OM9-L4-03-03-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-03-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Left-to-right drag is a window, right-to-left crossing; the marquee is painted only for a drag owned by a viewport.",
+  "tests": [
+    "om9-app rubber_band: 2 passed",
+    "om9-app selection_overlay: 8 passed",
+    "om9-app acceptance_viewport_selection: 8 passed",
+    "om9-scene selection_regressions: 7 passed"
+  ]
+}

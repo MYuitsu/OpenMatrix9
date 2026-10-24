@@ -16,6 +16,11 @@
 use std::ffi::{CStr, c_char, c_double, c_int};
 use std::fmt;
 pub mod brep;
+pub mod creation;
+pub mod editing;
+pub mod extrusion;
+pub mod intersect;
+pub mod transform_ops;
 
 /// A kernel call that did not produce a value.
 #[derive(Debug, Clone, PartialEq, Eq)]

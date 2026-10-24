@@ -1,0 +1,101 @@
+{
+  "schema": "om9.m02.checks.v1",
+  "work_item": "m02-l2-03-06-pictureframe-calibration-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-03-06",
+  "title": "Febe Viewport Pictureframe And Calibration",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Picture Frame was absent. Added PNG+JPEG import with immutable SHA-256 asset bytes, an aspect-locked 20x20 mm quad on the active CPlane, move/scale/bounds, opacity/lock/visibility, 0.25 mm/pixel calibration, embedded project persistence with missing/hash safeguards, and viewport texture painting with opacity.",
+  "audit_result": {
+    "existing_implementation": "MISSING",
+    "gaps_found": [
+      "No picture-frame model, image decode or quad import.",
+      "No reference-image move/scale/aspect policy.",
+      "No opacity/lock/selectability policy.",
+      "No known-distance calibration.",
+      "No project persistence for reference assets."
+    ],
+    "gaps_closed": "all five L3 capabilities implemented"
+  },
+  "code_changes": [
+    "crates/om9-app/src/pictureframe.rs (new)",
+    "crates/om9-app/src/lib.rs: pub mod pictureframe",
+    "crates/om9-app/src/session/pictureframe_state.rs (new om9.pictureframe.v1 resource)",
+    "crates/om9-app/src/ui.rs: import API, stage/reload and embedded manifest",
+    "crates/om9-app/tests/pictureframe_persistence.rs (new)",
+    "crates/om9-app/src/ui.rs: SHA-keyed texture cache and textured quad painting with opacity"
+  ],
+  "checks": [
+    {
+      "name": "pictureframe unit",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib pictureframe::tests -j 2",
+      "result": "6 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-pictureframe-unit.log",
+      "sha256": "e5c7730df18f905b1002d5ef759125e0159146c79e6ea446a9b6c23e2a97ba17"
+    },
+    {
+      "name": "pictureframe persistence",
+      "command": "cargo test -p om9-app --test pictureframe_persistence -j 2",
+      "result": "3 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-pictureframe-persistence.log",
+      "sha256": "bbce8a734e4578808b4f4e2d302da0eaebaa0636f9089b35d39bbe629212b5dc"
+    },
+    {
+      "name": "app library with GPU feature",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib -j 2",
+      "result": "161 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-pictureframe-app-lib.log",
+      "sha256": "f4ee9641609b9f044b6e1172b20c8710d7029af6c6022bec722c7849ff6a1242"
+    },
+    {
+      "name": "app cargo fmt",
+      "command": "cargo fmt --all -- --check",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-app-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "app clippy",
+      "command": "cargo clippy -p om9-app --all-targets -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-app-clippy-final.log",
+      "sha256": "2d52eff659ee930d5a1aef074714194f984ef78a17ce75ff602a15a4814ad265"
+    },
+    {
+      "name": "workspace clippy",
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-workspace-clippy-final.log",
+      "sha256": "12b63ea2f1341c1c56bcdff61cecea8024b78a41bfdc141f4f2e8383a2a0c5ec"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M02/2026-10-22-pictureframe-public-source-audit.log",
+      "sha256": "ff8e492461a0d74bd7637423c43a37b29853fa6c57ed4bb69696c322d7253ca7"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-03-06-001": "5/5",
+    "OM9-L3-03-06-002": "5/5",
+    "OM9-L3-03-06-003": "5/5",
+    "OM9-L3-03-06-004": "5/5",
+    "OM9-L3-03-06-005": "5/5"
+  },
+  "manual_gate": "M02-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M02-UI review of file-picker flow and visual composition at production scale.",
+    "macOS runtime is unverified.",
+    "PNG and JPEG are supported; other raster formats are outside this service."
+  ],
+  "not_claimed": [
+    "Human approval or M02-UI sign-off",
+    "macOS execution",
+    "Non-PNG raster formats",
+    "GPU texture draw/visual sign-off"
+  ]
+}

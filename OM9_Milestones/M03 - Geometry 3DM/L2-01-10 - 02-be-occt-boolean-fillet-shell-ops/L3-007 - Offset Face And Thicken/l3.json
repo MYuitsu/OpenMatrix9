@@ -139,7 +139,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE",
   "task_ids": [
     "OM9-L4-01-10-007-01",
     "OM9-L4-01-10-007-02",
@@ -297,6 +297,115 @@
     "priority_pilot": false,
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "SURFACE_BREP"
+  "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
+  "acceptance_category": "SURFACE_BREP",
+  "proposed_fixture": {
+    "fixture_id": "OM9-L3-01-10-007-POSITIVE",
+    "status": "RUNTIME_MEASURED_2026_10_22",
+    "positive": {
+      "input": {
+        "face_mm": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            10,
+            0,
+            0
+          ],
+          [
+            10,
+            20,
+            0
+          ],
+          [
+            0,
+            20,
+            0
+          ]
+        ],
+        "thickness_mm": 2,
+        "offset_mm": 2
+      },
+      "expect": {
+        "thicken_volume_mm3": 400.0,
+        "offset_area_mm2": 200.0,
+        "offset_plane_shift_mm": 2.0
+      }
+    },
+    "negative": {
+      "input": [
+        "thickness 0",
+        "offset 0",
+        "thicken a solid"
+      ],
+      "expect": "CreationError::Invalid; no body"
+    },
+    "tolerance_policy": {
+      "thicken_volume_mm3": "1e-5",
+      "offset_area_mm2": "1e-6"
+    },
+    "rust_test_name": "m03_01_10_007"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "offset a face and thicken it into a shell/solid",
+    "owner": {
+      "crate": "om9-kernel",
+      "files": [
+        "crates/om9-kernel/src/editing.rs",
+        "crates/om9-kernel/src/editing_bridge.cpp",
+        "crates/om9-kernel/src/brep_snapshot.hxx",
+        "crates/om9-kernel/tests/l2_01_10.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-01-10-007/api.md",
+      "implementation/design/M03/OM9-L3-01-10-007/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-01-10-007/positive.json",
+      "implementation/fixtures/M03/OM9-L3-01-10-007/negative.json",
+      "implementation/evidence/M03/OM9-L3-01-10-007/OM9-L4-01-10-007-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-01-10-007/OM9-L4-01-10-007-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-01-10-007/OM9-L4-01-10-007-05.ui-review.json"
+    ],
+    "tests": [
+      "m03_01_10_007: passed",
+      "l2_01_10 suite: 12 passed"
+    ],
+    "human_approval": null,
+    "remaining": [],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "AUTO_ONLY",
+      "design": "implementation/design/M03/OM9-L3-01-10-007/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-01-10-007/positive.json",
+        "implementation/fixtures/M03/OM9-L3-01-10-007/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M03/OM9-L3-01-10-007/OM9-L4-01-10-007-05.ui-review.json"
+      ],
+      "measured": {
+        "thicken_volume_mm3": 400.0,
+        "offset_area_mm2": 200.0
+      },
+      "tolerances": {
+        "thicken_volume_mm3": "1e-5",
+        "offset_area_mm2": "1e-6"
+      },
+      "acceptance": "planar 10×20 face thickened 2 mm: 400 mm³ closed solid, thickness 2 mm; planar face offset 2 mm: still one 200 mm² face, plane shifted by 2 mm"
+    },
+    "l4_evidence": {
+      "OM9-L4-01-10-007-01": "1/1",
+      "OM9-L4-01-10-007-02": "1/1",
+      "OM9-L4-01-10-007-03": "1/1",
+      "OM9-L4-01-10-007-04": "1/1",
+      "OM9-L4-01-10-007-05": "1/1"
+    }
+  }
 }

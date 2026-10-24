@@ -1,0 +1,16 @@
+{
+  "l4": "OM9-L4-02-03-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-03-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "Near is a clamped segment solve with a finite t; Intersection is an exact 3D segment/segment solve over distinct roots, skipping parallel pairs.",
+  "source_paths": [
+    "crates/om9-scene/src/osnap.rs",
+    "crates/om9-scene/src/scene.rs"
+  ],
+  "tests": [
+    "om9-scene osnap: 11 passed",
+    "om9-app osnap UI: 3 passed"
+  ]
+}

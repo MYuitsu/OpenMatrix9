@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m03.l2-03-08.l4.receipt.v1",
+  "l4": "OM9-L4-03-08-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-08-002",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crates": [
+      "om9-core",
+      "om9-app"
+    ],
+    "files": [
+      "crates/om9-core/src/top11.rs",
+      "crates/om9-app/src/session/top11.rs",
+      "crates/om9-app/src/ui/top11.rs"
+    ],
+    "test": "crates/om9-app/tests/top11.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --no-default-features --test top11 m03_03_08_002 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-03-08-002/OM9-L4-03-08-002-03.focused-test.log",
+      "stdout_log_sha256": "6a3b11932a26cacddd45530274862aefa6bc589cf17da3be8760786742ddb807"
+    }
+  ],
+  "observed": {
+    "grip_points_on_line": 2.0,
+    "grip_mode_toggle_passed": "true",
+    "grip_drag_end_mm": "[15.0, 2.0, 0.0]",
+    "grip_drag_undo_passed": "true",
+    "circle_grip_radius": 5.0,
+    "surface_control_grips": 4.0,
+    "surface_edit_reversed": "true",
+    "surface_edit_grips": 4.0,
+    "surface_edit_periodic": "true",
+    "surface_edit_handles_96_ms": 98.075,
+    "surface_edit_move_96_ms": 48.388
+  },
+  "expected": {
+    "grip_points_on_line": 2.0,
+    "grip_mode_toggle_passed": "true",
+    "grip_drag_end_mm": "[15.0, 2.0, 0.0]",
+    "grip_drag_undo_passed": "true",
+    "circle_grip_radius": 5.0,
+    "surface_control_grips": 4.0,
+    "surface_edit_reversed": "true",
+    "surface_edit_grips": 4.0,
+    "surface_edit_periodic": "true",
+    "surface_edit_handles_96_ms": 98.075,
+    "surface_edit_move_96_ms": 48.388
+  },
+  "effective_tolerance": {
+    "grip_points_on_line": "exact integer",
+    "grip_mode_toggle_passed": "boolean assertion",
+    "grip_drag_end_mm": "1e-9",
+    "grip_drag_undo_passed": "boolean assertion",
+    "circle_grip_radius": "1e-9",
+    "surface_control_grips": "exact integer",
+    "surface_edit_grips": "exact integer",
+    "surface_edit_reversed": "boolean assertion",
+    "surface_edit_periodic": "boolean assertion",
+    "surface_edit_handles_96_ms": "< 1500 ms",
+    "surface_edit_move_96_ms": "< 500 ms"
+  },
+  "input_validation": [
+    "selection/ids exist",
+    "finite points/fractions",
+    "one admitted transaction"
+  ],
+  "error_type": "om9_core::Error (Invalid/Unsupported/Budget/Overflow)",
+  "rollback_behavior": "a refused action returns before a transaction is prepared",
+  "compile_receipt": "om9-core and om9-app compile with the focused test (exit 0)",
+  "worktree_state": "The recorded revision is HEAD; L2-03-08 changes were measured before commit."
+}

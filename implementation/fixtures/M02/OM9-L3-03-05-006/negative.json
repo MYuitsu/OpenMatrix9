@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G03-B-03-05-006",
+  "l3_id": "OM9-L3-03-05-006",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Preset lỗi schema dùng fallback và cảnh báo, không crash",
+  "expected": "No document mutation, no invented gem material, no disabled category hiding model geometry, and a safe schema fallback.",
+  "evidence": [
+    "om9-app display cues: 6 passed",
+    "om9-app display_modes: 3 passed",
+    "om9-app display_persistence: 2 passed"
+  ],
+  "status": "PASS"
+}

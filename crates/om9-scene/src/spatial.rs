@@ -13,7 +13,10 @@ pub struct Aabb {
 #[allow(dead_code, clippy::needless_range_loop)]
 impl Aabb {
     fn empty() -> Self {
-        Self { min: [f64::INFINITY; 3], max: [f64::NEG_INFINITY; 3] }
+        Self {
+            min: [f64::INFINITY; 3],
+            max: [f64::NEG_INFINITY; 3],
+        }
     }
     fn add_sphere(&mut self, centre: [f64; 3], radius: f64) {
         for axis in 0..3 {
@@ -90,7 +93,12 @@ impl SpatialIndex {
 
     /// Object indices whose sphere may be hit by the ray, in arbitrary order.
     /// Conservative query for a pixel-tolerance pick: the ray is widened by `padding` in world units.
-    pub fn ray_candidates_fat(&self, origin: [f64; 3], direction: [f64; 3], padding: f64) -> Vec<usize> {
+    pub fn ray_candidates_fat(
+        &self,
+        origin: [f64; 3],
+        direction: [f64; 3],
+        padding: f64,
+    ) -> Vec<usize> {
         let mut out = Vec::new();
         if self.nodes.is_empty() {
             return out;
@@ -98,11 +106,18 @@ impl SpatialIndex {
         let mut stack = vec![0u32];
         while let Some(index) = stack.pop() {
             let node = self.nodes[index as usize];
-            if !node.bounds.hit_with_padding(origin, direction, padding.max(0.0)) {
+            if !node
+                .bounds
+                .hit_with_padding(origin, direction, padding.max(0.0))
+            {
                 continue;
             }
             if node.count > 0 {
-                out.extend(self.order[node.start as usize..(node.start + node.count) as usize].iter().copied());
+                out.extend(
+                    self.order[node.start as usize..(node.start + node.count) as usize]
+                        .iter()
+                        .copied(),
+                );
             } else {
                 stack.push(node.left);
                 stack.push(node.right);
@@ -123,7 +138,11 @@ impl SpatialIndex {
                 continue;
             }
             if node.count > 0 {
-                out.extend(self.order[node.start as usize..(node.start + node.count) as usize].iter().copied());
+                out.extend(
+                    self.order[node.start as usize..(node.start + node.count) as usize]
+                        .iter()
+                        .copied(),
+                );
             } else {
                 stack.push(node.left);
                 stack.push(node.right);
@@ -152,7 +171,13 @@ fn build_node(
         bounds.add_sphere(centres[object], radii[object]);
     }
     let slot = nodes.len() as u32;
-    nodes.push(Node { bounds, left: 0, right: 0, start: start as u32, count: (end - start) as u32 });
+    nodes.push(Node {
+        bounds,
+        left: 0,
+        right: 0,
+        start: start as u32,
+        count: (end - start) as u32,
+    });
     if end - start <= 8 {
         return slot;
     }
@@ -165,7 +190,9 @@ fn build_node(
             hi[axis] = hi[axis].max(c[axis]);
         }
     }
-    let axis = (0..3).max_by(|a, b| (hi[*a] - lo[*a]).total_cmp(&(hi[*b] - lo[*b]))).unwrap_or(0);
+    let axis = (0..3)
+        .max_by(|a, b| (hi[*a] - lo[*a]).total_cmp(&(hi[*b] - lo[*b])))
+        .unwrap_or(0);
     if hi[axis] - lo[axis] < 1e-9 {
         return slot;
     }
@@ -211,9 +238,13 @@ mod tests {
     fn a_27k_object_index_matches_brute_force_and_stays_fast() {
         let side = 30usize;
         let mut centres = Vec::new();
-        for x in 0..side { for y in 0..side { for z in 0..side {
-            centres.push([x as f64, y as f64, z as f64]);
-        }}}
+        for x in 0..side {
+            for y in 0..side {
+                for z in 0..side {
+                    centres.push([x as f64, y as f64, z as f64]);
+                }
+            }
+        }
         let radii = vec![0.4; centres.len()];
         let started = std::time::Instant::now();
         let index = SpatialIndex::build(&centres, &radii);
@@ -228,7 +259,9 @@ mod tests {
         for (i, centre) in centres.iter().enumerate() {
             let mut bounds = Aabb::empty();
             bounds.add_sphere(*centre, radii[i]);
-            if bounds.hit(origin, direction) { brute.push(i); }
+            if bounds.hit(origin, direction) {
+                brute.push(i);
+            }
         }
         assert_eq!(candidates, brute);
         assert!(build_ms < 1000.0, "BVH build {build_ms:.1} ms");

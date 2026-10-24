@@ -1,0 +1,54 @@
+{
+  "schema": "om9.m03.l2-02-04.ui-review.v1",
+  "task_id": "OM9-L4-02-04-004-05",
+  "l3_id": "OM9-L3-02-04-004",
+  "title": "Curve Edit Points And Grips",
+  "oracle": {
+    "positive": [
+      "4-pole cubic exposes 4 edit points; moving pole 1 is observable; inserting a control point raises the pole count to 5"
+    ],
+    "negative": [
+      "out-of-range grip index",
+      "grip editing on a circle or polycurve (explicit unsupported)",
+      "degenerate line after a move"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is asserted by a focused Rust test and every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "portable curve service and typed refusal; no window, menu or human review"
+  },
+  "measured": {
+    "nurbs_grip_count": 4.0,
+    "inserted_grip_count": 5.0
+  },
+  "tolerances": {
+    "nurbs_grip_count": "exact integer",
+    "inserted_grip_count": "exact integer"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test l2_02_04 m03_02_04_004_curve_edit_points_and_grips -- --exact (exit 0)",
+    "regression: cargo test -p om9-core -j 2 (52 suites, 447 passed)",
+    "clippy: cargo clippy -p om9-core --all-targets -j 2 -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-04-004/api.md",
+    "implementation/design/M03/OM9-L3-02-04-004/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-004/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-004/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-04-004/OM9-L4-02-04-004-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-02-04-004/OM9-L4-02-04-004-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_02_04_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

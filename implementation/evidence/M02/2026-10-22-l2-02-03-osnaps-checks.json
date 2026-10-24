@@ -1,0 +1,130 @@
+{
+  "schema": "om9.m02.checks.v1",
+  "work_item": "m02-l2-02-03-osnaps-smarttrack-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-02-03",
+  "title": "Febe Osnaps And Basic Smarttrack",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "No object-snap/SmartTrack engine existed; only disabled icons. Implemented the pure Rust snap query (End/Mid/Center/Quadrant/Point/Intersection/Near/Tangent/Perpendicular/Surface), deterministic priority and one-shot state, transient SmartTrack guides/inference, and the viewport marker/click integration. Added 15 focused tests plus the existing viewport regressions.",
+  "audit_result": {
+    "existing_implementation": "MISSING_ENGINE",
+    "gaps_found": [
+      "No osnap candidate query over the captured scene.",
+      "No near/intersection/tangent/perpendicular math for the documented geometry.",
+      "No BRep display surface snap.",
+      "No priority or one-shot override state machine.",
+      "No SmartTrack anchors/guides/inferred point.",
+      "No snap marker, tooltip or click-path consumption."
+    ],
+    "gaps_closed": "all"
+  },
+  "code_changes": [
+    "crates/om9-scene/src/osnap.rs (new): SnapKind, SnapSettings, SnapCandidate, SnapState, SmartTrack, candidates/choose and geometry solvers",
+    "crates/om9-scene/src/lib.rs: pub mod osnap",
+    "crates/om9-app/src/ui.rs: snap/snap_state/smarttrack fields, hover/click consumption, marker + guides painting, Escape clear, public snap controls",
+    "crates/om9-app/src/ui/sidebar_palettes.rs: osnap palette icons toggle persistent kinds",
+    "crates/om9-scene/tests/osnap.rs (new): 11 scene/geometry tests",
+    "crates/om9-app/tests/osnap_ui.rs (new): 3 marker/click/SmartTrack UI tests",
+    "crates/om9-app/tests/osnap_brep.rs (new): 1 trimmed BRep surface test"
+  ],
+  "checks": [
+    {
+      "name": "osnap scene engine",
+      "command": "cargo test -p om9-scene --test osnap -j 2",
+      "result": "11 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-scene.log",
+      "sha256": "1f4b3f9eafe33b33df8e6d8bc429277b47d6258dc6f2cdea63e6bfbb57c33eaa"
+    },
+    {
+      "name": "osnap BRep surface",
+      "command": "cargo test -p om9-app --features occt-brep --test osnap_brep -j 2",
+      "result": "1 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-brep.log",
+      "sha256": "a83e02e2e674c833f049d3ce7865585859d96ac0daf91fe82acc522493789b30"
+    },
+    {
+      "name": "osnap UI marker/click/SmartTrack",
+      "command": "cargo test -p om9-app --test osnap_ui -j 2",
+      "result": "3 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-ui.log",
+      "sha256": "13c85c12533411f7d1ef74e728978a8dda5a9007f448c517996c84d504e12e73"
+    },
+    {
+      "name": "om9-scene full",
+      "command": "cargo test -p om9-scene -j 2",
+      "result": "99 passed; 0 failed; 20 suites",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-scene-full.log",
+      "sha256": "81e71e0d62072c51af872c054323b274983c1900e38bb51f92e0e1daec8c126d"
+    },
+    {
+      "name": "om9-core full",
+      "command": "cargo test -p om9-core -j 2",
+      "result": "407 passed; 0 failed; 48 suites",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-core-full.log",
+      "sha256": "bbb8d0657198090552e34adb3fff61b5ee380a78e692ac0577ef0f19309def73"
+    },
+    {
+      "name": "app viewport/selection regressions",
+      "command": "cargo test -p om9-app --test viewport_title_menu --test chrome_actions --test command_sessions --test acceptance_viewport_selection --test selection_overlay --test pick_disambiguation --test gumball_viewport -j 2",
+      "result": "60 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-regressions.log",
+      "sha256": "755d5831f4b2379150de45b75c459447bb7815db9e27d812cfcc4bb774c99a0e"
+    },
+    {
+      "name": "app library with GPU feature",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib -j 2",
+      "result": "148 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-app-lib.log",
+      "sha256": "c3b654633383e7742e6ed241b4348327ecbb2b2d908d8ff521cacd30465727a1"
+    },
+    {
+      "name": "clippy osnap",
+      "command": "cargo clippy -p om9-scene --lib --test osnap -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-clippy.log",
+      "sha256": "5a3df8949e3ff2edec03240b3d5778c767bd91beef666643015aba689056bd23"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M02/2026-10-22-osnap-public-source-audit.log",
+      "sha256": "c89f230a63aea58ae7a3a620b994cff4fa21daa68ad9004e0327cb12876c43cb"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-02-03-001": "5/5",
+    "OM9-L3-02-03-002": "6/6",
+    "OM9-L3-02-03-003": "6/6",
+    "OM9-L3-02-03-004": "6/6",
+    "OM9-L3-02-03-005": "5/5",
+    "OM9-L3-02-03-006": "6/6",
+    "OM9-L3-02-03-007": "5/5"
+  },
+  "artifacts": [
+    "implementation/design/M02/OM9-L2-02-03/README.md",
+    "implementation/design/M02/OM9-L3-02-03-001/api.md",
+    "implementation/design/M02/OM9-L3-02-03-002/api.md",
+    "implementation/design/M02/OM9-L3-02-03-003/api.md",
+    "implementation/design/M02/OM9-L3-02-03-004/api.md",
+    "implementation/design/M02/OM9-L3-02-03-005/api.md",
+    "implementation/design/M02/OM9-L3-02-03-006/api.md",
+    "implementation/design/M02/OM9-L3-02-03-007/api.md"
+  ],
+  "manual_gate": "M02-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M02-UI visual review of snap markers/tooltips, one-shot toggles and SmartTrack guides.",
+    "macOS runtime is unverified.",
+    "Trimmed NURBS-surface snapping beyond the BRep display tessellation and grid/object projection snapping remain outside this L2.",
+    "App-wide clippy is blocked by pre-existing lints outside this module; cargo fmt --check has pre-existing differences."
+  ],
+  "not_claimed": [
+    "Human approval or M02-UI sign-off",
+    "macOS execution",
+    "QymCAD pinned-source reuse or a build-time QymCAD dependency",
+    "NURBS analysis-surface snapping beyond the displayed BRep tessellation"
+  ]
+}

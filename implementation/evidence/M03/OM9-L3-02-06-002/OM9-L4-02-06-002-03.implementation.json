@@ -1,0 +1,67 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-06-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel + om9-app",
+    "files": [
+      "crates/om9-core/src/transform_session.rs",
+      "crates/om9-kernel/src/transform_ops.rs"
+    ],
+    "test": "crates/om9-core/tests/transform_sessions.rs + crates/om9-kernel/tests/l2_02_06.rs + app gumball suites"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test transform_sessions scale_1d_2d_and_3d -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/L3-002.log",
+      "stdout_log_sha256": "4cd5a45c3a46bf36233e11fab6199ffaf5d82ac112eafa0bcde07a12ae672adc"
+    },
+    {
+      "argv": "cargo test -p om9-app --test gumball_interaction --test gumball_numeric --test gumball_placement --test gumball_cold -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/app-gumball.log",
+      "stdout_log_sha256": "60809e9877ccfe554df52e97f463ac448db652cc5edf9d0c423bb45f35d6d7f7"
+    }
+  ],
+  "observed": {
+    "factor_1d": 2.0,
+    "factor_2d": 2.0,
+    "factor_3d": 2.0,
+    "point_3d": [
+      2.0,
+      4.0,
+      6.0
+    ]
+  },
+  "expected": {
+    "factor_1d": 2.0,
+    "factor_2d": 2.0,
+    "factor_3d": 2.0,
+    "point_3d": [
+      2.0,
+      4.0,
+      6.0
+    ]
+  },
+  "tolerances": {
+    "factor": "1e-12",
+    "point": "1e-12"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/transform_session.rs",
+    "crates/om9-kernel/src/transform_ops.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/transform_session.rs": "2f0a44e314909c8895442516539a0122fb195db0c3bda17e635c08847dcd6cac",
+    "crates/om9-kernel/src/transform_ops.rs": "64925c4f9e63d2ef19c5568df42d89e31c512b1adcd69a3f5eccd960fba020f3"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "date": "2026-10-21",
+  "status": "project_state_and_save_request_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-12",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "First file-lifecycle SDK slice: read project path/dirty and stage one atomic save after commit, reusing the existing file save path; no document open/create/replace from a command.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "5319087cddfc246e3f880d859b59c778a6dc1944dc7976524a49c157894e762b",
+    "crates/om9-plugin-host/src/staged.rs": "a57f88905fbde3cecf95fd755567926a98b606f5d21364160a244c501b925878",
+    "crates/om9-plugin-host/src/lib.rs": "156f089aa89b1f919f120d1d60e1979baf8cab3b5212280cb624042a17a54be6",
+    "crates/om9-app/src/session/plugins.rs": "fb3b0f35c8dda85b50c5de20ac6544d8d791903ad5e8cbab28cf6ec25184333b",
+    "crates/om9-app/tests/plugin_native.rs": "b0476ce9856889371ec411c0e2c27c7710a8c2f5a4805c5ede46bec0ac4a2d60",
+    "sdk/examples/hello-plugin/src/lib.rs": "4b55ad40d5d6e2c4098683c3f4180e79a467029ca0d23474058dfd6f56873f8d",
+    "sdk/examples/hello-plugin/descriptor.json": "d5f59e3def7a0192f8f46243f85d83d7c34150e1278ecd9bc07525b3428d668f",
+    "sdk/README.md": "9e537682fe6e9c5fbc368972ddc97a266061153b38fe5256fedf653c5303113e",
+    "sdk/API-INVENTORY.md": "0a4401ca6cf584e94d9bc823766788df43da2300fc049995dd600bb29eea7845"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["project_state", "save_project"],
+    "public_types": ["ProjectInfo"],
+    "shared_service": [
+      "om9_app::session::Controller::begin_file_operation(FileKind::Save)",
+      "om9_archive::Archive::save",
+      "om9_core::model::Document"
+    ],
+    "error_codes": ["save", "id", "missing"]
+  },
+  "asserted_semantics": [
+    "project_state is host file identity: path is the last opened/saved path (absent for untitled) and dirty compares the document to the last saved/opened fingerprint.",
+    "save_project is staged, not executed inside the command: the transaction commits first and the host then saves through the atomic save path.",
+    "An untitled project refuses the save request before commit (save), so no command half-applies.",
+    "A save failure after commit is a warning event and the document stays dirty; the command is still reported as committed.",
+    "A plugin cannot open, create or replace the active document; those remain interactive host operations."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "54 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "14 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-project",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8811 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "untitled_path_null": true,
+    "untitled_dirty": false,
+    "untitled_save_refused": true,
+    "dirty_after_create_profile": true,
+    "saved_request_clears_dirty": true,
+    "reopened_entity_count_matches": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1585620,
+      "sha256": "199e25a81469e66de16204e4cc2f002dc460b0f03b2f7b9a8bb0a57b7473cf90"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "d0849237afbdd9f1189c718e9c9d50b1a12862d452c918483af8564957bd4de9"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 154385,
+      "sha256": "7e105ad7b2615bc9b2e45ccb2bffbcf3aeb8ec21bd024672f17592ec94d98c7d"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "fab1b043751d743b8e1c6b29bb1b865a8f860a1c8b9d0182232f098233e9e0a5"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1583616,
+      "sha256": "0f34988765f5673dd2280604dc84ad54985fdf6befc3eb4eeb869fa2249679dd"
+    },
+    "om9.exe": {
+      "bytes": 68932608,
+      "sha256": "232c5b6c04c52e721731d4d0ff2fdaea7795e78467e1c0855dd47c9f528e2fdc"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-12-005 (atomic save, requested through the plugin boundary)"],
+    "open": [
+      "plugin-driven open/create/Save As (intentionally host-only)",
+      "write-failure recovery re-exercised through the plugin path",
+      "project load validation and document reload"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "A plugin cannot open, create, replace or Save As a project and cannot choose a destination.",
+    "Write-failure recovery was not re-exercised through the plugin path in this batch.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose document change notification or object subobject/pick services at M02, or add Save As as an explicit host dialog request."
+}

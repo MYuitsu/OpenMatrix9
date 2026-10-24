@@ -1,0 +1,59 @@
+{
+  "schema": "om9.m03.l2-01-13.ui-review.v1",
+  "task_id": "OM9-L4-01-13-002-06",
+  "l3_id": "OM9-L3-01-13-002",
+  "title": "Opennurbs Reader Bridge Contract",
+  "oracle": {
+    "positive": [
+      "hosted import of the authored `mm` archive succeeds with 15 root objects, 2 layers, 3 definitions and 4 definition members",
+      "receipt.native.exited is true and receipt.native.active_processes is 0",
+      "receipt.source_sha256 equals the SHA-256 of the source file"
+    ],
+    "negative": [
+      "a caller-supplied model factor of 25.4 against a declared millimetre archive is refused before commit"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTO_ONLY",
+    "date_utc": "2026-10-22",
+    "statement": "Every measured value in this record comes from the focused Rust run; no manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "reader abstraction, parser lifetime, compatibility limits"
+  },
+  "measured": {
+    "root_objects": 15,
+    "layers": 2,
+    "definitions": 3,
+    "definition_members": 4,
+    "active_processes": 0
+  },
+  "tolerances": {
+    "source_sha256": "exact",
+    "counts": "exact"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-app --test l2_01_13 m03_01_13_002 -- --ignored --exact --nocapture (exit 0)",
+    "regression: cargo test -p om9-app --test l2_01_13 -- --ignored --test-threads=1 --nocapture (14 passed)",
+    "crate suites: om9-exchange/om9-archive/om9-3dm, om9-kernel --features 3dm-brep, om9-app --lib (exit 0)",
+    "clippy: owned files warning-free (see regression receipt note)",
+    "format: scoped rustfmt --check exit 0",
+    "public source: python tools/public_source_audit.py exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-01-13-002/api.md",
+    "implementation/design/M03/OM9-L3-01-13-002/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-01-13-002/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-13-002/negative.json",
+    "implementation/evidence/M03/OM9-L3-01-13-002/"
+  ],
+  "gate": {
+    "scope": "AUTO_ONLY",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  },
+  "date": "2026-10-23"
+}

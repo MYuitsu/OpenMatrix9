@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-004-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-004",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-004/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-004/negative.json",
+  "fixture_sha256": {
+    "positive": "cd393af849b4f9b71eecf5cb07249874106b35d4faa672c927bb401d99af526d",
+    "negative": "3cd212aad687ecfd6a1948ef2cad31efff201ec63d0cf633a8ca1f355dfb4e5c"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-004/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-004/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-004/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "a 4x2 planar surface evaluates exactly at its corners and centre",
+      "a 4x2 boundary patch measures area 8 mm2 with deviation 4.47e-16 mm",
+      "all four boundary curves are available from the surface"
+    ],
+    "negative": [
+      "a non-orthonormal plane frame or zero size is refused",
+      "a boundary loop with a gap is refused"
+    ]
+  }
+}

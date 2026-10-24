@@ -218,5 +218,16 @@
       "id": "OM9-L4-02-01-004-05",
       "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-004 - Surface UV Domain And Seam Rules/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Surface UV/seam cần cho plugin surface.",
+    "api": [],
+    "candidate_api": [
+      "surface_domain(id)"
+    ],
+    "host_only": "UV/seam do kernel host; SDK đọc domain."
+  }
 }

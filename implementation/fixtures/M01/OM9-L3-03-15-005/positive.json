@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-15-005",
+  "case": "positive",
+  "oracle": "capture selected objects without changing geometry",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

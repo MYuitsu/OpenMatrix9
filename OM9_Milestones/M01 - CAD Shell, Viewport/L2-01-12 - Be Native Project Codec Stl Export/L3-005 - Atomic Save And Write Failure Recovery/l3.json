@@ -184,21 +184,44 @@
     "OM9-L4-01-12-005-05"
   ],
   "runtime_implementation": {
-    "date": "2026-10-19",
-    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
-    "target": "standalone Rust OM9",
-    "scope": "Encode/verify, unique staging file, fsync, re-read verification and atomic publication; every failure keeps the last good file.",
-    "evidence": [
-      "implementation/design/M01/OM9-L2-01-12/crosswalk.json",
-      "implementation/design/M01/OM9-L2-01-12/l4-matrix.json",
-      "implementation/design/M01/OM9-L2-01-12/oracles.json",
-      "crates/om9-archive/tests/atomic_save.rs:24",
-      "crates/om9-archive/tests/atomic_save.rs:35",
-      "crates/om9-archive/tests/atomic_save.rs:56",
-      "crates/om9-archive/tests/atomic_save.rs:79"
-    ],
-    "human_approval": null,
-    "remaining": []
+    "plugin_sdk_v1_project_state": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "project_state reports the host project path and dirty comparison; save_project stages one atomic save that the Controller performs after the command commits through begin_file_operation(FileKind::Save), so the existing atomic save, fingerprint and receipt stay with the file owner. An untitled project is refused before commit; a save failure after commit is a warning and the document stays dirty. A plugin cannot open, create or replace the active document.",
+      "public_api": [
+        "Host::project_state",
+        "Host::save_project",
+        "ProjectInfo"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-12-project-state.md",
+        "docs/validation/2026-10-21-m01-01-12-project-state.json"
+      ],
+      "limitations": [
+        "Partial scope only: plugin-driven open/create/Save As is intentionally host-only.",
+        "Write-failure recovery was not re-exercised through the plugin path in this batch.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_save_as": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "host_save_as_flow_verified_windows",
+      "scope": "save_project_as stages a host Save As request; after the command commits the Controller calls begin_file_operation(FileKind::SaveAs), the user chooses the destination in the host dialog, and the existing atomic save writes the file. Combining save and save-as in one command is a save refusal, and a busy/failed file operation is a warning, not a command failure.",
+      "public_api": [
+        "Host::save_project_as"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-12-save-as.md",
+        "docs/validation/2026-10-21-m01-01-12-save-as.json"
+      ],
+      "limitations": [
+        "The path dialog itself is host UI; UI acceptance was not performed.",
+        "Write-failure recovery was not re-exercised through the plugin path.",
+        "macOS execution unverified."
+      ]
+    }
   },
   "children_l4": [
     {
@@ -222,5 +245,25 @@
       "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-005 - Atomic Save And Write Failure Recovery/L4-05 - Acceptance Test/l4.json"
     }
   ],
-  "hardening_notes": "# OM9-L3-01-12-005 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-01-12`.\n- Luồng/đối tượng: atomic native save and recovery.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-io/src/project_file.rs`.\n- API Rust dự kiến: `ProjectCodec::save_atomic(path: &Path, document: &Document) -> Result<(), IoError>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** write temporary→sync→atomic replacement; reopen good project.\n- **Negative:** injected disk failure preserves last valid target unchanged.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n"
+  "hardening_notes": "# OM9-L3-01-12-005 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-01-12`.\n- Luồng/đối tượng: atomic native save and recovery.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-io/src/project_file.rs`.\n- API Rust dự kiến: `ProjectCodec::save_atomic(path: &Path, document: &Document) -> Result<(), IoError>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** write temporary→sync→atomic replacement; reopen good project.\n- **Negative:** injected disk failure preserves last valid target unchanged.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n",
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::project_state",
+      "Host::save_project",
+      "Host::save_project_as"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_project_state",
+      "plugin_sdk_v1_save_as"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-01-12-project-state.json",
+      "docs/validation/2026-10-21-m01-01-12-project-state.md",
+      "docs/validation/2026-10-21-m01-01-12-save-as.json",
+      "docs/validation/2026-10-21-m01-01-12-save-as.md"
+    ]
+  }
 }

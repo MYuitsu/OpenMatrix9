@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-07-001",
+  "case": "positive",
+  "oracle": "left sidebar sections remain ordered and docked across 1280x720 and 1600x1000",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

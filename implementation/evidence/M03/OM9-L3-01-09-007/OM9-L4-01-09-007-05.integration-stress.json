@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-01-09.l4.receipt.v1",
+  "l4": "OM9-L4-01-09-007-05",
+  "role": "INTEGRATION_STRESS",
+  "l3": "OM9-L3-01-09-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "fixture": "OM9-L2-01-09 sweep family: rail steps 0.5/1/2/5 mm, a 64-line profile and a 33-station rail",
+  "invariants": [
+    "volume scales with the rail step and stays within 1e-6 mm3",
+    "every stress result is one closed solid",
+    "the long 64-line/33-station sweep stays valid and inside the point/node budget"
+  ],
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_09 m03_01_09_stress_a_sweep_family_keeps_its_volume_and_topology -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-09-007/OM9-L4-01-09-007-05.stress.log",
+      "stdout_log_sha256": "4de9658c0da77a7ae5ecf24565046602f1d54250e4adcd7db46e7976cb294fa1"
+    }
+  ]
+}

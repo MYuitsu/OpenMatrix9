@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests\pick_27k.rs (L:/om9-target\debug\deps\pick_27k-6ed897b0de92dd34.exe)
+
+running 1 test
+27k pick average 580.62 ms over 27000 objects
+test picking_27k_uses_the_bvh_and_stays_under_a_frame ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.27s
+

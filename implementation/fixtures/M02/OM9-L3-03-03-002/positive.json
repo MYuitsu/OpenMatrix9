@@ -1,0 +1,15 @@
+{
+  "fixture_id": "G03-B-03-03-002",
+  "l3_id": "OM9-L3-03-03-002",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Kéo trái→phải window và phải→trái crossing vẽ đúng rectangle, trả set tương ứng",
+  "expected": "The documented selection/gumball result with a stable object identity.",
+  "evidence": [
+    "om9-app rubber_band: 2 passed",
+    "om9-app selection_overlay: 8 passed",
+    "om9-app acceptance_viewport_selection: 8 passed",
+    "om9-scene selection_regressions: 7 passed"
+  ],
+  "status": "PASS"
+}

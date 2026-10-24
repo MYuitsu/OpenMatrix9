@@ -213,21 +213,40 @@
     }
   ],
   "runtime_implementation": {
-    "date": "2026-10-19",
+    "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "File > Import/Export 3DM invokes the shared host adapter; import is transactional, export is read-only.",
+    "scope": "3DM Import/Export through the shared native host adapter; import transactional, export read-only.",
+    "owner": "crates/om9-app/src/three_dm_host.rs + native/native_exchange.cpp",
+    "tests": [
+      "existing 2026-10-19 host evidence retained",
+      "file_widgets 21 passed",
+      "project_manager_persistence 2 passed"
+    ],
     "evidence": [
-      "implementation/design/M01/THREE-DM-HOST-ADAPTER.md",
-      "implementation/evidence/M01/2026-10-19-three-dm-native-host-checks.json",
-      "crates/om9-app/tests/three_dm_curve_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_brep_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_native_roundtrip.rs",
-      "native/native_exchange.cpp"
+      "implementation/design/M01/OM9-L2-03-15/README.md",
+      "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json"
     ],
     "human_approval": null,
     "remaining": [
-      "UI picker/menu still needs a human visual review on a real desktop."
-    ]
+      "Manual M01-UI visual review pending.",
+      "Job Bag state is in-session; project-file embedding is not claimed."
+    ],
+    "last_verified": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "tests": {
+        "project_manager": "8 passed",
+        "project_manager_ui": "3 passed",
+        "project_manager_persistence": "2 passed",
+        "file_lifecycle": "20 passed",
+        "file_widgets": "21 passed",
+        "panel_ops": "33 passed",
+        "shell_docking": "10 passed"
+      },
+      "evidence": "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json",
+      "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-15-20261022/acceptance.log",
+      "note": "Job Bag state embedded as .om9 resource and restored on Open; Master restore live; manual M01-UI pending."
+    }
   }
 }

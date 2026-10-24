@@ -1,0 +1,134 @@
+{
+  "schema": "om9.m02.checks.v1",
+  "work_item": "m02-l2-03-05-display-shading-gems-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-03-05",
+  "title": "Febe Viewport Display Shading And Gems",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Wireframe and selection overlay existed. Added Shaded mode, semantic gem cues with DEFERRED_WAIT_M05, presentation-only curve/cutter visibility with a disabled M07 category, determinant-aware backface cues and a versioned display preset.",
+  "audit_result": {
+    "existing_implementation": "PARTIAL",
+    "gaps_found": [
+      "Shaded was listed in the View menu but explicitly refused.",
+      "No gem semantic display cue or deferred M05 token.",
+      "No curve/cutter category visibility preset.",
+      "No backface side cue with mirrored-placement parity.",
+      "No versioned display preset persistence."
+    ],
+    "gaps_closed": "all typed/display scope; manual visual acceptance remains open"
+  },
+  "code_changes": [
+    "crates/om9-app/src/display.rs (new): gem cue, category visibility, backface side, DisplayPreferences",
+    "crates/om9-app/src/lib.rs: pub mod display",
+    "crates/om9-app/src/viewport_menu.rs: Shaded availability",
+    "crates/om9-app/src/session.rs: Shaded mode switch",
+    "crates/om9-app/tests/display_modes.rs (new)",
+    "crates/om9-app/tests/viewport_title_menu.rs: Shaded positive case",
+    "crates/om9-app/src/session/display_state.rs: om9.display.v1 embedded resource",
+    "crates/om9-app/tests/display_persistence.rs (new)",
+    "typed M05 GemMaterialRecord and M07 CutterRecord"
+  ],
+  "checks": [
+    {
+      "name": "display mode switch",
+      "command": "cargo test -p om9-app --test display_modes -j 2",
+      "result": "3 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-display-modes.log",
+      "sha256": "194c3e4287a28e5ffb080c115bfd99db305830a2249d8e8f0cd2d8f3a4bd01fb"
+    },
+    {
+      "name": "display cue unit tests",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib display::tests -j 2",
+      "result": "6 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-display-cues.log",
+      "sha256": "ebfadaf8f875213e34ab69af0ed6e5cbfaab8e37322954b1f9745fb09794438d"
+    },
+    {
+      "name": "display/persistence/selection regressions",
+      "command": "cargo test -p om9-app --test display_modes --test viewport_title_menu --test selection_overlay -j 2",
+      "result": "33 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-display-regressions.log",
+      "sha256": "aa38f433ee3a013b64d2dde173bea1480b0ed32b8365988746235fec741108ea"
+    },
+    {
+      "name": "app library with GPU feature",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib -j 2",
+      "result": "155 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-display-app-lib.log",
+      "sha256": "305ee2d74bc715df8bac623f3637b12941e2475fc8777a5f09d1ef70275640e8"
+    },
+    {
+      "name": "shaded view menu",
+      "command": "cargo test -p om9-app --test viewport_title_menu -j 2",
+      "result": "18 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-display-shaded-menu.log",
+      "sha256": "69a0ac372315f738054ac94ecd7fe6353cac09d8de3a2d5fadf2aa5e3971e110"
+    },
+    {
+      "name": "om9-scene full",
+      "command": "cargo test -p om9-scene -j 2",
+      "result": "103 passed; 0 failed; 21 suites",
+      "log": "implementation/evidence/M02/2026-10-22-snaps-scene-full.log",
+      "sha256": "dc99f98fc6ce25182a93db7126d47bbd84654ee7921f2338f712db5702a2e79b"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M02/2026-10-22-display-public-source-audit.log",
+      "sha256": "bec757a5b136435070e1581a9dd4acb1b25259441757abb7186ebc61ff89e468"
+    },
+    {
+      "name": "display preset persistence",
+      "command": "cargo test -p om9-app --test display_persistence -j 2",
+      "result": "2 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-display-preset-persistence.log",
+      "sha256": "39d26b7567a8071cd95eb0dc9d2abc0f00137a69ac93cffe21dc1b951d535c37"
+    },
+    {
+      "name": "app cargo fmt",
+      "command": "cargo fmt --all -- --check",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-app-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "app clippy",
+      "command": "cargo clippy -p om9-app --all-targets -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-app-clippy-final.log",
+      "sha256": "a0a09f1c24750e8bd77604ce36d298c5ef0aef21a5955c99a3d76e8d00fadbb3"
+    },
+    {
+      "name": "workspace clippy",
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-workspace-clippy-final.log",
+      "sha256": "a905345a90ddc157b63ecbee3cde890835d78819c7377bd2c2edc186eb82ade1"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-03-05-001": "5/5",
+    "OM9-L3-03-05-002": "5/5",
+    "OM9-L3-03-05-003": "5/5",
+    "OM9-L3-03-05-004": "5/5",
+    "OM9-L3-03-05-005": "5/5",
+    "OM9-L3-03-05-006": "5/5"
+  },
+  "manual_gate": "M02-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M02-UI visual review of shaded faces, gem token cues, cutter filtering, backfaces and preset reload.",
+    "macOS runtime is unverified.",
+    "Typed M05/M07 provider records are synthetic fixtures; production gem asset library and cutter generator are not claimed.",
+    "DEFERRED_WAIT_M05 / DEFERRED_WAIT_M07 remain intentional when records are absent."
+  ],
+  "not_claimed": [
+    "Human approval or M02-UI sign-off",
+    "macOS execution",
+    "M05 gem materials or M07 cutters",
+    "QymCAD pinned-source reuse or a build-time QymCAD dependency"
+  ]
+}

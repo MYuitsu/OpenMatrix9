@@ -1,0 +1,103 @@
+{
+  "schema": "om9.m03.checks.v1",
+  "work_item": "m03-l2-01-13-3dm-import-r5a-2026-10-23",
+  "date": "2026-10-23",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-01-13",
+  "title": "14-febe-import-rhino-3dm",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Re-ran 15 native acceptance tests (12 original + R5-A proxy + receipt/stress) against authored binary 3DM fixtures; all pass. R5-A now gets a coarse untrimmed display proxy when cached render meshes are absent, and best-effort import retains an unconvertible BRep instead of aborting.",
+  "audit_result": {
+    "existing_implementation": "IMPLEMENTED_NATIVE_BRIDGE",
+    "gaps_found": [
+      "No registered m03_01_13 focused tests existed.",
+      "No per-L4 design/fixture/evidence package existed.",
+      "Milestone runtime status still described core work as pending."
+    ],
+    "gaps_closed": "Added crates/om9-app/tests/l2_01_13.rs (12 L3 tests + integration stress + measured receipt), the import-summary seam, per-L3 design/fixtures and one receipt per L4 role; updated L1/L2/L3 runtime records and the live ledger."
+  },
+  "native": {
+    "program": "build/native-exchange/Release/om9-exchange-native.exe",
+    "program_sha256": "fdc86df9ce84334eab213ba0ac8491de823be222710416ae2871361539697e6a",
+    "fixture_builder": "build/source-fixture.exe",
+    "fixture_builder_sha256": "d315c6d35a94bad0d05cb4aeaff8a90ac6fd5437646ee6d006463c73386dc0d7",
+    "fixtures_are_binary_3dm": true,
+    "note": "The authored fixture writer embeds openNURBS-generated component UUIDs; each receipt records the archive SHA actually read."
+  },
+  "checks": [
+    {
+      "name": "L2 native acceptance",
+      "command": "cargo test -p om9-app --features occt-brep --test l2_01_13 -- --ignored --test-threads=1",
+      "result": "15 passed; 0 failed",
+      "duration_seconds": 28.96,
+      "log": "implementation/evidence/M03/2026-10-23-l2-01-13-native-proxy.log",
+      "sha256": "5f17d8fb70e6af80cfb22dfa9bc1e9105403804beee719bca3fb3fe82695d37d"
+    },
+    {
+      "name": "R5-A no-OCCT display and best effort",
+      "command": "cargo test -p om9-app --no-default-features --test r5a_display -- --ignored --test-threads=1",
+      "result": "2 passed; 0 failed",
+      "log": "implementation/evidence/M03/2026-10-23-r5a-display.log",
+      "sha256": "f7dfdca7bb1ee7fb0eba181268f6ee1cd1b9779d81ec61d87aa3c1cd6dd05ead"
+    },
+    {
+      "name": "R5-A proxy in OCCT build",
+      "command": "cargo test -p om9-app --features occt-brep --test l2_01_13 m03_01_13_008_r5a_proxy_display_without_conversion -- --ignored --test-threads=1",
+      "result": "1 passed; 0 failed",
+      "log": "implementation/evidence/M03/2026-10-23-r5a-proxy.log",
+      "sha256": "adf95f3b9e929c9328587a3d40620dc6a4e81a5f1642767ad6e91f8d0e5207cd"
+    },
+    {
+      "name": "fmt",
+      "command": "cargo fmt --all -- --check",
+      "result": "exit 0",
+      "log": "implementation/evidence/M03/2026-10-23-r5a-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "workspace clippy",
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M03/2026-10-23-r5a-clippy.log",
+      "sha256": "a905345a90ddc157b63ecbee3cde890835d78819c7377bd2c2edc186eb82ade1"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M03/2026-10-23-r5a-public-source-audit.log",
+      "sha256": "3abcebabbedcb1470d910628ca544988c37c33953858af4f1e62802608565728"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-01-13-001": "5/5",
+    "OM9-L3-01-13-002": "6/6",
+    "OM9-L3-01-13-003": "5/5",
+    "OM9-L3-01-13-004": "5/5",
+    "OM9-L3-01-13-005": "6/6",
+    "OM9-L3-01-13-006": "6/6",
+    "OM9-L3-01-13-007": "6/6",
+    "OM9-L3-01-13-008": "5/5",
+    "OM9-L3-01-13-009": "6/6",
+    "OM9-L3-01-13-010": "5/5",
+    "OM9-L3-01-13-011": "5/5",
+    "OM9-L3-01-13-012": "6/6"
+  },
+  "manual_gate": "M03-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M03-UI review of native picker appearance and production-scale summary/warning presentation.",
+    "macOS runtime is unverified.",
+    "R5-A display is a coarse untrimmed surface proxy, not exact trimmed tessellation.",
+    "Explicit EditableStrict still aborts on a conversion failure; default product path is EditableBestEffort.",
+    "V6+ and some V5 annotation/hatch/light families remain explicitly deferred."
+  ],
+  "not_claimed": [
+    "Human M03-UI approval",
+    "macOS execution",
+    "Exact trimmed R5-A tessellation",
+    "Full V6/V7/V8 parity",
+    "Visual sign-off of the OS native file dialog"
+  ]
+}

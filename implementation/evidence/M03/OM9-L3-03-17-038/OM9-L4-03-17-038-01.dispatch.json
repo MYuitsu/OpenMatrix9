@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-038-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-038",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-040",
+  "source_command": "Set Surface Tangent",
+  "menu_icon": "SurfaceSurfaceEditToolsSetSurfaceTangent",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-038/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-038/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-038/dispatch_contract.json": "52fd33811f3fe3b51c6feb2306c163ce6519639a68e793d9874aa38ea72dcf1c",
+    "implementation/design/M03/OM9-L3-03-17-038/source_crosswalk.json": "395388a39e1498a6043f4d88e49b3767db810eb6876d782dc2f06462cee0d506"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

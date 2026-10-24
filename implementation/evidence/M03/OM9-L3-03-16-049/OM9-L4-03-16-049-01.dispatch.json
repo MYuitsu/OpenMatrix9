@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-049-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-049",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-149",
+  "source_command": "Interp Curve on Surface",
+  "menu_icon": "CurveFreeFormInterpolateonSurface",
+  "owner_candidate": "OM9-L3-02-04-003",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Interp Curve on Surface command session is not wired; owner candidate OM9-L3-02-04-003 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-049/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-049/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-049/dispatch_contract.json": "bff7aa1a0cd660b21eeb7267dac70f49405e2161951b9ccb9e027d801d66dbd8",
+    "implementation/design/M03/OM9-L3-03-16-049/dispatch_contract.md": "c24b5e98f2d1f3d9ad91f3a42c4401b2e1d1fd4a2e1a7b62f829333bd907cc7a"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

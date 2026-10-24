@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-001-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-001",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-001/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-001/negative.json",
+  "fixture_sha256": {
+    "positive": "14021adf47256f0f2f9803a31351debf0e662039cecc2d3ca097018051d4d2e5",
+    "negative": "1b6d1b12c260afe575b7e88c4b5cf251101b0869a7b4b2b0c427322ebeb01aad"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-001/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-001/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-001/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "circle r=2 swept along a 10 mm straight rail keeps radius 2 at every station",
+      "sweep2 rails from width 5 to 9 mm keep both boundaries in contact",
+      "maintain-height preserves the 2 mm crown (OFF gives 3.6 mm)"
+    ],
+    "negative": [
+      "too few profile or rail samples are refused",
+      "a degenerate rail has no frame",
+      "degree 4, closed rails and a profile not spanning the rails are refused"
+    ]
+  }
+}

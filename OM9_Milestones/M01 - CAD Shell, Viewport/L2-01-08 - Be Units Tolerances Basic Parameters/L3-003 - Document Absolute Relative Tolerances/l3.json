@@ -190,5 +190,86 @@
       "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-003 - Document Absolute Relative Tolerances/L4-05 - Acceptance Test/l4.json"
     }
   ],
-  "hardening_notes": "# OM9-L3-01-08-003 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-01-08`.\n- Luồng/đối tượng: document absolute tolerance.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-core/src/model.rs`.\n- API Rust dự kiến: `Tolerance::try_new(abs_mm: f64, rel: f64) -> Result<Tolerance, Error>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** 0.001 mm tolerance stored per document.\n- **Negative:** zero and negative tolerance rejected.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n"
+  "hardening_notes": "# OM9-L3-01-08-003 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-01-08`.\n- Luồng/đối tượng: document absolute tolerance.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-core/src/model.rs`.\n- API Rust dự kiến: `Tolerance::try_new(abs_mm: f64, rel: f64) -> Result<Tolerance, Error>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** 0.001 mm tolerance stored per document.\n- **Negative:** zero and negative tolerance rejected.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n",
+  "runtime_implementation": {
+    "plugin_sdk_v1_units": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "SDK v1 reports the document's own tolerance policy (absolute mm, relative fraction, angular radians) and reports none when the document states none; the host never invents a default.",
+      "public_api": [
+        "Host::document_units",
+        "Host::parse_length",
+        "Host::parse_angle",
+        "Host::parse_coordinates"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-08-units-sdk.md",
+        "docs/validation/2026-10-21-m01-08-units-sdk.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "Tolerance is read only; builder parameter values/range/serialization (L3-004/005/006) remain open.",
+        "Local-frame/CPlane resolution and interactive input remain host-owned.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_tolerance_write": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "tolerance_write_verified_windows_host_only",
+      "scope": "set_document_tolerance validates through Tolerance::try_new and stages Mutation::Tolerance at the base revision; invalid values are tolerance refusals; one Undo restores.",
+      "public_api": [
+        "Host::set_document_tolerance"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-08-tolerance-write.md",
+        "docs/validation/2026-10-21-m01-01-08-tolerance-write.json"
+      ],
+      "limitations": [
+        "No native command yet.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_tolerance_native": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "tolerance_write_native_command_verified_windows",
+      "scope": "ToleranceDemo sets 0.01 mm through the packaged plugin; the DLL test observes 0.01 after the command and the document default 0.001 mm after Undo.",
+      "public_api": [
+        "Host::set_document_tolerance"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-08-tolerance-native.json"
+      ],
+      "limitations": [
+        "Per-object tolerance open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::document_units",
+      "Host::parse_angle",
+      "Host::parse_coordinates",
+      "Host::parse_length",
+      "Host::set_document_tolerance"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_tolerance_native",
+      "plugin_sdk_v1_tolerance_write",
+      "plugin_sdk_v1_units"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-01-08-tolerance-native.json",
+      "docs/validation/2026-10-21-m01-01-08-tolerance-write.json",
+      "docs/validation/2026-10-21-m01-01-08-tolerance-write.md",
+      "docs/validation/2026-10-21-m01-08-units-sdk.json",
+      "docs/validation/2026-10-21-m01-08-units-sdk.md"
+    ]
+  }
 }

@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-004",
+  "fixture_id": "OM9-L3-02-05-004-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Edge Planar And Patch Surface Workflows",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "plane_corner": [
+      4.0,
+      2.0,
+      0.0
+    ],
+    "patch_area_mm2": 8.0,
+    "patch_deviation_mm": 0.0
+  },
+  "tolerances": {
+    "area_mm2": "1e-5",
+    "deviation_mm": "1e-6"
+  },
+  "measured_on_2026_10_22": {
+    "plane_corner": [
+      4.0,
+      2.0,
+      0.0
+    ],
+    "patch_area_mm2": 7.999999999999918,
+    "patch_deviation_mm": 4.466484191439815e-16
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "schema": "om9.m03.l2-03-17.wire_ui.v1",
+  "l3_id": "OM9-L3-03-17-006",
+  "menu_icon": "OthersSurfaceRebuild",
+  "command_id": "OM9-SURFACE-006",
+  "menu_and_commandline_same_id": true,
+  "enabled": true,
+  "disabled_reason": "",
+  "visible_disabled_reason": true,
+  "ui_state": "FUNCTIONAL",
+  "owner_service_reused": "OM9-L3-02-04-008",
+  "status": "FUNCTIONAL_UI",
+  "task_id": "OM9-L4-03-17-006-02",
+  "role": "WIRE_UI",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test surface_menu",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-03-17-logs/surface-menu.log",
+      "stdout_log_sha256": "fc187a7b5d404a097ffff645124216a76c112054ea7ffcc361f70e2680e11dcc"
+    }
+  ],
+  "observed": {
+    "catalog_rows": 38,
+    "enabled_rows": 38,
+    "disabled_rows": 0,
+    "disabled_reason_visible": true,
+    "no_fake_success": true,
+    "functional": [
+      "Sweep 4",
+      "Sweep 1 History",
+      "Sweep 2 History",
+      "Sweep 1",
+      "Sweep 2",
+      "Profile Sweep",
+      "Sweep Multi",
+      "Merge Surfaces",
+      "Patch",
+      "Edge Curves",
+      "Planar Curves",
+      "Variable Offset Surface",
+      "Variable Blend Surfaces",
+      "Shrink Trimmed Surface",
+      "Untrim",
+      "Chamfer Surfaces",
+      "Fillet Surfaces",
+      "Variable Fillet Surfaces",
+      "Variable Chamfer Surfaces",
+      "Cutting Plane",
+      "Split at Isocurve",
+      "Drape",
+      "Set Surface Tangent",
+      "Surface Extrude All",
+      "Rail Revolve",
+      "Match Surfaces",
+      "Adjust Closed Surface Seam",
+      "Soft Edit",
+      "Tween Surfaces",
+      "Extend Surface",
+      "Rebuild",
+      "Blend Surface",
+      "Loft",
+      "Curve Network",
+      "Unroll Surface",
+      "Offset Surface",
+      "Extrude Normal",
+      "Plane from Corners"
+    ]
+  },
+  "expected": {
+    "menu_and_commandline_same_id": true,
+    "no_document_mutation_when_disabled": true
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-006/wire_ui.json",
+    "crates/om9-app/src/surface_menu.rs",
+    "crates/om9-app/src/ui/chrome.rs"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-006/wire_ui.json": "5295a1285cf91ec2a9bd7bc34d16bc236a8abb221cedfbfbebd99c8fda61892c",
+    "crates/om9-app/src/surface_menu.rs": "95f6bd38c984023f419f7990868b4974de2841b9c8e06ac372969b1da0268665",
+    "crates/om9-app/src/ui/chrome.rs": "0c9e190f50f68ee19f02610d688ee6e29509deb8421d8aa0b3f3d4f257261b5f"
+  },
+  "human_approval": null,
+  "manual_gate": "M03-UI"
+}

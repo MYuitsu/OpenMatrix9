@@ -217,5 +217,16 @@
       "id": "OM9-L4-02-01-001-05",
       "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-001 - Point And Polyline Semantic Types/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Point/polyline semantic đã có một phần; cần API đọc đầy đủ.",
+    "api": [],
+    "candidate_api": [
+      "geometry_semantics(id)"
+    ],
+    "host_only": "Semantic point/polyline đã có một phần; mở rộng ở host."
+  }
 }

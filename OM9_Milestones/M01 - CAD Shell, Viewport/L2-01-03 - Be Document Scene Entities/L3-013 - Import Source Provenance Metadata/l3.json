@@ -204,6 +204,39 @@
       "native/native_exchange.cpp"
     ],
     "human_approval": null,
-    "remaining": []
+    "remaining": [],
+    "plugin_sdk_v1_object_provenance": {
+      "date": "2026-10-22",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "provenance_read_verified_windows",
+      "scope": "object_provenance maps Document::provenance to a read-only DTO; incomplete chains are null; enum strings fixed; sha256 lowercase hex.",
+      "public_api": [
+        "Host::object_provenance"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-22-m01-01-03-provenance.md",
+        "docs/validation/2026-10-22-m01-01-03-provenance.json"
+      ],
+      "limitations": [
+        "Read-only.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::object_provenance"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_object_provenance"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-22-m01-01-03-provenance.md",
+      "docs/validation/2026-10-22-m01-01-03-provenance.json"
+    ],
+    "updated": "2026-10-22"
   }
 }

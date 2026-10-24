@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-10-006",
+  "case": "positive",
+  "oracle": "Escape aborts and Enter/Space repeat only allowlisted command",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-036-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-036",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-039",
+  "source_command": "Cutting Plane",
+  "menu_icon": "SurfacePlaneCuttingPlane",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-036/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-036/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-036/dispatch_contract.json": "b9e08713e40ba9f3c1b6ee2df5c320dbb4d0021e2e8601049056c05e9d16dd86",
+    "implementation/design/M03/OM9-L3-03-17-036/source_crosswalk.json": "8b93a869477052e11ea189e0a29f01ee55050e31bf8dbd10bbdc14636144045a"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

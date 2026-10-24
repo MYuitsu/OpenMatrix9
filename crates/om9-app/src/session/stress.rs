@@ -48,9 +48,9 @@ fn stress_cube() -> Mesh {
         faces,
         normals: Vec::new(),
         colors: Vec::new(),
+        corner_uvs: Vec::new(),
     }
 }
-
 impl Controller {
     /// Inserts `count` mesh objects in one transaction and returns how many were created.
     pub fn insert_stress_meshes(&mut self, count: usize) -> Result<usize> {

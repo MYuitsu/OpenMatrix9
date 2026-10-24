@@ -494,3 +494,156 @@ fn oversized_assignment_capture_and_late_cancel_keep_world_and_old_redo() {
     c.redo().unwrap();
     assert_eq!(c.world().documents[&did].current_layer, Some(lid));
 }
+
+#[test]
+fn created_layer_and_its_output_are_one_transaction_and_one_undo() {
+    let d = Document::new("create and add");
+    let did = d.id;
+    let mut c = coordinator(d);
+    let before = c.snapshot();
+    let layer = Layer::new("Gems", [1, 2, 3, 255]);
+    let lid = layer.id;
+    let entity = Entity::new("gem", Geometry::Point([1., 2., 3.]), lid);
+    let eid = entity.id;
+    let plan = LayerPlan::capture(
+        &c,
+        did,
+        LayerAction::Create {
+            layer,
+            make_current: true,
+        },
+        None,
+    )
+    .unwrap();
+    let r = TransactionRequest::new(
+        "create and add",
+        vec![
+            Mutation::Layers(Box::new(plan)),
+            Mutation::Insert {
+                document: did,
+                entity,
+            },
+        ],
+    );
+    let prepared = c.prepare(r).unwrap();
+    c.commit(prepared).unwrap();
+    let updated = &c.world().documents[&did];
+    assert!(updated.layers.contains_key(&lid));
+    assert_eq!(updated.current_layer, Some(lid));
+    assert_eq!(updated.entities[&eid].attributes.layer, Some(lid));
+    assert_eq!(c.undo_len(), 1);
+    c.undo().unwrap();
+    assert_eq!(c.world(), &before.world);
+}
+
+#[test]
+fn output_into_a_created_locked_layer_publishes_nothing() {
+    let d = Document::new("created locked");
+    let did = d.id;
+    let c = coordinator(d);
+    let before = c.snapshot();
+    let mut layer = Layer::new("Locked", [1, 2, 3, 255]);
+    layer.locked = true;
+    let lid = layer.id;
+    let entity = Entity::new("blocked", Geometry::Point([0.; 3]), lid);
+    let plan = LayerPlan::capture(
+        &c,
+        did,
+        LayerAction::Create {
+            layer,
+            make_current: false,
+        },
+        None,
+    )
+    .unwrap();
+    let r = TransactionRequest::new(
+        "locked output",
+        vec![
+            Mutation::Layers(Box::new(plan)),
+            Mutation::Insert {
+                document: did,
+                entity,
+            },
+        ],
+    );
+    assert!(matches!(
+        c.prepare(r),
+        Err(Error::Permission("output layer"))
+    ));
+    assert_eq!(c.snapshot(), before);
+}
+
+#[test]
+fn output_into_a_created_layer_honours_the_captured_parent_chain() {
+    let mut d = Document::new("created child");
+    let mut parent = Layer::new("Locked parent", [9, 9, 9, 255]);
+    parent.locked = true;
+    let pid = parent.id;
+    d.layer_order.push(pid);
+    d.layers.insert(pid, parent);
+    let did = d.id;
+    let c = coordinator(d);
+    let before = c.snapshot();
+    let mut child = Layer::new("Child", [2, 2, 2, 255]);
+    child.parent = Some(pid);
+    let cid = child.id;
+    let entity = Entity::new("blocked", Geometry::Point([0.; 3]), cid);
+    let plan = LayerPlan::capture(
+        &c,
+        did,
+        LayerAction::Create {
+            layer: child,
+            make_current: false,
+        },
+        None,
+    )
+    .unwrap();
+    let r = TransactionRequest::new(
+        "child output",
+        vec![
+            Mutation::Layers(Box::new(plan)),
+            Mutation::Insert {
+                document: did,
+                entity,
+            },
+        ],
+    );
+    assert!(matches!(
+        c.prepare(r),
+        Err(Error::Permission("output layer"))
+    ));
+    assert_eq!(c.snapshot(), before);
+}
+
+#[test]
+fn output_into_a_layer_whose_flags_change_in_the_same_request_is_refused() {
+    let mut d = Document::new("stale permission");
+    let layer = Layer::new("Gems", [1, 2, 3, 255]);
+    let lid = layer.id;
+    d.layer_order.push(lid);
+    d.layers.insert(lid, layer);
+    let did = d.id;
+    let c = coordinator(d);
+    let before = c.snapshot();
+    let mut updated = c.world().documents[&did].layers[&lid].clone();
+    updated.visible = false;
+    let plan = LayerPlan::capture(&c, did, LayerAction::Update { layer: updated }, None).unwrap();
+    let entity = Entity::new("gem", Geometry::Point([1., 2., 3.]), lid);
+    let r = TransactionRequest::new(
+        "stale permission",
+        vec![
+            Mutation::Layers(Box::new(plan)),
+            Mutation::Insert {
+                document: did,
+                entity,
+            },
+        ],
+    );
+    assert!(matches!(
+        c.prepare(r),
+        Err(Error::Invalid(
+            "layer read/write conflict within transaction"
+        ))
+    ));
+    assert_eq!(c.snapshot(), before);
+}

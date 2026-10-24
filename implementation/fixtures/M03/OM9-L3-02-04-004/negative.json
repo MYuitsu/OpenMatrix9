@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-004",
+  "fixture_id": "OM9-L3-02-04-004-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "out-of-range grip index",
+    "grip editing on a circle or polycurve (explicit unsupported)",
+    "degenerate line after a move"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_004_curve_edit_points_and_grips"
+}

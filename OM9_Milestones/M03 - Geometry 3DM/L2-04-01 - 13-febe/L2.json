@@ -263,5 +263,186 @@
   "execution_state": "NOT_STARTED",
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "l4_status": "PLANNED_NOT_EXECUTED",
-  "planned_l4_count_m08": 44
+  "planned_l4_count_m08": 44,
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-04-01",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED standalone",
+      "sdk_signal": "AUDIT-THEN-ROUTE → EXPORT/CO-IMPLEMENT",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Toolbar Transform là adapter selection và context/command/input/UI; tái sử dụng exact operator và transaction.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-04-01-001",
+      "OM9-L3-04-01-002",
+      "OM9-L3-04-01-003",
+      "OM9-L3-04-01-004",
+      "OM9-L3-04-01-005",
+      "OM9-L3-04-01-006",
+      "OM9-L3-04-01-007",
+      "OM9-L3-04-01-008",
+      "OM9-L3-04-01-009",
+      "OM9-L3-04-01-010",
+      "OM9-L3-04-01-011",
+      "OM9-L3-04-01-012",
+      "OM9-L3-04-01-013",
+      "OM9-L3-04-01-014",
+      "OM9-L3-04-01-015",
+      "OM9-L3-04-01-016",
+      "OM9-L3-04-01-017",
+      "OM9-L3-04-01-018",
+      "OM9-L3-04-01-019",
+      "OM9-L3-04-01-020",
+      "OM9-L3-04-01-021",
+      "OM9-L3-04-01-022",
+      "OM9-L3-04-01-023",
+      "OM9-L3-04-01-024",
+      "OM9-L3-04-01-025",
+      "OM9-L3-04-01-026",
+      "OM9-L3-04-01-027",
+      "OM9-L3-04-01-028",
+      "OM9-L3-04-01-029",
+      "OM9-L3-04-01-030",
+      "OM9-L3-04-01-031",
+      "OM9-L3-04-01-032",
+      "OM9-L3-04-01-033",
+      "OM9-L3-04-01-034",
+      "OM9-L3-04-01-035",
+      "OM9-L3-04-01-036",
+      "OM9-L3-04-01-037",
+      "OM9-L3-04-01-038",
+      "OM9-L3-04-01-039",
+      "OM9-L3-04-01-040",
+      "OM9-L3-04-01-041",
+      "OM9-L3-04-01-042"
+    ],
+    "deferred_execution": [
+      {
+        "l3_id": "OM9-L3-04-01-008",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-011",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-012",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-013",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-014",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-015",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-017",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-018",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-020",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-021",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-024",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-027",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-028",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-029",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-032",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-033",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-034",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-035",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-036",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-039",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-040",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-04-01-041",
+        "execution_milestone": "M08",
+        "owner_unchanged": true
+      }
+    ]
+  }
 }

@@ -1,0 +1,11 @@
+# command: cargo test -p om9-kernel --features 3dm-brep --test l2_01_10 m03_01_10_006 -- --exact
+# cwd: H:\OpenMatrix9
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\l2_01_10.rs (L:\om9-target\debug\deps\l2_01_10-cd06607094d38232.exe)
+
+running 1 test
+test m03_01_10_006 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.02s

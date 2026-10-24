@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-15-002",
+  "case": "negative",
+  "oracle": "disabled/missing importer must not create an empty file or claim success",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

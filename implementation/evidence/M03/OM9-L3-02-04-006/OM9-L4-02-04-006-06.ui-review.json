@@ -1,0 +1,57 @@
+{
+  "schema": "om9.m03.l2-02-04.ui-review.v1",
+  "task_id": "OM9-L4-02-04-006-06",
+  "l3_id": "OM9-L3-02-04-006",
+  "title": "Offset Fillet Chamfer Curves",
+  "oracle": {
+    "positive": [
+      "line offset +2 mm moves to y=-2; circle radius 5 grows to 7; perpendicular fillet radius 2 gives a pi arc and 8 mm legs; chamfer 3/4 gives a 5 mm line; 100-corner stress"
+    ],
+    "negative": [
+      "fillet radius longer than a leg",
+      "offset that would make a non-positive circle radius",
+      "parallel or non-intersecting fillet lines"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is asserted by a focused Rust test and every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "portable curve service and typed refusal; no window, menu or human review"
+  },
+  "measured": {
+    "fillet_arc_length_mm": 3.14159265359,
+    "chamfer_length_mm": 5.0,
+    "stress_corners": 100.0,
+    "stress_max_tangency_error_mm": 0.0
+  },
+  "tolerances": {
+    "fillet_arc_length_mm": "1e-6",
+    "chamfer_length_mm": "1e-9",
+    "stress_max_tangency_error_mm": "1e-12"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test l2_02_04 m03_02_04_006_offset_fillet_chamfer -- --exact (exit 0)",
+    "regression: cargo test -p om9-core -j 2 (52 suites, 447 passed)",
+    "clippy: cargo clippy -p om9-core --all-targets -j 2 -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-04-006/api.md",
+    "implementation/design/M03/OM9-L3-02-04-006/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-006/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-006/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_02_04_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

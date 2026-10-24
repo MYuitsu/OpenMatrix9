@@ -205,5 +205,42 @@
     },
     "algorithm_and_coverage": "Frame affine trực chuẩn per viewport, phân biệt point/vector và units",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "A per-view CPlane is an orthonormal affine frame; local input resolves through the frame captured for the command, world input bypasses it.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-02-02-001/api.md",
+      "implementation/evidence/M02/OM9-L3-02-02-001/OM9-L4-02-02-001-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-02-02-001/OM9-L4-02-02-001-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-02-02-001/OM9-L4-02-02-001-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-core coordinate_input: 4 passed",
+      "om9-scene coordinate_frame: 4 passed",
+      "om9-app cplane_coordinate_input: 10 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-02-02-001/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-02-02-001/positive.json",
+        "implementation/fixtures/M02/OM9-L3-02-02-001/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-02-02-001/OM9-L4-02-02-001-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-02-02-001/OM9-L4-02-02-001-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-02-02-001/OM9-L4-02-02-001-06-acceptance.md"
+      ],
+      "acceptance": "Local (5,0,0) on a plane rotated 90 degrees about Z becomes world (0,5,0); a Front local point does not borrow Top's axes; camera pan leaves the stored world point unchanged."
+    }
   }
 }

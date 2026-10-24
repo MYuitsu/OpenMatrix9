@@ -1,0 +1,65 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.39s
+     Running tests\display_modes.rs (L:/om9-target\debug\deps\display_modes-1303279dc63042ec.exe)
+
+running 3 tests
+test a_display_preset_restores_wireframe_and_edge_preferences ... ok
+test a_mode_switch_keeps_selected_ids_and_visibility_flags ... ok
+test wireframe_and_shaded_show_the_same_box_and_do_not_write_the_model ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\display_persistence.rs (L:/om9-target\debug\deps\display_persistence-20f554b3b43bee19.exe)
+
+running 2 tests
+test a_corrupt_display_preset_falls_back_without_losing_the_project ... ok
+test a_display_preset_is_embedded_and_restored_with_the_project ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\project_manager_persistence.rs (L:/om9-target\debug\deps\project_manager_persistence-d7b9b38ab12051cf.exe)
+
+running 2 tests
+test restore_master_live_replaces_the_document_atomically ... ok
+test jobbag_state_survives_save_and_reopen_inside_the_om9_file ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\selection_overlay.rs (L:/om9-target\debug\deps\selection_overlay-0bd12558e6757112.exe)
+
+running 8 tests
+test ctrl_click_toggles_one_object_in_and_out_of_the_selection ... ok
+test any_selection_shows_the_gumball ... ok
+test clearing_the_selection_removes_the_frame_and_the_gumball ... ok
+test a_multi_selection_draws_a_frame_around_itself ... ok
+test a_single_selection_has_no_frame_but_two_do ... ok
+test hovering_an_object_shows_a_frame_that_follows_the_pointer ... ok
+test escape_cancels_a_gumball_drag_without_committing ... ok
+test the_band_is_a_window_left_to_right_and_crossing_right_to_left ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.04s
+
+     Running tests\viewport_title_menu.rs (L:/om9-target\debug\deps\viewport_title_menu-d1a4e6b40c2c2db6.exe)
+
+running 18 tests
+test wireframe_changes_only_captured_view_and_no_op_preserves_revision ... ok
+test fresh_layout_clock_with_copied_view_states_cannot_reset_menu_authority ... ok
+test shaded_switches_only_the_view_mode_and_keeps_the_model_and_journal ... ok
+test foreign_closed_and_replaced_view_capture_rejects_even_with_equal_visible_state ... ok
+test mismatched_view_key_cannot_redirect_menu_to_a_neighbor ... ok
+test render_plugin_and_unimplemented_modes_refuse_without_changing_any_view_or_model ... ok
+test wireframe_with_exhausted_revision_refuses_before_any_layout_or_camera_change ... ok
+test workspace_snapshot_restore_cannot_revive_a_used_menu ... ok
+test layout_roundtrip_keeps_views_exact_but_does_not_revive_a_previous_capture ... ok
+test changed_document_or_target_view_invalidates_popup_without_resetting_prior_state ... ok
+test captured_maximize_preserves_model_redo_pending_point_and_all_camera_poses ... ok
+test replacing_target_view_dismisses_popup_before_command_input_resumes ... ok
+test keyboard_enter_activates_focused_menu_item_and_returns_to_command_draft ... ok
+test escape_closes_title_popup_and_preserves_numeric_draft_and_pending_command ... ok
+test outside_canvas_click_only_dismisses_popup_and_preserves_pending_point ... ok
+test long_title_menu_scrolls_to_last_reference_item_in_a_short_window ... ok
+test title_popup_has_reference_actions_instead_of_the_old_three_entry_stub ... ok
+test popup_keyboard_cannot_commit_command_after_tab_reaches_editor ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.57s
+

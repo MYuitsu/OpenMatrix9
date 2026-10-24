@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-006-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-006",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-006",
+  "source_command": "Rebuild",
+  "menu_icon": "OthersSurfaceRebuild",
+  "owner_candidate": "OM9-L3-02-04-008",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-006/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-006/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-006/dispatch_contract.json": "131ce83d51653a689178796e4cb067cd9a82ce470b9217b780924fbac9b29811",
+    "implementation/design/M03/OM9-L3-03-17-006/source_crosswalk.json": "caa8536f20be32a2ca8232bc4b86e0358820071fd361491bd340f58715b0e86f"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

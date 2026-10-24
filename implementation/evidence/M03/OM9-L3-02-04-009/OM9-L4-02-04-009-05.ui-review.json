@@ -1,0 +1,54 @@
+{
+  "schema": "om9.m03.l2-02-04.ui-review.v1",
+  "task_id": "OM9-L4-02-04-009-05",
+  "l3_id": "OM9-L3-02-04-009",
+  "title": "Project Pullback And Curve Intersections",
+  "oracle": {
+    "positive": [
+      "(2,3,5) projects to (2,3,0) at distance 5; a line 1 mm above the plane pulls back with 1 mm deviation; crossing lines meet at (5,5); a chord cuts a circle twice; a piercing line meets the plane once"
+    ],
+    "negative": [
+      "pullback deviation above tolerance",
+      "intersection tolerance not positive",
+      "empty sketch/intersection input"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is asserted by a focused Rust test and every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "portable curve service and typed refusal; no window, menu or human review"
+  },
+  "measured": {
+    "projection_distance_mm": 5.0,
+    "pullback_deviation_mm": 1.0
+  },
+  "tolerances": {
+    "projection_distance_mm": "1e-9",
+    "pullback_deviation_mm": "1e-6"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test l2_02_04 m03_02_04_009_project_pullback_and_intersections -- --exact (exit 0)",
+    "regression: cargo test -p om9-core -j 2 (52 suites, 447 passed)",
+    "clippy: cargo clippy -p om9-core --all-targets -j 2 -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-04-009/api.md",
+    "implementation/design/M03/OM9-L3-02-04-009/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-009/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-009/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-04-009/OM9-L4-02-04-009-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-02-04-009/OM9-L4-02-04-009-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_02_04_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

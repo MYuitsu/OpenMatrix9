@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-23",
+  "scenario": "text",
+  "binary": "L:\\om9-target\\debug\\om9.exe",
+  "binary_sha256": "74e292a854014d0432a6a4a38dddd7e40e032c98e29a129615227c05011d8195",
+  "pid": 4744,
+  "command": [
+    "L:\\om9-target\\debug\\om9.exe"
+  ],
+  "run": "build/standalone-validation/ui-artifacts/solid-text-20261023T130349",
+  "sources": {
+    "crates/om9-kernel/src/creation.rs": "9ee9e1386122434da5bc30c4a797c400cdf8b9adc6e00162200039c31833a291",
+    "crates/om9-kernel/src/creation_bridge.cpp": "b924f6013f8480f7adf7693dd66846a2f493287bd0510941ab11351a6a3bc118",
+    "crates/om9-kernel/src/brep_bridge.cpp": "3aad801b0cdac90c33767a06ced101beef7c5c0c5bf529a03700e5b8b2102ea3",
+    "crates/om9-kernel/src/extrusion.rs": "b02c0b6b3478f690c0829dff8c97efbca874f6069eb62b6897a382a4c1902e04",
+    "crates/om9-kernel/src/extrusion_bridge.cpp": "2d4b58e76ea051aa8c38292ded028da7c70d7ebd9966d47022ee3c60a980f472",
+    "crates/om9-kernel/build.rs": "5bb042996893fd64b6ad04158f2adf425cf0d63fca047d0657fdf09f2af4c203",
+    "crates/om9-app/src/session/solid.rs": "f386feb6d991260995271c564b260b9c6e8dce4f479a5d961a432c3ccdc769bd",
+    "crates/om9-app/src/session/layers.rs": "cc09af54da59d411a16852d2f0c5678410f367aeed4a9ffe08ad79d220e3257a"
+  },
+  "human_approval": null,
+  "manual_gate_promoted": false,
+  "observations": [
+    "Solid menu Text -> content H -> Height 5 -> solid in four views",
+    "Save As text-live.om9; clean title; window closed"
+  ],
+  "window_closed_cleanly": true,
+  "saved_file": "implementation/evidence/M03/solid-ui-followup-2026-10-23/text-live.om9"
+}

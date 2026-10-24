@@ -1,0 +1,36 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "m01-l2-03-07-menu-docking-recheck-2026-10-21",
+  "date": "2026-10-21",
+  "target": "standalone Rust OM9",
+  "milestone": "OM9-L2-03-07",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Rechecked the existing Matrix main-menu, icon-history and docking implementation after the 300 px dock alignment. No menu/docking code change was required for this recheck.",
+  "implementation": {
+    "chrome": "crates/om9-app/src/ui/chrome.rs",
+    "ui": "crates/om9-app/src/ui.rs",
+    "dock_layout": "crates/om9-app/src/dock_layout.rs",
+    "menu_catalog": "crates/om9-app/src/menu_catalog.rs",
+    "design": "implementation/design/M01/OM9-L2-03-07/README.md"
+  },
+  "checks": [
+    {"name": "chrome-actions", "command": ["cargo", "test", "-p", "om9-app", "--test", "chrome_actions", "-j", "2"], "exit_code": 0, "test_count": 13},
+    {"name": "left-stack-layers", "command": ["cargo", "test", "-p", "om9-app", "--test", "left_stack_layers", "-j", "2"], "exit_code": 0, "test_count": 8},
+    {"name": "panel-ops", "command": ["cargo", "test", "-p", "om9-app", "--test", "panel_ops", "-j", "2"], "exit_code": 0, "test_count": 33},
+    {"name": "shell-docking", "command": ["cargo", "test", "-p", "om9-app", "--test", "shell_docking", "-j", "2"], "exit_code": 0, "test_count": 10},
+    {"name": "dock-default", "command": ["cargo", "test", "-p", "om9-app", "--test", "dock_layout_default", "-j", "2"], "exit_code": 0, "test_count": 7},
+    {"name": "dock-persistence", "command": ["cargo", "test", "-p", "om9-app", "--test", "dock_layout_persistence", "-j", "2"], "exit_code": 0, "test_count": 6},
+    {"name": "command-sessions", "command": ["cargo", "test", "-p", "om9-app", "--test", "command_sessions", "-j", "2"], "exit_code": 0, "test_count": 6},
+    {"name": "command-options-repeat", "command": ["cargo", "test", "-p", "om9-app", "--test", "command_options_and_repeat", "-j", "2"], "exit_code": 0, "test_count": 6},
+    {"name": "startup", "command": ["cargo", "test", "-p", "om9-app", "--test", "startup_contract", "-j", "2"], "exit_code": 0, "test_count": 3}
+  ],
+  "logs": {
+    "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261021/acceptance.log",
+    "acceptance_sha256": "07fcdb80f790fb8d8834685fc9dc671692ae6c6b1ee56705ea720a41406c77be"
+  },
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual visual review of the real Windows window is still required.",
+    "No feature registers a right-click alternative yet; the slot is inert by default."
+  ]
+}

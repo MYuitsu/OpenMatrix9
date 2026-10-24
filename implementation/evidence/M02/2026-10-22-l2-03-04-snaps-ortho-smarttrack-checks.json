@@ -1,0 +1,100 @@
+{
+  "schema": "om9.m02.checks.v1",
+  "work_item": "m02-l2-03-04-snaps-ortho-smarttrack-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-03-04",
+  "title": "Febe Viewport Snaps Ortho Smarttrack",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Snap kinds and SmartTrack already existed from OM9-L2-02-03. Added Project mode, a clickable active-state snap palette, the SmartTrack on/off control with all-view guides, End/Mid one-shot shortcuts and their indicator, plus focused evidence.",
+  "audit_result": {
+    "existing_implementation": "PARTIAL",
+    "gaps_found": [
+      "Project was a disabled palette label with no Controller flag or projection path.",
+      "Snap palette icons could not display off/on state while remaining clickable.",
+      "SmartTrack had no on/off control and guides painted only in the active view.",
+      "No End/Mid keyboard shortcuts or one-shot indicator.",
+      "A focused command editor could swallow the shortcut if it were routed naively."
+    ],
+    "gaps_closed": "all"
+  },
+  "code_changes": [
+    "crates/om9-app/src/session.rs: project flag, project_to_plane, Project in constrain_point",
+    "crates/om9-app/src/ui.rs: SmartTrack enable/disable, all-view guides, one-shot badge, E/M shortcuts, viewport focus release",
+    "crates/om9-app/src/ui/chrome.rs: icon_toggle and Project section-bar control",
+    "crates/om9-app/src/ui/sidebar_palettes.rs: clickable snap state, Project and SmartTrack toggles",
+    "crates/om9-app/tests/snap_panel_modes.rs (new)"
+  ],
+  "checks": [
+    {
+      "name": "palette toggle",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib ui::sidebar_palettes::tests::project_ortho_planar_and_smarttrack_palette_slots_toggle_their_state",
+      "result": "1 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-snaps-palette.log",
+      "sha256": "2316277899c11d7866891fa3f4277ec2552e95ccb56fd6aff4c004871f4cbf72"
+    },
+    {
+      "name": "snap modes and shortcuts",
+      "command": "cargo test -p om9-app --test snap_panel_modes -j 2",
+      "result": "4 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-snaps-modes.log",
+      "sha256": "6f26114005bfe96e191d98e6b6d1325f73e4b3d1a63a54dec936300807170a66"
+    },
+    {
+      "name": "snap/selection regressions",
+      "command": "cargo test -p om9-app --test snap_panel_modes --test osnap_ui --test osnap_brep -j 2",
+      "result": "8 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-snaps-regressions.log",
+      "sha256": "0e2298402fb5ddfac1bb36a0a1d91a3a2f0635223597ffc4a4001eed67e8ea67"
+    },
+    {
+      "name": "app library with GPU feature",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib -j 2",
+      "result": "149 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-snaps-app-lib.log",
+      "sha256": "74ed4a7e9f8f9d5f9a11711a0f0d903b615ef375c0b131e40cee34969e548154"
+    },
+    {
+      "name": "om9-scene full",
+      "command": "cargo test -p om9-scene -j 2",
+      "result": "103 passed; 0 failed; 21 suites",
+      "log": "implementation/evidence/M02/2026-10-22-snaps-scene-full.log",
+      "sha256": "dc99f98fc6ce25182a93db7126d47bbd84654ee7921f2338f712db5702a2e79b"
+    },
+    {
+      "name": "scene osnap",
+      "command": "cargo test -p om9-scene --test osnap -j 2",
+      "result": "11 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-snaps-scene-osnap.log",
+      "sha256": "848b2c3788fe9aa30de3c4fe6d77c998f7a66d0f8660fa4d437c4dad7869846c"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M02/2026-10-22-snaps-public-source-audit.log",
+      "sha256": "de7c0b8223e906573ae9c4ab56e0efbc6ba433e197eb74170db2e16d983dda46"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-03-04-001": "5/5",
+    "OM9-L3-03-04-002": "5/5",
+    "OM9-L3-03-04-003": "5/5",
+    "OM9-L3-03-04-004": "5/5",
+    "OM9-L3-03-04-005": "5/5"
+  },
+  "manual_gate": "M02-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M02-UI visual review of palette state, Project behavior, one-shot indicator and SmartTrack guides.",
+    "macOS runtime is unverified.",
+    "Grid Snap remains a present-but-disabled palette control; this L2 records object snap and Ortho/Planar/Project.",
+    "App-wide clippy/fmt has pre-existing issues outside this module."
+  ],
+  "not_claimed": [
+    "Human approval or M02-UI sign-off",
+    "macOS execution",
+    "QymCAD pinned-source reuse or a build-time QymCAD dependency"
+  ]
+}

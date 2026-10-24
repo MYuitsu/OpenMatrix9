@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-22",
+  "status": "pickability_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "is_object_pickable reuses object_attributes effective flags.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "7da923127c94cd9cdcd2be0b4eb08015cb79e5e280764c761fb953660aafc759",
+    "crates/om9-plugin-host/src/staged.rs": "deb9f0ed71428250f55dd2af63206655c373a4655b5023ae114a66b28699eaa8",
+    "crates/om9-app/tests/plugin_native.rs": "45b7b45fa4d5e3b25d75a9cb7474bd922558fe37d4ed799f866bfb33c0bb525f",
+    "sdk/examples/hello-plugin/src/lib.rs": "ffabeb54a33346984c9ced59a025ff0bdf3b099aa50eafb70ac9e7a4a759ff6e",
+    "sdk/examples/hello-plugin/descriptor.json": "9c1d2b57e013c4be6d956e6aa05bf8a47a1106b3f003553ea9e17ce102cd3bbe"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "is_object_pickable"
+    ],
+    "error_codes": [
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Pickable = effective visible && selectable.",
+    "locked does not affect pickability.",
+    "Reading stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "67 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 143 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "38 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261022-plugin-sdk-pickable",
+      "result": "PASS, 10 commands",
+      "native_tests": 38,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8990 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "pickable_before": true,
+    "pickable_after_attributes_demo": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1991589,
+      "sha256": "a5abaeddcd2489070bc5fbede74bf08d4054da119eaf09741e4b973ea2cb5bb3"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "1cd8be4ffee0133b93cc88415c1e04cb8a664e72af038cdbf52fc6d7ef9180ca"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 195893,
+      "sha256": "4e07b76500736e716c025719845df4425df0f9a43648b677ae2b290fa47cac9d"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "9d7a51c3ea97dc496bee7e26c1640810db1c78600cfa3a6f1b41f7d8b8dd1bc8"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1987584,
+      "sha256": "7306daefc3d6ea709df881a1812df76cd92e5d02d9a59b93f43f72d4af43a467"
+    },
+    "om9.exe": {
+      "bytes": 70164992,
+      "sha256": "6d85c568c0ccacf236e537304f8ff6f5142141acb3c59af139db74fdb28ac8ed"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-006 (pickability rule read)"
+    ],
+    "open": [
+      "pick geometry (ray/subobject)"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Rule read only; no pick geometry.",
+    "macOS host and plugin execution unverified.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Wrap object_id helpers, or build the pick core service before wrapping pick_point."
+}

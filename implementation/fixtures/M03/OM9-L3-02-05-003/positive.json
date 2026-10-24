@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-003",
+  "fixture_id": "OM9-L3-02-05-003-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Revolve Railrevolve And Extrude Workflows",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "rail_parallel_radius_mm": 2.0,
+    "rail_parallel_height_mm": 10.0,
+    "helix_point_at_t0": [
+      2.0,
+      0.0,
+      0.0
+    ],
+    "helix_point_at_2pi": [
+      2.0,
+      0.0,
+      6.283185307179586
+    ]
+  },
+  "tolerances": {
+    "geometry_mm": "1e-6"
+  },
+  "measured_on_2026_10_22": {
+    "rail_parallel_radius_mm": 2.0,
+    "rail_parallel_height_mm": 10.0,
+    "helix_point_at_t0": [
+      2.0,
+      0.0,
+      0.0
+    ],
+    "helix_point_at_2pi": [
+      2.0,
+      0.0,
+      6.283185307179586
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-001",
+  "fixture_id": "OM9-L3-02-05-001-NEGATIVE",
+  "cases": [
+    "too few profile or rail samples are refused",
+    "a degenerate rail has no frame",
+    "degree 4, closed rails and a profile not spanning the rails are refused"
+  ],
+  "invariants": [
+    "no partial surface is returned on refusal",
+    "no tessellation is substituted for the exact NURBS surface",
+    "the typed error reaches the caller"
+  ],
+  "measured_on_2026_10_22": "all listed negative cases pass in the focused logs"
+}

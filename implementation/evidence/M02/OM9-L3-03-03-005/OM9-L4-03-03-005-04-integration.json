@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-03-005-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-03-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The viewport frame and the rotate/scale transaction use the same captured frame basis.",
+  "tests": [
+    "om9-app gumball_placement: 4 passed",
+    "om9-app gumball_interaction: 6 passed"
+  ]
+}

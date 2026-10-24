@@ -1,0 +1,94 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-010-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-01-13-010",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-app/src/native_picker.rs",
+      "crates/om9-native-owner/src/file_dialog.rs",
+      "crates/om9-app/src/ui/chrome.rs",
+      "crates/om9-app/src/ui/files.rs"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 -- --ignored --test-threads=1 --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/suite.log",
+      "stdout_log_sha256": "1b20dcd1d3be8e8e8158f80829d0fd021da7671415f621cf5be50efbe2bb399f"
+    },
+    {
+      "argv": "cargo test -p om9-exchange -p om9-archive -p om9-3dm -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/exchange-archive-3dm.log",
+      "stdout_log_sha256": "d40e83a0da72d8aad3b479e1323892980c3308b114114c1a1cdd4a09d0c1c476"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/kernel-3dm-brep.log",
+      "stdout_log_sha256": "f522d1ca69ef848e12d36b8cd7a2b8c76605e6034776dde36f5beb5b47af3fca"
+    },
+    {
+      "argv": "cargo test -p om9-app --lib -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/app-lib.log",
+      "stdout_log_sha256": "51c584e669ca91fe4255aeca80400595d8962779509e801710e9f777f273f274"
+    },
+    {
+      "argv": "cargo clippy -p om9-app --lib --test l2_01_13 -j 2 -- -D warnings",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/clippy.log",
+      "stdout_log_sha256": "a442fe1ca03550abc98d4f4345b3cb734c1e3eb93d1d9ee09bd329c1cd2b40ea"
+    },
+    {
+      "argv": "rustfmt --edition 2024 --check crates/om9-app/src/session.rs crates/om9-app/src/session/files.rs crates/om9-app/tests/l2_01_13.rs",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/scoped-fmt.log",
+      "stdout_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "observed": {
+    "menu_import_entry": true,
+    "menu_export_entry": true,
+    "wrong_digest": "refused",
+    "relative_path": "refused",
+    "zero_byte_limit": "refused"
+  },
+  "expected": {
+    "menu_import_entry": true,
+    "menu_export_entry": true,
+    "wrong_digest": "refused",
+    "relative_path": "refused",
+    "zero_byte_limit": "refused"
+  },
+  "tolerances": {
+    "admission": "exact"
+  },
+  "artifact_paths": [
+    "crates/om9-app/src/native_picker.rs",
+    "crates/om9-native-owner/src/file_dialog.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/ui/files.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-app/src/native_picker.rs": "08d83a86e2fe10b645a66137676f0f7a441dc057cb8251b9cc30784c044cfd5e",
+    "crates/om9-native-owner/src/file_dialog.rs": "11544f7e291daf41aa394752e25fbde1e3f96a107718112eef7adbdbeac5c36e",
+    "crates/om9-app/src/ui/chrome.rs": "f03f1f08dc98c8e1bec730f7ca992ebc783cf124a4063bb5c392643ee39b1b3f",
+    "crates/om9-app/src/ui/files.rs": "1c7b6e3e973dbffa2196185a705a79fe98aec232757ebf31333f6aaad8be451f"
+  }
+}

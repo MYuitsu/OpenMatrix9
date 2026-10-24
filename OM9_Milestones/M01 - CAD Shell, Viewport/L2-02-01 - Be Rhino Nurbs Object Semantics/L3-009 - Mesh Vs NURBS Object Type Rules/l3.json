@@ -217,5 +217,16 @@
       "id": "OM9-L4-02-01-009-05",
       "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-009 - Mesh Vs NURBS Object Type Rules/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Rule mesh vs NURBS nên lộ qua semantics.",
+    "api": [],
+    "candidate_api": [
+      "mesh_vs_nurbs_rule(id)"
+    ],
+    "host_only": "Rule ở host; SDK đọc kết quả."
+  }
 }

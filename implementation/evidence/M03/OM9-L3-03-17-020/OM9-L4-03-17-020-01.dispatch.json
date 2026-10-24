@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-020-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-020",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-020",
+  "source_command": "Fillet Surfaces",
+  "menu_icon": "SurfaceFilletSurfaces",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-020/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-020/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-020/dispatch_contract.json": "4c9f0003de2f8ab99e66a0c37feff481b828e2a7e0e225d53e8e0f1d5bf0b8d3",
+    "implementation/design/M03/OM9-L3-03-17-020/source_crosswalk.json": "d9596958b613d15162acd4613dfe20691ccc3dbf99ca37f82ecf339ee3e0b07f"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

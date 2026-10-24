@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "m01-l2-03-01-viewport-recheck-2026-10-21",
+  "date": "2026-10-21",
+  "target": "standalone Rust OM9",
+  "milestone": "OM9-L2-03-01",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Rechecked the existing L2-03-01 implementation after the menu/dock iteration; no viewport-layout code change was required.",
+  "implementation": {
+    "workspace": "crates/om9-scene/src/workspace.rs",
+    "camera": "crates/om9-scene/src/camera.rs",
+    "grid": "crates/om9-scene/src/grid.rs",
+    "ui": "crates/om9-app/src/ui.rs",
+    "tests": ["crates/om9-app/tests/viewport_layout.rs", "crates/om9-app/tests/chrome_actions.rs", "crates/om9-app/tests/viewport_title_menu.rs"]
+  },
+  "checks": [
+    {
+      "name": "viewport-layout",
+      "command": ["cargo", "test", "-p", "om9-app", "--test", "viewport_layout", "-j", "2"],
+      "exit_code": 0,
+      "test_count": 3
+    },
+    {
+      "name": "chrome-actions",
+      "command": ["cargo", "test", "-p", "om9-app", "--test", "chrome_actions", "-j", "2"],
+      "exit_code": 0,
+      "test_count": 13
+    },
+    {
+      "name": "viewport-title-menu",
+      "command": ["cargo", "test", "-p", "om9-app", "--test", "viewport_title_menu", "-j", "2"],
+      "exit_code": 0,
+      "test_count": 17
+    }
+  ],
+  "logs": {
+    "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-01-20261021/acceptance.log",
+    "acceptance_sha256": "37c9ef10e31b964d101ca6565f26a1077f4e17e8d97dd15f7358ff436a5cc339"
+  },
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual visual review at the supported window size and DPI is still pending.",
+    "No human UI sign-off is claimed."
+  ]
+}

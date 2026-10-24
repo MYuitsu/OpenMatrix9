@@ -1,0 +1,16 @@
+{
+  "l3": "OM9-L3-03-07-008",
+  "title": "Disabled Menu Action Visibility",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/command.rs"
+  ],
+  "api": "disabled authored actions + visible-but-non-invoking card",
+  "tests": [
+    "chrome_actions"
+  ],
+  "manual_reference": "Matrix8 Book 1, pp11-13 and reference menu icon catalog",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

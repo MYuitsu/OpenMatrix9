@@ -1,0 +1,16 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\transform_sessions.rs (L:\om9-target\debug\deps\transform_sessions-c856d8e5811067f5.exe)
+
+running 8 tests
+{"copy_option":true,"move_preview":[[1.0,0.0,0.0,3.0],[0.0,1.0,0.0,4.0],[0.0,0.0,1.0,5.0],[0.0,0.0,0.0,1.0]],"rotate_angle_rad":1.5707963267948966,"scale_factor":2.0,"setpoint_maps":[4.0,6.0,3.0],"status":"measured"}
+test m03_02_06_align_rotates_and_scales_not_only_translates ... ok
+test m03_02_06_move_preview_copy_and_cancel ... ok
+test m03_02_06_scale_1d_2d_and_3d_apply_the_right_axes ... ok
+test m03_02_06_preview_is_one_pure_transform_and_survives_copy ... ok
+test m03_02_06_setpoint_and_align_project_to_world_or_plane ... ok
+test m03_02_06_receipt ... ok
+test m03_02_06_integration_stress_many_sessions_stay_exact ... ok
+test m03_02_06_rotate_uses_the_reference_and_copy_option ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

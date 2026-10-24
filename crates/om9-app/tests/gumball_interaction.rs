@@ -177,3 +177,37 @@ fn the_pivot_is_none_without_a_selection() {
     let pivot = c.gumball_pivot().expect("pivot");
     assert_eq!(pivot.origin, [0.0, 0.0, 0.0]);
 }
+
+#[test]
+fn an_x_axis_drag_adds_exactly_five_millimetres_with_one_undo_redo() {
+    let mut c = controller();
+    let ids = points(&mut c, 2);
+    select(&mut c, &ids);
+    let frame = c.gumball_pivot().expect("pivot");
+    let undo_before = c.coordinator().undo_len();
+    let mut session = Session::begin(frame, c.gumball_targets(), false).expect("session");
+    session
+        .drag(Handle::MoveAxis(Axis::X), Drag::WorldDelta([5.0, 0.0, 0.0]))
+        .expect("axis drag");
+    c.commit_gumball(&session, "Move").expect("commit");
+    assert_eq!(c.coordinator().undo_len(), undo_before + 1);
+    for (index, id) in ids.iter().enumerate() {
+        let moved = centre_of(&mut c, *id);
+        assert!(
+            (moved[0] - (index as f64 * 10.0 + 5.0)).abs() < 1e-9
+                && moved[1].abs() < 1e-9
+                && moved[2].abs() < 1e-9,
+            "axis X +5: {moved:?}"
+        );
+    }
+    c.undo().expect("undo");
+    for (index, id) in ids.iter().enumerate() {
+        let restored = centre_of(&mut c, *id);
+        assert!(
+            (restored[0] - index as f64 * 10.0).abs() < 1e-9,
+            "{restored:?}"
+        );
+    }
+    c.redo().expect("redo");
+    assert!((centre_of(&mut c, ids[1])[0] - 15.0).abs() < 1e-9);
+}

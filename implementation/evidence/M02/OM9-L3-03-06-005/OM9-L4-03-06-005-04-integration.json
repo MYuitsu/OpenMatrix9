@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-06-005-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-06-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "stage_project_state writes the manifest as om9.pictureframe.v1; reload restores image, transform, opacity, lock and calibration, and the SHA-keyed texture cache paints the quad with opacity.",
+  "tests": [
+    "om9-app pictureframe unit: 6 passed",
+    "om9-app pictureframe persistence: 3 passed"
+  ]
+}

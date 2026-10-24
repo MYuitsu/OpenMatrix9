@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-035-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-035",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-003",
+  "source_command": "Continue Interpolated Curve",
+  "menu_icon": "CurveFreeFormContinueInterpCurve",
+  "owner_candidate": "OM9-L3-02-04-003",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Continue Interpolated Curve command session is not wired; owner candidate OM9-L3-02-04-003 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-035/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-035/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-035/dispatch_contract.json": "16ac760dfc20d58baca73dea9114d6e47882a26f9dfbef33228924b9cf8088c8",
+    "implementation/design/M03/OM9-L3-03-16-035/dispatch_contract.md": "67bd23eb6353a1642edfb034636069375227c747bec617b1b96efede877c10da"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

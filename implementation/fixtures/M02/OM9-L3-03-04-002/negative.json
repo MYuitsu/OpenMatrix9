@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-04-002",
+  "l3_id": "OM9-L3-03-04-002",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Ba toggle không vi phạm rule tương thích, không làm đổi active CPlane",
+  "expected": "No solver duplication, no CPlane mutation, no stale marker or ghost guide, and no shortcut while the text editor owns focus.",
+  "evidence": [
+    "om9-app sidebar_palettes toggle: 1 passed",
+    "om9-app snap_panel_modes: 4 passed"
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-037-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-037",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-037",
+  "source_command": "Curve Boolean",
+  "menu_icon": "CurveCurveEditToolsCurveBoolean",
+  "owner_candidate": "OM9-L3-01-10-001",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Curve Boolean command session is not wired; owner candidate OM9-L3-01-10-001 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-037/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-037/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-037/dispatch_contract.json": "70b781da86609f8099f2053ad48acdd2ff4701692f19692ae3893c289fe2e415",
+    "implementation/design/M03/OM9-L3-03-16-037/dispatch_contract.md": "d6e60c98e217f178042d0c434949235f44df41ee29eda3a6f36737adf7ddd035"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

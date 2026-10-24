@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-use crate::camera::{CPlane, Camera};
+use crate::camera::{CPlane, CPlanePreset, Camera};
 use om9_core::Result;
 use om9_core::{Error, identity::SessionId};
 use serde::{Deserialize, Serialize};
@@ -83,6 +83,31 @@ impl Default for Workspace {
     }
 }
 impl Workspace {
+    /// The startup camera preset for one view. View Home restores exactly this pose.
+    pub fn default_camera(id: ViewId) -> Camera {
+        match id {
+            ViewId::LookingDown => Camera::orthographic([0., 0., 100.], [0.; 3], [0., 1., 0.], 41.)
+                .expect("constant camera"),
+            ViewId::Perspective => {
+                Camera::perspective([35., -35., 35.], [0.; 3], [0., 0., 1.], 35f64.to_radians())
+                    .expect("constant camera")
+            }
+            ViewId::ThroughFinger => {
+                Camera::orthographic([0., -100., 0.], [0.; 3], [0., 0., 1.], 41.)
+                    .expect("constant camera")
+            }
+            ViewId::SideView => Camera::orthographic([100., 0., 0.], [0.; 3], [0., 0., 1.], 41.)
+                .expect("constant camera"),
+        }
+    }
+    /// The startup construction plane for one view.
+    pub fn default_cplane(id: ViewId) -> CPlane {
+        match id {
+            ViewId::LookingDown | ViewId::Perspective => CPlane::preset(CPlanePreset::Top),
+            ViewId::ThroughFinger => CPlane::preset(CPlanePreset::Front),
+            ViewId::SideView => CPlane::preset(CPlanePreset::Right),
+        }
+    }
     /// Heap owners used by the app's aggregate scene/lifecycle admission.
     pub fn storage_usage(&self) -> Result<om9_core::budget::Usage> {
         Self::usage_for(self.views.len())
@@ -101,37 +126,17 @@ impl Workspace {
         Ok(usage)
     }
     pub fn new() -> Self {
-        // Explicit initial OM9 numerical camera choices; view names/planes and
-        // finite grid follow Matrix9. Pixel/preset parity remains a UI gate.
-        let views = [
-            ViewState::new(
-                ViewId::LookingDown,
-                Camera::orthographic([0., 0., 100.], [0.; 3], [0., 1., 0.], 41.)
-                    .expect("constant camera"),
-                CPlane::world_xy(),
-            ),
-            ViewState::new(
-                ViewId::Perspective,
-                Camera::perspective([35., -35., 35.], [0.; 3], [0., 0., 1.], 35f64.to_radians())
-                    .expect("constant camera"),
-                CPlane::world_xy(),
-            ),
-            ViewState::new(
-                ViewId::ThroughFinger,
-                Camera::orthographic([0., -100., 0.], [0.; 3], [0., 0., 1.], 41.)
-                    .expect("constant camera"),
-                CPlane::new([0.; 3], [1., 0., 0.], [0., 0., 1.]).expect("constant CPlane"),
-            ),
-            ViewState::new(
-                ViewId::SideView,
-                Camera::orthographic([100., 0., 0.], [0.; 3], [0., 0., 1.], 41.)
-                    .expect("constant camera"),
-                CPlane::new([0.; 3], [0., 1., 0.], [0., 0., 1.]).expect("constant CPlane"),
-            ),
-        ]
-        .into_iter()
-        .map(|v| (v.id, v))
-        .collect();
+        // Explicit initial OM9 camera choices; view names/planes and finite grid
+        // follow Matrix9. Pixel/preset parity remains a UI gate.
+        let views = ViewId::ALL
+            .into_iter()
+            .map(|id| {
+                (
+                    id,
+                    ViewState::new(id, Self::default_camera(id), Self::default_cplane(id)),
+                )
+            })
+            .collect();
         Self {
             views,
             active: ViewId::Perspective,

@@ -187,5 +187,17 @@
       "id": "OM9-L4-01-02-001-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-001 - Command IDs And Alias Registry/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Registry command id để plugin gọi/nhận diện command.",
+    "api": [],
+    "candidate_api": [
+      "commands()",
+      "command_descriptor(id)"
+    ],
+    "host_only": "Registry do host sở hữu; SDK đọc danh sách."
+  }
 }

@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m03.l2-03-08.ui-review.v1",
+  "task_id": "OM9-L4-03-08-003-05",
+  "l3_id": "OM9-L3-03-08-003",
+  "title": "Top11 Mirror Move Rotate Actions",
+  "oracle": {
+    "positive": [
+      "Move origin (5,-2,0); Rotate end (0,10,0); Mirror copies 1..4 mm to -1..-4; Delete reflects in place; a three-point plane through (0,0,0),(0,1,0),(0,0,1) also gives x=-1; a non-rigid x-scale 2 line mirrors its 2 mm world end to -2; a scaled BRep mirrors to bounds -4..0; a placed BRep mirrors to volume 24"
+    ],
+    "negative": [
+      "Move/Rotate/Mirror with an empty selection",
+      "mirror points that coincide or give a degenerate plane",
+      "mirror of a singular placement or an unsupported geometry kind",
+      "BRep mirror without the occt-brep feature",
+      "a pending command blocks another action"
+    ]
+  },
+  "manual_test_gate": "M03-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "manual M03-UI gate pending",
+    "date_utc": "2026-10-23",
+    "statement": "The command/action oracle is asserted by focused Rust tests and every measured value comes from that run. No interactive window, menu or human geometry review is part of this automated receipt.",
+    "scope": "Top 11 command adapter, selection/kind availability, one transaction; no human review"
+  },
+  "measured": {
+    "mirror_delete_entities": 1.0,
+    "mirror_delete_start_x_mm": -1.0,
+    "mirror_copies": 2.0,
+    "mirrored_start_x_mm": -1.0,
+    "three_point_mirror_start_x_mm": -1.0,
+    "non_rigid_mirror_end_x_mm": -2.0,
+    "move_base_mm": "[5.0, -2.0, 0.0]",
+    "rotate_end_mm": "[6.123233995736766e-16, 10.0, 0.0]",
+    "brep_cutter_entities": 4.0,
+    "exact_brep_fractions": "[0.25, 0.75]",
+    "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+    "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+    "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+    "brep_mirror_volume_mm3": 24.0,
+    "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+  },
+  "tolerances": {
+    "move_base_mm": "exact value",
+    "rotate_end_mm": "1e-6",
+    "mirror_copies": "exact integer",
+    "mirrored_start_x_mm": "1e-9",
+    "mirror_delete_entities": "exact integer",
+    "mirror_delete_start_x_mm": "1e-9",
+    "three_point_mirror_start_x_mm": "1e-9",
+    "non_rigid_mirror_end_x_mm": "1e-9",
+    "brep_mirror_volume_mm3": "1e-6",
+    "brep_mirror_local_bounds": "1e-4",
+    "brep_non_rigid_mirror_bounds": "1e-4"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-app --no-default-features --test top11 m03_03_08_003 -- --nocapture (exit 0)",
+    "regression: cargo test -p om9-app --no-default-features --lib --test top11 -j 2 (195 passed)",
+    "core: cargo test -p om9-core --test top11 -j 2 (6 passed)",
+    "clippy and format: exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-03-08-003/api.md",
+    "implementation/design/M03/OM9-L3-03-08-003/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-03-08-003/positive.json",
+    "implementation/fixtures/M03/OM9-L3-03-08-003/negative.json",
+    "implementation/evidence/M03/OM9-L3-03-08-003/OM9-L4-03-08-003-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-03-08-003/OM9-L4-03-08-003-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_03_08_scope": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

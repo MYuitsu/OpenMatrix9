@@ -760,44 +760,66 @@ fn entity(
             None
         };
         if let Some((payload, id)) = conversion {
-            let Some(bridge) = bridge else {
-                return Err(Error::Missing("BRep conversion backend"));
-            };
-            match bridge.import(&payload, tolerance_mm, deflection_mm, limits) {
-                Ok(brep) => {
-                    object.geometry = Some(Geometry::Brep(brep));
-                    counters.editable = counters
-                        .editable
-                        .checked_add(1)
-                        .ok_or(Error::Overflow("editable BRep count"))?;
-                    counters.displayable = counters
-                        .displayable
-                        .checked_add(1)
-                        .ok_or(Error::Overflow("displayable BRep count"))?;
-                }
-                Err(error) if brep_mode.strict() => {
-                    return Err(Error::Io(format!("3DM BRep {id}: {error}")));
-                }
-                Err(error) => {
-                    counters.opaque = counters
-                        .opaque
-                        .checked_add(1)
-                        .ok_or(Error::Overflow("opaque BRep count"))?;
-                    if let Some(Geometry::NativeBrep(native)) = &object.geometry
-                        && native_display_available(native)
-                    {
+            if let Some(bridge) = bridge {
+                match bridge.import(&payload, tolerance_mm, deflection_mm, limits) {
+                    Ok(brep) => {
+                        object.geometry = Some(Geometry::Brep(brep));
+                        counters.editable = counters
+                            .editable
+                            .checked_add(1)
+                            .ok_or(Error::Overflow("editable BRep count"))?;
                         counters.displayable = counters
                             .displayable
                             .checked_add(1)
                             .ok_or(Error::Overflow("displayable BRep count"))?;
-                    } else {
-                        counters.display_unavailable = counters
-                            .display_unavailable
-                            .checked_add(1)
-                            .ok_or(Error::Overflow("display-unavailable BRep count"))?;
                     }
-                    diagnostics.push(format!("{id}: BREP_CONVERSION_FAILED: {error}"));
+                    Err(error) if brep_mode.strict() => {
+                        return Err(Error::Io(format!("3DM BRep {id}: {error}")));
+                    }
+                    Err(error) => {
+                        counters.opaque = counters
+                            .opaque
+                            .checked_add(1)
+                            .ok_or(Error::Overflow("opaque BRep count"))?;
+                        if let Some(Geometry::NativeBrep(native)) = &object.geometry
+                            && native_display_available(native)
+                        {
+                            counters.displayable = counters
+                                .displayable
+                                .checked_add(1)
+                                .ok_or(Error::Overflow("displayable BRep count"))?;
+                        } else {
+                            counters.display_unavailable = counters
+                                .display_unavailable
+                                .checked_add(1)
+                                .ok_or(Error::Overflow("display-unavailable BRep count"))?;
+                        }
+                        diagnostics.push(format!("{id}: BREP_CONVERSION_FAILED: {error}"));
+                    }
                 }
+            } else if brep_mode.strict() {
+                return Err(Error::Missing("BRep conversion backend"));
+            } else {
+                counters.opaque = counters
+                    .opaque
+                    .checked_add(1)
+                    .ok_or(Error::Overflow("opaque BRep count"))?;
+                if let Some(Geometry::NativeBrep(native)) = &object.geometry
+                    && native_display_available(native)
+                {
+                    counters.displayable = counters
+                        .displayable
+                        .checked_add(1)
+                        .ok_or(Error::Overflow("displayable BRep count"))?;
+                } else {
+                    counters.display_unavailable = counters
+                        .display_unavailable
+                        .checked_add(1)
+                        .ok_or(Error::Overflow("display-unavailable BRep count"))?;
+                }
+                diagnostics.push(format!(
+                    "{id}: BREP_CONVERSION_UNAVAILABLE: no editable backend; retained opaque"
+                ));
             }
         }
     } else if let Some(Geometry::NativeBrep(native)) = &object.geometry {
@@ -1017,7 +1039,7 @@ fn convert(
         (source_units.model.absolute_tolerance * source_units.model.millimeters_per_unit).max(1e-7);
     let brep_deflection_mm = 0.02_f64.max(brep_tolerance_mm * 2.);
     let mut brep_counters = BrepCounters::default();
-    if options.brep.editable() && bridge.is_none() {
+    if options.brep.strict() && bridge.is_none() {
         return Err(Error::Missing("BRep conversion backend"));
     }
     let mut catalog = Catalog {

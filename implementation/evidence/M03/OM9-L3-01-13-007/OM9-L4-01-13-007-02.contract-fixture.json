@@ -1,0 +1,37 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-007-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-01-13-007",
+  "date": "2026-10-23",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-01-13-007/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-01-13-007/negative.json",
+  "fixture_sha256": {
+    "positive": "ba8e4a6f6d83b0cf329a339c42e2c5be78bc647dc871bd4a2bebd25373a845e6",
+    "negative": "b0599d7677972e48558cb891bbd9dd3d111a314ee60b64f01847929f91f614e4"
+  },
+  "generator": {
+    "source": "native/source_inventory_fixture.cpp",
+    "source_sha256": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+    "binary": "build/source-fixture.exe",
+    "binary_sha256": "d315c6d35a94bad0d05cb4aeaff8a90ac6fd5437646ee6d006463c73386dc0d7",
+    "opennurbs_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "note": "The authored writer embeds openNURBS-generated component UUIDs, so regenerated archives are structurally identical but not byte-identical; each receipt records the SHA-256 of the archive actually read."
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-01-13-007/api.md",
+    "implementation/fixtures/M03/OM9-L3-01-13-007/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-13-007/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "the mesh vertices and quad face round-trip exactly",
+      "one definition with one member serves two instances",
+      "instance translations 0 and 50 mm on X survive"
+    ],
+    "negative": [
+      "an instance whose definition is missing or cyclic is refused/retained by the source admission"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-03-16.wire_ui.v1",
+  "l3_id": "OM9-L3-03-16-018",
+  "menu_icon": "CurveOffsetCurve",
+  "command_id": "OM9-CURVE-118",
+  "menu_and_commandline_same_id": true,
+  "enabled": false,
+  "disabled_reason": "interactive Offset Curve command session is not wired; owner candidate OM9-L3-02-04-006 is unverified",
+  "visible_disabled_reason": true,
+  "ui_state": "DISABLED_VISIBLE_REASON",
+  "owner_service_reused": "OM9-L3-02-04-006",
+  "transaction": "one session; one Undo entry",
+  "smoke_receipt": "implementation/evidence/M03/OM9-L3-03-16-018/OM9-L4-03-16-018-02.wire.json",
+  "status": "VERIFIED_DISABLED_PLACEHOLDER"
+}

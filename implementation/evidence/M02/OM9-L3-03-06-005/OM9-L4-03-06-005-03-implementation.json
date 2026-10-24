@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-06-005-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-06-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "PictureFrameStore embeds base64 PNG/JPEG bytes plus SHA-256; from_record blocks a hash mismatch and turns a missing external bitmap into a warning/placeholder.",
+  "tests": [
+    "om9-app pictureframe unit: 6 passed",
+    "om9-app pictureframe persistence: 3 passed"
+  ]
+}

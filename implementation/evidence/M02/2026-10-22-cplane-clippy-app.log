@@ -1,0 +1,37 @@
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Checking om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Checking om9-sdk v0.1.0 (H:\OpenMatrix9\crates\om9-sdk)
+    Checking om9-render v0.1.0 (H:\OpenMatrix9\crates\om9-render)
+error: the loop variable `col` is only used to index `model`
+   --> crates\om9-render\src\scene.rs:809:24
+    |
+809 |             for col in 0..4 {
+    |                        ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+    = note: `-D clippy::needless-range-loop` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_range_loop)]`
+help: consider using an iterator
+    |
+809 -             for col in 0..4 {
+809 +             for <item> in &model {
+    |
+
+error: the loop variable `row` is only used to index `model`
+   --> crates\om9-render\src\scene.rs:810:28
+    |
+810 |                 for row in 0..4 {
+    |                            ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+help: consider using an iterator
+    |
+810 -                 for row in 0..4 {
+810 +                 for <item> in &model {
+    |
+
+error: could not compile `om9-render` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

@@ -1,0 +1,29 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-002-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-06-002",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-06-002/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-06-002/negative.json",
+  "fixture_sha256": {
+    "positive": "7ae2e60bf8c0e8f5e1b9c50981491934d967cd9ff5647abc6846374fd152c8cf",
+    "negative": "e2dd9a433702c214bd670f8d4ee3d30eedc7d32208329cdf8cee2853476def73"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-06-002/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-06-002/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-002/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "1D/2D/3D all produce factor 2 for the authored reference/current pair",
+      "XY scaling changes x/y but not z; YZ leaves x unchanged"
+    ],
+    "negative": [
+      "a zero reference distance is refused",
+      "a zero/NaN scale factor is refused"
+    ]
+  }
+}

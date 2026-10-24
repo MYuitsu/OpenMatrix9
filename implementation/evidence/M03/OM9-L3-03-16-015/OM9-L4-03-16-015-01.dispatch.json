@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-015-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-015",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-015",
+  "source_command": "Pullback",
+  "menu_icon": "CurveCurveFromObjectsPullback",
+  "owner_candidate": "OM9-L3-02-04-009",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Pullback command session is not wired; owner candidate OM9-L3-02-04-009 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-015/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-015/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-015/dispatch_contract.json": "64ccbfac11e76999d5b11c9273a0485b7a733aaf1055843352d86f9a59ddffe6",
+    "implementation/design/M03/OM9-L3-03-16-015/dispatch_contract.md": "d507aba3f0b5965927d2793252439e4e9a50fe8da209c70ec87e55df4d3fd145"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

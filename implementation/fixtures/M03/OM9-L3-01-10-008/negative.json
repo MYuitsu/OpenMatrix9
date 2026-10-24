@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-008",
+  "fixture_id": "OM9-L3-01-10-008-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "face index 9999",
+    "sew a face with a distant unrelated face"
+  ],
+  "expect": "Invalid index; the unrelated join is open (not a solid)"
+}

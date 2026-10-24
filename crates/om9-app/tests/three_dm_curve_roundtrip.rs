@@ -109,6 +109,8 @@ fn line_circle_nurbs_and_mesh_survive_the_3dm_round_trip_exactly() {
         faces: vec![vec![0, 1, 2], vec![1, 3, 2]],
         normals: vec![],
         colors: vec![],
+
+        corner_uvs: Vec::new(),
     });
 
     let mut document = Document::new("curve round trip");

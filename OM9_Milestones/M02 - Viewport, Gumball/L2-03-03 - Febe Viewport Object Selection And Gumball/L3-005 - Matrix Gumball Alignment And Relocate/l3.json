@@ -214,5 +214,43 @@
     },
     "algorithm_and_coverage": "Frame/basis derived by mode; relocate pivot separate from geometry",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "GumballAlignment selects world/CPlane/object axes for the frame; relocate changes only the pivot origin; neither rewrites geometry.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-03-03-005/api.md",
+      "implementation/evidence/M02/OM9-L3-03-03-005/OM9-L4-03-03-005-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-03-03-005/OM9-L4-03-03-005-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-03-03-005/OM9-L4-03-03-005-05-regression.json",
+      "implementation/evidence/M02/OM9-L3-03-03-005/OM9-L4-03-03-005-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app gumball_placement: 4 passed",
+      "om9-app gumball_interaction: 6 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-03-03-005/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-03-03-005/positive.json",
+        "implementation/fixtures/M02/OM9-L3-03-03-005/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-03-03-005/OM9-L4-03-03-005-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-03-03-005/OM9-L4-03-03-005-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-03-03-005/OM9-L4-03-03-005-05-regression.json",
+        "implementation/evidence/M02/OM9-L3-03-03-005/OM9-L4-03-03-005-06-acceptance.md"
+      ],
+      "acceptance": "World/CPlane/Object alignment changes the gizmo basis without moving the object; relocating the pivot leaves object placement unchanged."
+    }
   }
 }

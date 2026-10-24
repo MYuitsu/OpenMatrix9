@@ -199,5 +199,24 @@
       "id": "OM9-L4-03-10-002-05",
       "file": "M01 - CAD Shell, Viewport/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-002 - Interactive Command Prompts/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Interactive prompts show the Controller's exact next point/object/option prompt; stale prompts are refused.",
+    "owner": "ui.rs + session.rs",
+    "tests": [
+      "command_state_machine 3 passed",
+      "command_feedback_adapter 5 passed"
+    ],
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-10/README.md",
+      "implementation/evidence/M01/2026-10-22-l2-03-10-commandline-feedback.json"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M01-UI visual review pending."
+    ]
+  }
 }

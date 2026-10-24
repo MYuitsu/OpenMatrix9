@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-10-003-03",
+  "l3": "OM9-L3-03-10-003",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/option_parser.rs"
+  ],
+  "tests": "command_tokens 1 passed; command_options_and_repeat 6 passed",
+  "oracle": "clicking a token sets the same option as typing it"
+}

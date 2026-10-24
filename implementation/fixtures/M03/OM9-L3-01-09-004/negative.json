@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-004",
+  "fixture_id": "OM9-L3-01-09-004-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "r=0",
+    "path (0,0,0)->(0,0,0)"
+  ],
+  "expect": "CreationError::Invalid; no body"
+}

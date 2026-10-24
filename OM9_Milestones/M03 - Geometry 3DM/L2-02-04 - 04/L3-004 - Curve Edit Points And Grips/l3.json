@@ -303,5 +303,73 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "NURBS_CURVE"
+  "acceptance_category": "NURBS_CURVE",
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Edit point/grip cần cho sửa curve.",
+    "api": [],
+    "candidate_api": [
+      "move_edit_point(id, index, point)"
+    ],
+    "host_only": "Grip/edit state ở host; SDK đổi điểm."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "show and edit freeform control points",
+    "owner": {
+      "crate": "om9-core",
+      "test": "crates/om9-core/tests/l2_02_04.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-02-04-004/api.md",
+      "implementation/design/M03/OM9-L3-02-04-004/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-02-04-004/positive.json",
+      "implementation/fixtures/M03/OM9-L3-02-04-004/negative.json",
+      "implementation/evidence/M03/OM9-L3-02-04-004/OM9-L4-02-04-004-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-02-04-004/OM9-L4-02-04-004-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-02-04-004/OM9-L4-02-04-004-05.ui-review.json",
+      "implementation/evidence/M03/OM9-L3-02-04-004/OM9-L4-02-04-004-05.acceptance.md"
+    ],
+    "tests": [
+      "m03_02_04_004: passed",
+      "l2_02_04 suite: 15 passed, 0 failed",
+      "om9-core suite: 447 passed, 0 failed (52 suites)",
+      "clippy -D warnings: exit 0",
+      "cargo fmt --all -- --check: exit 0",
+      "cargo check --workspace --all-targets -j 2: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "Control-point deletion is not delivered.",
+      "Grip editing is admitted for line and NURBS records; circle/polycurve grips are display-only.",
+      "Manual M03-UI interactive acceptance is not performed by the implementer.",
+      "macOS runtime is unverified."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "manual_gate": "M03-UI",
+      "design": "implementation/design/M03/OM9-L3-02-04-004/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-02-04-004/positive.json",
+        "implementation/fixtures/M03/OM9-L3-02-04-004/negative.json"
+      ],
+      "measured": {
+        "nurbs_grip_count": 4.0,
+        "inserted_grip_count": 5.0
+      }
+    },
+    "l4_evidence": {
+      "OM9-L4-02-04-004-01": "1/1",
+      "OM9-L4-02-04-004-02": "1/1",
+      "OM9-L4-02-04-004-03": "1/1",
+      "OM9-L4-02-04-004-04": "1/1",
+      "OM9-L4-02-04-004-05": "1/1"
+    }
+  }
 }

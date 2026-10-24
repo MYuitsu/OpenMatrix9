@@ -1,0 +1,59 @@
+{
+  "schema": "om9.m03.l2-02-05.ui-review.v1",
+  "task_id": "OM9-L4-02-05-004-05",
+  "l3_id": "OM9-L3-02-05-004",
+  "title": "Edge Planar And Patch Surface Workflows",
+  "oracle": {
+    "positive": [
+      "a 4x2 planar surface evaluates exactly at its corners and centre",
+      "a 4x2 boundary patch measures area 8 mm2 with deviation 4.47e-16 mm",
+      "all four boundary curves are available from the surface"
+    ],
+    "negative": [
+      "a non-orthonormal plane frame or zero size is refused",
+      "a boundary loop with a gap is refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The core surface oracle passes; the UI rail/profile/boundary selection, preview, commit/cancel and warning review is not signed by a human.",
+    "scope": "surface from boundaries and planar loops"
+  },
+  "measured": {
+    "plane_corner": [
+      4.0,
+      2.0,
+      0.0
+    ],
+    "patch_area_mm2": 7.999999999999918,
+    "patch_deviation_mm": 4.466484191439815e-16
+  },
+  "tolerances": {
+    "area_mm2": "1e-5",
+    "deviation_mm": "1e-6"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "core suite 16 passed; kernel suite 6 passed; core lib/kernel all exit 0",
+    "clippy and fmt exit 0",
+    "public source audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-05-004/api.md",
+    "implementation/design/M03/OM9-L3-02-05-004/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-004/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-004/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-05-004/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

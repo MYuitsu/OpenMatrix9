@@ -1,0 +1,59 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-008-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-13-008",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "native/native_exchange.cpp",
+      "crates/om9-exchange/src/imported.rs",
+      "crates/om9-core/src/retained.rs"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_008 -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/m03_01_13_008.focused.log",
+      "stdout_log_sha256": "f18f77a338747eb225864c8299539cf817f47748e03602d0a23bfaf48243b7c4"
+    },
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_receipt -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/receipt.log",
+      "stdout_log_sha256": "7cc14fd37a5ab33b8935885cd590697bb335d8549488cd4f712c38b97199a893"
+    }
+  ],
+  "observed": {
+    "userdata_diagnostic": true,
+    "retained_records_gt_zero": true,
+    "unknown_class": "refused"
+  },
+  "expected": {
+    "userdata_diagnostic": true,
+    "retained_records_gt_zero": true,
+    "unknown_class": "refused"
+  },
+  "tolerances": {
+    "diagnostic_text": "case-insensitive substring"
+  },
+  "artifact_paths": [
+    "native/native_exchange.cpp",
+    "crates/om9-exchange/src/imported.rs",
+    "crates/om9-core/src/retained.rs"
+  ],
+  "artifact_sha256": {
+    "native/native_exchange.cpp": "8cf87d2ca10e785300232219f3742973ecbde4d6249dfb96d190498db27ef6c1",
+    "crates/om9-exchange/src/imported.rs": "7511ebb3d8eb09c1fafd675d2d42080d471a5b551f1b221f1ed98ae89b541e2e",
+    "crates/om9-core/src/retained.rs": "36d7670b510ce75fdbfdd2c580c1798ae2831f1b4c525d36a1ce10b6e02099f9"
+  }
+}

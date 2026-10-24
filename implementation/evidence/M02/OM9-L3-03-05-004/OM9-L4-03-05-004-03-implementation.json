@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-05-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-05-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "surface_side applies determinant parity to the face normal before the view comparison and returns Front/Back/EdgeOn; it never rewrites a face key.",
+  "tests": [
+    "om9-app display cues: 6 passed"
+  ]
+}

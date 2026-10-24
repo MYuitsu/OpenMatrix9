@@ -1,0 +1,20 @@
+{
+  "l3": "OM9-L3-03-03-004",
+  "title": "Matrix Gumball Axis Drag",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/session/gumball.rs",
+    "crates/om9-core/src/gumball.rs"
+  ],
+  "tests": [
+    "om9-app gumball_interaction: 6 passed",
+    "om9-app gumball_viewport: 3 passed",
+    "om9-core gumball: 15 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.12-16 and pp.34-37 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-03-004-01"
+}

@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-03-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-03-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The popup reads the core pick-all candidate list and renders each row as name + geometry type + layer-colour swatch; Escape and stale publication preserve the prior selection.",
+  "tests": [
+    "om9-app pick_disambiguation: 5 passed",
+    "om9-app matrix_selection_sequence: 2 passed"
+  ]
+}

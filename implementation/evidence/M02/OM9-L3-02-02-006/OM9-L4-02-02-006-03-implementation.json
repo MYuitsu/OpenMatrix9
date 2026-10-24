@@ -1,0 +1,18 @@
+{
+  "l4": "OM9-L4-02-02-006-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-02-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "Controller::constrain_point projects to the active plane first, then snaps the dominant local X/Y direction from the previous point; typed coordinates bypass both modes.",
+  "source_paths": [
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/ui/sidebar_palettes.rs"
+  ],
+  "tests": [
+    "om9-app cplane_coordinate_input: 10 passed",
+    "om9-app chrome_actions: 13 passed"
+  ]
+}

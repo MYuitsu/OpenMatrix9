@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-006",
+  "fixture_id": "OM9-L3-02-04-006-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "fillet radius longer than a leg",
+    "offset that would make a non-positive circle radius",
+    "parallel or non-intersecting fillet lines"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_006_offset_fillet_chamfer"
+}

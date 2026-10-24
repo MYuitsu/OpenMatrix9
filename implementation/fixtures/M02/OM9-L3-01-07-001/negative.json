@@ -1,0 +1,15 @@
+{
+  "fixture_id": "G02-A-01-07-001",
+  "l3_id": "OM9-L3-01-07-001",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Ray không giao đối tượng trả danh sách rỗng, không chọn",
+  "expected": "An explicit miss/error or unchanged state; no stale selection and no nearby-geometry rematch.",
+  "evidence": [
+    "om9-scene acceptance_l2_01_07: 9 passed",
+    "om9-scene world_picking: 7 passed",
+    "om9-scene navigation_snapshot: 2 passed",
+    "om9-app brep_selection (gpu-sphere): 5 passed"
+  ],
+  "status": "PASS"
+}

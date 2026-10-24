@@ -445,5 +445,7 @@
     "Imported pinned-source gate not certified"
   ],
   "occurrence_path_subselection": "VALIDATED",
-  "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport"
+  "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
+  "superseded_by": "implementation/evidence/M02/2026-10-22-l2-01-07-selection-handles-checks.json",
+  "superseded_note": "Historical 2026-10-19 snapshot. Native BRep selection and occurrence-path subselection were validated later; see the 2026-10-22 checks and design README for current counts and the pick_all disambiguation fix. Manual M02-UI review is still open."
 }

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-007-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-007",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-007",
+  "source_command": "Blend Surface",
+  "menu_icon": "SurfaceBlendSurface",
+  "owner_candidate": "OM9-L3-02-04-007",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-007/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-007/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-007/dispatch_contract.json": "b3e27888a625489ff67058bb4a7314091b5fe8a06cfa0db485bf9af024b26e64",
+    "implementation/design/M03/OM9-L3-03-17-007/source_crosswalk.json": "3aaebee43c4323602b74158584fe6c962d0c2d1255bf05b1686242c52594c024"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

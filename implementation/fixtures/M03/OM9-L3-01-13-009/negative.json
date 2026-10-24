@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-01-13.fixture.v1",
+  "l3_id": "OM9-L3-01-13-009",
+  "fixture_id": "OM9-L3-01-13-009-NEGATIVE",
+  "cases": [
+    "a truncated archive leaves entity count and undo_len unchanged",
+    "a cancelled import leaves the target document empty"
+  ],
+  "invariants": [
+    "no partial document commit",
+    "no fabricated geometry or silently dropped unsupported field",
+    "the typed error reaches the caller/UI"
+  ],
+  "measured_on_2026_10_22": "all listed negative cases pass in the focused test"
+}

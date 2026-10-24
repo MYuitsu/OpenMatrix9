@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-21",
+  "status": "polygon_creation_sdk_export_verified_windows",
+  "owner": "OM9-L2-02-04",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Completes the polygon-by-points creation kind of OM9-L3-02-04-002 with curve_build::polyline and the shared output path.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "ce26d749044c772b1af5958b5ad64d44d22d140c5ac65267542992c29d1f39e1",
+    "crates/om9-plugin-host/src/staged.rs": "3e737be17084c0aa0a136e92a178d763bb63d116b1ed4ecbe0650270ded70a9a",
+    "crates/om9-app/tests/plugin_native.rs": "4117fa9eba3981b1889a4fea8ebe1b7f9eaf102047faffa9e25941af7f2fbf88",
+    "sdk/examples/hello-plugin/src/lib.rs": "b61c9bc88c006d99528c1a1c4df40e507f2fe3ac49a242fa5321b7424529ac40",
+    "sdk/README.md": "1e322c7f281f6d7478414b6a8abefd8c20de35e6cc0869d7c6c14f06ab7513d7",
+    "sdk/API-INVENTORY.md": "6a8ba535558c2b9ce114825a7b8cae90978bd518a5fb0ecb9fcaface5f14ecf8"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["add_polygon"],
+    "shared_service": ["om9_core::curve_build::polyline"],
+    "error_codes": ["curve", "budget", "permission", "layer"]
+  },
+  "asserted_semantics": [
+    "A polygon is a closed polycurve: the first point is appended when the caller did not repeat it, and the closing point is never appended twice.",
+    "Fewer than three distinct points, repeated consecutive points or a zero-length edge are a curve refusal; the polygon is never silently reduced to a line.",
+    "The polygon publishes as one object in the command's single transaction and one Undo removes it.",
+    "curve_info reports polycurve with segments equal to the point count; curve_semantics reports closed and planar for coplanar input."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "53 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "13 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-polygon",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8809 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "polygon_kind": "polycurve",
+    "polygon_segments": 4,
+    "polygon_closed": true,
+    "document_objects": 6,
+    "undo_units": 2,
+    "undo_restores_profile": true,
+    "redo_restores_shapes": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1569645,
+      "sha256": "83163b99d6d87e2ab103fbeaeb92bb116c4db221984f7a22509b65f00ad361aa"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "d07e027211e0f65a27ccd6c2f6d3ca701add92faff62a6d4d4d031feb2fd3eb7"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 151941,
+      "sha256": "9fbb12e926f6bed92e6c1e289a379fda6058011034cf1372be4818c4daba384a"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "8b78d57ee180022734fa0fda874d9f7580e09885f955795cc3cacf8345f430dc"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1567744,
+      "sha256": "1584c86e8b58b18d511b193b1e43007ba2c575af63d947228a04dba656fbdeb1"
+    },
+    "om9.exe": {
+      "bytes": 68925952,
+      "sha256": "2d4c08ed8f84f6e69e1d4e6c53881e3c7220429a0f9f0965fac7781df15944d9"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-02-04-002 (circle/arc/ellipse/rectangle/polygon creation)"
+    ],
+    "open": [
+      "spiral and helix creation",
+      "control-point editing and rebuild",
+      "offset, fillet/blend and intersections",
+      "periodic/seam NURBS construction"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Spiral/helix creation and curve editing remain open.",
+    "A polygon is a polycurve through its points; it is not converted to arcs or a NURBS approximation.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Take OM9-L2-01-12 file lifecycle (project state and atomic save semantics)."
+}

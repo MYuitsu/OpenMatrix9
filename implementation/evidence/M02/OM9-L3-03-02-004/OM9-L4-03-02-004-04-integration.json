@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-02-004-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-02-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Middle-button or Shift right drag pans; blocked popup/menu frames do not begin a gesture.",
+  "tests": [
+    "om9-app navigation_drag: 3 passed",
+    "om9-app navigation_lifecycle: 8 passed"
+  ]
+}

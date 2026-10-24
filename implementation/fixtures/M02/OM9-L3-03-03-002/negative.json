@@ -1,0 +1,15 @@
+{
+  "fixture_id": "G03-B-03-03-002",
+  "l3_id": "OM9-L3-03-03-002",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Drag bắt đầu trên UI dock không phát selection marquee",
+  "expected": "No locked/stale selection, no marquee from the dock, and no journal write on cancel/invalid input.",
+  "evidence": [
+    "om9-app rubber_band: 2 passed",
+    "om9-app selection_overlay: 8 passed",
+    "om9-app acceptance_viewport_selection: 8 passed",
+    "om9-scene selection_regressions: 7 passed"
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-01-007",
+  "case": "negative",
+  "oracle": "switching to a non-visible view must not keep a stale maximized pane",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

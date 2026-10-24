@@ -1,0 +1,11 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\curve_menu.rs (L:\om9-target\debug\deps\curve_menu-2c3a5b8c6dca9962.exe)
+
+running 4 tests
+test line_and_point_are_the_enabled_rows_and_dispatch_to_their_session ... ok
+test disabled_reasons_name_the_missing_interactive_session_and_owner ... ok
+test every_documented_curve_menu_row_has_one_stable_id_and_icon ... ok
+test line_and_point_commands_still_create_geometry_through_the_same_ids ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

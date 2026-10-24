@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-001-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-01-07-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Viewport click and hover call Scene::pick/pick_all with the live camera, viewport and DPI tolerance; held picks are revalidated before dispatch.",
+  "tests": [
+    "om9-app acceptance_viewport_selection: 8 passed",
+    "om9-app brep_selection (gpu-sphere): 5 passed"
+  ]
+}

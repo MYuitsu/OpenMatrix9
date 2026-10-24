@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-01-005",
+  "case": "negative",
+  "oracle": "non-finite/negative spacing is refused; grid cannot draw outside its viewport",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

@@ -42,7 +42,7 @@ const CATEGORIES: [&str; 12] = [
     "Cutters",
     "Render",
 ];
-const TABS: [&str; 20] = [
+const TABS: [&str; 21] = [
     "Standard",
     "CPlanes",
     "Set View",
@@ -63,6 +63,7 @@ const TABS: [&str; 20] = [
     "Sculpt",
     "Tools",
     "Settings",
+    "Top 11",
 ];
 
 fn apply_dock_theme(ui: &mut egui::Ui) {
@@ -164,6 +165,31 @@ impl MatrixApp {
                                 ui.close();
                             }
                         }
+                        // Four Rail Profile (OM9-TOOLS-004): tag profiles with the
+                        // four selected rails so Sweep 4 can resolve them later.
+                        if ui.button("Four Rail Profile").clicked() {
+                            self.invoke("OM9-TOOLS-004", InvocationOrigin::Menu);
+                            ui.close();
+                        }
+                        if ui.button("Object Health Report").clicked() {
+                            let summary = self.controller.health_summary();
+                            self.status.info(&summary);
+                            ui.close();
+                        }
+                        if ui.button("Select Bad Objects").clicked() {
+                            match self.controller.select_bad_objects() {
+                                Ok(count) => self.status.info(&format!("{count} bad objects selected")),
+                                Err(error) => self.status.error(&error.to_string()),
+                            };
+                            ui.close();
+                        }
+                        if ui.button("Detect Naked Edges").clicked() {
+                            match self.controller.select_naked_edges() {
+                                Ok(count) => self.status.info(&format!("{count} open objects selected")),
+                                Err(error) => self.status.error(&error.to_string()),
+                            };
+                            ui.close();
+                        }
                     }
                     "File" => {
                         for kind in crate::file_lifecycle::FileKind::ALL {
@@ -261,6 +287,23 @@ impl MatrixApp {
                                 }
                             }
                         }
+                    }
+                    "Curve" => {
+                        egui::ScrollArea::vertical().max_height(620.0).show(ui, |ui| {
+                            for binding in crate::curve_menu::BINDINGS {
+                                let response = ui.add_enabled(
+                                    binding.enabled(),
+                                    egui::Button::new(binding.label),
+                                );
+                                if !binding.enabled() {
+                                    response.clone().on_hover_text(binding.disabled_reason);
+                                }
+                                if response.clicked() {
+                                    self.invoke(binding.feature, InvocationOrigin::Menu);
+                                    ui.close();
+                                }
+                            }
+                        });
                     }
                     "View" => {
                         for id in [
@@ -428,8 +471,45 @@ impl MatrixApp {
     fn section_bar_controls(&mut self, ui: &mut egui::Ui, id: SectionId) {
         ui.horizontal_wrapped(|ui| match id {
             SectionId::Snaps => {
-                for name in ["GridSnap", "Ortho", "Planar"] {
-                    self.icon(ui, name, false, name);
+                for name in ["GridSnap", "Ortho", "Planar", "Project"] {
+                    let enabled = matches!(name, "Ortho" | "Planar" | "Project");
+                    let active = match name {
+                        "Ortho" => self.controller.ortho(),
+                        "Planar" => self.controller.planar(),
+                        "Project" => self.controller.project(),
+                        _ => false,
+                    };
+                    let response = if enabled {
+                        self.icon_toggle(ui, name, active, name)
+                    } else {
+                        self.icon(ui, name, false, name)
+                    };
+                    if enabled && response.clicked() {
+                        match name {
+                            "Ortho" => {
+                                let enabled = !self.controller.ortho();
+                                self.controller.set_ortho(enabled);
+                                self.status
+                                    .info(if enabled { "Ortho on" } else { "Ortho off" });
+                            }
+                            "Planar" => {
+                                let enabled = !self.controller.planar();
+                                self.controller.set_planar(enabled);
+                                self.status
+                                    .info(if enabled { "Planar on" } else { "Planar off" });
+                            }
+                            "Project" => {
+                                let enabled = !self.controller.project();
+                                self.controller.set_project(enabled);
+                                self.status.info(if enabled {
+                                    "Project on"
+                                } else {
+                                    "Project off"
+                                });
+                            }
+                            _ => {}
+                        }
+                    }
                 }
             }
             SectionId::Layers => {
@@ -447,6 +527,27 @@ impl MatrixApp {
     }
     fn icon(&mut self, ui: &mut egui::Ui, name: &str, enabled: bool, help: &str) -> egui::Response {
         self.icon_slot(ui, name, enabled, help, None)
+    }
+
+    /// A clickable icon whose active state is drawn as a bright frame instead of
+    /// being disabled: snap toggles must stay clickable while they are off.
+    pub(super) fn icon_toggle(
+        &mut self,
+        ui: &mut egui::Ui,
+        name: &str,
+        active: bool,
+        help: &str,
+    ) -> egui::Response {
+        let response = self.icon_slot(ui, name, true, help, None);
+        if active {
+            ui.painter().rect_stroke(
+                response.rect.shrink(1.5),
+                4,
+                Stroke::new(1.5, Color32::from_rgb(90, 190, 245)),
+                egui::StrokeKind::Inside,
+            );
+        }
+        response
     }
     pub(super) fn icon_slot(
         &mut self,
@@ -521,8 +622,19 @@ impl MatrixApp {
         response
     }
     fn feature_icon(&mut self, ui: &mut egui::Ui, id: &str, name: &str) {
-        let actual = crate::icons::feature_for(name)
+        let curve = crate::curve_menu::by_icon(name);
+        let surface = crate::surface_menu::by_icon(name);
+        let catalog_feature = curve
+            .map(|binding| binding.feature)
+            .or_else(|| surface.map(|binding| binding.feature));
+        let catalog_enabled = curve.is_none_or(crate::curve_menu::CurveMenuBinding::enabled)
+            && surface.is_none_or(crate::surface_menu::SurfaceMenuBinding::enabled);
+        let catalog_reason = curve
+            .map(|binding| binding.disabled_reason)
+            .or_else(|| surface.map(|binding| binding.disabled_reason));
+        let actual = catalog_feature
             .map(str::to_owned)
+            .or_else(|| crate::icons::feature_for(name).map(str::to_owned))
             .or_else(|| {
                 self.features
                     .iter()
@@ -534,13 +646,23 @@ impl MatrixApp {
             .as_ref()
             .and_then(|id| self.features.iter().find(|f| &f.id == id).cloned());
         if let Some(actual) = actual {
-            let enabled = Controller::availability(&actual).is_ok();
-            let help = feature.as_ref().map_or(name, |f| f.name.as_str());
+            let enabled = Controller::availability(&actual).is_ok() && catalog_enabled;
+            let help = if enabled {
+                feature
+                    .as_ref()
+                    .map_or(name, |f| f.name.as_str())
+                    .to_owned()
+            } else {
+                catalog_reason
+                    .filter(|reason| !reason.is_empty())
+                    .unwrap_or("operation unavailable")
+                    .to_owned()
+            };
             let right = feature
                 .as_ref()
                 .and_then(|f| f.right_click.as_deref())
                 .filter(|command| Controller::availability(command).is_ok());
-            if self.icon_slot(ui, name, enabled, help, right).clicked() {
+            if self.icon_slot(ui, name, enabled, &help, right).clicked() {
                 self.invoke(&actual, InvocationOrigin::Menu);
             }
         } else {
@@ -857,56 +979,200 @@ impl MatrixApp {
     }
     /// PROJECTS: the Project Manager area of the left column.
     fn projects_ui(&mut self, ui: &mut egui::Ui) {
+        self.project_row_rects.clear();
+        self.jobbag_slot_rects.clear();
+        self.project_action_rects.clear();
+        let active_id = self.project_manager.active().id;
+        let active_index = self.project_manager.active_index();
+        let rows: Vec<(crate::project_manager::ProjectId, String)> = self
+            .project_manager
+            .rows()
+            .iter()
+            .map(|row| (row.id, row.name.clone()))
+            .collect();
         ui.horizontal_wrapped(|ui| {
-            let (list, _) = ui.allocate_exact_size(Vec2::new(62., 76.), Sense::hover());
-            ui.painter().rect_filled(list, 0, Color32::from_gray(74));
-            ui.painter().text(
-                list.min + Vec2::new(2., 3.),
-                Align2::LEFT_TOP,
-                "Default",
-                FontId::proportional(10.),
-                PANEL_INK,
-            );
-            for (index, name) in ["Project", "Gem", "Emerald"].iter().enumerate() {
-                ui.allocate_ui_with_layout(
-                    Vec2::new(62., 79.),
-                    egui::Layout::top_down(egui::Align::Min),
-                    |ui| {
-                        let (rect, response) =
-                            ui.allocate_exact_size(Vec2::new(62., 60.), Sense::hover());
-                        gradient(
-                            ui.painter(),
-                            rect,
-                            Color32::from_rgb(20, 47, 160),
-                            Color32::from_rgb(5, 12, 45),
-                        );
-                        self.icons.paint(ui, rect.shrink(12.), name);
-                        ui.painter().text(
-                            rect.min + Vec2::new(2., 2.),
-                            Align2::LEFT_TOP,
-                            (index + 1).to_string(),
-                            FontId::proportional(10.),
-                            PANEL_INK,
-                        );
-                        response.on_hover_text("Project preview unavailable");
-                        ui.add_enabled(false, egui::Button::new("↑  ▣  ×"));
-                    },
-                );
+            for (index, (id, name)) in rows.into_iter().enumerate() {
+                let response = ui.selectable_label(index == active_index, &name);
+                self.project_row_rects.insert(id, response.rect);
+                if response.clicked()
+                    && let Err(error) = self.project_manager.select(id)
+                {
+                    self.feedback(Err(error));
+                }
+            }
+            let add = ui.small_button("+");
+            self.project_action_rects.insert("new-project", add.rect);
+            if add.on_hover_text("Create a project row").clicked() {
+                let name = format!("Project {}", self.project_manager.rows().len() + 1);
+                let revision = self.controller.document().revision;
+                let result = self
+                    .project_manager
+                    .create_project(&name, revision)
+                    .map(|_| ());
+                self.feedback(result);
             }
         });
-        ui.horizontal_wrapped(|ui| {
-            for name in ["Master", "Creation", "Parts", "Render", "Output"] {
-                let (rect, response) = ui.allocate_exact_size(Vec2::new(55., 49.), Sense::hover());
-                ui.painter().rect_filled(rect, 0, Color32::from_gray(79));
+        let active = self.project_manager.active();
+        let mut name = active.name.clone();
+        let mut notes = active.notes.clone();
+        let mut customer = active.customer.clone();
+        ui.horizontal(|ui| {
+            ui.label("Name");
+            let response = ui.add(
+                egui::TextEdit::singleline(&mut name)
+                    .desired_width(104.)
+                    .id_salt("project-name"),
+            );
+            if response.changed()
+                && let Err(error) = self.project_manager.rename_project(active_id, &name)
+            {
+                self.feedback(Err(error));
+            }
+        });
+        ui.horizontal(|ui| {
+            ui.label("Customer");
+            let response = ui.add(
+                egui::TextEdit::singleline(&mut customer)
+                    .desired_width(104.)
+                    .id_salt("project-customer"),
+            );
+            if response.changed()
+                && let Err(error) = self.project_manager.set_customer(&customer)
+            {
+                self.feedback(Err(error));
+            }
+        });
+        let notes_response = ui.add(
+            egui::TextEdit::singleline(&mut notes)
+                .hint_text("Project notes")
+                .desired_width(ui.available_width().min(220.))
+                .id_salt("project-notes"),
+        );
+        if notes_response.changed()
+            && let Err(error) = self.project_manager.set_notes(&notes)
+        {
+            self.feedback(Err(error));
+        }
+        type SlotRow = (usize, Option<(String, usize, String, u64)>, bool);
+        let slots: Vec<SlotRow> = (0..3)
+            .map(|slot| {
+                let info = self
+                    .project_manager
+                    .active()
+                    .slot(slot)
+                    .and_then(|slot| slot.snapshot.as_ref())
+                    .map(|snapshot| {
+                        (
+                            snapshot.thumbnail.label.clone(),
+                            snapshot.thumbnail.count,
+                            snapshot.thumbnail.kind.clone(),
+                            snapshot.thumbnail.source_revision,
+                        )
+                    });
+                let available = self
+                    .project_manager
+                    .slot_available(slot, self.controller.document());
+                (slot, info, available)
+            })
+            .collect();
+        for (slot, info, available) in slots {
+            ui.horizontal(|ui| {
+                let (rect, response) = ui.allocate_exact_size(Vec2::new(76., 44.), Sense::click());
+                self.jobbag_slot_rects.insert(slot, rect);
+                let fill = if available {
+                    Color32::from_rgb(22, 58, 42)
+                } else {
+                    Color32::from_rgb(28, 34, 32)
+                };
+                ui.painter().rect_filled(rect, 4, fill);
                 bevel(ui.painter(), rect);
-                ui.painter().text(
-                    rect.min + Vec2::new(2., 3.),
-                    Align2::LEFT_TOP,
-                    name,
-                    FontId::proportional(10.),
-                    PANEL_INK,
+                ui.painter().rect_stroke(
+                    rect.shrink(0.5),
+                    4,
+                    egui::Stroke::new(1., PANEL_EDGE),
+                    egui::StrokeKind::Inside,
                 );
-                response.on_hover_text("Project operation unavailable");
+                if let Some((label, count, kind, revision)) = info.as_ref() {
+                    self.icons.paint(ui, rect.shrink(7.), "Project");
+                    ui.painter().text(
+                        rect.left_top() + Vec2::new(3., 2.),
+                        Align2::LEFT_TOP,
+                        format!("{count} {kind}"),
+                        FontId::proportional(9.),
+                        PANEL_INK,
+                    );
+                    ui.painter().text(
+                        rect.left_bottom() + Vec2::new(3., -2.),
+                        Align2::LEFT_BOTTOM,
+                        format!("{label} r{revision}"),
+                        FontId::proportional(9.),
+                        PANEL_TITLE,
+                    );
+                    response
+                        .clone()
+                        .on_hover_text("Jobbag slot; click Restore below");
+                } else {
+                    ui.painter().text(
+                        rect.center(),
+                        Align2::CENTER_CENTER,
+                        "Empty slot",
+                        FontId::proportional(9.),
+                        PANEL_TITLE,
+                    );
+                }
+                ui.vertical(|ui| {
+                    if ui.small_button(format!("Capture {}", slot + 1)).clicked() {
+                        let selected = self.controller.jobbag_selected_entities();
+                        let result = match selected {
+                            Ok(entities) => self
+                                .project_manager
+                                .capture(slot, entities, self.controller.document())
+                                .map(|_| ()),
+                            Err(error) => Err(error),
+                        };
+                        self.feedback(result);
+                    }
+                    if available && ui.small_button("Restore").clicked() {
+                        let result = (|| {
+                            let entities = self.project_manager.restore_entities(slot)?;
+                            self.controller.insert_jobbag_entities(entities)?;
+                            Ok(())
+                        })();
+                        self.feedback(result);
+                    }
+                });
+            });
+        }
+        ui.horizontal(|ui| {
+            let capture = ui.small_button("Capture Master");
+            self.project_action_rects
+                .insert("capture-master", capture.rect);
+            if capture.clicked() {
+                let result = self
+                    .project_manager
+                    .capture_master(self.controller.document())
+                    .map(|_| ());
+                self.feedback(result);
+            }
+            if let Some(master) = self.project_manager.master_document() {
+                ui.label(format!(
+                    "Master: {} objects, {} layers r{}",
+                    master.entities.len(),
+                    master.layer_order.len(),
+                    master.revision
+                ));
+            }
+        });
+        ui.horizontal(|ui| {
+            let restore = ui.add_enabled(
+                self.project_manager.master_document().is_some(),
+                egui::Button::new("Restore Master"),
+            );
+            self.project_action_rects
+                .insert("restore-master", restore.rect);
+            if restore.clicked() {
+                let result = self.restore_master_live();
+                self.feedback(result);
             }
         });
     }
@@ -1035,6 +1301,26 @@ impl MatrixApp {
                                     if *name == "Line" { LINE } else { POINT },
                                     name,
                                 );
+                            }
+                            _ if tab == "Top 11" => {
+                                let Some(action) = om9_core::top11::Top11Action::from_icon(name)
+                                else {
+                                    continue;
+                                };
+                                let state = self
+                                    .controller
+                                    .top11_availability()
+                                    .into_iter()
+                                    .find(|state| state.action == action)
+                                    .expect("top 11 state");
+                                let tooltip = if state.enabled {
+                                    action.label().to_string()
+                                } else {
+                                    format!("{}: {}", action.label(), state.reason)
+                                };
+                                if self.icon(ui, name, state.enabled, &tooltip).clicked() {
+                                    self.top11_action(name);
+                                }
                             }
                             _ => {
                                 self.icon(ui, name, false, name);
@@ -1386,6 +1672,19 @@ fn toolbar_palette(tab: &str) -> &'static [&'static str] {
         "Render Tools" => category_palette("Render"),
         "Tools" => category_palette("Tools"),
         "Settings" => category_palette("Setting"),
+        "Top 11" => &[
+            "Duplicate",
+            "Mirror",
+            "Move",
+            "Rotate",
+            "EditPoints",
+            "ControlPoints",
+            "Explode",
+            "Join",
+            "Split",
+            "Trim",
+            "RingRail",
+        ],
         _ => &[],
     }
 }
@@ -1699,6 +1998,25 @@ mod chrome_tests {
         assert_eq!(app.transcript.draft(), "12.5,3,");
         assert_eq!(app.controller.workspace.active, ViewId::SideView);
         assert_eq!(app.controller.workspace.maximized, Some(ViewId::SideView));
+        assert!(app.controller.document().entities.is_empty());
+        assert_eq!(app.controller.coordinator().undo_len(), 0);
+    }
+
+    #[test]
+    fn top11_tab_lists_the_eleven_action_icons() {
+        assert!(TABS.contains(&"Top 11"));
+        let palette = toolbar_palette("Top 11");
+        assert_eq!(palette.len(), 11);
+        for action in om9_core::top11::Top11Action::ALL {
+            assert!(palette.contains(&action.icon()), "{action:?}");
+        }
+    }
+
+    #[test]
+    fn top11_tab_renders_without_mutating_the_document() {
+        let mut app = MatrixApp::new(Document::new("top11 chrome")).unwrap();
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Top 11").unwrap();
+        narrow_frame(&mut app, false);
         assert!(app.controller.document().entities.is_empty());
         assert_eq!(app.controller.coordinator().undo_len(), 0);
     }

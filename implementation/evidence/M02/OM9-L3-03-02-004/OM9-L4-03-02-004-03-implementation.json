@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-02-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-02-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The modifier decision is captured at press time (pan flag), so a later frame without a modifier event cannot turn a Shift-pan into an orbit.",
+  "tests": [
+    "om9-app navigation_drag: 3 passed",
+    "om9-app navigation_lifecycle: 8 passed"
+  ]
+}

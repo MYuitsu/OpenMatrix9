@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-10-003",
+  "case": "negative",
+  "oracle": "invalid/unknown option token is refused",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

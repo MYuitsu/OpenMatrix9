@@ -125,11 +125,11 @@ impl ThreeDmHost {
             document,
             source,
             &ImportOptions {
-                // The product requirement is editable geometry: no retained history/source
-                // tables are needed to continue editing curves, lines and meshes.
+                // Best effort keeps editable BReps while retaining an unconvertible one as opaque;
+                // a single difficult BRep no longer aborts the whole import.
                 mode: ImportMode::Geometry,
                 brep: if cfg!(feature = "occt-brep") {
-                    BrepMode::EditableStrict
+                    BrepMode::EditableBestEffort
                 } else {
                     BrepMode::RetainOpaque
                 },

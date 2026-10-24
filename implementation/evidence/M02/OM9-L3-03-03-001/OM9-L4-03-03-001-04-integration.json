@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-03-001-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-03-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The same Controller selection set feeds the gumball frame, selection overlay and command context.",
+  "tests": [
+    "om9-app matrix_selection_sequence: 2 passed",
+    "om9-app acceptance_viewport_selection: 8 passed"
+  ]
+}

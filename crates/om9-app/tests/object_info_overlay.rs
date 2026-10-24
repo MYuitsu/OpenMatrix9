@@ -76,6 +76,7 @@ fn i1_to_i5_the_info_is_sourced_from_the_model() {
         faces: Vec::new(),
         normals: Vec::new(),
         colors: Vec::new(),
+        corner_uvs: Vec::new(),
     });
     let (doc, id) = document_with(mesh);
     let info = doc.object_info(id, &limits).expect("mesh info");
@@ -97,6 +98,7 @@ fn i1_to_i5_the_info_is_sourced_from_the_model() {
             faces: Vec::new(),
             normals: Vec::new(),
             colors: Vec::new(),
+            corner_uvs: Vec::new(),
         },
         payload: Vec::new(),
         crc: 0,
@@ -142,6 +144,7 @@ fn j1_to_j4_an_unavailable_measurement_is_never_a_zero() {
         faces: Vec::new(),
         normals: Vec::new(),
         colors: Vec::new(),
+        corner_uvs: Vec::new(),
     }));
     let info = doc.object_info(id, &limits).expect("mesh");
     let zeros = Measurement::Size(size(&j1["expect"]["not_size"]));

@@ -313,5 +313,79 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "NURBS_CURVE"
+  "acceptance_category": "NURBS_CURVE",
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Offset/fillet/chamfer là thao tác plugin cần.",
+    "api": [],
+    "candidate_api": [
+      "offset_curve(id, distance)",
+      "fillet_curves(a, b, radius)"
+    ],
+    "host_only": "Thuật toán kernel ở host; SDK tham số + kết quả."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "curve modifications for jewelry profile design",
+    "owner": {
+      "crate": "om9-core",
+      "test": "crates/om9-core/tests/l2_02_04.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-02-04-006/api.md",
+      "implementation/design/M03/OM9-L3-02-04-006/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-02-04-006/positive.json",
+      "implementation/fixtures/M03/OM9-L3-02-04-006/negative.json",
+      "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-06.ui-review.json",
+      "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-06.acceptance.md",
+      "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-05.integration-stress.log",
+      "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-05.integration-stress.json"
+    ],
+    "tests": [
+      "m03_02_04_006: passed",
+      "l2_02_04 suite: 15 passed, 0 failed",
+      "om9-core suite: 447 passed, 0 failed (52 suites)",
+      "clippy -D warnings: exit 0",
+      "cargo fmt --all -- --check: exit 0",
+      "cargo check --workspace --all-targets -j 2: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "Fillet and chamfer are delivered for line-line corners only; polyline corner chains and line-arc fillets are open.",
+      "NURBS offset is sampled from the exact OffsetCurve derivative contract and fitted back to NURBS; the test bounds the radial deviation at 0.02 mm.",
+      "Manual M03-UI interactive acceptance is not performed by the implementer.",
+      "macOS runtime is unverified."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "manual_gate": "M03-UI",
+      "design": "implementation/design/M03/OM9-L3-02-04-006/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-02-04-006/positive.json",
+        "implementation/fixtures/M03/OM9-L3-02-04-006/negative.json"
+      ],
+      "measured": {
+        "fillet_arc_length_mm": 3.14159265359,
+        "chamfer_length_mm": 5.0,
+        "stress_corners": 100.0,
+        "stress_max_tangency_error_mm": 0.0
+      }
+    },
+    "l4_evidence": {
+      "OM9-L4-02-04-006-01": "1/1",
+      "OM9-L4-02-04-006-02": "1/1",
+      "OM9-L4-02-04-006-03": "1/1",
+      "OM9-L4-02-04-006-04": "1/1",
+      "OM9-L4-02-04-006-05": "1/1",
+      "OM9-L4-02-04-006-06": "1/1"
+    }
+  }
 }

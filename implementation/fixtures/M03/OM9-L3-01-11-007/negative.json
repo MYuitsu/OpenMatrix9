@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-007",
+  "fixture_id": "OM9-L3-01-11-007-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "A = B",
+    "source points collinear"
+  ],
+  "expect": "CreationError::Invalid; no transform"
+}

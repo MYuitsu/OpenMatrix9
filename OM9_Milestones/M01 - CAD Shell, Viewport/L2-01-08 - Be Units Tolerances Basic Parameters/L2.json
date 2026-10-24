@@ -77,5 +77,166 @@
       "id": "OM9-L3-01-08-007",
       "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-007 - Coordinate Numeric Input Primitives/l3.json"
     }
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-01-08",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M01",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "SOURCE-PRESENT",
+      "sdk_signal": "EXPORT-BACKLOG",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Xuất units/tolerance/coordinate types và validation; geometry mm, display unit tách riêng.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-01-08-001",
+      "OM9-L3-01-08-002",
+      "OM9-L3-01-08-003",
+      "OM9-L3-01-08-004",
+      "OM9-L3-01-08-005",
+      "OM9-L3-01-08-006",
+      "OM9-L3-01-08-007"
+    ]
+  },
+  "sdk_implementation_progress": [
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-08",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Public SDK v1 adapter for the document display unit, the document's own tolerance policy, typed length/angle parsing and the command prompt's coordinate grammar. The host dispatch calls the existing core services; no parser or unit table is duplicated.",
+      "public_api": [
+        "Host::document_units",
+        "Host::parse_length",
+        "Host::parse_angle",
+        "Host::parse_coordinates"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-08-001",
+        "OM9-L3-01-08-002",
+        "OM9-L3-01-08-003",
+        "OM9-L3-01-08-007"
+      ],
+      "l3_open": [
+        "OM9-L3-01-08-004",
+        "OM9-L3-01-08-005",
+        "OM9-L3-01-08-006"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-08-units-sdk.md",
+        "docs/validation/2026-10-21-m01-08-units-sdk.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Tolerance is read, not written; display/page unit mutation is not exposed. Local-frame/CPlane resolution and interactive input stay host-owned. This record does not close the L2, its manual gates or the SDK scope of L3-004/005/006."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-08",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Typed builder/command parameters: Dimension/ParameterDomain/ParameterSpec/ParameterValue mirror the document owner's request::OptionDomain and request::Value, and the host runs OptionDomain::check and CommandSchema::apply. Bounds are canonical (mm/degrees), step and the integer count rule apply, defaults are typed, required/unknown names are refused, and one call is bounded to 128 declarations and 128 values.",
+      "public_api": [
+        "Host::validate_parameter",
+        "Host::apply_parameters"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-08-004",
+        "OM9-L3-01-08-005",
+        "OM9-L3-01-08-006"
+      ],
+      "l3_open": [
+        "builder parameter editor/UI parity belongs to M04 and the command registry",
+        "document tolerance editing remains read-only",
+        "CPlane local-to-world frame resolution stays host-owned"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-08-builder-parameters.md",
+        "docs/validation/2026-10-21-m01-08-builder-parameters.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "The exported rule is the one command admission uses; the application has no builder parameter editor yet, so UI parity is not claimed. This record does not close the L2 or its manual gates."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-08",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Tolerance write (host-tested): validated policy mutation with one Undo.",
+      "public_api": [
+        "Host::set_document_tolerance"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-08-003"
+      ],
+      "l3_open": [
+        "native command",
+        "per-object tolerance"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-08-tolerance-write.md",
+        "docs/validation/2026-10-21-m01-01-08-tolerance-write.json"
+      ],
+      "target_proof": {
+        "windows_x64": "host_tests_only",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Host-tested only this round."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-08",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Native ToleranceDemo + DLL test (set 0.01 mm, Undo restores 0.001 mm).",
+      "public_api": [
+        "Host::set_document_tolerance"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-08-003"
+      ],
+      "l3_open": [
+        "per-object tolerance"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-08-tolerance-native.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Global policy only."
+    }
+  ],
+  "sdk_export_plan_policy": {
+    "decided": "2026-10-21",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "field": "sdk_export_plan",
+    "applies_to": "L3 files of this owner that have a recorded SDK slice"
+  }
 }

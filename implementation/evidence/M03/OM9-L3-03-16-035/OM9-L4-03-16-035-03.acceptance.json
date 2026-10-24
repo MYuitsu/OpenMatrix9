@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-035-03",
+  "role": "ACCEPTANCE",
+  "l3": "OM9-L3-03-16-035",
+  "date": "2026-10-23",
+  "status": "READY_FOR_REVIEW",
+  "manual_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "ui_state": "DISABLED_VISIBLE_REASON",
+  "disabled_reason": "interactive Continue Interpolated Curve command session is not wired; owner candidate OM9-L3-02-04-003 is unverified",
+  "human_approval": null,
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test curve_menu",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-03-16-logs/curve-menu.log",
+      "stdout_log_sha256": "393cc79e359e9292748c085a0eded27fa7caad37eae06339a197bc9f2144d396"
+    }
+  ],
+  "artifact_paths": [
+    "implementation/evidence/M03/OM9-L3-03-16-035/OM9-L4-03-16-035-03.acceptance.md"
+  ]
+}

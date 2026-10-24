@@ -72,5 +72,37 @@
     }
   ],
   "l4_status": "PLANNED_NOT_EXECUTED",
-  "planned_l4_count_m08": 17
+  "planned_l4_count_m08": 17,
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-05-03",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M08",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED standalone",
+      "sdk_signal": "AUDIT-THEN-ROUTE → EXPORT/CO-IMPLEMENT",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Audit Rust service và evidence đúng L3; phần có xuất public adapter, phần thiếu triển khai shared service + SDK theo Gems/Settings/Cutters/Advanced Jewelry cùng lượt.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-05-03-001",
+      "OM9-L3-05-03-002",
+      "OM9-L3-05-03-003",
+      "OM9-L3-05-03-004",
+      "OM9-L3-05-03-005"
+    ]
+  }
 }

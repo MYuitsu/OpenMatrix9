@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-06-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-06-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "opacity is bounded to 0..1; locked blocks mutation and selectable() is visible && !locked; asset bytes/hash remain untouched.",
+  "tests": [
+    "om9-app pictureframe unit: 6 passed"
+  ]
+}

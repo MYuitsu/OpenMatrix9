@@ -1,0 +1,54 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-001",
+  "fixture_id": "OM9-L3-01-09-001-POSITIVE",
+  "units": "mm",
+  "input": {
+    "box_sizes_mm": [
+      10,
+      20,
+      30
+    ],
+    "sphere_radius_mm": 5,
+    "cylinder": [
+      5,
+      10
+    ],
+    "cone": [
+      5,
+      0,
+      10
+    ],
+    "torus": [
+      10,
+      2
+    ],
+    "ellipsoid": [
+      3,
+      4,
+      5
+    ],
+    "pyramid": [
+      4,
+      10,
+      10
+    ]
+  },
+  "expect": {
+    "box_volume_mm3": 6000.0,
+    "sphere_volume_mm3": 523.5987755983,
+    "cylinder_volume_mm3": 785.3981633974,
+    "cone_volume_mm3": 261.7993877991,
+    "torus_volume_mm3": 789.5683520871,
+    "volume_abs_tol_mm3": 1e-06
+  },
+  "measured_on_2026_10_22": {
+    "box_volume_mm3": 6000.0,
+    "sphere_volume_mm3": 523.598775598299,
+    "cylinder_volume_mm3": 785.398163397449,
+    "cone_volume_mm3": 261.79938779915,
+    "torus_volume_mm3": 789.568352087151,
+    "ellipsoid_volume_mm3": 251.217495107596,
+    "pyramid_volume_mm3": 666.666666666666
+  }
+}

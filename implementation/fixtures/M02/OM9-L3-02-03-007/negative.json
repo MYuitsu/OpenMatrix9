@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-03-007",
+  "l3_id": "OM9-L3-02-03-007",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Không có candidate thì không còn marker cũ; disabled snap không hiển thị",
+  "expected": "No fake candidate, no stale marker and no document mutation.",
+  "evidence": [
+    "om9-app osnap UI: 3 passed",
+    "om9-scene osnap: 11 passed"
+  ],
+  "status": "PASS"
+}

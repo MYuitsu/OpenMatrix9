@@ -1,0 +1,39 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+   Compiling om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+   Compiling om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+   Compiling om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 35.03s
+     Running tests\cplane_coordinate_input.rs (L:/om9-target\debug\deps\cplane_coordinate_input-0565aa63dc5ffeb4.exe)
+
+running 10 tests
+test relative_entry_without_a_base_is_refused_without_a_document_write ... ok
+test malformed_point_text_keeps_the_prompt_and_the_document_unchanged ... ok
+test ortho_snaps_to_the_dominant_cplane_axis_from_the_previous_point ... ok
+test planar_projects_onto_the_active_plane_and_both_modes_stay_on_it ... ok
+test switching_views_reads_the_other_views_plane_without_moving_the_world_point ... ok
+test local_entry_uses_the_active_view_cplane ... ok
+test front_view_local_input_uses_the_front_cplane_not_top ... ok
+test cplane_origin_rotation_keeps_world_geometry_and_rejects_collinear_input ... ok
+test f4_inserts_the_world_origin_through_the_point_prompt ... ok
+test world_entry_ignores_the_cplane_and_relative_uses_the_previous_point ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\cplane_f4_ui.rs (L:/om9-target\debug\deps\cplane_f4_ui-d6b64579fa79c890.exe)
+
+running 1 test
+test f4_inserts_world_origin_in_a_point_prompt_and_only_toggles_the_datum_when_idle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s
+
+     Running tests\cplane_menu.rs (L:/om9-target\debug\deps\cplane_menu-a70e93c6e022c42d.exe)
+
+running 1 test
+test viewport_menu_applies_a_preset_to_the_captured_view_only ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

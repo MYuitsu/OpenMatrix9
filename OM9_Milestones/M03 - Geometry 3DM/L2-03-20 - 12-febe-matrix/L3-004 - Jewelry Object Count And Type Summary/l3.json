@@ -288,5 +288,40 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "plugin_sdk_v1_object_summary": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "object_summary_verified_windows",
+      "scope": "object_summary counts base plus staged objects by geometry kind, excluding deletions; counts are by intrinsic geometry kind, not jewelry semantic classes.",
+      "public_api": [
+        "Host::object_summary"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-summary.md",
+        "docs/validation/2026-10-21-m03-summary.json"
+      ],
+      "limitations": [
+        "Geometry-kind counts only.",
+        "Jewelry weight/class summary open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::object_summary"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_object_summary"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m03-summary.json",
+      "docs/validation/2026-10-21-m03-summary.md"
+    ]
+  }
 }

@@ -1,0 +1,55 @@
+{
+  "schema": "om9.m03.l2-02-04.ui-review.v1",
+  "task_id": "OM9-L4-02-04-011-05",
+  "l3_id": "OM9-L3-02-04-011",
+  "title": "Curve Seams Directions And Divisions",
+  "oracle": {
+    "positive": [
+      "square length 40 mm; 4 divisions give 5 monotone fractions; 10 mm divide-by-length gives 5 entries; seam at 0.25 starts at the old quarter; reversal swaps 0.25/0.75"
+    ],
+    "negative": [
+      "seam on an open curve",
+      "seam fraction at 0 or 1",
+      "non-positive divide length",
+      "length target above the curve length"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is asserted by a focused Rust test and every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "portable curve service and typed refusal; no window, menu or human review"
+  },
+  "measured": {
+    "square_length_mm": 40.0,
+    "division_count": 5.0
+  },
+  "tolerances": {
+    "square_length_mm": "1e-9",
+    "division_count": "exact integer"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test l2_02_04 m03_02_04_011_curve_seams_directions_and_divisions -- --exact (exit 0)",
+    "regression: cargo test -p om9-core -j 2 (52 suites, 447 passed)",
+    "clippy: cargo clippy -p om9-core --all-targets -j 2 -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-04-011/api.md",
+    "implementation/design/M03/OM9-L3-02-04-011/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-011/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-011/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-04-011/OM9-L4-02-04-011-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-02-04-011/OM9-L4-02-04-011-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_02_04_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

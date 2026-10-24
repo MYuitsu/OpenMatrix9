@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-004",
+  "fixture_id": "OM9-L3-01-11-004-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "count 0",
+    "spacing (-1,0,0)",
+    "count MAX+1",
+    "empty placements"
+  ],
+  "expect": "CreationError::Invalid or Budget; no body"
+}

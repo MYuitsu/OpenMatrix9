@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-03-16.wire_ui.v1",
+  "l3_id": "OM9-L3-03-16-010",
+  "menu_icon": "CurveCurveEditToolsRefitToTolerance",
+  "command_id": "OM9-CURVE-010",
+  "menu_and_commandline_same_id": true,
+  "enabled": false,
+  "disabled_reason": "interactive Refit to Tolerance command session is not wired; owner candidate OM9-L3-02-04-008 is unverified",
+  "visible_disabled_reason": true,
+  "ui_state": "DISABLED_VISIBLE_REASON",
+  "owner_service_reused": "OM9-L3-02-04-008",
+  "transaction": "one session; one Undo entry",
+  "smoke_receipt": "implementation/evidence/M03/OM9-L3-03-16-010/OM9-L4-03-16-010-02.wire.json",
+  "status": "VERIFIED_DISABLED_PLACEHOLDER"
+}

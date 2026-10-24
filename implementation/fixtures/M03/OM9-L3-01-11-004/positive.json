@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-004",
+  "fixture_id": "OM9-L3-01-11-004-POSITIVE",
+  "units": "mm",
+  "input": {
+    "count": 4,
+    "spacing_mm": [
+      10,
+      0,
+      0
+    ],
+    "include_source": true,
+    "polar_total_rad": 6.283185307179586
+  },
+  "expect": {
+    "placements": 4,
+    "origins_x": [
+      0,
+      10,
+      20,
+      30
+    ],
+    "polar_step_rad": 1.5707963267948966
+  },
+  "measured_on_2026_10_22": {
+    "linear_pattern_placements": 4.0,
+    "instance_definitions": 1.0,
+    "baked_bodies": 4.0
+  }
+}

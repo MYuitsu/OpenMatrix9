@@ -1,0 +1,17 @@
+{
+  "l3": "OM9-L3-03-07-007",
+  "title": "Default Menu Layout Reset",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/dock_layout.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "api": "DockLayout reset/default JSON + Reset Menus",
+  "tests": [
+    "dock_layout_default",
+    "dock_layout_persistence"
+  ],
+  "manual_reference": "Matrix8 Book 1, pp11-13 and reference menu icon catalog",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

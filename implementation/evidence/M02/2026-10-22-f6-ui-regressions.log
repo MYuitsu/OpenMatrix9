@@ -1,0 +1,47 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.33s
+     Running tests\command_sessions.rs (L:/om9-target\debug\deps\command_sessions-dd394d6424c7efc3.exe)
+
+running 6 tests
+test unavailable_command_and_unknown_options_cannot_publish_or_replace_active_session ... ok
+test numeric_cmd_points_use_page_units_and_captured_cplane_exactly_once ... ok
+test both_sides_uses_start_as_midpoint_and_empty_enter_never_repeats_active_session ... ok
+test cancel_and_invalid_second_point_preserve_world_and_executable_redo ... ok
+test menu_cmd_and_f6_dispatch_the_same_line_phases_and_atomic_commit ... ok
+test scene_is_derived_from_published_document_and_recent_icons_hold_nine_completed_commands ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\f6_context.rs (L:/om9-target\debug\deps\f6_context-695cc07518363b1b.exe)
+
+running 2 tests
+test f6_uses_the_selected_class_and_empty_general_context ... ok
+test a_custom_menu_persists_in_the_project_with_stable_order_and_stale_disable ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\ui_events.rs (L:/om9-target\debug\deps\ui_events-d1bf627c039fb97a.exe)
+
+running 6 tests
+test reference_workspace_places_sidebar_left_and_through_finger_below_looking_down ... ok
+test construction_grid_colors_only_positive_axes_like_the_reference ... FAILED
+test printable_viewport_input_routes_to_cmd_when_no_other_editor_owns_focus ... ok
+test actual_editor_select_all_cut_paste_cannot_mutate_transcript_prefix_or_execute_paste ... ok
+test f6_remains_open_between_frames_and_unpinned_escape_restores_command_focus ... ok
+test rendered_cmd_events_build_line_undo_redo_and_cancel_without_direct_model_writes ... ok
+
+failures:
+
+---- construction_grid_colors_only_positive_axes_like_the_reference stdout ----
+
+thread 'construction_grid_colors_only_positive_axes_like_the_reference' (38148) panicked at crates\om9-app\tests\ui_events.rs:158:10:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    construction_grid_colors_only_positive_axes_like_the_reference
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s
+
+error: test failed, to rerun pass `-p om9-app --test ui_events`

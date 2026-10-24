@@ -1,0 +1,32 @@
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+   Compiling om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 31.35s
+     Running tests\chrome_actions.rs (L:/om9-target\debug\deps\chrome_actions-4c6a554bb0ecde97.exe)
+
+running 13 tests
+test every_reference_menu_has_its_full_icon_list ... ok
+test main_menu_categories_wrap_at_the_rail_edge ... ok
+test f4_toggles_world_datum_without_mutating_document ... ok
+test unregistered_right_click_slot_never_executes_a_previous_action ... ok
+test view_tab_switches_active_and_maximized_view ... ok
+test main_menu_category_tabs_switch_palette_without_document_mutation ... ok
+test top_menu_labels_are_interactive_and_return_to_categories ... ok
+test help_popup_contains_help_and_about_without_feature_catalog_actions ... ok
+test icons_scale_with_the_screen_size ... ok
+test display_toolbar_tab_does_not_reuse_enabled_geometry_palette ... ok
+test view_tab_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test view_menu_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test snaps_are_noninvoking_even_where_the_old_sidebar_displayed_point_and_line ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
+
+     Running tests\osnap_ui.rs (L:/om9-target\debug\deps\osnap_ui-a4bace3b8de5dcd6.exe)
+
+running 3 tests
+test disabling_end_removes_the_marker_from_the_next_frame ... ok
+test escape_clears_the_smarttrack_guides_and_pending_snap ... ok
+test an_end_marker_is_consumed_by_the_point_prompt_and_smarttrack_keeps_two_anchors ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s
+

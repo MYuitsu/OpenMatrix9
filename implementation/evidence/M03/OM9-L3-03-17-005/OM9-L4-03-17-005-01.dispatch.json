@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-005-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-005",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-005",
+  "source_command": "Profile Sweep",
+  "menu_icon": "SurfaceSweepProfileSweep",
+  "owner_candidate": "OM9-L3-01-09-007",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-005/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-005/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-005/dispatch_contract.json": "711782fb662539f8345dcdb38ca787864484322e601585741273010b8f2953f0",
+    "implementation/design/M03/OM9-L3-03-17-005/source_crosswalk.json": "cc773e76cbe6584fea5faa992ccc66f93cb84b16e3c24f77701561eb7808e865"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

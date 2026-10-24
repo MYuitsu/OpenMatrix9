@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-017-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-017",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-017",
+  "source_command": "Intersection",
+  "menu_icon": "CurveCurveFromObjectsIntersection",
+  "owner_candidate": "OM9-L3-02-04-009",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Intersection command session is not wired; owner candidate OM9-L3-02-04-009 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-017/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-017/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-017/dispatch_contract.json": "dc2bcb34220db76b5c3ed1924d5e38d4c89b0cfb59708aa4f8a14d07af2348e8",
+    "implementation/design/M03/OM9-L3-03-16-017/dispatch_contract.md": "824bf513e1858e3673e1f8fad92fb8b2253616daf397b97b5f12ecab335c834f"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

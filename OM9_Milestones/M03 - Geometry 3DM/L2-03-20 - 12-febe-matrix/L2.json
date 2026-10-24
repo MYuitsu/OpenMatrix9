@@ -76,5 +76,248 @@
   ],
   "m03_l4_planned_count": 25,
   "execution_state": "NOT_STARTED",
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-03-20",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "SOURCE-PRESENT distance/angle",
+      "sdk_signal": "EXPORT-BACKLOG + AUDIT-THEN-ROUTE",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Xuất distance/angle trước; length/area/volume/statistics theo backend và exact owner.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-03-20-001",
+      "OM9-L3-03-20-002",
+      "OM9-L3-03-20-003",
+      "OM9-L3-03-20-004",
+      "OM9-L3-03-20-005"
+    ]
+  },
+  "sdk_implementation_progress": [
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-03-20",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Distance and angle measurement: measure_distance calls measure::distance_mm (canonical millimetres, 1e9 coordinate bound) and measure_angle calls measure::angle_degrees (undirected [0,180] degrees, zero-length direction refused). Both return typed DTOs and stage no mutation; object-to-object measurement, length/radius/area/volume and labels remain open.",
+      "public_api": [
+        "Host::measure_distance",
+        "Host::measure_angle"
+      ],
+      "l3_covered": [
+        "OM9-L3-03-20-001",
+        "OM9-L3-03-20-002"
+      ],
+      "l3_open": [
+        "curve length, radius, area and volume",
+        "bounding size and center",
+        "measurement label and command feedback integration",
+        "object-to-object distance/angle"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-measure.md",
+        "docs/validation/2026-10-21-m03-measure.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Point-to-point distance and line-to-line angle only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-03-20",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Object bounds: object-local box/size/center from point position, 33-sampled curve points or mesh vertices; unsupported kinds refused; read-only.",
+      "public_api": [
+        "Host::object_bounds"
+      ],
+      "l3_covered": [
+        "OM9-L3-03-20-003"
+      ],
+      "l3_open": [
+        "exact analytic curve bounds",
+        "B-Rep/surface/cloud bounds",
+        "group bounds and count summary"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-bounds.md",
+        "docs/validation/2026-10-21-m03-bounds.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Sampled curve bounds; three geometry kinds only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-03-20",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Curve length: sampled 33-point chord length in object-local mm; non-curve unsupported.",
+      "public_api": [
+        "Host::measure_curve_length"
+      ],
+      "l3_covered": [
+        "OM9-L3-03-20-001"
+      ],
+      "l3_open": [
+        "exact/adaptive length",
+        "radius/area/volume",
+        "statistics"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-length.md",
+        "docs/validation/2026-10-21-m03-length.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Sampled approximation."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-03-20",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Circle radius: native circle/arc record radius in object-local mm; other curve kinds refused.",
+      "public_api": [
+        "Host::measure_curve_radius"
+      ],
+      "l3_covered": [
+        "OM9-L3-03-20-002"
+      ],
+      "l3_open": [
+        "ellipse radius",
+        "area/volume",
+        "statistics"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-radius.md",
+        "docs/validation/2026-10-21-m03-radius.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Circle record only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-03-20",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Object count/type summary by geometry kind, staged-consistent.",
+      "public_api": [
+        "Host::object_summary"
+      ],
+      "l3_covered": [
+        "OM9-L3-03-20-004"
+      ],
+      "l3_open": [
+        "jewelry semantic classes/weight summary",
+        "grouped counts"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-summary.md",
+        "docs/validation/2026-10-21-m03-summary.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Geometry-kind counts only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-03-20",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Measurement label: one bounded Progress line through the plugin message pipeline.",
+      "public_api": [
+        "Host::report_measurement"
+      ],
+      "l3_covered": [
+        "OM9-L3-03-20-005"
+      ],
+      "l3_open": [
+        "structured measurement record",
+        "UI acceptance"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-label.md",
+        "docs/validation/2026-10-21-m03-label.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Free-text label only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-03-20",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Mesh area: fan-triangulated planar face area sum in object-local mm².",
+      "public_api": [
+        "Host::measure_mesh_area"
+      ],
+      "l3_covered": [
+        "OM9-L3-03-20-001"
+      ],
+      "l3_open": [
+        "surface/solid volume",
+        "NURBS area"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-area.md",
+        "docs/validation/2026-10-21-m03-area.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Planar mesh faces only."
+    }
+  ],
+  "sdk_export_plan_policy": {
+    "decided": "2026-10-21",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "field": "sdk_export_plan",
+    "applies_to": "L3 files of this owner that have a recorded SDK slice"
+  }
 }

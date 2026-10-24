@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-003-05",
+  "role": "REGRESSION_STRESS",
+  "l3": "OM9-L3-01-07-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "regression": "publication_prunes_subobjects_and_undo_never_rematches_them; invalid_topology_and_a_tessellation_diagonal_are_rejected; a_face_that_disappears_after_a_rebuild_is_a_stale_miss.",
+  "tests": [
+    "om9-app subobject_selection: 8 passed",
+    "om9-app brep_selection (gpu-sphere): 5 passed"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "l3": "OM9-L3-03-15-009",
+  "title": "Project Manager Dock Interaction",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/dock_layout.rs"
+  ],
+  "tests": "panel_ops 33 passed; shell_docking 10 passed",
+  "manual_reference": "Matrix8 Book 1 pp48-56/79-86",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-15-009-01"
+}

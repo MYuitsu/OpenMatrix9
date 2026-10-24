@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-02-005",
+  "l3_id": "OM9-L3-03-02-005",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Fit 10×20×30 mm box vào viewport với margin, ZoomSelected chỉ fit selected IDs",
+  "expected": "The documented camera motion with the world/document unchanged where required.",
+  "evidence": [
+    "om9-app navigation_commands: 6 passed",
+    "om9-scene camera_fit: 4 passed"
+  ],
+  "status": "PASS"
+}

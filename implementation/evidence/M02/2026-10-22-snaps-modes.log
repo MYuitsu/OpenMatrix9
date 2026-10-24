@@ -1,0 +1,12 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.19s
+     Running tests\snap_panel_modes.rs (L:/om9-target\debug\deps\snap_panel_modes-432321f511cf99a6.exe)
+
+running 4 tests
+test project_projects_to_the_active_cplane_without_changing_it ... ok
+test panel_updates_enabled_state_and_override_in_the_same_frame ... ok
+test a_focused_command_editor_does_not_consume_the_snap_shortcut ... ok
+test e_and_m_select_end_and_mid_while_a_command_is_running ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s
+

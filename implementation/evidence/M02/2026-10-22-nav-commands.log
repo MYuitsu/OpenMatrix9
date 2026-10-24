@@ -1,0 +1,14 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.26s
+     Running tests\navigation_commands.rs (L:/om9-target\debug\deps\navigation_commands-d760d31d2ffd5f38.exe)
+
+running 6 tests
+test home_restores_the_camera_preset_without_touching_cplane_layers_or_document ... ok
+test center_moves_the_target_to_the_world_origin_and_preserves_rotation ... ok
+test zoom_extents_fits_the_whole_scene_and_keeps_the_view_direction ... ok
+test view_commands_are_available_and_dispatch_through_the_session ... ok
+test zoom_selected_ignores_far_unselected_geometry ... ok
+test empty_scene_is_a_typed_fit_failure_and_a_point_keeps_a_finite_span ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

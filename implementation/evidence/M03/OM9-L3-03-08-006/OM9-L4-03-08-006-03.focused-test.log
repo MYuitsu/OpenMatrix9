@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\top11.rs (L:\om9-target\debug\deps\top11-0eff463d083938e7.exe)
+
+running 1 test
+top11_buttons=11
+ringrail_enabled=false
+test m03_03_08_006_toolbar_has_eleven_actions_and_ring_rail_stays_disabled ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
+

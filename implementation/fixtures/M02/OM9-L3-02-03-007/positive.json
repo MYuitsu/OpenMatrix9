@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-03-007",
+  "l3_id": "OM9-L3-02-03-007",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Marker END hiện đúng khi candidate END thắng và tooltip mô tả chính xác",
+  "expected": "The documented snap kind and world point with a stable object identity.",
+  "evidence": [
+    "om9-app osnap UI: 3 passed",
+    "om9-scene osnap: 11 passed"
+  ],
+  "status": "PASS"
+}

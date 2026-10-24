@@ -1,0 +1,34 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.94s
+     Running tests\camera_grid.rs (L:/om9-target\debug\deps\camera_grid-70dd08e7e87bc301.exe)
+
+running 5 tests
+test cplane_coordinate_resolution_is_independent_from_camera_navigation ... ok
+test invalid_camera_frame_clipping_and_viewport_ranges_reject ... ok
+test maximize_restore_preserves_each_view_and_original_titles ... ok
+test orthographic_projection_and_ray_share_world_frame_after_pan ... ok
+test finite_grid_is_world_geometry_for_display_only_with_exact_subdivision ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\camera_orbit.rs (L:/om9-target\debug\deps\camera_orbit-c3b305da90863ad7.exe)
+
+running 5 tests
+test an_orthographic_view_zooms_its_span_and_keeps_the_eye ... ok
+test orbit_clamps_the_elevation_below_the_pole ... ok
+test zoom_scales_the_distance_in_perspective ... ok
+test pan_moves_eye_and_target_together ... ok
+test orbit_keeps_the_target_and_the_distance ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\navigation_snapshot.rs (L:/om9-target\debug\deps\navigation_snapshot-75441b4671762ba3.exe)
+
+running 2 tests
+test conservative_pick_bounds_enclose_scaled_sheared_vertices_at_large_coordinates ... ok
+test worker_snapshot_and_canonical_scene_pick_the_same_face_and_corners ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

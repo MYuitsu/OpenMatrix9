@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-07-001",
+  "case": "negative",
+  "oracle": "a section cannot disappear, duplicate, or leave the left column after reset/reload",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

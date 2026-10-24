@@ -1,0 +1,20 @@
+{
+  "l3": "OM9-L3-02-02-006",
+  "title": "Ortho Planar Project Cursor Constrain",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/ui/sidebar_palettes.rs"
+  ],
+  "tests": [
+    "om9-app cplane_coordinate_input: 10 passed",
+    "om9-app chrome_actions: 13 passed"
+  ],
+  "manual_reference": "Rhino5 user guide pp.37-43; Matrix8 Book 1 pp.12-16 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-02-02-006-01"
+}

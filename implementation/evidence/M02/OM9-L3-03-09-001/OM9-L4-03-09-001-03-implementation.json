@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-09-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-09-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "f6::classify resolves General/Solid/Curve/Surface/Gem from the complete selected set; mixed or unknown sets deliberately fall back to General.",
+  "tests": [
+    "om9-app f6 unit: 7 passed",
+    "om9-app f6_context: 2 passed"
+  ]
+}

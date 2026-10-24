@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-02-02-007-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-02-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Switching the active view changes only which CPlane reads local input; the point entity is unchanged. Camera pan is display-only.",
+  "tests": [
+    "om9-app cplane_coordinate_input: 10 passed"
+  ]
+}

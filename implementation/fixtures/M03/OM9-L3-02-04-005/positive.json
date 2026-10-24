@@ -1,0 +1,19 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-005",
+  "fixture_id": "OM9-L3-02-04-005-POSITIVE",
+  "units": "mm",
+  "oracle": "two 10 mm lines join to 20 mm; trim [0.25,0.75] is 10 mm; split 0.25 gives 5+15 mm; close adds the exact gap; 9 polygon round trips with no length drift",
+  "measured": {
+    "joined_length_mm": 20.0,
+    "trimmed_length_mm": 10.0,
+    "stress_polygons": 9.0,
+    "stress_max_length_drift_mm": 0.0
+  },
+  "tolerances": {
+    "joined_length_mm": "1e-9",
+    "trimmed_length_mm": "1e-9",
+    "stress_max_length_drift_mm": "1e-8"
+  },
+  "test": "m03_02_04_005_join_explode_close_and_split"
+}

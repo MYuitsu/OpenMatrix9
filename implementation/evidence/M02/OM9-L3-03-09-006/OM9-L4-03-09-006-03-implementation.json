@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-09-006-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-09-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "builder_prefill emits versioned selection IDs, origin hint and plane revision only when the M04 provider flag is present; otherwise it returns Unsupported.",
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ]
+}

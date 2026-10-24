@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-04-003-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-04-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The marker is produced from core candidates; the UI observes the state transition rather than keeping a second flag.",
+  "tests": [
+    "om9-app snap_panel_modes: 4 passed",
+    "om9-app osnap_ui: 3 passed"
+  ]
+}

@@ -594,6 +594,3 @@ fn schema4_cold_process_preserves_namespaces_current_edits_tombstones_and_origin
     );
     fs::remove_file(path).unwrap();
 }
-
-
-

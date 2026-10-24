@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-02-03-005-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-03-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "The viewport exposes set_snap_override/set_snap_enabled and the Snaps palette toggles persistent kinds; the winner is used by the click path.",
+  "tests": [
+    "om9-app osnap UI: 3 passed",
+    "om9-app chrome_actions: 13 passed"
+  ]
+}

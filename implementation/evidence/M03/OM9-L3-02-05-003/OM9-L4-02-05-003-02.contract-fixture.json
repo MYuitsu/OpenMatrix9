@@ -1,0 +1,29 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-003-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-003",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-003/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-003/negative.json",
+  "fixture_sha256": {
+    "positive": "0ee729a03fb937386a29fd1ce897307a0cbd8bf2f01d310394f3c853e2487689",
+    "negative": "acf646973941833e37f59e07076c88cacdd8d5de6bde2bf5678b29a752a1e94a"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-003/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-003/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-003/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "a rail parallel to the axis extrudes the profile over 10 mm",
+      "a two-turn helical rail places the authored profile point at [2cos(t), 2sin(t), t]"
+    ],
+    "negative": [
+      "a zero axis direction is refused",
+      "fewer than four profile samples or two rail samples are refused"
+    ]
+  }
+}

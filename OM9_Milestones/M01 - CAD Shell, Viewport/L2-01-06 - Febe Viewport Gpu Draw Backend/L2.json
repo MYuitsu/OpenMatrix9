@@ -240,6 +240,57 @@
       "manual_gate_promoted": false,
       "preview_mesh_policy": "LOD0 for all occurrences; resolution/MSAA adapt; certified decimation not integrated",
       "presentation_acceptance": "NOT_PROVED"
+    },
+    "plugin_sdk_v1": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9",
+      "status": "partial_sdk_consumer_verified_windows",
+      "scope": "Versioned native SDK consumer; host-owned atomic document/scene publication; exact simple polyline cache/picking. Does not close the full module.",
+      "evidence": [
+        "docs/validation/2026-10-21-plugin-sdk.json",
+        "docs/validation/2026-10-21-plugin-sdk.md"
+      ],
+      "limitations": [
+        "macOS execution unverified",
+        "full module/manual gates remain open",
+        "2 unrelated broad app dock reset regressions remain failing"
+      ]
     }
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-01-06",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M01",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "EVIDENCE-SCOPED display; gate mở",
+      "sdk_signal": "HOST-INTERNAL + façade S07",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Giữ GPU/cache nội bộ; chỉ xuất preview/overlay DTO có budget và cleanup.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-01-06-001",
+      "OM9-L3-01-06-002",
+      "OM9-L3-01-06-003",
+      "OM9-L3-01-06-004",
+      "OM9-L3-01-06-005",
+      "OM9-L3-01-06-006",
+      "OM9-L3-01-06-007",
+      "OM9-L3-01-06-008",
+      "OM9-L3-01-06-009"
+    ]
   }
 }

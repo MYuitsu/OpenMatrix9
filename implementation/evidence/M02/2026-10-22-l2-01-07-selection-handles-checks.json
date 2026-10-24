@@ -1,0 +1,171 @@
+{
+  "schema": "om9.m02.checks.v1",
+  "work_item": "m02-l2-01-07-picking-selection-handles-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-01-07",
+  "title": "Febe Picking Selection Generic Handles",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Audited the existing standalone picking/selection/Gumball implementation against all eight L3 oracles. No L3 feature surface was missing. One real defect was found and fixed: Scene::pick_all applied the nearest-only depth early-out, so a farther object on the same ray could disappear from the disambiguation popup depending on spatial-index order.",
+  "audit": {
+    "existing_implementation": true,
+    "l3_count": 8,
+    "missing_feature_code": [],
+    "new_feature_code_required": false,
+    "bug_fixed": "crates/om9-scene/src/picking.rs: the depth early-out now applies only when nearest_only is true; pick_all keeps every distinct object under the pointer, nearest first.",
+    "regression": "crates/om9-scene/tests/acceptance_l2_01_07.rs::two_objects_on_one_ray_are_both_candidates_in_every_publication"
+  },
+  "code_changes": [
+    "crates/om9-scene/src/picking.rs: guard the sphere-depth early-out with nearest_only",
+    "crates/om9-scene/tests/acceptance_l2_01_07.rs: 32-publication candidate regression"
+  ],
+  "red_evidence": [
+    {
+      "name": "pick_disambiguation before the fix",
+      "result": "FAILED: escaping_the_choice_keeps_the_previous_selection expected 2 candidates, got 0",
+      "log": "implementation/evidence/M02/2026-10-22-pick-disambiguation-retry.log",
+      "sha256": "c54cc72dd99018cf26bed2bdc4f9ee64e1bd3af52e084237ecce0259b72319ce"
+    },
+    {
+      "name": "selection suite before the fix",
+      "result": "exit 101 at pick_disambiguation",
+      "log": "implementation/evidence/M02/2026-10-22-app-selection-tests.log",
+      "sha256": "bba71e5cd4c25ea0f433774a7b8d28c7bf137181dab18c5589005cd5a747ca48"
+    }
+  ],
+  "checks": [
+    {
+      "name": "om9-core",
+      "command": "cargo test -p om9-core -j 2",
+      "result": "403 passed; 0 failed; 47 suites",
+      "log": "implementation/evidence/M02/2026-10-22-core-tests-after-fix.log",
+      "sha256": "4db23424bf10718c08a55cc98619950717ad24aad43e569baa6f510be46536cf"
+    },
+    {
+      "name": "om9-scene",
+      "command": "cargo test -p om9-scene -j 2",
+      "result": "82 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-scene-tests-after-fix.log",
+      "sha256": "5b1626f5307f164488454f2316ee3bb7c87d16bacee0d86ac1b2869a4d535efc"
+    },
+    {
+      "name": "om9-scene acceptance_l2_01_07",
+      "command": "cargo test -p om9-scene --test acceptance_l2_01_07 -j 2",
+      "result": "9 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-scene-acceptance-after-fix.log",
+      "sha256": "f22477474f3d6b6b2aea3f935f3800fb350cf33305e37f46270997390485306b"
+    },
+    {
+      "name": "om9-app selection and Gumball",
+      "command": "cargo test -p om9-app -j 2 --test acceptance_selection_set --test acceptance_viewport_selection --test clip_behaviours --test gumball_cold --test gumball_interaction --test gumball_numeric --test gumball_placement --test gumball_viewport --test pick_27k --test pick_disambiguation --test rubber_band --test selection_overlay --test subobject_occurrences --test subobject_selection",
+      "result": "63 passed; 0 failed; 1 ignored (pick_27k needs OM9_PICK_FIXTURE)",
+      "log": "implementation/evidence/M02/2026-10-22-app-selection-tests-after-fix.log",
+      "sha256": "59166e3601b9b09d8bf5c0f2d4f6193c659aaaf7c8318bbfd5013f6ebee125ec"
+    },
+    {
+      "name": "om9-app library with GPU feature",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib -j 2",
+      "result": "148 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-app-gpu-lib.log",
+      "sha256": "9ff596b04eb1ad19abc92df2b51762682b4650085ec4c3fc1c5eec25b09d2909"
+    },
+    {
+      "name": "native BRep selection",
+      "command": "cargo test -p om9-app --features gpu-sphere --test brep_selection -j 2",
+      "result": "5 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-brep-selection-after-fix.log",
+      "sha256": "af8981acf1f715eb70c2b1b71ede4c20a072e75d1b3167a06efa36c35c988382"
+    },
+    {
+      "name": "pick_disambiguation repeated",
+      "command": "cargo test -p om9-app --test pick_disambiguation -j 2 (x10)",
+      "result": "10/10 runs; 5 passed each",
+      "log": "implementation/evidence/M02/2026-10-22-pick-disambiguation-x10.log",
+      "sha256": "be577b3b4d89b6d884ba62ffb29a8cbbffbada75555a3772a0bd50498ededc5b"
+    },
+    {
+      "name": "clippy scene",
+      "command": "cargo clippy -p om9-scene --all-targets -j 2 -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-scene-clippy.log",
+      "sha256": "86a833e341cee4dc4c3bf1225b4f22e4458593aca73f21edba0bd2f9184caac2"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M02/2026-10-22-public-source-audit-final.log",
+      "sha256": "cc136b3fd41989baccb790ceff8af808d025134ffdaece353ae0813bed053cda"
+    },
+    {
+      "name": "three_dm_brep_pick (fixture-gated, enabled run)",
+      "command": "$env:OM9_THREE_DM_OM9=<fixture.om9>; cargo test -p om9-app --features occt-brep --test three_dm_brep_pick -- --ignored --nocapture -j 2",
+      "result": "1 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-three-dm-brep-pick-pass.log",
+      "sha256": "ecf702090dbb546ce9de924192e9cf7f93b27c23bcd58d9d8af709da9cc3bbb8"
+    },
+    {
+      "name": "pick_27k (fixture-gated baseline)",
+      "command": "$env:OM9_PICK_FIXTURE=<27k.om9>; cargo test -p om9-app --test pick_27k -- --ignored --nocapture -j 2",
+      "result": "1 passed; 580.62 ms average over 27000 objects; current test threshold 3000 ms; not a 16.7 ms frame-rate claim",
+      "log": "implementation/evidence/M02/2026-10-22-pick-27k-run.log",
+      "sha256": "f3a07dbfd481a5ec283047ea2356dbf864bfe044a9bc0647ad76c014210c9bc6"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-01-07-001": "6/6",
+    "OM9-L3-01-07-002": "5/5",
+    "OM9-L3-01-07-003": "6/6",
+    "OM9-L3-01-07-004": "5/5",
+    "OM9-L3-01-07-005": "5/5",
+    "OM9-L3-01-07-006": "5/5",
+    "OM9-L3-01-07-007": "6/6",
+    "OM9-L3-01-07-008": "6/6"
+  },
+  "artifacts": [
+    "implementation/design/M02/OM9-L2-01-07/README.md",
+    "implementation/evidence/M02/2026-10-22-pick-all-fix.md",
+    "implementation/design/M02/OM9-L3-01-07-001/api.md",
+    "implementation/design/M02/OM9-L3-01-07-002/api.md",
+    "implementation/design/M02/OM9-L3-01-07-003/api.md",
+    "implementation/design/M02/OM9-L3-01-07-004/api.md",
+    "implementation/design/M02/OM9-L3-01-07-005/api.md",
+    "implementation/design/M02/OM9-L3-01-07-006/api.md",
+    "implementation/design/M02/OM9-L3-01-07-007/api.md",
+    "implementation/design/M02/OM9-L3-01-07-008/api.md",
+    "implementation/evidence/M02/2026-10-22-three-dm-brep-pick-pass.log",
+    "implementation/evidence/M02/2026-10-22-pick-27k-run.log"
+  ],
+  "manual_gate": "M02-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M02-UI visual review of picking, hover, window/crossing, subobject and Gumball feedback is pending.",
+    "macOS runtime is unverified.",
+    "pick_27k and three_dm_brep_pick remain #[ignore] by convention because they need external fixtures; both passed on 2026-10-22 with local fixtures.",
+    "cargo fmt --check still reports pre-existing differences in crates/om9-app/src/camera_rig.rs, outside this module."
+  ],
+  "not_claimed": [
+    "Human approval or M02-UI sign-off",
+    "macOS execution",
+    "QymCAD pinned-source reuse or a build-time QymCAD dependency"
+  ],
+  "fixture_provenance": {
+    "three_dm_brep_pick": {
+      "source_3dm": "build/standalone-deps/opennurbs/example_files/V5/v5_my_brep.3dm",
+      "source_sha256": "59a632b9a04c5278053bd4f28d3580bfdc9de160aa9138f45ffe0d2f5b0bcc4c",
+      "import": "om9 --import-3dm v5_my_brep.3dm build/tmp/v5_my_brep.om9 (paired Windows release app + native exchange)",
+      "fixture_om9": "build/tmp/v5_my_brep.om9",
+      "fixture_sha256": "941fb8348dabc9ae8e76de812ed2956ce3a154d9c67c55bfc2a2e41487a0155c",
+      "fixture_bytes": 42415,
+      "label": "Twisted b-rep",
+      "note": "One editable ON_Brep with display points/triangles; generated 2026-10-22 in gitignored build storage."
+    },
+    "pick_27k": {
+      "fixture_om9": "build/stress-27000/bong-27k.om9",
+      "objects": 27000,
+      "average_ms": 580.62,
+      "note": "Measured baseline only; the test asserts <3000 ms, not one 16.7 ms frame."
+    }
+  }
+}

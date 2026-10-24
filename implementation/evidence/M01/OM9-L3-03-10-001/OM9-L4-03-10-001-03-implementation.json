@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-10-001-03",
+  "l3": "OM9-L3-03-10-001",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/transcript.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": "command_feedback_adapter 5 passed",
+  "oracle": "typed alias submits one command and echoes canonical ID"
+}

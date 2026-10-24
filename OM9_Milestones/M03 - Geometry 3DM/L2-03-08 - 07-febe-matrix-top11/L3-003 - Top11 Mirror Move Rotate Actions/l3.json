@@ -278,5 +278,82 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "date": "2026-10-23",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "quick toolbar bindings to transform engine",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "test": "crates/om9-app/tests/top11.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-03-08-003/api.md",
+      "implementation/design/M03/OM9-L3-03-08-003/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-03-08-003/positive.json",
+      "implementation/fixtures/M03/OM9-L3-03-08-003/negative.json",
+      "implementation/evidence/M03/OM9-L3-03-08-003/OM9-L4-03-08-003-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-03-08-003/OM9-L4-03-08-003-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-03-08-003/OM9-L4-03-08-003-05.acceptance.md",
+      "implementation/evidence/M03/OM9-L3-03-08-003/OM9-L4-03-08-003-05.ui-review.json",
+      "implementation/evidence/M03/OM9-L3-03-08-003/OM9-L4-03-08-003-03b.brep-mirror.log"
+    ],
+    "tests": [
+      "m03_03_08_003: passed",
+      "om9-app lib: 175 passed, 0 failed",
+      "om9-app Top 11 suite: 19 passed, 0 failed",
+      "om9-app BRep suite: 6 passed, 0 failed",
+      "om9-core Top 11 suite: 17 passed, 0 failed",
+      "clippy -D warnings: exit 0",
+      "cargo fmt --all -- --check: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "The toolbar Mirror starts with the two-point vertical plane; typing 3Point switches to the arbitrary three-point plane and resets the picks.",
+      "Non-rigid circles become NURBS ellipses; mesh/cloud normals and winding are transformed.",
+      "BRep mirror needs the occt-brep feature (product default).",
+      "Rotate uses the active CPlane normal.",
+      "Interactive M03-UI acceptance of the toolbar and point prompts is not performed by the implementer.",
+      "macOS runtime is unverified."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-23",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "manual_gate": "M03-UI",
+      "design": "implementation/design/M03/OM9-L3-03-08-003/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-03-08-003/positive.json",
+        "implementation/fixtures/M03/OM9-L3-03-08-003/negative.json"
+      ],
+      "measured": {
+        "mirror_delete_entities": 1.0,
+        "mirror_delete_start_x_mm": -1.0,
+        "mirror_copies": 2.0,
+        "mirrored_start_x_mm": -1.0,
+        "three_point_mirror_start_x_mm": -1.0,
+        "non_rigid_mirror_end_x_mm": -2.0,
+        "move_base_mm": "[5.0, -2.0, 0.0]",
+        "rotate_end_mm": "[6.123233995736766e-16, 10.0, 0.0]",
+        "brep_cutter_entities": 4.0,
+        "exact_brep_fractions": "[0.25, 0.75]",
+        "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+        "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+        "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+        "brep_mirror_volume_mm3": 24.0,
+        "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+      }
+    },
+    "l4_evidence": {
+      "OM9-L4-03-08-003-01": "1/1",
+      "OM9-L4-03-08-003-02": "1/1",
+      "OM9-L4-03-08-003-03": "1/1",
+      "OM9-L4-03-08-003-04": "1/1",
+      "OM9-L4-03-08-003-05": "1/1"
+    }
+  }
 }

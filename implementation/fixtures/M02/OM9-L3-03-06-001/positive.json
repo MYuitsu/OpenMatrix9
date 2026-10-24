@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-06-001",
+  "l3_id": "OM9-L3-03-06-001",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Import PNG 100×100 gắn quad 20×20 mm vào active plane",
+  "expected": "The documented reference-image behavior with asset/model integrity preserved.",
+  "evidence": [
+    "om9-app pictureframe unit: 6 passed",
+    "om9-app pictureframe persistence: 3 passed"
+  ],
+  "status": "PASS"
+}

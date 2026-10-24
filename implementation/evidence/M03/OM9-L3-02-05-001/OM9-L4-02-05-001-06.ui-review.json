@@ -1,0 +1,66 @@
+{
+  "schema": "om9.m03.l2-02-05.ui-review.v1",
+  "task_id": "OM9-L4-02-05-001-06",
+  "l3_id": "OM9-L3-02-05-001",
+  "title": "Sweep1 Sweep2 And Profile Sweep Workflows",
+  "oracle": {
+    "positive": [
+      "circle r=2 swept along a 10 mm straight rail keeps radius 2 at every station",
+      "sweep2 rails from width 5 to 9 mm keep both boundaries in contact",
+      "maintain-height preserves the 2 mm crown (OFF gives 3.6 mm)"
+    ],
+    "negative": [
+      "too few profile or rail samples are refused",
+      "a degenerate rail has no frame",
+      "degree 4, closed rails and a profile not spanning the rails are refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The core surface oracle passes; the UI rail/profile/boundary selection, preview, commit/cancel and warning review is not signed by a human.",
+    "scope": "select rails and cross sections for sweep surfaces"
+  },
+  "measured": {
+    "sweep1_radius_mm": 2.0,
+    "sweep1_height_mm": 10.0,
+    "sweep2_rail_a": [
+      0.0,
+      0.0,
+      10.0
+    ],
+    "sweep2_rail_b_at_v1": [
+      9.0,
+      0.0,
+      10.0
+    ]
+  },
+  "tolerances": {
+    "radius_mm": "1e-6",
+    "height_mm": "1e-9",
+    "rail_contact_mm": "1e-6"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "core suite 16 passed; kernel suite 6 passed; core lib/kernel all exit 0",
+    "clippy and fmt exit 0",
+    "public source audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-05-001/api.md",
+    "implementation/design/M03/OM9-L3-02-05-001/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-001/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-001/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-05-001/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

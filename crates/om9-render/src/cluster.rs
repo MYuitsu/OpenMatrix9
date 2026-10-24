@@ -763,7 +763,12 @@ impl ClusterRenderer {
         groups: &[crate::meshlet::ClusterGroup],
         coarse_pixels: f32,
     ) -> Option<Self> {
-        let level_count = groups.iter().map(|group| group.levels.len()).max().unwrap_or(1).max(1) as u32;
+        let level_count = groups
+            .iter()
+            .map(|group| group.levels.len())
+            .max()
+            .unwrap_or(1)
+            .max(1) as u32;
         let mut entries: Vec<(Meshlet, u32, u32)> = Vec::new();
         let mut radii: Vec<f32> = Vec::with_capacity(groups.len());
         for (group_index, group) in groups.iter().enumerate() {
@@ -990,7 +995,11 @@ impl ClusterRenderer {
                 } else {
                     0.0
                 },
-                if self.level_select { self.level_count.max(1) as f32 } else { 0.0 },
+                if self.level_select {
+                    self.level_count.max(1) as f32
+                } else {
+                    0.0
+                },
             ],
             projection: [
                 if camera.is_orthographic() { 1.0 } else { 0.0 },
@@ -1302,7 +1311,15 @@ mod jewellery_threshold_tests {
         let half = 500.0;
         // Distance where 0.05 mm projects to about 0.8 px.
         let distance = 0.05 * half / (0.8 * tan);
-        assert_eq!(choose_level(&errors, distance, half, tan, 0.5), 0, "gem keeps LOD 0");
-        assert_eq!(choose_level(&errors, distance, half, tan, 1.0), 1, "shank may use coarse");
+        assert_eq!(
+            choose_level(&errors, distance, half, tan, 0.5),
+            0,
+            "gem keeps LOD 0"
+        );
+        assert_eq!(
+            choose_level(&errors, distance, half, tan, 1.0),
+            1,
+            "shank may use coarse"
+        );
     }
 }

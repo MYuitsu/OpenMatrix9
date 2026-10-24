@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G02-A-01-07-006",
+  "l3_id": "OM9-L3-01-07-006",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Hover cạnh face rồi select box hiển thị màu highlight đồng bộ cả 4 view",
+  "expected": "The documented hit/selection is produced with the exact object/subobject key and no silent fallback.",
+  "evidence": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app subobject_occurrences: 5 passed",
+    "om9-app acceptance_viewport_selection: 8 passed"
+  ],
+  "status": "PASS"
+}

@@ -218,5 +218,16 @@
       "id": "OM9-L4-02-01-005-05",
       "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-005 - Trimmed Vs Underlying Surface Model/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Trimmed surface nên lộ loại đối tượng.",
+    "api": [],
+    "candidate_api": [
+      "trimmed_surface(id)"
+    ],
+    "host_only": "Trim ở host; SDK đọc loại đối tượng."
+  }
 }

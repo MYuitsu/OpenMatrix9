@@ -1,0 +1,62 @@
+{
+  "schema": "om9.m03.l2-01-11.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-11-003",
+  "owner_l2_id": "OM9-L2-01-11",
+  "date": "2026-10-22",
+  "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "reviewed_upstream": [
+    {
+      "path": "crates/qymcad-kernel/src/shape/ops.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "SYMBOL_INDEX_READ_AT_PINNED_REVISION",
+      "observed_symbols": [
+        "transform",
+        "copy"
+      ],
+      "observation": "QymCAD shape operations include typed transform/copy entry points over its native C ABI."
+    },
+    {
+      "path": "crates/qymcad-kernel/src/shape/build.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "SYMBOL_INDEX_READ_AT_PINNED_REVISION",
+      "observed_symbols": [
+        "extrude",
+        "revolve_profile_axis",
+        "sweep_profile"
+      ],
+      "observation": "Placement is expressed by transforming a profile/path; no separate matrix service is exposed."
+    }
+  ],
+  "local_owner": {
+    "crate": "om9-kernel",
+    "files": [
+      "crates/om9-kernel/src/transform_ops.rs",
+      "crates/om9-kernel/src/transform_bridge.cpp",
+      "crates/om9-kernel/tests/l2_01_11.rs"
+    ],
+    "symbols": [
+      "transform_ops::translation",
+      "transform_ops::rotation",
+      "transform_ops::scaling",
+      "transform_ops::mirror",
+      "transform_ops::inverse",
+      "transform_ops::compose",
+      "transform_ops::transform_brep",
+      "transform_ops::frames_along_polyline",
+      "transform_ops::frames_along_curve",
+      "transform_ops::frame_on_surface",
+      "transform_ops::orient_two_point",
+      "transform_ops::orient_three_point",
+      "transform_ops::linear_pattern",
+      "transform_ops::polar_pattern",
+      "transform_ops::apply_pattern"
+    ]
+  },
+  "decision": "ADD",
+  "rationale": "The matrix/frame/pattern service is new safe Rust; the B-Rep application is a new OCCT 8.0.1 adapter (BRepBuilderAPI_GTransform + ShapeFix). QymCAD exposes typed transform/copy asks over its own native ABI with a different naming model, so no code is copied; only the ABI idea (typed request in, one complete result out) is aligned.",
+  "not_reused": [
+    "QymCAD Roles/GeoName naming and its native C ABI.",
+    "QymCAD has no placement-frame/pattern policy service; the bake/instance policy is OM9's."
+  ],
+  "l3_scope": "non-uniform scaling of a B-Rep with determinant accounting"
+}

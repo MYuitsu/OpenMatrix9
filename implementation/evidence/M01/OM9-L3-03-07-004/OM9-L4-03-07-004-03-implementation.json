@@ -1,0 +1,14 @@
+{
+  "l4": "OM9-L4-03-07-004-03",
+  "l3": "OM9-L3-03-07-004",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs"
+  ],
+  "tests": {
+    "chrome_actions": "13 passed",
+    "left_stack_layers": "8 passed"
+  },
+  "oracle": "ten icons per row, two rows per page, page column anchored right at the 300 px dock"
+}

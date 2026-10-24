@@ -47,7 +47,7 @@ pub enum MenuAction {
     ShadeSelectedOnly,
     PanZoomRotate,
     SetView,
-    SetCPlane,
+    SetCPlane(om9_scene::camera::CPlanePreset),
     SetCamera,
     ActiveViewport,
     ViewportLayout,
@@ -125,7 +125,18 @@ pub const ENTRIES: &[MenuEntry] = &[
     submenu("Pan, Zoom, and Rotate", A::PanZoomRotate),
     SEP,
     submenu("Set View", A::SetView),
-    submenu("Set CPlane", A::SetCPlane),
+    item(
+        "Set CPlane: Top",
+        A::SetCPlane(om9_scene::camera::CPlanePreset::Top),
+    ),
+    item(
+        "Set CPlane: Front",
+        A::SetCPlane(om9_scene::camera::CPlanePreset::Front),
+    ),
+    item(
+        "Set CPlane: Right",
+        A::SetCPlane(om9_scene::camera::CPlanePreset::Right),
+    ),
     submenu("Set Camera", A::SetCamera),
     SEP,
     submenu("Active Viewport", A::ActiveViewport),
@@ -145,10 +156,10 @@ pub const ENTRIES: &[MenuEntry] = &[
 impl MenuAction {
     pub fn availability(self) -> Result<()> {
         match self {
-            Self::Maximize | Self::Preset(P::Wireframe) => Ok(()),
-            Self::Preset(P::Shaded) => Err(Error::Unsupported(
-                "Shaded display adapter not yet accepted",
-            )),
+            Self::Maximize
+            | Self::Preset(P::Wireframe)
+            | Self::Preset(P::Shaded)
+            | Self::SetCPlane(_) => Ok(()),
             Self::Preset(_) => Err(Error::Unsupported(
                 "Display preset/backend not yet accepted",
             )),

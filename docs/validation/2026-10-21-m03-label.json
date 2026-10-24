@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-21",
+  "status": "measurement_label_sdk_export_verified_windows",
+  "owner": "OM9-L2-03-20",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "One bounded Progress label through the existing plugin message pipeline.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "983b72c7b3dd5e0cffe4aa4ea0f6bfb7ebf4cb8737aef1ce6f38d4c8787a4a20",
+    "crates/om9-plugin-host/src/staged.rs": "66a79922d5068d50b89511655a79ff28230dacdc80e36cc37bf7c8b88e16e0e2",
+    "crates/om9-app/tests/plugin_native.rs": "c9389763b1de3df5e9393b8218c638445549e57863903200957f8f07f464f880",
+    "sdk/examples/hello-plugin/src/lib.rs": "b8fcb4ee2ed8487290c2da468298a03f72cf2d5ced87bc7c8c3eed1bdf1fd5a1",
+    "sdk/examples/hello-plugin/descriptor.json": "645e0d0d9a65976bf2ce796c0a78314324aba0618f7dbbcfedcedd26d0c3e32f",
+    "sdk/README.md": "ed09d37f262755324c01d58f76eceb730133f65a9a72aed73d66afaf161600e1",
+    "sdk/API-INVENTORY.md": "e6053e12eb687b0341fc3fa285e9d61ad7cd09fc06dbeb566463a866b1a30e99"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "report_measurement"
+    ],
+    "error_codes": [
+      "message",
+      "budget"
+    ],
+    "limits": {
+      "bytes": 512,
+      "messages": 32
+    }
+  },
+  "asserted_semantics": [
+    "One Progress label through the bounded event log.",
+    "Empty/oversized text is a message refusal.",
+    "Reporting stages no document mutation and a failed command discards the report."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "66 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "24 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-label",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8835 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "label": "length 10.00 mm",
+    "present_in_event_log": true,
+    "undo_len": 1
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1834774,
+      "sha256": "67fe20d121556dfb80d534853a770a2ef8e02661f4d20400a051b314979db597"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "20fc6442255cf134676f9cfb353f9f1af7bad1ec809f8602439d7f36f4b88487"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 177942,
+      "sha256": "3d6db7b9a65c65aa8b32485b6a8e292aa189749d937f587caa6fc38ef48a6398"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "24f0828899e8d8fab2e2146d721fbd8b0a017e6394af5b267cc167f90063980f"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1831936,
+      "sha256": "80008b847eb9061b732e342846d4970b588d4bb54a71cf85f54bb96f168baaab"
+    },
+    "om9.exe": {
+      "bytes": 69418496,
+      "sha256": "de62ef4c216f37c96ab2c60f16c8cb40ac1b936e46ff8b1fafd1ff305b74ce26"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-03-20-005 (measurement label and command feedback)"
+    ],
+    "open": [
+      "structured measurement record/annotation object",
+      "UI acceptance"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Free-text label only.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Broaden the recorded feed to host commands, or return to M02 for subobject/pick query services."
+}

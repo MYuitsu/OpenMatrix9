@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-03-004-05",
+  "role": "REGRESSION_STRESS",
+  "l3": "OM9-L3-03-03-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "regression": [
+    "om9-core gumball: 15 passed",
+    "om9-app gumball_interaction: 6 passed"
+  ]
+}

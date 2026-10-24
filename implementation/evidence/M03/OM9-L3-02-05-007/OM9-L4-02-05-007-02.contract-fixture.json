@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-007-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-007",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-007/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-007/negative.json",
+  "fixture_sha256": {
+    "positive": "def23c30a4e7bc7e9e6b9b91df864f855bfd10e2a9b79228d283b234bb6df2a3",
+    "negative": "6fbdacef3c3e6408c90b4e1da55b8ebb18159ed58167c07a9df234f07bbb4cae"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-007/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-007/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-007/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "G0 match gap 5.55e-17 mm; G1 angle 1.20e-4 rad; G2 angle 2.11e-8 rad",
+      "G0/G1/G2 blends with straight tangents all pass through (2,1,0)",
+      "two 2x2 sheets join to 2 faces, 1 shell"
+    ],
+    "negative": [
+      "G1/G2 blend without tangents is refused",
+      "G2 match against a target with too few cross rows is refused",
+      "a boundary gap in the patch is refused"
+    ]
+  }
+}

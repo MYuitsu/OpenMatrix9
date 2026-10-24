@@ -91,6 +91,112 @@ fn weight(surface: &NurbsSurface, u: usize, v: usize) -> f64 {
     surface.weights[u * surface.size[1] + v]
 }
 
+/// The Greville parameter of pole `index` on one axis.
+pub fn greville_parameter(surface: &NurbsSurface, axis: usize, index: usize) -> f64 {
+    let degree = surface.degree[axis];
+    (1..=degree)
+        .map(|offset| surface.knots[axis][index + offset])
+        .sum::<f64>()
+        / degree as f64
+}
+
+/// All surface edit points in one tensor contraction: O(n_u n_v (n_u + n_v)) instead of
+/// evaluating each grid point against every pole. Row-major, the same order as `poles`.
+pub fn edit_points(surface: &NurbsSurface, limits: &Limits) -> Result<Vec<Point3>> {
+    surface.validate(limits)?;
+    let [nu_count, nv_count] = surface.size;
+    let mut nu_rows = Vec::with_capacity(nu_count);
+    for i in 0..nu_count {
+        nu_rows.push(basis_row(surface, 0, greville_parameter(surface, 0, i))?);
+    }
+    let mut nv_rows = Vec::with_capacity(nv_count);
+    for j in 0..nv_count {
+        nv_rows.push(basis_row(surface, 1, greville_parameter(surface, 1, j))?);
+    }
+    let mut weighted = vec![[0.0; 3]; nu_count * nv_count];
+    let mut denominators = vec![0.0; nu_count * nv_count];
+    for k in 0..nu_count {
+        for j in 0..nv_count {
+            let mut numerator = [0.0; 3];
+            let mut denominator = 0.0;
+            for (l, nv) in nv_rows[j].iter().enumerate() {
+                let coefficient = nv * weight(surface, k, l);
+                denominator += coefficient;
+                let point = pole(surface, k, l);
+                for axis in 0..3 {
+                    numerator[axis] += coefficient * point[axis];
+                }
+            }
+            weighted[k * nv_count + j] = numerator;
+            denominators[k * nv_count + j] = denominator;
+        }
+    }
+    let mut points = Vec::with_capacity(nu_count * nv_count);
+    for nu in &nu_rows {
+        for j in 0..nv_count {
+            let mut numerator = [0.0; 3];
+            let mut denominator = 0.0;
+            for (k, coefficient) in nu.iter().enumerate() {
+                denominator += coefficient * denominators[k * nv_count + j];
+                let value = weighted[k * nv_count + j];
+                for axis in 0..3 {
+                    numerator[axis] += coefficient * value[axis];
+                }
+            }
+            if !denominator.is_finite() || denominator <= 0.0 {
+                return Err(Error::Invalid("edit-point surface denominator"));
+            }
+            let point = [
+                numerator[0] / denominator,
+                numerator[1] / denominator,
+                numerator[2] / denominator,
+            ];
+            finite(point)?;
+            points.push(point);
+        }
+    }
+    Ok(points)
+}
+
+/// The rational basis influence of one pole at its own Greville point:
+/// `N_i(u_i) N_j(v_j) w_ij / W(u_i, v_j)`.
+pub fn edit_influence(surface: &NurbsSurface, i: usize, j: usize, limits: &Limits) -> Result<f64> {
+    surface.validate(limits)?;
+    if i >= surface.size[0] || j >= surface.size[1] {
+        return Err(Error::Invalid("surface edit index"));
+    }
+    let nu = basis_row(surface, 0, greville_parameter(surface, 0, i))?;
+    let nv = basis_row(surface, 1, greville_parameter(surface, 1, j))?;
+    let mut denominator = 0.0;
+    for (k, nu_k) in nu.iter().enumerate() {
+        for (l, nv_l) in nv.iter().enumerate() {
+            denominator += nu_k * nv_l * weight(surface, k, l);
+        }
+    }
+    let own = nu[i] * nv[j] * weight(surface, i, j);
+    if !denominator.is_finite() || denominator.abs() <= 1e-15 || !own.is_finite() {
+        return Err(Error::Invalid("surface edit influence"));
+    }
+    let influence = own / denominator;
+    if influence.abs() <= 1e-15 {
+        return Err(Error::Invalid("surface edit influence"));
+    }
+    Ok(influence)
+}
+
+/// `S(u_i, v_j)` for one edit point, without materialising the whole grid.
+pub fn edit_point(surface: &NurbsSurface, i: usize, j: usize, limits: &Limits) -> Result<Point3> {
+    if i >= surface.size[0] || j >= surface.size[1] {
+        return Err(Error::Invalid("surface edit index"));
+    }
+    evaluate(
+        surface,
+        greville_parameter(surface, 0, i),
+        greville_parameter(surface, 1, j),
+        limits,
+    )
+}
+
 /// The surface point `S(u, v)` with rational weights applied.
 pub fn evaluate(surface: &NurbsSurface, u: f64, v: f64, limits: &Limits) -> Result<Point3> {
     surface.validate(limits)?;

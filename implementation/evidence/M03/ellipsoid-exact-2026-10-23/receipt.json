@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-23",
+  "target": "standalone Windows x64 Rust OM9; native OCCT 8.0.1",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree": "dirty; source hashes identify this scoped implementation",
+  "implementation": "Rust-authored rational biquadratic 9x5 sphere net with scaled poles; OCCT single-face closed solid; no GTransform fallback",
+  "measurement": "BRepGProp adaptive volume/area Eps=1e-12 on canonical stored B-Rep",
+  "fixtures": 6,
+  "analytic_diameters": 498,
+  "analytic_intersections": 996,
+  "relative_volume_threshold": 1e-10,
+  "max_observed_relative_volume_error": 9.302e-12,
+  "volume_2_3_4_mm3": 100.530964913938,
+  "volume_3_4_5_mm3": 251.327412284846,
+  "tests": {
+    "kernel": {
+      "passed": 69,
+      "failed": 0,
+      "ignored": 1
+    },
+    "app": {
+      "passed": 183,
+      "failed": 0,
+      "ignored": 0
+    },
+    "native-ui-fixture": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "build": "PASS",
+  "kernel_clippy_tests_deny_warnings": "PASS",
+  "format": "rustfmt --edition 2024 --check on four touched Rust files",
+  "source_fingerprints": {
+    "crates/om9-kernel/src/creation.rs": "9ee9e1386122434da5bc30c4a797c400cdf8b9adc6e00162200039c31833a291",
+    "crates/om9-kernel/src/creation_bridge.cpp": "b924f6013f8480f7adf7693dd66846a2f493287bd0510941ab11351a6a3bc118",
+    "crates/om9-kernel/src/brep_bridge.cpp": "c11d4412068cb6ad79730f1c7fdbc6d4c7fe9e85776eb9030d7c797a2554f088",
+    "crates/om9-kernel/tests/ellipsoid.rs": "81cfa404849e6789566091214fbe2c4a512c672cad9a4e3f88ad49b338d635a7",
+    "crates/om9-kernel/tests/l2_01_09.rs": "1c2511c62e8471c6cb0bc599f36a9e767c4e3313e406bb33d2ea692ad8579490",
+    "crates/om9-app/tests/solid.rs": "b77c2bd8c16e116dfcb626f55666989c8fe68df9a03fcaff9b81f97ff9dcf4a1"
+  },
+  "binary_sha256": "d583f9b08b138cb632e96f9d798f4a0868c812c51023d638c44ccc362d92c346",
+  "native_runtime": "implementation/evidence/M03/ellipsoid-exact-2026-10-23/native-runtime.json",
+  "native_ui": "menu and CMD construction, four GPU views, Undo/Redo, invalid-input feedback, Esc cancel, native Save and cold Rust read/measure PASS",
+  "manual_gate": "M03-UI",
+  "manual_gate_promoted": false,
+  "human_approval": null,
+  "remaining": [
+    "Human M03-UI review/signoff; other Solid workflows are not newly certified by the ellipsoid UI observation.",
+    "macOS runtime unverified."
+  ],
+  "report": "docs/validation/2026-10-23-exact-ellipsoid.md",
+  "artifact_sha256": {
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/app.log": "1a5f01ca4696ac2b3ffd395bcc6c2c8c19b349593472ed8ed570185ab4f27506",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/baseline.log": "a0e5d060ef050abf8d807f496c5fbde33597b7f395f95d97989bc4b76333c32f",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/build.log": "d5311940e0ad43ce23275b7e77c459470d9dedb4b132dc150ea70f00be6fdb52",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/clippy.log": "de2cd159e311bbcdc5922bbc606f1826bf94cf0b30fea01fbdfdd7f0f6dd9fc0",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ellipsoid-ui.om9": "8756a8e8e74c1e8010847fabcba2da3927cb5d4ddc817bad5c7a88a2ba0a5d56",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/gtransform-adaptive-diagnostic.log": "00558ebf4edbeb816b8f46c68879942391300a9d1e4a014e86ca7704b6063d8a",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/kernel.log": "ee7069821dffd555fc2b612f4521d351906106c2abd2437e1581bf0a0fe0d631",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/native-runtime.json": "5ff01d9462979313392f5d8648a278f2a5ec582507bb2eb02c08d9db106048bf",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/native-ui-fixture.log": "e6a5a82212cd0d07780af1d43301eae4bba69e7efb7943d892961ffb894da4f6",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/net-adaptive.log": "79e824a6fae84de8e3e5795a4c7c82eeefa0a58a28d922c1b995010a4b6d768f",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/net-initial.log": "d5cb238ed2e0c6afc1a67764a60113121faae37730a5989186174ba2fadfcfb4",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-cancel.png": "e9c674174f594ec6475ffed667ab9cebcf2e67ea110efa7acdc3e81d9cf454b9",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-cmd.png": "fb6e1625ec90f9211ebb9ee92996d01655b1a3160eca4070b651dda8f09fca32",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-committed.png": "1d6782ea14faa9c00efcbaf455aaf792dfee9924f15154d1fa57d6bf4d5f7b1f",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-redo.png": "9e1827a420c4d2728def250658533d6c1d23fa21e1315a4d4cf3abd56ddc5476",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-saved.png": "78bfd90249cb2ef70e08b2a4df7b6cbe4f190221ccae08f9ddac4c9bbeb5949e",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-undo.png": "b0a98bacb363759927330fd5985778c91cc38ee98ccf5cd16849eeb7c2a01ae2",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-invalid-input.png": "60f12d0f60c0dfd30b1783196d157db6b6fad19ad3913f58c649710ebe092088",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-review.json": "d1b4557ba9907e2373593661a8a96d38962bfabac1aaf3e3d12c94ee98e3ff3d",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-solid-menu.png": "13f8296935583a11f9c7f76b4ee99110ca4a6d5589e2a2f582e920adb379f9e7"
+  },
+  "final_checks": {
+    "public_source_audit": {
+      "source_files": 12105,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    },
+    "rustfmt_touched_files": "PASS",
+    "scoped_git_diff_check": "PASS",
+    "artifact_prune": {
+      "removed_runs": 0,
+      "newest_kept_per_root": 10,
+      "older_cited_runs_preserved": 104
+    }
+  }
+}

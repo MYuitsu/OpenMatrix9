@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-011-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-011",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-011",
+  "source_command": "Quick Curve Blend",
+  "menu_icon": "CurveBlendCurvesBlendCurves",
+  "owner_candidate": "OM9-L3-02-04-007",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Quick Curve Blend command session is not wired; owner candidate OM9-L3-02-04-007 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-011/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-011/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-011/dispatch_contract.json": "0466657589d5b3641ae514be319f573bd5123c47c0fe55c0998232b343cd8e4d",
+    "implementation/design/M03/OM9-L3-03-16-011/dispatch_contract.md": "e7b2f5510938574e7e700f3cc9142a4a0f6028d17da0c6ab7cec40d4d1734843"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

@@ -1,0 +1,22 @@
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.88s
+     Running tests\top11_brep.rs (L:\om9-target\debug\deps\top11_brep-a86a381baa73d1f3.exe)
+
+running 6 tests
+brep_cutter_entities=4
+test brep_can_be_a_cutting_object_for_split ... ok
+exact_brep_fractions=[0.25, 0.75]
+test exact_brep_intersection_uses_the_analytic_sphere_surface ... ok
+brep_non_rigid_mirror_bounds=[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]
+brep_mirror_copy_bounds=[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]
+test brep_mirror_accepts_a_non_rigid_placement ... ok
+test brep_mirror_copy_leaves_the_source_in_place ... ok
+exact_nurbs_polycurve_fractions=[0.25, 0.75]
+test exact_brep_intersection_handles_nurbs_and_polycurve_targets ... ok
+brep_mirror_volume_mm3=24.000000
+brep_mirror_local_bounds=[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]
+test brep_mirror_deletes_input_in_place_and_keeps_one_undo ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

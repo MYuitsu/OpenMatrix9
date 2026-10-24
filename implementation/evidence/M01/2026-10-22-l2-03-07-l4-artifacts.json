@@ -1,0 +1,44 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "m01-l2-03-07-l4-artifacts-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9",
+  "milestone": "OM9-L2-03-07",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Created the per-L4 source/API/fixture/implementation/integration/acceptance artefacts required by the milestone dashboard and re-ran the menu/docking acceptance tests.",
+  "l4_counts": {
+    "OM9-L3-03-07-001": "5/5",
+    "OM9-L3-03-07-002": "5/5",
+    "OM9-L3-03-07-003": "5/5",
+    "OM9-L3-03-07-004": "5/5",
+    "OM9-L3-03-07-005": "5/5",
+    "OM9-L3-03-07-006": "5/5",
+    "OM9-L3-03-07-007": "5/5",
+    "OM9-L3-03-07-008": "5/5"
+  },
+  "checks": {
+    "chrome_actions": "13 passed",
+    "left_stack_layers": "8 passed",
+    "panel_ops": "33 passed",
+    "shell_docking": "10 passed",
+    "dock_layout_default": "7 passed",
+    "dock_layout_persistence": "6 passed",
+    "command_sessions": "6 passed",
+    "command_options_and_repeat": "6 passed",
+    "startup_contract": "3 passed"
+  },
+  "logs": {
+    "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261022/acceptance.log",
+    "acceptance_sha256": "9b778a25107cab9d6a2f0cbb4b311cdfc8f72c0cdc595a4b0527bdbce7c1905b"
+  },
+  "artifacts": {
+    "design": "implementation/design/M01/OM9-L3-03-07-*",
+    "fixtures": "implementation/fixtures/M01/OM9-L3-03-07-*",
+    "evidence": "implementation/evidence/M01/OM9-L3-03-07-*"
+  },
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual visual review of the real Windows window is still required.",
+    "No feature registers a right-click alternative yet; the slot is inert by default."
+  ]
+}

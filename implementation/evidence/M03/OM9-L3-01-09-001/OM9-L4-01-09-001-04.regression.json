@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m03.l2-01-09.l4.receipt.v1",
+  "l4": "OM9-L4-01-09-001-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-01-09-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "suite": "crates/om9-kernel/tests/l2_01_09.rs (12 tests) plus the full om9-kernel suite",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_09 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log_sha256": "1c70f7c4f9c4c28e39daf2a9f5d3aed7bca9b2ab0ccbcfba104186b2a2b86644"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log_sha256": "b0e7fd5b542b888ccb0b7881676c746f99580de85a06e28dee6a544151ab66dd"
+    }
+  ],
+  "repeatable": "all oracles are analytic and tolerance-bounded; the suite is deterministic on this checkout",
+  "observed": {
+    "box_volume_mm3": 6000.0,
+    "sphere_volume_mm3": 523.598775598299,
+    "cylinder_volume_mm3": 785.398163397449,
+    "cone_volume_mm3": 261.79938779915,
+    "torus_volume_mm3": 789.568352087151,
+    "ellipsoid_volume_mm3": 251.217495107596,
+    "pyramid_volume_mm3": 666.666666666666
+  }
+}

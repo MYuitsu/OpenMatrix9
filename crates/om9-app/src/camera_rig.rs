@@ -16,7 +16,12 @@ pub struct Quat {
 }
 
 impl Quat {
-    pub const IDENTITY: Self = Self { w: 1.0, x: 0.0, y: 0.0, z: 0.0 };
+    pub const IDENTITY: Self = Self {
+        w: 1.0,
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
 
     pub fn axis_angle(axis: [f64; 3], angle: f64) -> Self {
         let length = (axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]).sqrt();
@@ -25,7 +30,12 @@ impl Quat {
         }
         let (sin, cos) = (angle * 0.5).sin_cos();
         let scale = sin / length;
-        Self { w: cos, x: axis[0] * scale, y: axis[1] * scale, z: axis[2] * scale }
+        Self {
+            w: cos,
+            x: axis[0] * scale,
+            y: axis[1] * scale,
+            z: axis[2] * scale,
+        }
     }
 
     /// Quaternion from orthonormal basis columns `right`, `up`, `back` (`back = -forward`).
@@ -81,11 +91,16 @@ impl Quat {
         if !length.is_finite() || length <= 1e-15 {
             return Self::IDENTITY;
         }
-        Self { w: self.w / length, x: self.x / length, y: self.y / length, z: self.z / length }
+        Self {
+            w: self.w / length,
+            x: self.x / length,
+            y: self.y / length,
+            z: self.z / length,
+        }
     }
 
     /// `self * other`: rotate by `other` first, then by `self`.
-    pub fn mul(self, other: Self) -> Self {
+    pub fn multiply(self, other: Self) -> Self {
         Self {
             w: self.w * other.w - self.x * other.x - self.y * other.y - self.z * other.z,
             x: self.w * other.x + self.x * other.w + self.y * other.z - self.z * other.y,
@@ -111,7 +126,12 @@ impl Quat {
     }
 
     pub fn negated(self) -> Self {
-        Self { w: -self.w, x: -self.x, y: -self.y, z: -self.z }
+        Self {
+            w: -self.w,
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
 
     /// Shortest-arc spherical interpolation.
@@ -147,7 +167,11 @@ impl Quat {
 }
 
 fn cross(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
-    [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+    [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ]
 }
 
 fn dot(a: [f64; 3], b: [f64; 3]) -> f64 {
@@ -196,7 +220,12 @@ impl CameraRig {
             Projection::Orthographic { vertical_span_mm } => Some(vertical_span_mm),
             Projection::Perspective { .. } => None,
         };
-        Some(Self { pivot: camera.target, orientation, distance, ortho_span })
+        Some(Self {
+            pivot: camera.target,
+            orientation,
+            distance,
+            ortho_span,
+        })
     }
 
     pub fn to_camera(&self, template: &Camera) -> Option<Camera> {
@@ -225,13 +254,15 @@ impl CameraRig {
             return;
         }
         let yaw_rotation = Quat::axis_angle([0.0, 0.0, 1.0], yaw);
-        self.orientation = yaw_rotation.mul(self.orientation);
-        let elevation = self.orientation.rotate([0.0, 0.0, -1.0])[2].clamp(-1.0, 1.0).asin();
+        self.orientation = yaw_rotation.multiply(self.orientation);
+        let elevation = self.orientation.rotate([0.0, 0.0, -1.0])[2]
+            .clamp(-1.0, 1.0)
+            .asin();
         let limit = std::f64::consts::FRAC_PI_2 - 0.02;
         // Clamp before rotating: asin after crossing a pole folds the angle and misses the flip.
         let pitch = pitch.clamp(-limit - elevation, limit - elevation);
         let right = self.orientation.rotate([1.0, 0.0, 0.0]);
-        self.orientation = Quat::axis_angle(right, pitch).mul(self.orientation);
+        self.orientation = Quat::axis_angle(right, pitch).multiply(self.orientation);
         self.clamp_elevation();
     }
 
@@ -243,13 +274,13 @@ impl CameraRig {
         if (clamped - elevation).abs() > 1e-15 {
             let right = self.orientation.rotate([1.0, 0.0, 0.0]);
             self.orientation =
-                Quat::axis_angle(right, clamped - elevation).mul(self.orientation);
+                Quat::axis_angle(right, clamped - elevation).multiply(self.orientation);
         }
     }
 
     pub fn pan(&mut self, delta: [f64; 3]) {
-        for axis in 0..3 {
-            self.pivot[axis] += delta[axis];
+        for (pivot, delta) in self.pivot.iter_mut().zip(delta) {
+            *pivot += delta;
         }
     }
 
@@ -272,8 +303,8 @@ impl CameraRig {
         let before = self.ortho_span.unwrap_or(self.distance);
         self.zoom(factor);
         let actual = self.ortho_span.unwrap_or(self.distance) / before;
-        for axis in 0..3 {
-            self.pivot[axis] = cursor[axis] + (self.pivot[axis] - cursor[axis]) * actual;
+        for (pivot, cursor) in self.pivot.iter_mut().zip(cursor) {
+            *pivot = cursor + (*pivot - cursor) * actual;
         }
     }
 }
@@ -310,7 +341,9 @@ mod tests {
         let a = Quat::axis_angle([0.0, 0.0, 1.0], 179f64.to_radians());
         let b = Quat::axis_angle([0.0, 0.0, 1.0], (-179f64).to_radians());
         let mid = a.slerp(b, 0.5);
-        assert!((mid.w * mid.w + mid.x * mid.x + mid.y * mid.y + mid.z * mid.z - 1.0).abs() < 1e-12);
+        assert!(
+            (mid.w * mid.w + mid.x * mid.x + mid.y * mid.y + mid.z * mid.z - 1.0).abs() < 1e-12
+        );
         let turned = mid.rotate([1.0, 0.0, 0.0]);
         assert!(turned[0] < 0.0);
     }
@@ -352,7 +385,10 @@ mod tests {
             rig.pivot[1] + right[1] + up[1] * 0.5,
             rig.pivot[2] + right[2] + up[2] * 0.5,
         ];
-        let viewport = om9_scene::camera::Viewport { origin: [0.0, 0.0], size: [800.0, 600.0] };
+        let viewport = om9_scene::camera::Viewport {
+            origin: [0.0, 0.0],
+            size: [800.0, 600.0],
+        };
         let before = camera.project(point, viewport).unwrap().unwrap();
         rig.zoom_toward(point, 0.5);
         let after_camera = rig.to_camera(&camera).unwrap();

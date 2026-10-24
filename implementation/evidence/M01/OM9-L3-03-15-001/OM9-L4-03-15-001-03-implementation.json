@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-15-001-03",
+  "l3": "OM9-L3-03-15-001",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/file_lifecycle.rs",
+    "crates/om9-app/src/session/files.rs"
+  ],
+  "tests": "file_lifecycle 20 passed; file_widgets 21 passed",
+  "oracle": "file lifecycle New/Open/Save/Save As + cancel/failure preserves document"
+}

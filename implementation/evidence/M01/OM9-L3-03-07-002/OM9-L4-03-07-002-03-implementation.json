@@ -1,0 +1,15 @@
+{
+  "l4": "OM9-L4-03-07-002-03",
+  "l3": "OM9-L3-03-07-002",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/menu_catalog.rs",
+    "crates/om9-app/src/icons.rs"
+  ],
+  "tests": {
+    "chrome_actions": "13 passed"
+  },
+  "oracle": "all 16 reference menus expose their full authored icon list; category cards select the matching palette"
+}

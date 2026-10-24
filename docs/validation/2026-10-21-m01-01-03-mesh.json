@@ -1,0 +1,139 @@
+{
+  "date": "2026-10-21",
+  "status": "polygon_mesh_creation_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Exports polygon-mesh creation through the document transaction, reusing Mesh::validate and the shared output path.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "9f5ad98509ac93405b4653f63e7b41c27669d0253b3b42df24b6413ca1bc4391",
+    "crates/om9-plugin-host/src/staged.rs": "f31e98bf8756082a3d69ca2ccc55e8f2be337039a3860bc7141a1eb2be49ceb3",
+    "crates/om9-app/tests/plugin_native.rs": "be2a5f13afa98ad12d7a7fe301cd0a5693eedee976d478cdd645860aa95f2461",
+    "sdk/examples/hello-plugin/src/lib.rs": "d723b882b3d74559f09294ad3d8d9e9b61a9a1748dedd5465d67d37b7870398e",
+    "sdk/examples/hello-plugin/descriptor.json": "2880d7bb831cee7a5e8bdfc710e8e7402f5412b58fde75a62956aac2516e4b6c",
+    "sdk/README.md": "51f0e557e57371bd97a543dbb5413a8f5be666b4388bf1236d6f97726ee45151",
+    "sdk/API-INVENTORY.md": "68e69ea234d4216a6f0d7b2a0219ddff01507b446d036df4be5c509cfdb0d866"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["add_mesh"],
+    "shared_service": ["om9_core::geometry::Mesh::validate", "shared add_output path"],
+    "error_codes": ["mesh", "budget", "permission", "layer"]
+  },
+  "asserted_semantics": [
+    "Faces are indices into vertices; an out-of-range index is a mesh refusal and the core record decides size/index bounds.",
+    "Normals and per-face colors are not accepted in this version; the stored channels are empty and display normals are recomputed.",
+    "The mesh publishes as one object in the command's single transaction and one Undo removes it."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "59 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "18 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-mesh",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8821 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "vertices": 4,
+    "faces": [[0, 1, 2, 3]],
+    "geometry_kind": "Mesh",
+    "undo_removes_mesh": true,
+    "redo_restores_mesh": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1680111,
+      "sha256": "e446d4b9196a908272d781344de6ee795e06f891effa249453cd0ba5db63b1e4"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "0babec6f63fcfb5d50a781e8c164badbbae464c44cf9282b49edc2ac893a8195"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 165470,
+      "sha256": "b8da9b0aa2e97b81f80c8548e6b26b9b5f9c8a15286bb8dc34a9c4a3059d2802"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "781cbe92508b822e3f0665b164661f71fbae23296b0470bfeb8889b9a742037c"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1677824,
+      "sha256": "13bc624c28d2cb22cfbdc30d658b922292dbc6915b4f2683a8cac4c0c9b8979b"
+    },
+    "om9.exe": {
+      "bytes": 69234176,
+      "sha256": "d235b7e646604959c622ab778c305e5bd946b54f4dd4bfe905430a54330b287f"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-03-003 (geometry handle: polygon mesh record)"],
+    "open": [
+      "mesh normals, colors and UVs",
+      "mesh editing, booleans and repair",
+      "recorded change notification feed"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only position/index geometry is exposed; normals, colors and UVs are not.",
+    "Mesh editing, booleans and repair remain open.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose the recorded change feed at M01 01-03 L3-011, or return to M02 for subobject/pick query services."
+}

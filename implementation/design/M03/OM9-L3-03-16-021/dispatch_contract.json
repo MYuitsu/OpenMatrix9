@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m03.l2-03-16.dispatch_contract.v1",
+  "l3_id": "OM9-L3-03-16-021",
+  "command_id": "OM9-CURVE-021",
+  "source_command": "Fillet Curves",
+  "menu_icon": "CurveFilletCurves",
+  "owner_candidate": "OM9-L3-02-04-006",
+  "state": "BLOCKED_OWNER",
+  "selection_precondition": "one or more selected curves/surfaces compatible with the command",
+  "units_and_options": "canonical millimetres; options are owner-declared and parsed before the first mutation",
+  "undo_transaction_policy": "one command session = one transaction; cancel/refusal writes nothing",
+  "dialog_result_mapping": "menu and command line resolve to the same command_id; a disabled row reports the reason and does not mutate",
+  "disabled_reason": "interactive Fillet Curves command session is not wired; owner candidate OM9-L3-02-04-006 is unverified",
+  "status": "BLOCKED_OWNER_VISIBLE_DISABLED",
+  "backend_owner": "OM9-L3-02-04-006",
+  "reviewed_sources": [
+    "crates/om9-app/src/curve_menu.rs",
+    "crates/om9-app/src/icons.rs",
+    "crates/om9-app/src/menu_catalog.rs",
+    "crates/om9-app/src/session.rs"
+  ]
+}

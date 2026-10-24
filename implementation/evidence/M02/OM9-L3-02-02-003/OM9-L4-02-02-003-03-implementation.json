@@ -1,0 +1,17 @@
+{
+  "l4": "OM9-L4-02-02-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-02-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "CPlane::with_origin, rotated and from_three_points build an orthonormal frame before assignment; Controller::set_cplane bumps the revision atomically.",
+  "source_paths": [
+    "crates/om9-scene/src/camera.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/viewport_menu.rs"
+  ],
+  "tests": [
+    "om9-scene cplane_presets: 6 passed",
+    "om9-app cplane_coordinate_input: 10 passed"
+  ]
+}

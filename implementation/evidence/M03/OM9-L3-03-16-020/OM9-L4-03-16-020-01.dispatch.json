@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-020-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-020",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-019",
+  "source_command": "Extract Isocurve",
+  "menu_icon": "CurveCurveFromObjectsExtractIsocurve",
+  "owner_candidate": "OM9-L3-02-04-010",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Extract Isocurve command session is not wired; owner candidate OM9-L3-02-04-010 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-020/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-020/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-020/dispatch_contract.json": "d5244569c829a048fa1ef15681211c67316ff1b0116cd3db9977e23fb47c5805",
+    "implementation/design/M03/OM9-L3-03-16-020/dispatch_contract.md": "dd260dae52be9cbd0932b18d5b069d2cfa2700171c892bc0a50b0a2ae41a07c3"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

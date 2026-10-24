@@ -1,0 +1,100 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-005-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-06-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel + om9-app",
+    "files": [
+      "crates/om9-core/src/transform_session.rs"
+    ],
+    "test": "crates/om9-core/tests/transform_sessions.rs + crates/om9-kernel/tests/l2_02_06.rs + app gumball suites"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test transform_sessions setpoint_and_align -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/L3-005.log",
+      "stdout_log_sha256": "9c1e5b09bf67af85e2e9caa501e775be1957054365ff9d7bb50e57e4d79b7093"
+    }
+  ],
+  "observed": {
+    "setpoint": [
+      4.0,
+      6.0,
+      3.0
+    ],
+    "plane": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "axis": [
+      2.0,
+      0.0,
+      0.0
+    ],
+    "rotate_maps": [
+      4.0,
+      6.0,
+      6.0
+    ],
+    "scale_maps": [
+      12.0,
+      0.0,
+      0.0
+    ],
+    "rotate_scale_maps": [
+      10.0,
+      2.0,
+      0.0
+    ]
+  },
+  "expected": {
+    "setpoint": [
+      4.0,
+      6.0,
+      3.0
+    ],
+    "plane": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "axis": [
+      2.0,
+      0.0,
+      0.0
+    ],
+    "rotate_maps": [
+      4.0,
+      6.0,
+      6.0
+    ],
+    "scale_maps": [
+      12.0,
+      0.0,
+      0.0
+    ],
+    "rotate_scale_maps": [
+      10.0,
+      2.0,
+      0.0
+    ]
+  },
+  "tolerances": {
+    "points": "1e-12"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/transform_session.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/transform_session.rs": "2f0a44e314909c8895442516539a0122fb195db0c3bda17e635c08847dcd6cac"
+  }
+}

@@ -182,5 +182,41 @@
     },
     "algorithm_and_coverage": "Lắng nghe snap state-transition chứ không tự giữ trạng thái thứ hai",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "SnapSettings.one_shot is the single one-shot state; the active viewport paints a label while it is set, and accept/cancel clear it.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-03-04-003/api.md",
+      "implementation/evidence/M02/OM9-L3-03-04-003/OM9-L4-03-04-003-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-03-04-003/OM9-L4-03-04-003-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-03-04-003/OM9-L4-03-04-003-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app snap_panel_modes: 4 passed",
+      "om9-app osnap_ui: 3 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-03-04-003/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-03-04-003/positive.json",
+        "implementation/fixtures/M02/OM9-L3-03-04-003/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-03-04-003/OM9-L4-03-04-003-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-03-04-003/OM9-L4-03-04-003-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-03-04-003/OM9-L4-03-04-003-06-acceptance.md"
+      ],
+      "acceptance": "An END/MID one-shot applies to exactly one pick and its indicator disappears; Escape clears the indicator and does not carry it to the next project."
+    }
   }
 }

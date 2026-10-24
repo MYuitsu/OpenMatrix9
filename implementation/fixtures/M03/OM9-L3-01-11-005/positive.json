@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-005",
+  "fixture_id": "OM9-L3-01-11-005-POSITIVE",
+  "units": "mm",
+  "input": {
+    "rail_mm": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        10
+      ]
+    ],
+    "count": 3
+  },
+  "expect": {
+    "origins_z": [
+      0,
+      5,
+      10
+    ],
+    "orthonormal": true,
+    "right_handed": true
+  },
+  "measured_on_2026_10_22": {
+    "frame_mid_z_mm": 5.0
+  }
+}

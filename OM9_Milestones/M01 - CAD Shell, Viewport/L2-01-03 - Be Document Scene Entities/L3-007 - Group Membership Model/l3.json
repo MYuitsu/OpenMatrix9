@@ -189,5 +189,82 @@
       "id": "OM9-L4-01-03-007-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-007 - Group Membership Model/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "plugin_sdk_v1_groups": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "group_read_verified_windows",
+      "scope": "groups maps document.groups to GroupInfo (id/name/members in order/revision); read-only, no group mutation.",
+      "public_api": [
+        "Host::groups"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-groups.md",
+        "docs/validation/2026-10-21-m01-01-03-groups.json"
+      ],
+      "limitations": [
+        "Read-only.",
+        "Block instance graph open.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_group_create": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "group_create_verified_windows",
+      "scope": "create_group validates a bounded name and existing members and stages Mutation::GroupCreate at the base revision; staged groups appear in groups(); one Undo removes the group.",
+      "public_api": [
+        "Host::create_group"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-group-create.md",
+        "docs/validation/2026-10-21-m01-01-03-group-create.json"
+      ],
+      "limitations": [
+        "No edit/dissolve.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_group_delete": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "group_delete_verified_windows",
+      "scope": "delete_group validates the id and stages Mutation::GroupDelete at the base revision; members stay; groups() filters staged deletions; one Undo restores.",
+      "public_api": [
+        "Host::delete_group"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-group-delete.md",
+        "docs/validation/2026-10-21-m01-01-03-group-delete.json"
+      ],
+      "limitations": [
+        "No member edits.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::create_group",
+      "Host::delete_group",
+      "Host::groups"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_group_create",
+      "plugin_sdk_v1_group_delete",
+      "plugin_sdk_v1_groups"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-01-03-group-create.json",
+      "docs/validation/2026-10-21-m01-01-03-group-create.md",
+      "docs/validation/2026-10-21-m01-01-03-group-delete.json",
+      "docs/validation/2026-10-21-m01-01-03-group-delete.md",
+      "docs/validation/2026-10-21-m01-01-03-groups.json",
+      "docs/validation/2026-10-21-m01-01-03-groups.md"
+    ]
+  }
 }

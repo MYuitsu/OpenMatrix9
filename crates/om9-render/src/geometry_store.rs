@@ -44,14 +44,11 @@ impl GeometryStore {
 
     /// Bytes the vertex/index buffers will need, including every LOD, for upload budgeting.
     pub fn gpu_bytes(&self) -> u64 {
-        let mesh_bytes = |mesh: &MeshData| {
-            mesh.positions.len() as u64 * 12 + mesh.indices.len() as u64 * 4
-        };
+        let mesh_bytes =
+            |mesh: &MeshData| mesh.positions.len() as u64 * 12 + mesh.indices.len() as u64 * 4;
         self.entries
             .iter()
-            .map(|entry| {
-                mesh_bytes(&entry.base) + entry.lods.iter().map(mesh_bytes).sum::<u64>()
-            })
+            .map(|entry| mesh_bytes(&entry.base) + entry.lods.iter().map(mesh_bytes).sum::<u64>())
             .sum()
     }
 
@@ -60,46 +57,6 @@ impl GeometryStore {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn entry(triangles: usize) -> GeometryEntry {
-        let mut positions = Vec::new();
-        let mut indices = Vec::new();
-        for i in 0..triangles {
-            let base = (i * 3) as u32;
-            positions.extend_from_slice(&[[i as f32, 0.0, 0.0], [i as f32, 1.0, 0.0], [i as f32, 1.0, 1.0]]);
-            indices.extend_from_slice(&[base, base + 1, base + 2]);
-        }
-        GeometryEntry {
-            base: MeshData::new(positions, indices),
-            lods: Vec::new(),
-            errors_world: vec![0.0],
-            bounds: ([0.0; 3], 1.0),
-        }
-    }
-
-    #[test]
-    fn repeated_keys_share_one_geometry() {
-        let mut store = GeometryStore::default();
-        let first = store.insert(7, entry(2));
-        let second = store.insert(7, entry(2));
-        let other = store.insert(9, entry(3));
-        assert_eq!(first, second);
-        assert_ne!(first, other);
-        assert_eq!(store.len(), 2);
-        assert_eq!(store.get(first).unwrap().base.triangle_count(), 2);
-    }
-
-    #[test]
-    fn gpu_bytes_counts_base_and_every_lod() {
-        let mut store = GeometryStore::default();
-        store.insert(1, entry(2));
-        // 6 vertices * 12 bytes + 6 indices * 4 bytes = 96.
-        assert_eq!(store.gpu_bytes(), 96);
-    }
-}
 /// GPU copy of one geometry entry: base and every LOD, uploaded once.
 pub struct GpuGeometryEntry {
     pub base_vertices: wgpu::Buffer,
@@ -153,5 +110,50 @@ impl GpuGeometryStore {
 
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn entry(triangles: usize) -> GeometryEntry {
+        let mut positions = Vec::new();
+        let mut indices = Vec::new();
+        for i in 0..triangles {
+            let base = (i * 3) as u32;
+            positions.extend_from_slice(&[
+                [i as f32, 0.0, 0.0],
+                [i as f32, 1.0, 0.0],
+                [i as f32, 1.0, 1.0],
+            ]);
+            indices.extend_from_slice(&[base, base + 1, base + 2]);
+        }
+        GeometryEntry {
+            base: MeshData::new(positions, indices),
+            lods: Vec::new(),
+            errors_world: vec![0.0],
+            bounds: ([0.0; 3], 1.0),
+        }
+    }
+
+    #[test]
+    fn repeated_keys_share_one_geometry() {
+        let mut store = GeometryStore::default();
+        let first = store.insert(7, entry(2));
+        let second = store.insert(7, entry(2));
+        let other = store.insert(9, entry(3));
+        assert_eq!(first, second);
+        assert_ne!(first, other);
+        assert_eq!(store.len(), 2);
+        assert_eq!(store.get(first).unwrap().base.triangle_count(), 2);
+    }
+
+    #[test]
+    fn gpu_bytes_counts_base_and_every_lod() {
+        let mut store = GeometryStore::default();
+        store.insert(1, entry(2));
+        // 6 vertices * 12 bytes + 6 indices * 4 bytes = 96.
+        assert_eq!(store.gpu_bytes(), 96);
     }
 }

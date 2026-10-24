@@ -1,0 +1,18 @@
+{
+  "l4": "OM9-L4-01-07-006-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-07-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "Shared hover/selection overlay, alpha/depth-correct GPU pass and four-view occurrence outlines.",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-render/src/scene.rs",
+    "crates/om9-scene/src/selection.rs"
+  ],
+  "tests": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app subobject_occurrences: 5 passed",
+    "om9-app acceptance_viewport_selection: 8 passed"
+  ]
+}

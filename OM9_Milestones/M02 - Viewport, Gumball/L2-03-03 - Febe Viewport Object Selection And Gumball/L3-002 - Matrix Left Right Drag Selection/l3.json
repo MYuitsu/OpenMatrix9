@@ -207,5 +207,43 @@
     },
     "algorithm_and_coverage": "Phân biệt vùng kéo và drag handle, capture pointer với viewport id",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Left-to-right drag is a window, right-to-left crossing; the marquee is painted only for a drag owned by a viewport.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-03-03-002/api.md",
+      "implementation/evidence/M02/OM9-L3-03-03-002/OM9-L4-03-03-002-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-03-03-002/OM9-L4-03-03-002-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-03-03-002/OM9-L4-03-03-002-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app rubber_band: 2 passed",
+      "om9-app selection_overlay: 8 passed",
+      "om9-app acceptance_viewport_selection: 8 passed",
+      "om9-scene selection_regressions: 7 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-03-03-002/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-03-03-002/positive.json",
+        "implementation/fixtures/M02/OM9-L3-03-03-002/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-03-03-002/OM9-L4-03-03-002-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-03-03-002/OM9-L4-03-03-002-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-03-03-002/OM9-L4-03-03-002-06-acceptance.md"
+      ],
+      "acceptance": "Window selects fully contained objects and crossing selects intersecting objects; a drag starting on the dock produces no marquee."
+    }
   }
 }

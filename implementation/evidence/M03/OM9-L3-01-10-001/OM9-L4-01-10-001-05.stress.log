@@ -1,0 +1,24 @@
+# command: cargo test -p om9-kernel --features 3dm-brep --test l2_01_10 m03_01_10_stress_union_chain_and_fillet_family -- --exact
+# cwd: H:\OpenMatrix9
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\l2_01_10.rs (L:\om9-target\debug\deps\l2_01_10-cd06607094d38232.exe)
+
+running 1 test
+test m03_01_10_stress_union_chain_and_fillet_family ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.80s
+
+
+# command: cargo test -p om9-kernel --features 3dm-brep --test l2_01_10 m03_01_10_regression_boolean_identity_and_round_trip -- --exact
+# cwd: H:\OpenMatrix9
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\l2_01_10.rs (L:\om9-target\debug\deps\l2_01_10-cd06607094d38232.exe)
+
+running 1 test
+test m03_01_10_regression_boolean_identity_and_round_trip ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.04s

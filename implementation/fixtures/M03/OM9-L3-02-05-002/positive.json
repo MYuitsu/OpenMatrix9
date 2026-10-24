@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-002",
+  "fixture_id": "OM9-L3-02-05-002-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Loft And Curve Network Workflows",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "loft_radius_mm": 5.0,
+    "network_centre": [
+      1.0,
+      1.0,
+      0.0
+    ],
+    "raised_network_centre_z": 0.5
+  },
+  "tolerances": {
+    "loft_radius_mm": "0.05",
+    "network": "1e-6"
+  },
+  "measured_on_2026_10_22": {
+    "loft_radius_mm": 5.0,
+    "network_centre": [
+      1.0,
+      1.0,
+      0.0
+    ],
+    "raised_network_centre_z": 0.5
+  }
+}

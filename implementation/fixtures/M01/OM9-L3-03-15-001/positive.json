@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-15-001",
+  "case": "positive",
+  "oracle": "file lifecycle New/Open/Save/Save As + cancel/failure preserves document",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

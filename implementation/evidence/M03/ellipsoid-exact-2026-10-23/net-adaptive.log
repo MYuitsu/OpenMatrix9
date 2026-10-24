@@ -1,0 +1,23 @@
+    Blocking waiting for file lock on build directory
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 38.15s
+     Running tests\ellipsoid.rs (L:/om9-target\debug\deps\ellipsoid-68960f04f9cf5021.exe)
+
+running 1 test
+axes=[1.0, 1.0, 1.0] volume=4.188790204747 expected=4.188790204786 relative_error=9.302e-12 faces=1 naked_edges=0
+axes=[1.0, 1.0, 1.0] analytic_diameters=83 reload=PASS
+axes=[2.0, 3.0, 4.0] volume=100.530964913938 expected=100.530964914873 relative_error=9.302e-12 faces=1 naked_edges=0
+axes=[2.0, 3.0, 4.0] analytic_diameters=83 reload=PASS
+axes=[3.0, 4.0, 5.0] volume=251.327412284846 expected=251.327412287183 relative_error=9.301e-12 faces=1 naked_edges=0
+axes=[3.0, 4.0, 5.0] analytic_diameters=83 reload=PASS
+axes=[0.1, 0.2, 0.3] volume=0.025132741228 expected=0.025132741229 relative_error=9.302e-12 faces=1 naked_edges=0
+axes=[0.1, 0.2, 0.3] analytic_diameters=83 reload=PASS
+axes=[20.0, 0.5, 3.0] volume=125.663706142423 expected=125.663706143592 relative_error=9.301e-12 faces=1 naked_edges=0
+axes=[20.0, 0.5, 3.0] analytic_diameters=83 reload=PASS
+axes=[4.0, 3.0, 2.0] volume=100.530964913938 expected=100.530964914873 relative_error=9.302e-12 faces=1 naked_edges=0
+axes=[4.0, 3.0, 2.0] analytic_diameters=83 reload=PASS
+test ellipsoid_exact_volume_topology_and_surface ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.13s
+

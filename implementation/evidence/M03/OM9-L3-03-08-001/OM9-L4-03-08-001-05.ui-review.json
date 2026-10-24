@@ -1,0 +1,63 @@
+{
+  "schema": "om9.m03.l2-03-08.ui-review.v1",
+  "task_id": "OM9-L4-03-08-001-05",
+  "l3_id": "OM9-L3-03-08-001",
+  "title": "Top11 Duplicate Action",
+  "oracle": {
+    "positive": [
+      "In Place: one line -> 2 objects and Undo/Redo; base flow: 2 copies at x=5 and x=10; Vertical projects (3,4,5) to (0,0,5); Use Last Distance turns a 5 mm y move into 10 mm; Use Last Direction turns it into 5 mm along x; From Last Point continues from the last destination"
+    ],
+    "negative": [
+      "duplicate with an empty selection",
+      "duplicate while a command is already running",
+      "a destination equal to the base point"
+    ]
+  },
+  "manual_test_gate": "M03-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "manual M03-UI gate pending",
+    "date_utc": "2026-10-23",
+    "statement": "The command/action oracle is asserted by focused Rust tests and every measured value comes from that run. No interactive window, menu or human geometry review is part of this automated receipt.",
+    "scope": "Top 11 command adapter, selection/kind availability, one transaction; no human review"
+  },
+  "measured": {
+    "duplicate_vertical_origin": "[0.0, 0.0, 5.0]",
+    "duplicate_base_copies": 2.0,
+    "duplicate_total_objects": 3.0,
+    "duplicate_undo_redo_passed": "true",
+    "duplicate_last_distance_y": 10.0,
+    "duplicate_last_direction_x": 5.0
+  },
+  "tolerances": {
+    "duplicate_entities": "exact integer",
+    "duplicate_undo_redo_passed": "boolean assertion",
+    "duplicate_base_copies": "exact integer",
+    "duplicate_total_objects": "exact integer",
+    "duplicate_vertical_origin": "1e-9",
+    "duplicate_last_distance_y": "1e-9",
+    "duplicate_last_direction_x": "1e-9"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-app --no-default-features --test top11 m03_03_08_001 -- --nocapture (exit 0)",
+    "regression: cargo test -p om9-app --no-default-features --lib --test top11 -j 2 (195 passed)",
+    "core: cargo test -p om9-core --test top11 -j 2 (6 passed)",
+    "clippy and format: exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-03-08-001/api.md",
+    "implementation/design/M03/OM9-L3-03-08-001/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-03-08-001/positive.json",
+    "implementation/fixtures/M03/OM9-L3-03-08-001/negative.json",
+    "implementation/evidence/M03/OM9-L3-03-08-001/OM9-L4-03-08-001-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-03-08-001/OM9-L4-03-08-001-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_03_08_scope": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

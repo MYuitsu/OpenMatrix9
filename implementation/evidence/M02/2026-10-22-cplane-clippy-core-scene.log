@@ -1,0 +1,31 @@
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+error: variable does not need to be mutable
+   --> crates\om9-core\tests\layer_transactions.rs:543:9
+    |
+543 |     let mut c = coordinator(d);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `-D unused-mut` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(unused_mut)]`
+
+error: variable does not need to be mutable
+   --> crates\om9-core\tests\layer_transactions.rs:585:9
+    |
+585 |     let mut c = coordinator(d);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+
+error: variable does not need to be mutable
+   --> crates\om9-core\tests\layer_transactions.rs:626:9
+    |
+626 |     let mut c = coordinator(d);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+
+error: could not compile `om9-core` (test "layer_transactions") due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...

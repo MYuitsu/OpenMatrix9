@@ -11,7 +11,8 @@ use om9_scene::workspace::ViewId;
 
 #[test]
 fn a_right_drag_writes_an_orbit_record() {
-    let directory = std::env::temp_dir().join(format!("om9-interaction-log-{}", std::process::id()));
+    let directory =
+        std::env::temp_dir().join(format!("om9-interaction-log-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(&directory).expect("log directory");
     let path = directory.join("interaction.jsonl");
@@ -70,7 +71,10 @@ fn a_right_drag_writes_an_orbit_record() {
             },
         ],
     );
-    frame(&mut app, vec![Event::PointerMoved(start + Vec2::new(-30., 18.))]);
+    frame(
+        &mut app,
+        vec![Event::PointerMoved(start + Vec2::new(-30., 18.))],
+    );
     frame(
         &mut app,
         vec![Event::PointerButton {

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-015-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-015",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-015",
+  "source_command": "Plane from Corners",
+  "menu_icon": "SurfacePlaneCornertoCorner",
+  "owner_candidate": "OM9-L2-03-17",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-015/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-015/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-015/dispatch_contract.json": "db478ba3b5e5b00ef0d24bbbae154c6c1b812795573babbc18e750e757663683",
+    "implementation/design/M03/OM9-L3-03-17-015/source_crosswalk.json": "ed8032ec3d8a7d4aa35faadc5f76fe2ec5666a3e9174c7053194cfcc5c456891"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

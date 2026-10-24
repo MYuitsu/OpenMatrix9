@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-001-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-001",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-001",
+  "source_command": "PolyLine",
+  "menu_icon": "CurvePolylinePolyline",
+  "owner_candidate": "OM9-L3-02-04-001",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive PolyLine command session is not wired; owner candidate OM9-L3-02-04-001 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-001/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-001/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-001/dispatch_contract.json": "e6fd61d8e14b9a592fdab6868a47ca0611a7dd3d175813583827760d5fdee03c",
+    "implementation/design/M03/OM9-L3-03-16-001/dispatch_contract.md": "d056b50dda5e21ef2be2e48ce593c7844468a60e37a6b306c14b872026bdb74f"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

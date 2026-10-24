@@ -216,5 +216,22 @@
     "api": "implementation/design/M01/OM9-L3-01-06-003/api.md",
     "evidence": "implementation/evidence/M01/OM9-L3-01-06-003/",
     "manual_pending": "the mesh must rebuild and look identical after a real OCCT parameter change"
+  },
+  "runtime_implementation": {
+    "plugin_sdk_v1": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9",
+      "status": "partial_sdk_consumer_verified_windows",
+      "scope": "Versioned native SDK consumer; host-owned atomic document/scene publication; exact simple polyline cache/picking. Does not close the full module.",
+      "evidence": [
+        "docs/validation/2026-10-21-plugin-sdk.json",
+        "docs/validation/2026-10-21-plugin-sdk.md"
+      ],
+      "limitations": [
+        "macOS execution unverified",
+        "full module/manual gates remain open",
+        "2 unrelated broad app dock reset regressions remain failing"
+      ]
+    }
   }
 }

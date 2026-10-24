@@ -218,9 +218,9 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
-    "date": "2026-10-19",
+    "date": "2026-10-22",
     "target": "standalone Rust OM9",
-    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "scope": "Hover, shared selection, polygon subobject outlines, alpha/depth-correct GPU highlight",
     "evidence": [
       "implementation/evidence/M02/2026-10-19-selection-video-review.md",
@@ -231,14 +231,53 @@
       "implementation/evidence/M02/2026-10-19-occurrence-checks.json",
       "implementation/evidence/M02/2026-10-19-brep-selection.md",
       "implementation/evidence/M02/2026-10-19-brep-checks.json",
-      "implementation/evidence/M02/2026-10-19-brep-native.json"
+      "implementation/evidence/M02/2026-10-19-brep-native.json",
+      "implementation/design/M02/OM9-L3-01-07-006/api.md",
+      "implementation/evidence/M02/OM9-L3-01-07-006/OM9-L4-01-07-006-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-01-07-006/OM9-L4-01-07-006-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-01-07-006/OM9-L4-01-07-006-06-acceptance.md"
     ],
     "human_approval": null,
     "remaining": [
-      "External M02-UI review; pinned upstream reuse not claimed"
+      "Manual M02-UI review pending."
     ],
     "occurrence_path_subselection": "VALIDATED",
     "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
-    "native_brep_selection": "VALIDATED_SOURCE_BOUND_UUID_TOPOLOGY"
+    "native_brep_selection": "VALIDATED_SOURCE_BOUND_UUID_TOPOLOGY",
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "tests": [
+        "om9-app selection_overlay: 8 passed",
+        "om9-app subobject_occurrences: 5 passed",
+        "om9-app acceptance_viewport_selection: 8 passed"
+      ],
+      "design": "implementation/design/M02/OM9-L3-01-07-006/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-01-07-006/positive.json",
+        "implementation/fixtures/M02/OM9-L3-01-07-006/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-01-07-006/OM9-L4-01-07-006-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-01-07-006/OM9-L4-01-07-006-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-01-07-006/OM9-L4-01-07-006-06-acceptance.md"
+      ],
+      "remaining": [
+        "Manual M02-UI review pending; no human sign-off is claimed."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Highlight/hover nên cho plugin đặt trạng thái.",
+    "api": [],
+    "candidate_api": [
+      "set_highlight(ids)",
+      "clear_highlight()"
+    ],
+    "host_only": "Vẽ highlight ở host; SDK chỉ đặt/đọc tập id."
   }
 }

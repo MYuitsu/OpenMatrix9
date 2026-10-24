@@ -1,0 +1,60 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-005",
+  "fixture_id": "OM9-L3-02-05-005-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Trim Split Untrim And Shrink Surface",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "outer_points": 4,
+    "inner_loops": 1,
+    "split_left_outer": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        0.5,
+        1.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    "shrunk_corner_matches_source": true
+  },
+  "tolerances": {
+    "uv": "1e-12",
+    "underlying_geometry": "exact"
+  },
+  "measured_on_2026_10_22": {
+    "outer_points": 4,
+    "inner_loops": 1,
+    "split_left_outer": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        0.5,
+        1.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    "shrunk_corner_matches_source": true
+  }
+}

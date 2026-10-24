@@ -1,0 +1,40 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-004",
+  "fixture_id": "OM9-L3-03-08-004-POSITIVE",
+  "units": "mm",
+  "oracle": "join 1, explode 2; one cutter splits 3 objects; two cutters split 5 objects and trim leaves 4; a NURBS plane cuts one line into 2 new pieces; a BRep box cuts one line into 3 new pieces; an exact sphere/line cut returns fractions 0.25 and 0.75; Trim keeps the half starting at x=0; 50 stress cycles complete",
+  "measured": {
+    "multi_cutter_split_entities": 5.0,
+    "multi_cutter_trim_entities": 4.0,
+    "joined_entities": 1.0,
+    "exploded_entities": 2.0,
+    "split_entities": 3.0,
+    "trim_remaining_entities": 2.0,
+    "trim_kept_start_x_mm": 0.0,
+    "surface_cutter_entities": 3.0,
+    "stress_cycles": 50.0,
+    "brep_cutter_entities": 4.0,
+    "exact_brep_fractions": "[0.25, 0.75]",
+    "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+    "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+    "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+    "brep_mirror_volume_mm3": 24.0,
+    "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+  },
+  "tolerances": {
+    "joined_entities": "exact integer",
+    "exploded_entities": "exact integer",
+    "split_entities": "exact integer",
+    "trim_remaining_entities": "exact integer",
+    "trim_kept_start_x_mm": "1e-9",
+    "multi_cutter_split_entities": "exact integer",
+    "multi_cutter_trim_entities": "exact integer",
+    "surface_cutter_entities": "exact integer",
+    "brep_cutter_entities": "exact integer",
+    "exact_brep_fractions": "1e-6",
+    "exact_nurbs_polycurve_fractions": "1e-6",
+    "stress_cycles": "exact integer"
+  },
+  "test": "m03_03_08_004"
+}

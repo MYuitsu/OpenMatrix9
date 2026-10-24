@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-010",
+  "fixture_id": "OM9-L3-02-04-010-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "unknown B-Rep edge id",
+    "edge with no display segments",
+    "empty B-Rep topology"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_010_duplicate_edge_border_and_isocurve"
+}

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "G02-A-01-07-007",
+  "l3_id": "OM9-L3-01-07-007",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Gizmo Move/Rotate/Scale xuất hiện theo bounding box, trục đúng world axes",
+  "expected": "The documented hit/selection is produced with the exact object/subobject key and no silent fallback.",
+  "evidence": [
+    "om9-scene lib gumball_view: 13 passed",
+    "om9-app gumball_viewport: 3 passed",
+    "om9-app gumball_placement: 4 passed",
+    "om9-app gumball_interaction: 5 passed",
+    "om9-app gumball_numeric: 5 passed",
+    "om9-core gumball: 15 passed"
+  ],
+  "status": "PASS"
+}

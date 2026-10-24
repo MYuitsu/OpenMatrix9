@@ -1,0 +1,11 @@
+{
+  "l3_id": "OM9-L3-03-19-001",
+  "title": "Check Object Validity And Bad Objects",
+  "owner": "OM9-L2-03-19",
+  "sources": [
+    "OM9_Milestones/OM9_Milestones/M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-001 - Check Object Validity And Bad Objects/l3.json",
+    "crates/om9-core/src/utilities.rs",
+    "crates/om9-app/src/utilities.rs"
+  ],
+  "qymcad_source_paths_verified": []
+}

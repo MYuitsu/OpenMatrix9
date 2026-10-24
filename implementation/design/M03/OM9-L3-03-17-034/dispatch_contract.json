@@ -1,0 +1,21 @@
+{
+  "schema": "om9.m03.l2-03-17.dispatch_contract.v1",
+  "l3_id": "OM9-L3-03-17-034",
+  "command_id": "OM9-SURFACE-134",
+  "source_command": "Unroll Surface",
+  "menu_icon": "SurfaceUnrollDevelopableSrf",
+  "owner_candidate": "OM9-L2-03-17",
+  "state": "IMPLEMENTED",
+  "selection_precondition": "a compatible selected surface/curve profile as declared by the owner; no geometry is produced by the UI",
+  "units_and_options": "canonical millimetres; options must be owner-declared and parsed before mutation",
+  "undo_transaction_policy": "one command session = one transaction; disabled/refused/cancel writes nothing",
+  "dialog_result_mapping": "Matrix Surface menu and command line resolve to this one command id; a disabled row reports the reason and never mutates",
+  "disabled_reason": "",
+  "status": "DISPATCH_IMPLEMENTED",
+  "backend_owner": "OM9-L2-03-17",
+  "reviewed_sources": [
+    "crates/om9-app/src/surface_menu.rs",
+    "crates/om9-app/src/icons.rs",
+    "crates/om9-app/src/menu_catalog.rs"
+  ]
+}

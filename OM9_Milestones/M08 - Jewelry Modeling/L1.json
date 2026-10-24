@@ -77,5 +77,27 @@
     "M03",
     "M05",
     "M06"
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_MILESTONE_AND_OWNERS",
+    "responsibility": "SmartFlow, placement, deformation, ornament, pattern, rope và library được mở SDK theo từng owner. Không kéo phạm vi AFTER vào M08.",
+    "owner_ids": [
+      "OM9-L2-04-04",
+      "OM9-L2-04-05",
+      "OM9-L2-04-06",
+      "OM9-L2-04-07",
+      "OM9-L2-04-08",
+      "OM9-L2-05-01",
+      "OM9-L2-05-02",
+      "OM9-L2-05-03"
+    ],
+    "already_implemented_rule": "Add the missing public SDK contract/adapter/proof to the existing owner backlog; preserve validated core evidence and reuse its implementation.",
+    "not_yet_implemented_rule": "Deliver shared Rust service and SDK adapter/proof together inside the same canonical L3/L2 milestone owner; do not defer SDK to a separate delivery track.",
+    "host_internal_rule": "Keep ownership and private runtime resources in the host; document the reason and expose only a bounded service/DTO when needed.",
+    "completion_rule": "SDK-eligible feature delivery includes public DTO/wrapper, host dispatch/capability, shared service, atomicity/limits and external plugin evidence for each advertised target, alongside the existing owner acceptance contract."
+  }
 }

@@ -1,0 +1,70 @@
+{
+  "schema": "om9.m03.l2-02-06.ui-review.v1",
+  "task_id": "OM9-L4-02-06-004-05",
+  "l3_id": "OM9-L3-02-06-004",
+  "title": "Orient By Two Three Reference Points",
+  "oracle": {
+    "positive": [
+      "two-point maps (0,0,0)->(10,20,30) and (1,0,0)->(10,21,30)",
+      "three-point maps [0,0,0],[1,0,0],[0,1,0] to a 90-degree rotated translated frame exactly"
+    ],
+    "negative": [
+      "coincident two-point references are refused",
+      "collinear three-point references are refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The transform-session and matrix oracles pass; the interactive selection/reference picker/preview/commit/cancel and warning review is not signed by a human.",
+    "scope": "reference-target coordinate frame placement"
+  },
+  "measured": {
+    "two_point_a": [
+      10.0,
+      20.0,
+      30.0
+    ],
+    "two_point_b": [
+      10.0,
+      21.0,
+      30.0
+    ],
+    "three_point_1": [
+      2.0,
+      4.0,
+      4.0
+    ],
+    "three_point_2": [
+      1.0,
+      3.0,
+      4.0
+    ]
+  },
+  "tolerances": {
+    "points": "1e-12"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "app gumball suites 17 passed (interaction 6, numeric 6, placement 4, cold 1)",
+    "core suite 8 passed; kernel suite 3 passed; kernel l2_01_11 11 passed",
+    "clippy/fmt/public audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-06-004/api.md",
+    "implementation/design/M03/OM9-L3-02-06-004/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-004/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-004/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-06-004/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

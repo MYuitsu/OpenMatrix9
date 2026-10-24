@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-21",
+  "status": "sdk_surface_record_refreshed",
+  "target": "Main SDK record now lists the current service surface",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "record": "docs/validation/2026-10-21-plugin-sdk.md",
+  "record_sha256": "65293b85ca387adbd37f20fd927f9883a7e6d66de1896fbec4b3116bc68a7b9e",
+  "batch": {
+    "run": "build/standalone-validation/ui-artifacts/20261021-plugin-sdk-surface",
+    "status": "PASS",
+    "commands": 10,
+    "objects": 3,
+    "cold_project_hash_equal": true,
+    "failed_commands_preserved_file": true,
+    "standalone_sdk_build": true,
+    "native_tests": 32,
+    "artifacts": {
+      "hello.om9p": {
+        "bytes": 1927038,
+        "sha256": "a11b1eb1a9d6000670421e00e4c67bcb266e154146a2be59689d0110a96ab90f"
+      },
+      "hello.om9": {
+        "bytes": 2159,
+        "sha256": "5e02edda854fdc4d579f9227a2236ae221a56f24720163b2e9fbcfe011f2ac38"
+      },
+      "openmatrix9-sdk-0.1.0.zip": {
+        "bytes": 187004,
+        "sha256": "65a9eb9bb6d36c2863f49b6f0a1018a9dfb84a23484fad6785bd6b38169dfe50"
+      },
+      "om9-plugin.exe": {
+        "bytes": 1661440,
+        "sha256": "37039e122400b3b8e802720512fe3018d3c7d7d149910ab04655fb07b4658009"
+      },
+      "om9_hello_plugin.dll": {
+        "bytes": 1923584,
+        "sha256": "a70ca62a173b511e9acb0a693cc2fc9d68ce1f62dbee4da805474c02cbcf0cf5"
+      },
+      "om9.exe": {
+        "bytes": 69503488,
+        "sha256": "21b96beb04201520d58825cfe927c9d461d98897b9f94da916c35e1c8b909362"
+      }
+    }
+  },
+  "workspace_tests": {
+    "sdk": "13 passed, 3 suites",
+    "plugin_host": "61 passed, 5 suites",
+    "core": "403 passed, 47 suites",
+    "controller_plugin": "5 passed, 135 filtered",
+    "product_check": "exit 0 (default features including occt-brep)"
+  },
+  "limitations": [
+    "Record refresh only; no behaviour change.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ]
+}

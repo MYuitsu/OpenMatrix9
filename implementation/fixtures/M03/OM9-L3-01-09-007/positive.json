@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-007",
+  "fixture_id": "OM9-L3-01-09-007-POSITIVE",
+  "units": "mm",
+  "input": {
+    "profile_mm": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        0,
+        3,
+        0
+      ]
+    ],
+    "rail_mm": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        10
+      ]
+    ],
+    "sweep2_rails": [
+      [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          10
+        ]
+      ],
+      [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          10
+        ]
+      ]
+    ]
+  },
+  "expect": {
+    "sweep1_volume_mm3": 60.0,
+    "sweep2_volume_mm3": 60.0,
+    "size_mm": [
+      2,
+      3,
+      10
+    ]
+  },
+  "measured_on_2026_10_22": {
+    "sweep1_volume_mm3": 60.0,
+    "sweep2_volume_mm3": 60.0
+  }
+}

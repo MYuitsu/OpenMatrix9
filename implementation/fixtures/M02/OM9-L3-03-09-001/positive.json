@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-09-001",
+  "l3_id": "OM9-L3-03-09-001",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "F6 với selected curve hiển thị nhóm curve; với box hiển thị solid actions",
+  "expected": "The documented F6 group/action with the command registry as the only dispatch source.",
+  "evidence": [
+    "om9-app f6 unit: 7 passed",
+    "om9-app f6_context: 2 passed"
+  ],
+  "status": "PASS"
+}

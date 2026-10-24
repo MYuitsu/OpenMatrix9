@@ -209,11 +209,9 @@ fn prepare_task<T: Send + 'static>(
 /// never per frame, so painting costs one draw pass.
 /// Above this many mesh objects the unselected ones are merged into static ranges: one draw instead of
 /// one per object, at the cost of one colour for the merged group.
-
 /// Samples per pixel of the document viewport. Four is the multisample count WebGPU guarantees for a
 /// renderable format, and it is what keeps the one-pixel grid from turning into a staircase: a diagonal
 /// segment now covers part of a pixel and resolves to a grey level instead of a hard step.
-
 pub struct GpuScene {
     batch: om9_render::scene::SceneBatch,
     /// Only the selected objects, drawn over the scene with alpha blending. Selection changes rebuild this
@@ -400,10 +398,10 @@ impl GpuViewport {
         {
             return;
         }
-        if let Some(id) = self.texture_id.take() {
-            if Some(id) != self.published_id {
-                state.renderer.write().free_texture(&id);
-            }
+        if let Some(id) = self.texture_id.take()
+            && Some(id) != self.published_id
+        {
+            state.renderer.write().free_texture(&id);
         }
         let samples = self.sample_count();
         let colour = state.device.create_texture(&wgpu::TextureDescriptor {
@@ -713,15 +711,16 @@ impl GpuViewport {
                 if !object.visible {
                     continue;
                 }
-                if close && !selected.contains(&object.root) {
-                    if let Some((centre, radius)) = spheres.get(object_index) {
-                        let distance = ((centre[0] - camera.target[0]).powi(2)
-                            + (centre[1] - camera.target[1]).powi(2)
-                            + (centre[2] - camera.target[2]).powi(2))
-                        .sqrt();
-                        if distance - radius > focus_radius {
-                            continue;
-                        }
+                if close
+                    && !selected.contains(&object.root)
+                    && let Some((centre, radius)) = spheres.get(object_index)
+                {
+                    let distance = ((centre[0] - camera.target[0]).powi(2)
+                        + (centre[1] - camera.target[1]).powi(2)
+                        + (centre[2] - camera.target[2]).powi(2))
+                    .sqrt();
+                    if distance - radius > focus_radius {
+                        continue;
                     }
                 }
 
@@ -875,19 +874,19 @@ impl GpuViewport {
         self.refinement_ms
     }
     pub fn window_submitted(&mut self, queue: &wgpu::Queue) {
-        if let Some(frame) = self.timer_frame.take() {
-            if let Some(timer) = self.timer.as_mut() {
-                timer.submitted(frame);
-            }
+        if let Some(frame) = self.timer_frame.take()
+            && let Some(timer) = self.timer.as_mut()
+        {
+            timer.submitted(frame);
         }
-        if let Some(pending) = self.pending_publication.as_mut() {
-            if !pending.submitted {
-                let done = pending.done.clone();
-                queue.on_submitted_work_done(move || {
-                    done.store(true, std::sync::atomic::Ordering::Release)
-                });
-                pending.submitted = true;
-            }
+        if let Some(pending) = self.pending_publication.as_mut()
+            && !pending.submitted
+        {
+            let done = pending.done.clone();
+            queue.on_submitted_work_done(move || {
+                done.store(true, std::sync::atomic::Ordering::Release)
+            });
+            pending.submitted = true;
         }
     }
     pub fn refinement_delayed(&self) -> bool {
@@ -1198,10 +1197,10 @@ impl GpuViewport {
         if self.pending_publication.is_some() {
             let _ = state.device.poll(wgpu::PollType::Poll);
         }
-        if let Some(timer) = self.timer.as_mut() {
-            if let Some(sample) = timer.poll(&state.device, &state.queue) {
-                self.gpu_sample = Some(sample);
-            }
+        if let Some(timer) = self.timer.as_mut()
+            && let Some(sample) = timer.poll(&state.device, &state.queue)
+        {
+            self.gpu_sample = Some(sample);
         }
         let scale = if self.request.moving {
             self.request.quality.scale()
@@ -1238,10 +1237,10 @@ impl GpuViewport {
         let document_id = scene.map(|s| s.document.id);
         if self.last_document != document_id {
             // An old document's image cannot serve as the new document's placeholder.
-            if let Some(id) = self.published_id.take() {
-                if Some(id) != self.texture_id {
-                    state.renderer.write().free_texture(&id);
-                }
+            if let Some(id) = self.published_id.take()
+                && Some(id) != self.texture_id
+            {
+                state.renderer.write().free_texture(&id);
             }
             self.published_colour = None;
             self.displayed_camera = None;
@@ -1276,39 +1275,38 @@ impl GpuViewport {
                 size: (width, height),
                 generation: self.request.generation,
             });
-            if !self.request.moving && !self.rendered_final {
-                if let Some(key) = key {
-                    if self.refinement.as_ref().is_none_or(|(old, _)| *old != key) {
-                        self.refinement = Some((key, std::time::Instant::now()));
-                    }
-                }
+            if !self.request.moving
+                && !self.rendered_final
+                && let Some(key) = key
+                && self.refinement.as_ref().is_none_or(|(old, _)| *old != key)
+            {
+                self.refinement = Some((key, std::time::Instant::now()));
             }
-            if let Some(pending) = self.pending_publication.take() {
-                if Some(pending.key) == key
-                    && pending.camera == *document_camera
-                    && !self.request.moving
-                {
-                    if pending.done.load(std::sync::atomic::Ordering::Acquire) {
-                        if let Some(old) = self.published_id.replace(pending.texture) {
-                            if old != pending.texture {
-                                state.renderer.write().free_texture(&old);
-                            }
-                        }
-                        self.published_colour = Some(pending.colour);
-                        self.displayed_camera = Some(pending.camera);
-                        self.rendered_final = true;
-                        self.published_frame = Some(self.request.frame_id);
-                        if let Some((_, started)) = self.refinement.take() {
-                            self.refinement_ms = Some(started.elapsed().as_secs_f64() * 1000.);
-                        }
-                    } else {
-                        self.pending_publication = Some(pending);
-                        self.preparing = true;
-                        ui.ctx()
-                            .request_repaint_after(std::time::Duration::from_millis(2));
+            if let Some(pending) = self.pending_publication.take()
+                && Some(pending.key) == key
+                && pending.camera == *document_camera
+                && !self.request.moving
+            {
+                if pending.done.load(std::sync::atomic::Ordering::Acquire) {
+                    if let Some(old) = self.published_id.replace(pending.texture)
+                        && old != pending.texture
+                    {
+                        state.renderer.write().free_texture(&old);
                     }
-                    return self.paint_published(ui, rect);
+                    self.published_colour = Some(pending.colour);
+                    self.displayed_camera = Some(pending.camera);
+                    self.rendered_final = true;
+                    self.published_frame = Some(self.request.frame_id);
+                    if let Some((_, started)) = self.refinement.take() {
+                        self.refinement_ms = Some(started.elapsed().as_secs_f64() * 1000.);
+                    }
+                } else {
+                    self.pending_publication = Some(pending);
+                    self.preparing = true;
+                    ui.ctx()
+                        .request_repaint_after(std::time::Duration::from_millis(2));
                 }
+                return self.paint_published(ui, rect);
             }
             let samples = self.sample_count();
             let viewport = om9_scene::camera::Viewport {
@@ -1434,21 +1432,21 @@ impl GpuViewport {
                         false,
                     )
                     .ok();
-                if delta.0 != om9_core::geometry::Transform::identity().0 {
-                    if let Some(ghost) = gpu.ghost.as_mut() {
-                        ghost
-                            .encode_pass(
-                                encoder,
-                                &render_colour,
-                                resolve,
-                                &depth,
-                                camera,
-                                width,
-                                height,
-                                false,
-                            )
-                            .ok();
-                    }
+                if delta.0 != om9_core::geometry::Transform::identity().0
+                    && let Some(ghost) = gpu.ghost.as_mut()
+                {
+                    ghost
+                        .encode_pass(
+                            encoder,
+                            &render_colour,
+                            resolve,
+                            &depth,
+                            camera,
+                            width,
+                            height,
+                            false,
+                        )
+                        .ok();
                 }
                 overlays.fixed.encode_pass(
                     encoder,
@@ -1497,10 +1495,10 @@ impl GpuViewport {
                 self.last_preview = Some(preview_revision);
                 drop(slot);
                 if self.request.moving {
-                    if let Some(old) = self.published_id.replace(texture_id) {
-                        if old != texture_id {
-                            state.renderer.write().free_texture(&old);
-                        }
+                    if let Some(old) = self.published_id.replace(texture_id)
+                        && old != texture_id
+                    {
+                        state.renderer.write().free_texture(&old);
                     }
                     self.published_colour = self.colour.clone();
                     self.displayed_camera = Some(document_camera.clone());
@@ -1689,6 +1687,10 @@ fn world_per_pixel(
     }
 }
 
+/// Matrix9's selection pink (`#FF79C6`): the manual's "pink highlighted color" is reserved for "this
+/// object is selected", so only curve/point/mesh-edge lines use it.
+const SELECTION_PINK: [f32; 4] = [1.0, 0.475, 0.776, 1.0];
+
 /// One object's triangles in world space, or `None` when it has no mesh or no transform.
 fn build_lines(
     state: &RenderState,
@@ -1724,7 +1726,7 @@ fn build_lines(
             }
             let picked = selected.contains(&object.root);
             let tint = if picked {
-                [1., 0.86, 0., 1.]
+                SELECTION_PINK
             } else {
                 object.color.map(|x| x as f32 / 255.)
             };
@@ -1747,6 +1749,19 @@ fn build_lines(
                     for p in points {
                         if let Ok(p) = object.transform.point(*p) {
                             batch.point(p, point_size, color);
+                        }
+                    }
+                }
+                RenderBuffers::Mesh {
+                    vertices, edges, ..
+                } if picked => {
+                    for [a, b] in edges {
+                        if let (Some(a), Some(b)) =
+                            (vertices.get(*a as usize), vertices.get(*b as usize))
+                            && let (Ok(a), Ok(b)) =
+                                (object.transform.point(*a), object.transform.point(*b))
+                        {
+                            batch.line(a, b, color);
                         }
                     }
                 }
@@ -1832,24 +1847,13 @@ fn build_ghost(
 fn build_highlight(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
-    scene: Option<&om9_scene::scene::Scene>,
-    selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
+    _scene: Option<&om9_scene::scene::Scene>,
+    _selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
     samples: u32,
 ) -> om9_render::scene::SceneBatch {
-    let mut highlight =
-        om9_render::scene::SceneBatch::with_samples(device.clone(), queue.clone(), samples);
-    let Some(scene) = scene else {
-        return highlight;
-    };
-    for object in &scene.objects {
-        if !selected.contains(&object.root) {
-            continue;
-        }
-        if let Some(mesh) = world_mesh_at(object, object.transform) {
-            highlight.add_mesh(&mesh, identity_model(), [0.25, 0.80, 0.50, 0.55]);
-        }
-    }
-    highlight
+    // Selected solids keep their face colours; `build_lines` draws their B-Rep edges in
+    // the selection pink instead of tinting every triangle.
+    om9_render::scene::SceneBatch::with_samples(device.clone(), queue.clone(), samples)
 }
 
 /// The model matrix of geometry that is already in world space.
@@ -1983,6 +1987,7 @@ mod ghost_tests {
             ],
             normals: Vec::new(),
             colors: Vec::new(),
+            corner_uvs: Vec::new(),
         }
     }
 
@@ -2038,7 +2043,9 @@ mod display_lod_tests {
             .collect();
         let triangles: Vec<([u32; 3], u32)> = sphere
             .indices
-            .chunks_exact(3)
+            .as_chunks::<3>()
+            .0
+            .iter()
             .enumerate()
             .map(|(face, corners)| ([corners[0], corners[1], corners[2]], face as u32))
             .collect();
@@ -2076,5 +2083,63 @@ mod selected_lod_tests {
         assert_eq!(display_lod_target(false, Some(100), Some(50)), Some(100));
         assert_eq!(display_lod_target(false, None, Some(50)), Some(50));
         assert_eq!(display_lod_target(false, None, None), None);
+    }
+}
+
+#[cfg(test)]
+mod selection_colour_tests {
+    use super::SELECTION_PINK;
+
+    /// Matrix9 marks a selected object with its pink highlight; a yellow selection reads as unselected
+    /// geometry from the manual's own colours, so the rule is pinned here.
+    #[test]
+    #[allow(clippy::assertions_on_constants)]
+    fn the_selection_colour_is_pink_not_yellow() {
+        let [red, green, blue, alpha] = SELECTION_PINK;
+        assert!(red > 0.9, "the selection keeps a full red channel: {red}");
+        assert!(
+            blue > 0.7 && blue > green + 0.25,
+            "the selection is pink, not yellow: {SELECTION_PINK:?}"
+        );
+        assert!(
+            green < 0.5,
+            "a yellow selection has its green channel near red: {green}"
+        );
+        assert_eq!(alpha, 1.0, "lines and points stay opaque");
+    }
+
+    /// The tint the app hands the GPU must actually reach the image as pink; a hue mistake in either
+    /// constant would otherwise only show up in the running viewport.
+    #[test]
+    fn the_renderer_paints_the_selection_pink() {
+        let Some(mut renderer) = om9_render::Renderer::new() else {
+            eprintln!("no wgpu adapter on this machine; the manual viewport check covers it");
+            return;
+        };
+        // Big enough to cover a large part of the texture, as the sphere does in the render loop test.
+        let mesh = om9_render::MeshData::new(
+            vec![[-6.0, -5.0, 0.0], [6.0, -5.0, 0.0], [0.0, 6.0, 0.0]],
+            vec![0, 1, 2],
+        );
+        let style = om9_render::RenderStyle {
+            tint: SELECTION_PINK,
+            ..Default::default()
+        };
+        let frame = renderer
+            .render_with(1, &mesh, om9_render::Camera::default(), 320, 180, style)
+            .expect("selection frame");
+        let mut pink = 0;
+        for y in 0..frame.height {
+            for x in 0..frame.width {
+                let [red, green, blue, _] = frame.pixel(x, y);
+                if red > 60 && blue > 50 && blue as u32 * 2 > red as u32 && green < red {
+                    pink += 1;
+                }
+            }
+        }
+        assert!(
+            pink > 5_000,
+            "the selected object must be pink, counted {pink} pink pixels"
+        );
     }
 }

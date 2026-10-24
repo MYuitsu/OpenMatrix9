@@ -1,0 +1,54 @@
+{
+  "schema": "om9.m03.l2-02-04.ui-review.v1",
+  "task_id": "OM9-L4-02-04-008-05",
+  "l3_id": "OM9-L3-02-04-008",
+  "title": "Rebuild Refit And Knot Operations",
+  "oracle": {
+    "positive": [
+      "circle rebuild radial deviation 1.7e-5 mm < 0.02 mm; one knot insertion adds one pole without moving 17 sampled points; degree elevates by one; 6-pole fit keeps 6 poles"
+    ],
+    "negative": [
+      "fit control count not greater than degree",
+      "fit control count above the sample count",
+      "knot insertion outside the domain"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is asserted by a focused Rust test and every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "portable curve service and typed refusal; no window, menu or human review"
+  },
+  "measured": {
+    "rebuild_max_radial_deviation_mm": 1.6688046e-05,
+    "knot_inserted_poles": 5.0
+  },
+  "tolerances": {
+    "rebuild_max_radial_deviation_mm": "0.02",
+    "knot_inserted_poles": "exact integer"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test l2_02_04 m03_02_04_008_rebuild_refit_and_knot_operations -- --exact (exit 0)",
+    "regression: cargo test -p om9-core -j 2 (52 suites, 447 passed)",
+    "clippy: cargo clippy -p om9-core --all-targets -j 2 -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-04-008/api.md",
+    "implementation/design/M03/OM9-L3-02-04-008/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-008/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-008/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-04-008/OM9-L4-02-04-008-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-02-04-008/OM9-L4-02-04-008-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_02_04_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

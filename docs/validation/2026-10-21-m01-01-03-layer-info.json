@@ -1,0 +1,134 @@
+{
+  "date": "2026-10-21",
+  "status": "single_layer_info_sdk_export_verified_windows_host_only",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "One shared layer_info helper for list and single read.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "31a62b38177c8d40ed74d279367d3471703b4e5f5780183fc05f3d6868ce30d7",
+    "crates/om9-plugin-host/src/staged.rs": "3b6004b92f5baaad03aaa7bee32e9faccdd7306aeebadaa9b0e9348089493254",
+    "sdk/README.md": "048ca88da46fca1c60088741b3b412b729301153102fab4e1e944bd14a1f03a4",
+    "sdk/API-INVENTORY.md": "c34b5fd17f2840e51a26cdd75389352e3c6721c81501e65c3f6fb9c0b113c3d4"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "layer_info"
+    ],
+    "error_codes": [
+      "layer",
+      "id"
+    ]
+  },
+  "asserted_semantics": [
+    "Single record equals the listed record (shared helper).",
+    "Effective permissions; locked = !editable.",
+    "Reading stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "64 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-layer-info-b",
+      "result": "PASS, 10 commands",
+      "native_tests": 34,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8860 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": [],
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1940019,
+      "sha256": "0aeb2e71bc5cb7eff53c7788ab78eeefdacf9e3118f1fe3d83850c77175d398b"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "a7ea159509e8e2d7e0f75e658dafc7ad91ed25c30776da0d01bd6fc54b8060b9"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 190728,
+      "sha256": "99e7747c7d7c3c62b64130b589bcdba3d0393c143c488774edec731aa4736dce"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "c90e3aa6359ddd88bf7983154d295abc53a40840675a896e53c27b800b7c792b"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1936384,
+      "sha256": "7e440a7ba4e627a6074d5b77fcec41dba4d62a25cedf3025b205ba3a05b2399c"
+    },
+    "om9.exe": {
+      "bytes": 69595648,
+      "sha256": "ab7a0e00283d4c43f67d749448bf02184d95aed76595261cf3baeef953015a91"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-004 (single layer record read)"
+    ],
+    "open": [
+      "layer delete/reorder",
+      "native command for layer_info"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "host_tests_only_plus_existing_native_suite",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "No native command exercises layer_info yet.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Add a native layer_info command, or return to M02 for subobject/pick query services."
+}

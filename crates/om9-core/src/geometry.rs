@@ -441,6 +441,9 @@ pub struct Mesh {
     pub faces: Vec<Vec<u32>>,
     pub normals: Vec<Point3>,
     pub colors: Vec<[u8; 4]>,
+    /// Per-corner UVs in face order (3DM-style). Empty when the mesh has no UV.
+    #[serde(default)]
+    pub corner_uvs: Vec<[f64; 2]>,
 }
 impl Mesh {
     pub fn validate(&self, l: &Limits) -> Result<Usage> {
@@ -458,6 +461,18 @@ impl Mesh {
             l,
         )?;
         usage.add(Usage::array::<Vec<u32>>(self.faces.capacity())?, l)?;
+        if !self.corner_uvs.is_empty() {
+            let expected: usize = self.faces.iter().map(Vec::len).sum();
+            if self.corner_uvs.len() != expected
+                || self
+                    .corner_uvs
+                    .iter()
+                    .any(|uv| !uv[0].is_finite() || !uv[1].is_finite())
+            {
+                return Err(Error::Invalid("mesh corner uvs"));
+            }
+            usage.add(Usage::array::<[f64; 2]>(self.corner_uvs.len())?, l)?;
+        }
         for face in &self.faces {
             if !(3..=4).contains(&face.len())
                 || face.iter().any(|i| *i as usize >= self.vertices.len())
@@ -752,8 +767,3 @@ impl Geometry {
         Ok(total)
     }
 }
-
-
-
-
-

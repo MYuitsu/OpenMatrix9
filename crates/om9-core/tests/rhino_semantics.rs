@@ -701,6 +701,8 @@ fn mesh_cube() -> Mesh {
         ],
         normals: vec![],
         colors: vec![],
+
+        corner_uvs: Vec::new(),
     }
 }
 

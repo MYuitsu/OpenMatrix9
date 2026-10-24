@@ -1,0 +1,86 @@
+{
+  "schema": "om9.m03.l2-02-06.ui-review.v1",
+  "task_id": "OM9-L4-02-06-005-05",
+  "l3_id": "OM9-L3-02-06-005",
+  "title": "Align And Setpoints",
+  "oracle": {
+    "positive": [
+      "SetPt (1,2,3)->(4,6,8) on XY maps to (4,6,3)",
+      "align to plane z=1 maps (1,1,5) to (1,1,1)",
+      "align to X axis maps (2,3,4) to (2,0,0)",
+      "rotate align maps source X onto target Y and the source origin onto the target origin",
+      "scale align maps extent 2 to 4 (factor 2) about the aligned origin",
+      "rotate+scale maps (1,0,0) to target_origin+(0,2,0)"
+    ],
+    "negative": [
+      "a zero plane normal is refused",
+      "a NaN set point is refused",
+      "a Rotate request without an axis, or a Scale request without an extent, is refused",
+      "a zero/negative align extent is refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The transform-session and matrix oracles pass; the interactive selection/reference picker/preview/commit/cancel and warning review is not signed by a human.",
+    "scope": "align selected points/objects to CPlane/World axis"
+  },
+  "measured": {
+    "setpoint": [
+      4.0,
+      6.0,
+      3.0
+    ],
+    "plane": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "axis": [
+      2.0,
+      0.0,
+      0.0
+    ],
+    "rotate_maps": [
+      4.0,
+      6.0,
+      6.0
+    ],
+    "scale_maps": [
+      12.0,
+      0.0,
+      0.0
+    ],
+    "rotate_scale_maps": [
+      10.0,
+      2.0,
+      0.0
+    ]
+  },
+  "tolerances": {
+    "points": "1e-12"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "app gumball suites 17 passed (interaction 6, numeric 6, placement 4, cold 1)",
+    "core suite 8 passed; kernel suite 3 passed; kernel l2_01_11 11 passed",
+    "clippy/fmt/public audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-06-005/api.md",
+    "implementation/design/M03/OM9-L3-02-06-005/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-005/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-06-005/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

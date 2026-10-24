@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-05-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-05-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "gem_cue reads a typed M05 GemMaterialRecord (asset/material/color) from the om9.gem extension; a colour token is used when present, otherwise a neutral token is returned with DEFERRED_WAIT_M05.",
+  "tests": [
+    "om9-app display cues: 6 passed"
+  ]
+}

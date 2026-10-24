@@ -105,7 +105,7 @@ impl Controller {
         }
         self.validate_gumball_targets(session)?;
         let mutations = session.move_mutations(self.document())?;
-        self.commit_mutations(name, mutations)
+        self.commit_gumball_mutations(name, mutations)
     }
 
     /// Copy variant of [`Controller::commit_gumball`]: the selection stays where it is and each target is
@@ -118,7 +118,7 @@ impl Controller {
         }
         self.validate_gumball_targets(session)?;
         let mutations = session.copy_mutations(self.document())?;
-        self.commit_mutations(name, mutations)
+        self.commit_gumball_mutations(name, mutations)
     }
 
     /// The shared transaction path used by both gumball modes.
@@ -126,7 +126,7 @@ impl Controller {
     /// A placement change is a geometry-visible edit, so the scene is **rebuilt** afterwards: the cached
     /// scene only allows an in-place update when placements are unchanged, and refusing that here would be
     /// the wrong trade (a transform must be visible immediately).
-    fn commit_mutations(&mut self, name: &str, mutations: Vec<Mutation>) -> Result<()> {
+    fn commit_gumball_mutations(&mut self, name: &str, mutations: Vec<Mutation>) -> Result<()> {
         if mutations.is_empty() {
             return Ok(());
         }

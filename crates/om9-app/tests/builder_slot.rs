@@ -339,10 +339,12 @@ fn y1_a_click_on_the_bar_is_refused() {
     let case = fixture_case(&document, "Y1-a-click-on-the-bar-is-refused");
     let context = egui::Context::default();
     let mut app = MatrixApp::new(Document::new("builder click")).unwrap();
+    // The reserved slot sits below the 720-high fold; a click outside the viewport is
+    // never delivered by egui. Use the design work area so the event lands on the bar.
     for _ in 0..3 {
         let mut output = context.run_ui(
             egui::RawInput {
-                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))),
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1600., 1000.))),
                 ..Default::default()
             },
             |ui| app.show(ui),
@@ -354,7 +356,7 @@ fn y1_a_click_on_the_bar_is_refused() {
     for pressed in [true, false] {
         let mut output = context.run_ui(
             egui::RawInput {
-                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))),
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1600., 1000.))),
                 events: vec![
                     Event::PointerMoved(bar.center()),
                     Event::PointerButton {

@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-21",
+  "status": "l3_planned_candidate_api_sketched",
+  "target": "Planned L3 entries now name the intended SDK surface and what stays host-only",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "tool": "tools/l3_sdk_export_plan.py",
+  "index": "docs/validation/2026-10-21-l3-sdk-export-plan.md",
+  "annotated": [
+    "OM9-L3-01-07-001",
+    "OM9-L3-01-07-003",
+    "OM9-L3-01-07-004",
+    "OM9-L3-01-07-005",
+    "OM9-L3-01-07-006",
+    "OM9-L3-01-07-007",
+    "OM9-L3-01-07-008",
+    "OM9-L3-01-03-012",
+    "OM9-L3-01-12-008",
+    "OM9-L3-01-12-009"
+  ],
+  "fields_added": [
+    "candidate_api",
+    "host_only"
+  ],
+  "assertions": [
+    "Only planned L3 got candidate_api; exported L3 still list the delivered API.",
+    "Every candidate names what remains host-only, so the sketch cannot be mistaken for a delivered API.",
+    "The index renders candidates with the 'đề xuất:' prefix (10 rows)."
+  ],
+  "limitations": [
+    "Planning sketch only; no method exists in the SDK and no runtime status changed.",
+    "Names may change when the slice is implemented."
+  ]
+}

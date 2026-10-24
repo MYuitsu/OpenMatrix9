@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-001-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-06-001",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-06-001/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-06-001/negative.json",
+  "fixture_sha256": {
+    "positive": "cece97c85464c28136d203f2b143bf62fafb128a7b37833d67cf6ba10c893233",
+    "negative": "5f5f952d67a67941279c95438218160eaada818a201567e16b8e26394713fa6a"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-06-001/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-06-001/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-001/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "Move (1,2,3) -> (4,6,8) previews translation (3,4,5)",
+      "Rotate 90 deg about Z maps (1,0,0) to (0,1,0)",
+      "the Copy flag survives preview/cancel"
+    ],
+    "negative": [
+      "NaN/INF references are refused",
+      "a zero rotate axis is refused",
+      "a malformed numeric transform leaves the document unchanged"
+    ]
+  }
+}

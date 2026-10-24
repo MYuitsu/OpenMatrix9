@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "m01-l2-03-01-l4-artifacts-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9",
+  "milestone": "OM9-L2-03-01",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Created the per-L4 source/API/fixture/implementation/acceptance artefacts required by the milestone dashboard and re-ran the viewport acceptance tests.",
+  "l4_counts": {
+    "OM9-L3-03-01-001": "5/5",
+    "OM9-L3-03-01-002": "4/4",
+    "OM9-L3-03-01-003": "4/4",
+    "OM9-L3-03-01-004": "4/4",
+    "OM9-L3-03-01-005": "4/4",
+    "OM9-L3-03-01-006": "4/4",
+    "OM9-L3-03-01-007": "4/4"
+  },
+  "checks": [
+    {"name": "viewport-layout", "test_count": 3, "exit_code": 0},
+    {"name": "chrome-actions", "test_count": 13, "exit_code": 0},
+    {"name": "viewport-title-menu", "test_count": 17, "exit_code": 0}
+  ],
+  "logs": {
+    "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-01-20261022/acceptance.log",
+    "acceptance_sha256": "2c57c51127b200989d57786cd9ea4d327d132fbd62b15d593a91d407ea4b320a"
+  },
+  "artifacts": {
+    "design": "implementation/design/M01/OM9-L3-03-01-*",
+    "fixtures": "implementation/fixtures/M01/OM9-L3-03-01-*",
+    "evidence": "implementation/evidence/M01/OM9-L3-03-01-*"
+  },
+  "manual_gate": "M01-UI",
+  "remaining": ["Manual M01-UI visual review pending; no human sign-off is claimed."]
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "om9.m03.l2-02-04.ui-review.v1",
+  "task_id": "OM9-L4-02-04-012-05",
+  "l3_id": "OM9-L3-02-04-012",
+  "title": "Sketch On Surface Mesh And Two Views",
+  "oracle": {
+    "positive": [
+      "surface sketch at UV (0.1,0.2) starts at (1,2,0); mesh sketch stays on z=0 after projection; two perpendicular view rays meet at the origin"
+    ],
+    "negative": [
+      "sketch points farther from the mesh than tolerance",
+      "skew view rays above tolerance",
+      "parallel view rays",
+      "fewer than two sketch points"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is asserted by a focused Rust test and every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "portable curve service and typed refusal; no window, menu or human review"
+  },
+  "measured": {
+    "surface_sketch_start": "[1.0, 2.0, 0.0]",
+    "two_view_point": "[0.0, 0.0, 0.0]"
+  },
+  "tolerances": {
+    "surface_sketch_start": "1e-9",
+    "two_view_point": "1e-9"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test l2_02_04 m03_02_04_012_sketch_on_surface_mesh_and_two_views -- --exact (exit 0)",
+    "regression: cargo test -p om9-core -j 2 (52 suites, 447 passed)",
+    "clippy: cargo clippy -p om9-core --all-targets -j 2 -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-04-012/api.md",
+    "implementation/design/M03/OM9-L3-02-04-012/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-012/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-012/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-04-012/OM9-L4-02-04-012-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-02-04-012/OM9-L4-02-04-012-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_02_04_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

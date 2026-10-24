@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-004-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-004",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-104",
+  "source_command": "Sweep 2 History",
+  "menu_icon": "SurfaceSweepSweep2Rails",
+  "owner_candidate": "OM9-L3-01-09-007",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-004/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-004/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-004/dispatch_contract.json": "e9c2e03951301d3d5ee4fc25cd97ee3d237e4c673ebc6cc31bcba580ad48242c",
+    "implementation/design/M03/OM9-L3-03-17-004/source_crosswalk.json": "d2506b57026e7fab64ecb1f66f60a052962cc3404a48bd72b59a9e54f69d5508"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

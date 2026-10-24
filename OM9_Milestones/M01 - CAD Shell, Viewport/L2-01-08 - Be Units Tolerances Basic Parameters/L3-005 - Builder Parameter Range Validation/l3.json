@@ -187,5 +187,43 @@
       "id": "OM9-L4-01-08-005-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-005 - Builder Parameter Range Validation/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "plugin_sdk_v1_parameters": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "Builder parameter range validation: bounds are canonical and the minimum is exclusive unless min_inclusive; max is inclusive; the optional step grid is measured from min (or zero); a count must be a non-negative integer; choice/text domains and the schema's required/default rules are enforced by request::OptionDomain::check and command_schema::CommandSchema::apply.",
+      "public_api": [
+        "Host::validate_parameter",
+        "Host::apply_parameters"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-08-builder-parameters.md",
+        "docs/validation/2026-10-21-m01-08-builder-parameters.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "The application has no builder parameter editor yet; UI parity is not claimed.",
+        "Document tolerance editing and CPlane frame resolution remain open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::apply_parameters",
+      "Host::validate_parameter"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_parameters"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-08-builder-parameters.json",
+      "docs/validation/2026-10-21-m01-08-builder-parameters.md"
+    ]
+  }
 }

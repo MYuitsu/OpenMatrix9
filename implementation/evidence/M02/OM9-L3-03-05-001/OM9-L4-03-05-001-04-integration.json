@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-05-001-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-05-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The view menu captures one target view and applies the mode without touching the document or journal.",
+  "tests": [
+    "om9-app display_modes: 3 passed",
+    "om9-app viewport_title_menu: 18 passed"
+  ]
+}

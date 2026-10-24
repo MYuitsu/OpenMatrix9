@@ -1,0 +1,29 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.29s
+     Running tests\solid_workflows.rs (L:/om9-target\debug\deps\solid_workflows-398d44b418c911f2.exe)
+
+running 8 tests
+test invalid_topology_indices_do_not_edit_edge_or_face_zero ... ok
+menu_measured OM9-SOLID-012 volume=24.000000000000
+test text_menu_has_content_height_retry_and_cancel ... ok
+test circle_extrusion_preserves_exact_geometry ... ok
+test extrude_all_is_one_atomic_transaction ... ok
+menu_measured OM9-SOLID-001 volume=500
+menu_measured OM9-SOLID-002 volume=500
+menu_measured Pipe Extract Fillet Shell Cap=PASS
+test pipe_extract_fillet_shell_and_cap_have_measured_menu_results ... ok
+menu_measured OM9-SOLID-003 volume=1500
+test immediate_boolean_menu_actions_have_measured_results ... ok
+test boolean_two_objects_menu_has_operation_prompt ... ok
+menu_measured OM9-SOLID-013 volume=100.530964914873
+menu_measured OM9-SOLID-014 volume=113.097335529233
+menu_measured OM9-SOLID-015 volume=98.696044010894
+menu_measured OM9-SOLID-016 volume=141.371669411541
+menu_measured OM9-SOLID-017 volume=78.539816339745
+menu_measured OM9-SOLID-018 volume=30.000000000000
+menu_measured OM9-SOLID-019 volume=47.123889803847
+menu_measured OM9-SOLID-020 volume=68.067840827779
+test remaining_primitive_menu_prompts_produce_analytic_volumes ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.47s
+

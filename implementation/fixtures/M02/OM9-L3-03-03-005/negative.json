@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-03-005",
+  "l3_id": "OM9-L3-03-03-005",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Gizmo origin relocation ngoài object không làm tự thay đổi object position",
+  "expected": "No locked/stale selection, no marquee from the dock, and no journal write on cancel/invalid input.",
+  "evidence": [
+    "om9-app gumball_placement: 4 passed",
+    "om9-app gumball_interaction: 6 passed"
+  ],
+  "status": "PASS"
+}

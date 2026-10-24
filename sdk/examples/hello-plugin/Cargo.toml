@@ -1,0 +1,13 @@
+[package]
+name = "om9-hello-plugin"
+version = "0.1.0"
+edition = "2024"
+license = "LGPL-2.1-or-later"
+rust-version = "1.88"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+om9-sdk = { path = "../../../crates/om9-sdk" }
+serde_json = "=1.0.150"

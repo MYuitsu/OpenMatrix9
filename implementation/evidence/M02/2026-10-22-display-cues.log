@@ -1,0 +1,14 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.55s
+     Running unittests src\lib.rs (L:/om9-target\debug\deps\om9_app-b418a9bda46e9e6a.exe)
+
+running 6 tests
+test display::tests::a_mirrored_face_flips_its_side_and_never_touches_an_id ... ok
+test display::tests::a_display_preset_round_trips_and_a_bad_schema_falls_back_with_a_warning ... ok
+test display::tests::a_gem_colour_token_is_used_when_the_semantic_provider_has_it ... ok
+test display::tests::a_gem_without_m05_material_is_neutral_and_explicitly_deferred ... ok
+test display::tests::a_disabled_cutter_category_never_hides_model_geometry ... ok
+test display::tests::typed_m05_and_m07_records_are_read_without_inventing_assets ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 149 filtered out; finished in 0.00s
+

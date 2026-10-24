@@ -1,0 +1,110 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-06-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel + om9-app",
+    "files": [
+      "crates/om9-core/src/transform_session.rs",
+      "crates/om9-core/src/gumball.rs",
+      "crates/om9-app/src/session/gumball.rs"
+    ],
+    "test": "crates/om9-core/tests/transform_sessions.rs + crates/om9-kernel/tests/l2_02_06.rs + app gumball suites"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test transform_sessions move_preview_copy_and_cancel -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/L3-001.log",
+      "stdout_log_sha256": "b0553a0a23480936b3c6c9f07275eb181cd01bc459b05580b9b4dd4f22850395"
+    },
+    {
+      "argv": "cargo test -p om9-app --test gumball_interaction --test gumball_numeric --test gumball_placement --test gumball_cold -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/app-gumball.log",
+      "stdout_log_sha256": "60809e9877ccfe554df52e97f463ac448db652cc5edf9d0c423bb45f35d6d7f7"
+    }
+  ],
+  "observed": {
+    "move_preview": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        4.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rotate_angle_rad": 1.5707963267948966,
+    "copy_option": true
+  },
+  "expected": {
+    "move_preview": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        4.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rotate_angle_rad": 1.5707963267948966,
+    "copy_option": true
+  },
+  "tolerances": {
+    "matrix": "exact",
+    "angle_rad": "1e-12"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/transform_session.rs",
+    "crates/om9-core/src/gumball.rs",
+    "crates/om9-app/src/session/gumball.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/transform_session.rs": "2f0a44e314909c8895442516539a0122fb195db0c3bda17e635c08847dcd6cac",
+    "crates/om9-core/src/gumball.rs": "870661d90df2e55e770352458b2d2e8f2476980cebcabd944b32f2232d9cc81e",
+    "crates/om9-app/src/session/gumball.rs": "38ebb662db09592ae315cfacdfd9df1aeb0c494dc661c59f47236c867a6faf4d"
+  }
+}

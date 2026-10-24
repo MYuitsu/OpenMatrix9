@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-01-004",
+  "case": "positive",
+  "oracle": "f4_toggles_world_datum_without_mutating_document",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

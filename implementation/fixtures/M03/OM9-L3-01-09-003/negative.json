@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-003",
+  "fixture_id": "OM9-L3-01-09-003-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "axis (0,0,0)",
+    "angle 0",
+    "profile x=-2..2 revolved about z"
+  ],
+  "expect": "CreationError::Invalid; nothing built"
+}

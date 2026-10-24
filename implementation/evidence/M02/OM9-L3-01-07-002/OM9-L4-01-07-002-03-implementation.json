@@ -1,0 +1,19 @@
+{
+  "l4": "OM9-L4-01-07-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-07-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "Persistent ObjectId selection set with deterministic ordering and explicit permission/stale/budget errors.",
+  "source_paths": [
+    "crates/om9-app/src/session/layers.rs",
+    "crates/om9-core/src/selection.rs",
+    "crates/om9-sdk/src/lib.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "om9-app acceptance_selection_set: 6 passed",
+    "om9-core selection_state: 7 passed",
+    "om9-app selection_overlay: 8 passed"
+  ]
+}

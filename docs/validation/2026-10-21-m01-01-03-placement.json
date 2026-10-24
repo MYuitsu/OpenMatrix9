@@ -1,0 +1,143 @@
+{
+  "date": "2026-10-21",
+  "status": "object_placement_write_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Exports one object's affine placement write through the document transaction, reusing Transform::validate and the one-source-write rule.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "48e9da56f6546c153d31749a2673795d94e5c3551d79a8a13c1565840eb5460f",
+    "crates/om9-plugin-host/src/staged.rs": "48e429d1734b9a97020f41cc9eeed10aecf78d7e40c9c673c8c653263c0083d3",
+    "crates/om9-app/tests/plugin_native.rs": "052dcb4a06207f9c61dd7cab468a676e8ffae6d9b2b2a25d3650bdde9f704d80",
+    "sdk/examples/hello-plugin/src/lib.rs": "d6ba107d9b213f352dd05eaf6e1e13496c161df013c6fdef168aa42bcf2bfbcb",
+    "sdk/examples/hello-plugin/descriptor.json": "6e7b4be4d60f6d8de32cdd5319f3b6824c4b22e1bfaae59ed46b8ad0c5c6fff0",
+    "sdk/README.md": "2b39acdf960e0e2a85cc60c3b190871799c9fc2e7548d45678677fb2eac176b4",
+    "sdk/API-INVENTORY.md": "8575f39d9905e3db2965c03117e530bae00aa7a4b15355d70ec645ec4a85d34d"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["set_object_placement"],
+    "shared_service": [
+      "om9_core::geometry::Transform::validate",
+      "om9_core::transaction::Mutation::Placement"
+    ],
+    "error_codes": ["placement", "conflict", "missing", "permission", "budget"]
+  },
+  "asserted_semantics": [
+    "The matrix is row-major local-to-world and must be finite affine with an invertible linear part; otherwise placement is refused.",
+    "The write is one source write like attributes/rename/layer, so mixing two kinds on one object in one command conflicts.",
+    "The object must already exist; a command cannot retro-place an object it created.",
+    "Undo restores the previous matrix exactly and Redo re-applies it."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "57 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "17 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-placement",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8817 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "translation": [10.0, 20.0, 30.0],
+    "undo_restores_matrix": true,
+    "redo_reapplies_matrix": true,
+    "undo_units": 2
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1663646,
+      "sha256": "6ff7b222c39690ed167dc9bba79a502cc974cae8811c647ee1f7bdf8d15472e7"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "a52510877b493e9d535e76565ff351bcee5a898fa4e3e9f3ea277b99a94efa2f"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 161913,
+      "sha256": "01bed0476bd47b6f249d7624c257a4ceec42c4d0f37bf9440dc92fe89b862b3f"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "96fc60803ae9b58da044a0bcc9950b093eef5253673bb0ea0107a47e83c672a1"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1661440,
+      "sha256": "ebbbf92efa944c4f9b90fe70f99bdceb7f5bc265db12c2552cd40f3a1b687275"
+    },
+    "om9.exe": {
+      "bytes": 69185536,
+      "sha256": "fd950f71a9101d1c4d449533913c9f7bc14007b7f3957c3cee021a9dbd789762"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-03-002 (typed scene entity records: placement write)"],
+    "open": [
+      "nested object/instance transforms",
+      "gumball interaction and drag transactions",
+      "created-in-command placement",
+      "recorded change notification feed"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only one object's placement matrix is exposed; instance/block transforms remain open.",
+    "An object created in the same command cannot be placed afterwards.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose the recorded change feed at M01 01-03 L3-011, or return to M02 for subobject/pick query services."
+}

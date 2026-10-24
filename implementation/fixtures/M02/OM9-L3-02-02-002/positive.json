@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G02-B-02-02-002",
+  "l3_id": "OM9-L3-02-02-002",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Top/Front/Right preset có origin đúng và basis right-handed",
+  "expected": "The documented coordinate/plane result with a stable world point and no silent fallback.",
+  "evidence": [
+    "om9-scene cplane_presets: 6 passed",
+    "om9-app cplane_menu: 1 passed",
+    "om9-app viewport_title_menu: 17 passed"
+  ],
+  "status": "PASS"
+}

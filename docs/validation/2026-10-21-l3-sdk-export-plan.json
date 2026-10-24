@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-21",
+  "status": "l3_sdk_export_plan_index_generated",
+  "target": "Reviewable index of the L3 sdk_export_plan annotations",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "tool": "tools/l3_sdk_export_plan.py",
+  "record": "docs/validation/2026-10-21-l3-sdk-export-plan.md",
+  "counts": {
+    "exported_in_sdk_v1": 28,
+    "planned": 38,
+    "not_in_sdk": 10,
+    "total": 76,
+    "owners": 8
+  },
+  "rows_rendered": 76,
+  "assertions": [
+    "Only the three documented statuses appear.",
+    "Exported rows list API names; planned rows carry a note; not_in_sdk rows are host codec/state/fixture only.",
+    "Generated from L3 JSON; the tool never writes milestones."
+  ],
+  "limitations": [
+    "Planning record only; no SDK implementation and no runtime status promotion.",
+    "Scope remains the 8 owners chosen by the user."
+  ]
+}

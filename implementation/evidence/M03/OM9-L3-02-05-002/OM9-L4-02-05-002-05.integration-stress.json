@@ -1,0 +1,60 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-002-05",
+  "role": "INTEGRATION_STRESS",
+  "l3": "OM9-L3-02-05-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel",
+    "files": [
+      "crates/om9-core/src/surface_kernel.rs",
+      "crates/om9-core/src/surface_ops.rs"
+    ],
+    "test": "crates/om9-core/tests/surface_ops.rs + crates/om9-kernel/tests/l2_02_05.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test surface_ops stress_large_grid -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/L3-stress.log",
+      "stdout_log_sha256": "ee0c0b7629d1e35c3043f1241639671751f1cbf2cb960c9896b3925dc07ea743"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_02_05 kernel_stress -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/L3-stress-kernel.log",
+      "stdout_log_sha256": "82674253de76f9a999a4361e19383ee3156ef0eda22e4b1402f4c646daf165e5"
+    }
+  ],
+  "observed": {
+    "stress_core": "41x17 refit + offset/trim/split/unroll",
+    "stress_kernel": "10 sheets sewn + 3 offsets"
+  },
+  "expected": {
+    "loft_radius_mm": 5.0,
+    "network_centre": [
+      1.0,
+      1.0,
+      0.0
+    ],
+    "raised_network_centre_z": 0.5
+  },
+  "tolerances": {
+    "loft_radius_mm": "0.05",
+    "network": "1e-6"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/surface_kernel.rs",
+    "crates/om9-core/src/surface_ops.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/surface_kernel.rs": "f6ee1938df7df299ba25e639c178c80c6e96c789c5e902af5b3406ace383ccc0",
+    "crates/om9-core/src/surface_ops.rs": "1c9a8cf3f4fde9da026a7c032c6f3c06976b593390c204bd4516250a8750b244"
+  }
+}

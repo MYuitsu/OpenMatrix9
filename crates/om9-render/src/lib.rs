@@ -19,8 +19,8 @@ pub mod qem;
 pub mod scene;
 pub mod shapes;
 pub mod streaming;
-pub mod timing;
 pub mod tests_support;
+pub mod timing;
 
 use wgpu::util::DeviceExt;
 

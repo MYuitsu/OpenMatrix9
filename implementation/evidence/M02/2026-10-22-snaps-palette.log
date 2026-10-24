@@ -1,0 +1,9 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.62s
+     Running unittests src\lib.rs (L:/om9-target\debug\deps\om9_app-b418a9bda46e9e6a.exe)
+
+running 1 test
+test ui::sidebar_palettes::tests::project_ortho_planar_and_smarttrack_palette_slots_toggle_their_state ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 148 filtered out; finished in 0.08s
+

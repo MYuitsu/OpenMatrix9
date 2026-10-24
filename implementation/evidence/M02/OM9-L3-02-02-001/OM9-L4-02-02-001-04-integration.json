@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-02-02-001-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-02-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "The command session captures the active view's CPlane at dispatch; switching the active view does not rewrite an already stored world point.",
+  "tests": [
+    "om9-app cplane_coordinate_input: 10 passed",
+    "om9-app viewport_title_menu: 17 passed"
+  ]
+}

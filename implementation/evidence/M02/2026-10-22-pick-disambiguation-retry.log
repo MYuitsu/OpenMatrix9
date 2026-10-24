@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\pick_disambiguation.rs (L:/om9-target\debug\deps\pick_disambiguation-bad21f519bcf9cec.exe)
+
+running 1 test
+
+thread 'escaping_the_choice_keeps_the_previous_selection' (58020) panicked at crates\om9-app\tests\pick_disambiguation.rs:158:5:
+assertion `left == right` failed
+  left: 0
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test escaping_the_choice_keeps_the_previous_selection ... FAILED
+
+failures:
+
+failures:
+    escaping_the_choice_keeps_the_previous_selection
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.62s
+
+error: test failed, to rerun pass `-p om9-app --test pick_disambiguation`

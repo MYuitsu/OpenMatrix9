@@ -1,0 +1,16 @@
+{
+  "l4": "OM9-L4-03-07-006-03",
+  "l3": "OM9-L3-03-07-006",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/dock_layout.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": {
+    "panel_ops": "33 passed",
+    "shell_docking": "10 passed"
+  },
+  "oracle": "sections collapse, reorder, float and dock right while preserving owner state"
+}

@@ -106,5 +106,646 @@
       "id": "OM9-L3-01-03-013",
       "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-013 - Import Source Provenance Metadata/l3.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "plugin_sdk_v1": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9",
+      "status": "partial_sdk_consumer_verified_windows",
+      "scope": "Versioned native SDK consumer; host-owned atomic document/scene publication; exact simple polyline cache/picking. Does not close the full module.",
+      "evidence": [
+        "docs/validation/2026-10-21-plugin-sdk.json",
+        "docs/validation/2026-10-21-plugin-sdk.md"
+      ],
+      "limitations": [
+        "macOS execution unverified",
+        "full module/manual gates remain open",
+        "2 unrelated broad app dock reset regressions remain failing"
+      ]
+    }
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-01-03",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M01",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "SOURCE-PRESENT; subset có proof",
+      "sdk_signal": "SDK-SUBSET + EXPORT-BACKLOG",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Read objects/layers đã có; xuất setters/query/attributes với permissions, không cấp mutable Document.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-01-03-001",
+      "OM9-L3-01-03-002",
+      "OM9-L3-01-03-003",
+      "OM9-L3-01-03-004",
+      "OM9-L3-01-03-005",
+      "OM9-L3-01-03-006",
+      "OM9-L3-01-03-007",
+      "OM9-L3-01-03-008",
+      "OM9-L3-01-03-009",
+      "OM9-L3-01-03-010",
+      "OM9-L3-01-03-011",
+      "OM9-L3-01-03-012",
+      "OM9-L3-01-03-013"
+    ]
+  },
+  "sdk_implementation_progress": [
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Public SDK v1 export of the document owner's read/write attribute services: a filtered paged object query with generation and geometry/attributes revisions, one object attribute record, one staged attribute edit and one staged rename. The host evaluates staged records with Document::permissions_for_attributes (the same layer chain the application uses) and emits Mutation::Attributes/Mutation::Label; no mutable Document crosses the ABI.",
+      "public_api": [
+        "Host::query_objects",
+        "Host::object_attributes",
+        "Host::set_object_attributes",
+        "Host::rename_object"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-002",
+        "OM9-L3-01-03-003"
+      ],
+      "l3_open": [
+        "layer create/update/current/assignment are not exposed",
+        "a layer created in the same command cannot receive newly added objects",
+        "groups, blocks/instances, jewellery extension records, change notification, snapshot/restore and import provenance have no plugin surface"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-03-attributes-sdk.md",
+        "docs/validation/2026-10-21-m01-03-attributes-sdk.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "One command stages at most one of transform, attributes or rename per object (the document transaction allows one source write per object). Attribute edits require an editable layer; object-level locked/hidden stay editable. This record does not close the L2 or its other child L3."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Public SDK v1 export of the document owner's layer service: create a layer (optional make-current), rename/recolour/reflag one layer, select or clear the current layer, and assign existing or already staged objects to an existing or this-command-created layer. Plans are LayerAction/LayerPlan captured through the coordinator; staged layer records are evaluated with Document::layer_permissions_with and permissions_for_attributes_with.",
+      "public_api": [
+        "Host::layer_create",
+        "Host::layer_update",
+        "Host::set_current_layer",
+        "Host::assign_objects_to_layer",
+        "Host::layers"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-004",
+        "OM9-L3-01-03-005"
+      ],
+      "l3_open": [
+        "layer delete/reparent/preset-slot editing",
+        "groups, blocks/instances, change notification, snapshot/restore and import provenance have no plugin surface"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-03-layers-sdk.md",
+        "docs/validation/2026-10-21-m01-03-layers-sdk.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "One layer write per layer per command. Adding objects to a layer whose flags change in the same command, and assigning objects off such a source layer, are refused by the application's permission-read rule. Assignment is an attribute write, so it conflicts with a transform, attribute edit or rename of the same object."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Same-command output into a layer this command creates: the transaction insert admission resolves the proposed layer record and its captured parent chain, so layer_create(make_current) followed by add_object publishes one transaction and one Undo unit. The permission-read overlap excludes only layers created by that request; a layer whose flags change in the same request still refuses output.",
+      "public_api": [
+        "Host::layer_create",
+        "Host::add_object",
+        "Host::assign_objects_to_layer"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-02-006",
+        "OM9-L3-01-03-004",
+        "OM9-L3-01-03-005"
+      ],
+      "l3_open": [
+        "Mutation::Publish and cross-document Move keep base-layer validation",
+        "groups, blocks/instances, change notification, snapshot/restore and import provenance have no plugin surface"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-02-created-layer-output.md",
+        "docs/validation/2026-10-21-m01-02-created-layer-output.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Only the insert path into a proposed layer is admitted. The anti-bypass rule for captured layers (flags changing in the same request) is unchanged."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Object extension slots read/write: verbatim JSON-object payload with a positive version, bounded slot name, merged staged reads and Mutation::Extension write under the one-source-write-per-object rule. An object created in the same command must be tagged next command.",
+      "public_api": [
+        "Host::object_extensions",
+        "Host::set_object_extension",
+        "Host::clear_object_extension"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-009"
+      ],
+      "l3_open": [
+        "extension schema interpretation",
+        "same-command tagging for created objects",
+        "change notification feed"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-extensions.md",
+        "docs/validation/2026-10-21-m01-01-03-extensions.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Payloads are opaque text; schema/version meaning stays with the plugin."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Object placement write: one affine matrix (row-major local->world) through Mutation::Placement, validated by Transform::validate, under the one-source-write-per-object rule; Undo restores the previous matrix.",
+      "public_api": [
+        "Host::set_object_placement"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-002"
+      ],
+      "l3_open": [
+        "nested object/instance transforms",
+        "gumball drag transactions",
+        "created-in-command placement",
+        "recorded change notification feed"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-placement.md",
+        "docs/validation/2026-10-21-m01-01-03-placement.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "One object's matrix only; instance/block transforms remain open."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Polygon mesh creation: add_mesh publishes vertices/faces through Mesh::validate and the shared output path; an out-of-range index is a mesh refusal; one transaction/Undo.",
+      "public_api": [
+        "Host::add_mesh"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-003"
+      ],
+      "l3_open": [
+        "mesh normals, colors and UVs",
+        "mesh editing, booleans and repair",
+        "recorded change notification feed"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-mesh.md",
+        "docs/validation/2026-10-21-m01-01-03-mesh.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Position/index geometry only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Recorded change feed: one bounded batch per plugin command, real from/to revisions, entity/layer entries, readable by the next plugin command. Host-command recording beyond the plugin boundary is documented as open.",
+      "public_api": [
+        "Host::last_change"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-011"
+      ],
+      "l3_open": [
+        "host-command feed",
+        "multi-batch history",
+        "group/feature producer entries"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-change-feed.md",
+        "docs/validation/2026-10-21-m01-01-03-change-feed.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Plugin-command changes only; one batch."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Layer order read (bottom to top), including a layer created by the same command.",
+      "public_api": [
+        "Host::layer_order"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-004"
+      ],
+      "l3_open": [
+        "layer reorder",
+        "group records",
+        "block instance graph"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-layer-order.md",
+        "docs/validation/2026-10-21-m01-01-03-layer-order.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Read-only order."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Feed covers plugin commands plus host Undo/Redo with real revisions and cause.",
+      "public_api": [
+        "Host::last_change"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-011"
+      ],
+      "l3_open": [
+        "other host edit paths",
+        "multi-batch history"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-change-undo.md",
+        "docs/validation/2026-10-21-m01-01-03-change-undo.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Plugin commands and host Undo/Redo only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Group records read (id/name/members/revision).",
+      "public_api": [
+        "Host::groups"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-007"
+      ],
+      "l3_open": [
+        "group create/edit/dissolve",
+        "block instance graph"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-groups.md",
+        "docs/validation/2026-10-21-m01-01-03-groups.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Read-only groups."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Block definition read (id/label/member count/revision).",
+      "public_api": [
+        "Host::block_definitions"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-008"
+      ],
+      "l3_open": [
+        "instance insertion",
+        "definition editing",
+        "instance graph edges"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-blocks.md",
+        "docs/validation/2026-10-21-m01-01-03-blocks.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Read-only definitions."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Clear current layer (no-op when already clear).",
+      "public_api": [
+        "Host::clear_current_layer"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-004"
+      ],
+      "l3_open": [
+        "layer delete",
+        "layer reorder"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-clear-layer.md",
+        "docs/validation/2026-10-21-m01-01-03-clear-layer.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "No layer delete/reorder."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Object placement read (base or staged matrix).",
+      "public_api": [
+        "Host::object_placement"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-002"
+      ],
+      "l3_open": [
+        "instance/parent composition",
+        "gumball drag"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-placement-read.md",
+        "docs/validation/2026-10-21-m01-01-03-placement-read.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Object-local matrix only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Single object record read (same ObjectInfo as query).",
+      "public_api": [
+        "Host::object_info"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-002"
+      ],
+      "l3_open": [
+        "instance composition",
+        "gumball drag"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-object-info.md",
+        "docs/validation/2026-10-21-m01-01-03-object-info.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Object-local record only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Group creation from existing members (one transaction/Undo).",
+      "public_api": [
+        "Host::create_group"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-007"
+      ],
+      "l3_open": [
+        "group edit/dissolve",
+        "member add/remove"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-group-create.md",
+        "docs/validation/2026-10-21-m01-01-03-group-create.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Create only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Group delete (record only; one Undo restores).",
+      "public_api": [
+        "Host::delete_group"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-007"
+      ],
+      "l3_open": [
+        "group edit",
+        "member add/remove"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-group-delete.md",
+        "docs/validation/2026-10-21-m01-01-03-group-delete.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Delete only."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Single layer record read via the shared list mapping (host-tested).",
+      "public_api": [
+        "Host::layer_info"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-004"
+      ],
+      "l3_open": [
+        "layer delete/reorder",
+        "native command for layer_info"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-layer-info.md",
+        "docs/validation/2026-10-21-m01-01-03-layer-info.json"
+      ],
+      "target_proof": {
+        "windows_x64": "host_tests_only",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Host-tested only this round."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Native command + DLL test for layer_info closes the previous host-only gap.",
+      "public_api": [
+        "Host::layer_info"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-004"
+      ],
+      "l3_open": [
+        "layer delete/reorder"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-layer-info-native.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Read-only."
+    },
+    {
+      "date": "2026-10-22",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Import provenance read (complete chain only; fixed enum strings).",
+      "public_api": [
+        "Host::object_provenance"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-013"
+      ],
+      "l3_open": [
+        "provenance write (host import flow)"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-22-m01-01-03-provenance.md",
+        "docs/validation/2026-10-22-m01-01-03-provenance.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Read-only."
+    },
+    {
+      "date": "2026-10-22",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-03",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Pickability rule read (effective visible && selectable; locked ignored).",
+      "public_api": [
+        "Host::is_object_pickable"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-03-006"
+      ],
+      "l3_open": [
+        "pick geometry (ray/subobject)"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-22-m01-01-03-pickable.md",
+        "docs/validation/2026-10-22-m01-01-03-pickable.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Rule read only."
+    }
+  ],
+  "sdk_export_plan_policy": {
+    "decided": "2026-10-21",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "field": "sdk_export_plan",
+    "applies_to": "L3 files of this owner that have a recorded SDK slice"
+  }
 }

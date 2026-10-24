@@ -1,0 +1,23 @@
+# command: cargo test -p om9-kernel --features 3dm-brep --test l2_01_10 -- --nocapture
+# cwd: H:\OpenMatrix9
+# exit: 0
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\l2_01_10.rs (L:\om9-target\debug\deps\l2_01_10-cd06607094d38232.exe)
+
+running 12 tests
+test m03_01_10_007 ... ok
+test m03_01_10_009 ... ok
+test m03_01_10_004 ... ok
+test m03_01_10_005 ... ok
+test m03_01_10_006 ... ok
+test m03_01_10_002 ... ok
+test m03_01_10_008 ... ok
+test m03_01_10_003 ... ok
+test m03_01_10_001 ... ok
+test m03_01_10_regression_boolean_identity_and_round_trip ... ok
+{"measured":{"union_volume_mm3":1499.999999999999,"difference_volume_mm3":500.000000000000,"intersection_volume_mm3":500.000000000000,"split_area_mm2":200.000000000000,"capped_volume_mm3":1000.000000000000,"fillet_one_edge_volume_mm3":997.853981633974,"chamfer_one_edge_volume_mm3":995.000000000000,"thicken_volume_mm3":400.000000000000,"offset_area_mm2":200.000000000000,"extracted_face_area_mm2":600.000000000000,"closed_naked_edges":0.000000000000,"open_naked_edges":4.000000000000}}
+test m03_01_10_receipt ... ok
+test m03_01_10_stress_union_chain_and_fillet_family ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.85s

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-025-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-025",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-026",
+  "source_command": "Variable Offset Surface",
+  "menu_icon": "SurfaceVariableOffsetSurface",
+  "owner_candidate": "OM9-L3-01-10-007",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-025/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-025/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-025/dispatch_contract.json": "1c8f1a7c49d930e68d3941244bc43d0c7f72c4030ace19cb7a609a59875552ca",
+    "implementation/design/M03/OM9-L3-03-17-025/source_crosswalk.json": "b633f9ebcdf523a10fd8c3b0a37de5e74932b46ea7d1aff9dcc327b425f029e7"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

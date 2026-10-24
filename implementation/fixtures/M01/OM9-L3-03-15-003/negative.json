@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-15-003",
+  "case": "negative",
+  "oracle": "duplicate labels allowed only with distinct IDs; unknown ID rejected",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

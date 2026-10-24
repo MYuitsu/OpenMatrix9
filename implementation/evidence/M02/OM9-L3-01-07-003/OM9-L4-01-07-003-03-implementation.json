@@ -1,0 +1,20 @@
+{
+  "l4": "OM9-L4-01-07-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-07-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "Revision-scoped mesh and native BRep face/edge/vertex keys, including nested occurrence paths.",
+  "source_paths": [
+    "crates/om9-scene/src/scene.rs",
+    "crates/om9-scene/src/picking.rs",
+    "crates/om9-app/src/session/subobjects.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "om9-scene subobject_pick: 4 passed",
+    "om9-app subobject_selection: 8 passed",
+    "om9-app subobject_occurrences: 5 passed",
+    "om9-app brep_selection (gpu-sphere): 5 passed"
+  ]
+}

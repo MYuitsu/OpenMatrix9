@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-21",
+  "status": "tolerance_write_native_command_verified_windows",
+  "owner": "OM9-L2-01-08",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Adds ToleranceDemo and the DLL test closing the host-only gap; the default document tolerance (0.001 mm) is restored by Undo.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-app/tests/plugin_native.rs": "4eb9fe4a92f7dc080fc5b914911e17a44aa7585df54f6e0689a51ddab2674893",
+    "sdk/examples/hello-plugin/src/lib.rs": "96ae04b2ca98271f46c2b1036e4ed3166897bb4d372ec507ba6ad58a4335407e",
+    "sdk/examples/hello-plugin/descriptor.json": "4e9f942f3b3670e2d0bf5605575a40f26b650198979255b5460166b52a275521"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "65 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "36 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-tolerance-native",
+      "result": "PASS, 10 commands",
+      "native_tests": 36,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "absolute_mm_after_set": 0.01,
+    "undo_len": 1,
+    "absolute_mm_after_undo": 0.001
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1948906,
+      "sha256": "b17d22c1563428440a41e15dfe4962687b69f2b82a7cb720dcc0d7547e4faa9d"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "266fde6ee982c3b2849e2e9f60cd28be6de3d21e552ff35b3acff1c16d10d24e"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 192819,
+      "sha256": "0d779d99f6c8c4c2b6ceb8ff756a6921f54947f82e666f90937df0c81b1ec3e1"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "5f21b0ad6a3964cef0fc541ab8a7545469dfe82e0eb6df43ecf6a897765eed98"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1945088,
+      "sha256": "06dd72d24dba441565af2aecb93181285e6ad445f04171ba3cebc80d791bc0c8"
+    },
+    "om9.exe": {
+      "bytes": 69611520,
+      "sha256": "ef1056508aaffaec366685759705c41e7812c4323a3368db6475865b85448b33"
+    }
+  },
+  "limitations": [
+    "Per-object tolerance overrides are not exposed.",
+    "macOS host and plugin execution unverified.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Return to M02 for subobject/pick query services, or record the remaining host edit paths."
+}

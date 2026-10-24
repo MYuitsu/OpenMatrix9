@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-007",
+  "fixture_id": "OM9-L3-01-11-007-POSITIVE",
+  "units": "mm",
+  "input": {
+    "source": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0
+      ]
+    ],
+    "target": [
+      [
+        10,
+        0,
+        0
+      ],
+      [
+        10,
+        1,
+        0
+      ]
+    ]
+  },
+  "expect": {
+    "mapped_a": [
+      10,
+      0,
+      0
+    ],
+    "mapped_b": [
+      10,
+      1,
+      0
+    ],
+    "distance_mm": 1.0
+  },
+  "measured_on_2026_10_22": {
+    "orientation_distance_mm": 1.0
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "G02-A-01-07-007",
+  "l3_id": "OM9-L3-01-07-007",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Object không hợp lệ/locked không tạo handle dùng được",
+  "expected": "An explicit miss/error or unchanged state; no stale selection and no nearby-geometry rematch.",
+  "evidence": [
+    "om9-scene lib gumball_view: 13 passed",
+    "om9-app gumball_viewport: 3 passed",
+    "om9-app gumball_placement: 4 passed",
+    "om9-app gumball_interaction: 5 passed",
+    "om9-app gumball_numeric: 5 passed",
+    "om9-core gumball: 15 passed"
+  ],
+  "status": "PASS"
+}

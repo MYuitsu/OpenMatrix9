@@ -825,3 +825,111 @@ pub fn fit_points(
     curve.validate(limits)?;
     Ok(curve)
 }
+
+/* --------------------------- analytic creation --------------------------- */
+
+fn check_frame(center: Point3, x: Point3, y: Point3) -> Result<()> {
+    for point in [center, x, y] {
+        finite(point)?;
+    }
+    if (dot_product(x, x) - 1.0).abs() > 1e-9
+        || (dot_product(y, y) - 1.0).abs() > 1e-9
+        || dot_product(x, y).abs() > 1e-9
+    {
+        return Err(Error::Invalid("circle frame"));
+    }
+    Ok(())
+}
+
+/// A full circle on an arbitrary orthonormal frame. The radius decides admission; the
+/// native parameter is the angle in radians over `[0, tau]`.
+pub fn circle_on_frame(center: Point3, x: Point3, y: Point3, radius: f64) -> Result<Curve> {
+    check_frame(center, x, y)?;
+    if !radius.is_finite() || radius <= 0.0 {
+        return Err(Error::Invalid("radius"));
+    }
+    Ok(Curve::Circle {
+        center,
+        x,
+        y,
+        radius,
+        domain: [0.0, std::f64::consts::TAU],
+        angle_domain: None,
+    })
+}
+
+/// An arc on an orthonormal frame from `start_angle` through a positive `sweep`
+/// (`0 < sweep <= tau`). The angle domain is increasing, so the evaluator's positive
+/// angular-rate rule holds for either turn direction (choose the frame accordingly).
+pub fn arc_by_center(
+    center: Point3,
+    x: Point3,
+    y: Point3,
+    radius: f64,
+    start_angle: f64,
+    sweep: f64,
+) -> Result<Curve> {
+    check_frame(center, x, y)?;
+    if !radius.is_finite() || radius <= 0.0 {
+        return Err(Error::Invalid("radius"));
+    }
+    if !start_angle.is_finite()
+        || !sweep.is_finite()
+        || sweep <= 0.0
+        || sweep > std::f64::consts::TAU + 1e-12
+    {
+        return Err(Error::Invalid("arc angle domain"));
+    }
+    Ok(Curve::Circle {
+        center,
+        x,
+        y,
+        radius,
+        domain: [0.0, 1.0],
+        angle_domain: Some([start_angle, start_angle + sweep]),
+    })
+}
+
+/// A closed polygon (at least three distinct points). The first point is appended only
+/// when the caller did not repeat it; consecutive duplicates are refused.
+pub fn polygon(points: &[Point3]) -> Result<Curve> {
+    if points.len() < 3 {
+        return Err(Error::Invalid("polygon point count"));
+    }
+    for point in points {
+        finite(*point)?;
+    }
+    let mut closed = Vec::new();
+    closed
+        .try_reserve_exact(points.len() + 1)
+        .map_err(|_| Error::Budget("polygon points"))?;
+    closed.extend_from_slice(points);
+    let distinct = {
+        let mut seen: Vec<Point3> = Vec::new();
+        for point in points {
+            if !seen.contains(point) {
+                seen.push(*point);
+            }
+        }
+        seen.len()
+    };
+    if distinct < 3 {
+        return Err(Error::Invalid("polygon distinct points"));
+    }
+    if closed.first() != closed.last() {
+        closed.push(closed[0]);
+    }
+    // A zero-area polygon is a degenerate point set, not a closed profile.
+    let mut normal = [0.0; 3];
+    let mut scale: f64 = 0.0;
+    for pair in closed.windows(2) {
+        let term = cross(pair[0], pair[1]);
+        normal = add(normal, term);
+        scale = scale.max(dot_product(pair[0], pair[0]).sqrt());
+    }
+    let area = dot_product(normal, normal).sqrt();
+    if !area.is_finite() || area <= 1e-12 * scale * scale {
+        return Err(Error::Invalid("degenerate polygon"));
+    }
+    polyline(&closed)
+}

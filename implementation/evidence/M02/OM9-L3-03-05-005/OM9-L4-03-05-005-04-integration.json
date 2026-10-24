@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-05-005-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-05-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Switch to Shaded keeps the selected IDs and their overlay; hidden objects remain absent from the scene.",
+  "tests": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app display_modes: 3 passed"
+  ]
+}

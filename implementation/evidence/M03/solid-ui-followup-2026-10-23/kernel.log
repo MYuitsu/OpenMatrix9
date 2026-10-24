@@ -1,0 +1,203 @@
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.66s
+     Running unittests src\lib.rs (L:/om9-target\debug\deps\om9_kernel-4ca270aae333a324.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\brep_3dm.rs (L:/om9-target\debug\deps\brep_3dm-ac91590cfcf2e014.exe)
+
+running 1 test
+test on_brep_payload_becomes_editable_occt_and_round_trips ... ignored, requires OM9_BREP_3DM_PAYLOAD and the OCCT runtime
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\ellipsoid.rs (L:/om9-target\debug\deps\ellipsoid-68960f04f9cf5021.exe)
+
+running 1 test
+axes=[1.0, 1.0, 1.0] volume=4.188790204786 expected=4.188790204786 relative_error=1.332e-15 faces=1 naked_edges=0
+axes=[1.0, 1.0, 1.0] analytic_diameters=83 reload=PASS
+axes=[2.0, 3.0, 4.0] volume=100.530964914874 expected=100.530964914873 relative_error=1.776e-15 faces=1 naked_edges=0
+axes=[2.0, 3.0, 4.0] analytic_diameters=83 reload=PASS
+axes=[3.0, 4.0, 5.0] volume=251.327412287184 expected=251.327412287183 relative_error=2.220e-15 faces=1 naked_edges=0
+axes=[3.0, 4.0, 5.0] analytic_diameters=83 reload=PASS
+axes=[0.1, 0.2, 0.3] volume=0.025132741229 expected=0.025132741229 relative_error=1.998e-15 faces=1 naked_edges=0
+axes=[0.1, 0.2, 0.3] analytic_diameters=83 reload=PASS
+axes=[20.0, 0.5, 3.0] volume=125.663706143592 expected=125.663706143592 relative_error=1.998e-15 faces=1 naked_edges=0
+axes=[20.0, 0.5, 3.0] analytic_diameters=83 reload=PASS
+axes=[4.0, 3.0, 2.0] volume=100.530964914874 expected=100.530964914873 relative_error=1.776e-15 faces=1 naked_edges=0
+axes=[4.0, 3.0, 2.0] analytic_diameters=83 reload=PASS
+test ellipsoid_exact_volume_topology_and_surface ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.71s
+
+     Running tests\extrusion.rs (L:/om9-target\debug\deps\extrusion-6feec21436fdbc50.exe)
+
+running 2 tests
+test exact_extrusion_refuses_open_nonplanar_and_disconnected_boundaries ... ok
+ellipse exact side intersections: [0.25, 0.75]
+exact_extrusion ellipse height=-5 volume=94.247779607694
+ellipse exact side intersections: [0.25, 0.75]
+exact_extrusion ellipse height=5 volume=94.247779607694
+ellipse_reversed exact side intersections: [0.25, 0.75]
+exact_extrusion ellipse_reversed height=-5 volume=94.247779607694
+ellipse_reversed exact side intersections: [0.25, 0.75]
+exact_extrusion ellipse_reversed height=5 volume=94.247779607694
+exact_extrusion rectangle_reversed height=-5 volume=30.000000000000
+exact_extrusion rectangle_reversed height=5 volume=30.000000000000
+test exact_extrusion_retains_rational_basis_and_reversal ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests\kernel.rs (L:/om9-target\debug\deps\kernel-3eb32a41725b0303.exe)
+
+running 4 tests
+test the_linked_kernel_is_the_pinned_version ... ok
+test invalid_input_is_reported_not_fatal ... ok
+test a_box_volume_is_exact_from_rust ... ok
+test a_boolean_drilled_volume_matches_the_analytic_value_from_rust ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\l2_01_05.rs (L:/om9-target\debug\deps\l2_01_05-0df45fa516b6f959.exe)
+
+running 7 tests
+test the_sphere_normal_is_the_unit_radial_direction ... ok
+test the_rational_nurbs_quarter_circle_evaluates_exactly ... ok
+test a_line_through_the_box_hits_two_faces ... ok
+test face_wire_edge_topology_is_exact ... ok
+test the_reference_fixtures_match_their_analytic_values ... ok
+test a_transform_moves_the_box_and_keeps_its_volume ... ok
+[mesh] tolerance=0.01 edges=7509 boundary=0 non_manifold=2
+[mesh] tolerance=0.001 edges=75633 boundary=0 non_manifold=2
+test the_tessellation_stays_on_the_exact_sphere ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s
+
+     Running tests\l2_01_09.rs (L:/om9-target\debug\deps\l2_01_09-9003115019e770d5.exe)
+
+running 12 tests
+test m03_01_09_005 ... ok
+test m03_01_09_009 ... ok
+test m03_01_09_002 ... ok
+test m03_01_09_006 ... ok
+test m03_01_09_008 ... ok
+test m03_01_09_007 ... ok
+test m03_01_09_004 ... ok
+test m03_01_09_003 ... ok
+test m03_01_09_regression_every_operation_is_a_valid_exact_brep ... ok
+test m03_01_09_stress_a_sweep_family_keeps_its_volume_and_topology ... ok
+test m03_01_09_001 ... ok
+{"measured":{"box_volume_mm3":5999.999999999999,"sphere_volume_mm3":523.598775598298,"cylinder_volume_mm3":785.398163397447,"cone_volume_mm3":261.799387799149,"torus_volume_mm3":789.568352087149,"ellipsoid_volume_mm3":251.327412287184,"pyramid_volume_mm3":666.666666666666,"extrusion_volume_mm3":3000.000000000000,"revolve_volume_mm3":753.982236861549,"pipe_volume_mm3":125.663706143592,"planar_area_mm2":200.000000000000,"loft_volume_mm3":1000.000000000000,"sweep1_volume_mm3":60.000000000000,"sweep2_volume_mm3":60.000000000000,"open_extrusion_area_mm2":1200.000000000000,"surface_area_mm2":1.000000000000,"surface_deviation_mm":0.000000000000,"profile_face_area_mm2":200.000000000000}}
+test m03_01_09_receipt ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.63s
+
+     Running tests\l2_01_10.rs (L:/om9-target\debug\deps\l2_01_10-cd06607094d38232.exe)
+
+running 12 tests
+test m03_01_10_007 ... ok
+test m03_01_10_004 ... ok
+test m03_01_10_009 ... ok
+test m03_01_10_005 ... ok
+test m03_01_10_006 ... ok
+test m03_01_10_008 ... ok
+test m03_01_10_002 ... ok
+test m03_01_10_003 ... ok
+test m03_01_10_001 ... ok
+test m03_01_10_regression_boolean_identity_and_round_trip ... ok
+{"measured":{"union_volume_mm3":1499.999999999999,"difference_volume_mm3":500.000000000000,"intersection_volume_mm3":500.000000000000,"split_area_mm2":200.000000000000,"capped_volume_mm3":1000.000000000000,"fillet_one_edge_volume_mm3":997.853981633974,"chamfer_one_edge_volume_mm3":995.000000000000,"thicken_volume_mm3":400.000000000000,"offset_area_mm2":200.000000000000,"extracted_face_area_mm2":600.000000000000,"closed_naked_edges":0.000000000000,"open_naked_edges":4.000000000000}}
+test m03_01_10_receipt ... ok
+test m03_01_10_stress_union_chain_and_fillet_family ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.92s
+
+     Running tests\l2_01_11.rs (L:/om9-target\debug\deps\l2_01_11-e20e71fd549d4016.exe)
+
+running 11 tests
+test m03_01_11_005 ... ok
+test m03_01_11_007 ... ok
+test m03_01_11_006 ... ok
+test m03_01_11_001 ... ok
+test m03_01_11_002 ... ok
+test m03_01_11_008 ... ok
+test m03_01_11_003 ... ok
+test m03_01_11_004 ... ok
+test m03_01_11_regression_matrix_round_trip_and_body_measure ... ok
+{"measured":{"translated_volume_mm3":24.000000000000,"mirrored_volume_mm3":24.000000000000,"mirrored_x_min_mm":-2.000000100000,"scaled_volume_mm3":576.000000000000,"scaled_size_x_mm":4.000000200000,"linear_pattern_placements":4.000000000000,"instance_definitions":1.000000000000,"baked_bodies":4.000000000000,"bake_instance_definitions":1.000000000000,"bake_bodies":2.000000000000,"frame_mid_z_mm":5.000000000000,"surface_frame_x_mm":2.000000000000,"surface_frame_y_mm":3.000000000000,"orientation_distance_mm":1.000000000000}}
+test m03_01_11_receipt ... ok
+test m03_01_11_stress_surface_frames_and_baked_pattern ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+
+     Running tests\l2_02_05.rs (L:/om9-target\debug\deps\l2_02_05-283783f86a2d9267.exe)
+
+running 6 tests
+test m03_02_05_offset_fillet_and_chamfer_use_the_shared_kernel ... ok
+test m03_02_05_join_surfaces_sews_two_sheets ... ok
+test m03_02_05_surface_services_refuse_degenerate_bodies ... ok
+test m03_02_05_patch_and_normal_extrude_are_exact_breps ... ok
+{"fillet_faces":7,"fillet_naked_edges":0,"join_faces":2,"join_shells":1,"offset_closed":true,"offset_volume_mm3":6733.33333333333,"patch_area_mm2":7.999999999999918,"patch_deviation_mm":4.466484191439815e-16,"status":"measured","thicken_closed":true,"thicken_volume_mm3":3.9999999999999623}
+test m03_02_05_kernel_receipt ... ok
+test m03_02_05_kernel_stress_joins_and_offsets_repeatedly ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.84s
+
+     Running tests\l2_02_06.rs (L:/om9-target\debug\deps\l2_02_06-f067a0f9fb3d3d0f.exe)
+
+running 3 tests
+{"linear_placements":3,"orient_maps_a":[1.0,2.0,3.0],"orient_maps_b":[1.0,3.0,3.0],"polar_placements":4,"status":"measured"}
+test m03_02_06_orientation_solver_maps_two_and_three_reference_points ... ok
+test m03_02_06_mirror_plane_reflects_and_array_patterns_generate_placements ... ok
+test m03_02_06_receipt ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\lifetime.rs (L:/om9-target\debug\deps\lifetime-7393dfb8a4ba8584.exe)
+
+running 4 tests
+test a_kernel_handle_reference_count_returns_to_baseline ... ok
+test every_invalid_input_is_rejected_with_a_message ... ok
+test serialized_calls_from_several_threads_stay_exact ... ok
+test ten_thousand_create_destroy_cycles_do_not_grow_the_working_set ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s
+
+     Running tests\line_curve.rs (L:/om9-target\debug\deps\line_curve-2e5de3d555a7f265.exe)
+
+running 2 tests
+test line_crosses_a_degree_one_nurbs_at_the_expected_fraction ... ok
+test line_and_circle_curves_also_use_the_kernel ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\numeric.rs (L:/om9-target\debug\deps\numeric-40e1a56b6cbe9c6f.exe)
+
+running 4 tests
+test unit_pinned_primitives_match_the_analytic_volume_and_area ... ok
+test degenerate_inputs_are_reported_instead_of_crashing ... ok
+test fillet_and_offset_volumes_match_the_analytic_values ... ok
+[mesh] tolerance=0.01 edges=7509 boundary=0 non_manifold=2
+[mesh] tolerance=0.001 edges=75633 boundary=0 non_manifold=2
+[mesh] tolerance=0.01 edges=7509 boundary=0 non_manifold=2
+[mesh] tolerance=0.001 edges=75633 boundary=0 non_manifold=2
+test the_mesh_stays_on_the_exact_sphere_and_is_closed ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.36s
+
+     Running tests\pipe_shell.rs (L:/om9-target\debug\deps\pipe_shell-f6110a259f565543.exe)
+
+running 3 tests
+test four_rail_sweep_sews_four_patches_into_one_polysurface ... ok
+test multi_profile_pipe_shell_builds_one_closed_brep ... ok
+test two_rail_pipe_shell_accepts_an_auxiliary_spine ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests om9_kernel
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

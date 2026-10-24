@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m03.l2-02-05.source_crosswalk.v1",
+  "l3_id": "OM9-L3-02-05-010",
+  "owner_l2_id": "OM9-L2-02-05",
+  "date": "2026-10-22",
+  "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "reviewed_upstream": [
+    {
+      "path": "crates/qymcad-kernel/src/ops/profile.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observed_symbols": [
+        "NamedSides",
+        "name_sides",
+        "profile"
+      ],
+      "observation": "Profile naming only; no portable sweep/loft/trim/match algorithm."
+    },
+    {
+      "path": "crates/qymcad-kernel/src/shape.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observed_symbols": [
+        "qym_shape_sweep",
+        "qym_shape_loft",
+        "qym_shape_trim",
+        "qym_shape_offset_faces"
+      ],
+      "observation": "OCCT-backed C ABI shape calls; no Rust ownership of a NURBS surface record."
+    },
+    {
+      "path": "crates/qymcad-kernel/src/kernel.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observed_symbols": [],
+      "observation": "Session/kernel gate only; no surface workflow service."
+    }
+  ],
+  "local_owner": {
+    "crate": "om9-core + om9-kernel",
+    "files": [
+      "crates/om9-core/src/surface_ops.rs",
+      "crates/om9-kernel/src/editing.rs",
+      "crates/om9-core/src/surface_kernel.rs",
+      "crates/om9-kernel/src/editing.rs"
+    ],
+    "symbols": [
+      "surface_kernel::sweep1",
+      "surface_kernel::sweep2",
+      "surface_kernel::loft",
+      "surface_kernel::refit",
+      "surface_kernel::isocurve",
+      "surface_ops::network",
+      "surface_ops::rail_revolve",
+      "surface_ops::trim_surface",
+      "surface_ops::split_surface",
+      "surface_ops::untrim_surface",
+      "surface_ops::shrink_surface",
+      "surface_ops::softedit",
+      "surface_ops::match_surface",
+      "surface_ops::blend_surface",
+      "surface_ops::offset_surface",
+      "surface_ops::normal_extrude",
+      "surface_ops::unroll",
+      "surface_ops::reverse_surface",
+      "surface_ops::seam_surface",
+      "editing::sew_all",
+      "editing::offset_shape",
+      "editing::fillet",
+      "editing::chamfer",
+      "editing::thicken"
+    ]
+  },
+  "decision": "ADD",
+  "rationale": "QymCAD exposes OCCT-backed shape C ABI calls and profile naming only. The portable NURBS surface workflows, trims, matches and unroll are new Rust code against the OM9 surface record; no QymCAD source is copied.",
+  "not_reused": [
+    "QymCAD OCCT C ABI surface calls are not the portable OM9 surface record.",
+    "FreeCAD legacy surface adapters remain historical inputs, not the standalone runtime."
+  ],
+  "l3_scope": "special surface construction and editable output"
+}

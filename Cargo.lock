@@ -931,6 +931,8 @@ dependencies = [
  "num-traits",
  "png 0.18.1",
  "tiff",
+ "zune-core",
+ "zune-jpeg",
 ]
 
 [[package]]
@@ -1267,6 +1269,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee6cda3051665f1fb8d9e08fc35c96d5a244fb1be711a03b71118828afc9a873"
 dependencies = [
  "jni-sys 0.3.1",
+]
+
+[[package]]
+name = "nix"
+version = "0.31.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf20d2fde8ff38632c426f1165ed7436270b44f199fc55284c38276f9db47c3d"
+dependencies = [
+ "bitflags 2.13.2",
+ "cfg-if",
+ "cfg_aliases",
+ "libc",
 ]
 
 [[package]]
@@ -1632,19 +1646,23 @@ name = "om9-app"
 version = "0.1.0"
 dependencies = [
  "eframe",
+ "epaint_default_fonts",
  "image",
  "om9-archive",
  "om9-core",
  "om9-exchange",
  "om9-kernel",
  "om9-native-owner",
+ "om9-plugin-host",
  "om9-render",
  "om9-scene",
+ "om9-sdk",
  "raw-window-handle",
  "resvg",
  "serde",
  "serde_json",
  "sha2",
+ "skrifa",
  "uuid",
 ]
 
@@ -1685,11 +1703,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "om9-hello-plugin"
+version = "0.1.0"
+dependencies = [
+ "om9-sdk",
+ "serde_json",
+]
+
+[[package]]
 name = "om9-kernel"
 version = "0.1.0"
 dependencies = [
  "cc",
  "om9-core",
+ "serde_json",
  "uuid",
 ]
 
@@ -1703,6 +1730,20 @@ dependencies = [
  "uuid",
  "windows",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "om9-plugin-host"
+version = "0.1.0"
+dependencies = [
+ "libloading",
+ "om9-core",
+ "om9-sdk",
+ "serde",
+ "serde_json",
+ "sha2",
+ "uuid",
+ "zip",
 ]
 
 [[package]]
@@ -1722,6 +1763,14 @@ dependencies = [
  "om9-core",
  "serde",
  "uuid",
+]
+
+[[package]]
+name = "om9-sdk"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2544,6 +2593,12 @@ checksum = "cb30dbbd9036155e74adad6812e9898d03ec374946234fbcebd5dfc7b9187b90"
 dependencies = [
  "rustc-hash 2.1.3",
 ]
+
+[[package]]
+name = "typed-path"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54ec2755506471f54baf5e4bb5499d8e510cc1caf271270e778a736bd2d7336c"
 
 [[package]]
 name = "typenum"
@@ -3444,6 +3499,19 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "zip"
+version = "9.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e04976da629d3b04204ba8105b396a193af8ad2583b2c79bfb3ab8af580a11e"
+dependencies = [
+ "crc32fast",
+ "indexmap",
+ "memchr",
+ "nix",
+ "typed-path",
 ]
 
 [[package]]

@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-01-13.fixture.v1",
+  "l3_id": "OM9-L3-01-13-005",
+  "fixture_id": "OM9-L3-01-13-005-NEGATIVE",
+  "cases": [
+    "an unsupported/reversed polycurve metadata case is refused by the native bridge rather than flattened",
+    "a degenerate curve is rejected by the core curve admission"
+  ],
+  "invariants": [
+    "no partial document commit",
+    "no fabricated geometry or silently dropped unsupported field",
+    "the typed error reaches the caller/UI"
+  ],
+  "measured_on_2026_10_22": "all listed negative cases pass in the focused test"
+}

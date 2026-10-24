@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-012",
+  "fixture_id": "OM9-L3-02-04-012-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "sketch points farther from the mesh than tolerance",
+    "skew view rays above tolerance",
+    "parallel view rays",
+    "fewer than two sketch points"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_012_sketch_on_surface_mesh_and_two_views"
+}

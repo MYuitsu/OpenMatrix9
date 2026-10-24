@@ -1,0 +1,28 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.26s
+     Running tests\osnap_brep.rs (L:/om9-target\debug\deps\osnap_brep-0d7271373faec77a.exe)
+
+running 1 test
+test a_ray_through_a_brep_face_returns_a_surface_snap_on_the_trimmed_face ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\osnap_ui.rs (L:/om9-target\debug\deps\osnap_ui-a4bace3b8de5dcd6.exe)
+
+running 3 tests
+test disabling_end_removes_the_marker_from_the_next_frame ... ok
+test escape_clears_the_smarttrack_guides_and_pending_snap ... ok
+test an_end_marker_is_consumed_by_the_point_prompt_and_smarttrack_keeps_two_anchors ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s
+
+     Running tests\snap_panel_modes.rs (L:/om9-target\debug\deps\snap_panel_modes-432321f511cf99a6.exe)
+
+running 4 tests
+test project_projects_to_the_active_cplane_without_changing_it ... ok
+test panel_updates_enabled_state_and_override_in_the_same_frame ... ok
+test a_focused_command_editor_does_not_consume_the_snap_shortcut ... ok
+test e_and_m_select_end_and_mid_while_a_command_is_running ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s
+

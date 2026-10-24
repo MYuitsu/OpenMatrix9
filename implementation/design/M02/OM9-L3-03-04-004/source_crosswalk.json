@@ -1,0 +1,19 @@
+{
+  "l3": "OM9-L3-03-04-004",
+  "title": "Matrix Smarttrack Toggle And Feedback",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-scene/src/osnap.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/ui/sidebar_palettes.rs"
+  ],
+  "tests": [
+    "om9-app snap_panel_modes: 4 passed",
+    "om9-app osnap_ui: 3 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.57-62 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-04-004-01"
+}

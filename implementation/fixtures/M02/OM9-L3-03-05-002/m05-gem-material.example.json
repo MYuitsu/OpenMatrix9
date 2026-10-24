@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m05.gem-material.example.v1",
+  "slot": "om9.gem",
+  "record": {
+    "asset": "round_1",
+    "material": "emerald",
+    "color": [
+      0,
+      255,
+      0,
+      255
+    ]
+  },
+  "status": "SYNTHETIC_PROVIDER_FIXTURE_NOT_M05_PRODUCTION_ASSET",
+  "note": "Demonstrates the typed record gem_material reads; it does not claim M05 asset availability."
+}

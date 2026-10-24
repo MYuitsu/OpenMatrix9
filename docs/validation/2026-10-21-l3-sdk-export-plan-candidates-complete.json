@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-21",
+  "status": "l3_planned_candidate_api_complete",
+  "target": "Every planned L3 now names its intended SDK surface and host-only remainder",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "tool": "tools/l3_sdk_export_plan.py",
+  "index": "docs/validation/2026-10-21-l3-sdk-export-plan.md",
+  "previous": "docs/validation/2026-10-21-l3-sdk-export-plan-candidates.json",
+  "counts": {
+    "exported_in_sdk_v1": 28,
+    "planned": 38,
+    "not_in_sdk": 10,
+    "planned_with_candidate": 38
+  },
+  "newly_sketched": [
+    "OM9-L3-01-03-001",
+    "OM9-L3-01-03-006",
+    "OM9-L3-01-03-010",
+    "OM9-L3-01-03-013",
+    "OM9-L3-01-02-001",
+    "OM9-L3-01-02-002",
+    "OM9-L3-01-02-005",
+    "OM9-L3-01-02-006",
+    "OM9-L3-01-02-007",
+    "OM9-L3-01-02-009",
+    "OM9-L3-01-02-011",
+    "OM9-L3-02-01-001",
+    "OM9-L3-02-01-004",
+    "OM9-L3-02-01-005",
+    "OM9-L3-02-01-006",
+    "OM9-L3-02-01-007",
+    "OM9-L3-02-01-008",
+    "OM9-L3-02-01-009",
+    "OM9-L3-02-01-010",
+    "OM9-L3-02-04-001",
+    "OM9-L3-02-04-004",
+    "OM9-L3-02-04-006",
+    "OM9-L3-02-04-007",
+    "OM9-L3-02-04-008",
+    "OM9-L3-02-04-009",
+    "OM9-L3-02-04-010",
+    "OM9-L3-02-04-011",
+    "OM9-L3-02-04-012"
+  ],
+  "assertions": [
+    "Every planned L3 has non-empty candidate_api and host_only.",
+    "Every exported L3 has api and no candidate_api.",
+    "Every not_in_sdk L3 has a note and no candidate_api.",
+    "Index renders 38 'đề xuất:' rows."
+  ],
+  "limitations": [
+    "Planning sketches only; no method exists and no runtime status changed.",
+    "Names may change when implemented."
+  ]
+}

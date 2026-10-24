@@ -1,0 +1,30 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+   Compiling om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+   Compiling om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+   Compiling om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.63s
+     Running tests\l2_01_13.rs (L:\om9-target\debug\deps\l2_01_13-3c2a3bc9043a6e16.exe)
+
+running 14 tests
+test m03_01_13_001 ... ok
+test m03_01_13_002 ... ok
+test m03_01_13_003 ... ok
+test m03_01_13_004 ... ok
+test m03_01_13_005 ... ok
+test m03_01_13_006 ... ok
+test m03_01_13_007 ... ok
+test m03_01_13_008 ... ok
+test m03_01_13_009 ... ok
+test m03_01_13_010 ... ok
+test m03_01_13_011 ... ok
+test m03_01_13_012 ... ok
+test m03_01_13_receipt ... {"clean_mm":{"breps_editable":0,"breps_opaque":0,"definitions":3,"entities":12,"fixture_sha256":"c5b2820b28c7fb16a9cf140b1e634a577bf7fde1915744061fc2a2398c9a6629","layers":1},"inch":{"exact_point_mm":[25.4,50.8,76.19999999999999],"fixture_sha256":"f073c0a179bb812b35ecfee158eb25d913a9bcdc3fe17692e3772af239c81fc9","model_unit":"Inch"},"mm":{"archive_version":50,"definition_members":4,"definitions":3,"diagnostics":55,"fixture_sha256":"9677636d5bddc89ad4cf8e1a85131479d282cfa30b06e571b6ca2c47f99d9ba3","layers":2,"model_unit":"Millimeter","root_objects":15},"native_exe_sha256":"923caba857b4f738b6641f3dfe1abd68705c33e32c5aab0de3f21e9069b1d1be","source_fixture_sha256":"d315c6d35a94bad0d05cb4aeaff8a90ac6fd5437646ee6d006463c73386dc0d7","status":"measured"}
+ok
+test m03_01_13_stress ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 27.25s
+

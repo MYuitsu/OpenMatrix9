@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-002-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-01-07-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Click, Shift-add, Ctrl-toggle and Shift/Ctrl band gestures all dispatch through Controller::select_root/select_objects/toggle_selection/add_objects/remove_objects.",
+  "tests": [
+    "om9-app acceptance_selection_set: 6 passed",
+    "om9-app selection_overlay: 8 passed"
+  ]
+}

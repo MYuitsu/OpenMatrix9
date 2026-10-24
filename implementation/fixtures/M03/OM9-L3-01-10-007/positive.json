@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-007",
+  "fixture_id": "OM9-L3-01-10-007-POSITIVE",
+  "units": "mm",
+  "input": {
+    "face_mm": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        0
+      ],
+      [
+        10,
+        20,
+        0
+      ],
+      [
+        0,
+        20,
+        0
+      ]
+    ],
+    "thickness_mm": 2,
+    "offset_mm": 2
+  },
+  "expect": {
+    "thicken_volume_mm3": 400.0,
+    "offset_area_mm2": 200.0,
+    "offset_plane_shift_mm": 2.0
+  },
+  "measured_on_2026_10_22": {
+    "thicken_volume_mm3": 400.0,
+    "offset_area_mm2": 200.0
+  }
+}

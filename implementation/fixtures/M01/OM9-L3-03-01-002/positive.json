@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-01-002",
+  "case": "positive",
+  "oracle": "matrix_four_view_camera_presets_are_distinct_and_valid",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

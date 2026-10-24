@@ -106,12 +106,115 @@
     }
   ],
   "m03_l4_planned_count": 50,
-  "execution_state": "NOT_STARTED",
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
+  "execution_state": "AUTOMATED_TARGET_VALIDATED",
+  "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
   "kernel_pin": {
     "version": "8.0.1",
     "tag": "V8_0_1",
     "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
     "pin_file": "native/occt/pin.json"
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-01-10",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED general ops",
+      "sdk_signal": "AUDIT-THEN-ROUTE",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Chứng minh linked boolean/fillet/shell trên input tùy biến trước; fixture measurement chưa đủ.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-01-10-001",
+      "OM9-L3-01-10-002",
+      "OM9-L3-01-10-003",
+      "OM9-L3-01-10-004",
+      "OM9-L3-01-10-005",
+      "OM9-L3-01-10-006",
+      "OM9-L3-01-10-007",
+      "OM9-L3-01-10-008",
+      "OM9-L3-01-10-009"
+    ]
+  },
+  "product_crate": {
+    "path": "crates/om9-kernel",
+    "capabilities": [
+      "boolean union/difference/intersection of closed solids with a typed empty outcome",
+      "single-face split by a trim curve with area-preserving verification",
+      "planar cap that closes an open shell into an exact solid",
+      "edge fillet and chamfer with index-based edge selection",
+      "one-sided thicken and surface offset",
+      "face extract, face unjoin and sew/rejoin with closed-shell promotion",
+      "exact geometry health (validity, closedness, naked edges, topology counts, source digest)"
+    ],
+    "tests": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_10: 12 passed",
+    "clippy": "clean with --all-targets -- -D warnings",
+    "state": "all nine L3 of L2-01-10 delivered on automated evidence; planning_state remains SPEC_ONLY_NOT_IMPLEMENTED and the acceptance record is implementation/evidence/M03"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "Nine editing owners: boolean union/difference/intersection, curve/face split, planar cap, fillet/chamfer, offset/thicken, face extract/unjoin/rejoin and geometry health.",
+    "evidence": [
+      "implementation/design/M03/OM9-L2-01-10/README.md",
+      "implementation/evidence/M03/OM9-L3-01-10-001",
+      "implementation/evidence/M03/OM9-L3-01-10-002",
+      "implementation/evidence/M03/OM9-L3-01-10-003",
+      "implementation/evidence/M03/OM9-L3-01-10-004",
+      "implementation/evidence/M03/OM9-L3-01-10-005",
+      "implementation/evidence/M03/OM9-L3-01-10-006",
+      "implementation/evidence/M03/OM9-L3-01-10-007",
+      "implementation/evidence/M03/OM9-L3-01-10-008",
+      "implementation/evidence/M03/OM9-L3-01-10-009"
+    ],
+    "l3_with_verified_supported_scope": 9,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": true,
+    "human_approval": null,
+    "manual_gate": "AUTO_ONLY",
+    "remaining": [
+      "Curve split (as opposed to a straight trim line on a planar face) is not part of this delivery.",
+      "General (non-planar) capping is refused by name; only a planar naked loop is capped.",
+      "macOS execution is unverified for this toolchain."
+    ],
+    "technical_scope_complete": true,
+    "latest_verification": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "receipt": "implementation/evidence/M03/OM9-L3-01-10-001/OM9-L4-01-10-001-03.focused-test.log",
+      "tests": {
+        "l2_01_10": "12 passed",
+        "om9-kernel suite": "43 passed, 1 ignored",
+        "workspace check": "exit 0",
+        "clippy": "exit 0",
+        "fmt": "exit 0"
+      },
+      "l4_evidence": {
+        "OM9-L3-01-10-001": "6/6",
+        "OM9-L3-01-10-002": "6/6",
+        "OM9-L3-01-10-003": "6/6",
+        "OM9-L3-01-10-004": "6/6",
+        "OM9-L3-01-10-005": "5/5",
+        "OM9-L3-01-10-006": "6/6",
+        "OM9-L3-01-10-007": "5/5",
+        "OM9-L3-01-10-008": "5/5",
+        "OM9-L3-01-10-009": "5/5"
+      }
+    }
   }
 }

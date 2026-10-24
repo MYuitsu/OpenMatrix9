@@ -1,0 +1,154 @@
+{
+  "date": "2026-10-21",
+  "status": "curve_definition_and_semantics_sdk_export_verified_windows",
+  "owner": "OM9-L2-02-01",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Extends the curve read surface with NURBS control data and the owner's closed/planar classification; no second rule.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "687a59e21255f72cd6dc6f22542bac6d7b8e57103dfdc5c2edc7b71d75fd3c1d",
+    "crates/om9-plugin-host/src/staged.rs": "8a6e1d6f27ccc433562e6c8dcc9d4d9d83c10b033de22aae232eff167c3cf406",
+    "crates/om9-app/tests/plugin_native.rs": "1476f8a4b8a1139038833f0d8611f0aada28d2d511ba52e49c93bc0b434f9438",
+    "sdk/examples/hello-plugin/src/lib.rs": "0981a567f936e201343db9a6d9f3aa01b252aa3102c163cc435337a97f2f1eb6",
+    "sdk/README.md": "33c5a1c675915366ef379581e1c378735e683653d3f2bfbe32885bfb24c615eb",
+    "sdk/API-INVENTORY.md": "5a9ba33cd3148f8e9d1ebe01958dff8c5fee66f0d7c21666401634f6410b803e"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["curve_definition", "curve_semantics"],
+    "public_types": ["CurveDefinition", "CurveSemantics"],
+    "shared_service": [
+      "om9_core::rhino_semantics::classify_curve",
+      "om9_core::model::Document::effective_tolerance",
+      "om9_core::geometry::NurbsCurve"
+    ],
+    "error_codes": ["curve", "unsupported", "budget", "tolerance", "id", "missing"],
+    "limits": {"control_points": 8192, "knots": 16384}
+  },
+  "asserted_semantics": [
+    "Definitions are object-local and bounded; a larger curve is a budget refusal rather than a truncated definition.",
+    "NURBS reports degree, poles, weights, knots, domain, periodic, reversed and seam; a circle reports its optional arc angle domain; a polycurve reports its segment count.",
+    "closed = distance(first, last) <= tolerance on the owner's 33-sample curve; planar uses the owner's Newell-normal rule; the tolerance used is reported back.",
+    "A document that states no tolerance refuses the implicit measurement; the caller must pass an explicit tolerance instead of receiving an invented default.",
+    "A curve whose sampled length is at or below the tolerance is refused as degenerate, never reclassified.",
+    "Reading a definition or semantics stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "48 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "10 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-curve-semantics",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8799 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "line_definition_has_no_control_data": true,
+    "circle_definition_has_no_arc_domain": true,
+    "line_closed": false,
+    "line_planar": true,
+    "tolerance_mm": 0.001,
+    "polyline_kind": "polyline",
+    "polyline_closed": true,
+    "document_unchanged": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1509961,
+      "sha256": "939a28344c47a0684afddf058de5194335cb5cb05a5e047eb3be28b756a419d8"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "ba27462bac6f21fd8938254fa40154680741aa85d510dfb89a6dc3923ec4ba7a"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 137030,
+      "sha256": "fb7c79da6a0a0330af9c5c83944fccfecefa846be317bbbff9d8cc6087aea34c"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "4173c84fa69bc70077767a11f027cddf5aae3beeeb15547d2238458c6088a52e"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1508352,
+      "sha256": "0b8e88a4f0ccbb20bee0e57236bea489f1456be3b4de6a7b40a64ef2c2645be5"
+    },
+    "om9.exe": {
+      "bytes": 68702720,
+      "sha256": "a891cf89068a24ac2b1160850a9c5480b082b5cdce639960754743ca83227878"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-02-01-002 (NURBS control data read)",
+      "OM9-L3-02-01-003 (open/closed/planar rules)"
+    ],
+    "open": [
+      "NURBS weights/knots write and point/knot editing",
+      "curve construction, offset, fillet/blend, rebuild and intersections",
+      "polycurve segment parameters",
+      "surface and BRep semantics"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Control data is read-only; curve editing and construction remain open.",
+    "Polycurve segment parameters and surface/BRep semantics are not exposed.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose curve construction (add_arc/add_nurbs) at the same owner, or take OM9-L2-01-12 file lifecycle."
+}

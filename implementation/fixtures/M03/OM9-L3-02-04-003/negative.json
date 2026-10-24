@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-003",
+  "fixture_id": "OM9-L3-02-04-003-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "even or oversized degree",
+    "degree not smaller than the point count",
+    "malformed knot/pole/weight record"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_003_interpolated_and_controlpoint_nurbs"
+}

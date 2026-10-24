@@ -1,0 +1,44 @@
+{
+  "schema": "om9.m03.l2-01-11.l4.receipt.v1",
+  "l4": "OM9-L4-01-11-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-11-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crate": "om9-kernel",
+    "files": [
+      "crates/om9-kernel/src/transform_ops.rs",
+      "crates/om9-kernel/src/transform_bridge.cpp"
+    ],
+    "test": "crates/om9-kernel/tests/l2_01_11.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 m03_01_11_001 -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-11-001/OM9-L4-01-11-001-03.focused-test.log",
+      "stdout_log_sha256": "958d545c06167f92afb6f2279d0558be0eb7070702cbe620026f8b3884607d2c"
+    }
+  ],
+  "observed": {
+    "translated_volume_mm3": 24.0
+  },
+  "expected": {
+    "translated_volume_mm3": 24.0
+  },
+  "effective_tolerance": {
+    "translated_volume_mm3": "1e-6"
+  },
+  "input_validation": [
+    "every matrix value must be finite and the affine last row must be (0,0,0,1)",
+    "the 3×3 determinant must be non-zero (else the matrix is singular)",
+    "deflection must be finite and positive"
+  ],
+  "error_type": "transform_ops::TransformError (creation::CreationError)",
+  "rollback_behavior": "inputs are immutable values; a refused operation returns before a body exists",
+  "compile_receipt": "the crate, the C++ transform adapter and the focused test compile (exit 0)",
+  "worktree_state": "The recorded revision is HEAD; L2-01-11 changes were measured before commit."
+}

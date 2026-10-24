@@ -1,0 +1,50 @@
+{
+  "schema": "om9.m03.l2-03-16.wire_ui.v1",
+  "l3_id": "OM9-L3-03-16-019",
+  "menu_icon": "CurveOffsetOffsetCrvOnSrf",
+  "command_id": "OM9-CURVE-020",
+  "menu_and_commandline_same_id": true,
+  "enabled": false,
+  "disabled_reason": "interactive Offset Curve on Surface command session is not wired; owner candidate OM9-L3-02-04-006 is unverified",
+  "visible_disabled_reason": true,
+  "ui_state": "DISABLED_VISIBLE_REASON",
+  "owner_service_reused": "OM9-L3-02-04-006",
+  "transaction": "one session; one Undo entry",
+  "smoke_receipt": "implementation/evidence/M03/OM9-L3-03-16-019/OM9-L4-03-16-019-02.wire.json",
+  "status": "VERIFIED_DISABLED_PLACEHOLDER",
+  "task_id": "OM9-L4-03-16-019-02",
+  "role": "WIRE_UI",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test curve_menu",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-03-16-logs/curve-menu.log",
+      "stdout_log_sha256": "393cc79e359e9292748c085a0eded27fa7caad37eae06339a197bc9f2144d396"
+    }
+  ],
+  "observed": {
+    "catalog_rows": 58,
+    "enabled_rows": 2,
+    "disabled_rows": 56,
+    "line_point_geometry_smoke": "passed",
+    "disabled_reason_visible": true
+  },
+  "expected": {
+    "menu_and_commandline_same_id": true,
+    "no_fake_success": true,
+    "no_document_mutation_when_disabled": true
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-019/wire_ui.json",
+    "crates/om9-app/src/curve_menu.rs",
+    "crates/om9-app/src/ui/chrome.rs"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-019/wire_ui.json": "3f442f92299f829625df4bbdbe1f72f681db482605d20a8b55ab230bb3167f4b",
+    "crates/om9-app/src/curve_menu.rs": "871fea98affbefb851d6c3e14182693565cc27b697ee6cfebea1b5932d7d8e50",
+    "crates/om9-app/src/ui/chrome.rs": "3c8865298d10ed3dae24e54ea989a825e6a815cc7718ddfaf18ef5a8af0cf6e0"
+  },
+  "human_approval": null,
+  "manual_gate": "M03-UI"
+}

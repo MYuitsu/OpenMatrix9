@@ -5,6 +5,27 @@ use om9_archive::Archive;
 use om9_core::budget::Usage;
 use std::path::{Path, PathBuf};
 const PATH_BYTES: usize = 32768;
+
+/// The single user-visible summary line for a completed 3DM import.
+///
+/// It is a pure function of the receipt so the UI can display it and a test can assert the
+/// exact counts without opening a window or a native dialog.
+pub fn format_import_summary(receipt: &om9_exchange::ImportReceipt) -> String {
+    format!(
+        "3DM import summary: {} editable BRep, {} opaque, {} displayable, {} display unavailable, {} annotation, {} hatch, {} light, {} group, {} line pattern, {} page-space",
+        receipt.breps_editable,
+        receipt.breps_opaque,
+        receipt.breps_displayable,
+        receipt.breps_display_unavailable,
+        receipt.annotations,
+        receipt.hatches,
+        receipt.lights,
+        receipt.groups,
+        receipt.line_patterns,
+        receipt.page_space_objects
+    )
+}
+
 impl Controller {
     pub fn from_file(path: &Path, limits: Limits) -> Result<Self> {
         let mut controller = Self::new(Document::with_template_tolerance("Untitled"), limits)?;
@@ -508,20 +529,9 @@ impl Controller {
             .selection_revision
             .checked_add(1)
             .ok_or(Error::Overflow("selection revision"))?;
+        let summary = format_import_summary(&receipt);
         let mut diagnostics = receipt.diagnostics;
-        diagnostics.push(format!(
-            "3DM import summary: {} editable BRep, {} opaque, {} displayable, {} display unavailable, {} annotation, {} hatch, {} light, {} group, {} line pattern, {} page-space",
-            receipt.breps_editable,
-            receipt.breps_opaque,
-            receipt.breps_displayable,
-            receipt.breps_display_unavailable,
-            receipt.annotations,
-            receipt.hatches,
-            receipt.lights,
-            receipt.groups,
-            receipt.line_patterns,
-            receipt.page_space_objects
-        ));
+        diagnostics.push(summary);
         Ok(diagnostics)
     }
     /// Export the current document to Rhino 3DM without changing the document, selection or Undo.

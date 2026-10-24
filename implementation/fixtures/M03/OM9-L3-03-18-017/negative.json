@@ -1,0 +1,8 @@
+{
+  "cases": [
+    "empty selection",
+    "invalid parameters",
+    "missing OCCT backend"
+  ],
+  "expected": "visible typed error, no document mutation"
+}

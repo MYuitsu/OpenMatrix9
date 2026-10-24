@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-013-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-013",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-013",
+  "source_command": "Planar Curves",
+  "menu_icon": "SurfacePlanarCurves",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-013/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-013/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-013/dispatch_contract.json": "3a4b91596286fc28954f9683d1d759c89480418f7902b6601e8cf0e936b70635",
+    "implementation/design/M03/OM9-L3-03-17-013/source_crosswalk.json": "43f94ca616f5c89ab1c719983384a01e8ac5d607e5ea752317dda8e4c49f8d91"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

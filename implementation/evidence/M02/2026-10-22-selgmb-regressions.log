@@ -1,0 +1,99 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 47.59s
+     Running tests\acceptance_viewport_selection.rs (L:/om9-target\debug\deps\acceptance_viewport_selection-0da181bb662510e5.exe)
+
+running 8 tests
+test escape_without_a_drag_clears_the_selection ... ok
+test ctrl_shift_click_picks_the_face_under_the_pointer ... ok
+test a_picked_subobject_is_drawn_in_the_viewport ... ok
+test a_drag_that_starts_on_the_dock_draws_no_selection_marquee ... ok
+test shift_adds_with_a_band_and_ctrl_removes ... ok
+test pick_tolerance_stays_in_logical_points_at_high_dpi ... ok
+test shift_click_adds_and_keeps_an_already_selected_object ... ok
+test twenty_band_passes_leave_the_same_selection ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.12s
+
+     Running tests\gumball_interaction.rs (L:/om9-target\debug\deps\gumball_interaction-98b5a5e43e47d0aa.exe)
+
+running 6 tests
+test the_pivot_is_none_without_a_selection ... ok
+test a_gesture_without_motion_writes_nothing ... ok
+test scaling_doubles_the_distance_from_the_pivot ... ok
+test rotating_turns_the_selection_about_its_centre ... ok
+test an_x_axis_drag_adds_exactly_five_millimetres_with_one_undo_redo ... ok
+test moving_two_selected_objects_is_one_journal_entry ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_numeric.rs (L:/om9-target\debug\deps\gumball_numeric-141ec5eaf342ba88.exe)
+
+running 5 tests
+test numeric_commands_without_a_selection_are_refused ... ok
+test a_malformed_numeric_command_changes_nothing ... ok
+test nan_and_empty_numeric_inputs_commit_nothing_and_keep_the_gumball ... ok
+test a_numeric_move_is_one_transaction ... ok
+test a_numeric_rotation_and_scale_turn_about_the_pivot ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_placement.rs (L:/om9-target\debug\deps\gumball_placement-947082a337db92eb.exe)
+
+running 4 tests
+test object_alignment_follows_the_selected_objects_axes ... ok
+test cplane_alignment_follows_the_active_construction_plane_without_moving_the_object ... ok
+test a_relocated_gumball_turns_about_the_new_origin ... ok
+test resetting_the_gumball_puts_the_pivot_back_at_the_selection_centre ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_viewport.rs (L:/om9-target\debug\deps\gumball_viewport-1367f1f2fcc31d97.exe)
+
+running 3 tests
+test a_click_selects_and_a_gumball_drag_moves_the_line ... ok
+test dragging_the_scale_square_scales_the_selection ... ok
+test shift_dragging_a_ring_rotates_the_selection ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.86s
+
+     Running tests\matrix_selection_sequence.rs (L:/om9-target\debug\deps\matrix_selection_sequence-2cb8b92df7f2cb57.exe)
+
+running 2 tests
+test the_overlap_popup_names_the_type_and_layer_swatch ... ok
+test plain_click_replaces_shift_adds_and_ctrl_toggles ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.86s
+
+     Running tests\pick_disambiguation.rs (L:/om9-target\debug\deps\pick_disambiguation-bad21f519bcf9cec.exe)
+
+running 5 tests
+test a_choice_is_refused_if_the_document_changed_while_the_popup_was_open ... ok
+test a_click_on_two_objects_offers_a_choice_and_the_choice_selects ... ok
+test a_click_on_one_object_selects_it_without_a_popup ... ok
+test escaping_the_choice_keeps_the_previous_selection ... ok
+test the_popup_rows_name_the_type_and_escape_closes_without_selecting ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s
+
+     Running tests\rubber_band.rs (L:/om9-target\debug\deps\rubber_band-822b115053dd4997.exe)
+
+running 2 tests
+test a_band_over_two_points_selects_both ... ok
+test a_band_around_one_point_selects_only_that_one ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s
+
+     Running tests\selection_overlay.rs (L:/om9-target\debug\deps\selection_overlay-0bd12558e6757112.exe)
+
+running 8 tests
+test ctrl_click_toggles_one_object_in_and_out_of_the_selection ... ok
+test any_selection_shows_the_gumball ... ok
+test clearing_the_selection_removes_the_frame_and_the_gumball ... ok
+test a_multi_selection_draws_a_frame_around_itself ... ok
+test a_single_selection_has_no_frame_but_two_do ... ok
+test hovering_an_object_shows_a_frame_that_follows_the_pointer ... ok
+test escape_cancels_a_gumball_drag_without_committing ... ok
+test the_band_is_a_window_left_to_right_and_crossing_right_to_left ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.02s
+

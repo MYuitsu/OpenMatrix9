@@ -1,0 +1,100 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-004-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-02-05-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel",
+    "files": [
+      "crates/om9-core/src/surface_kernel.rs",
+      "crates/om9-kernel/src/creation.rs"
+    ],
+    "test": "crates/om9-core/tests/surface_ops.rs + crates/om9-kernel/tests/l2_02_05.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test surface_ops -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/core-suite.log",
+      "stdout_log_sha256": "b0dbcc0b6be860aa2cb791323f611035999f8a2bb3b1383842611c9bef8a9041"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_02_05 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/kernel-suite.log",
+      "stdout_log_sha256": "c1c4a32362e4e7c8fd73090820542e4cc17be79dcfd61c88e9061d8ddcbc8b35"
+    },
+    {
+      "argv": "cargo test -p om9-core --lib -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/core-lib.log",
+      "stdout_log_sha256": "89918afc3be21e701f77577387525305465f88002dc8f3aafa7d12389796e424"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/kernel-suite-all.log",
+      "stdout_log_sha256": "6a832d83d4a6fb2cb6444aba9a8003a596d21ceff9bb2abdcc20294459accbc3"
+    },
+    {
+      "argv": "cargo clippy -p om9-core --test surface_ops -j 2 -- -D warnings",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/clippy-core.log",
+      "stdout_log_sha256": "3252670731ed9d37ef794ed65d034011a42c36fcfb0baba1498a16c7d8bdf970"
+    },
+    {
+      "argv": "cargo clippy -p om9-kernel --features 3dm-brep --test l2_02_05 -j 2 -- -D warnings",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/clippy-kernel.log",
+      "stdout_log_sha256": "3a094cca6611a3bd9593d2db21dbb4930947cf2dc732e8991dbe1a08ee0399ec"
+    },
+    {
+      "argv": "rustfmt --edition 2024 --check crates/om9-core/src/surface_ops.rs crates/om9-core/src/lib.rs crates/om9-core/tests/surface_ops.rs crates/om9-kernel/tests/l2_02_05.rs",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/fmt.log",
+      "stdout_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "observed": {
+    "plane_corner": [
+      4.0,
+      2.0,
+      0.0
+    ],
+    "patch_area_mm2": 7.999999999999918,
+    "patch_deviation_mm": 4.466484191439815e-16
+  },
+  "expected": {
+    "plane_corner": [
+      4.0,
+      2.0,
+      0.0
+    ],
+    "patch_area_mm2": 8.0,
+    "patch_deviation_mm": 0.0
+  },
+  "tolerances": {
+    "area_mm2": "1e-5",
+    "deviation_mm": "1e-6"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/surface_kernel.rs",
+    "crates/om9-kernel/src/creation.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/surface_kernel.rs": "f6ee1938df7df299ba25e639c178c80c6e96c789c5e902af5b3406ace383ccc0",
+    "crates/om9-kernel/src/creation.rs": "7f2e2dc0849d9497d9b202bdd23332989091ee2e8224a04ebfc8be1beb2a5e0f"
+  }
+}

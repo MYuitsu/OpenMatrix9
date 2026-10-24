@@ -1,0 +1,12 @@
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.65s
+     Running tests\camera_fit.rs (L:/om9-target\debug\deps\camera_fit-c7f9a576164e10f9.exe)
+
+running 4 tests
+test center_preserves_rotation_zoom_and_projection ... ok
+test orthographic_fit_contains_a_10_by_20_by_30_box_with_margin ... ok
+test perspective_fit_contains_the_same_box ... ok
+test invalid_fit_inputs_and_zoom_factors_are_refused ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

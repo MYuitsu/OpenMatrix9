@@ -1,0 +1,22 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running tests\gumball.rs (L:/om9-target\debug\deps\gumball-31bd22809bbe8326.exe)
+
+running 15 tests
+test a_handle_refuses_the_wrong_kind_of_drag_input ... ok
+test a_plane_handle_drops_the_normal_component ... ok
+test a_rectangular_array_places_every_occurrence_on_the_frame_grid ... ok
+test a_polar_array_spreads_occurrences_around_the_frame_axis ... ok
+test arrays_refuse_impossible_counts_and_spacing ... ok
+test rotation_and_scale_refuse_bad_parameters ... ok
+test a_session_composes_successive_drags_in_world_order ... ok
+test an_axis_handle_keeps_only_the_component_along_its_axis ... ok
+test a_session_refuses_an_empty_duplicate_or_nil_target_set ... ok
+test rotation_about_a_point_keeps_that_point_fixed ... ok
+test a_rotated_frame_axis_drag_follows_its_axis ... ok
+test scaling_along_an_axis_keeps_the_other_axes_and_the_origin ... ok
+test handle_codes_round_trip_like_the_legacy_wire ... ok
+test a_copy_session_inserts_clones_with_fresh_identities ... ok
+test a_move_session_rewrites_placement_only_and_is_one_undo_step ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

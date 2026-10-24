@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-006-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-06-006",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-06-006/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-06-006/negative.json",
+  "fixture_sha256": {
+    "positive": "a23ef1543653229d590906306a5f92c1e09d017ae2c6a635f815d0eb92cbc9e3",
+    "negative": "9ebd45ff903dd36c120015f2c54e354ab61359e1e31a9732253094db855707f5"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-06-006/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-06-006/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-006/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "before a reference the preview is identity; cancel restores identity",
+      "a move gesture with two selected objects is one journal entry with undo/redo",
+      "a numeric move/rotate/scale is one transaction",
+      "200 preview/cancel sessions stay exact"
+    ],
+    "negative": [
+      "a gesture without motion writes nothing",
+      "malformed numeric commands and NaN inputs commit nothing",
+      "no selection refuses numeric transforms"
+    ]
+  }
+}

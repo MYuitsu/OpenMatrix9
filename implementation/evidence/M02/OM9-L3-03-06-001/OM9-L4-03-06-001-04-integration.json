@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-06-001-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-06-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "MatrixApp::import_picture_frame decodes before pushing, so a bad image leaves the frame list empty.",
+  "tests": [
+    "om9-app pictureframe unit: 6 passed",
+    "om9-app pictureframe persistence: 3 passed"
+  ]
+}

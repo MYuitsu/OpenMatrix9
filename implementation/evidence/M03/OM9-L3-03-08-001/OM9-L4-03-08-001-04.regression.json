@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m03.l2-03-08.l4.receipt.v1",
+  "l4": "OM9-L4-03-08-001-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-03-08-001",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "suite": "app lib + Top 11 suite + core Top 11 suite",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --no-default-features --lib --test top11 -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-03-08-001/OM9-L4-03-08-001-04.regression.log",
+      "stdout_log_sha256": "21c1dacf4ccd4e4c43c6b95dc45c6e6521c8d4e5b426099e43fcf879605d1836",
+      "passed": 180
+    },
+    {
+      "argv": "cargo test -p om9-core --test top11 -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "passed": 10
+    }
+  ],
+  "repeatable": "the action oracles are exact counts and tolerance-bounded geometry; the suite is deterministic here",
+  "observed": {
+    "duplicate_vertical_origin": "[0.0, 0.0, 5.0]",
+    "duplicate_base_copies": 2.0,
+    "duplicate_total_objects": 3.0,
+    "duplicate_undo_redo_passed": "true",
+    "duplicate_last_distance_y": 10.0,
+    "duplicate_last_direction_x": 5.0
+  }
+}

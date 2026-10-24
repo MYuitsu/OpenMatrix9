@@ -1,0 +1,14 @@
+{
+  "l4": "OM9-L4-03-02-007-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-02-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Workspace::toggle_maximize changes only layout state; the title double-click calls it while the four ViewState cameras remain independent.",
+  "tests": [
+    "om9-app navigation_maximize: 2 passed",
+    "om9-app viewport_layout: 3 passed",
+    "om9-app viewport_title_menu: 17 passed",
+    "om9-scene camera_grid: 5 passed"
+  ]
+}

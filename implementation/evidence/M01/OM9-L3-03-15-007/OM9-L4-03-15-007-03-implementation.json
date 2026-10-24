@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-15-007-03",
+  "l3": "OM9-L3-03-15-007",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/project_manager.rs"
+  ],
+  "tests": "project_manager 8 passed",
+  "oracle": "deep whole-document Master snapshot including layers/instances"
+}

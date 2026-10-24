@@ -1,0 +1,176 @@
+{
+  "date": "2026-10-21",
+  "status": "object_attributes_and_query_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Second implementation slice of the milestone-integrated SDK plan; delivered inside the existing document owner, not as a separate SDK phase.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "b34d48bea2bade2603798ab3b571c579ec12e267eccee21e3ee2e6dd24816603",
+    "crates/om9-plugin-host/src/staged.rs": "daae6725f4c0b59daf7d5d7c793f82b3ad27e2952afaf307527f3013debc4cef",
+    "crates/om9-app/tests/plugin_native.rs": "6af1685f7dce9515921d8b6d124dc7cd728768654cf6d3778e8aa7356afa7d28",
+    "crates/om9-core/src/model.rs": "2d4146d7ccd0468fd720f6d97b3abcab2c5ffd0f1991691bc0faaf1f86dea826",
+    "sdk/examples/hello-plugin/src/lib.rs": "05e98078b498c8b0e2642eebcc661ccc3c884e4ac7973ce3eb4843ac9375401d",
+    "sdk/examples/hello-plugin/descriptor.json": "17271018682b9916da09465207f74dd09e179d4f3b621d9f4c7e122da475dbd7",
+    "sdk/README.md": "1a00ee932048f08a71f7a17adb30e5c691096714c8db073d72d576804b181711",
+    "sdk/API-INVENTORY.md": "54b7b7ca07ace8f3029fd083715f4fcb53a4d2b59348df63715aad805e62956c",
+    "tools/validate_plugin_sdk.py": "76f3eefb4a38aa3688fc4ada223d8a8f639f364680a8ef6425df61f0e0d0ff6d"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "query_objects",
+      "object_attributes",
+      "set_object_attributes",
+      "rename_object"
+    ],
+    "public_types": [
+      "ObjectInfo (generation, geometry_revision, attributes_revision)",
+      "ObjectAttributes",
+      "AttributesPatch",
+      "ObjectQuery",
+      "ObjectPage"
+    ],
+    "shared_service": [
+      "om9_core::model::Document::permissions_for_attributes",
+      "om9_core::model::Document::permissions_for_entity",
+      "om9_core::transaction::Mutation::Attributes",
+      "om9_core::transaction::Mutation::Label"
+    ],
+    "error_codes": ["conflict", "permission", "color", "label", "budget", "missing", "id"],
+    "query_page_default": 256,
+    "query_page_max": 1024
+  },
+  "asserted_semantics": [
+    "query_objects is ordered by object ID, includes the command's staged additions and attribute edits, supports layer, exact geometry kind, case-sensitive label substring, only_selected and include_hidden filters, and returns total plus page.",
+    "A page limit of zero selects the host default 256; a limit above 1024 is a budget refusal, never a silent truncation.",
+    "object_attributes reports stored and effective flags after the layer chain plus generation, geometry_revision and attributes_revision; a staged edit is visible to later reads in the same command with the revision the commit will publish.",
+    "set_object_attributes supports #rrggbb/#rrggbbaa or an empty colour, visible, hidden, selectable and locked; the object's layer must be editable while object-level lock/hidden stay editable.",
+    "rename_object applies the document label grammar and becomes a Mutation::Label.",
+    "One command may stage only one of placement, attributes or rename per object; a second kind is refused with the conflict code before commit.",
+    "A layer created by the same command cannot receive newly added objects (transaction insert admission validates the captured world); that flow needs two commands."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "35 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "399 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "4 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "5 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-attributes",
+      "result": "PASS, 10 commands (pack, inspect-package, create, inspect-project, cancel, unknown-command, controller-tests, native-tests, sdk-bundle, external-sdk-build)",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8783 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the five edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "command": "AttributesDemo after CreateProfile on the same controller",
+    "total_objects_after_edit": 3,
+    "first_object": {
+      "color": [255, 136, 0, 255],
+      "locked": true,
+      "effective_visible": true,
+      "effective_editable": false,
+      "attributes_revision_bumped_by": 1
+    },
+    "second_object_label": "SDK renamed",
+    "undo_units": 2,
+    "undo_restores_document": true,
+    "redo_reapplies_attributes": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1092201,
+      "sha256": "d31eea64b64b9bbbe80d8f9239e9a86e7b562437ca8da790281d3849c9e1ed81"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "7dbe25bd6686f4d0ca9bb2db8ab3fcddacf0926bbaffa0b38964f77e2c783688"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 107146,
+      "sha256": "058c30276bb62b7e1b3a7987b83976606f48d0cce2ff27cc8d0b0c8c0121d985"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "c8ece2a2e0ae46b882a29fe8fe0e868882c428cf67ed2eeb3b5bb413b96e0417"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1091072,
+      "sha256": "88a5ad0ae48eac10afb2ffa2a02251839f426bea3aaa0866eb08fc21df6d4164"
+    },
+    "om9.exe": {
+      "bytes": 67862528,
+      "sha256": "a2126a0e198446bb2e053bea8ba6aaee4f0ae328169b6c51d1bd9b78325ac265"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-03-002", "OM9-L3-01-03-003"],
+    "open": [
+      "layer create/update/current/assignment",
+      "groups",
+      "blocks/instances",
+      "jewellery extension record",
+      "document change notification",
+      "document snapshot/restore",
+      "import source provenance"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "One source write per object per command: transform, attributes and rename cannot be combined, matching the application property-edit model.",
+    "A layer created in the same command cannot receive newly added objects; layer create/update/current/assignment are not exposed.",
+    "Geometry editing remains read-only in the SDK; only attributes and labels are written.",
+    "macOS host and plugin execution unverified; macOS package support is structural only.",
+    "Interactive UI acceptance was not performed; this batch is headless SDK/Controller plus CLI."
+  ],
+  "next_action": "Expose the layer service (LayerAction create/update/set-current/assign) through the same Staged dispatch, deciding first whether the transaction owner extends insert admission for a layer created in the same command."
+}

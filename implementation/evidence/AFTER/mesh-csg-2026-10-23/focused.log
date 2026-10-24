@@ -1,0 +1,37 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.20s
+     Running tests\mesh_csg.rs (L:/om9-target\debug\deps\mesh_csg-954de4fbad8a5c93.exe)
+
+running 13 tests
+test crossing_triangles_have_an_actual_intersection_segment ... ok
+test detection_ignores_shared_boundaries_and_finds_coplanar_area_overlap ... ok
+test invalid_open_nonmanifold_and_budget_inputs_leave_sources_unchanged ... ok
+test sloped_tetrahedra_boolean_matches_analytic_volumes ... ok
+test new_corners_interpolate_primary_uvs_and_retain_seams ... ok
+test repair_rebuilds_the_union_of_crossing_shells_without_holes ... ok
+test coplanar_overlays_touching_faces_and_identical_solids_are_regularized ... ok
+connected pentagram: input signed volume 5.877852522924732, repaired 4.4902797657958535, expected 4.4902797657958535, triangles 200
+test connected_self_crossing_pentagram_prism_rebuilds_material_boundary ... ok
+Union: 208 triangles, volume 14.99999999999999, work 40296
+Difference: 120 triangles, volume 6.999999999999994, work 19876
+Intersection: 32 triangles, volume 1.0000000000000002, work 10368
+test overlapping_boxes_union_difference_intersection_are_closed_and_measured ... ok
+test independently_rotated_operands_satisfy_volume_conservation ... ok
+test scale_translation_and_reversed_winding_preserve_geometry ... ok
+test disjoint_contained_and_inward_cavity_shells ... ok
+rotated translated pairs: 24 analytic boolean fixtures passed
+test rotated_offset_solid_pairs_keep_expected_volumes ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests\utilities.rs (L:/om9-target\debug\deps\utilities-3e6d44531666489f.exe)
+
+running 6 tests
+test dihedral_feature_edges_are_detected ... ok
+test basic_mesh_reduction_drops_faces_and_merges_vertices ... ok
+test advanced_repair_removes_degenerate_duplicate_and_isolated_data ... ok
+test bounds_and_surface_mesh_are_available ... ok
+test self_intersection_detection_and_repair_refuse_open_crossing_faces ... ok
+test advanced_reduce_uses_qem_edge_collapse ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

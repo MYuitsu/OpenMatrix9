@@ -106,12 +106,200 @@
     }
   ],
   "m03_l4_planned_count": 47,
-  "execution_state": "NOT_STARTED",
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
+  "execution_state": "AUTOMATED_TARGET_VALIDATED",
+  "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
   "kernel_pin": {
     "version": "8.0.1",
     "tag": "V8_0_1",
     "commit": "b8f597c677811d1f9f4d8a97f5ae2825c0353a42",
     "pin_file": "native/occt/pin.json"
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-01-09",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "SOURCE-PRESENT từng operator",
+      "sdk_signal": "EXPORT-BACKLOG + AUDIT-THEN-ROUTE",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Đối chiếu curve/surface/native primitives; export operator đã đạt, làm mới operator thiếu kèm SDK.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-01-09-001",
+      "OM9-L3-01-09-002",
+      "OM9-L3-01-09-003",
+      "OM9-L3-01-09-004",
+      "OM9-L3-01-09-005",
+      "OM9-L3-01-09-006",
+      "OM9-L3-01-09-007",
+      "OM9-L3-01-09-008",
+      "OM9-L3-01-09-009"
+    ]
+  },
+  "product_crate": {
+    "path": "crates/om9-kernel",
+    "capabilities": [
+      "analytic primitive factories: box, sphere, cylinder, cone, torus, ellipsoid, pyramid",
+      "closed/open curve extrusion, revolution around an arbitrary axis",
+      "exact-circle pipe along rotation-minimizing frames",
+      "planar boundary face on an admitted plane",
+      "loft through cross-sections with winding refusal",
+      "single-rail and two-rail sweep with maintain-height semantics",
+      "surface filling through two to four boundary curves with measured deviation",
+      "general profile-to-B-Rep publication with generational handles and named entities",
+      "measured B-Rep report: volume, area, topology counts, closedness, optimal bounds"
+    ],
+    "tests": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_09: 12 passed",
+    "clippy": "clean with --all-targets -- -D warnings",
+    "state": "all nine L3 of L2-01-09 delivered on automated evidence; planning_state remains SPEC_ONLY_NOT_IMPLEMENTED and the acceptance record is implementation/evidence/M03"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "Nine geometry creation owners: analytic primitives, extrusion, revolve, pipe, planar boundary, loft, sweep1/sweep2, edge-curve surface and the general profile-to-B-Rep adapter.",
+    "evidence": [
+      "implementation/design/M03/OM9-L2-01-09/README.md",
+      "implementation/evidence/M03/OM9-L3-01-09-001",
+      "implementation/evidence/M03/OM9-L3-01-09-002",
+      "implementation/evidence/M03/OM9-L3-01-09-003",
+      "implementation/evidence/M03/OM9-L3-01-09-004",
+      "implementation/evidence/M03/OM9-L3-01-09-005",
+      "implementation/evidence/M03/OM9-L3-01-09-006",
+      "implementation/evidence/M03/OM9-L3-01-09-007",
+      "implementation/evidence/M03/OM9-L3-01-09-008",
+      "implementation/evidence/M03/OM9-L3-01-09-009"
+    ],
+    "l3_with_verified_supported_scope": 9,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": true,
+    "human_approval": null,
+    "manual_gate": "AUTO_ONLY",
+    "remaining": [
+      "Planar inner loops (holes) are a separate owner task, not part of the delivered loop.",
+      "QymCAD role naming is not reused; stable role names remain an M04 history/naming concern.",
+      "macOS execution is unverified for this toolchain."
+    ],
+    "technical_scope_complete": true,
+    "latest_verification": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "receipt": "implementation/evidence/M03/OM9-L3-01-09-001/OM9-L4-01-09-001-03.focused-test.log",
+      "tests": {
+        "l2_01_09": "12 passed",
+        "om9-kernel suite": "31 passed, 1 ignored",
+        "workspace check": "exit 0",
+        "clippy": "exit 0",
+        "fmt": "exit 0"
+      },
+      "l4_evidence": {
+        "OM9-L3-01-09-001": "5/5",
+        "OM9-L3-01-09-002": "5/5",
+        "OM9-L3-01-09-003": "5/5",
+        "OM9-L3-01-09-004": "5/5",
+        "OM9-L3-01-09-005": "5/5",
+        "OM9-L3-01-09-006": "6/6",
+        "OM9-L3-01-09-007": "6/6",
+        "OM9-L3-01-09-008": "5/5",
+        "OM9-L3-01-09-009": "5/5"
+      }
+    },
+    "exact_ellipsoid_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "EXACT_GEOMETRY_VALIDATED_NATIVE_UI_OBSERVED_HUMAN_SIGNOFF_PENDING",
+      "construction": "Rust-authored rational biquadratic 9x5 sphere net with scaled poles; OCCT single-face closed solid; no GTransform fallback",
+      "measurement": "BRepGProp adaptive volume/area Eps=1e-12 on canonical stored B-Rep",
+      "evidence": [
+        "docs/validation/2026-10-23-exact-ellipsoid.md",
+        "implementation/evidence/M03/ellipsoid-exact-2026-10-23/receipt.json"
+      ],
+      "tests": {
+        "kernel": {
+          "passed": 69,
+          "failed": 0,
+          "ignored": 1
+        },
+        "app": {
+          "passed": 183,
+          "failed": 0,
+          "ignored": 0
+        },
+        "native-ui-fixture": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      },
+      "relative_volume_threshold": 1e-10,
+      "max_observed_relative_volume_error": 9.302e-12,
+      "manual_gate_promoted": false,
+      "human_approval": null
+    },
+    "solid_ui_followup_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "GEOMETRY_AND_CONTROLLER_VALIDATED_NATIVE_UI_PARTIALLY_OBSERVED_HUMAN_SIGNOFF_PENDING",
+      "evidence": [
+        "docs/validation/2026-10-23-solid-ui-followup.md",
+        "implementation/evidence/M03/solid-ui-followup-2026-10-23/receipt.json",
+        "implementation/evidence/M03/solid-ui-followup-2026-10-23/M03-UI-CHECKLIST.md"
+      ],
+      "tests": {
+        "kernel": {
+          "passed": 71,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "app_lib": {
+          "passed": 176,
+          "failed": 0
+        },
+        "solid": {
+          "passed": 7,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "solid_workflows": {
+          "passed": 8,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "native_saved_files": {
+          "tests": 1,
+          "files": 3,
+          "passed": 1,
+          "failed": 0
+        }
+      },
+      "controller_measured_bindings": 21,
+      "current_native_ui_scenarios": [
+        "Text",
+        "Boolean Two Objects/U",
+        "Solid Extrude All with Undo/Redo"
+      ],
+      "prior_native_ui_scenario": "Ellipsoid; earlier executable fingerprint retained separately",
+      "exact_ellipsoid_max_relative_volume_error": 2.22e-15,
+      "relative_volume_threshold": 1e-10,
+      "measurement": "Canonical B-Rep VolumePropertiesGK Eps=1e-12; adaptive SurfaceProperties Eps=1e-12",
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "human_approval": null,
+      "remaining": [
+        "Human M03-UI review/signoff using the 21-row worksheet."
+      ]
+    }
   }
 }

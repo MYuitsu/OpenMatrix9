@@ -1,0 +1,16 @@
+{
+  "l4": "OM9-L4-03-07-001-03",
+  "l3": "OM9-L3-03-07-001",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/dock_layout.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": {
+    "left_stack_layers": "8 passed",
+    "chrome_actions": "13 passed"
+  },
+  "oracle": "left sidebar sections remain ordered and docked across 1280x720 and 1600x1000"
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-003-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-01-13-003",
+  "date": "2026-10-23",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-01-13-003/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-01-13-003/negative.json",
+  "fixture_sha256": {
+    "positive": "45be9d521054f4cff1ebc8ffd8725fdff51b83eb15c9e6690fd0197373233abe",
+    "negative": "196d30aca393ca32978095db67cc64a1438d403056f1005a5f3a26c21f7b49fe"
+  },
+  "generator": {
+    "source": "native/source_inventory_fixture.cpp",
+    "source_sha256": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+    "binary": "build/source-fixture.exe",
+    "binary_sha256": "d315c6d35a94bad0d05cb4aeaff8a90ac6fd5437646ee6d006463c73386dc0d7",
+    "opennurbs_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "note": "The authored writer embeds openNURBS-generated component UUIDs, so regenerated archives are structurally identical but not byte-identical; each receipt records the SHA-256 of the archive actually read."
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-01-13-003/api.md",
+    "implementation/fixtures/M03/OM9-L3-01-13-003/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-13-003/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "an authored inch archive maps the exact source point (1,2,3) in to (25.4,50.8,76.2) mm",
+      "model_unit is reported as Inch before conversion"
+    ],
+    "negative": [
+      "a unitless archive is refused without an explicit resolution",
+      "a declared millimetre archive is refused when the caller insists on 25.4 mm/unit"
+    ]
+  }
+}

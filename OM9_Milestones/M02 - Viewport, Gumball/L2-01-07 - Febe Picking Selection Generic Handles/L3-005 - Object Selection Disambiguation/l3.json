@@ -218,9 +218,9 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
-    "date": "2026-10-19",
+    "date": "2026-10-22",
     "target": "standalone Rust OM9",
-    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "scope": "Object ambiguity popup, names/IDs, stale publication rejection and Escape preservation",
     "evidence": [
       "implementation/evidence/M02/2026-10-19-selection-video-review.md",
@@ -228,13 +228,51 @@
       "implementation/evidence/M02/2026-10-19-selection-checks.json",
       "implementation/evidence/M02/2026-10-19-brep-selection.md",
       "implementation/evidence/M02/2026-10-19-brep-checks.json",
-      "implementation/evidence/M02/2026-10-19-brep-native.json"
+      "implementation/evidence/M02/2026-10-19-brep-native.json",
+      "implementation/design/M02/OM9-L3-01-07-005/api.md",
+      "implementation/evidence/M02/OM9-L3-01-07-005/OM9-L4-01-07-005-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-01-07-005/OM9-L4-01-07-005-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-01-07-005/OM9-L4-01-07-005-06-acceptance.md"
     ],
     "human_approval": null,
     "remaining": [
-      "External M02-UI review; pinned upstream reuse not claimed"
+      "Manual M02-UI review pending."
     ],
     "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
-    "native_brep_selection": "VALIDATED_SOURCE_BOUND_UUID_TOPOLOGY"
+    "native_brep_selection": "VALIDATED_SOURCE_BOUND_UUID_TOPOLOGY",
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "tests": [
+        "om9-app pick_disambiguation: 5 passed (10/10 consecutive runs)",
+        "om9-scene acceptance_l2_01_07: 9 passed"
+      ],
+      "design": "implementation/design/M02/OM9-L3-01-07-005/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-01-07-005/positive.json",
+        "implementation/fixtures/M02/OM9-L3-01-07-005/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-01-07-005/OM9-L4-01-07-005-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-01-07-005/OM9-L4-01-07-005-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-01-07-005/OM9-L4-01-07-005-06-acceptance.md"
+      ],
+      "remaining": [
+        "Manual M02-UI review pending; no human sign-off is claimed."
+      ],
+      "bug_fixed": "Scene::pick_all no longer applies the nearest-only depth early-out; two overlapping objects always produce two candidates. Covered by acceptance_l2_01_07::two_objects_on_one_ray_are_both_candidates_in_every_publication."
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Disambiguation cần khi nhiều hit.",
+    "api": [],
+    "candidate_api": [
+      "pick_nearest(x_mm, y_mm)"
+    ],
+    "host_only": "Heuristic ưu tiên ở host; SDK trả một kết quả đã phân xử."
   }
 }

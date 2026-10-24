@@ -1,0 +1,141 @@
+{
+  "schema": "om9.m02.checks.v1",
+  "work_item": "m02-l2-03-02-navigation-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-03-02",
+  "title": "Febe Viewport Navigation Pan Zoom Orbit",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Orbit, orthographic pan, wheel zoom-to-cursor and title maximize already existed. Added Zoom Extents/Selected, Home/Center, a captured Shift-pan decision and the Camera fit/center primitives, with explicit tests for orbit/pan ownership and 10x20x30 fitting.",
+  "audit_result": {
+    "existing_implementation": "PARTIAL",
+    "gaps_found": [
+      "No Zoom Extents or Zoom Selected command.",
+      "No Home or Center view reset command.",
+      "Shift+right pan relied on the modifier state of a later frame; a Shift-pan could become an orbit.",
+      "No camera fit primitive or explicit 10x20x30 fit test."
+    ],
+    "gaps_closed": "all"
+  },
+  "code_changes": [
+    "crates/om9-scene/src/camera.rs: Camera::fit_bounds and Camera::center_at",
+    "crates/om9-scene/src/workspace.rs: Workspace::default_camera/default_cplane and initial-view refactor",
+    "crates/om9-app/src/session.rs: world bounds, zoom_extents/zoom_selected, view_home/view_center, view command aliases/dispatch",
+    "crates/om9-app/src/ui.rs: ZoomExtents/ZoomSelected/Home/Center UI routing and aspect-aware fits",
+    "crates/om9-app/src/navigation.rs: GestureSession.pan captured at press",
+    "crates/om9-scene/tests/camera_fit.rs, crates/om9-app/tests/navigation_commands.rs, crates/om9-app/tests/navigation_drag.rs"
+  ],
+  "checks": [
+    {
+      "name": "camera fit and center",
+      "command": "cargo test -p om9-scene --test camera_fit -j 2",
+      "result": "4 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-nav-camera-fit.log",
+      "sha256": "5baaf1942626fe5d998c15946a8259943b1fa7073974edc87291f349a12d34af"
+    },
+    {
+      "name": "navigation commands",
+      "command": "cargo test -p om9-app --test navigation_commands -j 2",
+      "result": "6 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-nav-commands.log",
+      "sha256": "6a57ffb4d865490a4e9a19f738391af97eead882acc1cd7a6b9f949bd96fe37a"
+    },
+    {
+      "name": "right-drag orbit/pan",
+      "command": "cargo test -p om9-app --test navigation_drag -j 2",
+      "result": "3 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-nav-drag.log",
+      "sha256": "5733adb0ac0e2c9dc88a3b3030a5fa8bf15f1fe2ecb8b5e7446d05f65a978901"
+    },
+    {
+      "name": "navigation regressions",
+      "command": "cargo test -p om9-app --test navigation_input --test navigation_lifecycle --test navigation_precision --test navigation_deadlines --test viewport_layout --test navigation_commands --test navigation_drag -j 2",
+      "result": "25 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-nav-regressions.log",
+      "sha256": "05c77db66ca22a46a8bd3ce0e5622283ec465be9ed51094a61fcc58f4e81abdc"
+    },
+    {
+      "name": "om9-scene full",
+      "command": "cargo test -p om9-scene -j 2",
+      "result": "103 passed; 0 failed; 21 suites",
+      "log": "implementation/evidence/M02/2026-10-22-nav-scene-full.log",
+      "sha256": "2e1068a2f2a5ca9f88cf3db6f93ef16e77ef28211c31a265a47894f71d71caf1"
+    },
+    {
+      "name": "om9-core full",
+      "command": "cargo test -p om9-core -j 2",
+      "result": "407 passed; 0 failed; 48 suites",
+      "log": "implementation/evidence/M02/2026-10-22-nav-core-full.log",
+      "sha256": "e33518fd13fa2b626b8c1276802f08699be9789ad3cbfd0661aa3f1d7bccb91d"
+    },
+    {
+      "name": "app library with GPU feature",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib -j 2",
+      "result": "148 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-nav-app-lib.log",
+      "sha256": "1cdb144f1313499272944d766477b29dce5ac10b98e7a7f841010385c78e73bf"
+    },
+    {
+      "name": "title maximize and chrome",
+      "command": "cargo test -p om9-app --test viewport_title_menu --test chrome_actions -j 2",
+      "result": "17 + 13 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-nav-title-menu.log",
+      "sha256": "03f7269d4c50fb99b968d213d0e636889250a339f37cb2a5359ee70894c0c3b8"
+    },
+    {
+      "name": "clippy navigation",
+      "command": "cargo clippy -p om9-scene --lib --test camera_fit -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-nav-clippy.log",
+      "sha256": "2b41df63a0fd928c192ea8ff3b4df441143d26c704f30a7f1e10e50b80cace1c"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M02/2026-10-22-nav-public-source-audit.log",
+      "sha256": "25f7d39a817b79efabc847c5c24b968da7d4a58225f7034ec3617c4505ed7503"
+    },
+    {
+      "name": "title double-click maximize",
+      "command": "cargo test -p om9-app --test navigation_maximize -j 2",
+      "result": "2 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-nav-maximize.log",
+      "sha256": "7dbdcd4155d577b0d61c852a4637c1286699f9225b725b99555a5aa321e5b69a"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-03-02-001": "5/5",
+    "OM9-L3-03-02-002": "5/5",
+    "OM9-L3-03-02-003": "5/5",
+    "OM9-L3-03-02-004": "5/5",
+    "OM9-L3-03-02-005": "5/5",
+    "OM9-L3-03-02-006": "5/5",
+    "OM9-L3-03-02-007": "5/5"
+  },
+  "artifacts": [
+    "implementation/design/M02/OM9-L2-03-02/README.md",
+    "implementation/design/M02/OM9-L3-03-02-001/api.md",
+    "implementation/design/M02/OM9-L3-03-02-002/api.md",
+    "implementation/design/M02/OM9-L3-03-02-003/api.md",
+    "implementation/design/M02/OM9-L3-03-02-004/api.md",
+    "implementation/design/M02/OM9-L3-03-02-005/api.md",
+    "implementation/design/M02/OM9-L3-03-02-006/api.md",
+    "implementation/design/M02/OM9-L3-03-02-007/api.md"
+  ],
+  "manual_gate": "M02-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M02-UI visual review of orbit/pan feel, fit/home/center and title maximize.",
+    "macOS runtime is unverified.",
+    "Presentation/performance acceptance remains open as recorded by the 2026-10-21 checkpoint.",
+    "App-wide clippy/fmt has pre-existing issues outside this module."
+  ],
+  "not_claimed": [
+    "Human approval or M02-UI sign-off",
+    "macOS execution",
+    "QymCAD pinned-source reuse or a build-time QymCAD dependency",
+    "Presentation/performance acceptance"
+  ]
+}

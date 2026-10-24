@@ -191,19 +191,92 @@
     }
   ],
   "runtime_implementation": {
-    "date": "2026-10-19",
-    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
-    "target": "standalone Rust OM9",
-    "scope": "NativeBrep is a distinct typed entity envelope classified as Brep.",
-    "evidence": [
-      "implementation/design/M01/THREE-DM-HOST-ADAPTER.md",
-      "implementation/evidence/M01/2026-10-19-three-dm-native-host-checks.json",
-      "crates/om9-app/tests/three_dm_curve_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_brep_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_native_roundtrip.rs",
-      "native/native_exchange.cpp"
+    "plugin_sdk_v1_attributes": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "Typed scene entity records: SDK v1 returns typed object records with geometry kind, layer, placement, generation and geometry/attributes revisions, and serves a filtered, ordered, paged query (layer, exact geometry kind, label substring, selection only, hidden inclusion) with a total match count.",
+      "public_api": [
+        "Host::query_objects",
+        "Host::object_attributes",
+        "Host::set_object_attributes",
+        "Host::rename_object"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-03-attributes-sdk.md",
+        "docs/validation/2026-10-21-m01-03-attributes-sdk.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "One source write per object per command: transform, attributes and rename cannot be combined.",
+        "Layer CRUD/current/assignment, groups, blocks/instances and change notification remain open.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_placement": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "placement_write_verified_windows",
+      "scope": "set_object_placement writes one object's affine placement matrix through Mutation::Placement after Transform::validate (finite, last row [0,0,0,1], invertible linear part). One source write per object per command; an object created in the same command carries its insert placement instead; Undo restores the previous matrix.",
+      "public_api": [
+        "Host::set_object_placement"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-placement.md",
+        "docs/validation/2026-10-21-m01-01-03-placement.json"
+      ],
+      "limitations": [
+        "Nested object/instance transforms and gumball interaction remain open.",
+        "A created-in-command object cannot be placed afterwards.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_placement_read": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "placement_read_verified_windows",
+      "scope": "object_placement returns the staged placement when set, else the base entity matrix; object-local, no parent composition.",
+      "public_api": [
+        "Host::object_placement"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-placement-read.md",
+        "docs/validation/2026-10-21-m01-01-03-placement-read.json"
+      ],
+      "limitations": [
+        "Object-local only.",
+        "Instance composition open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::object_attributes",
+      "Host::object_info",
+      "Host::object_placement",
+      "Host::query_objects",
+      "Host::rename_object",
+      "Host::set_object_attributes",
+      "Host::set_object_placement"
     ],
-    "human_approval": null,
-    "remaining": []
+    "implemented_slices": [
+      "plugin_sdk_v1_attributes",
+      "plugin_sdk_v1_placement",
+      "plugin_sdk_v1_placement_read"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-01-03-object-info.json",
+      "docs/validation/2026-10-21-m01-01-03-object-info.md",
+      "docs/validation/2026-10-21-m01-01-03-placement-read.json",
+      "docs/validation/2026-10-21-m01-01-03-placement-read.md",
+      "docs/validation/2026-10-21-m01-01-03-placement.json",
+      "docs/validation/2026-10-21-m01-01-03-placement.md",
+      "docs/validation/2026-10-21-m01-03-attributes-sdk.json",
+      "docs/validation/2026-10-21-m01-03-attributes-sdk.md"
+    ]
   }
 }

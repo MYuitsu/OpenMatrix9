@@ -1,0 +1,13 @@
+{
+  "l4": "OM9-L4-03-05-006-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-05-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "DisplayPreferences is versioned JSON with wireframe/show_edges/backface/gem/category fields; unsupported schemas return defaults with a warning.",
+  "tests": [
+    "om9-app display cues: 6 passed",
+    "om9-app display_modes: 3 passed",
+    "om9-app display_persistence: 2 passed"
+  ]
+}

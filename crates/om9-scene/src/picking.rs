@@ -297,7 +297,6 @@ pub(crate) fn pick_candidates(
         .ray_candidates_fat(ray.origin, ray.direction, padding);
     let mut hits: Vec<PickHit> = Vec::new();
     let mut best_depth = f64::INFINITY;
-    let _ = nearest_only;
     for index in candidates {
         let object = &scene.objects[index];
         let mut best: Option<PickHit> = None;
@@ -321,7 +320,9 @@ pub(crate) fn pick_candidates(
                 crate::camera::Projection::Perspective { vertical_fov_rad } => {
                     2.0 * (vertical_fov_rad * 0.5).tan() * projected.depth / height
                 }
-                crate::camera::Projection::Orthographic { vertical_span_mm } => vertical_span_mm / height,
+                crate::camera::Projection::Orthographic { vertical_span_mm } => {
+                    vertical_span_mm / height
+                }
             };
             let pixel_radius = radius / wpp.max(1e-9) * 1.1;
             let dx = projected.screen[0] - screen[0];
@@ -330,7 +331,10 @@ pub(crate) fn pick_candidates(
                 continue;
             }
         }
-        if sphere_depth - radius > best_depth {
+        // The depth early-out is only sound when one nearest hit is wanted. A disambiguation
+        // query must keep every distinct object under the pointer, including one hidden behind
+        // the nearest object, so it must not prune by the depth of an earlier candidate.
+        if nearest_only && sphere_depth - radius > best_depth {
             continue;
         }
         let transform = object.display_transform()?;
@@ -371,22 +375,63 @@ pub(crate) fn pick_candidates(
                 let Geometry::Curve(curve) = &scene.entity_for(object)?.geometry else {
                     return Err(Error::Invalid("curve cache source"));
                 };
-                let evaluator = CurveEvaluator::capture(curve, &scene.limits)?;
-                if let Some(parameter) = curve_parameter(
-                    curve, &evaluator, transform, screen, camera, viewport, points, parameters,
-                )? {
-                    let p = evaluator.evaluate(Parameter::Native(parameter), 0, transform)?[0];
-                    if let Some(h) = hit(
-                        scene,
-                        object,
-                        camera,
-                        viewport,
-                        screen,
-                        p,
-                        Subelement::CurveParameter(parameter),
-                        tolerance,
+                if matches!(curve, Curve::Polycurve { .. }) {
+                    // Polyline display retains exact direct-line endpoints but
+                    // has no certified global native parameter. Object/reference
+                    // picks are exact; segment subobject bindings are deferred.
+                    if kind != PickKind::Object {
+                        continue;
+                    }
+                    for pair in points.windows(2) {
+                        let Some([a, b]) = camera
+                            .clip_segment(transform.point(pair[0])?, transform.point(pair[1])?)?
+                        else {
+                            continue;
+                        };
+                        let (Some(pa), Some(pb)) =
+                            (camera.project(a, viewport)?, camera.project(b, viewport)?)
+                        else {
+                            continue;
+                        };
+                        let depths = match camera.projection {
+                            crate::camera::Projection::Perspective { .. } => [pa.depth, pb.depth],
+                            crate::camera::Projection::Orthographic { .. } => [1., 1.],
+                        };
+                        let Some(point) = edge_point(screen, pa.screen, pb.screen, a, b, depths)
+                        else {
+                            continue;
+                        };
+                        if let Some(candidate) = hit(
+                            scene,
+                            object,
+                            camera,
+                            viewport,
+                            screen,
+                            point,
+                            Subelement::Whole,
+                            tolerance,
+                        )? {
+                            candidates.push(candidate);
+                        }
+                    }
+                } else {
+                    let evaluator = CurveEvaluator::capture(curve, &scene.limits)?;
+                    if let Some(parameter) = curve_parameter(
+                        curve, &evaluator, transform, screen, camera, viewport, points, parameters,
                     )? {
-                        candidates.push(h);
+                        let p = evaluator.evaluate(Parameter::Native(parameter), 0, transform)?[0];
+                        if let Some(h) = hit(
+                            scene,
+                            object,
+                            camera,
+                            viewport,
+                            screen,
+                            p,
+                            Subelement::CurveParameter(parameter),
+                            tolerance,
+                        )? {
+                            candidates.push(h);
+                        }
                     }
                 }
             }
@@ -603,4 +648,3 @@ pub(crate) fn pick_candidates(
     hits.retain(|hit| roots.insert(hit.root));
     Ok(hits)
 }
-

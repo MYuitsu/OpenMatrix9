@@ -1,0 +1,21 @@
+{
+  "schema": "om9.m03.l2-01-11.l4.receipt.v1",
+  "l4": "OM9-L4-01-11-001-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-01-11-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "suite": "crates/om9-kernel/tests/l2_01_11.rs (11 tests) plus the full om9-kernel suite",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log_sha256": "7de1768e82139d3611cd2a0299d396440d41092de9447ef7621da67cb67cbae6"
+    }
+  ],
+  "repeatable": "matrix and body oracles are analytic and tolerance-bounded; the suite is deterministic here",
+  "observed": {
+    "translated_volume_mm3": 24.0
+  }
+}

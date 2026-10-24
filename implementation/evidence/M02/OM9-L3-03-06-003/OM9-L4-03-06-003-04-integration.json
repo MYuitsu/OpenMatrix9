@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-06-003-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-06-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Visibility/lock are presentation flags, not document or image edits.",
+  "tests": [
+    "om9-app pictureframe unit: 6 passed"
+  ]
+}

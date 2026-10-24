@@ -1,0 +1,50 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-004",
+  "fixture_id": "OM9-L3-01-10-004-POSITIVE",
+  "units": "mm",
+  "input": {
+    "face_mm": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        0
+      ],
+      [
+        10,
+        20,
+        0
+      ],
+      [
+        0,
+        20,
+        0
+      ]
+    ],
+    "trim_mm": [
+      [
+        5,
+        -5,
+        0
+      ],
+      [
+        5,
+        25,
+        0
+      ]
+    ]
+  },
+  "expect": {
+    "pieces": 2,
+    "piece_area_mm2": 100.0,
+    "total_area_mm2": 200.0
+  },
+  "measured_on_2026_10_22": {
+    "split_area_mm2": 200.0
+  }
+}

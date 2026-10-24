@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-23",
+  "status": "APPROVED_RECORDED_VALIDATED",
+  "user_authorization": "Đồng ý ghi vào skill",
+  "scope": [
+    "Text content -> Height; preserve spaces/digits; invalid Height retry; Esc without document edit",
+    "Boolean Two Objects Operation U/Union D/Difference I/Intersection case insensitive; invalid choice retry",
+    "Shared menu/CMD dispatcher; one successful operation transaction"
+  ],
+  "files_sha256": {
+    "skills/openmatrix9-feature-port/SKILL.md": "36f877474a2a3ba2a68c1c3a54a6dcd99de20887266edbb3ac540549d17673b0",
+    "skills/openmatrix9-feature-port/references/solid-prompt-contract.md": "34c01a837c7a084924b24acd5571e1fecc5b761706e062031a78c0390b60b288",
+    "C:/Users/nguye/.codex/skills/openmatrix9-feature-port/SKILL.md": "9b60e5bf59f6161287cbcdacb35efd14e5e04de6544e4e4561212bf6bd3ac3b7",
+    "C:/Users/nguye/.codex/skills/openmatrix9-feature-port/references/solid-prompt-contract.md": "34c01a837c7a084924b24acd5571e1fecc5b761706e062031a78c0390b60b288"
+  },
+  "validation": {
+    "source_quick_validate": "Skill is valid!",
+    "installed_quick_validate": "Skill is valid!",
+    "new_reference_identical": true
+  },
+  "m03_ui_user_answer": "Chưa duyệt",
+  "manual_gate_promoted": false,
+  "human_approval": null,
+  "historical_receipts_preserved": true
+}

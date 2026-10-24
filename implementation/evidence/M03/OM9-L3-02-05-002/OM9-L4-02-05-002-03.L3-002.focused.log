@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\surface_ops.rs (L:\om9-target\debug\deps\surface_ops-2141b94b79e93132.exe)
+
+running 2 tests
+test m03_02_05_network_refuses_open_or_degenerate_corners ... ok
+test m03_02_05_network_builds_a_coons_patch_from_four_boundaries ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+

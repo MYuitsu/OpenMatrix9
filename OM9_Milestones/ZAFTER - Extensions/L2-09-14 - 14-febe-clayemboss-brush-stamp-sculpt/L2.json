@@ -67,5 +67,64 @@
       "file": "AFTER - Post-Release Extensions/L2-09-14 - 14-febe-clayemboss-brush-stamp-sculpt/L3-005 - Clayemboss Brush Settings And Preview/l3.json",
       "target_implementation_milestone": "AFTER"
     }
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-09-14",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "AFTER",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED standalone",
+      "sdk_signal": "AUDIT-THEN-ROUTE → CO-IMPLEMENT nếu thiếu",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Brush/stamp operations và interaction sessions; preview/cancel/commit bounded.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-09-14-001",
+      "OM9-L3-09-14-002",
+      "OM9-L3-09-14-003",
+      "OM9-L3-09-14-004",
+      "OM9-L3-09-14-005"
+    ],
+    "deferred_execution": [
+      {
+        "l3_id": "OM9-L3-09-14-001",
+        "execution_milestone": "AFTER",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-09-14-002",
+        "execution_milestone": "AFTER",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-09-14-003",
+        "execution_milestone": "AFTER",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-09-14-004",
+        "execution_milestone": "AFTER",
+        "owner_unchanged": true
+      },
+      {
+        "l3_id": "OM9-L3-09-14-005",
+        "execution_milestone": "AFTER",
+        "owner_unchanged": true
+      }
+    ]
+  }
 }

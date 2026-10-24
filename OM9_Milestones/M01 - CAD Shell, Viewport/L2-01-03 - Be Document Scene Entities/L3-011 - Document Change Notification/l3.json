@@ -189,5 +189,62 @@
       "id": "OM9-L4-01-03-011-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-011 - Document Change Notification/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "plugin_sdk_v1_change_feed": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "recorded_plugin_change_feed_verified_windows",
+      "scope": "The Controller records ChangeBatch::between(before, after, Edit) after each successful plugin command into one bounded field; the next plugin command reads it via last_change (real revision range, entity/layer entries). Host commands outside the plugin boundary are not recorded (documented; compare document_info().revision).",
+      "public_api": [
+        "Host::last_change",
+        "ProjectChange",
+        "ChangeEntry"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-change-feed.md",
+        "docs/validation/2026-10-21-m01-01-03-change-feed.json"
+      ],
+      "limitations": [
+        "Partial scope only: host-command feed and multi-batch history remain open.",
+        "Group/feature entries are mapped but not produced by current services.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_change_feed_undo": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "host_undo_redo_feed_verified_windows",
+      "scope": "Host undo/redo record ChangeBatch::between(before, after, Undo/Redo) into the plugin feed, so the next plugin command sees the last committed change with a truthful cause and revision range.",
+      "public_api": [
+        "Host::last_change"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-change-undo.md",
+        "docs/validation/2026-10-21-m01-01-03-change-undo.json"
+      ],
+      "limitations": [
+        "Other host edit paths remain outside the feed.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::last_change"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_change_feed",
+      "plugin_sdk_v1_change_feed_undo"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-01-03-change-feed.json",
+      "docs/validation/2026-10-21-m01-01-03-change-feed.md",
+      "docs/validation/2026-10-21-m01-01-03-change-undo.json",
+      "docs/validation/2026-10-21-m01-01-03-change-undo.md"
+    ]
+  }
 }

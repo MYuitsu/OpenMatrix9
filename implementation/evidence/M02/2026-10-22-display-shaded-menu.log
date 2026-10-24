@@ -1,0 +1,26 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.86s
+     Running tests\viewport_title_menu.rs (L:/om9-target\debug\deps\viewport_title_menu-d1a4e6b40c2c2db6.exe)
+
+running 18 tests
+test wireframe_with_exhausted_revision_refuses_before_any_layout_or_camera_change ... ok
+test mismatched_view_key_cannot_redirect_menu_to_a_neighbor ... ok
+test render_plugin_and_unimplemented_modes_refuse_without_changing_any_view_or_model ... ok
+test fresh_layout_clock_with_copied_view_states_cannot_reset_menu_authority ... ok
+test layout_roundtrip_keeps_views_exact_but_does_not_revive_a_previous_capture ... ok
+test workspace_snapshot_restore_cannot_revive_a_used_menu ... ok
+test wireframe_changes_only_captured_view_and_no_op_preserves_revision ... ok
+test foreign_closed_and_replaced_view_capture_rejects_even_with_equal_visible_state ... ok
+test shaded_switches_only_the_view_mode_and_keeps_the_model_and_journal ... ok
+test changed_document_or_target_view_invalidates_popup_without_resetting_prior_state ... ok
+test captured_maximize_preserves_model_redo_pending_point_and_all_camera_poses ... ok
+test replacing_target_view_dismisses_popup_before_command_input_resumes ... ok
+test outside_canvas_click_only_dismisses_popup_and_preserves_pending_point ... ok
+test escape_closes_title_popup_and_preserves_numeric_draft_and_pending_command ... ok
+test keyboard_enter_activates_focused_menu_item_and_returns_to_command_draft ... ok
+test long_title_menu_scrolls_to_last_reference_item_in_a_short_window ... ok
+test title_popup_has_reference_actions_instead_of_the_old_three_entry_stub ... ok
+test popup_keyboard_cannot_commit_command_after_tab_reaches_editor ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.62s
+

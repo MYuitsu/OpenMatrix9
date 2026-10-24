@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G03-B-03-02-003",
+  "l3_id": "OM9-L3-03-02-003",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Zoom factor 0/NaN/negative hoặc ở ngoài view được từ chối",
+  "expected": "A typed refusal or an explicitly unchanged camera/document; no infinite scale or cross-view ownership.",
+  "evidence": [
+    "om9-app navigation_input: 1 passed",
+    "om9-app navigation_precision: 3 passed",
+    "om9-scene camera_fit: 4 passed"
+  ],
+  "status": "PASS"
+}

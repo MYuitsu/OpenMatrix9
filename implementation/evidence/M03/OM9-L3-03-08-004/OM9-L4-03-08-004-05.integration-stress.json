@@ -1,0 +1,25 @@
+{
+  "schema": "om9.m03.l2-03-08.l4.receipt.v1",
+  "l4": "OM9-L4-03-08-004-05",
+  "role": "INTEGRATION_STRESS",
+  "l3": "OM9-L3-03-08-004",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --no-default-features --test top11 m03_03_08_004_stress -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-05.integration-stress.log",
+      "stdout_log_sha256": "e54c04048afe3630e4c38eb82146079c730f024848c9fbb2930b5cf2f6b0edb0"
+    }
+  ],
+  "observed": {
+    "stress_cycles": 50.0
+  },
+  "invariants": [
+    "each cycle keeps the entity count at 1 after join, 2 after explode, 3 after split",
+    "the trimmed curve keeps a positive length below 10 mm",
+    "every cycle commits through the same transaction path"
+  ]
+}

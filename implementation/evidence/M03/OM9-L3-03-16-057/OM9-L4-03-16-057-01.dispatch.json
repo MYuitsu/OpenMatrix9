@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-057-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-057",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-056",
+  "source_command": "Arc Blend",
+  "menu_icon": "CurveBlendCurvesArcBlend",
+  "owner_candidate": "OM9-L3-02-04-002",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Arc Blend command session is not wired; owner candidate OM9-L3-02-04-002 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-057/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-057/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-057/dispatch_contract.json": "45b9b1bd28e26433bc8f7da168e5a00cf81f5916bad37d1d07669f647c1a2a25",
+    "implementation/design/M03/OM9-L3-03-16-057/dispatch_contract.md": "fabe9a8ed7dc2e3576f9321a537d88a9fc60fc5cd92109f65bb979b13036d459"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

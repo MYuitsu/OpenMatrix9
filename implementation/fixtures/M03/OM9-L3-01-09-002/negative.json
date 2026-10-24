@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-002",
+  "fixture_id": "OM9-L3-01-09-002-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "bow-tie wire",
+    "direction (0,0,0)",
+    "direction (0,0,NaN)"
+  ],
+  "expect": "CreationError::Invalid; no partial body"
+}

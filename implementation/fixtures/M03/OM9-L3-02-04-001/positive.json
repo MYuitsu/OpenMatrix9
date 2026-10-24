@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-001",
+  "fixture_id": "OM9-L3-02-04-001-POSITIVE",
+  "units": "mm",
+  "oracle": "line (0,0,0)->(3,4,0) length 5 mm; polyline of two 10 mm segments length 20 mm; two exploded segments",
+  "measured": {
+    "line_length_mm": 5.0,
+    "polyline_length_mm": 20.0
+  },
+  "tolerances": {
+    "line_length_mm": "1e-10",
+    "polyline_length_mm": "1e-9"
+  },
+  "test": "m03_02_04_001_line_polyline_point_creation"
+}

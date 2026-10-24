@@ -1,0 +1,17 @@
+{
+  "l3": "OM9-L3-03-09-007",
+  "title": "F6 Floating Pin And Position",
+  "date": "2026-10-22",
+  "decision": "NEW_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-app/src/f6.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.9-11 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-09-007-01"
+}

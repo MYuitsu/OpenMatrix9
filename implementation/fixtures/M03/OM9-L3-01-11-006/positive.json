@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-006",
+  "fixture_id": "OM9-L3-01-11-006-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "plane XY, domain 0..10",
+    "uv": [
+      2,
+      3
+    ]
+  },
+  "expect": {
+    "origin": [
+      2,
+      3,
+      0
+    ],
+    "z": [
+      0,
+      0,
+      1
+    ],
+    "right_handed": true
+  },
+  "measured_on_2026_10_22": {
+    "surface_frame_x_mm": 2.0,
+    "surface_frame_y_mm": 3.0
+  }
+}

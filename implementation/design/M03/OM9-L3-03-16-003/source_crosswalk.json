@@ -1,0 +1,43 @@
+{
+  "schema": "om9.m03.l2-03-16.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-16-003",
+  "owner_l2_id": "OM9-L2-03-16",
+  "date": "2026-10-23",
+  "command_id": "OM9-CURVE-103",
+  "menu_icon": "CurveFreeFormInterpolatePoints",
+  "owner_candidate": "OM9-L3-02-04-003",
+  "decision": "BLOCKED_OWNER",
+  "reviewed_upstream": [
+    {
+      "path": "crates/qymcad/src/command_catalog.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observation": "Command catalog supplies the Matrix command spelling; no local geometry implementation is copied."
+    },
+    {
+      "path": "crates/qymcad/src/gui.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observation": "UI actions are reference material only; the local menu binding owns the command id."
+    },
+    {
+      "path": "crates/qymcad-core/src/feature/kind.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observation": "Feature kinds do not implement the curve menu session."
+    }
+  ],
+  "local_owner": {
+    "crate": "om9-app",
+    "files": [
+      "crates/om9-app/src/curve_menu.rs",
+      "crates/om9-app/src/ui/chrome.rs",
+      "crates/om9-app/tests/curve_menu.rs"
+    ],
+    "symbols": [
+      "curve_menu::BINDINGS",
+      "Controller::availability"
+    ]
+  },
+  "rationale": "interactive Interp Curve command session is not wired; owner candidate OM9-L3-02-04-003 is unverified"
+}

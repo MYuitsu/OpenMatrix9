@@ -1,0 +1,143 @@
+{
+  "date": "2026-10-21",
+  "status": "object_summary_sdk_export_verified_windows",
+  "owner": "OM9-L2-03-20",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Counts base plus staged objects by geometry kind.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "f136740ac48b354924aedb826afbb4fd47e4d9c10f28684331ab10ea19133361",
+    "crates/om9-plugin-host/src/staged.rs": "434b51826a59de178d36d50bcd2f26e725f6fd4fa77654e4784170c34dad722c",
+    "crates/om9-app/tests/plugin_native.rs": "5a89c0af04a80fc033ec6847ee5f6eea1401d3c9214fc18d713bd301a88967b5",
+    "sdk/examples/hello-plugin/src/lib.rs": "b9dec569edb68efdbcb2563b864a3b481354a93baf2f64c65cb10f6079d2e34a",
+    "sdk/examples/hello-plugin/descriptor.json": "670ee81e9a206d02df058cc71cb35e01b7e9e78e328d7d99df63db827776d5fa",
+    "sdk/README.md": "8ad8a29979ea462c387328d9de607c29e455d90904c431776f3396767c05d397",
+    "sdk/API-INVENTORY.md": "771b3eb3525ba374a3d0d3fc896ff535eccfb200406e23dab15b6bc5ebf1351a"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "object_summary"
+    ],
+    "public_types": [
+      "ObjectSummary"
+    ],
+    "error_codes": [
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Counts are staged-consistent (base + additions - deletions).",
+    "Kinds are geometry tags; absent kinds are omitted rather than zero.",
+    "Reading stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "65 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "23 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-summary",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8833 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "total": 3,
+    "curves": 3,
+    "undo_len": 1
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1831100,
+      "sha256": "e9df916c26806e3051ee3213522651c9ef9d4f38b97d8855aa4c86fa7301b839"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "16671a4bdb4d75adfa45d8fafabc0d1979f81d3808a50da5886cf1c05031b59f"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 176382,
+      "sha256": "c5c561da96cb1e23b2ae900d7034e47aaae496af86adb60e6f7cb3f824f74b9c"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "c3f1c3abc40bbb932a923f53d95b02814b9842ae73e4d9b1ea69f261688bb812"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1828352,
+      "sha256": "97954477b2eb26506426fea126de8dee9fec2ecc9c7287fbc7d1a8b3c7abeb6e"
+    },
+    "om9.exe": {
+      "bytes": 69404160,
+      "sha256": "32492a784de6842fab693166f4f1bb9b5e23b7bbbcbc7be58d52cde5915a089a"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-03-20-004 (object count and type summary)"
+    ],
+    "open": [
+      "jewelry semantic classes/weight summary",
+      "grouped counts"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Counts by geometry kind only.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Broaden the recorded feed to host commands, or return to M02 for subobject/pick query services."
+}

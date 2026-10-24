@@ -1,0 +1,35 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-005-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-06-005",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-06-005/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-06-005/negative.json",
+  "fixture_sha256": {
+    "positive": "590a599731a8cf55008bac91cdca1a7a9d9658d1b4c742492b5277c5f925b6b6",
+    "negative": "f5ec592f1e9c54efe44a2fde7d8a95282549f8c2492da94c55b11894c71c8a69"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-06-005/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-06-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-005/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "SetPt (1,2,3)->(4,6,8) on XY maps to (4,6,3)",
+      "align to plane z=1 maps (1,1,5) to (1,1,1)",
+      "align to X axis maps (2,3,4) to (2,0,0)",
+      "rotate align maps source X onto target Y and the source origin onto the target origin",
+      "scale align maps extent 2 to 4 (factor 2) about the aligned origin",
+      "rotate+scale maps (1,0,0) to target_origin+(0,2,0)"
+    ],
+    "negative": [
+      "a zero plane normal is refused",
+      "a NaN set point is refused",
+      "a Rotate request without an axis, or a Scale request without an extent, is refused",
+      "a zero/negative align extent is refused"
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-007-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-05-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel",
+    "files": [
+      "crates/om9-core/src/surface_ops.rs",
+      "crates/om9-kernel/src/editing.rs"
+    ],
+    "test": "crates/om9-core/tests/surface_ops.rs + crates/om9-kernel/tests/l2_02_05.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test surface_ops match_surface -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/L3-007a.log",
+      "stdout_log_sha256": "b15d18388b81dd1870a21a0d4b6a101d888f9b209ab58fcf1e4a7d62af53bb6d"
+    },
+    {
+      "argv": "cargo test -p om9-core --test surface_ops blend_surface -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/L3-007b.log",
+      "stdout_log_sha256": "298e687b461ba2478b17e8c4358b0fd177bff2bb44e7dda5fa316248c79ad1a4"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_02_05 join_surfaces -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-05-logs/L3-007c.log",
+      "stdout_log_sha256": "59d6311dbf9bf85e2a67c914930a9f75eab006fc7f90385678f7611f4e138a72"
+    }
+  ],
+  "observed": {
+    "match_g0_gap_mm": 5.551115123125783e-17,
+    "match_g1_angle_rad": 0.00011999519952506682,
+    "match_g2_angle_rad": 2.1073424255447017e-08,
+    "blend_midpoint": [
+      2.0,
+      1.0,
+      0.0
+    ],
+    "join_faces": 2,
+    "join_shells": 1
+  },
+  "expected": {
+    "match_g0_gap_mm": 0.0,
+    "match_g1_angle_rad": "< 1e-3",
+    "match_g2_angle_rad": "< 1e-3",
+    "blend_midpoint": [
+      2.0,
+      1.0,
+      0.0
+    ],
+    "join_faces": 2,
+    "join_shells": 1
+  },
+  "tolerances": {
+    "gap_mm": "1e-9",
+    "angle_rad": "1e-3"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/surface_ops.rs",
+    "crates/om9-kernel/src/editing.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/surface_ops.rs": "1c9a8cf3f4fde9da026a7c032c6f3c06976b593390c204bd4516250a8750b244",
+    "crates/om9-kernel/src/editing.rs": "9b93d9eff62bfdb583d5682d7da17d59ba1315fd8ef968be405e30332a9dad7c"
+  }
+}

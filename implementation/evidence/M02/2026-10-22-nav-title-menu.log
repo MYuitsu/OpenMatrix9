@@ -1,0 +1,44 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.80s
+     Running tests\chrome_actions.rs (L:/om9-target\debug\deps\chrome_actions-4c6a554bb0ecde97.exe)
+
+running 13 tests
+test every_reference_menu_has_its_full_icon_list ... ok
+test main_menu_categories_wrap_at_the_rail_edge ... ok
+test f4_toggles_world_datum_without_mutating_document ... ok
+test unregistered_right_click_slot_never_executes_a_previous_action ... ok
+test help_popup_contains_help_and_about_without_feature_catalog_actions ... ok
+test view_tab_switches_active_and_maximized_view ... ok
+test main_menu_category_tabs_switch_palette_without_document_mutation ... ok
+test top_menu_labels_are_interactive_and_return_to_categories ... ok
+test icons_scale_with_the_screen_size ... ok
+test display_toolbar_tab_does_not_reuse_enabled_geometry_palette ... ok
+test view_tab_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test view_menu_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test snaps_are_noninvoking_even_where_the_old_sidebar_displayed_point_and_line ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.37s
+
+     Running tests\viewport_title_menu.rs (L:/om9-target\debug\deps\viewport_title_menu-d1a4e6b40c2c2db6.exe)
+
+running 17 tests
+test fresh_layout_clock_with_copied_view_states_cannot_reset_menu_authority ... ok
+test render_plugin_and_unimplemented_modes_refuse_without_changing_any_view_or_model ... ok
+test wireframe_changes_only_captured_view_and_no_op_preserves_revision ... ok
+test foreign_closed_and_replaced_view_capture_rejects_even_with_equal_visible_state ... ok
+test workspace_snapshot_restore_cannot_revive_a_used_menu ... ok
+test wireframe_with_exhausted_revision_refuses_before_any_layout_or_camera_change ... ok
+test mismatched_view_key_cannot_redirect_menu_to_a_neighbor ... ok
+test layout_roundtrip_keeps_views_exact_but_does_not_revive_a_previous_capture ... ok
+test changed_document_or_target_view_invalidates_popup_without_resetting_prior_state ... ok
+test captured_maximize_preserves_model_redo_pending_point_and_all_camera_poses ... ok
+test replacing_target_view_dismisses_popup_before_command_input_resumes ... ok
+test escape_closes_title_popup_and_preserves_numeric_draft_and_pending_command ... ok
+test keyboard_enter_activates_focused_menu_item_and_returns_to_command_draft ... ok
+test outside_canvas_click_only_dismisses_popup_and_preserves_pending_point ... ok
+test long_title_menu_scrolls_to_last_reference_item_in_a_short_window ... ok
+test title_popup_has_reference_actions_instead_of_the_old_three_entry_stub ... ok
+test popup_keyboard_cannot_commit_command_after_tab_reaches_editor ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.50s
+

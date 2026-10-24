@@ -1,0 +1,52 @@
+{
+  "schema": "om9.m03.l2-01-10.ui-review.v1",
+  "task_id": "OM9-L4-01-10-005-05",
+  "l3_id": "OM9-L3-01-10-005",
+  "title": "Planar Cap And Close Solid",
+  "oracle": {
+    "positive": [
+      "open 10³ box missing its top: cap yields a closed solid, volume 1000 mm³, 0 naked edges"
+    ],
+    "negative": [
+      "capping an already closed box is refused",
+      "a non-planar naked loop is refused"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is an exact OCCT B-Rep measured from the canonical source and asserted by a focused Rust test; every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "geometry editing, typed refusal and ownership; no window, menu or human review"
+  },
+  "measured": {
+    "capped_volume_mm3": 1000.0
+  },
+  "tolerances": {
+    "capped_volume_mm3": "1e-6"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-kernel --features 3dm-brep --test l2_01_10 m03_01_10_005 -- --exact (exit 0)",
+    "regression: cargo test -p om9-kernel --features 3dm-brep --test l2_01_10 (12 passed)",
+    "crate suite: cargo test -p om9-kernel --features 3dm-brep (all passed)",
+    "clippy: cargo clippy -p om9-kernel --features 3dm-brep --all-targets -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-01-10-005/api.md",
+    "implementation/design/M03/OM9-L3-01-10-005/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-01-10-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-10-005/negative.json",
+    "implementation/evidence/M03/OM9-L3-01-10-005/OM9-L4-01-10-005-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-01-10-005/OM9-L4-01-10-005-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_01_10_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running tests\display_persistence.rs (L:/om9-target\debug\deps\display_persistence-20f554b3b43bee19.exe)
+
+running 2 tests
+test a_corrupt_display_preset_falls_back_without_losing_the_project ... ok
+test a_display_preset_is_embedded_and_restored_with_the_project ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

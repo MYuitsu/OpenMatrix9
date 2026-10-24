@@ -22,6 +22,8 @@ fn empty_mesh() -> Geometry {
         faces: Vec::new(),
         normals: Vec::new(),
         colors: Vec::new(),
+
+        corner_uvs: Vec::new(),
     })
 }
 

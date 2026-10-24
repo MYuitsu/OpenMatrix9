@@ -228,6 +228,9 @@ impl Controller {
     }
     pub(super) fn auxiliary_usage(&self) -> Result<om9_core::budget::Usage> {
         let mut usage = om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len())?;
+        if let Some(pending) = &self.solid_pending {
+            usage.add(pending.usage()?, self.coordinator.limits())?;
+        }
         usage.add(
             om9_core::budget::Usage::array::<super::SelectedSubobject>(
                 self.subselection.capacity(),
@@ -278,6 +281,21 @@ impl Controller {
     }
     pub fn selected(&self) -> &std::collections::BTreeSet<ObjectId> {
         &self.selection
+    }
+    /// Selection in pick order, then any remaining ids in stable set order.
+    pub fn selected_ordered(&self) -> Vec<ObjectId> {
+        let mut ordered: Vec<ObjectId> = self
+            .selection_order
+            .iter()
+            .filter(|id| self.selection.contains(id))
+            .copied()
+            .collect();
+        for id in &self.selection {
+            if !ordered.contains(id) {
+                ordered.push(*id);
+            }
+        }
+        ordered
     }
     pub fn clear_selection(&mut self) {
         self.clear_subselection();
@@ -409,6 +427,13 @@ impl Controller {
         if next != self.selection {
             self.selection_revision = self.selection_revision.saturating_add(1);
         }
+        let mut order = Vec::with_capacity(ids.len());
+        for id in ids {
+            if !order.contains(id) {
+                order.push(*id);
+            }
+        }
+        self.selection_order = order;
         self.selection = next;
         Ok(())
     }

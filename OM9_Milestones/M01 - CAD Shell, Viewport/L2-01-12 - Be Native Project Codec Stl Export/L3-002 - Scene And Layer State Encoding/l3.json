@@ -218,5 +218,12 @@
       "id": "OM9-L4-01-12-002-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-002 - Scene And Layer State Encoding/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "not_in_sdk",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Encoding scene/layer thuộc host.",
+    "api": []
+  }
 }

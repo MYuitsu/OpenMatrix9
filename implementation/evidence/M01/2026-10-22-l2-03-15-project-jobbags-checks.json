@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "m01-l2-03-15-project-jobbags-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9",
+  "milestone": "OM9-L2-03-15",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Implemented the missing Project Manager/Job Bag surface (rows, three slots, capture/restore, Master snapshot, notes/metadata, dock placement) on top of the existing file lifecycle and 3DM adapter.",
+  "implementation": {
+    "project_manager": "crates/om9-app/src/project_manager.rs",
+    "controller_bridge": "crates/om9-app/src/session/jobbag.rs",
+    "projects_ui": "crates/om9-app/src/ui/chrome.rs",
+    "app_state": "crates/om9-app/src/ui.rs",
+    "tests": [
+      "crates/om9-app/tests/project_manager_ui.rs",
+      "crates/om9-app/src/project_manager.rs",
+      "crates/om9-app/tests/file_lifecycle.rs",
+      "crates/om9-app/tests/file_widgets.rs",
+      "crates/om9-app/tests/panel_ops.rs",
+      "crates/om9-app/tests/shell_docking.rs"
+    ],
+    "project_state": "crates/om9-app/src/session/project_state.rs"
+  },
+  "checks": {
+    "project_manager_lib": "8 passed",
+    "project_manager_ui": "3 passed",
+    "file_lifecycle": "20 passed",
+    "file_widgets": "21 passed",
+    "panel_ops": "33 passed",
+    "shell_docking": "10 passed",
+    "project_manager_persistence": "2 passed"
+  },
+  "logs": {
+    "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-15-20261022/acceptance.log",
+    "acceptance_sha256": "c6fe4947c89e75db9c091054367a8267e5fa48efff1d71f87ca60e2ee9050c2e"
+  },
+  "ui_audit": {
+    "screenshot": "build/ui-audit-l2-03-15/workspace.png",
+    "screenshot_sha256": "e48d851f13f4f1efbf79acddf33069928f15515be7c485de11c2757e190c5deb",
+    "receipt": "build/ui-audit-l2-03-15/ui-receipt.json",
+    "receipt_sha256": "5f092564a88e2de933f9c0aa701521b3b9eea2019f98b2f80523f0c1a980440f"
+  },
+  "manual_gate": "M01-UI",
+  "known_limits": [
+    "Manual M01-UI visual review is still pending."
+  ],
+  "remaining": [
+    "Manual visual review of the real Windows window/pickers is still required.",
+    "No human sign-off is claimed."
+  ],
+  "persistence": {
+    "format": "opaque om9.project-manager.v1 archive resource",
+    "round_trip": "save/reopen test passed",
+    "master_restore": "atomic live Controller replacement; failure leaves current document intact"
+  }
+}

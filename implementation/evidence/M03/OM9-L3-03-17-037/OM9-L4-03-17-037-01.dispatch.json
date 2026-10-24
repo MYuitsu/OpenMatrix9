@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-037-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-037",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-038",
+  "source_command": "Adjust Closed Surface Seam",
+  "menu_icon": "SurfaceSurfaceEditToolsAdjustClosedSurfaceSeam",
+  "owner_candidate": "OM9-L3-02-04-005",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-037/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-037/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-037/dispatch_contract.json": "76295097bf10dbeee854f13c84028d1c0d62384b29f5eb1e106a8aa78056db64",
+    "implementation/design/M03/OM9-L3-03-17-037/source_crosswalk.json": "cdb40704c1b50efa8f00308d18295bc4c1d9e13853634aedcb5dd92f579a33ef"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

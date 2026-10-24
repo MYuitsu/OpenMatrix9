@@ -1,0 +1,17 @@
+{
+  "l3": "OM9-L3-03-07-005",
+  "title": "Recent Command Icon History",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/ui/chrome.rs"
+  ],
+  "api": "recent-command list + nine history slots",
+  "tests": [
+    "command_sessions",
+    "command_options_and_repeat"
+  ],
+  "manual_reference": "Matrix8 Book 1, pp11-13 and reference menu icon catalog",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

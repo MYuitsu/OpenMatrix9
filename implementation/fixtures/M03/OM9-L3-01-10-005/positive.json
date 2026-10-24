@@ -1,0 +1,18 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-005",
+  "fixture_id": "OM9-L3-01-10-005-POSITIVE",
+  "units": "mm",
+  "input": {
+    "open_shell": "box 10×10×10 minus top face",
+    "cap_tolerance_mm": 1e-06
+  },
+  "expect": {
+    "volume_mm3": 1000.0,
+    "solids": 1,
+    "naked_edges": 0
+  },
+  "measured_on_2026_10_22": {
+    "capped_volume_mm3": 1000.0
+  }
+}

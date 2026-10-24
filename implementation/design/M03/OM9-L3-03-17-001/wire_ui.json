@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-03-17.wire_ui.v1",
+  "l3_id": "OM9-L3-03-17-001",
+  "menu_icon": "SurfaceSweepSweep1Rail",
+  "command_id": "OM9-SURFACE-101",
+  "menu_and_commandline_same_id": true,
+  "enabled": true,
+  "disabled_reason": "",
+  "visible_disabled_reason": true,
+  "ui_state": "FUNCTIONAL",
+  "owner_service_reused": "OM9-L3-01-09-007",
+  "status": "FUNCTIONAL_UI"
+}

@@ -278,5 +278,76 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "date": "2026-10-23",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "control point toggles on selected object",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "test": "crates/om9-app/tests/top11.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-03-08-002/api.md",
+      "implementation/design/M03/OM9-L3-03-08-002/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-03-08-002/positive.json",
+      "implementation/fixtures/M03/OM9-L3-03-08-002/negative.json",
+      "implementation/evidence/M03/OM9-L3-03-08-002/OM9-L4-03-08-002-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-03-08-002/OM9-L4-03-08-002-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-03-08-002/OM9-L4-03-08-002-05.acceptance.md",
+      "implementation/evidence/M03/OM9-L3-03-08-002/OM9-L4-03-08-002-05.ui-review.json"
+    ],
+    "tests": [
+      "m03_03_08_002: passed",
+      "om9-app lib: 175 passed, 0 failed",
+      "om9-app Top 11 suite: 19 passed, 0 failed",
+      "om9-app BRep suite: 6 passed, 0 failed",
+      "om9-core Top 11 suite: 17 passed, 0 failed",
+      "clippy -D warnings: exit 0",
+      "cargo fmt --all -- --check: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "Grip dragging projects onto the active CPlane through the grip.",
+      "Surface edit grips are an OM9 extension: they move one pole by the basis-scaled delta, keeping knots/weights/degree and the periodic/reversed record; the grid is tensor-contracted, capped at 10,000 points and cached by the overlay.",
+      "A circle quadrant drag changes radius but keeps the circle frame.",
+      "Interactive M03-UI acceptance of the toolbar and point prompts is not performed by the implementer.",
+      "macOS runtime is unverified."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-23",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "manual_gate": "M03-UI",
+      "design": "implementation/design/M03/OM9-L3-03-08-002/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-03-08-002/positive.json",
+        "implementation/fixtures/M03/OM9-L3-03-08-002/negative.json"
+      ],
+      "measured": {
+        "grip_points_on_line": 2.0,
+        "grip_mode_toggle_passed": "true",
+        "grip_drag_end_mm": "[15.0, 2.0, 0.0]",
+        "grip_drag_undo_passed": "true",
+        "circle_grip_radius": 5.0,
+        "surface_control_grips": 4.0,
+        "surface_edit_reversed": "true",
+        "surface_edit_grips": 4.0,
+        "surface_edit_periodic": "true",
+        "surface_edit_handles_96_ms": 98.075,
+        "surface_edit_move_96_ms": 48.388
+      }
+    },
+    "l4_evidence": {
+      "OM9-L4-03-08-002-01": "1/1",
+      "OM9-L4-03-08-002-02": "1/1",
+      "OM9-L4-03-08-002-03": "1/1",
+      "OM9-L4-03-08-002-04": "1/1",
+      "OM9-L4-03-08-002-05": "1/1"
+    }
+  }
 }

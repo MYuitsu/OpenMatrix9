@@ -1,0 +1,147 @@
+{
+  "date": "2026-10-21",
+  "status": "group_records_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Read-only mapping of document group records.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "df206102e553d7df016e14e149f343a6e659dbd6c1943cdb3a21013d43c182bf",
+    "crates/om9-plugin-host/src/staged.rs": "4dc5f5e750b28bfce7714077bc744c58fc3ba17c7600bd4f5d866585769dc40b",
+    "crates/om9-app/tests/plugin_native.rs": "743374dfe54eea1b29c4f82c281a24fb59c06bcba0641494baeea53d1a3980ed",
+    "sdk/examples/hello-plugin/src/lib.rs": "2d55b1f82bb5b626d6c7bbf0820d2697f482810045f3247a01e7ad09d89bc61b",
+    "sdk/examples/hello-plugin/descriptor.json": "f15cb98665f07a2443fc62e74a8b032c23713afd339c86570e588bae863e17e9",
+    "sdk/README.md": "f04886e34b9f0a07e756890495f9115e32bb4d30dfda86490ae6b4494665f818",
+    "sdk/API-INVENTORY.md": "355d1b9117125e28d7f8dfe706b3c6f4a0d3b0808b2f8494f02d343f5bf68db6"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "groups"
+    ],
+    "public_types": [
+      "GroupInfo"
+    ],
+    "error_codes": [
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Member ids in document order; group revision preserved.",
+    "Read-only; no group mutation is fabricated.",
+    "Reading stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "57 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "28 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-groups",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8845 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "groups_len": 0,
+    "undo_len": 1
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1880598,
+      "sha256": "52c22f57d845d1ef0ab4b40093beffce71e775a313897974c8addb3374e393d2"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "eadc62a6162ad509328b87bf596f241247ecd66b6f20b4b98de8c7fd21a31301"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 181908,
+      "sha256": "52d5240baf52b9358e3a22eae69fba1c6c12445c7e1c52743d65c2ad036e4407"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "6c9d164e02203683777cc4ef1d9f53d93007d92816ed72fa59f80ed0ab9563eb"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1877504,
+      "sha256": "e9393944e57521facb552889db7a78745a092db40061019384b2e9eccbcc62ef"
+    },
+    "om9.exe": {
+      "bytes": 69462016,
+      "sha256": "31d920b79d19f60f0004abb0e92817b01b9d7c90463bcebe36349e5a5ec31370"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-007 (group membership read)"
+    ],
+    "open": [
+      "group create/edit/dissolve",
+      "block instance graph"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Read-only groups.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose block/instance graph read, or return to M02 for subobject/pick query services."
+}

@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-02-004",
+  "l3_id": "OM9-L3-03-02-004",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Không pan trong khi UI popup chiếm pointer focus",
+  "expected": "A typed refusal or an explicitly unchanged camera/document; no infinite scale or cross-view ownership.",
+  "evidence": [
+    "om9-app navigation_drag: 3 passed",
+    "om9-app navigation_lifecycle: 8 passed"
+  ],
+  "status": "PASS"
+}

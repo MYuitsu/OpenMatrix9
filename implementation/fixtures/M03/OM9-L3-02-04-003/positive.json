@@ -1,0 +1,17 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-003",
+  "fixture_id": "OM9-L3-02-04-003-POSITIVE",
+  "units": "mm",
+  "oracle": "4-point cubic interpolation passes through every chord-length parameter; one inserted control point leaves geometry unchanged at 17 stations; 25 curve/degree combinations in stress",
+  "measured": {
+    "interpolated_pole_count": 4.0,
+    "stress_curves": 25.0,
+    "stress_max_control_insertion_deviation_mm": 0.0
+  },
+  "tolerances": {
+    "interpolated_pole_count": "exact integer",
+    "stress_max_control_insertion_deviation_mm": "1e-7"
+  },
+  "test": "m03_02_04_003_interpolated_and_controlpoint_nurbs"
+}

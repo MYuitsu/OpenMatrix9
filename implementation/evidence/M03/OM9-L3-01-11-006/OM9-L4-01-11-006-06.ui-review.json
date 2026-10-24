@@ -1,0 +1,55 @@
+{
+  "schema": "om9.m03.l2-01-11.ui-review.v1",
+  "task_id": "OM9-L4-01-11-006-06",
+  "l3_id": "OM9-L3-01-11-006",
+  "title": "Surface UV Normal Placement Frames",
+  "oracle": {
+    "positive": [
+      "plane XY, UV (2,3): origin (2,3,0), z = +Z, x = +X, y = +Y",
+      "a cylinder frame at (u,v) has a radial unit normal and stays right-handed"
+    ],
+    "negative": [
+      "a fully degenerate surface has zero derivatives",
+      "an out-of-domain UV is refused"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is an analytic matrix/frame rule and an exact OCCT B-Rep measurement, asserted by a focused Rust test; every value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "transform/frame/pattern behaviour and typed refusal; no window, menu or human review"
+  },
+  "measured": {
+    "surface_frame_x_mm": 2.0,
+    "surface_frame_y_mm": 3.0
+  },
+  "tolerances": {
+    "surface_frame_x_mm": "1e-6",
+    "surface_frame_y_mm": "1e-6"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 m03_01_11_006 -- --exact (exit 0)",
+    "regression: cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 (11 passed)",
+    "crate suite: cargo test -p om9-kernel --features 3dm-brep (all passed)",
+    "clippy: cargo clippy -p om9-kernel --features 3dm-brep --all-targets -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-01-11-006/api.md",
+    "implementation/design/M03/OM9-L3-01-11-006/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-01-11-006/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-11-006/negative.json",
+    "implementation/evidence/M03/OM9-L3-01-11-006/OM9-L4-01-11-006-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-01-11-006/OM9-L4-01-11-006-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_01_11_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

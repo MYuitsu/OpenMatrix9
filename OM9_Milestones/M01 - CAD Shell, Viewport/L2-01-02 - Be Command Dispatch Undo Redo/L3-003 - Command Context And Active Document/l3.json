@@ -187,5 +187,12 @@
       "id": "OM9-L4-01-02-003-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-003 - Command Context And Active Document/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "not_in_sdk",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Context/active document là trạng thái host.",
+    "api": []
+  }
 }

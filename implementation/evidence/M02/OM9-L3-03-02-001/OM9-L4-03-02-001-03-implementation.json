@@ -1,0 +1,13 @@
+{
+  "l4": "OM9-L4-03-02-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-02-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Right-drag capture selects the viewport under the press; Perspective with no modifier orbits about the target while preserving distance and target.",
+  "tests": [
+    "om9-app navigation_drag: 3 passed",
+    "om9-app navigation_lifecycle: 8 passed",
+    "om9-scene camera_orbit: 5 passed"
+  ]
+}

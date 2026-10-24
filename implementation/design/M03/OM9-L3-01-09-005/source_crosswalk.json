@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m03.l2-01-09.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-09-005",
+  "owner_l2_id": "OM9-L2-01-09",
+  "date": "2026-10-22",
+  "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "reviewed_upstream": [
+    {
+      "path": "crates/qymcad-kernel/src/shape/build.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "SYMBOL_INDEX_READ_AT_PINNED_REVISION",
+      "observed_symbols": [
+        "extrude",
+        "extrude_profile",
+        "revolve_profile_axis",
+        "sweep_profile",
+        "loft_sections",
+        "cylinder",
+        "sphere",
+        "cone",
+        "torus"
+      ],
+      "observation": "QymCAD construction is a thin Rust wrapper over a native C ABI that takes flat f64 profile arrays and offset tables."
+    },
+    {
+      "path": "crates/qymcad-kernel/src/ops/primitives.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "CONTENT_READ_AT_PINNED_REVISION",
+      "observed_symbols": [
+        "ends_and_side"
+      ],
+      "observation": "The file only names primitive faces by role; it contains no construction algorithm."
+    },
+    {
+      "path": "crates/qymcad-kernel/src/ops/profile.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "CONTENT_READ_AT_PINNED_REVISION",
+      "observed_symbols": [
+        "NamedSides",
+        "name_sides"
+      ],
+      "observation": "The file only names profile walls/caps; construction stays in the native bridge."
+    }
+  ],
+  "local_owner": {
+    "crate": "om9-kernel",
+    "files": [
+      "crates/om9-kernel/src/creation.rs",
+      "crates/om9-kernel/src/creation_bridge.cpp",
+      "crates/om9-kernel/src/brep_snapshot.hxx",
+      "crates/om9-kernel/src/tests/l2_01_09.rs"
+    ],
+    "symbols": [
+      "creation::primitive",
+      "creation::extrude",
+      "creation::extrude_wire",
+      "creation::revolve",
+      "creation::planar",
+      "creation::loft",
+      "creation::pipe",
+      "creation::sweep1",
+      "creation::sweep2",
+      "creation::surface_from_edges",
+      "creation::profile_to_brep",
+      "creation::CreationSession"
+    ]
+  },
+  "decision": "ADD",
+  "rationale": "The construction adapter is new code against the pinned OCCT 8.0.1 C++ API. QymCAD's shape/build.rs is a thin C ABI wrapper and its face naming (Roles/GeoName) belongs to a different history/naming design, so no code is copied or reused. Only the ABI shape (flat f64 arrays plus offset tables) is aligned conceptually.",
+  "not_reused": [
+    "QymCAD Roles/GeoName naming: our publication names are per-snapshot UUIDs, not role keys.",
+    "QymCAD native C ABI: the adapters are our own in crates/om9-kernel/src/creation_bridge.cpp."
+  ],
+  "l3_scope": "planar faces from loops of curves"
+}

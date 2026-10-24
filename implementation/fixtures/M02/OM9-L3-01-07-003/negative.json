@@ -1,0 +1,15 @@
+{
+  "fixture_id": "G02-A-01-07-003",
+  "l3_id": "OM9-L3-01-07-003",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Click vùng trống hoặc face không còn sau rebuild báo miss, không đổi sang mặt gần đó",
+  "expected": "An explicit miss/error or unchanged state; no stale selection and no nearby-geometry rematch.",
+  "evidence": [
+    "om9-scene subobject_pick: 4 passed",
+    "om9-app subobject_selection: 8 passed",
+    "om9-app subobject_occurrences: 5 passed",
+    "om9-app brep_selection (gpu-sphere): 5 passed"
+  ],
+  "status": "PASS"
+}

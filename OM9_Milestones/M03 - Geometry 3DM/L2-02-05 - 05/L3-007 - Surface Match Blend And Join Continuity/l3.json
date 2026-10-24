@@ -145,7 +145,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-02-05-007-01",
     "OM9-L4-02-05-007-02",
@@ -302,6 +302,48 @@
     "priority_pilot": true,
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "NURBS_CURVE"
+  "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
+  "acceptance_category": "NURBS_CURVE",
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "G0/G1/G2 surface match, ruled/Hermite blend and OCCT sew-join",
+    "owner": {
+      "crate": "om9-core + om9-kernel",
+      "files": [
+        "crates/om9-core/src/surface_ops.rs",
+        "crates/om9-core/src/surface_kernel.rs",
+        "crates/om9-core/tests/surface_ops.rs",
+        "crates/om9-kernel/tests/l2_02_05.rs"
+      ],
+      "test": "crates/om9-core/tests/surface_ops.rs + crates/om9-kernel/tests/l2_02_05.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-02-05-007/api.md",
+      "implementation/design/M03/OM9-L3-02-05-007/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-02-05-007/positive.json",
+      "implementation/fixtures/M03/OM9-L3-02-05-007/negative.json",
+      "implementation/evidence/M03/OM9-L3-02-05-007/",
+      "implementation/evidence/M03/2026-10-22-l2-02-05-checks.json"
+    ],
+    "tests": [
+      "core surface suite: 16 passed",
+      "kernel surface suite: 6 passed",
+      "crate suites: core lib 12 passed; kernel --features 3dm-brep exit 0"
+    ],
+    "l4_evidence": {
+      "OM9-L4-02-05-007-01": "1/1",
+      "OM9-L4-02-05-007-02": "1/1",
+      "OM9-L4-02-05-007-03": "1/1",
+      "OM9-L4-02-05-007-04": "1/1",
+      "OM9-L4-02-05-007-05": "1/1"
+    },
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "G1/G2 matching is a boundary-row replacement with a measured angle, not a full optimization.",
+      "The M03-UI workflow is not signed."
+    ]
+  }
 }

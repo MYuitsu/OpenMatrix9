@@ -1,0 +1,59 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-005-05",
+  "role": "INTEGRATION_STRESS",
+  "l3": "OM9-L3-01-13-005",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-core/src/geometry.rs",
+      "crates/om9-core/src/curve_build.rs",
+      "native/native_exchange.cpp"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_stress -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/m03_01_13_stress.log",
+      "stdout_log_sha256": "14c1dfa4ed336f20d5d5f408e2673f65022571ea383eae38140f327cb6c69211"
+    }
+  ],
+  "observed": {
+    "objects": 205,
+    "layers_at_least": 3,
+    "instances": 5,
+    "native_active_processes": 0
+  },
+  "expected": {
+    "variants": [
+      "Line",
+      "Circle",
+      "Circle(arc)",
+      "Polycurve",
+      "Nurbs"
+    ],
+    "nurbs_pole_abs_tolerance": 1e-12
+  },
+  "tolerances": {
+    "nurbs_poles": "1e-12",
+    "weights_knots": "exact"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/geometry.rs",
+    "crates/om9-core/src/curve_build.rs",
+    "native/native_exchange.cpp"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/geometry.rs": "0a1a62351650209e7ccccd67fbb04b5b176c21e35dfe1cd911c0c737fb02373b",
+    "crates/om9-core/src/curve_build.rs": "2b3194a5172953293d99d1f2086cde842b75ced4e000a65e69469367b9887c24",
+    "native/native_exchange.cpp": "8cf87d2ca10e785300232219f3742973ecbde4d6249dfb96d190498db27ef6c1"
+  }
+}

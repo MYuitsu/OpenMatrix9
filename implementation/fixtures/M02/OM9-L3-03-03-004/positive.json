@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G03-B-03-03-004",
+  "l3_id": "OM9-L3-03-03-004",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Gumball kéo trục X +5mm từ (0,0,0) và Undo/Redo đúng một lần",
+  "expected": "The documented selection/gumball result with a stable object identity.",
+  "evidence": [
+    "om9-app gumball_interaction: 6 passed",
+    "om9-app gumball_viewport: 3 passed",
+    "om9-core gumball: 15 passed"
+  ],
+  "status": "PASS"
+}

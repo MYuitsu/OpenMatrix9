@@ -1,0 +1,5 @@
+{
+  "l3_id": "OM9-L3-03-19-001",
+  "case": "empty or invalid selection",
+  "expected": "explicit error, document unchanged"
+}

@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-02-03-004-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-03-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Surface candidates join the same SnapState ranking and marker path; native BRep display uses the same triangle rule.",
+  "tests": [
+    "om9-app osnap BRep: 1 passed"
+  ]
+}

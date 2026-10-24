@@ -1,0 +1,25 @@
+{
+  "schema": "om9.m03.l2-02-06.fixture.v1",
+  "l3_id": "OM9-L3-02-06-006",
+  "fixture_id": "OM9-L3-02-06-006-POSITIVE",
+  "units": "mm",
+  "input": {
+    "workflow": "Transform Cancel Preview And Undo",
+    "kind": "typed transform/orient session and analytic matrix oracle"
+  },
+  "expect": {
+    "preview_before_reference": "identity",
+    "cancel_preview": "identity",
+    "two_object_gesture_undo_entries": 1,
+    "stress_sessions": 200
+  },
+  "tolerances": {
+    "journal": "exact"
+  },
+  "measured_on_2026_10_22": {
+    "preview_before_reference": "identity",
+    "cancel_preview": "identity",
+    "two_object_gesture_undo_entries": 1,
+    "stress_sessions": 200
+  }
+}

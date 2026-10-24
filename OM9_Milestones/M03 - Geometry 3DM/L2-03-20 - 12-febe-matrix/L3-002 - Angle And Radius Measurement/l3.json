@@ -288,5 +288,64 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "plugin_sdk_v1_measurement": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "measure_angle returns the undirected angle in [0,180] degrees between two directed lines through measure::angle_degrees (atan2(|a x b|, a . b)); a zero-length direction is a measure refusal. Radius measurement remains open.",
+      "public_api": [
+        "Host::measure_distance",
+        "Host::measure_angle"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-measure.md",
+        "docs/validation/2026-10-21-m03-measure.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "No object-to-object, label or interactive measurement.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_circle_radius": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "circle_radius_verified_windows",
+      "scope": "measure_curve_radius returns the native circle/arc record radius in object-local mm; line/NURBS/polycurve are unsupported.",
+      "public_api": [
+        "Host::measure_curve_radius"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-radius.md",
+        "docs/validation/2026-10-21-m03-radius.json"
+      ],
+      "limitations": [
+        "Circle record only.",
+        "Ellipse/area/volume open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::measure_angle",
+      "Host::measure_curve_radius",
+      "Host::measure_distance"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_circle_radius",
+      "plugin_sdk_v1_measurement"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m03-measure.json",
+      "docs/validation/2026-10-21-m03-measure.md",
+      "docs/validation/2026-10-21-m03-radius.json",
+      "docs/validation/2026-10-21-m03-radius.md"
+    ]
+  }
 }

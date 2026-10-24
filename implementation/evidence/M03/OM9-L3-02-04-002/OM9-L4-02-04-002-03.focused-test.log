@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\l2_02_04.rs (L:\om9-target\debug\deps\l2_02_04-34b138616c292c92.exe)
+
+running 1 test
+circle_length_mm=31.415926535898
+polygon_length_mm=40.000000000000
+test m03_02_04_002_circle_arc_ellipse_polygon_creation ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+

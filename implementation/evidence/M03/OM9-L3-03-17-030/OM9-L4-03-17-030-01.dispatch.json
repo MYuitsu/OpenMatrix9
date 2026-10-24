@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-030-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-030",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-032",
+  "source_command": "Sweep Multi",
+  "menu_icon": "SurfaceSweepSweepMultiRail",
+  "owner_candidate": "OM9-L3-01-09-007",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-030/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-030/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-030/dispatch_contract.json": "6808e8bd00190d450d1cbe91739181d5e3d81f899951ece8452d153ea13d2d67",
+    "implementation/design/M03/OM9-L3-03-17-030/source_crosswalk.json": "63beccd3d09125ecfee0280c95d4538f378288c440fd2fb60a6b956c1a8b2c85"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

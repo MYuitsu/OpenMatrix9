@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-007",
+  "fixture_id": "OM9-L3-02-04-007-POSITIVE",
+  "units": "mm",
+  "oracle": "G1 blend reaches (10,0)->(20,10) with +X/-Y end tangents; G2 has zero second derivative at both ends; G0 is the 14.142 mm chord; ArcBlend is a pi arc; match puts the source end on the target with the target tangent",
+  "measured": {
+    "g1_blend_length_mm": 14.862666324708,
+    "g2_blend_length_mm": 15.243044351953
+  },
+  "tolerances": {
+    "g1_blend_length_mm": "no fixed oracle; endpoint/tangent assertions at 1e-9",
+    "g2_blend_length_mm": "no fixed oracle; D2 assertions at 1e-9"
+  },
+  "test": "m03_02_04_007_blend_arcblend_and_match"
+}

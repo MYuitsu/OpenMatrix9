@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-021-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-021",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-022",
+  "source_command": "Variable Fillet Surfaces",
+  "menu_icon": "SurfaceVariableFilletBlendChamferVariableFilletSurfaces",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-021/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-021/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-021/dispatch_contract.json": "75449ada2544470de9d291c3765e095784804286948d40187139a661556cecb3",
+    "implementation/design/M03/OM9-L3-03-17-021/source_crosswalk.json": "1167a54e324f64ecf11a1314eec2fa52005f7b68af39711760821a7518bdb727"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

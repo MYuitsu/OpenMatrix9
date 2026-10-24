@@ -180,5 +180,40 @@
     },
     "algorithm_and_coverage": "Lấy 2 calibration anchors, compute positive uniform scale, undoable edit",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "calibrate computes target_mm/pixel_distance, then set_width(target*width_px); zero/negative inputs are rejected before division.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-03-06-004/api.md",
+      "implementation/evidence/M02/OM9-L3-03-06-004/OM9-L4-03-06-004-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-03-06-004/OM9-L4-03-06-004-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-03-06-004/OM9-L4-03-06-004-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app pictureframe unit: 6 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-03-06-004/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-03-06-004/positive.json",
+        "implementation/fixtures/M02/OM9-L3-03-06-004/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-03-06-004/OM9-L4-03-06-004-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-03-06-004/OM9-L4-03-06-004-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-03-06-004/OM9-L4-03-06-004-06-acceptance.md"
+      ],
+      "acceptance": "100 px -> 25 mm yields 0.25 mm/pixel; zero pixel distance or target length returns an error without changing the frame."
+    }
   }
 }

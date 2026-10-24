@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-044-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-044",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-043",
+  "source_command": "Cross Section Profiles",
+  "menu_icon": "CurveCrossSectionProfiles",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Cross Section Profiles; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-044/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-044/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-044/dispatch_contract.json": "81ea0a7e415b06096df52581472e6eaee071f71501ede21233f78bf82b465900",
+    "implementation/design/M03/OM9-L3-03-16-044/dispatch_contract.md": "6be223598270cc7535a2b074d9da8ccb1c19640acfe394b43bd8beffa0d365de"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

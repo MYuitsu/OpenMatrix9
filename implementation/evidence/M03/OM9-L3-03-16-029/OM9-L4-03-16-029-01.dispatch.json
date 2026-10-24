@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-029-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-029",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-029",
+  "source_command": "Spiral",
+  "menu_icon": "CurveSpiral",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Spiral; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-029/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-029/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-029/dispatch_contract.json": "cb158cf17ecfe76d6c5eb1649b1587192280b9a445c77a67abfb4d4adeb5cc66",
+    "implementation/design/M03/OM9-L3-03-16-029/dispatch_contract.md": "d07abece6af3ebc32e3946d2ebb9b0e7ad88b47a0e2adb1359daff63489be6c4"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

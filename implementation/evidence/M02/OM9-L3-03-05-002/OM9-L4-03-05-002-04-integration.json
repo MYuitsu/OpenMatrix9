@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-05-002-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-05-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The cue is presentation data; no geometry, layer, material or M05 record is fabricated.",
+  "tests": [
+    "om9-app display cues: 6 passed"
+  ]
+}

@@ -78,5 +78,87 @@
       "id": "OM9-L3-02-03-007",
       "file": "M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-007 - Osnap Debug Marker And Tooltip/l3.json"
     }
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-02-03",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M02",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED standalone",
+      "sdk_signal": "AUDIT-THEN-ROUTE → EXPORT/CO-IMPLEMENT",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Audit osnap/smarttrack queries; xuất service theo snap context và tolerance, không state UI pointer.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-02-03-001",
+      "OM9-L3-02-03-002",
+      "OM9-L3-02-03-003",
+      "OM9-L3-02-03-004",
+      "OM9-L3-02-03-005",
+      "OM9-L3-02-03-006",
+      "OM9-L3-02-03-007"
+    ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "End/Mid/Center/Quadrant/Point/Intersection/Near/Tangent/Perpendicular/Surface snaps, priority and one-shot overrides, SmartTrack guides and the viewport marker/tooltip.",
+    "evidence": [
+      "implementation/design/M02/OM9-L2-02-03/README.md",
+      "implementation/evidence/M02/2026-10-22-l2-02-03-osnaps-checks.json",
+      "crates/om9-scene/src/osnap.rs",
+      "crates/om9-app/src/ui.rs",
+      "crates/om9-app/src/ui/sidebar_palettes.rs"
+    ],
+    "l3_with_verified_supported_scope": 7,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI visual review of snap markers/tooltips, one-shot toggles and SmartTrack guides.",
+      "macOS runtime is unverified."
+    ],
+    "manual_gate": "M02-UI",
+    "technical_scope_complete": true,
+    "latest_verification": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "checks": "implementation/evidence/M02/2026-10-22-l2-02-03-osnaps-checks.json",
+      "readme": "implementation/design/M02/OM9-L2-02-03/README.md",
+      "tests": {
+        "om9-core": "407 passed, 48 suites",
+        "om9-scene": "99 passed, 20 suites",
+        "om9-scene osnap": "11 passed",
+        "om9-app osnap UI": "3 passed",
+        "om9-app osnap BRep": "1 passed",
+        "om9-app viewport/selection regressions": "60 passed",
+        "om9-app gpu library": "148 passed"
+      },
+      "l4_evidence": {
+        "OM9-L3-02-03-001": "5/5",
+        "OM9-L3-02-03-002": "6/6",
+        "OM9-L3-02-03-003": "6/6",
+        "OM9-L3-02-03-004": "6/6",
+        "OM9-L3-02-03-005": "5/5",
+        "OM9-L3-02-03-006": "6/6",
+        "OM9-L3-02-03-007": "5/5"
+      },
+      "manual_gate": "M02-UI"
+    }
+  }
 }

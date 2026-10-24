@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-05-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-05-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "VisibilityFilter resolves WorkingCurve/Cutter/Model categories and reads a typed M07 CutterRecord (kind/seat); a cutter category with no M07 record is disabled.",
+  "tests": [
+    "om9-app display cues: 6 passed"
+  ]
+}

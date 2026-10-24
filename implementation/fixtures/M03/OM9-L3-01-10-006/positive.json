@@ -1,0 +1,20 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-006",
+  "fixture_id": "OM9-L3-01-10-006-POSITIVE",
+  "units": "mm",
+  "input": {
+    "solid": "box 10×10×10",
+    "edge": "one vertical edge",
+    "fillet_radius_mm": 1,
+    "chamfer_distance_mm": 1
+  },
+  "expect": {
+    "fillet_volume_mm3": 997.8539816339745,
+    "chamfer_volume_mm3": 995.0
+  },
+  "measured_on_2026_10_22": {
+    "fillet_one_edge_volume_mm3": 997.853981633974,
+    "chamfer_one_edge_volume_mm3": 995.0
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-06-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel + om9-app",
+    "files": [
+      "crates/om9-kernel/src/transform_ops.rs",
+      "crates/om9-core/src/gumball.rs"
+    ],
+    "test": "crates/om9-core/tests/transform_sessions.rs + crates/om9-kernel/tests/l2_02_06.rs + app gumball suites"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_02_06 mirror_plane -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/L3-003k.log",
+      "stdout_log_sha256": "33647751523c7443fe6fefef82b5fab290c96637a971ef60da5fd1188ea1a072"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/kernel-l2_01_11.log",
+      "stdout_log_sha256": "8fdc1480a36cf1b76b0673287b988a73e01c3fc51a6e1dc7be2d38e429ad9576"
+    }
+  ],
+  "observed": {
+    "mirror_point": [
+      -2.0,
+      3.0,
+      4.0
+    ],
+    "linear_placements": 3,
+    "polar_placements": 4,
+    "seam_duplicate": false
+  },
+  "expected": {
+    "mirror_point": [
+      -2.0,
+      3.0,
+      4.0
+    ],
+    "linear_placements": 3,
+    "polar_placements": 4,
+    "seam_duplicate": false
+  },
+  "tolerances": {
+    "point": "1e-12",
+    "angle": "1e-12"
+  },
+  "artifact_paths": [
+    "crates/om9-kernel/src/transform_ops.rs",
+    "crates/om9-core/src/gumball.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-kernel/src/transform_ops.rs": "64925c4f9e63d2ef19c5568df42d89e31c512b1adcd69a3f5eccd960fba020f3",
+    "crates/om9-core/src/gumball.rs": "870661d90df2e55e770352458b2d2e8f2476980cebcabd944b32f2232d9cc81e"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-047-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-047",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-147",
+  "source_command": "Sketch on Mesh",
+  "menu_icon": "CurveFreeFormSketchonPolygonMesh",
+  "owner_candidate": "OM9-L3-02-04-003",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Sketch on Mesh command session is not wired; owner candidate OM9-L3-02-04-003 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-047/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-047/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-047/dispatch_contract.json": "e259ad7554987a18165d37f83b8fb2e766d74c6efeb5e647ef594a81cabdc4fe",
+    "implementation/design/M03/OM9-L3-03-16-047/dispatch_contract.md": "07c0392f77a3d9cfdb3c8c8c5a5b5d427ec7f72b66b0aa8eeec2eeddc97515ff"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

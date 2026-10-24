@@ -1,0 +1,19 @@
+{
+  "l3": "OM9-L3-03-05-001",
+  "title": "Wireframe Shaded Mode Switcher",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-app/src/viewport_menu.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-scene/src/workspace.rs"
+  ],
+  "tests": [
+    "om9-app display_modes: 3 passed",
+    "om9-app viewport_title_menu: 18 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.63-70 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-05-001-01"
+}

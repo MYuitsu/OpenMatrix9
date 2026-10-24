@@ -176,6 +176,8 @@ fn mesh_and_brep_keep_distinct_kinds_across_the_codec() {
             faces: vec![vec![0, 1, 2]],
             normals: vec![],
             colors: vec![],
+
+            corner_uvs: Vec::new(),
         }),
         None,
     );

@@ -184,7 +184,9 @@ fn four_cameras_in_one_encoder_match_independent_full_quality_images() {
         let pixels = target.pixels(&device, &queue);
         assert!(
             pixels
-                .chunks_exact(4)
+                .as_chunks::<4>()
+                .0
+                .iter()
                 .filter(|p| p[0] > 60 || p[1] > 60)
                 .count()
                 > 20

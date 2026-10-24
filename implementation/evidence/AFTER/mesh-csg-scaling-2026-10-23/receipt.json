@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-23T12:51:21.288615+00:00",
+  "target": "Windows x64 safe Rust standalone om9-core",
+  "status": "VALIDATED_BVH_SCALING_SLICE_NUMERICAL_LIMIT_RECORDED",
+  "tests": {
+    "core_regression": {
+      "passed": 512,
+      "failed": 0,
+      "ignored": 2,
+      "suites_including_doctests": 58
+    },
+    "app_utilities": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "suites_including_doctests": 1
+    },
+    "explicit_release_benchmarks": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "suites_including_doctests": 1
+    }
+  },
+  "defaults_before": {
+    "max_triangles": 2000,
+    "max_work": 10000000,
+    "max_fragments": 50000
+  },
+  "defaults_after": {
+    "max_triangles": 25000,
+    "max_fragments": 50000,
+    "max_work": 20000000,
+    "tolerance": 1e-08
+  },
+  "baseline": [
+    {
+      "input": 24,
+      "output": 208,
+      "work": 40296,
+      "elapsed_ms": 2.117,
+      "result": "PASS"
+    },
+    {
+      "input": 384,
+      "output": 1008,
+      "work": 1637352,
+      "elapsed_ms": 55.041,
+      "result": "PASS"
+    },
+    {
+      "input": 1536,
+      "elapsed_ms": 416.75,
+      "result": "ERR",
+      "error": "Invalid(\"CSG"
+    },
+    {
+      "input": 6144,
+      "elapsed_ms": 410.774,
+      "result": "ERR",
+      "error": "Invalid(\"CSG"
+    },
+    {
+      "input": 24576,
+      "elapsed_ms": 487.939,
+      "result": "ERR",
+      "error": "Invalid(\"CSG"
+    }
+  ],
+  "optimized_planar": [
+    {
+      "input": 24,
+      "output": 56,
+      "work": 8677,
+      "elapsed_ms": 0.597,
+      "result": "PASS"
+    },
+    {
+      "input": 384,
+      "output": 336,
+      "work": 153820,
+      "elapsed_ms": 6.133,
+      "result": "PASS"
+    },
+    {
+      "input": 1536,
+      "output": 1344,
+      "work": 662482,
+      "elapsed_ms": 24.482,
+      "result": "PASS"
+    },
+    {
+      "input": 6144,
+      "output": 5376,
+      "work": 2967892,
+      "elapsed_ms": 102.15,
+      "result": "PASS"
+    },
+    {
+      "input": 24576,
+      "output": 21504,
+      "work": 12954642,
+      "elapsed_ms": 426.373,
+      "result": "PASS"
+    }
+  ],
+  "optimized_curved": [
+    {
+      "input": 1024,
+      "output": 1956,
+      "work": 707130,
+      "rays": 23124,
+      "fallbacks": 0,
+      "elapsed_ms": 23.321
+    },
+    {
+      "input": 4096,
+      "output": 5360,
+      "work": 2776992,
+      "rays": 83896,
+      "fallbacks": 0,
+      "elapsed_ms": 79.939
+    }
+  ],
+  "accepted_geometry_counts": {
+    "planar_scales": 5,
+    "curved_scales": 2
+  },
+  "known_negative_fixture": {
+    "input_triangles": 16384,
+    "kind": "curved sphere overlap",
+    "result": "CSG feature below tolerance",
+    "accepted_geometry": false,
+    "discovery_log": "curved-limit-discovery.log",
+    "source_unchanged_regression": true
+  },
+  "source_sha256": {
+    "crates/om9-core/src/mesh_csg.rs": "30febbce50ac11f16cb8584ed58a0a4eb5da3dc08fe57c92b38a392b83f18c31",
+    "crates/om9-core/src/mesh_csg/spatial.rs": "97811123ec0f59eb045b3ca85e32de7fd5a657d25697babbc580ab8778f7b230",
+    "crates/om9-core/tests/mesh_csg.rs": "70e49875af31b40535d39e5f7b6dfcf2fc06a823544e15f8405cda9e3448cd47"
+  },
+  "milestone_views": [
+    "OM9_Milestones/ZAFTER - Extensions/L1.json",
+    "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/L2.json",
+    "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/L3-002 - Mesh Manifold And Hole Repair/l3.json",
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L2.json",
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-006 - Mesh Reduce Basic/l3.json"
+  ],
+  "limitations": [
+    "Closed oriented triangle input and f64/tolerance restrictions retained.",
+    "16384-triangle curved fixture remains unsupported: CSG feature below tolerance; sources unchanged.",
+    "Dense intersections may still exhaust budgets; 25K is admission, not an unconditional success guarantee.",
+    "No new UI/SDK command, exact predicates, open-hole repair, production fixture or macOS certification."
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "L:/om9-target",
+    "jobs": 2,
+    "release_test_threads": 1,
+    "hardware": "hardware.json",
+    "toolchain": "toolchain.log",
+    "working_tree": "Existing multi-session changes retained; no staging/commit."
+  },
+  "commands": [
+    {
+      "command": "cargo test -p om9-core -j 2",
+      "exit_code": 0,
+      "log": "core-regression.log"
+    },
+    {
+      "command": "cargo test -p om9-app -j 2 --test utilities",
+      "exit_code": 0,
+      "log": "app-utilities.log"
+    },
+    {
+      "command": "cargo test -p om9-core -j 2 --release --test mesh_csg scaling_measurement -- --ignored --nocapture --test-threads=1",
+      "exit_code": 0,
+      "log": "optimized.log"
+    },
+    {
+      "command": "cargo clippy -p om9-core -p om9-app -j 2 --lib --test mesh_csg --test utilities -- -D warnings",
+      "exit_code": 0,
+      "log": "clippy.log"
+    },
+    {
+      "command": "rustfmt --edition 2024 --config skip_children=true --check [three changed Rust files]",
+      "exit_code": 0,
+      "log": "fmt.log"
+    }
+  ],
+  "manual_gate_promoted": false,
+  "skill_rule_changed": false,
+  "public_source_audit": {
+    "exit_code": 0,
+    "result": {
+      "source_files": 12220,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "scoped_diff_check": {
+    "exit_code": 0,
+    "log": "scoped-diff-check.log"
+  },
+  "prune": {
+    "exit_code": 0,
+    "log": "prune.log"
+  },
+  "log_sha256": {
+    "app-utilities.log": "dfaaec5760dc0df59b43b9aefd186a0891bdddacc3c224c0b541f35fa4ea093d",
+    "baseline.log": "fa1a17130599753b26d576b1d3f4eed023d0f56240cf145da898e1fccbe20462",
+    "clippy.log": "7f51b99db489a0843a637f22d3ff60f019dfe72a2cb19cd330cfa4afc4a121a6",
+    "core-regression.log": "0b0560c88b174c063ac363b61e11613c8deb2f8c2278af85c564e9fd75dd680f",
+    "curved-limit-discovery.log": "476f9ec4d8372f29906f7be86e3ba776ab6d5e267a214fe3d071ff86c07b2830",
+    "expanded-budget-trial.log": "94440f07e5e1da69da25387f4e9e51f6505c0653584696c1de3a76735558a3f9",
+    "fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "focused.log": "e6a71d176bb7e06bfe869184f2ad152920221ac8de34eb92cb79763a8d065c55",
+    "optimized-trial.log": "04ddf1a96683b309aeabf004977dd4370c5bcd6afa1338944ff0f35b7350e13d",
+    "optimized.log": "acd5f4c7ef5a746661e65161b19c9c42733ac2306167eb0bbcd249d15b0b3d70",
+    "prune.log": "61b7a1cf007378e5f7e0e7076d2d6d1b412e26c2a8d736fbc070d555b8373e1d",
+    "public-source-audit.log": "67ac7ba56a26616092fff01965834ee744ff3e20b5801d705623cc3dbef4e9d0",
+    "scoped-diff-check.log": "24b4bd85414b47691565809f973e7eaa2155fbcae0f03cebce94c28c99cacd67",
+    "toolchain.log": "c7e18b4c54a1afca97023c8a1a25836b8a758b4dc75eaf8eae717cebab63af88"
+  }
+}

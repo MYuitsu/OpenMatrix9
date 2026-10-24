@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-02-03-003-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-03-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "The command session supplies its previous accepted point as the tangent/perpendicular reference; the viewport only consumes candidates.",
+  "tests": [
+    "om9-scene osnap: 11 passed"
+  ]
+}

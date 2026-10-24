@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-035-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-035",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-037",
+  "source_command": "Soft Edit",
+  "menu_icon": "SurfaceSurfaceEditToolsSoftEdit",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-035/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-035/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-035/dispatch_contract.json": "2071d8de416a4f626efb7ac6cc5e18cc1539544ecbdb05f9aaaef740fa686ca1",
+    "implementation/design/M03/OM9-L3-03-17-035/source_crosswalk.json": "bd3b0ea4f5d17e56f7e30cbe6a95242504c4d3d31365d788b9450437c20788f6"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

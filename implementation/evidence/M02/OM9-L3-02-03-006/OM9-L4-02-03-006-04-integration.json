@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-02-03-006-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-03-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Accepted picks push anchors; the viewport paints the guides; Escape clears anchors/guides; no guide is ever added to the document.",
+  "tests": [
+    "om9-app osnap UI: 3 passed"
+  ]
+}

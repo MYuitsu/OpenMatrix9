@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G02-B-02-03-003",
+  "l3_id": "OM9-L3-02-03-003",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Line từ điểm ngoài circle tìm tangent và perpendicular có nghiệm phù hợp",
+  "expected": "The documented snap kind and world point with a stable object identity.",
+  "evidence": [
+    "om9-scene osnap: 11 passed"
+  ],
+  "status": "PASS"
+}

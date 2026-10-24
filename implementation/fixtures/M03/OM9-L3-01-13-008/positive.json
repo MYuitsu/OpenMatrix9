@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m03.l2-01-13.fixture.v1",
+  "l3_id": "OM9-L3-01-13-008",
+  "fixture_id": "OM9-L3-01-13-008-POSITIVE",
+  "generator": {
+    "source": "native/source_inventory_fixture.cpp",
+    "source_sha256": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+    "binary": "build/source-fixture.exe",
+    "binary_sha256": "d315c6d35a94bad0d05cb4aeaff8a90ac6fd5437646ee6d006463c73386dc0d7",
+    "opennurbs_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "note": "The authored writer embeds openNURBS-generated component UUIDs, so regenerated archives are structurally identical but not byte-identical; each receipt records the SHA-256 of the archive actually read."
+  },
+  "input": {
+    "modes": [
+      "attribute-userdata",
+      "unknown-class"
+    ],
+    "units": "declared by the archive (mm or inch) and converted to canonical mm",
+    "archive": "authored binary 3DM, Rhino 5 archive version 50"
+  },
+  "expect": {
+    "userdata_diagnostic": true,
+    "retained_records_gt_zero": true,
+    "unknown_class": "refused"
+  },
+  "tolerances": {
+    "diagnostic_text": "case-insensitive substring"
+  },
+  "measured_on_2026_10_22": {
+    "userdata_diagnostic": true,
+    "retained_records_gt_zero": true,
+    "unknown_class": "refused"
+  }
+}

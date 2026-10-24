@@ -511,8 +511,19 @@ fn editable_layer(d: &Document, mut layer: Option<LayerId>) -> Result<bool> {
 
 pub(crate) fn check_layer_reads(
     d: &Document,
+    layer: Option<LayerId>,
+    written: &BTreeSet<(DocumentId, LayerId)>,
+) -> Result<()> {
+    check_layer_reads_with(d, layer, written, |id| d.layers.get(&id))
+}
+
+/// The same guard resolved through a caller lookup, so a chain that includes a
+/// layer proposed by this batch can be walked and its captured writes excluded.
+pub(crate) fn check_layer_reads_with<'l>(
+    d: &Document,
     mut layer: Option<LayerId>,
     written: &BTreeSet<(DocumentId, LayerId)>,
+    resolve: impl Fn(LayerId) -> Option<&'l Layer>,
 ) -> Result<()> {
     if written.is_empty() {
         return Ok(());
@@ -523,9 +534,7 @@ pub(crate) fn check_layer_reads(
                 "layer read/write conflict within transaction",
             ));
         }
-        layer = d
-            .layers
-            .get(&id)
+        layer = resolve(id)
             .ok_or(Error::Missing("layer permission chain"))?
             .parent;
     }

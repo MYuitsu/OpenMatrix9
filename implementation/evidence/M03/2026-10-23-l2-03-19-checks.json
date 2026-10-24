@@ -1,0 +1,47 @@
+{
+  "module": "OM9-L2-03-19",
+  "date": "2026-10-23",
+  "tests": {
+    "core_utilities": "6 passed; 0 failed",
+    "app_utilities": "4 passed; 0 failed",
+    "public_source_audit": "0 errors"
+  },
+  "l3": [
+    {
+      "l3_id": "OM9-L3-03-19-001",
+      "l4": 6,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-19-002",
+      "l4": 5,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-19-003",
+      "l4": 5,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-19-004",
+      "l4": 5,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-19-005",
+      "l4": 6,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-19-006",
+      "l4": 5,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-19-007",
+      "l4": 5,
+      "source_crosswalk": true
+    }
+  ],
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

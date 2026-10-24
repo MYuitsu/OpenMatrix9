@@ -216,5 +216,16 @@
       "id": "OM9-L4-02-01-010-05",
       "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-010 - Instance And Block Semantic Type/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Instance/block type cần cho plugin block.",
+    "api": [],
+    "candidate_api": [
+      "instance_semantics(id)"
+    ],
+    "host_only": "Instance graph ở host; SDK đọc loại/member."
+  }
 }

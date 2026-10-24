@@ -216,5 +216,17 @@
       "id": "OM9-L4-02-01-006-05",
       "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-006 - Surface Edge And Isocurve Semantics/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Edge/isocurve semantics cần cho chọn cạnh.",
+    "api": [],
+    "candidate_api": [
+      "surface_edges(id)",
+      "surface_isocurves(id)"
+    ],
+    "host_only": "Topology ở host; SDK đọc danh sách."
+  }
 }

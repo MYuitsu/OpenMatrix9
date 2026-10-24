@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-011",
+  "fixture_id": "OM9-L3-02-04-011-POSITIVE",
+  "units": "mm",
+  "oracle": "square length 40 mm; 4 divisions give 5 monotone fractions; 10 mm divide-by-length gives 5 entries; seam at 0.25 starts at the old quarter; reversal swaps 0.25/0.75",
+  "measured": {
+    "square_length_mm": 40.0,
+    "division_count": 5.0
+  },
+  "tolerances": {
+    "square_length_mm": "1e-9",
+    "division_count": "exact integer"
+  },
+  "test": "m03_02_04_011_curve_seams_directions_and_divisions"
+}

@@ -1,0 +1,12 @@
+[package]
+name = "om9-sdk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Public plugin contract and versioned native ABI for standalone OpenMatrix9"
+readme = "README.md"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true

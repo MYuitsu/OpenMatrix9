@@ -1,0 +1,46 @@
+{
+  "schema": "om9.m03.l2-01-10.l4.receipt.v1",
+  "l4": "OM9-L4-01-10-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-10-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crate": "om9-kernel",
+    "files": [
+      "crates/om9-kernel/src/editing.rs",
+      "crates/om9-kernel/src/editing_bridge.cpp",
+      "crates/om9-kernel/src/brep_snapshot.hxx"
+    ],
+    "test": "crates/om9-kernel/tests/l2_01_10.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_10 m03_01_10_003 -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-10-003/OM9-L4-01-10-003-03.focused-test.log",
+      "stdout_log_sha256": "08e98c85dd6a0b2e4b1d78a21533864dc19cb296ccd15df7b72bc9da3cc4a434"
+    }
+  ],
+  "observed": {
+    "intersection_volume_mm3": 500.0
+  },
+  "expected": {
+    "intersection_volume_mm3": 500.0
+  },
+  "effective_tolerance": {
+    "intersection_volume_mm3": "1e-6"
+  },
+  "input_validation": [
+    "both operands must be admitted closed solids",
+    "disjoint solids produce BooleanOutcome::Empty rather than an error or a phantom body",
+    "coplanar borderline contact must not silently produce a wrong solid body"
+  ],
+  "error_type": "editing::EditingError (creation::CreationError)",
+  "rollback_behavior": "inputs are immutable values; a refused operation returns before a Brep exists",
+  "compile_receipt": "the crate, the C++ editing adapter and the focused test compile (exit 0)",
+  "source_revision": "working tree at 831a2c4d (see worktree_state)",
+  "worktree_state": "The recorded revision is HEAD; L2-01-10 changes were measured before commit."
+}

@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-02-006-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-02-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Home/Center are available commands through the session and the UI command path; the active view camera is replaced/shifted only.",
+  "tests": [
+    "om9-app navigation_commands: 6 passed",
+    "om9-scene camera_fit: 4 passed"
+  ]
+}

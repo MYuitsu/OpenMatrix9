@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\top11.rs (L:\om9-target\debug\deps\top11-0eff463d083938e7.exe)
+
+running 4 tests
+multi_cutter_split_entities=5
+multi_cutter_trim_entities=4
+test m03_03_08_004_multiple_cutters_split_and_trim_one_target ... ok
+joined_entities=1
+exploded_entities=2
+split_entities=3
+trim_remaining_entities=2
+trim_kept_start_x_mm=0.000000000000
+test m03_03_08_004_join_explode_split_and_trim_run_from_the_toolbar ... ok
+surface_cutter_entities=3
+test m03_03_08_004_a_surface_can_be_the_cutting_object ... ok
+stress_cycles=50
+test m03_03_08_004_stress_join_explode_split_trim_cycles ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.38s
+

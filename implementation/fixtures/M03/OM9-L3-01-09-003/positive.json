@@ -1,0 +1,51 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-003",
+  "fixture_id": "OM9-L3-01-09-003-POSITIVE",
+  "units": "mm",
+  "input": {
+    "profile_r_z_mm": [
+      [
+        5,
+        0,
+        0
+      ],
+      [
+        7,
+        0,
+        0
+      ],
+      [
+        7,
+        0,
+        10
+      ],
+      [
+        5,
+        0,
+        10
+      ]
+    ],
+    "axis": {
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    "angle_rad": "2*pi"
+  },
+  "expect": {
+    "volume_mm3": 753.9822368615,
+    "solids": 1,
+    "closed": true
+  },
+  "measured_on_2026_10_22": {
+    "revolve_volume_mm3": 753.982236861551
+  }
+}

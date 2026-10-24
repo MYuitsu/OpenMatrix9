@@ -140,5 +140,3 @@ pub struct SourceStamp {
     pub geometry_revision: u64,
     pub attributes_revision: u64,
 }
-
-

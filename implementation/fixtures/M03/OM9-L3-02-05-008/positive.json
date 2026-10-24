@@ -1,0 +1,29 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-008",
+  "fixture_id": "OM9-L3-02-05-008-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Surface Offset Fillet Chamfer",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "plane_offset_z": 2.5,
+    "cylinder_offset_radius_mm": 4.0,
+    "box_offset_volume_mm3": 6733.333333333332,
+    "fillet_faces": 7,
+    "fillet_naked_edges": 0
+  },
+  "tolerances": {
+    "plane": "1e-9",
+    "cylinder_radius_mm": "0.05",
+    "volume_mm3": "1e-6"
+  },
+  "measured_on_2026_10_22": {
+    "plane_offset_z": 2.5,
+    "cylinder_offset_radius_mm": 4.0,
+    "box_offset_volume_mm3": 6733.333333333332,
+    "fillet_faces": 7,
+    "fillet_naked_edges": 0
+  }
+}

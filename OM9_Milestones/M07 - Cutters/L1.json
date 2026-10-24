@@ -52,5 +52,30 @@
   },
   "delegated_l3_from_milestone": {
     "OM9-L3-01-12-008": "M01"
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_MILESTONE_AND_OWNERS",
+    "responsibility": "Cutter generation/apply, manufacturing checks và STL có SDK service cùng implementation. L3 STL OM9-L3-01-12-008 giữ owner gốc M01 nhưng thực thi ở M07; không nhân bản owner.",
+    "owner_ids": [
+      "OM9-L2-04-16",
+      "OM9-L2-04-17",
+      "OM9-L2-04-18"
+    ],
+    "already_implemented_rule": "Add the missing public SDK contract/adapter/proof to the existing owner backlog; preserve validated core evidence and reuse its implementation.",
+    "not_yet_implemented_rule": "Deliver shared Rust service and SDK adapter/proof together inside the same canonical L3/L2 milestone owner; do not defer SDK to a separate delivery track.",
+    "host_internal_rule": "Keep ownership and private runtime resources in the host; document the reason and expose only a bounded service/DTO when needed.",
+    "completion_rule": "SDK-eligible feature delivery includes public DTO/wrapper, host dispatch/capability, shared service, atomicity/limits and external plugin evidence for each advertised target, alongside the existing owner acceptance contract.",
+    "delegated_existing_owner": [
+      {
+        "l3_id": "OM9-L3-01-12-008",
+        "owner_l2": "OM9-L2-01-12",
+        "execution_milestone": "M07",
+        "owner_unchanged": true
+      }
+    ]
   }
 }

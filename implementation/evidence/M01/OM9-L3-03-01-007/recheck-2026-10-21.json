@@ -1,0 +1,20 @@
+{
+  "l3": "OM9-L3-03-01-007",
+  "title": "Viewport Tab Switch When Maximized",
+  "date": "2026-10-21",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "tests": [
+    "view_tab_switches_active_and_maximized_view"
+  ],
+  "acceptance": {
+    "viewport_layout": "3 passed",
+    "chrome_actions": "13 passed",
+    "viewport_title_menu": "17 passed"
+  },
+  "evidence": "implementation/evidence/M01/2026-10-21-l2-03-01-viewport-layout-recheck.json",
+  "log": "build/standalone-validation/ui-artifacts/m01-l2-03-01-20261021/acceptance.log",
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual M01-UI visual review pending."
+  ]
+}

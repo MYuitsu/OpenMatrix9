@@ -1,0 +1,44 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-002",
+  "fixture_id": "OM9-L3-01-11-002-POSITIVE",
+  "units": "mm",
+  "input": {
+    "point_mm": [
+      2,
+      3,
+      4
+    ],
+    "plane_origin": [
+      0,
+      0,
+      0
+    ],
+    "plane_normal": [
+      1,
+      0,
+      0
+    ],
+    "box_mm": [
+      2,
+      3,
+      4
+    ]
+  },
+  "expect": {
+    "mirrored_point_mm": [
+      -2,
+      3,
+      4
+    ],
+    "body_volume_mm3": 24.0,
+    "body_bounds_x": [
+      -2,
+      0
+    ]
+  },
+  "measured_on_2026_10_22": {
+    "mirrored_volume_mm3": 24.0,
+    "mirrored_x_min_mm": -2.0000001
+  }
+}

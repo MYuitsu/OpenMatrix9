@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-21",
+  "status": "selection_write_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-07",
+  "milestone": "M02",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Exports the Controller selection set with the owner's scene-root rule; selection stays outside document state and Undo.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "bda9e1a4451ff2d52623152cd81b8b26e3da56d6e8122d4060053bb07d0bbda5",
+    "crates/om9-plugin-host/src/lib.rs": "f516548ef5c37ec390de6467b87bfc42d9f7d9d412222630207998713cb6ec3e",
+    "crates/om9-plugin-host/src/staged.rs": "2245e31af4676e477a46ae6c207d00a88ccb0c97876a24723b4350a4f255d515",
+    "crates/om9-app/src/session/plugins.rs": "939cdbdbf7e1734841380bb2b5558505e5472eada7ffc92bce727dc55f36e3d4",
+    "crates/om9-app/tests/plugin_native.rs": "ce13d6036ea062d80900a0c999d8f613d7fa21afe85f444ce34ce49f7bdf5c70",
+    "sdk/examples/hello-plugin/src/lib.rs": "2deb862c522b91c3166c90cf4ad2af4b96f4d1eb7cb8a9136b69cf6bb2d6d4c6",
+    "sdk/examples/hello-plugin/descriptor.json": "08a9d5487d6eaf3e17ac17abb680718e936f3460df49048045b7deda0b103546",
+    "sdk/README.md": "9cc8831d50827380df09a1e751b7b5a2dac37ed37a780e0f0af5b8fa4e225723",
+    "sdk/API-INVENTORY.md": "2f5459f7baee34ae6204a7cf58fabd96794eac88ccb42b3bd168268ee6925afc"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["set_selection", "add_to_selection", "selected_objects (staged read-back)"],
+    "error_codes": ["id", "missing", "permission", "selection", "budget"],
+    "validation": [
+      "host: canonical non-nil id, existing object, effective selectable permission, max_outputs bound",
+      "controller: scene root selectable and has pick geometry, validated before commit"
+    ]
+  },
+  "asserted_semantics": [
+    "Selection is not document state: a selection-only command produces no transaction and no Undo entry.",
+    "set_selection replaces the set (empty clears); add_to_selection keeps existing entries.",
+    "A bad, missing, locked or deleted ID refuses the whole command before publication and leaves the previous selection untouched.",
+    "The Controller validates the staged selection against the scene it will publish before committing, so a committed command cannot fail afterwards on selection.",
+    "selected_objects reads the staged selection, so a plugin can select what it just created.",
+    "Subobject refs, pick queries, window/crossing selection and drag transactions remain open."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "45 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "9 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-selection",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8793 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "command": "SelectionDemo after CreateProfile on the same controller",
+    "selected_roots": 2,
+    "add_keeps_existing": true,
+    "unknown_root_refused": true,
+    "document_unchanged": true,
+    "undo_len_after_selection": 1,
+    "selection_unchanged_after_refusal": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1358311,
+      "sha256": "0aa2cc7a63482b19e2c2d7bb1797e8d1a42007787a2799b1454db3215fcbac9f"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "93bd2f75a42b0ef123836fcf014827d04fdff71439b233bfffaf4a3d151fea83"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 126984,
+      "sha256": "aaa044d9278bc92996f143d055322b5cbcb6570d59e3fa0bcd81a498170bf2ab"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "7f7cfcb22ab47ec82a0e1be45760ade300da2f91b6b04bc276dc79a69223c925"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1356800,
+      "sha256": "17e2ca4bf3780810c45638654b701b7e71287031d0a2c6fb90e1e4f077395326"
+    },
+    "om9.exe": {
+      "bytes": 68566016,
+      "sha256": "cf9e2e180be235e59aefe4dc898f6a9975984a893f2949049020b7a52824fe92"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-07-002 (replace and add)"],
+    "open": [
+      "remove and toggle variants",
+      "typed subobject/occurrence references",
+      "pick query, window/crossing selection",
+      "drag transaction and highlighting"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only replace and add are exposed from the add/remove/toggle L3 scope.",
+    "Subobject refs, pick queries, window/crossing selection and drag transactions remain open.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Complete the selection L3 (remove/toggle) or take the next plan-named owner slice (OM9-L2-01-12 file lifecycle)."
+}

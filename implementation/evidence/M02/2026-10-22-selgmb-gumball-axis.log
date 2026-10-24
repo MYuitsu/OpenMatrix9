@@ -1,0 +1,14 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.56s
+     Running tests\gumball_interaction.rs (L:/om9-target\debug\deps\gumball_interaction-98b5a5e43e47d0aa.exe)
+
+running 6 tests
+test the_pivot_is_none_without_a_selection ... ok
+test a_gesture_without_motion_writes_nothing ... ok
+test rotating_turns_the_selection_about_its_centre ... ok
+test scaling_doubles_the_distance_from_the_pivot ... ok
+test an_x_axis_drag_adds_exactly_five_millimetres_with_one_undo_redo ... ok
+test moving_two_selected_objects_is_one_journal_entry ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

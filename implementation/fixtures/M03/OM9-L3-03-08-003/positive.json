@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-003",
+  "fixture_id": "OM9-L3-03-08-003-POSITIVE",
+  "units": "mm",
+  "oracle": "Move origin (5,-2,0); Rotate end (0,10,0); Mirror copies 1..4 mm to -1..-4; Delete reflects in place; a three-point plane through (0,0,0),(0,1,0),(0,0,1) also gives x=-1; a non-rigid x-scale 2 line mirrors its 2 mm world end to -2; a scaled BRep mirrors to bounds -4..0; a placed BRep mirrors to volume 24",
+  "measured": {
+    "mirror_delete_entities": 1.0,
+    "mirror_delete_start_x_mm": -1.0,
+    "mirror_copies": 2.0,
+    "mirrored_start_x_mm": -1.0,
+    "three_point_mirror_start_x_mm": -1.0,
+    "non_rigid_mirror_end_x_mm": -2.0,
+    "move_base_mm": "[5.0, -2.0, 0.0]",
+    "rotate_end_mm": "[6.123233995736766e-16, 10.0, 0.0]",
+    "brep_cutter_entities": 4.0,
+    "exact_brep_fractions": "[0.25, 0.75]",
+    "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+    "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+    "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+    "brep_mirror_volume_mm3": 24.0,
+    "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+  },
+  "tolerances": {
+    "move_base_mm": "exact value",
+    "rotate_end_mm": "1e-6",
+    "mirror_copies": "exact integer",
+    "mirrored_start_x_mm": "1e-9",
+    "mirror_delete_entities": "exact integer",
+    "mirror_delete_start_x_mm": "1e-9",
+    "three_point_mirror_start_x_mm": "1e-9",
+    "non_rigid_mirror_end_x_mm": "1e-9",
+    "brep_mirror_volume_mm3": "1e-6",
+    "brep_mirror_local_bounds": "1e-4",
+    "brep_non_rigid_mirror_bounds": "1e-4"
+  },
+  "test": "m03_03_08_003"
+}

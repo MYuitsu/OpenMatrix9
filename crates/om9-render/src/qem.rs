@@ -751,7 +751,8 @@ mod lock_tests {
 /// differ by more than `sharp_degrees`. Gem facet rims and prong silhouettes sit on these edges.
 pub fn feature_locks(mesh: &MeshData, sharp_degrees: f64) -> Vec<bool> {
     let mut locked = vec![false; mesh.positions.len()];
-    let mut edges: std::collections::HashMap<(u32, u32), Vec<u32>> = std::collections::HashMap::new();
+    let mut edges: std::collections::HashMap<(u32, u32), Vec<u32>> =
+        std::collections::HashMap::new();
     let mut normals: Vec<Option<[f64; 3]>> = Vec::new();
     for (face_index, chunk) in mesh.indices.chunks(3).enumerate() {
         if chunk.len() != 3 {
@@ -774,7 +775,8 @@ pub fn feature_locks(mesh: &MeshData, sharp_degrees: f64) -> Vec<bool> {
         let sharp = owners.len() == 1
             || owners.iter().any(|left| {
                 owners.iter().any(|right| {
-                    let (Some(x), Some(y)) = (normals[*left as usize], normals[*right as usize]) else {
+                    let (Some(x), Some(y)) = (normals[*left as usize], normals[*right as usize])
+                    else {
                         return false;
                     };
                     dot(x, y) < cos_limit
@@ -805,7 +807,10 @@ mod feature_lock_tests {
             vec![0, 1, 2, 0, 2, 3, 0, 1, 4],
         );
         let locked = feature_locks(&mesh, 30.0);
-        assert!(locked[0] && locked[1] && locked[2] && locked[3], "open boundary");
+        assert!(
+            locked[0] && locked[1] && locked[2] && locked[3],
+            "open boundary"
+        );
         assert!(locked[4], "sharp fold at the raised triangle");
     }
 }
@@ -820,9 +825,15 @@ mod accuracy_tests {
         let locked = feature_locks(&mesh, 30.0);
         let (lod, _) = simplify_with_error_locked(&mesh, mesh.triangle_count() / 2, Some(&locked));
         assert!(lod.triangle_count() < mesh.triangle_count());
-        let area_error = ((surface_area(&lod) - surface_area(&mesh)) / surface_area(&mesh) * 100.0).abs();
-        let volume_error = ((signed_volume(&lod) - signed_volume(&mesh)) / signed_volume(&mesh) * 100.0).abs();
-        eprintln!("locked LOD tris {} -> {}, area {area_error:.2}%, volume {volume_error:.2}%", mesh.triangle_count(), lod.triangle_count());
+        let area_error =
+            ((surface_area(&lod) - surface_area(&mesh)) / surface_area(&mesh) * 100.0).abs();
+        let volume_error =
+            ((signed_volume(&lod) - signed_volume(&mesh)) / signed_volume(&mesh) * 100.0).abs();
+        eprintln!(
+            "locked LOD tris {} -> {}, area {area_error:.2}%, volume {volume_error:.2}%",
+            mesh.triangle_count(),
+            lod.triangle_count()
+        );
         assert!(area_error < 2.0, "area error {area_error:.2}%");
         assert!(volume_error < 4.0, "volume error {volume_error:.2}%");
     }
@@ -851,7 +862,14 @@ mod prong_accuracy_tests {
             let next = base + sides;
             for i in 0..sides {
                 let j = (i + 1) % sides;
-                indices.extend_from_slice(&[base + i, base + j, next + i, base + j, next + j, next + i]);
+                indices.extend_from_slice(&[
+                    base + i,
+                    base + j,
+                    next + i,
+                    base + j,
+                    next + j,
+                    next + i,
+                ]);
             }
         }
         for i in 0..sides {
@@ -870,19 +888,27 @@ mod prong_accuracy_tests {
         let (lod, _) = simplify_with_error_locked(&mesh, mesh.triangle_count() / 2, Some(&locked));
         assert!(lod.triangle_count() < mesh.triangle_count());
         let bounds = |positions: &[[f32; 3]]| {
-            positions.iter().fold(([f32::MAX; 3], [f32::MIN; 3]), |(mut lo, mut hi), p| {
-                for axis in 0..3 {
-                    lo[axis] = lo[axis].min(p[axis]);
-                    hi[axis] = hi[axis].max(p[axis]);
-                }
-                (lo, hi)
-            })
+            positions
+                .iter()
+                .fold(([f32::MAX; 3], [f32::MIN; 3]), |(mut lo, mut hi), p| {
+                    for axis in 0..3 {
+                        lo[axis] = lo[axis].min(p[axis]);
+                        hi[axis] = hi[axis].max(p[axis]);
+                    }
+                    (lo, hi)
+                })
         };
         let (lo0, hi0) = bounds(&mesh.positions);
         let (lo1, hi1) = bounds(&lod.positions);
         for axis in 0..3 {
-            assert!((lo0[axis] - lo1[axis]).abs() < 1e-4, "prong min {axis} moved");
-            assert!((hi0[axis] - hi1[axis]).abs() < 1e-4, "prong max {axis} moved");
+            assert!(
+                (lo0[axis] - lo1[axis]).abs() < 1e-4,
+                "prong min {axis} moved"
+            );
+            assert!(
+                (hi0[axis] - hi1[axis]).abs() < 1e-4,
+                "prong max {axis} moved"
+            );
         }
     }
 }

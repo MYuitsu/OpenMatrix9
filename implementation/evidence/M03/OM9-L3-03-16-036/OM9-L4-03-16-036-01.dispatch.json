@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-036-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-036",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-036",
+  "source_command": "Divide Curve",
+  "menu_icon": "OthersCurveDivideCurve",
+  "owner_candidate": "OM9-L3-02-04-011",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Divide Curve command session is not wired; owner candidate OM9-L3-02-04-011 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-036/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-036/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-036/dispatch_contract.json": "5a2b6cd0ce964d4b0d3cb93eaa1a4f74f49cc5e8cf3adef6118a79d40a179dda",
+    "implementation/design/M03/OM9-L3-03-16-036/dispatch_contract.md": "fd48c53538cb766a920e3222442856c87ac067ff4518917bcc95b81b7fe6a5c2"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

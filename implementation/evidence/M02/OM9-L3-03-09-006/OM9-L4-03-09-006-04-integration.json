@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-09-006-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-09-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "F6 never performs builder geometry itself; the typed prefill is the only handoff.",
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ]
+}

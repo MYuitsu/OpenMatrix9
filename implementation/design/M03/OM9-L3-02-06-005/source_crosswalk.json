@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m03.l2-02-06.source_crosswalk.v1",
+  "l3_id": "OM9-L3-02-06-005",
+  "owner_l2_id": "OM9-L2-02-06",
+  "date": "2026-10-22",
+  "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "reviewed_upstream": [
+    {
+      "path": "crates/qymcad-kernel/src/kernel.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observed_symbols": [
+        "mirror",
+        "mirror_plane"
+      ],
+      "observation": "Mirror is an OCCT-backed core trait call; no portable reference-point transform session."
+    },
+    {
+      "path": "crates/qymcad-ui/src/acts.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observed_symbols": [
+        "LINEAR_PATTERN"
+      ],
+      "observation": "Linear pattern is a UI command flow; no Rust transform-session record."
+    }
+  ],
+  "local_owner": {
+    "crate": "om9-core + om9-kernel + om9-app",
+    "files": [
+      "crates/om9-core/src/transform_session.rs",
+      "crates/om9-kernel/src/transform_ops.rs"
+    ],
+    "symbols": [
+      "transform_session::MoveSession",
+      "transform_session::RotateSession",
+      "transform_session::ScaleSession",
+      "transform_session::set_point_transform",
+      "transform_session::align_point_to_plane",
+      "transform_session::align_point_to_axis",
+      "gumball::Session",
+      "transform_ops::mirror",
+      "transform_ops::linear_pattern",
+      "transform_ops::polar_pattern",
+      "transform_ops::orient_two_point",
+      "transform_ops::orient_three_point"
+    ]
+  },
+  "decision": "ADD",
+  "rationale": "QymCAD has OCCT-backed mirror calls and UI pattern flows, not a portable typed transform session. The command-session and orientation services are new Rust code against the OM9 Transform record.",
+  "not_reused": [
+    "QymCAD OCCT core trait calls are not a portable transform-session contract.",
+    "FreeCAD legacy transform adapters remain historical inputs."
+  ],
+  "l3_scope": "align selected points/objects to CPlane/World axis"
+}

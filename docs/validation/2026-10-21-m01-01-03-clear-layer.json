@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-21",
+  "status": "clear_current_layer_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Clears the current-layer pointer as one layer-plan mutation; no-op when already clear.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "9cd2d20a4abe280874569a334cdfe8e3efcc185ed021b0c18ff0b38839c75bde",
+    "crates/om9-plugin-host/src/staged.rs": "d69fd1a87b68a7dec66507e798eba3ed5c930a213a8656045a6d4878748d1f38",
+    "crates/om9-app/tests/plugin_native.rs": "acecbb9834b3f082fe97d156147340088a0aef912b1ebb6db02bd825e5060731",
+    "sdk/examples/hello-plugin/src/lib.rs": "5aba3cab127d11975cbd03d903163172a792ad0adbecbabbf089526d3ede3c47",
+    "sdk/examples/hello-plugin/descriptor.json": "71b2a4e6be00e3c8838308f802671352b777c5f7862664d1f2b2cb9da16d7f35",
+    "sdk/README.md": "d824883379b6945438371af13a958dc9772ae6e4828f0c1e87b3afeac438fcd1",
+    "sdk/API-INVENTORY.md": "f0fdc4521163c14442094c99258ef97ad91d6605680e591c33416e86945876b3"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "clear_current_layer"
+    ],
+    "error_codes": [
+      "layer",
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Layer records untouched; only the pointer clears.",
+    "No-op clear stages no transaction.",
+    "Undo restores the previous current layer."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "59 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "30 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-clear-layer",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8849 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "current_layer_cleared": true,
+    "undo_len": 3
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1908425,
+      "sha256": "42ddd777bdbe0091ef65c77609d81dc69ae12f93e196324494449d6db4f73325"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "6bdea5a6c74f90a306bb35f1fb524eb9fd5d93acfe20694070f7b3c809f2e041"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 184232,
+      "sha256": "69320065a4b0a6395981ff6dcc17b2a1d81008ea26acded7f927160d3abaed84"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "42f2ad49c3c28cfcf2ce96b5d57836f79b5edec60eb37fe95fbbb60a56d6ffae"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1905152,
+      "sha256": "121b6eddc14e21a3e983aa68182b5d2135737d6453a6a4341d28965aae7101f0"
+    },
+    "om9.exe": {
+      "bytes": 69472768,
+      "sha256": "97d84c4966c0dd020936dc91fa99a48e24ef936adc50c05ca4e62119900298d2"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-004 (layer current pointer clear)"
+    ],
+    "open": [
+      "layer delete",
+      "layer reorder"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "No layer delete/reorder.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Return to M02 for subobject/pick query services, or record the remaining host edit paths."
+}

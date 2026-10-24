@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-008-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-008",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-008",
+  "source_command": "Variable Blend Surfaces",
+  "menu_icon": "SurfaceVariableFilletBlendChamferVariableBlendSurfaces",
+  "owner_candidate": "OM9-L3-02-04-007",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-008/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-008/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-008/dispatch_contract.json": "32bbfc5b2cd2053c300df849573bf3e9833a58d7f180e6e8d641a9a8d66851d1",
+    "implementation/design/M03/OM9-L3-03-17-008/source_crosswalk.json": "cd15bd7cbf97041586cc940b0c5bf38d93693d471dadba2a00daa13f58d9e519"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

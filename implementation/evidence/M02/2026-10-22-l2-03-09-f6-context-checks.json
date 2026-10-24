@@ -1,0 +1,103 @@
+{
+  "schema": "om9.m02.checks.v1",
+  "work_item": "m02-l2-03-09-f6-context-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-03-09",
+  "title": "Febe Matrix F6 Context Actions",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "F6 was a fixed Line/Point/File popup. Added typed selection classification, registry-backed General actions, provider-gated curve/surface/gem/builder actions, a persisted custom command-ID menu, logical-point screen clamping and disabled-action gating.",
+  "audit_result": {
+    "existing_implementation": "PARTIAL",
+    "gaps_found": [
+      "F6 did not classify the selected object class.",
+      "No typed context groups or provider reasons.",
+      "No custom user menu or persistence.",
+      "No builder prefill request.",
+      "No clamped floating preference or one-shot disabled policy."
+    ],
+    "gaps_closed": "all eight L3 capabilities implemented"
+  },
+  "code_changes": [
+    "crates/om9-app/src/f6.rs (new)",
+    "crates/om9-app/src/lib.rs: pub mod f6",
+    "crates/om9-app/src/session/f6_state.rs (new om9.f6.v1 resource)",
+    "crates/om9-app/src/ui.rs: F6 context rendering, custom menu, clamp and dispatch",
+    "crates/om9-app/src/ui/sidebar_palettes.rs: palette test coverage retained",
+    "crates/om9-app/tests/f6_context.rs (new)"
+  ],
+  "checks": [
+    {
+      "name": "f6 unit",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib f6::tests -j 2",
+      "result": "7 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-f6-unit.log",
+      "sha256": "7e1fd49c9abee0d09c16a135a319fe31dd8cfca9b915647d7205c9ef40ad02c3"
+    },
+    {
+      "name": "f6 context",
+      "command": "cargo test -p om9-app --test f6_context -j 2",
+      "result": "2 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-f6-context.log",
+      "sha256": "a3164b669e0ad66e827f3a95610674dcb2f8e00f29b31e65cfbb86aae5234273"
+    },
+    {
+      "name": "app library with GPU feature",
+      "command": "cargo test -p om9-app --features gpu-sphere --lib -j 2",
+      "result": "168 passed; 0 failed",
+      "log": "implementation/evidence/M02/2026-10-22-f6-app-lib.log",
+      "sha256": "af8c098095b1111d4f14c3e60e3a44d6e76c02363ed675c5869cfdcc4c90aecf"
+    },
+    {
+      "name": "app cargo fmt",
+      "command": "cargo fmt --all -- --check",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-app-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "app clippy",
+      "command": "cargo clippy -p om9-app --all-targets -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-app-clippy-final.log",
+      "sha256": "2d52eff659ee930d5a1aef074714194f984ef78a17ce75ff602a15a4814ad265"
+    },
+    {
+      "name": "workspace clippy",
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "result": "exit 0",
+      "log": "implementation/evidence/M02/2026-10-22-workspace-clippy-final.log",
+      "sha256": "12b63ea2f1341c1c56bcdff61cecea8024b78a41bfdc141f4f2e8383a2a0c5ec"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "implementation/evidence/M02/2026-10-22-f6-public-source-audit.log",
+      "sha256": "172d6a6af40d6ea5e036f295492d8e979097109ddb1b13ae2007ac3a1f2da6be"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-03-09-001": "5/5",
+    "OM9-L3-03-09-002": "5/5",
+    "OM9-L3-03-09-003": "5/5",
+    "OM9-L3-03-09-004": "5/5",
+    "OM9-L3-03-09-005": "5/5",
+    "OM9-L3-03-09-006": "5/5",
+    "OM9-L3-03-09-007": "5/5",
+    "OM9-L3-03-09-008": "5/5"
+  },
+  "manual_gate": "M02-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Manual M02-UI review of F6 grouping, click dispatch, pin and disabled tooltips.",
+    "macOS runtime is unverified.",
+    "M03/M04/M05 providers are absent; their actions are registered disabled, not stub success."
+  ],
+  "not_claimed": [
+    "Human approval or M02-UI sign-off",
+    "macOS execution",
+    "M03/M04/M05 provider implementations"
+  ]
+}

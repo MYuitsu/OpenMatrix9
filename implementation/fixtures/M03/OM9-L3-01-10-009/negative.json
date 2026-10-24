@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-009",
+  "fixture_id": "OM9-L3-01-10-009-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "tampered canonical source"
+  ],
+  "expect": "CreationError::Invalid; no health is reported for an unbound source"
+}

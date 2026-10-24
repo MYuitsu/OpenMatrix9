@@ -1,0 +1,59 @@
+{
+  "schema": "om9.m03.l2-02-05.ui-review.v1",
+  "task_id": "OM9-L4-02-05-002-06",
+  "l3_id": "OM9-L3-02-05-002",
+  "title": "Loft And Curve Network Workflows",
+  "oracle": {
+    "positive": [
+      "three circles r=5 at z=0/5/10 loft to a cylinder of radius 5",
+      "the four-line network reproduces a 2x2 plane with centre (1,1,0)",
+      "raising one boundary to z=1 moves the Coons centre to z=0.5 while the other boundaries stay flat"
+    ],
+    "negative": [
+      "loft with one section, too few sections for the degree, or too few u samples is refused",
+      "a network with a mismatched corner is refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The core surface oracle passes; the UI rail/profile/boundary selection, preview, commit/cancel and warning review is not signed by a human.",
+    "scope": "surface through ordered curves / network"
+  },
+  "measured": {
+    "loft_radius_mm": 5.0,
+    "network_centre": [
+      1.0,
+      1.0,
+      0.0
+    ],
+    "raised_network_centre_z": 0.5
+  },
+  "tolerances": {
+    "loft_radius_mm": "0.05",
+    "network": "1e-6"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "core suite 16 passed; kernel suite 6 passed; core lib/kernel all exit 0",
+    "clippy and fmt exit 0",
+    "public source audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-05-002/api.md",
+    "implementation/design/M03/OM9-L3-02-05-002/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-002/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-002/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-05-002/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

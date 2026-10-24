@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G03-B-03-02-003",
+  "l3_id": "OM9-L3-03-02-003",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Wheel zoom tại pixel (x,y) giữ điểm world dưới cursor tại cùng pixel sau zoom",
+  "expected": "The documented camera motion with the world/document unchanged where required.",
+  "evidence": [
+    "om9-app navigation_input: 1 passed",
+    "om9-app navigation_precision: 3 passed",
+    "om9-scene camera_fit: 4 passed"
+  ],
+  "status": "PASS"
+}

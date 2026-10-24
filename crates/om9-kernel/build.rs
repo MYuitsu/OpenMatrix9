@@ -42,6 +42,11 @@ fn main() {
         .include(&include)
         .file("src/bridge.cpp")
         .file("src/brep_bridge.cpp")
+        .file("src/creation_bridge.cpp")
+        .file("src/extrusion_bridge.cpp")
+        .file("src/editing_bridge.cpp")
+        .file("src/transform_bridge.cpp")
+        .file("src/intersect_bridge.cpp")
         // OCCT hides M_PI under strict C++17 and its headers use std::min/std::max.
         .define("_USE_MATH_DEFINES", None)
         .define("NOMINMAX", None)
@@ -117,21 +122,36 @@ fn main() {
         "TKMesh",
         "TKFillet",
         "TKOffset",
+        "TKShHealing",
     ] {
         println!("cargo:rustc-link-lib=dylib={toolkit}");
     }
     if brep_3dm {
         println!("cargo:rustc-link-lib=dylib=TKShHealing");
-        println!("cargo:rustc-link-search=native={}", opennurbs_library.display());
-        println!("cargo:rustc-link-search=native={}", opennurbs_zlib.display());
+        println!(
+            "cargo:rustc-link-search=native={}",
+            opennurbs_library.display()
+        );
+        println!(
+            "cargo:rustc-link-search=native={}",
+            opennurbs_zlib.display()
+        );
         println!("cargo:rustc-link-lib=static=opennurbsStatic");
         println!("cargo:rustc-link-lib=static=zlib");
         for library in ["Shlwapi", "Usp10", "shell32", "advapi32", "Gdi32", "User32"] {
             println!("cargo:rustc-link-lib=dylib={library}");
         }
     }
-    // GetProcessMemoryInfo, used by the lifetime probe.\n    println!("cargo:rustc-link-lib=dylib=psapi");\n    println!("cargo:rerun-if-env-changed=OCCT_INCLUDE_DIR");
+    // GetProcessMemoryInfo, used by the lifetime probe.
+    println!("cargo:rustc-link-lib=dylib=psapi");
+    println!("cargo:rerun-if-env-changed=OCCT_INCLUDE_DIR");
     println!("cargo:rerun-if-env-changed=OCCT_LIB_DIR");
     println!("cargo:rerun-if-changed=src/bridge.cpp");
     println!("cargo:rerun-if-changed=src/brep_bridge.cpp");
+    println!("cargo:rerun-if-changed=src/brep_snapshot.hxx");
+    println!("cargo:rerun-if-changed=src/creation_bridge.cpp");
+    println!("cargo:rerun-if-changed=src/extrusion_bridge.cpp");
+    println!("cargo:rerun-if-changed=src/editing_bridge.cpp");
+    println!("cargo:rerun-if-changed=src/transform_bridge.cpp");
+    println!("cargo:rerun-if-changed=src/intersect_bridge.cpp");
 }

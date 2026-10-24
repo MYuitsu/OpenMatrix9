@@ -1,0 +1,141 @@
+{
+  "date": "2026-10-21",
+  "status": "selection_remove_toggle_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-07",
+  "milestone": "M02",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Completes the add/remove/toggle scope of OM9-L3-01-07-002 for the plugin boundary.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "66318fdd02b810b3462cf906baa873d08e8af8a23c8c1cfb3b133c5d65629e62",
+    "crates/om9-plugin-host/src/staged.rs": "3781181af72cb28076cb84e1c118540de6ffd0539cc81275d218865e32d9a9ff",
+    "crates/om9-app/tests/plugin_native.rs": "93eed1e610b718303b6b3a4b55c01e8629fabdbecdabc7657b77b26dc189c11e",
+    "sdk/examples/hello-plugin/src/lib.rs": "f127a35ee43e12cc7b2ff3b67e4351294e9f89b373527d60810ba7dba46a3d9f",
+    "sdk/README.md": "ace0cd8cdf5923477fbf4a34bfa702f2b54a1e6e2c86694032bd496721cb4c81",
+    "sdk/API-INVENTORY.md": "903aa8a2d501aa40326d0b45c0580da182411f5991f4de8d9d21f18bd2a16afd"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["remove_from_selection", "toggle_selection"],
+    "error_codes": ["id", "missing", "permission", "selection", "budget"]
+  },
+  "asserted_semantics": [
+    "toggle_selection removes a selected id and joins an unselected one; joining follows the add rule (canonical, live, selectable root) while leaving does not.",
+    "remove_from_selection is idempotent for unselected ids and only requires a canonical object UUID.",
+    "Selection is outside document state: no transaction, no Undo entry; a refused command leaves the previous selection untouched.",
+    "The Controller still validates the staged set against the scene it will publish before commit."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "46 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "9 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-selection-toggle",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8795 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "command": "SelectionDemo variants",
+    "select_two": 2,
+    "add_keeps_existing": true,
+    "toggle_removes_one": true,
+    "remove_empties_selection": true,
+    "invalid_root_refused": true,
+    "document_unchanged": true,
+    "undo_len_after_selection": 1
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1361383,
+      "sha256": "3e5ed2ca82736e2c360bda30b5abb23f1f2c7b6b46f81e6cfca01527322d9d13"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "9074dc132b604a966ba25b6f16b9a6712c0ecb0534e03f389e103e75d4052342"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 128923,
+      "sha256": "3f0a7d3b4def36ce91a5ab21177bfac54e87cb5a6403dedf6cdcb624be84f40f"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "f824abb947958f9ea04ddf45187126d7b6af889eb143159e03602d5b5364bae6"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1359872,
+      "sha256": "261383d9b7379fccd1162a656957f771d345eedc2d66d336e9b5d9d1548676fd"
+    },
+    "om9.exe": {
+      "bytes": 68593664,
+      "sha256": "caf48fb46e906a1ab6b786017ed38028e48ebf07dcd39997b0ff8575a10f5c4a"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-07-002 (replace/add/remove/toggle by persistent IDs)"],
+    "open": [
+      "typed subobject/occurrence references",
+      "pick query and window/crossing selection",
+      "drag transaction and highlighting"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only object-root selection is exported; subobject refs, pick queries, window/crossing and drag remain open.",
+    "Selection is not document state and does not participate in Undo/Redo.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Take the next plan-named owner slice (OM9-L2-01-12 file lifecycle) or the pick/query work at M02 01-07."
+}

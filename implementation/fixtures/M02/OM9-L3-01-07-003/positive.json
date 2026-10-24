@@ -1,0 +1,15 @@
+{
+  "fixture_id": "G02-A-01-07-003",
+  "l3_id": "OM9-L3-01-07-003",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Chọn đúng face/edge/vertex của box và lưu khóa topology bền",
+  "expected": "The documented hit/selection is produced with the exact object/subobject key and no silent fallback.",
+  "evidence": [
+    "om9-scene subobject_pick: 4 passed",
+    "om9-app subobject_selection: 8 passed",
+    "om9-app subobject_occurrences: 5 passed",
+    "om9-app brep_selection (gpu-sphere): 5 passed"
+  ],
+  "status": "PASS"
+}

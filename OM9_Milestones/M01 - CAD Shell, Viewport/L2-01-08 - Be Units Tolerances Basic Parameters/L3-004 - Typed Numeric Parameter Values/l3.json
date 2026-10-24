@@ -187,5 +187,43 @@
       "id": "OM9-L4-01-08-004-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-004 - Typed Numeric Parameter Values/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "plugin_sdk_v1_parameters": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "Typed numeric parameter values: SDK v1 exposes Dimension/ParameterValue with kind-tagged canonical units (length mm, angle degrees, ratio, count, choice, boolean, text); a bare number is refused and apply_parameters returns the filled typed map with declared defaults.",
+      "public_api": [
+        "Host::validate_parameter",
+        "Host::apply_parameters"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-08-builder-parameters.md",
+        "docs/validation/2026-10-21-m01-08-builder-parameters.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "The application has no builder parameter editor yet; UI parity is not claimed.",
+        "Document tolerance editing and CPlane frame resolution remain open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::apply_parameters",
+      "Host::validate_parameter"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_parameters"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-08-builder-parameters.json",
+      "docs/validation/2026-10-21-m01-08-builder-parameters.md"
+    ]
+  }
 }

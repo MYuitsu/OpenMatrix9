@@ -1,0 +1,7 @@
+{
+  "l4_id": "OM9-L4-03-18-004-03",
+  "review": "AUTO_ONLY",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03-UI",
+  "screenshots": []
+}

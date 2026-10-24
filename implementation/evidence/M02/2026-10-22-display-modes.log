@@ -1,0 +1,11 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.74s
+     Running tests\display_modes.rs (L:/om9-target\debug\deps\display_modes-1303279dc63042ec.exe)
+
+running 3 tests
+test a_display_preset_restores_wireframe_and_edge_preferences ... ok
+test a_mode_switch_keeps_selected_ids_and_visibility_flags ... ok
+test wireframe_and_shaded_show_the_same_box_and_do_not_write_the_model ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

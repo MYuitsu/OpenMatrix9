@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-007",
+  "fixture_id": "OM9-L3-01-10-007-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "thickness 0",
+    "offset 0",
+    "thicken a solid"
+  ],
+  "expect": "CreationError::Invalid; no body"
+}

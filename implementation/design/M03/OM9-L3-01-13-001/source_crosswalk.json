@@ -1,0 +1,71 @@
+{
+  "schema": "om9.m03.l2-01-13.source_crosswalk.v1",
+  "l3_id": "OM9-L3-01-13-001",
+  "owner_l2_id": "OM9-L2-01-13",
+  "date": "2026-10-22",
+  "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "reviewed_upstream": [
+    {
+      "path": "crates/qymcad-io/src/formats.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observed_symbols": [],
+      "observation": "No 3DM/Rhino reader or writer symbol is present. The module covers the formats QymCAD itself supports."
+    },
+    {
+      "path": "crates/qymcad-io/src/lib.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observed_symbols": [],
+      "observation": "No 3DM/Rhino import-export entry point is exposed."
+    },
+    {
+      "path": "crates/qymcad-kernel/src/shape/exchange.rs",
+      "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+      "review": "PATH_AND_CONTENT_SCANNED",
+      "observed_symbols": [],
+      "observation": "Native shape exchange is not a 3DM reader; no ONX_Model/ON_BinaryArchive call is present."
+    }
+  ],
+  "reviewed_upstream_opennurbs": [
+    {
+      "repository": "mcneel/opennurbs",
+      "revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+      "path": "example_read/example_read.cpp",
+      "review": "API_SURFACE_REFERENCE",
+      "observation": "Read loop uses ONX_Model::Read and the model component iterator; the local bridge keeps the same read-only ownership boundary."
+    },
+    {
+      "repository": "mcneel/opennurbs",
+      "revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+      "path": "opennurbs_3dm.h",
+      "review": "API_SURFACE_REFERENCE",
+      "observation": "Archive version/chunk and unit-system surface used by the probe and the unit projection."
+    }
+  ],
+  "qa_finding": "M00 L2-04 already proved QymCAD contains no 3DM reader; this L3 audit confirms it at the three candidate paths.",
+  "local_owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-core/src/three_dm.rs",
+      "crates/om9-exchange/src/import_dto.rs",
+      "native/native_exchange.cpp",
+      "native/native_exchange.cpp"
+    ],
+    "symbols": [
+      "ThreeDmHost::import",
+      "ThreeDmHost::import_with_options",
+      "ThreeDmHost::export",
+      "NativeExchange::prepare_import_with_brep",
+      "Controller::import_3dm",
+      "format_import_summary"
+    ]
+  },
+  "decision": "ADD",
+  "rationale": "QymCAD has no 3DM reader/writer. The product bridge is new Rust ownership around the pinned openNURBS C++ static library and the language-local C ABI; no QymCAD code or naming is copied.",
+  "not_reused": [
+    "QymCAD format registry: it does not contain Rhino 3DM.",
+    "FreeCAD legacy 3DM adapters: historical inputs, not the standalone OM9 runtime."
+  ],
+  "l3_scope": "Rhino 3dm header/format variant check"
+}

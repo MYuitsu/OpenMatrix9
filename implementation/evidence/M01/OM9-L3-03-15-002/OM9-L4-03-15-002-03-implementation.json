@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-15-002-03",
+  "l3": "OM9-L3-03-15-002",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/three_dm_host.rs",
+    "native/native_exchange.cpp"
+  ],
+  "tests": "existing 2026-10-19 host evidence; file_widgets 21 passed",
+  "oracle": "Import/Export 3DM through the shared host adapter"
+}

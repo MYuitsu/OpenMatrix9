@@ -1,0 +1,103 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests\acceptance_viewport_selection.rs (L:/om9-target\debug\deps\acceptance_viewport_selection-0da181bb662510e5.exe)
+
+running 8 tests
+test ctrl_shift_click_picks_the_face_under_the_pointer ... ok
+test escape_without_a_drag_clears_the_selection ... ok
+test a_picked_subobject_is_drawn_in_the_viewport ... ok
+test a_drag_that_starts_on_the_dock_draws_no_selection_marquee ... ok
+test shift_adds_with_a_band_and_ctrl_removes ... ok
+test pick_tolerance_stays_in_logical_points_at_high_dpi ... ok
+test shift_click_adds_and_keeps_an_already_selected_object ... ok
+test twenty_band_passes_leave_the_same_selection ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.02s
+
+     Running tests\chrome_actions.rs (L:/om9-target\debug\deps\chrome_actions-4c6a554bb0ecde97.exe)
+
+running 13 tests
+test every_reference_menu_has_its_full_icon_list ... ok
+test main_menu_categories_wrap_at_the_rail_edge ... ok
+test unregistered_right_click_slot_never_executes_a_previous_action ... ok
+test f4_toggles_world_datum_without_mutating_document ... ok
+test help_popup_contains_help_and_about_without_feature_catalog_actions ... ok
+test view_tab_switches_active_and_maximized_view ... ok
+test main_menu_category_tabs_switch_palette_without_document_mutation ... ok
+test top_menu_labels_are_interactive_and_return_to_categories ... ok
+test icons_scale_with_the_screen_size ... ok
+test display_toolbar_tab_does_not_reuse_enabled_geometry_palette ... ok
+test view_tab_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test view_menu_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test snaps_are_noninvoking_even_where_the_old_sidebar_displayed_point_and_line ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.42s
+
+     Running tests\command_sessions.rs (L:/om9-target\debug\deps\command_sessions-76f42123f0ba20d0.exe)
+
+running 6 tests
+test unavailable_command_and_unknown_options_cannot_publish_or_replace_active_session ... ok
+test numeric_cmd_points_use_page_units_and_captured_cplane_exactly_once ... ok
+test both_sides_uses_start_as_midpoint_and_empty_enter_never_repeats_active_session ... ok
+test cancel_and_invalid_second_point_preserve_world_and_executable_redo ... ok
+test menu_cmd_and_f6_dispatch_the_same_line_phases_and_atomic_commit ... ok
+test scene_is_derived_from_published_document_and_recent_icons_hold_nine_completed_commands ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_viewport.rs (L:/om9-target\debug\deps\gumball_viewport-1367f1f2fcc31d97.exe)
+
+running 3 tests
+test a_click_selects_and_a_gumball_drag_moves_the_line ... ok
+test shift_dragging_a_ring_rotates_the_selection ... ok
+test dragging_the_scale_square_scales_the_selection ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.87s
+
+     Running tests\pick_disambiguation.rs (L:/om9-target\debug\deps\pick_disambiguation-bad21f519bcf9cec.exe)
+
+running 5 tests
+test a_click_on_two_objects_offers_a_choice_and_the_choice_selects ... ok
+test a_click_on_one_object_selects_it_without_a_popup ... ok
+test a_choice_is_refused_if_the_document_changed_while_the_popup_was_open ... ok
+test escaping_the_choice_keeps_the_previous_selection ... ok
+test the_popup_rows_name_the_type_and_escape_closes_without_selecting ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s
+
+     Running tests\selection_overlay.rs (L:/om9-target\debug\deps\selection_overlay-0bd12558e6757112.exe)
+
+running 8 tests
+test ctrl_click_toggles_one_object_in_and_out_of_the_selection ... ok
+test any_selection_shows_the_gumball ... ok
+test a_multi_selection_draws_a_frame_around_itself ... ok
+test clearing_the_selection_removes_the_frame_and_the_gumball ... ok
+test a_single_selection_has_no_frame_but_two_do ... ok
+test hovering_an_object_shows_a_frame_that_follows_the_pointer ... ok
+test escape_cancels_a_gumball_drag_without_committing ... ok
+test the_band_is_a_window_left_to_right_and_crossing_right_to_left ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.05s
+
+     Running tests\viewport_title_menu.rs (L:/om9-target\debug\deps\viewport_title_menu-d1a4e6b40c2c2db6.exe)
+
+running 17 tests
+test wireframe_changes_only_captured_view_and_no_op_preserves_revision ... ok
+test workspace_snapshot_restore_cannot_revive_a_used_menu ... ok
+test layout_roundtrip_keeps_views_exact_but_does_not_revive_a_previous_capture ... ok
+test mismatched_view_key_cannot_redirect_menu_to_a_neighbor ... ok
+test wireframe_with_exhausted_revision_refuses_before_any_layout_or_camera_change ... ok
+test fresh_layout_clock_with_copied_view_states_cannot_reset_menu_authority ... ok
+test render_plugin_and_unimplemented_modes_refuse_without_changing_any_view_or_model ... ok
+test foreign_closed_and_replaced_view_capture_rejects_even_with_equal_visible_state ... ok
+test changed_document_or_target_view_invalidates_popup_without_resetting_prior_state ... ok
+test captured_maximize_preserves_model_redo_pending_point_and_all_camera_poses ... ok
+test replacing_target_view_dismisses_popup_before_command_input_resumes ... ok
+test keyboard_enter_activates_focused_menu_item_and_returns_to_command_draft ... ok
+test escape_closes_title_popup_and_preserves_numeric_draft_and_pending_command ... ok
+test outside_canvas_click_only_dismisses_popup_and_preserves_pending_point ... ok
+test long_title_menu_scrolls_to_last_reference_item_in_a_short_window ... ok
+test title_popup_has_reference_actions_instead_of_the_old_three_entry_stub ... ok
+test popup_keyboard_cannot_commit_command_after_tab_reaches_editor ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.65s
+

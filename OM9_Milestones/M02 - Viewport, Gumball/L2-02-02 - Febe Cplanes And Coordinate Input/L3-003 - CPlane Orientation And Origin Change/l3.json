@@ -207,5 +207,41 @@
     },
     "algorithm_and_coverage": "Tạo CPlane bằng transform orthonormalize, atomic assignment",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "CPlane::with_origin, rotated and from_three_points build an orthonormal frame before assignment; Controller::set_cplane bumps the revision atomically.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-02-02-003/api.md",
+      "implementation/evidence/M02/OM9-L3-02-02-003/OM9-L4-02-02-003-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-02-02-003/OM9-L4-02-02-003-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-02-02-003/OM9-L4-02-02-003-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-scene cplane_presets: 6 passed",
+      "om9-app cplane_coordinate_input: 10 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-02-02-003/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-02-02-003/positive.json",
+        "implementation/fixtures/M02/OM9-L3-02-02-003/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-02-02-003/OM9-L4-02-02-003-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-02-02-003/OM9-L4-02-02-003-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-02-02-003/OM9-L4-02-02-003-06-acceptance.md"
+      ],
+      "acceptance": "Origin (10,20,0) plus a 30-degree rotation leaves every world object's placement/geometry unchanged; collinear three-point input is refused and leaves the old plane in place."
+    }
   }
 }

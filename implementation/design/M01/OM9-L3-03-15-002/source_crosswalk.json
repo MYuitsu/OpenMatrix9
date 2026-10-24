@@ -1,0 +1,14 @@
+{
+  "l3": "OM9-L3-03-15-002",
+  "title": "Matrix File Import Export Entrypoints",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/three_dm_host.rs",
+    "native/native_exchange.cpp"
+  ],
+  "tests": "existing 2026-10-19 host evidence; file_widgets 21 passed",
+  "manual_reference": "Matrix8 Book 1 pp48-56/79-86",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-15-002-01"
+}

@@ -1,0 +1,18 @@
+{
+  "l3": "OM9-L3-02-03-004",
+  "title": "Osnap Surface And Polysurface",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-scene/src/osnap.rs",
+    "crates/om9-core/src/brep.rs"
+  ],
+  "tests": [
+    "om9-app osnap BRep: 1 passed",
+    "om9-scene osnap: 11 passed"
+  ],
+  "manual_reference": "Rhino5 user guide pp.37-40; Matrix8 Book 1 pp.57-62 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-02-03-004-01"
+}

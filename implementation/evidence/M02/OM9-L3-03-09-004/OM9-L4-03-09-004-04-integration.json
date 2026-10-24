@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-09-004-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-09-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "No gem geometry is created by F6; it only exposes/provider-gates the actions.",
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ]
+}

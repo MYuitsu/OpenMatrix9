@@ -191,7 +191,9 @@
       "crates/om9-app/tests/left_stack_layers.rs",
       "crates/om9-app/tests/panel_ops.rs",
       "crates/om9-app/tests/shell_docking.rs",
-      "implementation/evidence/M01/2026-10-20-menu-text-contrast.json"
+      "implementation/evidence/M01/2026-10-20-menu-text-contrast.json",
+      "implementation/evidence/M01/2026-10-21-l2-03-07-menu-docking-recheck.json",
+      "implementation/evidence/M01/2026-10-22-l2-03-07-l4-artifacts.json"
     ],
     "human_approval": null,
     "remaining": [
@@ -231,6 +233,26 @@
         "implementation/evidence/M01/2026-10-20-smooth-fonts.json"
       ],
       "limitation": "All three native app processes exited successfully and each completed five command checks. Full layout oracle remains FAIL because its 22pt icon expectation disagrees with the captured 24pt executable. Concurrent icon-size work is outside this font change."
+    },
+    "last_verified": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "tests": {
+        "chrome_actions": "13 passed",
+        "left_stack_layers": "8 passed",
+        "panel_ops": "33 passed",
+        "shell_docking": "10 passed",
+        "dock_layout_default": "7 passed",
+        "dock_layout_persistence": "6 passed",
+        "command_sessions": "6 passed",
+        "command_options_and_repeat": "6 passed",
+        "startup_contract": "3 passed"
+      },
+      "evidence": [
+        "implementation/evidence/M01/2026-10-22-l2-03-07-l4-artifacts.json"
+      ],
+      "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261022/acceptance.log",
+      "note": "L4 source/API/fixture/implementation/integration/acceptance artefacts created; all eight L3 buckets now have 5/5 L4 evidence. Manual M01-UI review remains pending."
     }
   }
 }

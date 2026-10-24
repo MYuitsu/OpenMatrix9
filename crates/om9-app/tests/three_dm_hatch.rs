@@ -22,6 +22,8 @@ fn rhino5_hatch_geometry_round_trips_as_display_proxy() {
             faces: vec![vec![0, 1, 2]],
             normals: vec![],
             colors: vec![],
+
+            corner_uvs: Vec::new(),
         },
         loops: vec![],
         pattern: Some("#0".into()),
@@ -51,4 +53,3 @@ fn rhino5_hatch_geometry_round_trips_as_display_proxy() {
     assert_eq!(hatch.pattern.as_deref(), Some("#0"));
     let _ = std::fs::remove_dir_all(root);
 }
-

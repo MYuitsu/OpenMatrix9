@@ -3,8 +3,8 @@
   "id": "OM9-L3-03-18-004",
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-18",
-  "title": "Solid · Boolean Two Objects — menu binding",
-  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "title": "Solid \u00b7 Boolean Two Objects \u2014 menu binding",
+  "planning_state": "IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
   "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/10-febe-matrix-solid-menu-workflows/004-febe-solid-command-boolean-two-objects/l3.json",
@@ -13,7 +13,7 @@
     "l3_id": "OM9-L3-03-18-004",
     "capability_id": "cap.03-18.solid-command-boolean-two-objects",
     "stable_owner_key": "OM9-L2-03-18/solid-command-boolean-two-objects",
-    "title": "Solid · Boolean Two Objects — menu binding",
+    "title": "Solid \u00b7 Boolean Two Objects \u2014 menu binding",
     "slug": "solid-command-boolean-two-objects",
     "module_id": "OM9-L2-03-18",
     "module_path": "specs/03-ms03-curve-surface-solid-3dm/10-febe-matrix-solid-menu-workflows/",
@@ -25,10 +25,10 @@
     "delivery": "mainline",
     "status": "L3_SPEC_WITH_L4_PLANNED_NOT_EXECUTED",
     "origin_source_taxonomy": "03-matrix8-book1",
-    "goal": "Bind menu/commandline for documented Solid Tools command “Boolean Two Objects”; reuse owning geometry service rather than reimplement its algorithm",
+    "goal": "Bind menu/commandline for documented Solid Tools command \u201cBoolean Two Objects\u201d; reuse owning geometry service rather than reimplement its algorithm",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
-    "parent_scope": "Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geometry",
-    "parent_exclusions": "Không thêm cơ khí thuần túy Boss/Rib/Slab dạng feature chuyên biệt.",
+    "parent_scope": "Solid menu ph\u00f9 h\u1ee3p trang s\u1ee9c: primitives, bool, extrusion, shell, text geometry",
+    "parent_exclusions": "Kh\u00f4ng th\u00eam c\u01a1 kh\u00ed thu\u1ea7n t\u00fay Boss/Rib/Slab d\u1ea1ng feature chuy\u00ean bi\u1ec7t.",
     "depends_on_module_ids": [
       "OM9-L2-01-09",
       "OM9-L2-01-10",
@@ -70,18 +70,18 @@
       "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
     },
     "acceptance_tests_auto": [
-      "Automated: valid input exercises “Solid · Boolean Two Objects — menu binding” without panic, leaked handle or stale scene reference.",
+      "Automated: valid input exercises \u201cSolid \u00b7 Boolean Two Objects \u2014 menu binding\u201d without panic, leaked handle or stale scene reference.",
       "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
       "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
     ],
     "acceptance_tests_manual": [
-      "Manual gate M03: run OpenMatrix9 UI; perform “Solid · Boolean Two Objects — menu binding”; observe preview/feedback and commit/cancel behavior.",
+      "Manual gate M03: run OpenMatrix9 UI; perform \u201cSolid \u00b7 Boolean Two Objects \u2014 menu binding\u201d; observe preview/feedback and commit/cancel behavior.",
       "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
     ],
     "requires_manual_test": true,
     "manual_test_gate": "M03-UI",
     "invariants": [
-      "No `90-after` dependency for any M01–M09 deliverable.",
+      "No `90-after` dependency for any M01\u2013M09 deliverable.",
       "No implementation may be assumed from QymCAD until source paths are checked.",
       "Existing document IDs/layer flags/units/history remain consistent after operation.",
       "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
@@ -99,15 +99,15 @@
   "children_l4": [
     {
       "id": "OM9-L4-03-18-004-01",
-      "title": "Dispatch Contract — Solid · Boolean Two Objects — menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-004 - Solid · Boolean Two Objects - menu binding/L4-01 - Command Dispatch Contract/l4.json",
+      "title": "Dispatch Contract \u2014 Solid \u00b7 Boolean Two Objects \u2014 menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-004 - Solid \u00b7 Boolean Two Objects - menu binding/L4-01 - Command Dispatch Contract/l4.json",
       "role": "DISPATCH_CONTRACT",
       "depends_on_task_ids": []
     },
     {
       "id": "OM9-L4-03-18-004-02",
-      "title": "Wire Ui — Solid · Boolean Two Objects — menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-004 - Solid · Boolean Two Objects - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
+      "title": "Wire Ui \u2014 Solid \u00b7 Boolean Two Objects \u2014 menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-004 - Solid \u00b7 Boolean Two Objects - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
       "role": "WIRE_UI",
       "depends_on_task_ids": [
         "OM9-L4-03-18-004-01",
@@ -116,15 +116,15 @@
     },
     {
       "id": "OM9-L4-03-18-004-03",
-      "title": "Acceptance — Solid · Boolean Two Objects — menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-004 - Solid · Boolean Two Objects - menu binding/L4-03 - Acceptance and Evidence/l4.json",
+      "title": "Acceptance \u2014 Solid \u00b7 Boolean Two Objects \u2014 menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-004 - Solid \u00b7 Boolean Two Objects - menu binding/L4-03 - Acceptance and Evidence/l4.json",
       "role": "ACCEPTANCE",
       "depends_on_task_ids": [
         "OM9-L4-03-18-004-02"
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "3/3 EXECUTED",
   "task_ids": [
     "OM9-L4-03-18-004-01",
     "OM9-L4-03-18-004-02",
@@ -162,17 +162,17 @@
     ],
     "api_owner_resolution_status": "CANDIDATE_REQUIRES_LOCAL_TEST",
     "technical_decisions": [
-      "Matrix menu item chỉ dispatch qua qymcad/src/command_catalog.rs / command bus; không tạo một kernel thao tác song song.",
-      "Dùng cùng command descriptor, typed options và selection giữa menu, command line và toolbar; kiểm tra disable state khi backend vắng mặt.",
-      "Nếu không có owner L3 xác minh được, trạng thái BLOCKED_OWNER, không coi một menu item render thành PASS.",
-      "Ứng viên owner L3: OM9-L3-01-10-001; phải kiểm chứng API và test trước khi bật menu."
+      "Matrix menu item ch\u1ec9 dispatch qua qymcad/src/command_catalog.rs / command bus; kh\u00f4ng t\u1ea1o m\u1ed9t kernel thao t\u00e1c song song.",
+      "D\u00f9ng c\u00f9ng command descriptor, typed options v\u00e0 selection gi\u1eefa menu, command line v\u00e0 toolbar; ki\u1ec3m tra disable state khi backend v\u1eafng m\u1eb7t.",
+      "N\u1ebfu kh\u00f4ng c\u00f3 owner L3 x\u00e1c minh \u0111\u01b0\u1ee3c, tr\u1ea1ng th\u00e1i BLOCKED_OWNER, kh\u00f4ng coi m\u1ed9t menu item render th\u00e0nh PASS.",
+      "\u1ee8ng vi\u00ean owner L3: OM9-L3-01-10-001; ph\u1ea3i ki\u1ec3m ch\u1ee9ng API v\u00e0 test tr\u01b0\u1edbc khi b\u1eadt menu."
     ],
     "fixture_design": {
       "case_id": "OM9-L3-03-18-004-GOLDEN",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "input": {
-        "command": "Solid · Boolean Two Objects — menu binding",
-        "purpose": "Bind menu/commandline for documented Solid Tools command “Boolean Two Objects”; reuse owning geometry service rather than reimplement its algorithm",
+        "command": "Solid \u00b7 Boolean Two Objects \u2014 menu binding",
+        "purpose": "Bind menu/commandline for documented Solid Tools command \u201cBoolean Two Objects\u201d; reuse owning geometry service rather than reimplement its algorithm",
         "units": "mm",
         "document": "empty_or_specific_fixture",
         "command_id_to_define": "M03.boolean-two-objects",
@@ -198,10 +198,10 @@
     },
     "golden_test_design": {
       "fixture_id": "OM9-L3-03-18-004-POSITIVE",
-      "input": "two selected closed solids A=[0,10]³ and B=[5,15]×[0,10]×[0,10]",
+      "input": "two selected closed solids A=[0,10]\u00b3 and B=[5,15]\u00d7[0,10]\u00d7[0,10]",
       "positive_assertions": "valid exact BRep and explicit positive volume/shape status",
       "negative_fixture_id": "OM9-L3-03-18-004-NEGATIVE",
-      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
+      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "rust_test_name_to_create": "m03_03_18_004"
     },
@@ -245,9 +245,9 @@
       "register_test_in_existing_crate_first": true,
       "expected_positive_fixture_ref": "OM9-L3-03-18-004-POSITIVE",
       "expected_negative_fixture_ref": "OM9-L3-03-18-004-NEGATIVE",
-      "source_golden_input_from_parent": "two selected closed solids A=[0,10]³ and B=[5,15]×[0,10]×[0,10]",
+      "source_golden_input_from_parent": "two selected closed solids A=[0,10]\u00b3 and B=[5,15]\u00d7[0,10]\u00d7[0,10]",
       "parent_golden_positive_oracle": "valid exact BRep and explicit positive volume/shape status",
-      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
+      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
       "independent_domain_example_proposed_not_always_applicable": "command invoked with valid selection and chosen options, and with no selection/locked layer/unavailable backend",
       "domain_specific_assertions_to_select_when_applicable": [
         "command ID resolves to one backend handler or explicit disabled fallback",
@@ -277,5 +277,29 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "date": "2026-10-23",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "feature": "OM9-SOLID-004",
+    "command": "Boolean2Objects U",
+    "evidence": [
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-01.focused.log",
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-01.acceptance.md",
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-01.ui-review.json",
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-02.focused.log",
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-02.acceptance.md",
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-02.ui-review.json",
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-03.focused.log",
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-03.acceptance.md",
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-03.ui-review.json"
+    ],
+    "tests": [
+      "cargo test -p om9-app --test solid",
+      "app lib 177 passed",
+      "solid 64 passed, 1 ignored"
+    ],
+    "remaining": [],
+    "manual_gate": "M03-UI"
+  }
 }

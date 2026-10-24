@@ -1,0 +1,43 @@
+{
+  "schema": "om9.m01.checks.v1",
+  "work_item": "m01-l2-03-10-commandline-feedback-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9",
+  "milestone": "OM9-L2-03-10",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Verified the existing command-line entry/submit, prompt, option-token, numeric feedback, history and Escape/repeat implementation; no new feature code was required.",
+  "implementation": {
+    "transcript": "crates/om9-app/src/transcript.rs",
+    "ui": "crates/om9-app/src/ui.rs",
+    "status": "crates/om9-app/src/status_surface.rs",
+    "tests": [
+      "crates/om9-app/tests/command_feedback_adapter.rs",
+      "crates/om9-app/tests/command_options_and_repeat.rs",
+      "crates/om9-app/tests/command_shortcuts.rs",
+      "crates/om9-app/tests/command_state_machine.rs",
+      "crates/om9-app/tests/command_tokens.rs",
+      "crates/om9-app/tests/command_transcript.rs",
+      "crates/om9-app/tests/command_sessions.rs",
+      "crates/om9-app/tests/status_bar_overlap.rs"
+    ]
+  },
+  "checks": {
+    "command_feedback_adapter": "5 passed",
+    "command_options_and_repeat": "6 passed",
+    "command_shortcuts": "3 passed",
+    "command_state_machine": "3 passed",
+    "command_tokens": "1 passed",
+    "command_transcript": "3 passed",
+    "command_sessions": "6 passed",
+    "status_bar_overlap": "4 passed"
+  },
+  "logs": {
+    "acceptance": "build/standalone-validation/ui-artifacts/m01-l2-03-10-20261022/acceptance.log",
+    "acceptance_sha256": "cf81470b2b85af1b90c94b04cfc00cae6e686915958c091342b8e31d34350de6"
+  },
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual visual review of the real Windows window is still required.",
+    "No human sign-off is claimed."
+  ]
+}

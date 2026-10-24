@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-A-01-07-005",
+  "l3_id": "OM9-L3-01-07-005",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Không có hit không mở popup; popup đóng không đổi selection",
+  "expected": "An explicit miss/error or unchanged state; no stale selection and no nearby-geometry rematch.",
+  "evidence": [
+    "om9-app pick_disambiguation: 5 passed (10/10 consecutive runs)",
+    "om9-scene acceptance_l2_01_07: 9 passed"
+  ],
+  "status": "PASS"
+}

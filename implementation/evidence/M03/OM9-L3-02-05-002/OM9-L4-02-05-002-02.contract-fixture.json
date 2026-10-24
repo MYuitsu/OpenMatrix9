@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-002-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-002",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-002/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-002/negative.json",
+  "fixture_sha256": {
+    "positive": "2e17aed6315eb87c1acb205f96173a790beed0437211fca1889ac99fa941c3f5",
+    "negative": "917cae61a14cb6c60437e73b1393f21e17c769fb5c206b37bae27fcfb718a660"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-002/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-002/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-002/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "three circles r=5 at z=0/5/10 loft to a cylinder of radius 5",
+      "the four-line network reproduces a 2x2 plane with centre (1,1,0)",
+      "raising one boundary to z=1 moves the Coons centre to z=0.5 while the other boundaries stay flat"
+    ],
+    "negative": [
+      "loft with one section, too few sections for the degree, or too few u samples is refused",
+      "a network with a mismatched corner is refused"
+    ]
+  }
+}

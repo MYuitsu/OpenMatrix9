@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-008-05",
+  "role": "REGRESSION_STRESS",
+  "l3": "OM9-L3-01-07-008",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "regression": "a_gesture_without_motion_writes_nothing; escape_cancels_a_gumball_drag_without_committing; a_numeric_move_is_one_transaction; a_gumball_commit_reopens_in_a_fresh_process_with_the_same_id_and_placement.",
+  "tests": [
+    "om9-app gumball_cold: 1 passed",
+    "om9-app selection_overlay: 8 passed"
+  ]
+}

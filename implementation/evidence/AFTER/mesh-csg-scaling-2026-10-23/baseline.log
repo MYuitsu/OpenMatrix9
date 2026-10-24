@@ -1,0 +1,36 @@
+   Compiling version_check v0.9.5
+   Compiling proc-macro2 v1.0.107
+   Compiling generic-array v0.14.7
+   Compiling serde_core v1.0.228
+   Compiling quote v1.0.47
+   Compiling typenum v1.20.1
+   Compiling unicode-ident v1.0.27
+   Compiling getrandom v0.4.3
+   Compiling zmij v1.0.23
+   Compiling cfg-if v1.0.5
+   Compiling syn v2.0.119
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling serde_json v1.0.150
+   Compiling serde v1.0.228
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling serde_derive v1.0.228
+   Compiling sha2 v0.10.9
+   Compiling uuid v1.23.3
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `release` profile [optimized] target(s) in 54.85s
+     Running tests\mesh_csg.rs (L:/om9-target\release\deps\mesh_csg-46c2699bbc657f33.exe)
+
+running 1 test
+SCALING input=24 output=208 work=40296 elapsed_ms=2.117 result=PASS
+SCALING input=384 output=1008 work=1637352 elapsed_ms=55.041 result=PASS
+SCALING input=1536 elapsed_ms=416.750 result=ERR error=Invalid("CSG work budget exceeded")
+SCALING input=6144 elapsed_ms=410.774 result=ERR error=Invalid("CSG work budget exceeded")
+SCALING input=24576 elapsed_ms=487.939 result=ERR error=Invalid("CSG work budget exceeded")
+test mesh_csg_scaling_measurement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 1.38s
+

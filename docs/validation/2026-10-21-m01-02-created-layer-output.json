@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-21",
+  "status": "created_layer_output_admitted_and_verified_windows",
+  "owner": "OM9-L2-01-02",
+  "supporting_owner": "OM9-L2-01-03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Closes the same-command create-then-add gap recorded by the layer SDK slice; delivered at the transaction owner and proven through the public SDK.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-core/src/transaction.rs": "7a3e3e66d9a84f897502f3ae619b618d28d6a47fdc62344ce7a5c8d3acc20fae",
+    "crates/om9-core/src/layers.rs": "f5af3339a4623d0198b320f41caf1b6f93592520c8aa7d5cc082202dd0ce6451",
+    "crates/om9-core/src/model.rs": "d471680a2d92858e4eac759e0a673101cdba84ea05db43d03f9df74b456abbe6",
+    "crates/om9-core/tests/layer_transactions.rs": "e6c53dd322dc7811e144f1e70a41e707b7a995eb5f55bf448cd730cbc5706140",
+    "crates/om9-sdk/src/lib.rs": "bd84f2e68274bfc22ee2ae9f492931fa009bc4d9bc9b23cc80d8b6792cfd72e4",
+    "crates/om9-plugin-host/src/staged.rs": "67f59fbce93bd85787d62d0a716d5f3815f110aae6e4c1d30b3572e867ceb2a8",
+    "crates/om9-app/tests/plugin_native.rs": "ad6884a5dcc5afc69b5e1659d5738e4959efa7706d41a9342c9889580c58015b",
+    "sdk/examples/hello-plugin/src/lib.rs": "049240710faa4701d87cd5a4df9eaeb54dee5300bb890a0023a7bc1f1694f895",
+    "sdk/README.md": "3757aaf1033e30bcdbaf140ae17b164f75ea5bdaf476d704ed52c5b54c6a767f",
+    "sdk/API-INVENTORY.md": "7450a06df5624b9cbd62469c35d02bad518ea0913e0e7391884a8e74a2ef4176"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "transaction_admission": [
+      "Mutation::Insert resolves the output layer through proposed layers and their captured parent chain",
+      "layers::check_layer_reads_with excludes only layer ids created by the same request from the permission-read overlap"
+    ],
+    "public_surface": "unchanged SDK methods; layer_create(make_current) + add_point/or add_line in one command now publishes atomically"
+  },
+  "asserted_semantics": [
+    "Output into a layer created by the same request is admitted when the proposed layer record is editable along its parent chain; a locked proposed layer or locked captured parent refuses with permission: output layer and publishes nothing.",
+    "Insert into a layer whose flags change in the same request is still refused with invalid layer read/write conflict within transaction.",
+    "Only layer ids created by the request are excluded from the read/write overlap because they have no captured permission at all.",
+    "The created layer, the new object, the current-layer choice and assignments publish as one transaction and one Undo unit."
+  ],
+  "batches": [
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "38 passed, 8 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "4 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "6 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-created-layer",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8787 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "command": "LayerDemo after CreateProfile on the same controller",
+    "layer_made_current": true,
+    "new_object_on_created_layer": true,
+    "existing_object_assigned": true,
+    "object_color_cleared": true,
+    "document_object_count": 4,
+    "undo_units": 2,
+    "undo_restores_document": true,
+    "redo_reapplies_layer_and_output": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1126092,
+      "sha256": "2a85c8e919a713110086a1ef089b468c859ea96561145576016de772aae9556b"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "ea6b2338e540e983908385799b43e5e34d57d7275d1c448d6ca19520fa96e613"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 114016,
+      "sha256": "aee112f7b4c6928e6cccfb9d453c53e5a45a3676d761fc6ed6d76a1743b3dee9"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "ae71c66eadf50c13b459fa4558aae320009227f347736f869cdedff7b350f1bc"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1124864,
+      "sha256": "f4d9ee0e8db4468e15640e6b1dc89ef380ec1eace933f7772629e73feb855297"
+    },
+    "om9.exe": {
+      "bytes": 68093952,
+      "sha256": "87d9d2dcc3598b8b7b51f49082ce0be67b700ce82f53efe663189b57fab29d7d"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-02-006 (insert admission for proposed layers)",
+      "OM9-L3-01-03-004",
+      "OM9-L3-01-03-005"
+    ],
+    "open": [
+      "Mutation::Publish and cross-document Move keep base-layer validation",
+      "layer delete/reparent/preset-slot editing",
+      "groups, blocks/instances, change notification, snapshot/restore, import provenance"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only the insert path into a proposed layer is admitted; prepared-operation publication and cross-document moves are unchanged.",
+    "Layer delete/reparent/preset-slot editing, groups, blocks/instances, change notification, snapshot/restore and provenance remain open.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Take the next plan-named owner slice (OM9-L2-01-12 file lifecycle or OM9-L3-01-08-004/005/006 typed builder parameters) with the same evidence path."
+}

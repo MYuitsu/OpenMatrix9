@@ -139,7 +139,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE",
   "task_ids": [
     "OM9-L4-01-11-004-01",
     "OM9-L4-01-11-004-02",
@@ -316,6 +316,107 @@
     "priority_pilot": false,
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "TRANSFORM"
+  "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
+  "acceptance_category": "TRANSFORM",
+  "proposed_fixture": {
+    "fixture_id": "OM9-L3-01-11-004-POSITIVE",
+    "status": "RUNTIME_MEASURED_2026_10_22",
+    "positive": {
+      "input": {
+        "count": 4,
+        "spacing_mm": [
+          10,
+          0,
+          0
+        ],
+        "include_source": true,
+        "polar_total_rad": 6.283185307179586
+      },
+      "expect": {
+        "placements": 4,
+        "origins_x": [
+          0,
+          10,
+          20,
+          30
+        ],
+        "polar_step_rad": 1.5707963267948966
+      }
+    },
+    "negative": {
+      "input": [
+        "count 0",
+        "spacing (-1,0,0)",
+        "count MAX+1",
+        "empty placements"
+      ],
+      "expect": "CreationError::Invalid or Budget; no body"
+    },
+    "tolerance_policy": {
+      "linear_pattern_placements": "exact",
+      "instance_definitions": "exact",
+      "baked_bodies": "exact"
+    },
+    "rust_test_name": "m03_01_11_004"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "generate linear and polar instance placements",
+    "owner": {
+      "crate": "om9-kernel",
+      "files": [
+        "crates/om9-kernel/src/transform_ops.rs",
+        "crates/om9-kernel/src/transform_bridge.cpp",
+        "crates/om9-kernel/tests/l2_01_11.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-01-11-004/api.md",
+      "implementation/design/M03/OM9-L3-01-11-004/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-01-11-004/positive.json",
+      "implementation/fixtures/M03/OM9-L3-01-11-004/negative.json",
+      "implementation/evidence/M03/OM9-L3-01-11-004/OM9-L4-01-11-004-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-01-11-004/OM9-L4-01-11-004-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-01-11-004/OM9-L4-01-11-004-05.ui-review.json"
+    ],
+    "tests": [
+      "m03_01_11_004: passed",
+      "l2_01_11 suite: 11 passed"
+    ],
+    "human_approval": null,
+    "remaining": [],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "AUTO_ONLY",
+      "design": "implementation/design/M03/OM9-L3-01-11-004/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-01-11-004/positive.json",
+        "implementation/fixtures/M03/OM9-L3-01-11-004/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M03/OM9-L3-01-11-004/OM9-L4-01-11-004-05.ui-review.json"
+      ],
+      "measured": {
+        "linear_pattern_placements": 4.0,
+        "instance_definitions": 1.0,
+        "baked_bodies": 4.0
+      },
+      "tolerances": {
+        "linear_pattern_placements": "exact",
+        "instance_definitions": "exact",
+        "baked_bodies": "exact"
+      },
+      "acceptance": "four linear instances at x = 0,10,20,30; four polar instances step 90° around Z with no seam duplicate; instance mode: one definition, four placements"
+    },
+    "l4_evidence": {
+      "OM9-L4-01-11-004-01": "1/1",
+      "OM9-L4-01-11-004-02": "1/1",
+      "OM9-L4-01-11-004-03": "1/1",
+      "OM9-L4-01-11-004-04": "1/1",
+      "OM9-L4-01-11-004-05": "1/1"
+    }
+  }
 }

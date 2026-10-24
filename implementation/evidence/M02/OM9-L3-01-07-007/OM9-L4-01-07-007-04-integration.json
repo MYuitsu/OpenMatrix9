@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-007-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-01-07-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "The gumball frame is derived from the selected objects' displayed bounding extents; move/rotate/scale groups are drawn together and hit-tested at the press position.",
+  "tests": [
+    "om9-app gumball_viewport: 3 passed",
+    "om9-app gumball_placement: 4 passed"
+  ]
+}

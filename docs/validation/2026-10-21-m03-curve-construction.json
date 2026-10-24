@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-21",
+  "status": "curve_construction_sdk_export_verified_windows",
+  "owner": "OM9-L2-02-04",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Exports the owner's arc and interpolated-curve builders through the same single-transaction output path as add_line/add_circle.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "2fd48fa6c5a8771652bac0ef986e9f34f16091fa871ab917c5e029f78649c0ff",
+    "crates/om9-plugin-host/src/staged.rs": "e0d5ac490b7718d5a9cac8a7a8d4b9b96738a74eac646da654c84a9418839e26",
+    "crates/om9-app/tests/plugin_native.rs": "8f15cd7aa391caa3b3e279629386113a4f375f142b5bc65477ada33d9fc25d0b",
+    "sdk/examples/hello-plugin/src/lib.rs": "b81c8f1bfc3c4c118d0336b33ec3b9a5cafe578ae258a8d91a4c6e65858dadfc",
+    "sdk/examples/hello-plugin/descriptor.json": "85aba61f273f7c18f779cd5b77747ad8b11f19cdb33f87307c918348c1a9e6a3",
+    "sdk/README.md": "8c8ad23e62c9fb04444b587ec815955762bcc503647abf78a49b4519607b6bdb",
+    "sdk/API-INVENTORY.md": "d32cb094c942fe878817b30692a229970b6eecf55dd70063f27f42abc664e0d0"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["add_arc", "add_interpolated_curve"],
+    "public_types": ["KnotMode"],
+    "shared_service": [
+      "om9_core::curve_build::arc_through",
+      "om9_core::curve_build::interpolate"
+    ],
+    "error_codes": ["curve", "unsupported", "budget", "permission", "layer"]
+  },
+  "asserted_semantics": [
+    "add_arc returns a circle with an increasing angle domain from start to end through the middle point and a [0,1] native domain; collinear or repeated points are a curve refusal.",
+    "add_interpolated_curve follows the document rule: odd degree 1..=11 below the point count; an even or out-of-range degree is a curve refusal; chord-length and uniform knots both pass through the points.",
+    "Both stage one object on the current layer and obey layer permission, label budget, object count and geometry budget.",
+    "Both publish in the command's single transaction, so one Undo removes them; a refusal publishes nothing."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "49 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "11 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-curve-build",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8801 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "arc_kind": "circle",
+    "arc_has_angle_domain": true,
+    "arc_midpoint": [0.0, 5.0, 0.0],
+    "spline_kind": "nurbs",
+    "spline_degree": 3,
+    "spline_poles": 4,
+    "document_objects": 5,
+    "undo_units": 2,
+    "undo_restores_profile": true,
+    "redo_restores_curves": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1520807,
+      "sha256": "7a6cc540c66d44e1088a2e5e52842e2579d8e8c8f188bd21f30c15c77c64a579"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "cd802f2645e4b057fb4603b984c4f7e5ae814e124a4cde3c89b616e73786c30b"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 141320,
+      "sha256": "18fac161be9314bb62a6dfd4afef6bfe2b33ae11ebaa71acd44a3dcc1ebd0771"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "1986d13c5bcbca2563df783ab571cefeff413a20e0cc3ffd7ba5e9d9759f2440"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1519104,
+      "sha256": "1009911749b230b8ac72289f1a392f18d657a882b428850ed7f54a4dda27db0b"
+    },
+    "om9.exe": {
+      "bytes": 68793856,
+      "sha256": "5a40d216881cb25c37d69a9f316d729c352d4b999fe843c90150f801bce43adb"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-02-04-002 (circle/arc creation)",
+      "OM9-L3-02-04-003 (interpolated NURBS creation)"
+    ],
+    "open": [
+      "control-point NURBS creation and point/knot editing",
+      "ellipse and polygon creation helpers",
+      "offset, fillet/blend, rebuild and intersections",
+      "polycurve segment parameters and surface/BRep semantics"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only arc-through-three-points and interpolated NURBS construction is exposed.",
+    "Control-point construction, editing, offset and surface creation remain open.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Add control-point NURBS construction or take OM9-L2-01-12 file lifecycle."
+}

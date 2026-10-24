@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-03-006-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-03-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Typed MoveX/Y/Z, RotateX/Y/Z and Scale forms resolve against the captured gumball frame and commit through one transaction.",
+  "tests": [
+    "om9-app gumball_numeric: 6 passed",
+    "om9-core gumball: 15 passed"
+  ]
+}

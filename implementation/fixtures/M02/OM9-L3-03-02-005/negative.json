@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-02-005",
+  "l3_id": "OM9-L3-03-02-005",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Scene trống hoặc bbox zero không sinh scale vô hạn",
+  "expected": "A typed refusal or an explicitly unchanged camera/document; no infinite scale or cross-view ownership.",
+  "evidence": [
+    "om9-app navigation_commands: 6 passed",
+    "om9-scene camera_fit: 4 passed"
+  ],
+  "status": "PASS"
+}

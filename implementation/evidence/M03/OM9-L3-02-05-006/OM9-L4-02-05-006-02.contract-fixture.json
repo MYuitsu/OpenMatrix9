@@ -1,0 +1,29 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-006-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-006",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-006/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-006/negative.json",
+  "fixture_sha256": {
+    "positive": "72b594babf476a38cc3a5c5fec2b1476e0c0290004978b8e86098bd10d62da58",
+    "negative": "01379f38d4599f7fb7503f24837b3bd34da38ce4ca34ffa501a71651cdde7536"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-006/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-006/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-006/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "a plane refit/rebuild to 3x3 degree 2 is still the same plane",
+      "softedit with delta z=1 moves the centre to z=0.2835 while the corners stay at z=0"
+    ],
+    "negative": [
+      "a refit grid that cannot hold the degree is refused",
+      "a zero softedit radius is refused"
+    ]
+  }
+}

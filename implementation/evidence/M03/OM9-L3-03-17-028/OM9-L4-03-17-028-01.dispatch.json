@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-028-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-028",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-128",
+  "source_command": "Match Surfaces",
+  "menu_icon": "SurfaceSurfaceEditToolsMatch",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-028/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-028/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-028/dispatch_contract.json": "6b543bf08ff2ccdb418b3a2bf1768caf5417f3e539ec8bbe7ea9aae393fbf5f9",
+    "implementation/design/M03/OM9-L3-03-17-028/source_crosswalk.json": "eddf67e64e8487906985f40d9696c3f5e29853020e8c790cb9d61e3f090eacea"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

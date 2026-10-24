@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-18-016",
+  "command": "Cylinder 2 10",
+  "expected": "one validated B-Rep result and one Undo entry",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

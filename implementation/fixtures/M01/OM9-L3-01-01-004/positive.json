@@ -16,7 +16,7 @@
     "builder-slot"
   ],
   "documented_panels": {
-    "left-rail": 360.0,
+    "left-rail": 300.0,
     "right-dock": 300.0,
     "command-line": 90.0,
     "toolbar": 67.0

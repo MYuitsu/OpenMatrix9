@@ -1,0 +1,13 @@
+{
+  "l3": "OM9-L3-03-15-007",
+  "title": "Master Jobbag Document Snapshot",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/project_manager.rs"
+  ],
+  "tests": "project_manager 8 passed",
+  "manual_reference": "Matrix8 Book 1 pp48-56/79-86",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-15-007-01"
+}

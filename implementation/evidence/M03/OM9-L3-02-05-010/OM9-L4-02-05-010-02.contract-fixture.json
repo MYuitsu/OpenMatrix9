@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-010-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-010",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-010/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-010/negative.json",
+  "fixture_sha256": {
+    "positive": "5edbb828dcce913261ab4922102f6844ba6700e121e973103332f8c19d0da421",
+    "negative": "e43cb008c43d2a810a9310bc6b90bb82c3aaf88fdec15148abd95821fe4dbac7"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-010/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-010/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-010/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "a plane normal extrusion at 2.5 mm has z=2.5",
+      "a plane unroll measures 4x2 with z=0",
+      "a cylinder r=5 h=8 unrolls to width 31.2135 mm and height 8 mm",
+      "thickening a 4x2 patch by 0.5 mm closes a 4 mm3 solid"
+    ],
+    "negative": [
+      "an unroll grid with fewer than two samples is refused",
+      "a zero normal-extrude height is refused"
+    ]
+  }
+}

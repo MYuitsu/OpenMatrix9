@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-07-007",
+  "case": "positive",
+  "oracle": "reset recreates the 300 px factory baseline after any placement kind",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-008-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-008",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-008/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-008/negative.json",
+  "fixture_sha256": {
+    "positive": "6231846f131dac28830332ab8a7ef7b231d61e6c59917b6b23808c71f9bdb6e4",
+    "negative": "78dd419949b6af6c1e31f7f79e5b21e4b1cc68ddb5e3bee38baa42e3f5db033c"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-008/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-008/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-008/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "a plane offset by 2.5 mm has z=2.5 everywhere",
+      "a cylinder offset inward by 1 mm has radius 4",
+      "a 10x20x30 box offsets to volume 6733.33 mm3 and stays closed",
+      "fillet/chamfer add a face and leave zero naked edges"
+    ],
+    "negative": [
+      "zero surface offset distance is refused",
+      "zero thicken/offset and an oversized fillet are refused"
+    ]
+  }
+}

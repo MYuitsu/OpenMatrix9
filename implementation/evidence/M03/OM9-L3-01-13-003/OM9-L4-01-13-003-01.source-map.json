@@ -1,0 +1,27 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-003-01",
+  "role": "SOURCE_MAP",
+  "l3": "OM9-L3-01-13-003",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "opennurbs_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+  "decision": "ADD",
+  "reviewed_paths": [
+    "crates/qymcad-io/src/formats.rs",
+    "crates/qymcad-io/src/lib.rs",
+    "crates/qymcad-kernel/src/shape/exchange.rs"
+  ],
+  "symbol_map": "no 3DM reader/writer symbol at the pinned QymCAD revision",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-01-13-003/source_crosswalk.json",
+    "implementation/design/M03/OM9-L3-01-13-003/api.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-01-13-003/source_crosswalk.json": "7a5e570679dc6a4fc668fe806dca5b5ff34131c8080bf566bb227f128f48ad86",
+    "implementation/design/M03/OM9-L3-01-13-003/api.md": "8b72067fd591b95f616a7e13051eb28151270b8ff356efa9e604c8e8e3256cf5"
+  },
+  "missing_capability": "QymCAD has no Rhino 3DM reader/writer; the product bridge is a new ADD.",
+  "build_status": "not applicable to the document-only source map"
+}

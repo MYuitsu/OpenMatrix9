@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-001",
+  "fixture_id": "OM9-L3-01-09-001-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "sphere r=0",
+    "sphere r=NaN",
+    "cylinder height=-1",
+    "box x=0",
+    "torus tube=ring",
+    "pyramid sides=2"
+  ],
+  "expect": "CreationError::Invalid with no published body; the document/Undo journal is untouched because the operation returns before a body exists"
+}

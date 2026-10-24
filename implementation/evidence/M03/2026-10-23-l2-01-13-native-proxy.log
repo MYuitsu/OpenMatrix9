@@ -1,0 +1,25 @@
+    Blocking waiting for file lock on build directory
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 44.23s
+     Running tests\l2_01_13.rs (L:/om9-target\debug\deps\l2_01_13-76a5fdb87b871b8c.exe)
+
+running 15 tests
+test m03_01_13_001 ... ok
+test m03_01_13_002 ... ok
+test m03_01_13_003 ... ok
+test m03_01_13_004 ... ok
+test m03_01_13_005 ... ok
+test m03_01_13_006 ... ok
+test m03_01_13_007 ... ok
+test m03_01_13_008 ... ok
+test m03_01_13_008_r5a_proxy_display_without_conversion ... ok
+test m03_01_13_009 ... ok
+test m03_01_13_010 ... ok
+test m03_01_13_011 ... ok
+test m03_01_13_012 ... ok
+test m03_01_13_receipt ... ok
+test m03_01_13_stress ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 28.96s
+

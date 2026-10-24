@@ -1,0 +1,43 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-001",
+  "fixture_id": "OM9-L3-02-05-001-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Sweep1 Sweep2 And Profile Sweep Workflows",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "sweep1_radius_mm": 2.0,
+    "sweep1_height_mm": 10.0,
+    "sweep2_rail_a": [
+      0.0,
+      0.0,
+      10.0
+    ],
+    "sweep2_rail_b_at_v1": [
+      9.0,
+      0.0,
+      10.0
+    ]
+  },
+  "tolerances": {
+    "radius_mm": "1e-6",
+    "height_mm": "1e-9",
+    "rail_contact_mm": "1e-6"
+  },
+  "measured_on_2026_10_22": {
+    "sweep1_radius_mm": 2.0,
+    "sweep1_height_mm": 10.0,
+    "sweep2_rail_a": [
+      0.0,
+      0.0,
+      10.0
+    ],
+    "sweep2_rail_b_at_v1": [
+      9.0,
+      0.0,
+      10.0
+    ]
+  }
+}

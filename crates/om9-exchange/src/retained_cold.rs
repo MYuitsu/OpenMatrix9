@@ -1968,4 +1968,3 @@ mod strict_metadata_tests {
         }
     }
 }
-

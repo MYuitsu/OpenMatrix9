@@ -1,0 +1,52 @@
+{
+  "schema": "om9.m03.l2-01-09.ui-review.v1",
+  "task_id": "OM9-L4-01-09-005-05",
+  "l3_id": "OM9-L3-01-09-005",
+  "title": "Planar Boundary Surface Generator",
+  "oracle": {
+    "positive": [
+      "10×20 rectangle: area 200 mm², one face, open surface"
+    ],
+    "negative": [
+      "non-coplanar boundary is refused",
+      "self-intersecting boundary is refused"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is an exact OCCT B-Rep measured from the canonical source and asserted by a focused Rust test; every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "geometry construction, typed refusal and ownership; no window, menu or human review"
+  },
+  "measured": {
+    "planar_area_mm2": 200.0
+  },
+  "tolerances": {
+    "planar_area_mm2": "1e-6"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-kernel --features 3dm-brep --test l2_01_09 m03_01_09_005 -- --exact (exit 0)",
+    "regression: cargo test -p om9-kernel --features 3dm-brep --test l2_01_09 (12 passed)",
+    "crate suite: cargo test -p om9-kernel --features 3dm-brep (all passed)",
+    "clippy: cargo clippy -p om9-kernel --features 3dm-brep --all-targets -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-01-09-005/api.md",
+    "implementation/design/M03/OM9-L3-01-09-005/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-01-09-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-09-005/negative.json",
+    "implementation/evidence/M03/OM9-L3-01-09-005/OM9-L4-01-09-005-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-01-09-005/OM9-L4-01-09-005-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_01_09_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

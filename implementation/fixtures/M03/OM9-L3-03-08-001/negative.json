@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-001",
+  "fixture_id": "OM9-L3-03-08-001-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "duplicate with an empty selection",
+    "duplicate while a command is already running",
+    "a destination equal to the base point"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; document, selection and Undo journal unchanged",
+  "test": "m03_03_08_001"
+}

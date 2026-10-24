@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-01-006",
+  "case": "positive",
+  "oracle": "maximize_is_per_view_and_restores_all_four_views",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

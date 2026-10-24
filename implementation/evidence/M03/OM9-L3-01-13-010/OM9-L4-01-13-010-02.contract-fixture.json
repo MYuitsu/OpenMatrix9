@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-010-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-01-13-010",
+  "date": "2026-10-23",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-01-13-010/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-01-13-010/negative.json",
+  "fixture_sha256": {
+    "positive": "3e5cf749f4ad57cf698095f82ab3d3d1bb745109b0fa3b20505ccf9da33f1cf3",
+    "negative": "a3bc1db3795100766fb1afedd71c7ab987a7cfc0f0a984044f13b44b91e214f5"
+  },
+  "generator": {
+    "source": "native/source_inventory_fixture.cpp",
+    "source_sha256": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+    "binary": "build/source-fixture.exe",
+    "binary_sha256": "d315c6d35a94bad0d05cb4aeaff8a90ac6fd5437646ee6d006463c73386dc0d7",
+    "opennurbs_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "note": "The authored writer embeds openNURBS-generated component UUIDs, so regenerated archives are structurally identical but not byte-identical; each receipt records the SHA-256 of the archive actually read."
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-01-13-010/api.md",
+    "implementation/fixtures/M03/OM9-L3-01-13-010/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-13-010/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "both 3DM menu entries render in the Matrix File menu",
+      "the admitted host exposes the configured native path",
+      "a zero byte limit is refused before the native run"
+    ],
+    "negative": [
+      "a wrong SHA-256 or a relative native path is refused",
+      "cancelling the picker changes nothing (manual gate below)"
+    ]
+  }
+}

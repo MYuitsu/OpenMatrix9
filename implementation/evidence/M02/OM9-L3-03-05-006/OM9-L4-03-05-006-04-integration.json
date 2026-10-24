@@ -1,0 +1,13 @@
+{
+  "l4": "OM9-L4-03-05-006-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-05-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "stage_project_state writes the display record as an opaque .om9 resource; reload_project_state restores it, and apply_to_mode restores the saved wireframe/shaded choice.",
+  "tests": [
+    "om9-app display cues: 6 passed",
+    "om9-app display_modes: 3 passed",
+    "om9-app display_persistence: 2 passed"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-010-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-010",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-010",
+  "source_command": "Curve Network",
+  "menu_icon": "SurfaceCurveNetwork",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-010/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-010/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-010/dispatch_contract.json": "abd255fea96e52a8172d71742486f03991601180f999c6e32c7e675c33179388",
+    "implementation/design/M03/OM9-L3-03-17-010/source_crosswalk.json": "2be094895dffa8a7570146a509c42663417396742befc3cdf8e0a92141a3efba"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-03-001",
+  "l3_id": "OM9-L3-03-03-001",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Shift click thêm, Ctrl click toggle selection, plain click replace theo mapping đã chốt",
+  "expected": "The documented selection/gumball result with a stable object identity.",
+  "evidence": [
+    "om9-app matrix_selection_sequence: 2 passed",
+    "om9-app acceptance_viewport_selection: 8 passed"
+  ],
+  "status": "PASS"
+}

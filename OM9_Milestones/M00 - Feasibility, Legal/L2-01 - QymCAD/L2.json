@@ -43,5 +43,33 @@
     }
   ],
   "gate_id": "G00-01",
-  "gate_registry": "implementation/evidence/M00/G00-INDEX.json"
+  "gate_registry": "implementation/evidence/M00/G00-INDEX.json",
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-M00-L2-01",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M00",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED governance",
+      "sdk_signal": "GATE-ONLY",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Đọc source/license/build feasibility evidence đúng owner; ghi điều kiện SDK và target. Không sinh geometry API từ nhiệm vụ quản trị.",
+    "tasks": [
+      "Audit the source/license/native/toolchain feasibility constraints owned by this module for the public SDK and advertised targets.",
+      "Record SDK distribution and build constraints in the existing milestone evidence; do not generate a callable geometry API from governance tasks.",
+      "Keep missing Mac/native/source-signoff evidence explicit; no runtime or release gate is promoted by this checklist."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-M00-L3-01-01",
+      "OM9-M00-L3-01-02",
+      "OM9-M00-L3-01-03"
+    ]
+  }
 }

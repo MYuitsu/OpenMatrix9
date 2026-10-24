@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-09-008-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-09-008",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Availability is carried per action; the popup uses add_enabled and only calls invoke for Enabled actions, so disabled clicks cannot reach the command engine.",
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ]
+}

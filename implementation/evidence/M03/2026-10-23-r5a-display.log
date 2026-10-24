@@ -1,0 +1,44 @@
+    Blocking waiting for file lock on build directory
+warning: function `resample_profile` is never used
+    --> crates\om9-app\src\session.rs:3983:4
+     |
+3983 | fn resample_profile(points: &[Point3], count: usize) -> Vec<Point3> {
+     |    ^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `slash_alignment_section` is never used
+    --> crates\om9-app\src\session.rs:4024:4
+     |
+4024 | fn slash_alignment_section(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `nearest_rail_parameter` is never used
+    --> crates\om9-app\src\session.rs:4196:4
+     |
+4196 | fn nearest_rail_parameter(rail: &[Point3], point: Point3) -> Option<f64> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `profile_point_at` is never used
+    --> crates\om9-app\src\session.rs:4415:4
+     |
+4415 | fn profile_point_at(profile: &[Point3], parameter: f64) -> Point3 {
+     |    ^^^^^^^^^^^^^^^^
+
+warning: function `profile_segment` is never used
+    --> crates\om9-app\src\session.rs:4427:4
+     |
+4427 | fn profile_segment(profile: &[Point3], start: f64, end: f64) -> Vec<Point3> {
+     |    ^^^^^^^^^^^^^^^
+
+warning: `om9-app` (lib) generated 5 warnings
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.77s
+     Running tests\r5a_display.rs (L:/om9-target\debug\deps\r5a_display-ce2343b0c44eb465.exe)
+
+running 2 tests
+test best_effort_without_occt_retains_opaque_and_does_not_abort ... ok
+test retained_native_brep_has_a_display_proxy_without_occt ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.20s
+

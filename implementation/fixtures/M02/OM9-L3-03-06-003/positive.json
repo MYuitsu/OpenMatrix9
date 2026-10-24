@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-06-003",
+  "l3_id": "OM9-L3-03-06-003",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Opacity 50%, locked prevents edits/selection nhưng vẫn visible",
+  "expected": "The documented reference-image behavior with asset/model integrity preserved.",
+  "evidence": [
+    "om9-app pictureframe unit: 6 passed"
+  ],
+  "status": "PASS"
+}

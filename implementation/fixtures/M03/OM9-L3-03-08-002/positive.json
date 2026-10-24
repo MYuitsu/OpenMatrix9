@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-002",
+  "fixture_id": "OM9-L3-03-08-002-POSITIVE",
+  "units": "mm",
+  "oracle": "a line exposes 2 control points and 2 edit points; a NURBS 4 of each; a circle exposes centre+4 quadrants and dragging a quadrant sets radius 5; a two-segment polycurve exposes 4 control points and editing one changes its segment; a 2x2 surface exposes 4 control grips and 4 edit grips; moving an edit grip to (3,3,2) reaches that point, and a periodic/reversed cylinder keeps its record; F10 and Esc behave as documented",
+  "measured": {
+    "grip_points_on_line": 2.0,
+    "grip_mode_toggle_passed": "true",
+    "grip_drag_end_mm": "[15.0, 2.0, 0.0]",
+    "grip_drag_undo_passed": "true",
+    "circle_grip_radius": 5.0,
+    "surface_control_grips": 4.0,
+    "surface_edit_reversed": "true",
+    "surface_edit_grips": 4.0,
+    "surface_edit_periodic": "true",
+    "surface_edit_handles_96_ms": 98.075,
+    "surface_edit_move_96_ms": 48.388
+  },
+  "tolerances": {
+    "grip_points_on_line": "exact integer",
+    "grip_mode_toggle_passed": "boolean assertion",
+    "grip_drag_end_mm": "1e-9",
+    "grip_drag_undo_passed": "boolean assertion",
+    "circle_grip_radius": "1e-9",
+    "surface_control_grips": "exact integer",
+    "surface_edit_grips": "exact integer",
+    "surface_edit_reversed": "boolean assertion",
+    "surface_edit_periodic": "boolean assertion",
+    "surface_edit_handles_96_ms": "< 1500 ms",
+    "surface_edit_move_96_ms": "< 500 ms"
+  },
+  "test": "m03_03_08_002"
+}

@@ -1,0 +1,14 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\l2_02_05.rs (L:\om9-target\debug\deps\l2_02_05-283783f86a2d9267.exe)
+
+running 6 tests
+test m03_02_05_offset_fillet_and_chamfer_use_the_shared_kernel ... ok
+test m03_02_05_join_surfaces_sews_two_sheets ... ok
+test m03_02_05_surface_services_refuse_degenerate_bodies ... ok
+test m03_02_05_patch_and_normal_extrude_are_exact_breps ... ok
+{"fillet_faces":7,"fillet_naked_edges":0,"join_faces":2,"join_shells":1,"offset_closed":true,"offset_volume_mm3":6733.333333333332,"patch_area_mm2":7.999999999999918,"patch_deviation_mm":4.466484191439815e-16,"status":"measured","thicken_closed":true,"thicken_volume_mm3":3.999999999999972}
+test m03_02_05_kernel_receipt ... ok
+test m03_02_05_kernel_stress_joins_and_offsets_repeatedly ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
+

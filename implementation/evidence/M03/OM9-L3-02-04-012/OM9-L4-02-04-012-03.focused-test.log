@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\l2_02_04.rs (L:\om9-target\debug\deps\l2_02_04-34b138616c292c92.exe)
+
+running 1 test
+surface_sketch_start=[1.0, 2.0, 0.0]
+two_view_point=[0.0, 0.0, 0.0]
+test m03_02_04_012_sketch_on_surface_mesh_and_two_views ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+

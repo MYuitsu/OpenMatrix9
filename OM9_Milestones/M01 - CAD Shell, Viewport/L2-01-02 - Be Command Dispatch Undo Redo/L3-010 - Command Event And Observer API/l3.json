@@ -187,5 +187,47 @@
       "id": "OM9-L4-01-02-010-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-010 - Command Event And Observer API/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "plugin_sdk_v1_command_feedback": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "Plugin progress and warning reports enter the app's existing command EventLog: Host::progress/warning stage at most 32 one-line reports of 512 bytes each, and the Controller emits them as Progress/Warn under the plugin:command label before publication. A refused invocation keeps Started then Finished(Refused) and its reports are discarded; reporting creates no transaction or Undo entry.",
+      "public_api": [
+        "Host::progress",
+        "Host::warning",
+        "MessageLevel",
+        "PluginMessage"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-02-command-feedback.md",
+        "docs/validation/2026-10-21-m01-02-command-feedback.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "Interactive prompts/input sessions, option tokens, preview overlays and observer callbacks remain open.",
+        "Failure-path diagnostic reports are not carried through the ABI.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::progress",
+      "Host::warning",
+      "MessageLevel",
+      "PluginMessage"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_command_feedback"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-02-command-feedback.json",
+      "docs/validation/2026-10-21-m01-02-command-feedback.md"
+    ]
+  }
 }

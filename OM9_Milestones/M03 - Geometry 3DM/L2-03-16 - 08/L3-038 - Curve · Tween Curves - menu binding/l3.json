@@ -122,7 +122,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-03-16-038-01",
     "OM9-L4-03-16-038-02",
@@ -271,6 +271,47 @@
     "priority_pilot": false,
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "date": "2026-10-23",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "cataloged command id with verified visible disabled reason; no interactive session yet",
+    "owner": {
+      "crate": "om9-app",
+      "files": [
+        "crates/om9-app/src/curve_menu.rs",
+        "crates/om9-app/src/ui/chrome.rs",
+        "crates/om9-app/tests/curve_menu.rs"
+      ],
+      "test": "crates/om9-app/tests/curve_menu.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-03-16-038/dispatch_contract.json",
+      "implementation/design/M03/OM9-L3-03-16-038/wire_ui.json",
+      "implementation/design/M03/OM9-L3-03-16-038/source_crosswalk.json",
+      "implementation/design/M03/OM9-L3-03-16-038/api.md",
+      "implementation/fixtures/M03/OM9-L3-03-16-038/positive.json",
+      "implementation/fixtures/M03/OM9-L3-03-16-038/negative.json",
+      "implementation/evidence/M03/OM9-L3-03-16-038/",
+      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json"
+    ],
+    "tests": [
+      "cargo test -p om9-app --test curve_menu: 4 passed",
+      "Line/Point geometry smoke: passed",
+      "disabled reason catalog: 56 rows verified"
+    ],
+    "l4_evidence": {
+      "OM9-L4-03-16-038-01": "1/1",
+      "OM9-L4-03-16-038-02": "1/1",
+      "OM9-L4-03-16-038-03": "1/1"
+    },
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "No interactive command session yet; the menu is disabled with a visible reason.",
+      "Human M03-UI review is unsigned."
+    ]
+  }
 }

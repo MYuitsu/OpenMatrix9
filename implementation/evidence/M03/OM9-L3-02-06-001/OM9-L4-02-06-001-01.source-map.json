@@ -1,0 +1,25 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-001-01",
+  "role": "SOURCE_MAP",
+  "l3": "OM9-L3-02-06-001",
+  "date": "2026-10-22",
+  "status": "DOCUMENT_READY",
+  "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "decision": "ADD",
+  "reviewed_paths": [
+    "crates/qymcad-kernel/src/kernel.rs",
+    "crates/qymcad-ui/src/acts.rs"
+  ],
+  "symbol_map": "QymCAD has OCCT mirror calls and UI pattern flows, not a portable typed transform session",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-06-001/source_crosswalk.json",
+    "implementation/design/M03/OM9-L3-02-06-001/api.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-02-06-001/source_crosswalk.json": "74fd724852eeaae4ffe8d06e5079e15121a4f0b0c6dfd5db10970aa9384b9003",
+    "implementation/design/M03/OM9-L3-02-06-001/api.md": "ad8cf9cc2dfd1f148e7c955303aab0f07fdeb568963e598b3e0fad5f314757be"
+  },
+  "missing_capability": "No portable transform-session/orientation service exists in QymCAD; the local module is an ADD.",
+  "build_status": "not applicable to the document-only source map"
+}

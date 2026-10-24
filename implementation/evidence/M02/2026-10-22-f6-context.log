@@ -1,0 +1,10 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.60s
+     Running tests\f6_context.rs (L:/om9-target\debug\deps\f6_context-695cc07518363b1b.exe)
+
+running 2 tests
+test f6_uses_the_selected_class_and_empty_general_context ... ok
+test a_custom_menu_persists_in_the_project_with_stable_order_and_stale_disable ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

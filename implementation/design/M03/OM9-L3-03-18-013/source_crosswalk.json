@@ -1,0 +1,12 @@
+{
+  "l3_id": "OM9-L3-03-18-013",
+  "feature": "OM9-SOLID-014",
+  "files": [
+    "crates/om9-app/src/session/solid.rs",
+    "crates/om9-app/src/solid_menu.rs"
+  ],
+  "tests": [
+    "crates/om9-app/tests/solid.rs"
+  ],
+  "owner": "om9-kernel"
+}

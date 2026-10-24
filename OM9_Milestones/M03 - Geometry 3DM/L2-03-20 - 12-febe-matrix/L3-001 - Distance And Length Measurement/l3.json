@@ -288,5 +288,86 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "plugin_sdk_v1_measurement": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "measure_distance returns the canonical millimetre distance between two world points through measure::distance_mm, so the 1e9 coordinate admission bound and typed refusal stay with the analysis command. Length measurement remains open.",
+      "public_api": [
+        "Host::measure_distance",
+        "Host::measure_angle"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-measure.md",
+        "docs/validation/2026-10-21-m03-measure.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "No object-to-object, label or interactive measurement.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_curve_length": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "sampled_curve_length_verified_windows",
+      "scope": "measure_curve_length samples a curve with the owner's 33-point sweep and sums chord lengths in object-local millimetres; a non-curve is unsupported; the value is a sampled approximation.",
+      "public_api": [
+        "Host::measure_curve_length"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-length.md",
+        "docs/validation/2026-10-21-m03-length.json"
+      ],
+      "limitations": [
+        "Sampled, not exact.",
+        "Radius/area/volume open.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_mesh_area": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "mesh_area_verified_windows",
+      "scope": "measure_mesh_area sums fan-triangulated planar face areas in object-local square millimetres; non-mesh unsupported.",
+      "public_api": [
+        "Host::measure_mesh_area"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-area.md",
+        "docs/validation/2026-10-21-m03-area.json"
+      ],
+      "limitations": [
+        "Planar faces only.",
+        "Surface/solid volume open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::measure_angle",
+      "Host::measure_curve_length",
+      "Host::measure_distance",
+      "Host::measure_mesh_area"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_curve_length",
+      "plugin_sdk_v1_measurement",
+      "plugin_sdk_v1_mesh_area"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m03-area.json",
+      "docs/validation/2026-10-21-m03-area.md",
+      "docs/validation/2026-10-21-m03-length.json",
+      "docs/validation/2026-10-21-m03-length.md",
+      "docs/validation/2026-10-21-m03-measure.json",
+      "docs/validation/2026-10-21-m03-measure.md"
+    ]
+  }
 }

@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-007",
+  "fixture_id": "OM9-L3-02-04-007-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "blend with coincident endpoints",
+    "match on a rational or reversed NURBS record",
+    "parallel fillet lines for ArcBlend"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_007_blend_arcblend_and_match"
+}

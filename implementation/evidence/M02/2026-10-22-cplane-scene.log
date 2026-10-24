@@ -1,0 +1,14 @@
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.73s
+     Running tests\cplane_presets.rs (L:/om9-target\debug\deps\cplane_presets-2351f377395762e8.exe)
+
+running 6 tests
+test invalid_presets_and_collinear_points_are_typed_errors ... ok
+test moving_the_origin_does_not_change_the_axes_or_existing_world_geometry ... ok
+test three_point_frame_uses_the_first_axis_and_orthonormalizes_the_second ... ok
+test rotation_about_the_normal_keeps_the_frame_right_handed ... ok
+test the_four_default_views_use_the_documented_construction_planes ... ok
+test top_front_and_right_presets_have_the_documented_axes_and_handedness ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

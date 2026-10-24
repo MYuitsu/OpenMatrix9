@@ -1,0 +1,14 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.36s
+     Running tests\gumball_numeric.rs (L:/om9-target\debug\deps\gumball_numeric-141ec5eaf342ba88.exe)
+
+running 6 tests
+test numeric_commands_without_a_selection_are_refused ... ok
+test a_malformed_numeric_command_changes_nothing ... ok
+test a_twelve_point_five_millimetre_handle_input_is_exact_and_one_entry ... ok
+test nan_and_empty_numeric_inputs_commit_nothing_and_keep_the_gumball ... ok
+test a_numeric_move_is_one_transaction ... ok
+test a_numeric_rotation_and_scale_turn_about_the_pivot ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

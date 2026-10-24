@@ -325,6 +325,8 @@ fn mesh_triangle_pick_maps_to_original_polygon_face() {
             faces: vec![vec![0, 1, 2, 3]],
             normals: vec![],
             colors: vec![],
+
+            corner_uvs: Vec::new(),
         }),
         d.current_layer,
     );

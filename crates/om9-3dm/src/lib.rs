@@ -397,6 +397,7 @@ pub fn read_meshes_with(
             colors: Vec::new(),
             vertices,
             faces,
+            corner_uvs: Vec::new(),
         });
     }
     Ok(meshes)

@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-002",
+  "fixture_id": "OM9-L3-02-04-002-POSITIVE",
+  "units": "mm",
+  "oracle": "circle radius 5 -> 10*pi mm; quarter arc -> (pi/2)*5 mm; semicircle -> 5*pi mm; ellipse (5,5) -> 10*pi mm; square polygon -> 40 mm",
+  "measured": {
+    "circle_length_mm": 31.415926535898,
+    "polygon_length_mm": 40.0
+  },
+  "tolerances": {
+    "circle_length_mm": "1e-6",
+    "polygon_length_mm": "1e-9"
+  },
+  "test": "m03_02_04_002_circle_arc_ellipse_polygon_creation"
+}

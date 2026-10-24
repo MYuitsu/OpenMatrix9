@@ -215,4 +215,3 @@ mod label_tests {
         assert!(label_text(&unjudged).ends_with("validity unavailable"));
     }
 }
-

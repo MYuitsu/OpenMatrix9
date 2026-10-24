@@ -1,0 +1,20 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-008",
+  "fixture_id": "OM9-L3-01-10-008-POSITIVE",
+  "units": "mm",
+  "input": {
+    "solid": "box 10×20×30",
+    "face_area_mm2": 600,
+    "sew_tolerance_mm": 1e-06
+  },
+  "expect": {
+    "extracted_area_mm2": 600.0,
+    "open_faces": 5,
+    "open_naked_edges": 4,
+    "rejoined_volume_mm3": 6000.0
+  },
+  "measured_on_2026_10_22": {
+    "extracted_face_area_mm2": 600.0
+  }
+}

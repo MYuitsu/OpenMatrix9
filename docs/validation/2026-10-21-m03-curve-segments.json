@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-21",
+  "status": "curve_segments_sdk_export_verified_windows",
+  "owner": "OM9-L2-02-04",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Lists polycurve segments and evaluates one by index, reusing the existing evaluation loop.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": ["crates/om9-sdk/", "crates/om9-plugin-host/", "sdk/", "crates/om9-app/tests/plugin_native.rs", "tools/validate_plugin_sdk.py"],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "2ebfa3b704c50ac385062897fcf6aac7251401953d664f0bacfde0bdf0d95ed6",
+    "crates/om9-plugin-host/src/staged.rs": "c14a5bbfff1788d6588dcb9d33a383d518b8d56e9ed78e1a45b00439e4246e56",
+    "crates/om9-app/tests/plugin_native.rs": "73a7ff968517c253f8aa884d689e3f8b85f4dfda61ff55079d2b21cd99275312",
+    "sdk/examples/hello-plugin/src/lib.rs": "2f8eafb2257b4eebcf7b46fbc606374b550ecd5ca686dfb2d1d12cee7c591ced",
+    "sdk/README.md": "51892bd7034d982150b624e363b4bc6cd024c3b1187955e93da60c1e10dce8cc",
+    "sdk/API-INVENTORY.md": "9d499f7e093d5f31168d6c7da2cb7513777bb565a31298e2c8946a3e83f15186"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["curve_segments", "evaluate_curve_segment"],
+    "public_types": ["CurveSegment"],
+    "shared_service": ["om9_core::evaluation::evaluate_curve"],
+    "error_codes": ["curve", "unsupported", "budget", "id", "missing"]
+  },
+  "asserted_semantics": [
+    "curve_segments reports kind/domain/angle_domain per segment; a native curve is one segment and a nested polycurve is unsupported.",
+    "evaluate_curve_segment addresses that list; index 0 on a native curve evaluates the curve and a larger index is a curve refusal.",
+    "Segment evaluation uses object-local millimetres, D0-D3 order, finite-parameter admission and the 1024-sample bound.",
+    "Both reads stage no mutation."
+  ],
+  "batches": [
+    {"name": "sdk-and-host-tests", "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2", "result": "61 passed, 8 suites"},
+    {"name": "core-tests", "command": "rtk cargo test -p om9-core -j 2", "result": "403 passed, 47 suites"},
+    {"name": "controller-plugin-tests", "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2", "result": "5 passed, 135 filtered"},
+    {"name": "native-plugin-tests", "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored", "result": "19 passed"},
+    {"name": "packaged-sdk-validation", "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-segments", "result": "PASS, 10 commands", "cold_project_hash_equal": true, "failed_commands_preserved_file": true, "standalone_sdk_build": true},
+    {"name": "product-feature-check", "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2", "result": "exit 0 (default features including occt-brep)"},
+    {"name": "public-source-audit", "command": "rtk python tools/public_source_audit.py", "result": "8825 source files, 511 icon bindings, 510 SVG, 0 errors"},
+    {"name": "format-and-whitespace", "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)", "result": "PASS"}
+  ],
+  "native_plugin_assertions": {
+    "rectangle_segments": 4,
+    "segment_kind": "line",
+    "segment_midpoint": [5.0, 0.0, 0.0]
+  },
+  "artifacts": {
+    "hello.om9p": {"bytes": 1746766, "sha256": "55cc343cc16eee7c0391a450c766d42efb6bbfeb8843db3d83b8db5c2e79e011"},
+    "hello.om9": {"bytes": 2159, "sha256": "6c434da8e42a9d63dfddfeb8466f677db6948095071b2eab66f9d91b8ad5014e"},
+    "openmatrix9-sdk-0.1.0.zip": {"bytes": 170081, "sha256": "03d80846f6f6f8338a9d60e7d2ce3bfe923e9599265db8d3402a11507cffa902"},
+    "om9-plugin.exe": {"bytes": 1661440, "sha256": "8105b61f0b14103b0d8450bb708ff84cc80385c423e6b2bceb5b9cbeef04b210"},
+    "om9_hello_plugin.dll": {"bytes": 1744384, "sha256": "c7101ce98968a1bafa1852aa33dd6a78afc1c277f16efcdcaa89204b94c78b3f"},
+    "om9.exe": {"bytes": 69306880, "sha256": "f5618987368bd903f6870588e894bd3c6bf292210a93d041de707d5f00a0a247"}
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-02-04-005 (polycurve segment inspection/evaluation)"],
+    "open": ["segment explode/split editing", "nested polycurve flattening", "arc direction/reversal segment edit"]
+  },
+  "target_proof": {"windows_x64": "verified_external_plugin_and_host", "macos_arm64": "unverified", "macos_x64": "unverified"},
+  "limitations": [
+    "Read-only segment access; explode/split editing remains open.",
+    "A nested polycurve is refused, not flattened.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Broaden the recorded feed to host commands, or return to M02 for subobject/pick query services."
+}

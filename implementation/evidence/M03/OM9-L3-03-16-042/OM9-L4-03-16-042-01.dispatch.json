@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-042-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-042",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-041",
+  "source_command": "Continue Control Point Curve",
+  "menu_icon": "CurveFreeFormContinueCurve",
+  "owner_candidate": "OM9-L3-02-04-001",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Continue Control Point Curve command session is not wired; owner candidate OM9-L3-02-04-001 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-042/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-042/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-042/dispatch_contract.json": "7fee41ee8828c7f7014fd6ad204ab1cdcd9598d716d5b6da7be0f9eabf833936",
+    "implementation/design/M03/OM9-L3-03-16-042/dispatch_contract.md": "1ed02234d704490421d2fb144fbfb56a60d8860e9fc59088547bdb2edd83c114"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

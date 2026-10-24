@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-09-001-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-09-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "MatrixApp::f6_context passes the live document selection into the classifier; the F6 popup renders its title and actions.",
+  "tests": [
+    "om9-app f6 unit: 7 passed",
+    "om9-app f6_context: 2 passed"
+  ]
+}

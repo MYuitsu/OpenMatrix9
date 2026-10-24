@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G02-B-02-02-005",
+  "l3_id": "OM9-L3-02-02-005",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "F4 ngoài point prompt không tạo object hoặc insert chuỗi sai",
+  "expected": "A typed error or unchanged state; no document mutation and no cross-view CPlane leak.",
+  "evidence": [
+    "om9-app cplane_f4_ui: 1 passed",
+    "om9-app cplane_coordinate_input: 10 passed",
+    "om9-app chrome_actions: 13 passed"
+  ],
+  "status": "PASS"
+}

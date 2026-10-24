@@ -187,5 +187,16 @@
       "id": "OM9-L4-01-02-005-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-005 - Command Option Parser/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Option parser dùng chung để plugin khớp cú pháp command.",
+    "api": [],
+    "candidate_api": [
+      "parse_command_arguments(id, tokens)"
+    ],
+    "host_only": "Parser ở host để khớp CLI; SDK gọi và nhận lỗi typed."
+  }
 }

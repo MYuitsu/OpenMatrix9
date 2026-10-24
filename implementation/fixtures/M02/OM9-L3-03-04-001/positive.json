@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G03-B-03-04-001",
+  "l3_id": "OM9-L3-03-04-001",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Bật END ở panel và core snap state nhận enabled=true, biểu tượng đồng bộ",
+  "expected": "The documented snap/Ortho/Planar/Project/SmartTrack state and marker.",
+  "evidence": [
+    "om9-app sidebar_palettes toggle: 1 passed",
+    "om9-app osnap_ui: 3 passed",
+    "om9-app snap_panel_modes: 4 passed"
+  ],
+  "status": "PASS"
+}

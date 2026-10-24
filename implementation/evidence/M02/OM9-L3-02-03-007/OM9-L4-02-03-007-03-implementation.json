@@ -1,0 +1,16 @@
+{
+  "l4": "OM9-L4-02-03-007-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-03-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "The viewport paints the last core candidate (kind label + marker) and its tooltip; it never runs another snap solver.",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-scene/src/osnap.rs"
+  ],
+  "tests": [
+    "om9-app osnap UI: 3 passed",
+    "om9-scene osnap: 11 passed"
+  ]
+}

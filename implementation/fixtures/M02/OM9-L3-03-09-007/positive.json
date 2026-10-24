@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-09-007",
+  "l3_id": "OM9-L3-03-09-007",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "F6 hiện tại cursor, pin/move rồi reopen nhớ vị trí khi đủ screen space",
+  "expected": "The documented F6 group/action with the command registry as the only dispatch source.",
+  "evidence": [
+    "om9-app f6 unit: 7 passed"
+  ],
+  "status": "PASS"
+}

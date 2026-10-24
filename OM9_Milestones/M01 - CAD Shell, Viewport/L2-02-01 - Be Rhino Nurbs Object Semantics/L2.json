@@ -133,5 +133,113 @@
       "id": "OM9-L3-02-01-010",
       "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-010 - Instance And Block Semantic Type/l3.json"
     }
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-02-01",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M01",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "EVIDENCE-SCOPED semantics",
+      "sdk_signal": "SDK-SUBSET + EXPORT-BACKLOG",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Simple shape DTO đã có; đưa NURBS/surface/trim/blocks vào public contract theo từng loại.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-02-01-001",
+      "OM9-L3-02-01-002",
+      "OM9-L3-02-01-003",
+      "OM9-L3-02-01-004",
+      "OM9-L3-02-01-005",
+      "OM9-L3-02-01-006",
+      "OM9-L3-02-01-007",
+      "OM9-L3-02-01-008",
+      "OM9-L3-02-01-009",
+      "OM9-L3-02-01-010"
+    ]
+  },
+  "sdk_implementation_progress": [
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-02-01",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Curve information and native-parameter evaluation for line, circle/arc and NURBS: kind, domain, NURBS degree/poles/periodic/reversed, D0-D3 samples in object-local millimetres bounded to 1024 samples. The owner's evaluation::evaluate_curve is reused; polycurve needs an explicit segment parameter and is refused. Reading/evaluating stages no mutation.",
+      "public_api": [
+        "Host::curve_info",
+        "Host::evaluate_curve"
+      ],
+      "l3_covered": [
+        "OM9-L3-02-01-002"
+      ],
+      "l3_open": [
+        "curve construction, editing, offset, fillet/blend, rebuild and intersections",
+        "polycurve segment parameters",
+        "NURBS weights/knots read or write, seam and closure editing",
+        "surface and BRep semantics"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-curve-evaluation.md",
+        "docs/validation/2026-10-21-m03-curve-evaluation.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Read-only curve services only; placement is not applied and a plugin must compose it once."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-02-01",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Curve definition and semantics: NURBS poles/weights/knots/degree/domain/periodic/reversed/seam and arc angle domain under a control-data bound; closedness/planarity measured by rhino_semantics::classify_curve under an explicit or the document tolerance, with a missing tolerance or a degenerate curve refused. Read-only.",
+      "public_api": [
+        "Host::curve_definition",
+        "Host::curve_semantics"
+      ],
+      "l3_covered": [
+        "OM9-L3-02-01-002",
+        "OM9-L3-02-01-003"
+      ],
+      "l3_open": [
+        "NURBS weights/knots write and point/knot editing",
+        "curve construction, offset, fillet/blend, rebuild and intersections",
+        "polycurve segment parameters",
+        "surface and BRep semantics"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-02-01-curve-definition.md",
+        "docs/validation/2026-10-21-m01-02-01-curve-definition.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Read-only: no control-data or curve editing is exposed."
+    }
+  ],
+  "sdk_export_plan_policy": {
+    "decided": "2026-10-21",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "field": "sdk_export_plan",
+    "applies_to": "L3 files of this owner that have a recorded SDK slice"
+  }
 }

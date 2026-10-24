@@ -201,21 +201,21 @@
     }
   ],
   "runtime_implementation": {
-    "appearance_update": {
-      "date": "2026-10-20",
-      "target": "standalone Rust OM9",
-      "status": "COMMAND_THEME_VALIDATED_MANUAL_UI_PENDING",
-      "scope": "Command appearance only: history, prompt, input, caret, selection, IME underline, option tokens and scrollbar widget colours.",
-      "colours": {
-        "history_background": "#01391C",
-        "input_background": "#005126",
-        "text_caret_ime": "#FDD880",
-        "selection": "#186C41"
-      },
-      "evidence": [
-        "implementation/evidence/M01/2026-10-20-command-green-gold.json"
-      ],
-      "limitation": "Appearance evidence only; no full L2/L3 command-completion promotion."
-    }
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Typed command aliases submit through the same Controller; accepted feature id echoed.",
+    "owner": "transcript.rs + ui.rs",
+    "tests": [
+      "command_feedback_adapter 5 passed"
+    ],
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-10/README.md",
+      "implementation/evidence/M01/2026-10-22-l2-03-10-commandline-feedback.json"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M01-UI visual review pending."
+    ]
   }
 }

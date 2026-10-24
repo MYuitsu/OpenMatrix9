@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-23T12:29:38.852714+00:00",
+  "target": "Windows x64 standalone om9-core; safe Rust; no native changes",
+  "status": "validated_bounded_kernel_slice",
+  "tests": {
+    "focused": {
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "suites_including_doctests": 2
+    },
+    "core_regression": {
+      "passed": 508,
+      "failed": 0,
+      "ignored": 0,
+      "suites_including_doctests": 58
+    },
+    "app_utilities": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "suites_including_doctests": 1
+    }
+  },
+  "commands": [
+    {
+      "command": "cargo test -p om9-core -j 2",
+      "exit_code": 0,
+      "log": "core-regression.log"
+    },
+    {
+      "command": "cargo test -p om9-core -j 2 --test mesh_csg --test utilities -- --nocapture",
+      "exit_code": 0,
+      "log": "focused.log"
+    },
+    {
+      "command": "cargo test -p om9-app -j 2 --test utilities",
+      "exit_code": 0,
+      "log": "app-utilities.log"
+    },
+    {
+      "command": "cargo clippy -p om9-core -p om9-app -j 2 --lib --test utilities --test mesh_csg -- -D warnings",
+      "exit_code": 0,
+      "log": "clippy.log"
+    },
+    {
+      "command": "rustfmt --edition 2024 --config skip_children=true --check [six changed Rust files]",
+      "exit_code": 0,
+      "log": "fmt.log"
+    },
+    {
+      "command": "python tools/public_source_audit.py",
+      "exit_code": 0,
+      "log": "public-source-audit.log",
+      "result": {
+        "source_files": 12202,
+        "icon_bindings": 511,
+        "svg_files": 510,
+        "errors": []
+      }
+    },
+    {
+      "command": "git diff --check [changed paths]",
+      "exit_code": 0,
+      "log": "scoped-diff-check.log"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 1,
+      "log": "diff-check.log",
+      "scope_note": "Whitespace in untouched crates/om9-app/Cargo.toml; scoped changes pass."
+    },
+    {
+      "command": "python tools/prune_build_artifacts.py --apply",
+      "exit_code": 0,
+      "log": "prune.log"
+    }
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "L:/om9-target",
+    "jobs": 2,
+    "toolchain_log": "toolchain.log",
+    "working_tree": "Pre-existing multi-session uncommitted changes retained; no commit or staging."
+  },
+  "source_sha256": {
+    "crates/om9-core/src/mesh_csg.rs": "545e3d85ede2935bf481ca25de8be8cd173546b77f80cb4bdfe885e5cf5936fd",
+    "crates/om9-core/src/mesh_repair.rs": "4598cdc0ca1040ba87b7748ab47357cb3bff866fa836a9491656694c0f5f9a23",
+    "crates/om9-core/src/lib.rs": "b7d8acb7afe6f0c44a03b39b4afd7a0b2b786b269cf7efcd11e05df092212e04",
+    "crates/om9-core/tests/mesh_csg.rs": "5c3185903e34d34a92c75467ea56f1043c4a8eed755cab49da451bab69849950",
+    "crates/om9-core/tests/utilities.rs": "6aad650ad1e5e43e72c585da72a29f49a92b3a8303bbe753ff26c772f124bf90",
+    "crates/om9-app/tests/utilities.rs": "468b3e21f5b970caa75d2687796033c775f9a9d6dbb68aa76eaf6ba0875c2cfb"
+  },
+  "milestone_views": [
+    "OM9_Milestones/ZAFTER - Extensions/L1.json",
+    "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/L2.json",
+    "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/L3-002 - Mesh Manifold And Hole Repair/l3.json",
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L2.json",
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-006 - Mesh Reduce Basic/l3.json"
+  ],
+  "limitations": [
+    "Bounded f64 kernel, not exact predicates or manufacturing certification.",
+    "Closed oriented triangle input only; vertex colours and open hole repair unsupported.",
+    "No new Menu/CMD/SDK command or interactive boolean/repair Undo/archive/native UI acceptance.",
+    "Basic reduction after its CSG prepass remains uncertified for watertightness.",
+    "macOS and large-mesh performance unverified."
+  ],
+  "manual_gate_promoted": false,
+  "business_skill_update": "PROPOSED_NOT_RECORDED_PENDING_USER_CONSENT",
+  "log_sha256": {
+    "app-utilities.log": "2101e689fbcdf9f7013ad9b5533e6c0e6e5ca5c8d7ec4d30c8fae38b58796fdf",
+    "clippy.log": "1a995a18a7098d79aeb7bfb861d7d2a421819d81838b2abe97c7f192ffbec0d4",
+    "core-regression.log": "d5b36c29366f67dbac1a4dc4fd39102d6ed0b4e0693f815ae39980a38cf7c139",
+    "diff-check.log": "4ef922a0d2e77b09298c7c32a6378bf8415d3c4c158bfc4af3a5047bb41e20c5",
+    "fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "focused.log": "2b9245d048b95a8cab9ad17d768c9af21201ee344a469c545ff6bba071878229",
+    "prune.log": "61b7a1cf007378e5f7e0e7076d2d6d1b412e26c2a8d736fbc070d555b8373e1d",
+    "public-source-audit.log": "f0fc90ee817c6c1f285bcb461ea8bae33df2baeaacb291580f3711cc2ab5fedf",
+    "scoped-diff-check.log": "24b4bd85414b47691565809f973e7eaa2155fbcae0f03cebce94c28c99cacd67",
+    "toolchain.log": "c7e18b4c54a1afca97023c8a1a25836b8a758b4dc75eaf8eae717cebab63af88"
+  },
+  "proposed_skill_rule": "proposed-skill-rule.md"
+}

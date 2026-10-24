@@ -1,0 +1,147 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-001-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-02-06-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel + om9-app",
+    "files": [
+      "crates/om9-core/src/transform_session.rs",
+      "crates/om9-core/src/gumball.rs",
+      "crates/om9-app/src/session/gumball.rs"
+    ],
+    "test": "crates/om9-core/tests/transform_sessions.rs + crates/om9-kernel/tests/l2_02_06.rs + app gumball suites"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test transform_sessions -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/core-suite.log",
+      "stdout_log_sha256": "75a72236e4cfafe1513f09b30c1ea357adf019ce4f37e0d04a2129309f73b356"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_02_06 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/kernel-suite.log",
+      "stdout_log_sha256": "d69f15f15b01fb450f381bd8cfc2acf0e892af7e0d651b9aab4fa0c92507f188"
+    },
+    {
+      "argv": "cargo test -p om9-core --lib -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/core-lib.log",
+      "stdout_log_sha256": "f46d561f66502ebd5c5333046ef3d0d34212d3a10b9db71fefc77aecd4a53fc3"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/kernel-all.log",
+      "stdout_log_sha256": "4e025363f07e0ad690222b507d34efb60cc14032ee8f12e502545fc97e82ea8b"
+    },
+    {
+      "argv": "cargo clippy -p om9-core --test transform_sessions -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/clippy-core-no-deny.log",
+      "stdout_log_sha256": "4922feacd74a87301786e4fa223e77832eb9953c4ed313793c8a2e7997643812",
+      "note": "owned files are warning-free; workspace `-D warnings` is currently blocked by another in-flight untracked om9-core top11 module, not by this owner."
+    },
+    {
+      "argv": "cargo clippy -p om9-kernel --features 3dm-brep --test l2_02_06 -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/clippy-kernel-no-deny.log",
+      "stdout_log_sha256": "518d1082dc89480b693df1892591447e6e73c52d3f0b601659ab4bf434f27785",
+      "note": "owned files are warning-free; same in-flight top11 warning applies."
+    },
+    {
+      "argv": "rustfmt --edition 2024 --check crates/om9-core/src/transform_session.rs crates/om9-core/tests/transform_sessions.rs crates/om9-kernel/tests/l2_02_06.rs crates/om9-kernel/src/transform_ops.rs",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/fmt.log",
+      "stdout_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "observed": {
+    "move_preview": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        4.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rotate_angle_rad": 1.5707963267948966,
+    "copy_option": true
+  },
+  "expected": {
+    "move_preview": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        4.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rotate_angle_rad": 1.5707963267948966,
+    "copy_option": true
+  },
+  "tolerances": {
+    "matrix": "exact",
+    "angle_rad": "1e-12"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/transform_session.rs",
+    "crates/om9-core/src/gumball.rs",
+    "crates/om9-app/src/session/gumball.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/transform_session.rs": "2f0a44e314909c8895442516539a0122fb195db0c3bda17e635c08847dcd6cac",
+    "crates/om9-core/src/gumball.rs": "870661d90df2e55e770352458b2d2e8f2476980cebcabd944b32f2232d9cc81e",
+    "crates/om9-app/src/session/gumball.rs": "38ebb662db09592ae315cfacdfd9df1aeb0c494dc661c59f47236c867a6faf4d"
+  }
+}

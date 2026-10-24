@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-23T13:06:21.443991+00:00",
+  "target": "Windows x64 safe Rust standalone om9-core",
+  "status": "VALIDATED_CURVED16K_ORIGINAL_TOLERANCE",
+  "tests": {
+    "core_regression": {
+      "passed": 514,
+      "failed": 0,
+      "ignored": 2,
+      "suites_including_doctests": 58
+    },
+    "app_utilities": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "suites_including_doctests": 1
+    },
+    "release_geometry_including_benchmarks": {
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0,
+      "suites_including_doctests": 1
+    }
+  },
+  "original_fixture": {
+    "triangles": 16384,
+    "sphere_level": 5,
+    "centers": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0.47,
+        0.13,
+        0.09
+      ]
+    ]
+  },
+  "defaults_unchanged": {
+    "tolerance": 1e-08,
+    "max_triangles": 25000,
+    "max_fragments": 50000,
+    "max_work": 20000000
+  },
+  "measurements": {
+    "union_volume": 5.70713209062495,
+    "intersection_volume": 2.65811845179003,
+    "difference_volume": 1.52450681941747,
+    "repair_volume": 5.70713209062495,
+    "union_triangles": 15724,
+    "repair_triangles": 15724,
+    "work": 11176806,
+    "elapsed_all_ms": 1159.752
+  },
+  "volumetric_assertion_bound_unchanged": 1e-07,
+  "corner_uv_assertion_bound": 1e-08,
+  "root_cause": "Infinite-plane distance divided by eight falsely failed the minimum probe guard; actual finite-triangle normal clearance remains adequate.",
+  "fix": "Bound both normal probes by one quarter of actual finite-triangle hit distance; keep geometric tolerances and minimum probe unchanged.",
+  "source_sha256": {
+    "crates/om9-core/src/mesh_csg.rs": "2d05c4327df974a5a50cc79555619a9818da4bc5bfb02d37f4f440bb47ac9934",
+    "crates/om9-core/src/mesh_csg/spatial.rs": "97811123ec0f59eb045b3ca85e32de7fd5a657d25697babbc580ab8778f7b230",
+    "crates/om9-core/tests/mesh_csg.rs": "4dceacaf3e36ed817f45f63ba3054860b3e8ef036deaeec5b50d5d3685a52645"
+  },
+  "milestone_views": [
+    "OM9_Milestones/ZAFTER - Extensions/L1.json",
+    "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/L2.json",
+    "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/L3-002 - Mesh Manifold And Hole Repair/l3.json",
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L2.json",
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-19 - 11-febe-matrix/L3-006 - Mesh Reduce Basic/l3.json"
+  ],
+  "limitations": [
+    "Bounded f64 kernel and closed oriented triangle input remain; no arbitrary production-mesh or exact-predicate certification.",
+    "Genuinely inadequate clearance, ambiguity, unsupported topology and exhausted budgets still fail explicitly.",
+    "New UI/SDK workflow, open-mesh repair and macOS remain outside this fix.",
+    "Combined app/core Clippy failed on unrelated needless_return in crates/om9-app/src/session/solid.rs:596; core Clippy passes."
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "L:/om9-target",
+    "jobs": 2,
+    "toolchain": "toolchain.log",
+    "hardware_ref": "../mesh-csg-scaling-2026-10-23/hardware.json",
+    "dirty_worktree": "Pre-existing multi-session changes retained; no staging or commit."
+  },
+  "commands": [
+    {
+      "command": "cargo test -p om9-core -j 2",
+      "exit_code": 0,
+      "log": "core-regression.log"
+    },
+    {
+      "command": "cargo test -p om9-app -j 2 --test utilities",
+      "exit_code": 0,
+      "log": "app-utilities.log"
+    },
+    {
+      "command": "cargo test -p om9-core -j 2 --release --test mesh_csg -- --include-ignored --nocapture --test-threads=1",
+      "exit_code": 0,
+      "log": "release-geometry.log"
+    },
+    {
+      "command": "cargo clippy -p om9-core -j 2 --lib --tests -- -D warnings",
+      "exit_code": 0,
+      "log": "core-clippy.log"
+    },
+    {
+      "command": "cargo clippy -p om9-core -p om9-app -j 2 --lib --test mesh_csg --test utilities -- -D warnings",
+      "exit_code": 1,
+      "log": "clippy.log",
+      "note": "Unrelated app needless_return; no file changed to hide it."
+    },
+    {
+      "command": "rustfmt --edition 2024 --config skip_children=true --check [kernel, spatial, geometry test]",
+      "exit_code": 0,
+      "log": "fmt.log"
+    }
+  ],
+  "manual_gate_promoted": false,
+  "skill_rule_changed": false,
+  "public_source_audit": {
+    "exit_code": 0,
+    "result": {
+      "source_files": 12234,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "scoped_diff_check": {
+    "exit_code": 0,
+    "log": "scoped-diff-check.log"
+  },
+  "prune": {
+    "exit_code": 0,
+    "log": "prune.log"
+  },
+  "log_sha256": {
+    "app-utilities.log": "5435dcb3628dc0ef8f8793ed059961ad34518d9ae8af7d1a84a534ae84792b6a",
+    "clippy.log": "9b131c31a04c06ff7b648e28c035e2f0cc8ab2fc17d82540ed9f6651c4c6fa57",
+    "core-clippy.log": "0dcf6b63a30c181f61ad6e8bdb7a8d363bf907582843eff6b9d88b05f9e709b5",
+    "core-regression.log": "928f6be502a03269c47e9c6d713778e44366d8978b35d7bf4cc52bd36da86aaf",
+    "curved16k-debug.log": "2ca01ed11bd61f295439fab9d63af6979fa12989dd563faaeff226642a1bcdda",
+    "diagnostic.log": "45ae4ef89afe155dde92860dc0bf7912a7ecaed6cb7858fcd1dac716246eddf8",
+    "fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prune.log": "61b7a1cf007378e5f7e0e7076d2d6d1b412e26c2a8d736fbc070d555b8373e1d",
+    "public-source-audit.log": "1baef92002219fc02b2101c2764fd5f37e85d8f1433760feabd9128c1e0dd8e8",
+    "release-geometry.log": "30ceadc833c03c2e2d173ee3ab3d6941b599dc0742c55c26dcd44b7b110d62cf",
+    "scoped-diff-check.log": "24b4bd85414b47691565809f973e7eaa2155fbcae0f03cebce94c28c99cacd67",
+    "toolchain.log": "c7e18b4c54a1afca97023c8a1a25836b8a758b4dc75eaf8eae717cebab63af88"
+  }
+}

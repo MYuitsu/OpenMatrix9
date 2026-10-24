@@ -32,6 +32,8 @@ fn fixture() -> Document {
                 faces: vec![vec![0, 1, 2]],
                 normals: vec![],
                 colors: vec![],
+
+                corner_uvs: Vec::new(),
             }),
         ),
         (

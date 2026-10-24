@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-004",
+  "fixture_id": "OM9-L3-02-05-004-NEGATIVE",
+  "cases": [
+    "a non-orthonormal plane frame or zero size is refused",
+    "a boundary loop with a gap is refused"
+  ],
+  "invariants": [
+    "no partial surface is returned on refusal",
+    "no tessellation is substituted for the exact NURBS surface",
+    "the typed error reaches the caller"
+  ],
+  "measured_on_2026_10_22": "all listed negative cases pass in the focused logs"
+}

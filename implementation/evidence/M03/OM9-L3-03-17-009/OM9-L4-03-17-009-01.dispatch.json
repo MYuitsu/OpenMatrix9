@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-009-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-009",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-109",
+  "source_command": "Loft",
+  "menu_icon": "SurfaceLoft",
+  "owner_candidate": "OM9-L3-01-09-007",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-009/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-009/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-009/dispatch_contract.json": "5b6f726fafe2b5f42aeeae38918b5a146b9286cceccc2096d0a7987ee560a656",
+    "implementation/design/M03/OM9-L3-03-17-009/source_crosswalk.json": "3cce581bbfa30641c52b76b33686854bba15eae8abb08af6fa27ede5d6c6ba21"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

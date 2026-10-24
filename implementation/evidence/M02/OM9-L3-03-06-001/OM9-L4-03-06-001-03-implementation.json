@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-06-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-06-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "RasterAsset::from_encoded decodes PNG/JPEG and bounds the immutable bytes; PictureFrame::import_png builds a 20x20 mm quad on the active CPlane for a 100x100 source.",
+  "tests": [
+    "om9-app pictureframe unit: 6 passed",
+    "om9-app pictureframe persistence: 3 passed"
+  ]
+}

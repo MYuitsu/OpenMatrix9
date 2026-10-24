@@ -151,18 +151,41 @@ const PALETTE: &[Icon] = &[
         "OM9-TOP11-009",
         "core-minimal/TopIconSplit.svg"
     ),
-    icon!("Trim", "TopIconTrim", "", "core-minimal/TopIconTrim.svg"),
+    icon!(
+        "Trim",
+        "TopIconTrim",
+        "OM9-TOP11-010",
+        "core-minimal/TopIconTrim.svg"
+    ),
     icon!(
         "Duplicate",
         "TopIconDuplicate",
-        "",
+        "OM9-TOP11-002",
         "core-minimal/TopIconDuplicate.svg"
     ),
     icon!(
         "EditPoints",
         "TopIconEditPointsOn",
-        "",
+        "OM9-TOP11-003",
         "core-minimal/TopIconEditPointsOn.svg"
+    ),
+    icon!(
+        "ControlPoints",
+        "TopIconControlPointsOn",
+        "OM9-TOP11-001",
+        "core-minimal/TopIconControlPointsOn.svg"
+    ),
+    icon!(
+        "Explode",
+        "TopIconExplode",
+        "OM9-TOP11-005",
+        "core-minimal/TopIconExplode.svg"
+    ),
+    icon!(
+        "RingRail",
+        "TopIconRingRail",
+        "OM9-TOP11-011",
+        "core-minimal/TopIconRingRail.svg"
     ),
     icon!("Undo", "Undo", "", "core-minimal/Undo.svg"),
     icon!("Redo", "Redo", "", "core-minimal/Redo.svg"),
@@ -2671,43 +2694,228 @@ const MENU_PALETTE: &[Icon] = &[
     ),
 ];
 const SIDEBAR_PALETTE: &[Icon] = &[
-    icon!("PreviewCutterON", "PreviewCutterON", "", "core-minimal/PreviewCutterON.svg"),
-    icon!("PreviewShadeON", "PreviewShadeON", "OM9-DISPLAY-001", "core-minimal/PreviewShadeON.svg"),
-    icon!("ShadeSelectedOnlyON", "ShadeSelectedOnlyON", "", "core-minimal/ShadeSelectedOnlyON.svg"),
-    icon!("GVGemView_1", "GVGemView_1", "OM9-DISPLAY-005", "core-minimal/GVGemView_1.svg"),
-    icon!("GVSurfaceView_1", "GVSurfaceView_1", "", "core-minimal/GVSurfaceView_1.svg"),
-    icon!("Dial_Ghosted", "Dial_Ghosted", "", "core-minimal/Dial_Ghosted.svg"),
-    icon!("Dial_Tech Shade", "Dial_Tech Shade", "", "core-minimal/Dial_Tech Shade.svg"),
-    icon!("Dial_Working Render", "Dial_Working Render", "", "core-minimal/Dial_Working Render.svg"),
-    icon!("ToolsObjectSnapPerpendicularTo", "ToolsObjectSnapPerpendicularTo", "", "core-minimal/ToolsObjectSnapPerpendicularTo.svg"),
-    icon!("ToolsObjectSnapTangentTo", "ToolsObjectSnapTangentTo", "", "core-minimal/ToolsObjectSnapTangentTo.svg"),
-    icon!("ToolsObjectSnapIntersection", "ToolsObjectSnapIntersection", "OM9-SNAP-005", "core-minimal/ToolsObjectSnapIntersection.svg"),
-    icon!("ToolsObjectSnapNear", "ToolsObjectSnapNear", "", "core-minimal/ToolsObjectSnapNear.svg"),
-    icon!("ToolsObjectSnapQuadrant", "ToolsObjectSnapQuadrant", "", "core-minimal/ToolsObjectSnapQuadrant.svg"),
-    icon!("SnapOnSurface", "SnapOnSurface", "", "core-minimal/SnapOnSurface.svg"),
-    icon!("SnapOnPolysurface", "SnapOnPolysurface", "", "core-minimal/SnapOnPolysurface.svg"),
-    icon!("SnapBetween", "SnapBetween", "OM9-SNAP-009", "core-minimal/SnapBetween.svg"),
-    icon!("ProjectSnapON", "ProjectSnapON", "", "core-minimal/ProjectSnapON.svg"),
-    icon!("GVObjectInfo", "GVObjectInfo", "", "core-minimal/GVObjectInfo.svg"),
-    icon!("AllObjectInfo", "AllObjectInfo", "OM9-INFO-003", "core-minimal/AllObjectInfo.svg"),
-    icon!("CommandHistory", "CommandHistory", "", "core-minimal/CommandHistory.svg"),
-    icon!("ProjectNotes", "ProjectNotes", "OM9-INFO-006", "core-minimal/ProjectNotes.svg"),
-    icon!("SuperSelect", "SuperSelect", "", "core-minimal/SuperSelect.svg"),
-    icon!("RhinoHistoryON", "RhinoHistoryON", "OM9-INFO-015", "core-minimal/RhinoHistoryON.svg"),
-    icon!("GVHistoryUpdateON", "GVHistoryUpdateON", "", "core-minimal/GVHistoryUpdateON.svg"),
-    icon!("GVHistoryRecordON", "GVHistoryRecordON", "", "core-minimal/GVHistoryRecordON.svg"),
-    icon!("InfoSettingsGVClearHistory", "InfoSettingsGVClearHistory", "OM9-INFO-016", "core-minimal/InfoSettingsGVClearHistory.svg"),
-    icon!("InfoSettingsViewportTabsToggle", "InfoSettingsViewportTabsToggle", "", "core-minimal/InfoSettingsViewportTabsToggle.svg"),
-    icon!("InfoSettingsDisplayProperties", "InfoSettingsDisplayProperties", "", "core-minimal/InfoSettingsDisplayProperties.svg"),
-    icon!("InfoSettingsBoxEdit", "InfoSettingsBoxEdit", "OM9-INFO-009", "core-minimal/InfoSettingsBoxEdit.svg"),
-    icon!("InfoSettingsLibraries", "InfoSettingsLibraries", "OM9-INFO-011", "core-minimal/InfoSettingsLibraries.svg"),
-    icon!("InfoSettingsSelectionFilter", "InfoSettingsSelectionFilter", "", "core-minimal/InfoSettingsSelectionFilter.svg"),
-    icon!("RhinoSmartTrackON", "RhinoSmartTrackON", "", "core-minimal/RhinoSmartTrackON.svg"),
-    icon!("InfoSettingsDesignReport", "InfoSettingsDesignReport", "OM9-INFO-014", "core-minimal/InfoSettingsDesignReport.svg"),
-    icon!("InfoSettingsSmartTargetsGumballON", "InfoSettingsSmartTargetsGumballON", "", "core-minimal/InfoSettingsSmartTargetsGumballON.svg"),
-    icon!("InfoSettingsGumballAlignment", "InfoSettingsGumballAlignment", "OM9-INFO-021", "core-minimal/InfoSettingsGumballAlignment.svg"),
-    icon!("InfoSettingsRelocateGumball", "InfoSettingsRelocateGumball", "", "core-minimal/InfoSettingsRelocateGumball.svg"),
-    icon!("InfoSettingsGumballON", "InfoSettingsGumballON", "OM9-INFO-020", "core-minimal/InfoSettingsGumballON.svg"),
+    icon!(
+        "PreviewCutterON",
+        "PreviewCutterON",
+        "",
+        "core-minimal/PreviewCutterON.svg"
+    ),
+    icon!(
+        "PreviewShadeON",
+        "PreviewShadeON",
+        "OM9-DISPLAY-001",
+        "core-minimal/PreviewShadeON.svg"
+    ),
+    icon!(
+        "ShadeSelectedOnlyON",
+        "ShadeSelectedOnlyON",
+        "",
+        "core-minimal/ShadeSelectedOnlyON.svg"
+    ),
+    icon!(
+        "GVGemView_1",
+        "GVGemView_1",
+        "OM9-DISPLAY-005",
+        "core-minimal/GVGemView_1.svg"
+    ),
+    icon!(
+        "GVSurfaceView_1",
+        "GVSurfaceView_1",
+        "",
+        "core-minimal/GVSurfaceView_1.svg"
+    ),
+    icon!(
+        "Dial_Ghosted",
+        "Dial_Ghosted",
+        "",
+        "core-minimal/Dial_Ghosted.svg"
+    ),
+    icon!(
+        "Dial_Tech Shade",
+        "Dial_Tech Shade",
+        "",
+        "core-minimal/Dial_Tech Shade.svg"
+    ),
+    icon!(
+        "Dial_Working Render",
+        "Dial_Working Render",
+        "",
+        "core-minimal/Dial_Working Render.svg"
+    ),
+    icon!(
+        "ToolsObjectSnapPerpendicularTo",
+        "ToolsObjectSnapPerpendicularTo",
+        "",
+        "core-minimal/ToolsObjectSnapPerpendicularTo.svg"
+    ),
+    icon!(
+        "ToolsObjectSnapTangentTo",
+        "ToolsObjectSnapTangentTo",
+        "",
+        "core-minimal/ToolsObjectSnapTangentTo.svg"
+    ),
+    icon!(
+        "ToolsObjectSnapIntersection",
+        "ToolsObjectSnapIntersection",
+        "OM9-SNAP-005",
+        "core-minimal/ToolsObjectSnapIntersection.svg"
+    ),
+    icon!(
+        "ToolsObjectSnapNear",
+        "ToolsObjectSnapNear",
+        "",
+        "core-minimal/ToolsObjectSnapNear.svg"
+    ),
+    icon!(
+        "ToolsObjectSnapQuadrant",
+        "ToolsObjectSnapQuadrant",
+        "",
+        "core-minimal/ToolsObjectSnapQuadrant.svg"
+    ),
+    icon!(
+        "SnapOnSurface",
+        "SnapOnSurface",
+        "",
+        "core-minimal/SnapOnSurface.svg"
+    ),
+    icon!(
+        "SnapOnPolysurface",
+        "SnapOnPolysurface",
+        "",
+        "core-minimal/SnapOnPolysurface.svg"
+    ),
+    icon!(
+        "SnapBetween",
+        "SnapBetween",
+        "OM9-SNAP-009",
+        "core-minimal/SnapBetween.svg"
+    ),
+    icon!(
+        "ProjectSnapON",
+        "ProjectSnapON",
+        "",
+        "core-minimal/ProjectSnapON.svg"
+    ),
+    icon!(
+        "GVObjectInfo",
+        "GVObjectInfo",
+        "",
+        "core-minimal/GVObjectInfo.svg"
+    ),
+    icon!(
+        "AllObjectInfo",
+        "AllObjectInfo",
+        "OM9-INFO-003",
+        "core-minimal/AllObjectInfo.svg"
+    ),
+    icon!(
+        "CommandHistory",
+        "CommandHistory",
+        "",
+        "core-minimal/CommandHistory.svg"
+    ),
+    icon!(
+        "ProjectNotes",
+        "ProjectNotes",
+        "OM9-INFO-006",
+        "core-minimal/ProjectNotes.svg"
+    ),
+    icon!(
+        "SuperSelect",
+        "SuperSelect",
+        "",
+        "core-minimal/SuperSelect.svg"
+    ),
+    icon!(
+        "RhinoHistoryON",
+        "RhinoHistoryON",
+        "OM9-INFO-015",
+        "core-minimal/RhinoHistoryON.svg"
+    ),
+    icon!(
+        "GVHistoryUpdateON",
+        "GVHistoryUpdateON",
+        "",
+        "core-minimal/GVHistoryUpdateON.svg"
+    ),
+    icon!(
+        "GVHistoryRecordON",
+        "GVHistoryRecordON",
+        "",
+        "core-minimal/GVHistoryRecordON.svg"
+    ),
+    icon!(
+        "InfoSettingsGVClearHistory",
+        "InfoSettingsGVClearHistory",
+        "OM9-INFO-016",
+        "core-minimal/InfoSettingsGVClearHistory.svg"
+    ),
+    icon!(
+        "InfoSettingsViewportTabsToggle",
+        "InfoSettingsViewportTabsToggle",
+        "",
+        "core-minimal/InfoSettingsViewportTabsToggle.svg"
+    ),
+    icon!(
+        "InfoSettingsDisplayProperties",
+        "InfoSettingsDisplayProperties",
+        "",
+        "core-minimal/InfoSettingsDisplayProperties.svg"
+    ),
+    icon!(
+        "InfoSettingsBoxEdit",
+        "InfoSettingsBoxEdit",
+        "OM9-INFO-009",
+        "core-minimal/InfoSettingsBoxEdit.svg"
+    ),
+    icon!(
+        "InfoSettingsLibraries",
+        "InfoSettingsLibraries",
+        "OM9-INFO-011",
+        "core-minimal/InfoSettingsLibraries.svg"
+    ),
+    icon!(
+        "InfoSettingsSelectionFilter",
+        "InfoSettingsSelectionFilter",
+        "",
+        "core-minimal/InfoSettingsSelectionFilter.svg"
+    ),
+    icon!(
+        "RhinoSmartTrackON",
+        "RhinoSmartTrackON",
+        "",
+        "core-minimal/RhinoSmartTrackON.svg"
+    ),
+    icon!(
+        "InfoSettingsDesignReport",
+        "InfoSettingsDesignReport",
+        "OM9-INFO-014",
+        "core-minimal/InfoSettingsDesignReport.svg"
+    ),
+    icon!(
+        "InfoSettingsSmartTargetsGumballON",
+        "InfoSettingsSmartTargetsGumballON",
+        "",
+        "core-minimal/InfoSettingsSmartTargetsGumballON.svg"
+    ),
+    icon!(
+        "InfoSettingsGumballAlignment",
+        "InfoSettingsGumballAlignment",
+        "OM9-INFO-021",
+        "core-minimal/InfoSettingsGumballAlignment.svg"
+    ),
+    icon!(
+        "InfoSettingsRelocateGumball",
+        "InfoSettingsRelocateGumball",
+        "",
+        "core-minimal/InfoSettingsRelocateGumball.svg"
+    ),
+    icon!(
+        "InfoSettingsGumballON",
+        "InfoSettingsGumballON",
+        "OM9-INFO-020",
+        "core-minimal/InfoSettingsGumballON.svg"
+    ),
 ];
 
 fn lookup(name: &str) -> Option<&'static Icon> {
@@ -2725,11 +2933,15 @@ fn lookup(name: &str) -> Option<&'static Icon> {
         "Scale3D" => "Scale",
         other => other,
     };
-    PALETTE.iter().chain(MENU_PALETTE.iter()).chain(SIDEBAR_PALETTE.iter()).find(|icon| {
-        icon.name.eq_ignore_ascii_case(name)
-            || icon.command_key.eq_ignore_ascii_case(name)
-            || (!icon.feature.is_empty() && icon.feature.eq_ignore_ascii_case(name))
-    })
+    PALETTE
+        .iter()
+        .chain(MENU_PALETTE.iter())
+        .chain(SIDEBAR_PALETTE.iter())
+        .find(|icon| {
+            icon.name.eq_ignore_ascii_case(name)
+                || icon.command_key.eq_ignore_ascii_case(name)
+                || (!icon.feature.is_empty() && icon.feature.eq_ignore_ascii_case(name))
+        })
 }
 
 /// Resolve a real menu command key, feature ID, or short palette label to its
@@ -2820,7 +3032,11 @@ mod tests {
 
     #[test]
     fn every_embedded_authored_svg_renders_visible_pixels() {
-        for icon in PALETTE.iter().chain(MENU_PALETTE.iter()).chain(SIDEBAR_PALETTE.iter()) {
+        for icon in PALETTE
+            .iter()
+            .chain(MENU_PALETTE.iter())
+            .chain(SIDEBAR_PALETTE.iter())
+        {
             let source = std::str::from_utf8(icon.svg).unwrap();
             assert!(!source.contains("<image") && !source.contains("<script"));
             let image = raster(icon.svg).unwrap_or_else(|| panic!("icon {}", icon.name));

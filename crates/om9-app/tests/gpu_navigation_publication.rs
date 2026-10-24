@@ -74,6 +74,8 @@ fn scene(count: usize) -> Scene {
                 faces: vec![vec![0, 1, 2]],
                 normals: vec![],
                 colors: vec![],
+
+                corner_uvs: Vec::new(),
             }),
             document.current_layer,
         );

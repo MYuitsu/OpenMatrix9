@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-006",
+  "fixture_id": "OM9-L3-01-09-006-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "middle square reversed",
+    "one section only"
+  ],
+  "expect": "CreationError::Invalid; no silently corrected loft"
+}

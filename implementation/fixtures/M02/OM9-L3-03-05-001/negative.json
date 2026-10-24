@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-05-001",
+  "l3_id": "OM9-L3-03-05-001",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Chuyển mode không thay đổi document dirty/undo journal",
+  "expected": "No document mutation, no invented gem material, no disabled category hiding model geometry, and a safe schema fallback.",
+  "evidence": [
+    "om9-app display_modes: 3 passed",
+    "om9-app viewport_title_menu: 18 passed"
+  ],
+  "status": "PASS"
+}

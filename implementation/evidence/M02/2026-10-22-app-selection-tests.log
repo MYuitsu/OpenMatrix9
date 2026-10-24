@@ -1,0 +1,124 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 01s
+     Running tests\acceptance_selection_set.rs (L:/om9-target\debug\deps\acceptance_selection_set-0f9ecc2840b604a4.exe)
+
+running 6 tests
+test an_identifier_that_no_longer_exists_is_refused ... ok
+test a_locked_or_hidden_object_is_refused_and_not_stored ... ok
+test a_batch_with_one_bad_id_is_refused_whole ... ok
+test click_a_then_ctrl_click_b_gives_both_and_toggling_a_leaves_b ... ok
+test selecting_never_writes_document_history ... ok
+test twenty_selection_round_trips_are_identical ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\acceptance_viewport_selection.rs (L:/om9-target\debug\deps\acceptance_viewport_selection-0da181bb662510e5.exe)
+
+running 8 tests
+test escape_without_a_drag_clears_the_selection ... ok
+test ctrl_shift_click_picks_the_face_under_the_pointer ... ok
+test a_picked_subobject_is_drawn_in_the_viewport ... ok
+test a_drag_that_starts_on_the_dock_draws_no_selection_marquee ... ok
+test shift_adds_with_a_band_and_ctrl_removes ... ok
+test pick_tolerance_stays_in_logical_points_at_high_dpi ... ok
+test shift_click_adds_and_keeps_an_already_selected_object ... ok
+test twenty_band_passes_leave_the_same_selection ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.83s
+
+     Running tests\brep_selection.rs (L:/om9-target\debug\deps\brep_selection-8eac930cc8dc0c1c.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\clip_behaviours.rs (L:/om9-target\debug\deps\clip_behaviours-84529c161d2c6428.exe)
+
+running 3 tests
+test clicking_selects_and_empty_space_deselects_with_the_gumball_following ... ok
+test a_window_band_selects_the_set_and_escape_clears_it ... ok
+test orbiting_and_zooming_leave_the_gumball_attached_and_the_same_screen_size ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.19s
+
+     Running tests\gumball_cold.rs (L:/om9-target\debug\deps\gumball_cold-0cb230fd92177fa8.exe)
+
+running 1 test
+test a_gumball_commit_reopens_in_a_fresh_process_with_the_same_id_and_placement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.92s
+
+     Running tests\gumball_interaction.rs (L:/om9-target\debug\deps\gumball_interaction-98b5a5e43e47d0aa.exe)
+
+running 5 tests
+test a_gesture_without_motion_writes_nothing ... ok
+test the_pivot_is_none_without_a_selection ... ok
+test scaling_doubles_the_distance_from_the_pivot ... ok
+test rotating_turns_the_selection_about_its_centre ... ok
+test moving_two_selected_objects_is_one_journal_entry ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_numeric.rs (L:/om9-target\debug\deps\gumball_numeric-141ec5eaf342ba88.exe)
+
+running 5 tests
+test numeric_commands_without_a_selection_are_refused ... ok
+test a_malformed_numeric_command_changes_nothing ... ok
+test nan_and_empty_numeric_inputs_commit_nothing_and_keep_the_gumball ... ok
+test a_numeric_move_is_one_transaction ... ok
+test a_numeric_rotation_and_scale_turn_about_the_pivot ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_placement.rs (L:/om9-target\debug\deps\gumball_placement-947082a337db92eb.exe)
+
+running 4 tests
+test object_alignment_follows_the_selected_objects_axes ... ok
+test cplane_alignment_follows_the_active_construction_plane_without_moving_the_object ... ok
+test a_relocated_gumball_turns_about_the_new_origin ... ok
+test resetting_the_gumball_puts_the_pivot_back_at_the_selection_centre ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\gumball_viewport.rs (L:/om9-target\debug\deps\gumball_viewport-1367f1f2fcc31d97.exe)
+
+running 3 tests
+test dragging_the_scale_square_scales_the_selection ... ok
+test shift_dragging_a_ring_rotates_the_selection ... ok
+test a_click_selects_and_a_gumball_drag_moves_the_line ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.87s
+
+     Running tests\pick_27k.rs (L:/om9-target\debug\deps\pick_27k-6ed897b0de92dd34.exe)
+
+running 1 test
+test picking_27k_uses_the_bvh_and_stays_under_a_frame ... ignored, needs OM9_PICK_FIXTURE (a 27k .om9 project)
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\pick_disambiguation.rs (L:/om9-target\debug\deps\pick_disambiguation-bad21f519bcf9cec.exe)
+
+running 5 tests
+test a_choice_is_refused_if_the_document_changed_while_the_popup_was_open ... ok
+test a_click_on_two_objects_offers_a_choice_and_the_choice_selects ... ok
+test a_click_on_one_object_selects_it_without_a_popup ... ok
+test escaping_the_choice_keeps_the_previous_selection ... FAILED
+test the_popup_rows_name_the_type_and_escape_closes_without_selecting ... ok
+
+failures:
+
+---- escaping_the_choice_keeps_the_previous_selection stdout ----
+
+thread 'escaping_the_choice_keeps_the_previous_selection' (49944) panicked at crates\om9-app\tests\pick_disambiguation.rs:158:5:
+assertion `left == right` failed
+  left: 0
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    escaping_the_choice_keeps_the_previous_selection
+
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s
+
+error: test failed, to rerun pass `-p om9-app --test pick_disambiguation`

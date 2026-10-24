@@ -1,0 +1,12 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.59s
+     Running tests\coordinate_input.rs (L:/om9-target\debug\deps\coordinate_input-42da07d0f703a0c2.exe)
+
+running 4 tests
+test a_shifted_frame_does_not_leak_its_origin_into_a_relative_entry ... ok
+test malformed_nan_overflow_and_ambiguous_separators_are_typed_errors ... ok
+test relative_input_is_a_displacement_and_needs_a_base ... ok
+test w_prefix_is_a_world_point_and_bare_values_are_local ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-04-003",
+  "l3_id": "OM9-L3-03-04-003",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Escape prompt phải dọn indicator, không lưu override sang project khác",
+  "expected": "No solver duplication, no CPlane mutation, no stale marker or ghost guide, and no shortcut while the text editor owns focus.",
+  "evidence": [
+    "om9-app snap_panel_modes: 4 passed",
+    "om9-app osnap_ui: 3 passed"
+  ],
+  "status": "PASS"
+}

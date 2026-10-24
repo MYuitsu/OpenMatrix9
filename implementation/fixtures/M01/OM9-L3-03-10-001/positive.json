@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-10-001",
+  "case": "positive",
+  "oracle": "typed alias submits one command and echoes canonical ID",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

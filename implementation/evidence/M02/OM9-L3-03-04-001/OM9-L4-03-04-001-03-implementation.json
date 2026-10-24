@@ -1,0 +1,13 @@
+{
+  "l4": "OM9-L4-03-04-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-04-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The fixed Snaps palette is a two-way binding to SnapSettings: each object-snap icon is clickable while off, draws an active frame while on, and never owns a second solver.",
+  "tests": [
+    "om9-app sidebar_palettes toggle: 1 passed",
+    "om9-app osnap_ui: 3 passed",
+    "om9-app snap_panel_modes: 4 passed"
+  ]
+}

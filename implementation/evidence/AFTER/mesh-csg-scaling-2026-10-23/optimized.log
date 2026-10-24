@@ -1,0 +1,17 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `release` profile [optimized] target(s) in 10.12s
+     Running tests\mesh_csg.rs (L:/om9-target\release\deps\mesh_csg-46c2699bbc657f33.exe)
+
+running 2 tests
+test mesh_csg_curved_scaling_measurement ... CURVED input=1024 output=1956 work=707130 rays=23124 fallbacks=0 elapsed_ms=23.321
+CURVED input=4096 output=5360 work=2776992 rays=83896 fallbacks=0 elapsed_ms=79.939
+ok
+test mesh_csg_scaling_measurement ... SCALING input=24 output=56 work=8677 elapsed_ms=0.597 result=PASS
+SCALING input=384 output=336 work=153820 elapsed_ms=6.133 result=PASS
+SCALING input=1536 output=1344 work=662482 elapsed_ms=24.482 result=PASS
+SCALING input=6144 output=5376 work=2967892 elapsed_ms=102.150 result=PASS
+SCALING input=24576 output=21504 work=12954642 elapsed_ms=426.373 result=PASS
+ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.75s
+

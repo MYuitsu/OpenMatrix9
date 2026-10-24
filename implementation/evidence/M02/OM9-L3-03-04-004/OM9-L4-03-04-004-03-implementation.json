@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-04-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-04-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "smarttrack_enabled gates both inference and painting; guides are projected in every view while only the active view paints the snap marker. Disabling clears anchors.",
+  "tests": [
+    "om9-app snap_panel_modes: 4 passed",
+    "om9-app osnap_ui: 3 passed"
+  ]
+}

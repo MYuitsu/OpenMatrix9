@@ -348,6 +348,8 @@ fn all_owned_master_kinds_shared_nested_instances_and_current_edits_survive_cold
             faces: vec![vec![0, 1, 2], vec![0, 1, 2, 3]],
             normals: vec![normal.map(|n| n * 2.); 4],
             colors: vec![[50, 100, 150, 210]; 4],
+
+            corner_uvs: Vec::new(),
         }),
         Geometry::Cloud(Cloud {
             points: vec![[2., 3., 4.], [5., 6., 7.]],

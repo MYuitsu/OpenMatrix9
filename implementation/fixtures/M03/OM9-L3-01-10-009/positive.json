@@ -1,0 +1,18 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-009",
+  "fixture_id": "OM9-L3-01-10-009-POSITIVE",
+  "units": "mm",
+  "input": {
+    "closed": "box 10×10×10",
+    "open": "the same box with the top face removed"
+  },
+  "expect": {
+    "closed_naked_edges": 0,
+    "open_naked_edges": 4
+  },
+  "measured_on_2026_10_22": {
+    "closed_naked_edges": 0.0,
+    "open_naked_edges": 4.0
+  }
+}

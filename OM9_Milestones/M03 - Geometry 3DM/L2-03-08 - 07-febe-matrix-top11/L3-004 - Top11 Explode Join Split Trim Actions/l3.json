@@ -288,5 +288,86 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "date": "2026-10-23",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "toolbar bindings for edit commands",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "test": "crates/om9-app/tests/top11.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-03-08-004/api.md",
+      "implementation/design/M03/OM9-L3-03-08-004/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-03-08-004/positive.json",
+      "implementation/fixtures/M03/OM9-L3-03-08-004/negative.json",
+      "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-06.acceptance.md",
+      "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-06.ui-review.json",
+      "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-03b.brep-mirror.log",
+      "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-05.integration-stress.log",
+      "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-05.integration-stress.json"
+    ],
+    "tests": [
+      "m03_03_08_004: passed",
+      "om9-app lib: 175 passed, 0 failed",
+      "om9-app Top 11 suite: 19 passed, 0 failed",
+      "om9-app BRep suite: 6 passed, 0 failed",
+      "om9-core Top 11 suite: 17 passed, 0 failed",
+      "clippy -D warnings: exit 0",
+      "cargo fmt --all -- --check: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "Cutters must share the target placement; several cutters accumulate until Enter.",
+      "The default build uses OCCT exact curve/face intersections for a BRep cutter; no-default refuses it with a typed error rather than approximating display triangles.",
+      "Trim keeps the complement of the picked interval; the pick is a point.",
+      "Join orders by endpoint continuity and refuses gaps.",
+      "Interactive M03-UI acceptance of the toolbar and point prompts is not performed by the implementer.",
+      "macOS runtime is unverified."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-23",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "manual_gate": "M03-UI",
+      "design": "implementation/design/M03/OM9-L3-03-08-004/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-03-08-004/positive.json",
+        "implementation/fixtures/M03/OM9-L3-03-08-004/negative.json"
+      ],
+      "measured": {
+        "multi_cutter_split_entities": 5.0,
+        "multi_cutter_trim_entities": 4.0,
+        "joined_entities": 1.0,
+        "exploded_entities": 2.0,
+        "split_entities": 3.0,
+        "trim_remaining_entities": 2.0,
+        "trim_kept_start_x_mm": 0.0,
+        "surface_cutter_entities": 3.0,
+        "stress_cycles": 50.0,
+        "brep_cutter_entities": 4.0,
+        "exact_brep_fractions": "[0.25, 0.75]",
+        "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+        "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+        "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+        "brep_mirror_volume_mm3": 24.0,
+        "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+      }
+    },
+    "l4_evidence": {
+      "OM9-L4-03-08-004-01": "1/1",
+      "OM9-L4-03-08-004-02": "1/1",
+      "OM9-L4-03-08-004-03": "1/1",
+      "OM9-L4-03-08-004-04": "1/1",
+      "OM9-L4-03-08-004-05": "1/1",
+      "OM9-L4-03-08-004-06": "1/1"
+    }
+  }
 }

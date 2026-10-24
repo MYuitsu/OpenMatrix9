@@ -51,6 +51,8 @@ fn gem_mesh() -> Mesh {
         faces: vec![vec![0, 1, 2]],
         normals: Vec::new(),
         colors: Vec::new(),
+
+        corner_uvs: Vec::new(),
     }
 }
 

@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-05-003",
+  "l3_id": "OM9-L3-03-05-003",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Chưa có cutter M07 thì registry category disabled, không bỏ ẩn model",
+  "expected": "No document mutation, no invented gem material, no disabled category hiding model geometry, and a safe schema fallback.",
+  "evidence": [
+    "om9-app display cues: 6 passed"
+  ],
+  "status": "PASS"
+}

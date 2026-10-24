@@ -1,0 +1,66 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-010-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-13-010",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-app/src/native_picker.rs",
+      "crates/om9-native-owner/src/file_dialog.rs",
+      "crates/om9-app/src/ui/chrome.rs",
+      "crates/om9-app/src/ui/files.rs"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_010 -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/m03_01_13_010.focused.log",
+      "stdout_log_sha256": "c9be2f1aeb23e256da719ea67d0c5e1fa35f898ef1b5c10e14f49c9ca5c3f73c"
+    },
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_receipt -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/receipt.log",
+      "stdout_log_sha256": "7cc14fd37a5ab33b8935885cd590697bb335d8549488cd4f712c38b97199a893"
+    }
+  ],
+  "observed": {
+    "menu_import_entry": true,
+    "menu_export_entry": true,
+    "wrong_digest": "refused",
+    "relative_path": "refused",
+    "zero_byte_limit": "refused"
+  },
+  "expected": {
+    "menu_import_entry": true,
+    "menu_export_entry": true,
+    "wrong_digest": "refused",
+    "relative_path": "refused",
+    "zero_byte_limit": "refused"
+  },
+  "tolerances": {
+    "admission": "exact"
+  },
+  "artifact_paths": [
+    "crates/om9-app/src/native_picker.rs",
+    "crates/om9-native-owner/src/file_dialog.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/ui/files.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-app/src/native_picker.rs": "08d83a86e2fe10b645a66137676f0f7a441dc057cb8251b9cc30784c044cfd5e",
+    "crates/om9-native-owner/src/file_dialog.rs": "11544f7e291daf41aa394752e25fbde1e3f96a107718112eef7adbdbeac5c36e",
+    "crates/om9-app/src/ui/chrome.rs": "f03f1f08dc98c8e1bec730f7ca992ebc783cf124a4063bb5c392643ee39b1b3f",
+    "crates/om9-app/src/ui/files.rs": "1c7b6e3e973dbffa2196185a705a79fe98aec232757ebf31333f6aaad8be451f"
+  }
+}

@@ -32,6 +32,8 @@ fn fixture() -> Document {
                 faces: vec![vec![0, 1, 2]],
                 normals: vec![],
                 colors: vec![],
+
+                corner_uvs: Vec::new(),
             }),
         ),
         (
@@ -135,6 +137,49 @@ fn inspect(path: &Path, hold: bool) -> Result<()> {
     }
     Ok(())
 }
+/// Explicit plugin execution uses the same scene/Undo-aware service as CMD.
+fn run_plugin(
+    package: &Path,
+    command: &std::ffi::OsStr,
+    arguments: &Path,
+    source: Option<&Path>,
+    target: &Path,
+) -> Result<()> {
+    let limits = Limits::default();
+    let command = command
+        .to_str()
+        .ok_or(Error::Invalid("UTF-8 plugin command"))?;
+    use std::io::Read;
+    let file = std::fs::File::open(arguments).map_err(|error| Error::Io(error.to_string()))?;
+    let mut bytes = Vec::new();
+    file.take(1024 * 1024 + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|error| Error::Io(error.to_string()))?;
+    if bytes.len() > 1024 * 1024 {
+        return Err(Error::Budget("plugin argument JSON"));
+    }
+    let arguments: serde_json::Value =
+        serde_json::from_slice(&bytes).map_err(|error| Error::Io(error.to_string()))?;
+    if !arguments.is_object() {
+        return Err(Error::Invalid("plugin arguments must be a JSON object"));
+    }
+    let document = match source {
+        Some(path) => {
+            Archive::open_restored(path, &limits, &std::collections::BTreeSet::new())?.document
+        }
+        None => Document::with_template_tolerance("Plugin output"),
+    };
+    let mut controller = om9_app::session::Controller::new(document, limits)?;
+    let descriptor = controller.load_plugin(package)?;
+    controller.run_loaded_plugin(&descriptor.id, command, arguments)?;
+    Archive::save(
+        target,
+        controller.document(),
+        &limits,
+        &Cancellation::default(),
+    )?;
+    report(controller.document(), &[])
+}
 /// Startup failures of the document/CLI path keep the document stage; the two
 /// UI entry points classify their own document restore and window creation.
 fn document_stage(result: Result<()>) -> std::result::Result<(), om9_app::startup::StartupFailure> {
@@ -153,6 +198,20 @@ fn run() -> std::result::Result<(), om9_app::startup::StartupFailure> {
     }
     let command = args[0].to_str();
     match command {
+        Some("--plugin-run") if args.len() == 5 => document_stage(run_plugin(
+            Path::new(&args[1]),
+            &args[2],
+            Path::new(&args[3]),
+            None,
+            Path::new(&args[4]),
+        )),
+        Some("--plugin-run-on") if args.len() == 6 => document_stage(run_plugin(
+            Path::new(&args[1]),
+            &args[2],
+            Path::new(&args[3]),
+            Some(Path::new(&args[4])),
+            Path::new(&args[5]),
+        )),
         Some("--import-3dm") if args.len() == 3 => {
             document_stage(import_3dm(Path::new(&args[1]), Path::new(&args[2])))
         }
@@ -161,7 +220,7 @@ fn run() -> std::result::Result<(), om9_app::startup::StartupFailure> {
         }
         _ if args.len() != 2 => Err(StartupFailure::new(
             StartupStage::Document,
-            "usage: om9 --create-fixture|--inspect|--audit|--migrate-v1|--migrate-v2|--migrate-v3 path.om9 | --import-3dm source.3dm target.om9 | --export-3dm source.om9 target.3dm",
+            "usage: om9 --create-fixture|--inspect|--audit|--migrate-v1|--migrate-v2|--migrate-v3 path.om9 | --import-3dm source.3dm target.om9 | --export-3dm source.om9 target.3dm | --plugin-run package.om9p command args.json output.om9 | --plugin-run-on package.om9p command args.json input.om9 output.om9",
         )),
         _ => {
             let path = Path::new(&args[1]);

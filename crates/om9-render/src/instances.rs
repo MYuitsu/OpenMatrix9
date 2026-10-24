@@ -86,12 +86,50 @@ impl InstanceTable {
     }
 }
 
+/// Instance records uploaded once as a storage buffer for the GPU cull/vertex stages.
+pub struct GpuInstanceBuffer {
+    pub buffer: wgpu::Buffer,
+    pub count: u32,
+}
+
+impl GpuInstanceBuffer {
+    pub fn upload(device: &wgpu::Device, table: &InstanceTable) -> Self {
+        use wgpu::util::DeviceExt;
+        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("instance records"),
+            contents: bytemuck::cast_slice(table.records()),
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        });
+        Self {
+            buffer,
+            count: table.len() as u32,
+        }
+    }
+
+    /// Updates a single occurrence (preview/selection) without re-uploading the table.
+    pub fn write_one(&self, queue: &wgpu::Queue, index: u32, record: InstanceRecord) {
+        if index >= self.count {
+            return;
+        }
+        queue.write_buffer(
+            &self.buffer,
+            index as u64 * std::mem::size_of::<InstanceRecord>() as u64,
+            bytemuck::bytes_of(&record),
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     fn record(mesh: u32) -> InstanceRecord {
-        InstanceRecord { mesh, flags: 0, model: [[0.0; 4]; 4], tint: [1.0; 4] }
+        InstanceRecord {
+            mesh,
+            flags: 0,
+            model: [[0.0; 4]; 4],
+            tint: [1.0; 4],
+        }
     }
 
     #[test]
@@ -138,34 +176,5 @@ mod tests {
         assert_eq!(args.len(), 42);
         assert_eq!(args.iter().map(|arg| arg[1]).sum::<u32>(), 27_000);
         assert_eq!(args[0][4], 0);
-    }
-}
-/// Instance records uploaded once as a storage buffer for the GPU cull/vertex stages.
-pub struct GpuInstanceBuffer {
-    pub buffer: wgpu::Buffer,
-    pub count: u32,
-}
-
-impl GpuInstanceBuffer {
-    pub fn upload(device: &wgpu::Device, table: &InstanceTable) -> Self {
-        use wgpu::util::DeviceExt;
-        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("instance records"),
-            contents: bytemuck::cast_slice(table.records()),
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
-        });
-        Self { buffer, count: table.len() as u32 }
-    }
-
-    /// Updates a single occurrence (preview/selection) without re-uploading the table.
-    pub fn write_one(&self, queue: &wgpu::Queue, index: u32, record: InstanceRecord) {
-        if index >= self.count {
-            return;
-        }
-        queue.write_buffer(
-            &self.buffer,
-            index as u64 * std::mem::size_of::<InstanceRecord>() as u64,
-            bytemuck::bytes_of(&record),
-        );
     }
 }

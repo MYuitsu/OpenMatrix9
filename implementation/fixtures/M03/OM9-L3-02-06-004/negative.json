@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-02-06.fixture.v1",
+  "l3_id": "OM9-L3-02-06-004",
+  "fixture_id": "OM9-L3-02-06-004-NEGATIVE",
+  "cases": [
+    "coincident two-point references are refused",
+    "collinear three-point references are refused"
+  ],
+  "invariants": [
+    "no document mutation from a preview or malformed input",
+    "no partial transform/Undo entry",
+    "the typed error reaches the caller/UI"
+  ],
+  "measured_on_2026_10_22": "all listed negative cases pass in the focused/app logs"
+}

@@ -1,0 +1,14 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 27.37s
+     Running unittests src\lib.rs (L:/om9-target\debug\deps\om9_app-32d496690914eb19.exe)
+
+running 6 tests
+test pictureframe::tests::known_distance_calibration_maps_100_pixels_to_25_mm ... ok
+test pictureframe::tests::move_and_scale_keep_the_aspect_ratio_and_refuse_bad_sizes ... ok
+test pictureframe::tests::a_png_gives_a_twenty_millimetre_quad_and_rejects_bad_bytes ... ok
+test pictureframe::tests::opacity_lock_and_visibility_preserve_the_asset ... ok
+test pictureframe::tests::an_embedded_store_round_trips_and_a_missing_or_mismatched_asset_is_explicit ... ok
+test pictureframe::tests::a_jpeg_gives_a_twenty_millimetre_quad_and_is_persisted ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 155 filtered out; finished in 0.01s
+

@@ -288,5 +288,41 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "plugin_sdk_v1_bounds": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "object_bounds_verified_windows",
+      "scope": "object_bounds measures one object's object-local box/size/center from the point position, the owner's 33-sampled curve points or mesh vertices; other kinds are unsupported and the placement is not applied.",
+      "public_api": [
+        "Host::object_bounds",
+        "ObjectBounds"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-bounds.md",
+        "docs/validation/2026-10-21-m03-bounds.json"
+      ],
+      "limitations": [
+        "Curve bounds are sampled, not exact.",
+        "Only point/curve/mesh are supported.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::object_bounds"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_bounds"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m03-bounds.json",
+      "docs/validation/2026-10-21-m03-bounds.md"
+    ]
+  }
 }

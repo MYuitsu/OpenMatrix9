@@ -1,0 +1,15 @@
+{
+  "fixture_id": "G02-A-01-07-001",
+  "l3_id": "OM9-L3-01-07-001",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Box tại tâm tia, điểm click ở viewport P trúng BodyId của box",
+  "expected": "The documented hit/selection is produced with the exact object/subobject key and no silent fallback.",
+  "evidence": [
+    "om9-scene acceptance_l2_01_07: 9 passed",
+    "om9-scene world_picking: 7 passed",
+    "om9-scene navigation_snapshot: 2 passed",
+    "om9-app brep_selection (gpu-sphere): 5 passed"
+  ],
+  "status": "PASS"
+}

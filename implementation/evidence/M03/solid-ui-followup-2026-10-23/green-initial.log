@@ -1,0 +1,13 @@
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 47.31s
+     Running tests\solid_workflows.rs (L:/om9-target\debug\deps\solid_workflows-398d44b418c911f2.exe)
+
+running 4 tests
+test circle_extrusion_preserves_exact_geometry ... ok
+test text_menu_has_content_height_retry_and_cancel ... ok
+test extrude_all_is_one_atomic_transaction ... ok
+test boolean_two_objects_menu_has_operation_prompt ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.82s
+

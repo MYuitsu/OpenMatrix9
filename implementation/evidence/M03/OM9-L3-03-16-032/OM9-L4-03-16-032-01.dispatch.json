@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-032-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-032",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-033",
+  "source_command": "Mark Curve Start",
+  "menu_icon": "CurvePointObjectMarkCurveStart",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Mark Curve Start; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-032/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-032/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-032/dispatch_contract.json": "4e4e371727255a575fdc655d7f9344c9ac6a9f7ebf544d9ce7a5ab320139813e",
+    "implementation/design/M03/OM9-L3-03-16-032/dispatch_contract.md": "14be18fe2db22e45f790963ed4450e593d60622201f7d31922ae5fb3deb65615"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

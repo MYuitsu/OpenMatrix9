@@ -207,5 +207,42 @@
     },
     "algorithm_and_coverage": "Shortcut gọi typed PointInput context, không trực tiếp sửa document",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Controller::submit_world_origin refuses outside a prompt and otherwise submits typed W0,0,0 through the ordinary point path.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-02-02-005/api.md",
+      "implementation/evidence/M02/OM9-L3-02-02-005/OM9-L4-02-02-005-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-02-02-005/OM9-L4-02-02-005-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-02-02-005/OM9-L4-02-02-005-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app cplane_f4_ui: 1 passed",
+      "om9-app cplane_coordinate_input: 10 passed",
+      "om9-app chrome_actions: 13 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-02-02-005/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-02-02-005/positive.json",
+        "implementation/fixtures/M02/OM9-L3-02-02-005/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-02-02-005/OM9-L4-02-02-005-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-02-02-005/OM9-L4-02-02-005-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-02-02-005/OM9-L4-02-02-005-06-acceptance.md"
+      ],
+      "acceptance": "F4 in a line/point prompt commits world (0,0,0); F4 outside a prompt creates no object and does not insert a malformed string."
+    }
   }
 }

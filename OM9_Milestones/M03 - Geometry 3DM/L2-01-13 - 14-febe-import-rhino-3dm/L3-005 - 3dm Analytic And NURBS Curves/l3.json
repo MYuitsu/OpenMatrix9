@@ -153,7 +153,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE",
   "task_ids": [
     "OM9-L4-01-13-005-01",
     "OM9-L4-01-13-005-02",
@@ -373,22 +373,59 @@
       "import_is_atomic": true
     }
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
+  "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
   "acceptance_category": "THREEDM",
   "runtime_implementation": {
-    "date": "2026-10-19",
-    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
-    "target": "standalone Rust OM9",
-    "scope": "Line, full circle, partial arc, polyline and rational NURBS curves exact; ARC angle_domain preserved.",
+    "date": "2026-10-23",
+    "status": "AUTOMATED_TARGET_VALIDATED",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "line/arc/polyline/rational NURBS curves kept exact",
+    "owner": {
+      "crate": "om9-app + om9-exchange + om9-kernel",
+      "files": [
+        "crates/om9-app/tests/l2_01_13.rs",
+        "crates/om9-app/src/three_dm_host.rs",
+        "crates/om9-exchange/src/imported.rs",
+        "native/native_exchange.cpp"
+      ],
+      "test": "crates/om9-app/tests/l2_01_13.rs"
+    },
     "evidence": [
-      "implementation/design/M01/THREE-DM-HOST-ADAPTER.md",
-      "implementation/evidence/M01/2026-10-19-three-dm-native-host-checks.json",
-      "crates/om9-app/tests/three_dm_curve_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_brep_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_native_roundtrip.rs",
-      "native/native_exchange.cpp"
+      "implementation/design/M03/OM9-L3-01-13-005/api.md",
+      "implementation/design/M03/OM9-L3-01-13-005/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-01-13-005/positive.json",
+      "implementation/fixtures/M03/OM9-L3-01-13-005/negative.json",
+      "implementation/evidence/M03/OM9-L3-01-13-005/",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-01.source-map.json",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-02.contract-fixture.json",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-03.implementation.json",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-04.regression.json",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-05.integration-stress.json",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-05.stress.log",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-06.acceptance.md",
+      "implementation/evidence/M03/OM9-L3-01-13-005/OM9-L4-01-13-005-06.ui-review.json",
+      "implementation/evidence/M03/2026-10-23-r5a-display.log",
+      "implementation/evidence/M03/2026-10-23-r5a-proxy.log"
     ],
+    "tests": [
+      "m03_01_13_005: passed",
+      "l2_01_13 suite: 14 passed",
+      "crate suites: om9-exchange/om9-archive/om9-3dm, om9-kernel --features 3dm-brep, om9-app --lib"
+    ],
+    "l4_evidence": {
+      "OM9-L4-01-13-005-01": "1/1",
+      "OM9-L4-01-13-005-02": "1/1",
+      "OM9-L4-01-13-005-03": "1/1",
+      "OM9-L4-01-13-005-04": "1/1",
+      "OM9-L4-01-13-005-05": "1/1",
+      "OM9-L4-01-13-005-06": "1/1"
+    },
     "human_approval": null,
-    "remaining": []
+    "manual_gate": "AUTO_ONLY",
+    "remaining": [
+      "A host `Curve::Polycurve` re-export reports non-identity native parameter correspondence and is not claimed exact."
+    ]
   }
 }

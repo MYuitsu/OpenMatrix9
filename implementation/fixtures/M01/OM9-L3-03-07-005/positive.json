@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-07-005",
+  "case": "positive",
+  "oracle": "completed commands enter history once, newest first, capped at nine",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-001",
+  "fixture_id": "OM9-L3-01-10-001-POSITIVE",
+  "units": "mm",
+  "input": {
+    "a_mm": [
+      0,
+      0,
+      0,
+      10,
+      10,
+      10
+    ],
+    "b_mm": [
+      5,
+      0,
+      0,
+      15,
+      10,
+      10
+    ]
+  },
+  "expect": {
+    "union_volume_mm3": 1500.0,
+    "solids": 1,
+    "naked_edges": 0
+  },
+  "measured_on_2026_10_22": {
+    "union_volume_mm3": 1499.999999999999
+  }
+}

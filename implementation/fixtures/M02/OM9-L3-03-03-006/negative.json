@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-03-006",
+  "l3_id": "OM9-L3-03-03-006",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "String NaN và trống không commit; parse fail giữ gizmo active",
+  "expected": "No locked/stale selection, no marquee from the dock, and no journal write on cancel/invalid input.",
+  "evidence": [
+    "om9-app gumball_numeric: 6 passed",
+    "om9-core gumball: 15 passed"
+  ],
+  "status": "PASS"
+}

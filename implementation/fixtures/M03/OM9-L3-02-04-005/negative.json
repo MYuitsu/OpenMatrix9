@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-005",
+  "fixture_id": "OM9-L3-02-04-005-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "join with a gap above tolerance",
+    "empty join input",
+    "trim with from >= to",
+    "split at 0 or 1"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_005_join_explode_close_and_split"
+}

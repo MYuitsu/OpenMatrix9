@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-07-004",
+  "case": "negative",
+  "oracle": "page index is clamped; icons never overflow the rail and page buttons cannot detach from the right edge",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

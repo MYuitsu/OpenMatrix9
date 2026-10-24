@@ -1,0 +1,253 @@
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Checking om9-sdk v0.1.0 (H:\OpenMatrix9\crates\om9-sdk)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Checking om9-render v0.1.0 (H:\OpenMatrix9\crates\om9-render)
+    Checking om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Checking om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+       Fixed crates\om9-app\src\ui\chrome.rs (4 fixes)
+       Fixed crates\om9-app\src\navigation.rs (2 fixes)
+       Fixed crates\om9-app\src\ui.rs (11 fixes)
+       Fixed crates\om9-app\src\gpu_viewport.rs (12 fixes)
+warning: empty lines after doc comment
+   --> crates\om9-app\src\gpu_viewport.rs:211:1
+    |
+211 | / /// one per object, at the cost of one colour for the merged group.
+212 | |
+213 | | /// Samples per pixel of the document viewport. Four is the multisample count WebGPU guarantees for a
+214 | | /// renderable format, and it is what keeps the one-pixel grid from turning into a staircase: a diagonal
+215 | | /// segment now covers part of a pixel and resolves to a grey level instead of a hard step.
+216 | |
+    | |_^
+217 |   pub struct GpuScene {
+    |   ------------------- the comment documents this struct
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#empty_line_after_doc_comments
+    = note: `-D clippy::empty-line-after-doc-comments` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::empty_line_after_doc_comments)]`
+    = note: the `clippy::empty_line_after_doc_comments` lint ignores `-D warnings`
+    = help: if the empty lines are unintentional, remove them
+
+warning: very complex type used. Consider factoring parts into `type` definitions
+   --> crates\om9-app\src\ui\chrome.rs:988:20
+    |
+988 |         let slots: Vec<(usize, Option<(String, usize, String, u64)>, bool)> = (0..3)
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#type_complexity
+    = note: `-D clippy::type-complexity` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::type_complexity)]`
+    = note: the `clippy::type_complexity` lint ignores `-D warnings`
+
+warning: very complex type used. Consider factoring parts into `type` definitions
+   --> crates\om9-app\src\ui.rs:246:16
+    |
+246 |       hover_job: Option<(
+    |  ________________^
+247 | |         om9_core::identity::DocumentId,
+248 | |         om9_scene::camera::Camera,
+249 | |         u64,
+...   |
+252 | |         std::sync::mpsc::Receiver<Option<om9_core::identity::ObjectId>>,
+253 | |     )>,
+    | |______^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#type_complexity
+
+warning: clamp-like pattern without using clamp function
+    --> crates\om9-app\src\ui.rs:2345:59
+     |
+2345 |             origin.1 + std::time::Duration::from_secs_f64((input_time - origin.0).max(0.).min(1e9))
+     |                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with clamp: `(input_time - origin.0).clamp(0., 1e9)`
+     |
+     = note: clamp will panic if max < min, min.is_nan(), or max.is_nan()
+     = note: clamp returns NaN if the input is NaN
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#manual_clamp
+     = note: `-D clippy::manual-clamp` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::manual_clamp)]`
+     = note: the `clippy::manual_clamp` lint ignores `-D warnings`
+
+warning: method `mul` can be confused for the standard trait method `std::ops::Mul::mul`
+   --> crates\om9-app\src\camera_rig.rs:103:5
+    |
+103 | /     pub fn mul(self, other: Self) -> Self {
+104 | |         Self {
+105 | |             w: self.w * other.w - self.x * other.x - self.y * other.y - self.z * other.z,
+106 | |             x: self.w * other.x + self.x * other.w + self.y * other.z - self.z * other.y,
+...   |
+110 | |         .normalized()
+111 | |     }
+    | |_____^
+    |
+    = help: consider implementing the trait `std::ops::Mul` or choosing a less ambiguous method name
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#should_implement_trait
+    = note: `-D clippy::should-implement-trait` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::should_implement_trait)]`
+    = note: the `clippy::should_implement_trait` lint ignores `-D warnings`
+
+warning: the loop variable `axis` is used to index `delta`
+   --> crates\om9-app\src\camera_rig.rs:281:21
+    |
+281 |         for axis in 0..3 {
+    |                     ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+    = note: `-D clippy::needless-range-loop` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_range_loop)]`
+    = note: the `clippy::needless_range_loop` lint ignores `-D warnings`
+help: consider using an iterator and enumerate()
+    |
+281 -         for axis in 0..3 {
+281 +         for (axis, <item>) in delta.iter().enumerate() {
+    |
+
+warning: the loop variable `axis` is used to index `cursor`
+   --> crates\om9-app\src\camera_rig.rs:305:21
+    |
+305 |         for axis in 0..3 {
+    |                     ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+help: consider using an iterator and enumerate()
+    |
+305 -         for axis in 0..3 {
+305 +         for (axis, <item>) in cursor.iter().enumerate() {
+    |
+
+warning: this function has too many arguments (8/7)
+   --> crates\om9-app\src\navigation.rs:232:5
+    |
+232 | /     pub fn wheel(
+233 | |         &mut self,
+234 | |         id: ViewId,
+235 | |         camera: &Camera,
+...   |
+240 | |         speed: f64,
+241 | |     ) {
+    | |_____^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_arguments
+    = note: `-D clippy::too-many-arguments` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::too_many_arguments)]`
+    = note: the `clippy::too_many_arguments` lint ignores `-D warnings`
+
+warning: this function has too many arguments (9/7)
+   --> crates\om9-app\src\navigation.rs:244:5
+    |
+244 | /     pub fn wheel_displayed(
+245 | |         &mut self,
+246 | |         id: ViewId,
+247 | |         camera: &Camera,
+...   |
+253 | |         speed: f64,
+254 | |     ) {
+    | |_____^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_arguments
+
+warning: `om9-app` (lib) generated 9 warnings
+       Fixed crates\om9-app\src\ui\sidebar_palettes.rs (1 fix)
+       Fixed crates\om9-app\src\project_manager.rs (1 fix)
+       Fixed crates\om9-app\src\gpu_viewport.rs (1 fix)
+warning: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-app\src\display.rs:387:9
+    |
+387 |         preset.wireframe = false;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `display::DisplayPreferences { wireframe: false, show_edges: false, hide_cutters: true, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-app\src\display.rs:386:9
+    |
+386 |         let mut preset = DisplayPreferences::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+    = note: `-D clippy::field-reassign-with-default` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::field_reassign_with_default)]`
+    = note: the `clippy::field_reassign_with_default` lint ignores `-D warnings`
+
+warning: the loop variable `index` is used to index `tabs`
+   --> crates\om9-app\src\ui\icon_size_audit.rs:263:26
+    |
+263 |             for index in 0..tabs.len() {
+    |                          ^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+    = note: `-D clippy::needless-range-loop` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_range_loop)]`
+    = note: the `clippy::needless_range_loop` lint ignores `-D warnings`
+help: consider using an iterator and enumerate()
+    |
+263 -             for index in 0..tabs.len() {
+263 +             for (index, <item>) in tabs.iter().enumerate() {
+    |
+
+warning: the loop variable `axis` is used to index `delta`
+   --> crates\om9-app\src\camera_rig.rs:281:21
+    |
+281 |         for axis in 0..3 {
+    |                     ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+help: consider using an iterator and enumerate()
+    |
+281 -         for axis in 0..3 {
+281 +         for (axis, <item>) in delta.iter().enumerate() {
+    |
+
+warning: `om9-app` (lib test) generated 11 warnings (8 duplicates)
+warning: field assignment outside of initializer for an instance created with Default::default()
+  --> crates\om9-app\tests\display_persistence.rs:10:5
+   |
+10 |     preset.wireframe = false;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+note: consider initializing the variable with `om9_app::display::DisplayPreferences { wireframe: false, show_edges: false, hide_cutters: true, ..Default::default() }` and removing relevant reassignments
+  --> crates\om9-app\tests\display_persistence.rs:9:5
+   |
+ 9 |     let mut preset = DisplayPreferences::default();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+   = note: `-D clippy::field-reassign-with-default` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::field_reassign_with_default)]`
+   = note: the `clippy::field_reassign_with_default` lint ignores `-D warnings`
+
+warning: `om9-app` (test "display_persistence") generated 1 warning
+       Fixed crates\om9-app\tests\accuracy_fixture.rs (1 fix)
+warning: using `chunks_exact` with a constant chunk size
+   --> crates\om9-app\tests\accuracy_fixture.rs:146:32
+    |
+146 |             .zip(coarse.pixels.chunks_exact(4))
+    |                                ^^^^^^^^^^^^^^^
+    |
+help: consider using `as_chunks::<4>()` instead
+   --> crates\om9-app\tests\accuracy_fixture.rs:146:32
+    |
+146 |             .zip(coarse.pixels.chunks_exact(4))
+    |                                ^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#chunks_exact_to_as_chunks
+    = note: `-D clippy::chunks-exact-to-as-chunks` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::chunks_exact_to_as_chunks)]`
+    = note: the `clippy::chunks_exact_to_as_chunks` lint ignores `-D warnings`
+
+warning: `om9-app` (test "accuracy_fixture") generated 1 warning
+warning: field assignment outside of initializer for an instance created with Default::default()
+  --> crates\om9-app\tests\display_modes.rs:98:5
+   |
+98 |     preset.wireframe = false;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+note: consider initializing the variable with `om9_app::display::DisplayPreferences { wireframe: false, show_edges: false, ..Default::default() }` and removing relevant reassignments
+  --> crates\om9-app\tests\display_modes.rs:97:5
+   |
+97 |     let mut preset = DisplayPreferences::default();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+   = note: `-D clippy::field-reassign-with-default` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::field_reassign_with_default)]`
+   = note: the `clippy::field_reassign_with_default` lint ignores `-D warnings`
+
+warning: `om9-app` (test "display_modes") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 47.30s

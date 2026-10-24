@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-024-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-024",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-025",
+  "source_command": "Create UV Curves",
+  "menu_icon": "CurveCurveFromObjectsCreateUVCurves",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Create UV Curves; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-024/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-024/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-024/dispatch_contract.json": "005db76a6c53b1dd61dc7d0858c3635eddca954852c9eeb93ed74c3508accaff",
+    "implementation/design/M03/OM9-L3-03-16-024/dispatch_contract.md": "59bc55dac57e6fe93d8c3fa1c1935c1f6a5c0f2e182a5af9634e33744605a6ca"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

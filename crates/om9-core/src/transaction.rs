@@ -193,6 +193,12 @@ pub enum Mutation {
         source: SourceStamp,
         attributes: Attributes,
     },
+    /// Replace the semantic extension slots of one object (for example the
+    /// FourRailProfile metadata on a profile curve).
+    Extensions {
+        source: SourceStamp,
+        extensions: std::collections::BTreeMap<String, crate::model::Extension>,
+    },
     /// Rename one object (OM9-L3-03-14-007). The label is document state, so it
     /// goes through a transaction like every other attribute and Undo restores it.
     Label {
@@ -215,6 +221,12 @@ pub enum Mutation {
         document: DocumentId,
         expected_revision: u64,
         tolerance: crate::history::Tolerance,
+    },
+    /// Insert one history recipe in the same transaction as its output entity.
+    History {
+        document: DocumentId,
+        expected_revision: u64,
+        recipe: Box<crate::history::Recipe>,
     },
     /// Adds one occurrence set of a definition plus the definition itself in a
     /// single atomic step: a definition never exists without its occurrences and
@@ -277,10 +289,12 @@ impl Mutation {
             | Self::Import { document, .. }
             | Self::Context { document, .. }
             | Self::Tolerance { document, .. }
+            | Self::History { document, .. }
             | Self::DefinitionInsert { document, .. }
             | Self::FeatureInsert { document, .. }
             | Self::GroupCreate { document, .. }
             | Self::GroupDelete { document, .. } => vec![*document],
+            Self::Extensions { source, .. } => vec![source.document],
             Self::Move {
                 source,
                 destination,
@@ -1275,6 +1289,20 @@ impl TransactionCoordinator {
     pub fn prepare(&self, request: TransactionRequest) -> Result<PreparedTransaction> {
         self.prepare_with_held_usage(request, Usage::default())
     }
+    /// Admit external scene/resource allocation while a private candidate and
+    /// its preparation reservation are still retained. This is conservative:
+    /// scene owners may count the shared candidate document a second time.
+    pub fn prepared_remaining_limits(
+        &self,
+        prepared: &PreparedTransaction,
+        held: Usage,
+    ) -> Result<Limits> {
+        self.available()?;
+        self.verify(prepared)?;
+        self.limits
+            .remaining_after(held)?
+            .remaining_after(prepared.reservation)
+    }
     /// Replace an operation's external metadata reservation without changing its
     /// acceptance authority. The original conservative preparation peak covers
     /// the immutable candidate, saved states, private Undo and preparation maps.
@@ -1601,9 +1629,16 @@ impl TransactionCoordinator {
                     entity.geometry.validate(&limits)?;
                     name(&entity.label, &limits)?;
                     entity.placement.validate()?;
-                    if !base
-                        .document(*document)?
-                        .layer_permissions(entity.attributes.layer, false)?
+                    // A layer created earlier in this request has no captured state; its
+                    // proposed record and parent chain decide whether it can receive output.
+                    let d = base.document(*document)?;
+                    if !d
+                        .layer_permissions_with(entity.attributes.layer, false, |id| {
+                            created_layers
+                                .get(&(*document, id))
+                                .copied()
+                                .or_else(|| d.layers.get(&id))
+                        })?
                         .editable
                     {
                         return Err(Error::Permission("output layer"));
@@ -1739,6 +1774,31 @@ impl TransactionCoordinator {
                         return Err(Error::Permission("assigned layer"));
                     }
                 }
+                Mutation::Extensions { source, extensions } => {
+                    if base
+                        .document(source.document)?
+                        .resolve(source)?
+                        .geometry_revision
+                        == 0
+                    {
+                        return Err(Error::Invalid("extension source"));
+                    }
+                    for (slot, extension) in extensions {
+                        if !crate::model::slot_name_valid(slot)
+                            || !crate::model::extension_slot_known(slot)
+                        {
+                            return Err(Error::Invalid("extension slot"));
+                        }
+                        peak.add(extension.validate(&limits)?, &limits)?;
+                        peak.add(
+                            Usage {
+                                bytes: slot.capacity() as u64,
+                                ..Usage::default()
+                            },
+                            &limits,
+                        )?;
+                    }
+                }
                 Mutation::Label { label, .. } => {
                     if label.is_empty()
                         || label.len() > 128
@@ -1805,6 +1865,20 @@ impl TransactionCoordinator {
                         },
                         &limits,
                     )?;
+                }
+                Mutation::History {
+                    document,
+                    expected_revision,
+                    recipe,
+                } => {
+                    let d = base.document(*document)?;
+                    if d.revision != *expected_revision {
+                        return Err(Error::Stale("history document revision"));
+                    }
+                    if d.history.recipes.contains_key(&recipe.id) {
+                        return Err(Error::Invalid("duplicate history recipe"));
+                    }
+                    peak.add(recipe.validate(d, &limits)?, &limits)?;
                 }
                 Mutation::DefinitionInsert {
                     document,
@@ -2012,6 +2086,14 @@ impl TransactionCoordinator {
         // A permission read is based on the captured world, never on an
         // earlier metadata write in this same batch. Reject the overlap before
         // candidate clones; otherwise Lock+Assign could use the old permission.
+        // A layer created by this batch has no captured permission to be stale, so
+        // it is excluded from that overlap; its record (and parent chain) was already
+        // checked when the output/assignment was admitted.
+        let readable_writes: BTreeSet<(DocumentId, LayerId)> = layer_writes
+            .iter()
+            .filter(|write| !created_layers.contains_key(*write))
+            .copied()
+            .collect();
         for mutation in &request.mutations {
             request.cancel.check()?;
             if let Some(source) = mutation.source() {
@@ -2030,11 +2112,20 @@ impl TransactionCoordinator {
                     &layer_writes,
                     &request.cancel,
                 )?,
-                Mutation::Insert { document, entity } => crate::layers::check_layer_reads(
-                    base.document(*document)?,
-                    entity.attributes.layer,
-                    &layer_writes,
-                )?,
+                Mutation::Insert { document, entity } => {
+                    let d = base.document(*document)?;
+                    crate::layers::check_layer_reads_with(
+                        d,
+                        entity.attributes.layer,
+                        &readable_writes,
+                        |id| {
+                            created_layers
+                                .get(&(*document, id))
+                                .copied()
+                                .or_else(|| d.layers.get(&id))
+                        },
+                    )?
+                }
                 Mutation::Attributes { source, attributes } => crate::layers::check_layer_reads(
                     base.document(source.document)?,
                     attributes.layer,
@@ -2236,6 +2327,18 @@ impl TransactionCoordinator {
                     e.attributes_revision = bump(e.attributes_revision, "attributes revision")?;
                     e.attributes = attributes;
                 }
+                Mutation::Extensions { source, extensions } => {
+                    staged
+                        .document_mut(source.document)?
+                        .invalidate_dependents(source.object, false)?;
+                    let e = staged
+                        .document_mut(source.document)?
+                        .entities
+                        .get_mut(&source.object)
+                        .ok_or(Error::Missing("source"))?;
+                    e.attributes_revision = bump(e.attributes_revision, "attributes revision")?;
+                    e.extensions = extensions;
+                }
                 Mutation::Label { source, label } => {
                     staged
                         .document_mut(source.document)?
@@ -2288,6 +2391,14 @@ impl TransactionCoordinator {
                     ..
                 } => {
                     staged.document_mut(document)?.tolerance = Some(tolerance);
+                }
+                Mutation::History {
+                    document, recipe, ..
+                } => {
+                    let d = staged.document_mut(document)?;
+                    if d.history.recipes.insert(recipe.id, *recipe).is_some() {
+                        return Err(Error::Invalid("duplicate history recipe"));
+                    }
                 }
                 Mutation::DefinitionInsert {
                     document,

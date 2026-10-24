@@ -187,5 +187,16 @@
       "id": "OM9-L4-01-02-011-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-02 - Be Command Dispatch Undo Redo/L3-011 - Command Availability Preconditions/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Availability preconditions nên đọc được trước khi gọi.",
+    "api": [],
+    "candidate_api": [
+      "command_available(id)"
+    ],
+    "host_only": "Precondition do host đánh giá; SDK đọc boolean."
+  }
 }

@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-05-002",
+  "l3_id": "OM9-L3-03-05-002",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Gem-like semantic material cue có token màu nếu semantic provider tồn tại",
+  "expected": "The documented display cue with the model and journal unchanged.",
+  "evidence": [
+    "om9-app display cues: 6 passed"
+  ],
+  "status": "PASS"
+}

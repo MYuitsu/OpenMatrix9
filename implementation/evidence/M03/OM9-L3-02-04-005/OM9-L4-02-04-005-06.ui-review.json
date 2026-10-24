@@ -1,0 +1,58 @@
+{
+  "schema": "om9.m03.l2-02-04.ui-review.v1",
+  "task_id": "OM9-L4-02-04-005-06",
+  "l3_id": "OM9-L3-02-04-005",
+  "title": "Join Explode Close And Split Curves",
+  "oracle": {
+    "positive": [
+      "two 10 mm lines join to 20 mm; trim [0.25,0.75] is 10 mm; split 0.25 gives 5+15 mm; close adds the exact gap; 9 polygon round trips with no length drift"
+    ],
+    "negative": [
+      "join with a gap above tolerance",
+      "empty join input",
+      "trim with from >= to",
+      "split at 0 or 1"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is asserted by a focused Rust test and every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "portable curve service and typed refusal; no window, menu or human review"
+  },
+  "measured": {
+    "joined_length_mm": 20.0,
+    "trimmed_length_mm": 10.0,
+    "stress_polygons": 9.0,
+    "stress_max_length_drift_mm": 0.0
+  },
+  "tolerances": {
+    "joined_length_mm": "1e-9",
+    "trimmed_length_mm": "1e-9",
+    "stress_max_length_drift_mm": "1e-8"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-core --test l2_02_04 m03_02_04_005_join_explode_close_and_split -- --exact (exit 0)",
+    "regression: cargo test -p om9-core -j 2 (52 suites, 447 passed)",
+    "clippy: cargo clippy -p om9-core --all-targets -j 2 -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-04-005/api.md",
+    "implementation/design/M03/OM9-L3-02-04-005/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-04-005/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-04-005/OM9-L4-02-04-005-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-02-04-005/OM9-L4-02-04-005-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_02_04_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

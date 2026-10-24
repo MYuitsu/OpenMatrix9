@@ -1,0 +1,17 @@
+{
+  "fixture_id": "G02-A-01-07-008",
+  "l3_id": "OM9-L3-01-07-008",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Lỗi kernel, mất selection giữa kéo hoặc Esc không được tạo journal entry",
+  "expected": "An explicit miss/error or unchanged state; no stale selection and no nearby-geometry rematch.",
+  "evidence": [
+    "om9-app gumball_interaction: 5 passed",
+    "om9-app gumball_numeric: 5 passed",
+    "om9-app gumball_cold: 1 passed",
+    "om9-app selection_overlay: 8 passed",
+    "om9-scene affine_gesture: 5 passed",
+    "om9-core gumball: 15 passed"
+  ],
+  "status": "PASS"
+}

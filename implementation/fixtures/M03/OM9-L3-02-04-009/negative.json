@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-009",
+  "fixture_id": "OM9-L3-02-04-009-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "pullback deviation above tolerance",
+    "intersection tolerance not positive",
+    "empty sketch/intersection input"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_009_project_pullback_and_intersections"
+}

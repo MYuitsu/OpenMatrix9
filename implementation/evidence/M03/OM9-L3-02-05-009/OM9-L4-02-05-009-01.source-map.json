@@ -1,0 +1,26 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-009-01",
+  "role": "SOURCE_MAP",
+  "l3": "OM9-L3-02-05-009",
+  "date": "2026-10-22",
+  "status": "DOCUMENT_READY",
+  "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "decision": "ADD",
+  "reviewed_paths": [
+    "crates/qymcad-kernel/src/ops/profile.rs",
+    "crates/qymcad-kernel/src/shape.rs",
+    "crates/qymcad-kernel/src/kernel.rs"
+  ],
+  "symbol_map": "QymCAD has OCCT C ABI shape calls and profile naming, not a portable NURBS surface workflow",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-009/source_crosswalk.json",
+    "implementation/design/M03/OM9-L3-02-05-009/api.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-02-05-009/source_crosswalk.json": "8210e5833df4a25c5d22ab2056676158afed86901363c7f413c9e6c44eba699f",
+    "implementation/design/M03/OM9-L3-02-05-009/api.md": "adf7c4d301458b71976d3a6d1608297e95353ca0dcb4dffb41eaf266966a1acf"
+  },
+  "missing_capability": "No portable surface workflow service exists in QymCAD; the local module is an ADD.",
+  "build_status": "not applicable to the document-only source map"
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-002",
+  "fixture_id": "OM9-L3-03-08-002-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "points toggle without a curve/surface selection",
+    "grips on an unsupported geometry",
+    "toggle while a Top 11 command is pending",
+    "grip drag with an out-of-range index or singular placement"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; document, selection and Undo journal unchanged",
+  "test": "m03_03_08_002"
+}

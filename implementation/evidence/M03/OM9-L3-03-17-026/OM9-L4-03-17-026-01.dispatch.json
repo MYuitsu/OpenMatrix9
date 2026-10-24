@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-026-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-026",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-027",
+  "source_command": "Tween Surfaces",
+  "menu_icon": "SurfaceTweenSurfaces",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-026/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-026/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-026/dispatch_contract.json": "bded5ded13ebbf73c356bb07339e9281b7e05aa78e614f208fb87a6f27b476c8",
+    "implementation/design/M03/OM9-L3-03-17-026/source_crosswalk.json": "4dfd113e3480eecbaf2010bec6a015976d7e01d81b7e1cec5f1cf35aa2b18aa4"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

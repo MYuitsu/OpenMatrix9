@@ -1,0 +1,29 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-004-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-06-004",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-06-004/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-06-004/negative.json",
+  "fixture_sha256": {
+    "positive": "8bae36b0a28875f15749c2f1dff00334821a7582544493d1ecd6f5d779565795",
+    "negative": "20f2f5be10a4b04cc05647014cf26b0d417baea8980a8a0cf0691510090eb818"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-06-004/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-06-004/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-004/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "two-point maps (0,0,0)->(10,20,30) and (1,0,0)->(10,21,30)",
+      "three-point maps [0,0,0],[1,0,0],[0,1,0] to a 90-degree rotated translated frame exactly"
+    ],
+    "negative": [
+      "coincident two-point references are refused",
+      "collinear three-point references are refused"
+    ]
+  }
+}

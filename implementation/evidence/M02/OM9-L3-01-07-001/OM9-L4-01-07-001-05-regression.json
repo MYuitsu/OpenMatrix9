@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-001-05",
+  "role": "REGRESSION_STRESS",
+  "l3": "OM9-L3-01-07-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "regression": "twenty_identical_picks_return_the_same_hit; twenty_face_edge_vertex_picks_are_identical; full om9-scene crate 82 passed.",
+  "tests": [
+    "om9-scene acceptance_l2_01_07: 9 passed",
+    "om9-scene world_picking: 7 passed"
+  ]
+}

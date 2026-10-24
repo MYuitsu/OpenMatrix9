@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-012-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-012",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-011",
+  "source_command": "Patch",
+  "menu_icon": "SurfacePatch",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-012/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-012/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-012/dispatch_contract.json": "2a34d7a38103c3471e5665e3a06aab3fc748bd7c4d6a7f98d8f83009fb8cecc6",
+    "implementation/design/M03/OM9-L3-03-17-012/source_crosswalk.json": "ab77076cd1b94429ec38c2bfbc43b309dfa680f7419d0a0e3942766c312933f6"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

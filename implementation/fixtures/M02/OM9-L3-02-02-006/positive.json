@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-02-006",
+  "l3_id": "OM9-L3-02-02-006",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Ortho giữ hướng trục CPlane; Planar project cho điểm hợp lệ lên active plane",
+  "expected": "The documented coordinate/plane result with a stable world point and no silent fallback.",
+  "evidence": [
+    "om9-app cplane_coordinate_input: 10 passed",
+    "om9-app chrome_actions: 13 passed"
+  ],
+  "status": "PASS"
+}

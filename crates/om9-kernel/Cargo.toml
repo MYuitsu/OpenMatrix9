@@ -17,3 +17,6 @@ cc = "1"
 [dependencies]
 om9-core = { path = "../om9-core" }
 uuid.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

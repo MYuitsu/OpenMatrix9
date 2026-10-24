@@ -1,0 +1,19 @@
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.18s
+     Running tests\osnap.rs (L:/om9-target\debug\deps\osnap-02749d3a1d5811da.exe)
+
+running 11 tests
+test surface_snap_uses_the_tessellated_trimmed_face ... ok
+test a_point_entity_is_a_point_snap ... ok
+test two_crossing_segments_produce_an_intersection_but_parallel_segments_do_not ... ok
+test parallel_segments_never_produce_a_fake_intersection ... ok
+test candidates_outside_the_radius_and_zero_radius_return_nothing ... ok
+test disabled_kinds_are_not_offered_and_marker_text_is_exact ... ok
+test smarttrack_guides_are_transient_and_infer_an_ephemeral_point ... ok
+test near_clamps_to_the_segment_and_carries_a_valid_parameter ... ok
+test tangent_and_perpendicular_are_only_offered_with_a_real_solution ... ok
+test one_shot_override_wins_one_pick_and_then_resets ... ok
+test end_mid_center_quadrant_are_ranked_inside_the_screen_radius ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,36 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-004",
+  "fixture_id": "OM9-L3-01-09-004-POSITIVE",
+  "units": "mm",
+  "input": {
+    "path_mm": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        10
+      ]
+    ],
+    "radius_mm": 2,
+    "capped": true
+  },
+  "expect": {
+    "volume_mm3": 125.6637061436,
+    "bounds_mm": [
+      0,
+      0,
+      0,
+      4,
+      4,
+      10
+    ]
+  },
+  "measured_on_2026_10_22": {
+    "pipe_volume_mm3": 125.663706143592
+  }
+}

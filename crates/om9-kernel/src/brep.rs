@@ -13,7 +13,7 @@ use std::{
 use uuid::Uuid;
 
 #[repr(C)]
-struct Snapshot {
+pub(crate) struct Snapshot {
     source: *const u8,
     source_len: usize,
     points: *const [f64; 3],
@@ -74,6 +74,12 @@ struct Context<'a> {
     limits: &'a Limits,
     deflection: f64,
     result: Option<om9_core::Result<Brep>>,
+}
+
+fn bound(value: u64) -> usize {
+    usize::try_from(value)
+        .unwrap_or(usize::MAX)
+        .min(isize::MAX as usize)
 }
 unsafe fn copy_array<T: Copy>(
     pointer: *const T,
@@ -146,43 +152,112 @@ fn snapshot(
     deflection: f64,
     limits: &Limits,
 ) -> Result<Brep, KernelError> {
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: callback/context and all input buffers live through this synchronous complete
+        // operation.
+        unsafe {
+            om9_occt_brep_snapshot(
+                source.as_ptr(),
+                source.len(),
+                kind,
+                dimensions.as_ptr(),
+                deflection,
+                bound(limits.max_points),
+                bound(limits.max_nodes),
+                bound(limits.max_bytes),
+                sink,
+                context,
+                message,
+                capacity,
+            )
+        }
+    })
+}
+
+/// The bounded native budget passed to every snapshot-producing adapter.
+pub(crate) struct SnapshotBudget {
+    pub(crate) points: usize,
+    pub(crate) nodes: usize,
+    pub(crate) bytes: usize,
+}
+
+pub(crate) fn snapshot_budget(limits: &Limits) -> SnapshotBudget {
+    SnapshotBudget {
+        points: bound(limits.max_points),
+        nodes: bound(limits.max_nodes),
+        bytes: bound(limits.max_bytes),
+    }
+}
+
+/// Run one synchronous native constructor and turn its snapshot into an owned [`Brep`].
+///
+/// The adapter writes its bounded snapshot through `sink` and returns `0`; any other status is
+/// reported as a typed kernel error carrying the adapter's message. A Rust-side refusal during
+/// the snapshot copy keeps the adapter's own status non-zero and the copy error wins, so a
+/// partially admitted shape is never returned.
+pub(crate) fn snapshot_via(
+    deflection: f64,
+    limits: &Limits,
+    invoke: impl FnOnce(
+        unsafe extern "C" fn(*mut c_void, *const Snapshot) -> c_int,
+        *mut c_void,
+        *mut c_char,
+        c_int,
+    ) -> c_int,
+) -> Result<Brep, KernelError> {
+    match snapshot_via_optional(deflection, limits, invoke)? {
+        Some(brep) => Ok(brep),
+        None => Err(KernelError::InvalidInput("BRep snapshot missing".into())),
+    }
+}
+
+/// The typed "valid but empty" native status: a boolean whose result has no face. An empty result
+/// is a legitimate outcome, not a zero-face shape, so it never becomes a [`Brep`].
+pub(crate) const NATIVE_EMPTY: c_int = 3;
+
+/// Like [`snapshot_via`], but `NATIVE_EMPTY` maps to `Ok(None)` and no snapshot is required.
+pub(crate) fn snapshot_via_optional(
+    deflection: f64,
+    limits: &Limits,
+    invoke: impl FnOnce(
+        unsafe extern "C" fn(*mut c_void, *const Snapshot) -> c_int,
+        *mut c_void,
+        *mut c_char,
+        c_int,
+    ) -> c_int,
+) -> Result<Option<Brep>, KernelError> {
     let mut context = Context {
         limits,
         deflection,
         result: None,
     };
     let mut message = [0i8; 512];
-    let bound = |value: u64| {
-        usize::try_from(value)
-            .unwrap_or(usize::MAX)
-            .min(isize::MAX as usize)
-    };
-    // SAFETY: callback/context and all input buffers live through this synchronous complete operation.
-    let status = unsafe {
-        om9_occt_brep_snapshot(
-            source.as_ptr(),
-            source.len(),
-            kind,
-            dimensions.as_ptr(),
-            deflection,
-            bound(limits.max_points),
-            bound(limits.max_nodes),
-            bound(limits.max_bytes),
-            receive,
-            (&mut context as *mut Context<'_>).cast(),
-            message.as_mut_ptr(),
-            512,
-        )
-    };
+    let status = invoke(
+        receive,
+        (&mut context as *mut Context<'_>).cast(),
+        message.as_mut_ptr(),
+        512,
+    );
     if let Some(result) = context.result {
-        return result.map_err(|error| KernelError::InvalidInput(error.to_string()));
+        return result
+            .map(Some)
+            .map_err(|error| KernelError::InvalidInput(error.to_string()));
+    }
+    if status == NATIVE_EMPTY {
+        return Ok(None);
     }
     if status != 0 {
         // SAFETY: native adapter always null-terminates a nonempty fixed-size message buffer.
         let text = unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }
             .to_string_lossy()
             .into_owned();
-        return Err(KernelError::InvalidInput(text));
+        // Status 2 is an OCCT failure after the input was admitted; status 1 is an adapter-level
+        // input refusal. Keeping them distinct lets an editing owner report `Kernel` vs `Invalid`.
+        return Err(if status == 2 {
+            KernelError::Failure(text)
+        } else {
+            KernelError::InvalidInput(text)
+        });
     }
     Err(KernelError::InvalidInput("BRep snapshot missing".into()))
 }
@@ -354,6 +429,7 @@ pub fn to_3dm(brep: &Brep, tolerance_mm: f64, limits: &Limits) -> Result<NativeB
         faces,
         normals: Vec::new(),
         colors: Vec::new(),
+        corner_uvs: Vec::new(),
     };
     Ok(NativeBrep {
         display,

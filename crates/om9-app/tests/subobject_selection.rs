@@ -34,6 +34,8 @@ fn controller() -> (Controller, om9_core::identity::ObjectId) {
             ],
             normals: vec![],
             colors: vec![],
+
+            corner_uvs: Vec::new(),
         }),
         None,
     );

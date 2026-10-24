@@ -1,0 +1,96 @@
+{
+  "schema": "om9.m03.checks.v1",
+  "work_item": "m03-l2-03-17-surface-menu-2026-10-23",
+  "date": "2026-10-23",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-03-17",
+  "title": "09-febe-matrix-surface-menu-workflows",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Added one catalog row for each of the 38 documented Surface Tools commands with a stable command id, authored icon, owner candidate and visible disabled reason. Sweep 1/2, Sweep 1 History, Sweep 2 History, Sweep 4, Profile Sweep, Sweep Multi, Merge, Patch, Planar, Variable Offset, Variable Blend, Shrink, Untrim, Chamfer, Fillet, Variable Fillet, Variable Chamfer, Edge Curves, Cutting Plane, Split, Drape, Tangent, Extrude All, Rail Revolve, Match, Seam, Soft Edit, Tween, Extend, Rebuild, Blend, Loft, Network, Unroll, Offset, Extrude Normal and Plane from Corners now run through surface_edit and om9_core::surface_ops, with scene tessellation for display/picking and one transaction/Undo each. The other 3 rows stay verified disabled placeholders, so the menu cannot silently no-op or claim geometry.",
+  "checks": [
+    {
+      "name": "surface menu catalog",
+      "command": "cargo test -p om9-app --test surface_menu",
+      "result": "41 passed; 0 failed",
+      "log": "build/l2-03-17-logs/surface-menu.log"
+    },
+    {
+      "name": "app compile",
+      "command": "cargo check -p om9-app -j 2",
+      "result": "exit 0",
+      "log": "build/l2-03-17-logs/check.log"
+    },
+    {
+      "name": "clippy",
+      "command": "cargo clippy -p om9-app --test surface_menu -j 2",
+      "result": "exit 0",
+      "log": "build/l2-03-17-logs/clippy.log"
+    },
+    {
+      "name": "format",
+      "command": "rustfmt --edition 2024 --check crates/om9-app/src/surface_menu.rs crates/om9-app/src/lib.rs crates/om9-app/src/ui/chrome.rs crates/om9-app/tests/surface_menu.rs",
+      "result": "exit 0",
+      "log": "build/l2-03-17-logs/fmt.log"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "build/l2-03-17-logs/public-source-audit.log"
+    }
+  ],
+  "counts": {
+    "l3": 38,
+    "l4": 114,
+    "enabled": 35,
+    "disabled_visible_reason": 3
+  },
+  "l4_evidence": {
+    "OM9-L3-03-17-001": "3/3",
+    "OM9-L3-03-17-002": "3/3",
+    "OM9-L3-03-17-003": "3/3",
+    "OM9-L3-03-17-004": "3/3",
+    "OM9-L3-03-17-005": "3/3",
+    "OM9-L3-03-17-006": "3/3",
+    "OM9-L3-03-17-007": "3/3",
+    "OM9-L3-03-17-008": "3/3",
+    "OM9-L3-03-17-009": "3/3",
+    "OM9-L3-03-17-010": "3/3",
+    "OM9-L3-03-17-011": "3/3",
+    "OM9-L3-03-17-012": "3/3",
+    "OM9-L3-03-17-013": "3/3",
+    "OM9-L3-03-17-014": "3/3",
+    "OM9-L3-03-17-015": "3/3",
+    "OM9-L3-03-17-016": "3/3",
+    "OM9-L3-03-17-017": "3/3",
+    "OM9-L3-03-17-018": "3/3",
+    "OM9-L3-03-17-019": "3/3",
+    "OM9-L3-03-17-020": "3/3",
+    "OM9-L3-03-17-021": "3/3",
+    "OM9-L3-03-17-022": "3/3",
+    "OM9-L3-03-17-023": "3/3",
+    "OM9-L3-03-17-024": "3/3",
+    "OM9-L3-03-17-025": "3/3",
+    "OM9-L3-03-17-026": "3/3",
+    "OM9-L3-03-17-027": "3/3",
+    "OM9-L3-03-17-028": "3/3",
+    "OM9-L3-03-17-029": "3/3",
+    "OM9-L3-03-17-030": "3/3",
+    "OM9-L3-03-17-031": "3/3",
+    "OM9-L3-03-17-032": "3/3",
+    "OM9-L3-03-17-033": "3/3",
+    "OM9-L3-03-17-034": "3/3",
+    "OM9-L3-03-17-035": "3/3",
+    "OM9-L3-03-17-036": "3/3",
+    "OM9-L3-03-17-037": "3/3",
+    "OM9-L3-03-17-038": "3/3"
+  },
+  "manual_gate": "M03-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "38 commands have no interactive command session yet; they are disabled with the owner candidate and reason.",
+    "Human M03-UI click/preview review is unsigned.",
+    "Source-present surface geometry services do not enable a row by themselves."
+  ]
+}

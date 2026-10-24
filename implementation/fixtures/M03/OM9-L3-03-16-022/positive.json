@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m03.l2-03-16.fixture.v1",
+  "l3_id": "OM9-L3-03-16-022",
+  "fixture_id": "OM9-L3-03-16-022-POSITIVE",
+  "command_id": "OM9-CURVE-023",
+  "input": {
+    "entry": "Matrix Curve menu and command line",
+    "selection": "one or more selected curves/surfaces compatible with the command"
+  },
+  "expect": {
+    "same_command_id": true,
+    "enabled": false,
+    "ui_state": "DISABLED_VISIBLE_REASON",
+    "one_transaction": true
+  },
+  "measured_on_2026_10_23": {
+    "catalog_rows": 58,
+    "enabled_rows": 2,
+    "disabled_rows": 56,
+    "line_point_smoke": "passed"
+  }
+}

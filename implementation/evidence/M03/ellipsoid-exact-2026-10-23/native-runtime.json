@@ -1,0 +1,40 @@
+{
+  "target": "standalone Windows x64 Rust OM9; native OCCT 8.0.1",
+  "binary": "L:\\om9-target\\debug\\om9.exe",
+  "binary_sha256": "d583f9b08b138cb632e96f9d798f4a0868c812c51023d638c44ccc362d92c346",
+  "pid": 43692,
+  "run": "build/standalone-validation/ui-artifacts/ellipsoid-exact-20261023T123742",
+  "sources": {
+    "crates/om9-kernel/src/creation.rs": "9ee9e1386122434da5bc30c4a797c400cdf8b9adc6e00162200039c31833a291",
+    "crates/om9-kernel/src/creation_bridge.cpp": "b924f6013f8480f7adf7693dd66846a2f493287bd0510941ab11351a6a3bc118",
+    "crates/om9-kernel/src/brep_bridge.cpp": "c11d4412068cb6ad79730f1c7fdbc6d4c7fe9e85776eb9030d7c797a2554f088",
+    "crates/om9-kernel/tests/ellipsoid.rs": "81cfa404849e6789566091214fbe2c4a512c672cad9a4e3f88ad49b338d635a7",
+    "crates/om9-kernel/tests/l2_01_09.rs": "1c2511c62e8471c6cb0bc599f36a9e767c4e3313e406bb33d2ea692ad8579490",
+    "crates/om9-app/tests/solid.rs": "90ac75bf0598fcdae55a8d7e26a7a93819833832aa9be3d7d90fa22bb450a3ce"
+  },
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree": "dirty; source hashes identify this scoped implementation",
+  "manual_gate_promoted": false,
+  "native_ui_observations": [
+    "Solid menu opens Ellipsoid X radius prompt",
+    "menu input 2 3 4 commits one visible ellipsoid in four GPU viewports",
+    "Icon History Undo removes it and Redo restores it",
+    "Ellipsoid 0 3 4 shows a visible finite/positive input error without replacing the existing body",
+    "Esc cancels a second Ellipsoid session",
+    "full CMD Ellipsoid 2 3 4 creates the same visible body",
+    "native Save dialog writes ellipsoid-ui.om9 and clears the dirty title"
+  ],
+  "screenshots": [
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-cancel.png",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-cmd.png",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-committed.png",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-redo.png",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-saved.png",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-ellipsoid-undo.png",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-invalid-input.png",
+    "implementation/evidence/M03/ellipsoid-exact-2026-10-23/ui-solid-menu.png"
+  ],
+  "reviewer": "agent observation only; human M03-UI signoff pending",
+  "clean_window_close_observed": true,
+  "post_build_test_addition": "solid_ellipsoid_native_ui_saved_fixture added and explicitly passed after the binary was built; production source hashes unchanged"
+}

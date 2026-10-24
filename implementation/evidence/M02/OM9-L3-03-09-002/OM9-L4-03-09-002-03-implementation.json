@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-09-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-09-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "An empty selection gets General actions from the existing command registry (Line, Point, Zoom Extents/Selected, Home, Center) without duplicates.",
+  "tests": [
+    "om9-app f6 unit: 7 passed",
+    "om9-app f6_context: 2 passed"
+  ]
+}

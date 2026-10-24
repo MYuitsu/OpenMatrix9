@@ -123,6 +123,9 @@ pub struct GestureSession {
     pub view: ViewId,
     pub button: eframe::egui::PointerButton,
     pub last: eframe::egui::Pos2,
+    /// Modifier decision captured at press time; a later frame without a modifier event
+    /// must not turn a Shift-pan into an orbit.
+    pub pan: bool,
 }
 #[derive(Default)]
 pub struct NavigationController {
@@ -180,13 +183,14 @@ impl NavigationController {
             view: id,
             button,
             last: pos,
+            pan: false,
         });
     }
     pub fn end_drag(&mut self) {
-        if let Some(g) = self.gesture.take() {
-            if let Some(s) = self.views.get_mut(&g.view) {
-                s.phase = NavigationPhase::Refining;
-            }
+        if let Some(g) = self.gesture.take()
+            && let Some(s) = self.views.get_mut(&g.view)
+        {
+            s.phase = NavigationPhase::Refining;
         }
     }
     pub fn drag(
@@ -217,7 +221,9 @@ impl NavigationController {
                 per_pixel * (-delta[0] * right[a] + delta[1] * up[a])
             }));
         } else {
-            rig.orbit_turntable(delta[0] * 0.01, -delta[1] * 0.01);
+            // Perspective orbit: dragging right turns the model right, matching the
+            // direction users expect from the turntable.
+            rig.orbit_turntable(-delta[0] * 0.01, -delta[1] * 0.01);
         }
         let out = rig.to_camera(camera)?;
         s.expected_camera = out.clone();
@@ -226,6 +232,7 @@ impl NavigationController {
         s.generation = s.generation.wrapping_add(1);
         Some(out)
     }
+    #[allow(clippy::too_many_arguments)]
     pub fn wheel(
         &mut self,
         id: ViewId,
@@ -238,6 +245,7 @@ impl NavigationController {
     ) {
         self.wheel_displayed(id, camera, camera, viewport, cursor, points, now, speed);
     }
+    #[allow(clippy::too_many_arguments)]
     pub fn wheel_displayed(
         &mut self,
         id: ViewId,
@@ -324,10 +332,11 @@ impl NavigationController {
         self.views.get(&id).map_or(0, |s| s.generation)
     }
     pub fn completed(&mut self, id: ViewId, generation: u64) {
-        if let Some(s) = self.views.get_mut(&id) {
-            if s.generation == generation && s.phase == NavigationPhase::Refining {
-                s.phase = NavigationPhase::Idle;
-            }
+        if let Some(s) = self.views.get_mut(&id)
+            && s.generation == generation
+            && s.phase == NavigationPhase::Refining
+        {
+            s.phase = NavigationPhase::Idle;
         }
     }
     pub fn needs_tick(&self) -> bool {

@@ -109,5 +109,16 @@
       "M07 owns tessellation and the document STL export command."
     ]
   },
-  "children_l4": []
+  "children_l4": [],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "STL export nên thành lệnh/plugin service khi làm M07.",
+    "api": [],
+    "candidate_api": [
+      "export_stl(path, options)"
+    ],
+    "host_only": "Tessellation OCCT ở host; SDK chỉ tham số + đường dẫn host cấp."
+  }
 }

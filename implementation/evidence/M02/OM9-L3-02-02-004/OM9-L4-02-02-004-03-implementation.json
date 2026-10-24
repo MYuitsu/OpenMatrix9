@@ -1,0 +1,16 @@
+{
+  "l4": "OM9-L4-02-02-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-02-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "parse_input recognises W/w (world), @ (relative) and bare local x,y[,z]; relative is a frame displacement from the previous accepted point.",
+  "source_paths": [
+    "crates/om9-core/src/coords.rs",
+    "crates/om9-app/src/session.rs"
+  ],
+  "tests": [
+    "om9-core coordinate_input: 4 passed",
+    "om9-app cplane_coordinate_input: 10 passed"
+  ]
+}

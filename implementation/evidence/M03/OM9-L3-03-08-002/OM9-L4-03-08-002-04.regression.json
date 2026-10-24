@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m03.l2-03-08.l4.receipt.v1",
+  "l4": "OM9-L4-03-08-002-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-03-08-002",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "suite": "app lib + Top 11 suite + core Top 11 suite",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --no-default-features --lib --test top11 -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-03-08-002/OM9-L4-03-08-002-04.regression.log",
+      "stdout_log_sha256": "21c1dacf4ccd4e4c43c6b95dc45c6e6521c8d4e5b426099e43fcf879605d1836",
+      "passed": 180
+    },
+    {
+      "argv": "cargo test -p om9-core --test top11 -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "passed": 10
+    }
+  ],
+  "repeatable": "the action oracles are exact counts and tolerance-bounded geometry; the suite is deterministic here",
+  "observed": {
+    "grip_points_on_line": 2.0,
+    "grip_mode_toggle_passed": "true",
+    "grip_drag_end_mm": "[15.0, 2.0, 0.0]",
+    "grip_drag_undo_passed": "true",
+    "circle_grip_radius": 5.0,
+    "surface_control_grips": 4.0,
+    "surface_edit_reversed": "true",
+    "surface_edit_grips": 4.0,
+    "surface_edit_periodic": "true",
+    "surface_edit_handles_96_ms": 98.075,
+    "surface_edit_move_96_ms": 48.388
+  }
+}

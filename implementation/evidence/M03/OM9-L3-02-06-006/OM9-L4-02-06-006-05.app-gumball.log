@@ -1,0 +1,45 @@
+    Blocking waiting for file lock on build directory
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 31.67s
+     Running tests\gumball_cold.rs (L:\om9-target\debug\deps\gumball_cold-cba1bdb0ff6ed995.exe)
+
+running 1 test
+test a_gumball_commit_reopens_in_a_fresh_process_with_the_same_id_and_placement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.91s
+
+     Running tests\gumball_interaction.rs (L:\om9-target\debug\deps\gumball_interaction-11ca2b106061f502.exe)
+
+running 6 tests
+test the_pivot_is_none_without_a_selection ... ok
+test a_gesture_without_motion_writes_nothing ... ok
+test rotating_turns_the_selection_about_its_centre ... ok
+test scaling_doubles_the_distance_from_the_pivot ... ok
+test an_x_axis_drag_adds_exactly_five_millimetres_with_one_undo_redo ... ok
+test moving_two_selected_objects_is_one_journal_entry ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_numeric.rs (L:\om9-target\debug\deps\gumball_numeric-79a501f2d82c97aa.exe)
+
+running 6 tests
+test numeric_commands_without_a_selection_are_refused ... ok
+test a_malformed_numeric_command_changes_nothing ... ok
+test nan_and_empty_numeric_inputs_commit_nothing_and_keep_the_gumball ... ok
+test a_twelve_point_five_millimetre_handle_input_is_exact_and_one_entry ... ok
+test a_numeric_move_is_one_transaction ... ok
+test a_numeric_rotation_and_scale_turn_about_the_pivot ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_placement.rs (L:\om9-target\debug\deps\gumball_placement-8f7dfd5e40a4163e.exe)
+
+running 4 tests
+test object_alignment_follows_the_selected_objects_axes ... ok
+test cplane_alignment_follows_the_active_construction_plane_without_moving_the_object ... ok
+test resetting_the_gumball_puts_the_pivot_back_at_the_selection_centre ... ok
+test a_relocated_gumball_turns_about_the_new_origin ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

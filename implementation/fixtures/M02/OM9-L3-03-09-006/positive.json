@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-09-006",
+  "l3_id": "OM9-L3-03-09-006",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "F6 Builder selection đóng gói typed IDs + origin hint đúng theo schema M04",
+  "expected": "The documented F6 group/action with the command registry as the only dispatch source.",
+  "evidence": [
+    "om9-app f6 unit: 7 passed"
+  ],
+  "status": "PASS"
+}

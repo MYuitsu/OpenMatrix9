@@ -1,0 +1,73 @@
+{
+  "schema": "om9.m03.l2-03-08.ui-review.v1",
+  "task_id": "OM9-L4-03-08-002-05",
+  "l3_id": "OM9-L3-03-08-002",
+  "title": "Top11 Editpoints And Controlpoints",
+  "oracle": {
+    "positive": [
+      "a line exposes 2 control points and 2 edit points; a NURBS 4 of each; a circle exposes centre+4 quadrants and dragging a quadrant sets radius 5; a two-segment polycurve exposes 4 control points and editing one changes its segment; a 2x2 surface exposes 4 control grips and 4 edit grips; moving an edit grip to (3,3,2) reaches that point, and a periodic/reversed cylinder keeps its record; F10 and Esc behave as documented"
+    ],
+    "negative": [
+      "points toggle without a curve/surface selection",
+      "grips on an unsupported geometry",
+      "toggle while a Top 11 command is pending",
+      "grip drag with an out-of-range index or singular placement"
+    ]
+  },
+  "manual_test_gate": "M03-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "manual M03-UI gate pending",
+    "date_utc": "2026-10-23",
+    "statement": "The command/action oracle is asserted by focused Rust tests and every measured value comes from that run. No interactive window, menu or human geometry review is part of this automated receipt.",
+    "scope": "Top 11 command adapter, selection/kind availability, one transaction; no human review"
+  },
+  "measured": {
+    "grip_points_on_line": 2.0,
+    "grip_mode_toggle_passed": "true",
+    "grip_drag_end_mm": "[15.0, 2.0, 0.0]",
+    "grip_drag_undo_passed": "true",
+    "circle_grip_radius": 5.0,
+    "surface_control_grips": 4.0,
+    "surface_edit_reversed": "true",
+    "surface_edit_grips": 4.0,
+    "surface_edit_periodic": "true",
+    "surface_edit_handles_96_ms": 98.075,
+    "surface_edit_move_96_ms": 48.388
+  },
+  "tolerances": {
+    "grip_points_on_line": "exact integer",
+    "grip_mode_toggle_passed": "boolean assertion",
+    "grip_drag_end_mm": "1e-9",
+    "grip_drag_undo_passed": "boolean assertion",
+    "circle_grip_radius": "1e-9",
+    "surface_control_grips": "exact integer",
+    "surface_edit_grips": "exact integer",
+    "surface_edit_reversed": "boolean assertion",
+    "surface_edit_periodic": "boolean assertion",
+    "surface_edit_handles_96_ms": "< 1500 ms",
+    "surface_edit_move_96_ms": "< 500 ms"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-app --no-default-features --test top11 m03_03_08_002 -- --nocapture (exit 0)",
+    "regression: cargo test -p om9-app --no-default-features --lib --test top11 -j 2 (195 passed)",
+    "core: cargo test -p om9-core --test top11 -j 2 (6 passed)",
+    "clippy and format: exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-03-08-002/api.md",
+    "implementation/design/M03/OM9-L3-03-08-002/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-03-08-002/positive.json",
+    "implementation/fixtures/M03/OM9-L3-03-08-002/negative.json",
+    "implementation/evidence/M03/OM9-L3-03-08-002/OM9-L4-03-08-002-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-03-08-002/OM9-L4-03-08-002-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_03_08_scope": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "l3": "OM9-L3-03-07-002",
+  "title": "Matrix Main Menu Category Tabs",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/menu_catalog.rs",
+    "crates/om9-app/src/icons.rs"
+  ],
+  "api": "category_palette + main category selection + top menu selection",
+  "tests": [
+    "chrome_actions"
+  ],
+  "manual_reference": "Matrix8 Book 1, pp11-13 and reference menu icon catalog",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

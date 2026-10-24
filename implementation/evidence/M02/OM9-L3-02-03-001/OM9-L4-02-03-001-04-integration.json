@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-02-03-001-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-03-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "The viewport queries the captured Scene with the active camera/rectangle and uses the winning candidate for the point pick.",
+  "tests": [
+    "om9-app osnap UI: 3 passed"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-05-004-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-05-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The cue is a pure read of normal/view data, so mirrored placements preserve face identity.",
+  "tests": [
+    "om9-app display cues: 6 passed"
+  ]
+}

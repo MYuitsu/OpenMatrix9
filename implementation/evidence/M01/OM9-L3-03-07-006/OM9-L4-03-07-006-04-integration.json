@@ -1,0 +1,16 @@
+{
+  "l4": "OM9-L4-03-07-006-04",
+  "l3": "OM9-L3-03-07-006",
+  "date": "2026-10-22",
+  "status": "INTEGRATED",
+  "source_paths": [
+    "crates/om9-app/src/dock_layout.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": {
+    "panel_ops": "33 passed",
+    "shell_docking": "10 passed"
+  },
+  "oracle": "invalid/stale float or dock target is repaired to a valid layout; no geometry/document mutation"
+}

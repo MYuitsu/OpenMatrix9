@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m03.l2-02-05.l4.receipt.v1",
+  "l4": "OM9-L4-02-05-005-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-05-005",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-05-005/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-05-005/negative.json",
+  "fixture_sha256": {
+    "positive": "f5c980cf1cb7b83a0d31973c969cf7a5c8e6813e4896a7c03122d201271a9fb6",
+    "negative": "9953555fd1fef2e0ab00d5855de69f043d522d2bd6e60272cc72832da3536d8d"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-05-005/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-05-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-005/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "a 0.2..0.8 outer loop with a 0.4..0.6 inner loop validates and keeps the underlying surface identical",
+      "split at u=0.5 returns two trimmed halves whose loops stay on their side",
+      "shrink maps (0,0) of the sub-surface back to the source (0.2,0.2)",
+      "untrim returns the exact original surface"
+    ],
+    "negative": [
+      "a loop outside the domain is refused",
+      "an inner loop outside the outer loop is refused",
+      "a split at the domain boundary is refused"
+    ]
+  }
+}

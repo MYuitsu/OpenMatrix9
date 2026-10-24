@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-006",
+  "fixture_id": "OM9-L3-03-08-006-POSITIVE",
+  "units": "mm",
+  "oracle": "the Top 11 tab lists 11 icons; Ring Rail is disabled with the M04 reason; two selected curves enable Duplicate/Mirror/Move/Rotate/Explode/Join and disable Split/Trim; a running command disables every button",
+  "measured": {
+    "top11_buttons": 11.0,
+    "ringrail_enabled": "false"
+  },
+  "tolerances": {
+    "top11_buttons": "exact integer",
+    "ringrail_enabled": "false"
+  },
+  "test": "m03_03_08_006"
+}

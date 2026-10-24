@@ -1,0 +1,14 @@
+{
+  "l3": "OM9-L3-03-10-005",
+  "title": "Command History Readable Panel",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/transcript.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": "command_transcript 3 passed; command_sessions 6 passed",
+  "manual_reference": "Matrix8 Book 1 command line/feedback pages",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-10-005-01"
+}

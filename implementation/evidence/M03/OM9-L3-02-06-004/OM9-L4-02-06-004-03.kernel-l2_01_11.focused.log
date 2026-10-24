@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\l2_01_11.rs (L:\om9-target\debug\deps\l2_01_11-e20e71fd549d4016.exe)
+
+running 11 tests
+test m03_01_11_007 ... ok
+test m03_01_11_006 ... ok
+test m03_01_11_005 ... ok
+test m03_01_11_001 ... ok
+test m03_01_11_002 ... ok
+test m03_01_11_003 ... ok
+test m03_01_11_008 ... ok
+test m03_01_11_004 ... ok
+test m03_01_11_regression_matrix_round_trip_and_body_measure ... ok
+{"measured":{"translated_volume_mm3":24.000000000000,"mirrored_volume_mm3":24.000000000000,"mirrored_x_min_mm":-2.000000100000,"scaled_volume_mm3":576.000000000000,"scaled_size_x_mm":4.000000200000,"linear_pattern_placements":4.000000000000,"instance_definitions":1.000000000000,"baked_bodies":4.000000000000,"bake_instance_definitions":1.000000000000,"bake_bodies":2.000000000000,"frame_mid_z_mm":5.000000000000,"surface_frame_x_mm":2.000000000000,"surface_frame_y_mm":3.000000000000,"orientation_distance_mm":1.000000000000}}
+test m03_01_11_receipt ... ok
+test m03_01_11_stress_surface_frames_and_baked_pattern ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+

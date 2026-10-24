@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-02-02-002-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-02-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "The viewport title menu offers Set CPlane: Top/Front/Right and applies the preset only to the captured view.",
+  "tests": [
+    "om9-app cplane_menu: 1 passed",
+    "om9-app viewport_title_menu: 17 passed"
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "date": "2026-10-21",
+  "status": "host_undo_feed_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Undo/Redo record their committed diff into the plugin feed.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "7dd97866e5a48b860f3efbbe7ada51bfc43a45bc8a1e970e1291525d2cb557d2",
+    "crates/om9-plugin-host/src/staged.rs": "1c281d7cb40d570c2f32bef11a13adb82cd9195acec879eb30e5d183b8bc439c",
+    "crates/om9-app/src/session.rs": "5cda049700052638779a2d5cad879174f7e9bc92ca6639387a4b5b0d33c04440",
+    "crates/om9-app/tests/plugin_native.rs": "7b32c4d5410f89e27d297103eab4c9944047673be5631812908aa729852f8e68",
+    "sdk/examples/hello-plugin/src/lib.rs": "dc1e3120b7cae7baa1f9320c6a494d4fa3307d935c1f6ee226abbdc19d1a8e14",
+    "sdk/examples/hello-plugin/descriptor.json": "d1df9e1f9748e5270008d267c33a200912a6b78edc703f0a74717548ba1d141e",
+    "sdk/README.md": "f6413b45680a9527d7d2c69db431b5517ded678067312140490109fd0f710ed0",
+    "sdk/API-INVENTORY.md": "b2f5e0e71c05d76628fed6eb326eb1ec18675d72cf4c76f28d3e7fc392a91538"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "last_change"
+    ],
+    "error_codes": [
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Feed holds one batch for the last committed change: plugin edit, host undo or host redo.",
+    "Revisions are real before/after documents.",
+    "Other host edit paths remain outside the feed."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "68 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "27 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-change-undo",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8841 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "cause": "undo",
+    "removed_entities": 3,
+    "undo_len": 0
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1850305,
+      "sha256": "218d3f5cc1d0851de2bd831ca1390e8f522cf786fbf38c7ec63e31f1363025e1"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "f1c7e80d429c69c24d285679184966c065cc7f684d9d2bcabe7722631a8a5631"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 180885,
+      "sha256": "086e46d8f70fd6fba28d5ff275c05fcba82961f9281196c68c04330b222c1ff6"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "07ca2f03c4e83489416d3d8893beb85e4f8e88782d69dc51ceee652839afa497"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1847296,
+      "sha256": "aca02ca620beb30921f02c2e9c02e69137587daa3d9f822757cfd8e14bd171b4"
+    },
+    "om9.exe": {
+      "bytes": 69448192,
+      "sha256": "aede3f51d974580cbf54cd17c2b4ba562b9bd0ed8252bd9805c930770a8b8b0d"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-011 (feed now covers plugin edit + host undo/redo)"
+    ],
+    "open": [
+      "other host edit paths",
+      "multi-batch history"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only plugin commands, host undo and host redo are recorded.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Record the remaining host edit paths at their commit sites, or return to M02 for subobject/pick query services."
+}

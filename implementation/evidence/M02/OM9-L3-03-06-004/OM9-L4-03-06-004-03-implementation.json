@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-06-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-06-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "calibrate computes target_mm/pixel_distance, then set_width(target*width_px); zero/negative inputs are rejected before division.",
+  "tests": [
+    "om9-app pictureframe unit: 6 passed"
+  ]
+}

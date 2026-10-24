@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-006",
+  "fixture_id": "OM9-L3-01-11-006-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "surface with all poles coincident",
+    "UV (11, 0.5)"
+  ],
+  "expect": "CreationError::Invalid; no frame"
+}

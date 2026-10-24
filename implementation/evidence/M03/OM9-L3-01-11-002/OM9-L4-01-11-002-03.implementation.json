@@ -1,0 +1,47 @@
+{
+  "schema": "om9.m03.l2-01-11.l4.receipt.v1",
+  "l4": "OM9-L4-01-11-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-11-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crate": "om9-kernel",
+    "files": [
+      "crates/om9-kernel/src/transform_ops.rs",
+      "crates/om9-kernel/src/transform_bridge.cpp"
+    ],
+    "test": "crates/om9-kernel/tests/l2_01_11.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 m03_01_11_002 -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-11-002/OM9-L4-01-11-002-03.focused-test.log",
+      "stdout_log_sha256": "6154a12f9873238d49fe2997545351b2f38c95b125f6dd0b657eb71ed36b5a68"
+    }
+  ],
+  "observed": {
+    "mirrored_volume_mm3": 24.0,
+    "mirrored_x_min_mm": -2.0000001
+  },
+  "expected": {
+    "mirrored_volume_mm3": 24.0,
+    "mirrored_x_min_mm": -2.0
+  },
+  "effective_tolerance": {
+    "mirrored_volume_mm3": "1e-6",
+    "mirrored_x_min_mm": "1e-5"
+  },
+  "input_validation": [
+    "the plane normal must be finite and non-zero",
+    "the mirror matrix has determinant −1; the body adapter reverses the inside-out result",
+    "the source body is an immutable value and is not mutated"
+  ],
+  "error_type": "transform_ops::TransformError (creation::CreationError)",
+  "rollback_behavior": "inputs are immutable values; a refused operation returns before a body exists",
+  "compile_receipt": "the crate, the C++ transform adapter and the focused test compile (exit 0)",
+  "worktree_state": "The recorded revision is HEAD; L2-01-11 changes were measured before commit."
+}

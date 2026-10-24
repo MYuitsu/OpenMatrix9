@@ -1,0 +1,26 @@
+{
+  "schema": "om9.m03.l2-02-04.l4.receipt.v1",
+  "l4": "OM9-L4-02-04-006-05",
+  "role": "INTEGRATION_STRESS",
+  "l3": "OM9-L3-02-04-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test l2_02_04 m03_02_04_006_stress -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-02-04-006/OM9-L4-02-04-006-05.integration-stress.log",
+      "stdout_log_sha256": "d5c0075995ca7f44e92c6a40c9df76bc6af12da5c93a028b6d706deaae2b30aa"
+    }
+  ],
+  "observed": {
+    "stress_corners": 100.0,
+    "stress_max_tangency_error_mm": 0.0
+  },
+  "invariants": [
+    "every stress case stays inside its declared tolerance",
+    "no panic, NaN or partial record across the loop",
+    "each iteration validates its record before the next one"
+  ]
+}

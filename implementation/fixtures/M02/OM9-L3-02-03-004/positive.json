@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-03-004",
+  "l3_id": "OM9-L3-02-03-004",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Đối với mặt phẳng BRep, nearest point nằm trên trimmed face và normal đúng",
+  "expected": "The documented snap kind and world point with a stable object identity.",
+  "evidence": [
+    "om9-app osnap BRep: 1 passed",
+    "om9-scene osnap: 11 passed"
+  ],
+  "status": "PASS"
+}

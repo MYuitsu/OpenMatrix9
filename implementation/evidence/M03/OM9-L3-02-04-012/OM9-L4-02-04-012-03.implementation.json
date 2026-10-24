@@ -1,0 +1,46 @@
+{
+  "schema": "om9.m03.l2-02-04.l4.receipt.v1",
+  "l4": "OM9-L4-02-04-012-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-04-012",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crate": "om9-core",
+    "files": [
+      "crates/om9-core/src/curve_surface_ops.rs"
+    ],
+    "test": "crates/om9-core/tests/l2_02_04.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core --test l2_02_04 m03_02_04_012_sketch_on_surface_mesh_and_two_views -- --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-02-04-012/OM9-L4-02-04-012-03.focused-test.log",
+      "stdout_log_sha256": "b887ce0aa419a885e032d6635f853b90ced188559c56e78536e722ede7cdbc2a"
+    }
+  ],
+  "observed": {
+    "surface_sketch_start": "[1.0, 2.0, 0.0]",
+    "two_view_point": "[0.0, 0.0, 0.0]"
+  },
+  "expected": {
+    "surface_sketch_start": "[1.0, 2.0, 0.0]",
+    "two_view_point": "[0.0, 0.0, 0.0]"
+  },
+  "effective_tolerance": {
+    "surface_sketch_start": "1e-9",
+    "two_view_point": "1e-9"
+  },
+  "input_validation": [
+    "finite points/parameters",
+    "record admission through Limits",
+    "typed refusal before publication"
+  ],
+  "error_type": "om9_core::Error (Invalid/Unsupported/Budget/Overflow)",
+  "rollback_behavior": "inputs are immutable values; a refused operation returns before a curve record exists",
+  "compile_receipt": "the om9-core crate and the focused test compile (exit 0)",
+  "worktree_state": "The recorded revision is HEAD; L2-02-04 changes were measured before commit."
+}

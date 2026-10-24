@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-005",
+  "fixture_id": "OM9-L3-01-10-005-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "closed box",
+    "open shell with a skewed non-planar top loop"
+  ],
+  "expect": "CreationError::Invalid or Kernel; no closed body is fabricated"
+}

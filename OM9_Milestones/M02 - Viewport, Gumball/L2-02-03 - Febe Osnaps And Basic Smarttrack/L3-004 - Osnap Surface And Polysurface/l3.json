@@ -219,5 +219,43 @@
     },
     "algorithm_and_coverage": "Dùng BRep closest projection/trim classification; NURBS M03 có gate mở rộng riêng",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "The BRep display tessellation is ray-hit nearest-first; the hit point and triangle normal form the surface candidate, so only trimmed display faces can snap.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-02-03-004/api.md",
+      "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-05-regression.json",
+      "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app osnap BRep: 1 passed",
+      "om9-scene osnap: 11 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-02-03-004/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-02-03-004/positive.json",
+        "implementation/fixtures/M02/OM9-L3-02-03-004/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-05-regression.json",
+        "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-06-acceptance.md"
+      ],
+      "acceptance": "A ray through a planar box face returns an on-face point and the face normal; a ray outside the trimmed face produces no surface snap."
+    }
   }
 }

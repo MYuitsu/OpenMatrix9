@@ -139,7 +139,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE",
   "task_ids": [
     "OM9-L4-01-09-001-01",
     "OM9-L4-01-09-001-02",
@@ -332,6 +332,224 @@
       ]
     }
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "GENERAL_CAD"
+  "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
+  "acceptance_category": "GENERAL_CAD",
+  "proposed_fixture": {
+    "fixture_id": "OM9-L3-01-09-001-POSITIVE",
+    "status": "RUNTIME_MEASURED_2026_10_22",
+    "positive": {
+      "input": {
+        "box_sizes_mm": [
+          10,
+          20,
+          30
+        ],
+        "sphere_radius_mm": 5,
+        "cylinder": [
+          5,
+          10
+        ],
+        "cone": [
+          5,
+          0,
+          10
+        ],
+        "torus": [
+          10,
+          2
+        ],
+        "ellipsoid": [
+          3,
+          4,
+          5
+        ],
+        "pyramid": [
+          4,
+          10,
+          10
+        ]
+      },
+      "expect": {
+        "box_volume_mm3": 6000.0,
+        "sphere_volume_mm3": 523.5987755983,
+        "cylinder_volume_mm3": 785.3981633974,
+        "cone_volume_mm3": 261.7993877991,
+        "torus_volume_mm3": 789.5683520871,
+        "volume_abs_tol_mm3": 1e-06
+      }
+    },
+    "negative": {
+      "input": [
+        "sphere r=0",
+        "sphere r=NaN",
+        "cylinder height=-1",
+        "box x=0",
+        "torus tube=ring",
+        "pyramid sides=2"
+      ],
+      "expect": "CreationError::Invalid with no published body; the document/Undo journal is untouched because the operation returns before a body exists"
+    },
+    "tolerance_policy": {
+      "box_volume_mm3": "1e-6",
+      "sphere_volume_mm3": "1e-6",
+      "cylinder_volume_mm3": "1e-6",
+      "cone_volume_mm3": "1e-6",
+      "torus_volume_mm3": "1e-6",
+      "ellipsoid_volume_mm3": "0.2 (general-transform BSpline approximation, measured error < 0.05%)",
+      "pyramid_volume_mm3": "1e-5"
+    },
+    "rust_test_name": "m03_01_09_001"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "sphere, cylinder, box, cone, torus BRep shapes",
+    "owner": {
+      "crate": "om9-kernel",
+      "files": [
+        "crates/om9-kernel/src/creation.rs",
+        "crates/om9-kernel/src/creation_bridge.cpp",
+        "crates/om9-kernel/src/brep_snapshot.hxx",
+        "crates/om9-kernel/tests/l2_01_09.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-01-09-001/api.md",
+      "implementation/design/M03/OM9-L3-01-09-001/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-01-09-001/positive.json",
+      "implementation/fixtures/M03/OM9-L3-01-09-001/negative.json",
+      "implementation/evidence/M03/OM9-L3-01-09-001/OM9-L4-01-09-001-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-01-09-001/OM9-L4-01-09-001-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-01-09-001/OM9-L4-01-09-001-05.ui-review.json"
+    ],
+    "tests": [
+      "m03_01_09_001: passed",
+      "l2_01_09 suite: 12 passed"
+    ],
+    "human_approval": null,
+    "remaining": [],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "AUTO_ONLY",
+      "design": "implementation/design/M03/OM9-L3-01-09-001/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-01-09-001/positive.json",
+        "implementation/fixtures/M03/OM9-L3-01-09-001/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M03/OM9-L3-01-09-001/OM9-L4-01-09-001-05.ui-review.json"
+      ],
+      "measured": {
+        "box_volume_mm3": 6000.0,
+        "sphere_volume_mm3": 523.598775598299,
+        "cylinder_volume_mm3": 785.398163397449,
+        "cone_volume_mm3": 261.79938779915,
+        "torus_volume_mm3": 789.568352087151,
+        "ellipsoid_volume_mm3": 251.217495107596,
+        "pyramid_volume_mm3": 666.666666666666
+      },
+      "tolerances": {
+        "box_volume_mm3": "1e-6",
+        "sphere_volume_mm3": "1e-6",
+        "cylinder_volume_mm3": "1e-6",
+        "cone_volume_mm3": "1e-6",
+        "torus_volume_mm3": "1e-6",
+        "ellipsoid_volume_mm3": "0.2 (general-transform BSpline approximation, measured error < 0.05%)",
+        "pyramid_volume_mm3": "1e-5"
+      },
+      "acceptance": "Box(10,20,30): volume 6000 mm³, bounds 10×20×30; Sphere(r=5): volume 4/3π·125; Cylinder(r=5,h=10), Cone(r1=5,r2=0,h=10), Torus(R=10,r=2), Ellipsoid(3,4,5), Pyramid(4 sides,R=10,h=10); the canonical source reopens to the same measured solid"
+    },
+    "l4_evidence": {
+      "OM9-L4-01-09-001-01": "1/1",
+      "OM9-L4-01-09-001-02": "1/1",
+      "OM9-L4-01-09-001-03": "1/1",
+      "OM9-L4-01-09-001-04": "1/1",
+      "OM9-L4-01-09-001-05": "1/1"
+    },
+    "exact_ellipsoid_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "EXACT_GEOMETRY_VALIDATED_NATIVE_UI_OBSERVED_HUMAN_SIGNOFF_PENDING",
+      "construction": "Rust-authored rational biquadratic 9x5 sphere net with scaled poles; OCCT single-face closed solid; no GTransform fallback",
+      "measurement": "BRepGProp adaptive volume/area Eps=1e-12 on canonical stored B-Rep",
+      "evidence": [
+        "docs/validation/2026-10-23-exact-ellipsoid.md",
+        "implementation/evidence/M03/ellipsoid-exact-2026-10-23/receipt.json"
+      ],
+      "tests": {
+        "kernel": {
+          "passed": 69,
+          "failed": 0,
+          "ignored": 1
+        },
+        "app": {
+          "passed": 183,
+          "failed": 0,
+          "ignored": 0
+        },
+        "native-ui-fixture": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      },
+      "relative_volume_threshold": 1e-10,
+      "max_observed_relative_volume_error": 9.302e-12,
+      "manual_gate_promoted": false,
+      "human_approval": null
+    },
+    "solid_ui_followup_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "GEOMETRY_AND_CONTROLLER_VALIDATED_NATIVE_UI_PARTIALLY_OBSERVED_HUMAN_SIGNOFF_PENDING",
+      "evidence": [
+        "docs/validation/2026-10-23-solid-ui-followup.md",
+        "implementation/evidence/M03/solid-ui-followup-2026-10-23/receipt.json",
+        "implementation/evidence/M03/solid-ui-followup-2026-10-23/M03-UI-CHECKLIST.md"
+      ],
+      "tests": {
+        "kernel": {
+          "passed": 71,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "app_lib": {
+          "passed": 176,
+          "failed": 0
+        },
+        "solid": {
+          "passed": 7,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "solid_workflows": {
+          "passed": 8,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "native_saved_files": {
+          "tests": 1,
+          "files": 3,
+          "passed": 1,
+          "failed": 0
+        }
+      },
+      "controller_measured_bindings": 21,
+      "current_native_ui_scenarios": [
+        "Text",
+        "Boolean Two Objects/U",
+        "Solid Extrude All with Undo/Redo"
+      ],
+      "prior_native_ui_scenario": "Ellipsoid; earlier executable fingerprint retained separately",
+      "exact_ellipsoid_max_relative_volume_error": 2.22e-15,
+      "relative_volume_threshold": 1e-10,
+      "measurement": "Canonical B-Rep VolumePropertiesGK Eps=1e-12; adaptive SurfaceProperties Eps=1e-12",
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "human_approval": null,
+      "remaining": [
+        "Human M03-UI review/signoff using the 21-row worksheet."
+      ]
+    }
+  }
 }

@@ -1,0 +1,793 @@
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+    Checking om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+error: empty lines after doc comment
+   --> crates\om9-app\src\gpu_viewport.rs:211:1
+    |
+211 | / /// one per object, at the cost of one colour for the merged group.
+212 | |
+213 | | /// Samples per pixel of the document viewport. Four is the multisample count WebGPU guarantees for a
+214 | | /// renderable format, and it is what keeps the one-pixel grid from turning into a staircase: a diagonal
+215 | | /// segment now covers part of a pixel and resolves to a grey level instead of a hard step.
+216 | |
+    | |_^
+217 |   pub struct GpuScene {
+    |   ------------------- the comment documents this struct
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#empty_line_after_doc_comments
+    = note: `-D clippy::empty-line-after-doc-comments` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::empty_line_after_doc_comments)]`
+    = help: if the empty lines are unintentional, remove them
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\gpu_viewport.rs:403:9
+    |
+403 | /         if let Some(id) = self.texture_id.take() {
+404 | |             if Some(id) != self.published_id {
+405 | |                 state.renderer.write().free_texture(&id);
+406 | |             }
+407 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+    = note: `-D clippy::collapsible-if` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+    |
+403 ~         if let Some(id) = self.texture_id.take()
+404 ~             && Some(id) != self.published_id {
+405 |                 state.renderer.write().free_texture(&id);
+406 ~             }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\gpu_viewport.rs:716:17
+    |
+716 | /                 if close && !selected.contains(&object.root) {
+717 | |                     if let Some((centre, radius)) = spheres.get(object_index) {
+718 | |                         let distance = ((centre[0] - camera.target[0]).powi(2)
+719 | |                             + (centre[1] - camera.target[1]).powi(2)
+...   |
+726 | |                 }
+    | |_________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+716 ~                 if close && !selected.contains(&object.root)
+717 ~                     && let Some((centre, radius)) = spheres.get(object_index) {
+718 |                         let distance = ((centre[0] - camera.target[0]).powi(2)
+...
+724 |                         }
+725 ~                     }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\gpu_viewport.rs:878:9
+    |
+878 | /         if let Some(frame) = self.timer_frame.take() {
+879 | |             if let Some(timer) = self.timer.as_mut() {
+880 | |                 timer.submitted(frame);
+881 | |             }
+882 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+878 ~         if let Some(frame) = self.timer_frame.take()
+879 ~             && let Some(timer) = self.timer.as_mut() {
+880 |                 timer.submitted(frame);
+881 ~             }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\gpu_viewport.rs:883:9
+    |
+883 | /         if let Some(pending) = self.pending_publication.as_mut() {
+884 | |             if !pending.submitted {
+885 | |                 let done = pending.done.clone();
+886 | |                 queue.on_submitted_work_done(move || {
+...   |
+891 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+883 ~         if let Some(pending) = self.pending_publication.as_mut()
+884 ~             && !pending.submitted {
+885 |                 let done = pending.done.clone();
+...
+889 |                 pending.submitted = true;
+890 ~             }
+    |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\gpu_viewport.rs:1201:9
+     |
+1201 | /         if let Some(timer) = self.timer.as_mut() {
+1202 | |             if let Some(sample) = timer.poll(&state.device, &state.queue) {
+1203 | |                 self.gpu_sample = Some(sample);
+1204 | |             }
+1205 | |         }
+     | |_________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1201 ~         if let Some(timer) = self.timer.as_mut()
+1202 ~             && let Some(sample) = timer.poll(&state.device, &state.queue) {
+1203 |                 self.gpu_sample = Some(sample);
+1204 ~             }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\gpu_viewport.rs:1241:13
+     |
+1241 | /             if let Some(id) = self.published_id.take() {
+1242 | |                 if Some(id) != self.texture_id {
+1243 | |                     state.renderer.write().free_texture(&id);
+1244 | |                 }
+1245 | |             }
+     | |_____________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1241 ~             if let Some(id) = self.published_id.take()
+1242 ~                 && Some(id) != self.texture_id {
+1243 |                     state.renderer.write().free_texture(&id);
+1244 ~                 }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\gpu_viewport.rs:1279:13
+     |
+1279 | /             if !self.request.moving && !self.rendered_final {
+1280 | |                 if let Some(key) = key {
+1281 | |                     if self.refinement.as_ref().is_none_or(|(old, _)| *old != key) {
+1282 | |                         self.refinement = Some((key, std::time::Instant::now()));
+...    |
+1285 | |             }
+     | |_____________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1279 ~             if !self.request.moving && !self.rendered_final
+1280 ~                 && let Some(key) = key {
+1281 |                     if self.refinement.as_ref().is_none_or(|(old, _)| *old != key) {
+1282 |                         self.refinement = Some((key, std::time::Instant::now()));
+1283 |                     }
+1284 ~                 }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\gpu_viewport.rs:1280:17
+     |
+1280 | /                 if let Some(key) = key {
+1281 | |                     if self.refinement.as_ref().is_none_or(|(old, _)| *old != key) {
+1282 | |                         self.refinement = Some((key, std::time::Instant::now()));
+1283 | |                     }
+1284 | |                 }
+     | |_________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1280 ~                 if let Some(key) = key
+1281 ~                     && self.refinement.as_ref().is_none_or(|(old, _)| *old != key) {
+1282 |                         self.refinement = Some((key, std::time::Instant::now()));
+1283 ~                     }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\gpu_viewport.rs:1286:13
+     |
+1286 | /             if let Some(pending) = self.pending_publication.take() {
+1287 | |                 if Some(pending.key) == key
+1288 | |                     && pending.camera == *document_camera
+1289 | |                     && !self.request.moving
+...    |
+1312 | |             }
+     | |_____________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1286 ~             if let Some(pending) = self.pending_publication.take()
+1287 ~                 && Some(pending.key) == key
+1288 |                     && pending.camera == *document_camera
+ ...
+1310 |                     return self.paint_published(ui, rect);
+1311 ~                 }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\gpu_viewport.rs:1292:25
+     |
+1292 | /                         if let Some(old) = self.published_id.replace(pending.texture) {
+1293 | |                             if old != pending.texture {
+1294 | |                                 state.renderer.write().free_texture(&old);
+1295 | |                             }
+1296 | |                         }
+     | |_________________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1292 ~                         if let Some(old) = self.published_id.replace(pending.texture)
+1293 ~                             && old != pending.texture {
+1294 |                                 state.renderer.write().free_texture(&old);
+1295 ~                             }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\gpu_viewport.rs:1437:17
+     |
+1437 | /                 if delta.0 != om9_core::geometry::Transform::identity().0 {
+1438 | |                     if let Some(ghost) = gpu.ghost.as_mut() {
+1439 | |                         ghost
+1440 | |                             .encode_pass(
+...    |
+1452 | |                 }
+     | |_________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1437 ~                 if delta.0 != om9_core::geometry::Transform::identity().0
+1438 ~                     && let Some(ghost) = gpu.ghost.as_mut() {
+1439 |                         ghost
+ ...
+1450 |                             .ok();
+1451 ~                     }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\gpu_viewport.rs:1500:21
+     |
+1500 | /                     if let Some(old) = self.published_id.replace(texture_id) {
+1501 | |                         if old != texture_id {
+1502 | |                             state.renderer.write().free_texture(&old);
+1503 | |                         }
+1504 | |                     }
+     | |_____________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1500 ~                     if let Some(old) = self.published_id.replace(texture_id)
+1501 ~                         && old != texture_id {
+1502 |                             state.renderer.write().free_texture(&old);
+1503 ~                         }
+     |
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\ui\chrome.rs:933:17
+    |
+933 | /                 if response.clicked() {
+934 | |                     if let Err(error) = self.project_manager.select(id) {
+935 | |                         self.feedback(Err(error));
+936 | |                     }
+937 | |                 }
+    | |_________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+933 ~                 if response.clicked()
+934 ~                     && let Err(error) = self.project_manager.select(id) {
+935 |                         self.feedback(Err(error));
+936 ~                     }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\ui\chrome.rs:962:13
+    |
+962 | /             if response.changed() {
+963 | |                 if let Err(error) = self.project_manager.rename_project(active_id, &name) {
+964 | |                     self.feedback(Err(error));
+965 | |                 }
+966 | |             }
+    | |_____________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+962 ~             if response.changed()
+963 ~                 && let Err(error) = self.project_manager.rename_project(active_id, &name) {
+964 |                     self.feedback(Err(error));
+965 ~                 }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\ui\chrome.rs:975:13
+    |
+975 | /             if response.changed() {
+976 | |                 if let Err(error) = self.project_manager.set_customer(&customer) {
+977 | |                     self.feedback(Err(error));
+978 | |                 }
+979 | |             }
+    | |_____________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+975 ~             if response.changed()
+976 ~                 && let Err(error) = self.project_manager.set_customer(&customer) {
+977 |                     self.feedback(Err(error));
+978 ~                 }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\ui\chrome.rs:987:9
+    |
+987 | /         if notes_response.changed() {
+988 | |             if let Err(error) = self.project_manager.set_notes(&notes) {
+989 | |                 self.feedback(Err(error));
+990 | |             }
+991 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+987 ~         if notes_response.changed()
+988 ~             && let Err(error) = self.project_manager.set_notes(&notes) {
+989 |                 self.feedback(Err(error));
+990 ~             }
+    |
+
+error: very complex type used. Consider factoring parts into `type` definitions
+   --> crates\om9-app\src\ui\chrome.rs:992:20
+    |
+992 |         let slots: Vec<(usize, Option<(String, usize, String, u64)>, bool)> = (0..3)
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#type_complexity
+    = note: `-D clippy::type-complexity` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::type_complexity)]`
+
+error: very complex type used. Consider factoring parts into `type` definitions
+   --> crates\om9-app\src\ui.rs:246:16
+    |
+246 |       hover_job: Option<(
+    |  ________________^
+247 | |         om9_core::identity::DocumentId,
+248 | |         om9_scene::camera::Camera,
+249 | |         u64,
+...   |
+252 | |         std::sync::mpsc::Receiver<Option<om9_core::identity::ObjectId>>,
+253 | |     )>,
+    | |______^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#type_complexity
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:1138:9
+     |
+1138 | /         if crate::file_lifecycle::FileKind::from_feature(id).is_some_and(|kind| {
+1139 | |             matches!(
+1140 | |                 kind,
+1141 | |                 crate::file_lifecycle::FileKind::Save | crate::file_lifecycle::FileKind::SaveAs
+...    |
+1148 | |         }
+     | |_________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1143 ~         })
+1144 ~             && let Err(error) = self.stage_project_state() {
+1145 |                 self.feedback(Err(error));
+1146 |                 return;
+1147 ~             }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:1171:9
+     |
+1171 | /         if crate::file_lifecycle::FileKind::from_command(&draft).is_some_and(|kind| {
+1172 | |             matches!(
+1173 | |                 kind,
+1174 | |                 crate::file_lifecycle::FileKind::Save | crate::file_lifecycle::FileKind::SaveAs
+...    |
+1181 | |         }
+     | |_________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1176 ~         })
+1177 ~             && let Err(error) = self.stage_project_state() {
+1178 |                 self.feedback(Err(error));
+1179 |                 return;
+1180 ~             }
+     |
+
+error: clamp-like pattern without using clamp function
+    --> crates\om9-app\src\ui.rs:2348:59
+     |
+2348 |             origin.1 + std::time::Duration::from_secs_f64((input_time - origin.0).max(0.).min(1e9))
+     |                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with clamp: `(input_time - origin.0).clamp(0., 1e9)`
+     |
+     = note: clamp will panic if max < min, min.is_nan(), or max.is_nan()
+     = note: clamp returns NaN if the input is NaN
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#manual_clamp
+     = note: `-D clippy::manual-clamp` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::manual_clamp)]`
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:2379:9
+     |
+2379 | / ...   if self.navigation_audit.is_some() {
+2380 | | ...       if let Some(log) = self.interaction_log.as_mut() {
+2381 | | ...           log.record(serde_json::json!({"event":"navigation_route","focused":ui.input(|i|i.focused),"blocked":blocked,"event...
+2382 | | ...       }
+2383 | | ...   }
+     | |_______^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2379 ~         if self.navigation_audit.is_some()
+2380 ~             && let Some(log) = self.interaction_log.as_mut() {
+2381 |                 log.record(serde_json::json!({"event":"navigation_route","focused":ui.input(|i|i.focused),"blocked":blocked,"events":events.len()}));
+2382 ~             }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:2429:13
+     |
+2429 | /             if matches!(
+2430 | |                 &event,
+2431 | |                 egui::Event::PointerMoved(_)
+2432 | |                     | egui::Event::PointerButton { .. }
+...    |
+2443 | |             }
+     | |_____________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2439 ~             )
+2440 ~                 && let Some(log) = self.interaction_log.as_mut() {
+2441 |                     log.record(serde_json::json!({"event":"navigation_input","frame_id":token,"input_seq":self.navigation.input_seq,"raw_event":format!("{event:?}")}));
+2442 ~                 }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:2456:21
+     |
+2456 | /                     if pressed
+2457 | |                         && !blocked
+2458 | |                         && ui.input(|i| i.focused)
+2459 | |                         && matches!(
+...    |
+2490 | |                     }
+     | |_____________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2462 ~                         )
+2463 ~                         && let Some((id, _, _)) = panes.iter().find(|(_, r, response)| {
+2464 |                             pos.y >= r.min.y + 18.
+ ...
+2487 |                             }
+2488 ~                         }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:2464:25
+     |
+2464 | /                         if let Some((id, _, _)) = panes.iter().find(|(_, r, response)| {
+2465 | |                             pos.y >= r.min.y + 18.
+2466 | |                                 && r.contains(pos)
+2467 | |                                 && (response.hovered() || response.is_pointer_button_down_on())
+...    |
+2489 | |                         }
+     | |_________________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2468 ~                         })
+2469 ~                             && self.navigation.gesture.is_none() {
+2470 |                                 if let Some(v) = self.controller.workspace.views.get_mut(id) {
+ ...
+2487 |                                 }
+2488 ~                             }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:2469:29
+     |
+2469 | / ...                   if self.navigation.gesture.is_none() {
+2470 | | ...                       if let Some(v) = self.controller.workspace.views.get_mut(id) {
+2471 | | ...                           if let Some(displayed) = self
+2472 | | ...                               .gpu_viewports
+...    |
+2488 | | ...                   }
+     | |_______________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2469 ~                             if self.navigation.gesture.is_none()
+2470 ~                                 && let Some(v) = self.controller.workspace.views.get_mut(id) {
+2471 |                                     if let Some(displayed) = self
+ ...
+2486 |                                     }
+2487 ~                                 }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:2536:21
+     |
+2536 | /                     if let Some(pos) = cursor {
+2537 | |                         if let Some((id, rect, _response)) = panes
+2538 | |                             .iter()
+2539 | |                             .find(|(_, r, response)| r.contains(pos) && response.hovered())
+...    |
+2580 | |                     }
+     | |_____________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2536 ~                     if let Some(pos) = cursor
+2537 ~                         && let Some((id, rect, _response)) = panes
+2538 |                             .iter()
+ ...
+2578 |                             }
+2579 ~                         }
+     |
+
+error: using `clone` on type `InputOptions` which implements the `Copy` trait
+    --> crates\om9-app\src\ui.rs:2541:64
+     |
+2541 | ...                   let options = ui.ctx().options(|o| o.input_options.clone());
+     |                                                          ^^^^^^^^^^^^^^^^^^^^^^^ help: try removing the `clone` call: `o.input_options`
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#clone_on_copy
+     = note: `-D clippy::clone-on-copy` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::clone_on_copy)]`
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:2600:17
+     |
+2600 | /                 if let Some(view) = self.controller.workspace.views.get_mut(&id) {
+2601 | |                     if self.nav_camera_sources.remove(&id) == Some(view.camera.revision) {
+2602 | |                         view.camera = camera;
+2603 | |                     }
+2604 | |                 }
+     | |_________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2600 ~                 if let Some(view) = self.controller.workspace.views.get_mut(&id)
+2601 ~                     && self.nav_camera_sources.remove(&id) == Some(view.camera.revision) {
+2602 |                         view.camera = camera;
+2603 ~                     }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\om9-app\src\ui.rs:2607:17
+     |
+2607 | /                 if let Some(view) = self.controller.workspace.views.get(id) {
+2608 | |                     if let Some(camera) = self.navigation.tick(*id, &view.camera, now) {
+2609 | |                         self.controller.workspace.views.get_mut(id).unwrap().camera = camera;
+2610 | |                         self.nav_actions.entry(*id).or_insert("zoom");
+2611 | |                     }
+2612 | |                 }
+     | |_________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2607 ~                 if let Some(view) = self.controller.workspace.views.get(id)
+2608 ~                     && let Some(camera) = self.navigation.tick(*id, &view.camera, now) {
+2609 |                         self.controller.workspace.views.get_mut(id).unwrap().camera = camera;
+2610 |                         self.nav_actions.entry(*id).or_insert("zoom");
+2611 ~                     }
+     |
+
+error: method `mul` can be confused for the standard trait method `std::ops::Mul::mul`
+  --> crates\om9-app\src\camera_rig.rs:88:5
+   |
+88 | /     pub fn mul(self, other: Self) -> Self {
+89 | |         Self {
+90 | |             w: self.w * other.w - self.x * other.x - self.y * other.y - self.z * other.z,
+91 | |             x: self.w * other.x + self.x * other.w + self.y * other.z - self.z * other.y,
+...  |
+95 | |         .normalized()
+96 | |     }
+   | |_____^
+   |
+   = help: consider implementing the trait `std::ops::Mul` or choosing a less ambiguous method name
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#should_implement_trait
+   = note: `-D clippy::should-implement-trait` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::should_implement_trait)]`
+
+error: the loop variable `axis` is used to index `delta`
+   --> crates\om9-app\src\camera_rig.rs:251:21
+    |
+251 |         for axis in 0..3 {
+    |                     ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+    = note: `-D clippy::needless-range-loop` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_range_loop)]`
+help: consider using an iterator and enumerate()
+    |
+251 -         for axis in 0..3 {
+251 +         for (axis, <item>) in delta.iter().enumerate() {
+    |
+
+error: the loop variable `axis` is used to index `cursor`
+   --> crates\om9-app\src\camera_rig.rs:275:21
+    |
+275 |         for axis in 0..3 {
+    |                     ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+help: consider using an iterator and enumerate()
+    |
+275 -         for axis in 0..3 {
+275 +         for (axis, <item>) in cursor.iter().enumerate() {
+    |
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\navigation.rs:190:9
+    |
+190 | /         if let Some(g) = self.gesture.take() {
+191 | |             if let Some(s) = self.views.get_mut(&g.view) {
+192 | |                 s.phase = NavigationPhase::Refining;
+193 | |             }
+194 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+190 ~         if let Some(g) = self.gesture.take()
+191 ~             && let Some(s) = self.views.get_mut(&g.view) {
+192 |                 s.phase = NavigationPhase::Refining;
+193 ~             }
+    |
+
+error: this function has too many arguments (8/7)
+   --> crates\om9-app\src\navigation.rs:233:5
+    |
+233 | /     pub fn wheel(
+234 | |         &mut self,
+235 | |         id: ViewId,
+236 | |         camera: &Camera,
+...   |
+241 | |         speed: f64,
+242 | |     ) {
+    | |_____^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_arguments
+    = note: `-D clippy::too-many-arguments` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::too_many_arguments)]`
+
+error: this function has too many arguments (9/7)
+   --> crates\om9-app\src\navigation.rs:245:5
+    |
+245 | /     pub fn wheel_displayed(
+246 | |         &mut self,
+247 | |         id: ViewId,
+248 | |         camera: &Camera,
+...   |
+254 | |         speed: f64,
+255 | |     ) {
+    | |_____^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_arguments
+
+error: this `if` statement can be collapsed
+   --> crates\om9-app\src\navigation.rs:331:9
+    |
+331 | /         if let Some(s) = self.views.get_mut(&id) {
+332 | |             if s.generation == generation && s.phase == NavigationPhase::Refining {
+333 | |                 s.phase = NavigationPhase::Idle;
+334 | |             }
+335 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+331 ~         if let Some(s) = self.views.get_mut(&id)
+332 ~             && s.generation == generation && s.phase == NavigationPhase::Refining {
+333 |                 s.phase = NavigationPhase::Idle;
+334 ~             }
+    |
+
+error: could not compile `om9-app` (lib) due to 38 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-app\src\display.rs:387:9
+    |
+387 |         preset.wireframe = false;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `display::DisplayPreferences { wireframe: false, show_edges: false, hide_cutters: true, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-app\src\display.rs:386:9
+    |
+386 |         let mut preset = DisplayPreferences::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+    = note: `-D clippy::field-reassign-with-default` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::field_reassign_with_default)]`
+
+error: using `chunks_exact` with a constant chunk size
+    --> crates\om9-app\src\gpu_viewport.rs:2041:14
+     |
+2041 |             .chunks_exact(3)
+     |              ^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<3>().0.iter()`
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#chunks_exact_to_as_chunks
+     = note: `-D clippy::chunks-exact-to-as-chunks` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::chunks_exact_to_as_chunks)]`
+
+error: items after a test module
+   --> crates\om9-app\src\project_manager.rs:409:1
+    |
+409 | mod tests {
+    | ^^^^^^^^^
+...
+562 | impl ProjectManager {
+    | ^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#items_after_test_module
+    = note: `-D clippy::items-after-test-module` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::items_after_test_module)]`
+    = help: move the items to before the test module was defined
+
+error: the loop variable `index` is used to index `tabs`
+   --> crates\om9-app\src\ui\icon_size_audit.rs:263:26
+    |
+263 |             for index in 0..tabs.len() {
+    |                          ^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+    = note: `-D clippy::needless-range-loop` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_range_loop)]`
+help: consider using an iterator and enumerate()
+    |
+263 -             for index in 0..tabs.len() {
+263 +             for (index, <item>) in tabs.iter().enumerate() {
+    |
+
+error: items after a test module
+   --> crates\om9-app\src\ui\sidebar_palettes.rs:272:1
+    |
+272 | mod tests {
+    | ^^^^^^^^^
+...
+441 | fn snap_kind_for_icon(key: &str) -> Option<om9_scene::osnap::SnapKind> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#items_after_test_module
+    = help: move the items to before the test module was defined
+
+error: the loop variable `axis` is used to index `delta`
+   --> crates\om9-app\src\camera_rig.rs:251:21
+    |
+251 |         for axis in 0..3 {
+    |                     ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+help: consider using an iterator and enumerate()
+    |
+251 -         for axis in 0..3 {
+251 +         for (axis, <item>) in delta.iter().enumerate() {
+    |
+
+error: could not compile `om9-app` (lib test) due to 43 previous errors

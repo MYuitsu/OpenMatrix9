@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-021-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-021",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-021",
+  "source_command": "Fillet Curves",
+  "menu_icon": "CurveFilletCurves",
+  "owner_candidate": "OM9-L3-02-04-006",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Fillet Curves command session is not wired; owner candidate OM9-L3-02-04-006 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-021/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-021/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-021/dispatch_contract.json": "c6569929dd99f4ec3a16215fc1c61e8e552146b004c8d840ac3fe065e3625fdd",
+    "implementation/design/M03/OM9-L3-03-16-021/dispatch_contract.md": "812d9432876c9cfc855c582a0e25f2ecdc753bd732651cd31dcb6813cdca5fc0"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

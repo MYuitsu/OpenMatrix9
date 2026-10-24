@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-033-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-033",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-032",
+  "source_command": "Mark Curve End",
+  "menu_icon": "CurvePointObjectMarkCurveEnd",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Mark Curve End; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-033/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-033/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-033/dispatch_contract.json": "9b937c7ed90c872da4f739ffb9f1a1426259874837198d2b55a78293e2b0a093",
+    "implementation/design/M03/OM9-L3-03-16-033/dispatch_contract.md": "3f4074c2f4593c737c71634e9c25b1084bfcef6610c4627363f5644fca0220d6"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

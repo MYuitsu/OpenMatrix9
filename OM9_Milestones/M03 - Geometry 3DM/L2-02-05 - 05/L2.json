@@ -114,6 +114,101 @@
     }
   ],
   "m03_l4_planned_count": 55,
-  "execution_state": "NOT_STARTED",
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+  "execution_state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "readiness_state": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-02-05",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "SOURCE-PRESENT selected surfaces",
+      "sdk_signal": "EXPORT-BACKLOG + AUDIT-THEN-ROUTE",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Bọc evaluate/loft/sweep selected path; trim/network/patch và UI workflow audit riêng.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-02-05-001",
+      "OM9-L3-02-05-002",
+      "OM9-L3-02-05-003",
+      "OM9-L3-02-05-004",
+      "OM9-L3-02-05-005",
+      "OM9-L3-02-05-006",
+      "OM9-L3-02-05-007",
+      "OM9-L3-02-05-008",
+      "OM9-L3-02-05-009",
+      "OM9-L3-02-05-010"
+    ]
+  },
+  "product_crate": {
+    "portable": "crates/om9-core/src/surface_ops.rs + surface_kernel.rs",
+    "exact": "crates/om9-kernel/src/creation.rs + editing.rs",
+    "tests": "crates/om9-core/tests/surface_ops.rs: 16 passed; crates/om9-kernel/tests/l2_02_05.rs: 6 passed",
+    "state": "all ten L3 have automated core evidence; the M03-UI selection/preview/commit workflow remains READY_FOR_REVIEW"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "Sweep1/sweep2/profile sweep, loft and four-sided network, revolve/extrude/rail revolve, planar/patch, trim/split/untrim/shrink, rebuild/refit/softedit, match/blend/join, offset/fillet/chamfer/thicken, UV reverse/isocurve/seam and normal extrude/unroll.",
+    "evidence": [
+      "implementation/design/M03/OM9-L2-02-05/README.md",
+      "implementation/evidence/M03/2026-10-22-l2-02-05-checks.json",
+      "implementation/evidence/M03/2026-10-22-l2-02-05-core-suite.log",
+      "implementation/evidence/M03/2026-10-22-l2-02-05-kernel-suite.log",
+      "crates/om9-core/src/surface_ops.rs",
+      "crates/om9-core/tests/surface_ops.rs",
+      "crates/om9-kernel/tests/l2_02_05.rs"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "All ten M03-UI surface workflows (selection, preview, commit/cancel, warning) are unsigned.",
+      "Network is four-sided Coons; n-sided networks are not implemented.",
+      "Match is a boundary-row replacement with a measured angle, not a full optimization.",
+      "Seam is a C0 metadata closure, not a true periodic re-parameterization.",
+      "Unroll is an average arc-length planar map; exact developable unroll is not claimed.",
+      "Portable surface offset is a sampled/refit approximation; exact offset remains OCCT."
+    ],
+    "l3_with_verified_supported_scope": 10,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "manual_gate": "M03-UI",
+    "technical_scope_complete": true,
+    "latest_verification": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "checks": "implementation/evidence/M03/2026-10-22-l2-02-05-checks.json",
+      "tests": {
+        "core_surface": "16 passed; 0 failed",
+        "kernel_surface": "6 passed; 0 failed",
+        "core_lib": "12 passed; 0 failed",
+        "kernel_all": "exit 0"
+      },
+      "l4_evidence": {
+        "OM9-L3-02-05-001": "6/6",
+        "OM9-L3-02-05-002": "6/6",
+        "OM9-L3-02-05-003": "5/5",
+        "OM9-L3-02-05-004": "5/5",
+        "OM9-L3-02-05-005": "6/6",
+        "OM9-L3-02-05-006": "5/5",
+        "OM9-L3-02-05-007": "5/5",
+        "OM9-L3-02-05-008": "6/6",
+        "OM9-L3-02-05-009": "6/6",
+        "OM9-L3-02-05-010": "5/5"
+      }
+    }
+  }
 }

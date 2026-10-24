@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-05-005-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-05-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Selection frame and gumball overlay are painted after the base viewport pass; display mode changes only ViewState.mode.",
+  "tests": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app display_modes: 3 passed"
+  ]
+}

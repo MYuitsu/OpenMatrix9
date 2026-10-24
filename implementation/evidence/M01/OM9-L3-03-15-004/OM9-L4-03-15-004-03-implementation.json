@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-15-004-03",
+  "l3": "OM9-L3-03-15-004",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/project_manager.rs",
+    "crates/om9-app/src/ui/chrome.rs"
+  ],
+  "tests": "project_manager 8 passed; project_manager_ui 3 passed",
+  "oracle": "three slots per project with revision/ID-tied data thumbnail"
+}

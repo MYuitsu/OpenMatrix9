@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-09-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-09-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "A fully-gem selection gets Gem actions; without M05 they are REGISTERED_DISABLED and only become enabled when the provider flag is set.",
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ]
+}

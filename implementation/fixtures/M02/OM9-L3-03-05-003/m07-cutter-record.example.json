@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m07.cutter-record.example.v1",
+  "slot": "om9.cutter",
+  "record": {
+    "kind": "seat",
+    "seat": "round"
+  },
+  "status": "SYNTHETIC_PROVIDER_FIXTURE_NOT_M07_PRODUCTION_CUTTER",
+  "note": "Demonstrates the typed record cutter_record reads; it does not claim M07 cutter generation."
+}

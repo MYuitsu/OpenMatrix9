@@ -144,5 +144,19 @@
     "M06",
     "M07",
     "M08"
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_MILESTONE_AND_OWNERS",
+    "responsibility": "Thu thập evidence SDK của các milestone đã triển khai trong G-MVP/G-FULL hiện có. Không thêm release gate/L2/L3; kế hoạch này không sửa trạng thái 30 L4 hoặc ký nghiệm thu.",
+    "owner_ids": [],
+    "already_implemented_rule": "Add the missing public SDK contract/adapter/proof to the existing owner backlog; preserve validated core evidence and reuse its implementation.",
+    "not_yet_implemented_rule": "Deliver shared Rust service and SDK adapter/proof together inside the same canonical L3/L2 milestone owner; do not defer SDK to a separate delivery track.",
+    "host_internal_rule": "Keep ownership and private runtime resources in the host; document the reason and expose only a bounded service/DTO when needed.",
+    "completion_rule": "SDK-eligible feature delivery includes public DTO/wrapper, host dispatch/capability, shared service, atomicity/limits and external plugin evidence for each advertised target, alongside the existing owner acceptance contract.",
+    "release_gate_policy": "Attach relevant upstream SDK evidence to existing G-MVP/G-FULL records; do not create owners or change NOT_TESTED/manual signoff from documentation."
+  }
 }

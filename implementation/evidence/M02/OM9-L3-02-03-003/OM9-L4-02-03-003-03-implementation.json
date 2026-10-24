@@ -1,0 +1,14 @@
+{
+  "l4": "OM9-L4-02-03-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-03-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "Tangent points use the two real branches from an external reference point; perpendicular uses the centre/reference radial line. Inside points yield no tangent.",
+  "source_paths": [
+    "crates/om9-scene/src/osnap.rs"
+  ],
+  "tests": [
+    "om9-scene osnap: 11 passed"
+  ]
+}

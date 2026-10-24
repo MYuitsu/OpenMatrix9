@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-02-004",
+  "l3_id": "OM9-L3-02-02-004",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Parse W10,20,30 và relative @5,0,0 thành điểm world đúng theo active CPlane",
+  "expected": "The documented coordinate/plane result with a stable world point and no silent fallback.",
+  "evidence": [
+    "om9-core coordinate_input: 4 passed",
+    "om9-app cplane_coordinate_input: 10 passed"
+  ],
+  "status": "PASS"
+}

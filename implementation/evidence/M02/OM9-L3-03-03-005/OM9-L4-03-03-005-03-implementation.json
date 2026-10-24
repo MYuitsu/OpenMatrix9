@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-03-005-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-03-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "GumballAlignment selects world/CPlane/object axes for the frame; relocate changes only the pivot origin; neither rewrites geometry.",
+  "tests": [
+    "om9-app gumball_placement: 4 passed",
+    "om9-app gumball_interaction: 6 passed"
+  ]
+}

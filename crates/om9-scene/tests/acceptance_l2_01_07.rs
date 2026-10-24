@@ -42,6 +42,8 @@ fn cube() -> Mesh {
         ],
         normals: Vec::new(),
         colors: Vec::new(),
+
+        corner_uvs: Vec::new(),
     }
 }
 
@@ -371,4 +373,59 @@ fn a_click_on_the_shared_diagonal_still_hits_the_face() {
         .expect("pick")
         .expect("the object pick finds the same spot");
     assert_eq!(object.root, fixture.root);
+}
+
+#[test]
+fn two_objects_on_one_ray_are_both_candidates_in_every_publication() {
+    // L3-002/L3-005: the ambiguity popup must see every object under the pointer, including the
+    // one hidden behind the nearest object. A depth early-out used to drop the farther point
+    // whenever the spatial index visited the nearer one first, so the popup opened only sometimes.
+    for run in 0..32 {
+        let mut document = Document::new("overlap");
+        let near = Entity::new("near", Geometry::Point([0.0, 0.0, 0.0]), None);
+        let far = Entity::new("far", Geometry::Point([0.0, 0.0, -4.0]), None);
+        let (near_id, far_id) = (near.id, far.id);
+        document.entities.insert(near_id, near);
+        document.entities.insert(far_id, far);
+        let document_id = document.id;
+        let coordinator = TransactionCoordinator::new(
+            World::new(vec![document], &Limits::default()).expect("world"),
+            Limits::default(),
+        )
+        .expect("coordinator");
+        let scene = Scene::capture_in_world(
+            &coordinator,
+            document_id,
+            om9_core::budget::Usage::default(),
+        )
+        .expect("scene");
+        let hits = scene
+            .pick_all(
+                screen([0.0, 0.0, 0.0]),
+                &camera(),
+                viewport(),
+                6.0,
+                PickIntent::Select,
+            )
+            .expect("pick");
+        assert_eq!(
+            hits.iter().map(|hit| hit.root).collect::<Vec<_>>(),
+            vec![near_id, far_id],
+            "run {run}: both objects under the pointer, nearest first"
+        );
+        let nearest = scene
+            .pick(
+                screen([0.0, 0.0, 0.0]),
+                &camera(),
+                viewport(),
+                6.0,
+                PickIntent::Select,
+            )
+            .expect("pick")
+            .expect("hit");
+        assert_eq!(
+            nearest.root, near_id,
+            "run {run}: a click still picks nearest"
+        );
+    }
 }

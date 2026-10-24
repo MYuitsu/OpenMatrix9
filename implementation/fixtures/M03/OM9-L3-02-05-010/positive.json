@@ -1,0 +1,35 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-010",
+  "fixture_id": "OM9-L3-02-05-010-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Surface Normal Extrude And Unroll",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "normal_extrude_plane_z": 2.5,
+    "unroll_plane_size_mm": [
+      4.0,
+      2.0
+    ],
+    "unroll_cylinder_u_mm": 31.41592653589793,
+    "unroll_cylinder_v_mm": 8.0,
+    "thicken_volume_mm3": 4.0
+  },
+  "tolerances": {
+    "plane": "1e-9",
+    "unroll_u_mm": "5% (chord sampling)",
+    "volume_mm3": "0.05"
+  },
+  "measured_on_2026_10_22": {
+    "normal_extrude_plane_z": 2.5,
+    "unroll_plane_size_mm": [
+      4.0,
+      2.0
+    ],
+    "unroll_cylinder_u_mm": 31.213484856999596,
+    "unroll_cylinder_v_mm": 8.0,
+    "thicken_volume_mm3": 3.999999999999972
+  }
+}

@@ -257,7 +257,17 @@ pub(crate) fn geometry(v: &Value, g: &Geometry, t: Transform) -> Result<()> {
         Geometry::Light(light) => {
             fields(v, &["Light"])?;
             let v = &v["Light"];
-            fields(v, &["display", "location", "direction", "diffuse", "intensity", "style"])?;
+            fields(
+                v,
+                &[
+                    "display",
+                    "location",
+                    "direction",
+                    "diffuse",
+                    "intensity",
+                    "style",
+                ],
+            )?;
             point(&v["display"], light.display, 1e-10)?;
             Ok(())
         }
@@ -846,6 +856,3 @@ mod tests {
         assert!((n[1] - 2. / 5f64.sqrt()).abs() < 1e-12);
     }
 }
-
-
-

@@ -1,0 +1,14 @@
+{
+  "l4": "OM9-L4-03-01-005-03",
+  "l3": "OM9-L3-03-01-005",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-scene/src/grid.rs",
+    "crates/om9-scene/src/camera.rs"
+  ],
+  "tests": [
+    "crates/om9-app/tests/viewport_layout.rs"
+  ],
+  "oracle": "jewelry_grid_axes_follow_each_view_cplane"
+}

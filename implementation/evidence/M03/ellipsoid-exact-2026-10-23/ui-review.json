@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-23",
+  "feature": "OM9-L3-03-18-014",
+  "target": "standalone Windows OM9 native winit/wgpu window",
+  "status": "AGENT_OBSERVED_HUMAN_REVIEW_PENDING",
+  "runtime_receipt": "native-runtime.json",
+  "observed": {
+    "menu_prompt_and_commit": true,
+    "cmd_commit": true,
+    "four_gpu_viewports": true,
+    "icon_history_undo_redo": true,
+    "invalid_input_visible_error": true,
+    "escape_cancel": true,
+    "native_save": true,
+    "cold_read_measure_of_saved_file": true,
+    "clean_window_close": true
+  },
+  "human_reviewer": null,
+  "human_signoff": null,
+  "manual_gate": "M03-UI",
+  "manual_gate_promoted": false,
+  "remaining": [
+    "Human review/signoff for the Ellipsoid workflow.",
+    "Full Solid M03-UI review includes twenty other workflows, outside this new native observation."
+  ]
+}

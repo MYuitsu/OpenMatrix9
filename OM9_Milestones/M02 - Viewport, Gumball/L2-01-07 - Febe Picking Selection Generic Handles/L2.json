@@ -86,8 +86,8 @@
     }
   ],
   "runtime_implementation": {
-    "date": "2026-10-19",
-    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
     "evidence": [
       "implementation/evidence/M02/2026-10-19-selection-video-review.md",
@@ -101,14 +101,20 @@
       "implementation/evidence/M02/2026-10-19-brep-native.json",
       "implementation/evidence/M02/2026-10-19-rotation-feedback.md",
       "implementation/evidence/M02/2026-10-19-rotation-feedback-checks.json",
-      "implementation/evidence/M02/2026-10-19-rotation-feedback-native.json"
+      "implementation/evidence/M02/2026-10-19-rotation-feedback-native.json",
+      "implementation/design/M02/OM9-L2-01-07/README.md",
+      "implementation/evidence/M02/2026-10-22-l2-01-07-selection-handles-checks.json",
+      "implementation/evidence/M02/2026-10-22-pick-all-fix.md",
+      "implementation/evidence/M02/2026-10-22-three-dm-brep-pick-pass.log",
+      "implementation/evidence/M02/2026-10-22-pick-27k-run.log"
     ],
     "l3_with_verified_supported_scope": 8,
     "full_l3_acceptance_promoted": 0,
     "full_l2_complete": false,
     "human_approval": null,
     "remaining": [
-      "M02-UI external review; QymCAD pinned-source audit is not certified (no reuse)"
+      "Manual M02-UI visual review of picking, hover, window/crossing, subobject and Gumball feedback is pending.",
+      "macOS runtime is unverified."
     ],
     "occurrence_path_subselection": "VALIDATED",
     "reference_foundation": "OM9_Milestones/M01 - CAD Shell, Viewport",
@@ -121,6 +127,143 @@
       "implementation/evidence/M02/2026-10-19-gpu-only-checks.json",
       "implementation/evidence/M02/2026-10-19-gpu-only-native.json"
     ],
-    "software_fallback": false
+    "software_fallback": false,
+    "manual_gate": "M02-UI",
+    "scope": "Picking object/face/edge/vertex, selection set, gizmo hooks and hover hit-tests; re-audited against all eight L3 oracles on 2026-10-22.",
+    "latest_verification": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Eight L3 oracles audited against the existing standalone Rust implementation.",
+      "checks": "implementation/evidence/M02/2026-10-22-l2-01-07-selection-handles-checks.json",
+      "readme": "implementation/design/M02/OM9-L2-01-07/README.md",
+      "bug_fixed": "Scene::pick_all applied the nearest-only depth early-out and could drop a farther overlapping object from the disambiguation candidates.",
+      "tests": {
+        "om9-core": "403 passed, 47 suites",
+        "om9-scene": "82 passed",
+        "om9-app selection/Gumball": "63 passed, 1 ignored",
+        "om9-app gpu library": "148 passed",
+        "native BRep selection": "5 passed",
+        "pick_disambiguation repeated": "10/10 runs, 5 passed each",
+        "three_dm_brep_pick": "1 passed with a generated single-BRep V5 fixture",
+        "pick_27k": "1 passed at 580.62 ms over 27k objects (3000 ms test threshold; not a frame-rate claim)"
+      },
+      "l4_evidence": {
+        "OM9-L3-01-07-001": "6/6",
+        "OM9-L3-01-07-002": "5/5",
+        "OM9-L3-01-07-003": "6/6",
+        "OM9-L3-01-07-004": "5/5",
+        "OM9-L3-01-07-005": "5/5",
+        "OM9-L3-01-07-006": "5/5",
+        "OM9-L3-01-07-007": "6/6",
+        "OM9-L3-01-07-008": "6/6"
+      },
+      "manual_gate": "M02-UI"
+    }
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-01-07",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M02",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "EVIDENCE-SCOPED; review mở",
+      "sdk_signal": "SDK-SUBSET read roots + EXPORT-BACKLOG",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Selection/query/picking write và typed subobject/occurrence qua Controller validation.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-01-07-001",
+      "OM9-L3-01-07-002",
+      "OM9-L3-01-07-003",
+      "OM9-L3-01-07-004",
+      "OM9-L3-01-07-005",
+      "OM9-L3-01-07-006",
+      "OM9-L3-01-07-007",
+      "OM9-L3-01-07-008"
+    ]
+  },
+  "sdk_implementation_progress": [
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-07",
+      "milestone": "M02",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Selection write through the Controller session: replace (set_selection) and extend (add_to_selection) with canonical-id, existence and effective permission checks in the host, then scene-root validation by the Controller before commit. A selection-only command produces no transaction or Undo entry; a bad id refuses the whole command and keeps the previous selection.",
+      "public_api": [
+        "Host::set_selection",
+        "Host::add_to_selection",
+        "Host::selected_objects"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-07-002"
+      ],
+      "l3_open": [
+        "remove/toggle variants",
+        "typed subobject/occurrence references",
+        "pick query and window/crossing selection",
+        "drag transaction and highlighting"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m02-selection-sdk.md",
+        "docs/validation/2026-10-21-m02-selection-sdk.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Only replace and add are exposed; subobject refs, pick queries, window/crossing selection and drag remain at their owners."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-07",
+      "milestone": "M02",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Complete add/remove/toggle for persistent object IDs: toggle removes a selected id and joins an unselected one; remove is idempotent and needs only a canonical UUID; joining still requires a live, selectable root validated against the published scene before commit. Selection remains outside document state.",
+      "public_api": [
+        "Host::remove_from_selection",
+        "Host::toggle_selection",
+        "Host::selected_objects"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-07-002"
+      ],
+      "l3_open": [
+        "typed subobject/occurrence references",
+        "pick query and window/crossing selection",
+        "drag transaction and highlighting"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m02-selection-toggle.md",
+        "docs/validation/2026-10-21-m02-selection-toggle.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Object-root selection only; subobject refs, pick queries, window/crossing and drag remain at their owners."
+    }
+  ],
+  "sdk_export_plan_policy": {
+    "decided": "2026-10-21",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "field": "sdk_export_plan",
+    "applies_to": "L3 files of this owner that have a recorded SDK slice"
   }
 }

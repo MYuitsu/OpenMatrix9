@@ -1,0 +1,147 @@
+{
+  "date": "2026-10-21",
+  "status": "object_info_read_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Reuses the query page's object_info helper for a single read.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "10f033167cccc7bce51205211e67b39793ea62c14c023ddc3477b524acbc963d",
+    "crates/om9-plugin-host/src/staged.rs": "ea79c25dd56b3165c9fc571743146ef7a2af900647bd1d4faac45464d11fff34",
+    "crates/om9-app/tests/plugin_native.rs": "141493e544d0ab686fe250e8678508e30259b6b52648e4292fd165bb93dc9b25",
+    "sdk/examples/hello-plugin/src/lib.rs": "598b0050890cc0ec7e4cf8f66f3597c8d9e66eec3f7532cd0928a91bf524bf99",
+    "sdk/examples/hello-plugin/descriptor.json": "a1405b8446cd7f2179316445d5a79586e1e89e06dade0e77f53a61d8b91fc303",
+    "sdk/README.md": "171a317e1699b8224705773a10ea210c0ebad87c8aaaa36ef2fead78e510a7b0",
+    "sdk/API-INVENTORY.md": "95f14fedca9f0078e053e1002a5dab240838997192a70b27c411d5c1ca0f9e4f"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "object_info"
+    ],
+    "public_types": [
+      "ObjectInfo"
+    ],
+    "error_codes": [
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Same ObjectInfo as the query page (shared helper).",
+    "Reading stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "61 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "32 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-info",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8853 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "kind": "Curve",
+    "placement_identity": true,
+    "undo_len": 1
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1927038,
+      "sha256": "a11b1eb1a9d6000670421e00e4c67bcb266e154146a2be59689d0110a96ab90f"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "714534bbcc4b0ab1a1fa8ae8fbd32d9a3a60e8c5915ce794a1696c1e305a7657"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 186784,
+      "sha256": "f608198b402d83f24f47ca2fa5c7125af1df6d2586d7ff7b397c4a67472503a1"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "37039e122400b3b8e802720512fe3018d3c7d7d149910ab04655fb07b4658009"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1923584,
+      "sha256": "a70ca62a173b511e9acb0a693cc2fc9d68ce1f62dbee4da805474c02cbcf0cf5"
+    },
+    "om9.exe": {
+      "bytes": 69503488,
+      "sha256": "21b96beb04201520d58825cfe927c9d461d98897b9f94da916c35e1c8b909362"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-002 (single object record read)"
+    ],
+    "open": [
+      "instance composition",
+      "gumball drag"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Object-local record only.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Return to M02 for subobject/pick query services, or record the remaining host edit paths."
+}

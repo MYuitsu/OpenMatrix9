@@ -247,4 +247,3 @@ fn the_summary_is_a_single_pass_over_a_large_import() {
     assert!(doc.has_source_proof(bound[0]));
     assert!(!doc.has_source_proof(ObjectId::new()));
 }
-

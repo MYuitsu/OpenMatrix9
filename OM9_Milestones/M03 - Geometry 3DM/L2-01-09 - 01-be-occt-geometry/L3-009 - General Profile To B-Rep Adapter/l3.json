@@ -139,7 +139,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE",
   "task_ids": [
     "OM9-L4-01-09-009-01",
     "OM9-L4-01-09-009-02",
@@ -296,6 +296,110 @@
     "priority_pilot": false,
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "GENERAL_CAD"
+  "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
+  "acceptance_category": "GENERAL_CAD",
+  "proposed_fixture": {
+    "fixture_id": "OM9-L3-01-09-009-POSITIVE",
+    "status": "RUNTIME_MEASURED_2026_10_22",
+    "positive": {
+      "input": {
+        "profile_mm": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            10,
+            0,
+            0
+          ],
+          [
+            10,
+            20,
+            0
+          ],
+          [
+            0,
+            20,
+            0
+          ]
+        ]
+      },
+      "expect": {
+        "area_mm2": 200.0,
+        "unique_names": true,
+        "stale_after_release": true
+      }
+    },
+    "negative": {
+      "input": [
+        "three collinear points",
+        "sphere r=-1 through the session",
+        "body(old_handle) after release"
+      ],
+      "expect": "CreationError::Invalid / CreationError::StaleHandle; live count stays unchanged on a refused build"
+    },
+    "tolerance_policy": {
+      "profile_face_area_mm2": "1e-6"
+    },
+    "rust_test_name": "m03_01_09_009"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "normalize OCCT geometry results into document entities",
+    "owner": {
+      "crate": "om9-kernel",
+      "files": [
+        "crates/om9-kernel/src/creation.rs",
+        "crates/om9-kernel/src/creation_bridge.cpp",
+        "crates/om9-kernel/src/brep_snapshot.hxx",
+        "crates/om9-kernel/tests/l2_01_09.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-01-09-009/api.md",
+      "implementation/design/M03/OM9-L3-01-09-009/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-01-09-009/positive.json",
+      "implementation/fixtures/M03/OM9-L3-01-09-009/negative.json",
+      "implementation/evidence/M03/OM9-L3-01-09-009/OM9-L4-01-09-009-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-01-09-009/OM9-L4-01-09-009-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-01-09-009/OM9-L4-01-09-009-05.ui-review.json"
+    ],
+    "tests": [
+      "m03_01_09_009: passed",
+      "l2_01_09 suite: 12 passed"
+    ],
+    "human_approval": null,
+    "remaining": [],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "AUTO_ONLY",
+      "design": "implementation/design/M03/OM9-L3-01-09-009/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-01-09-009/positive.json",
+        "implementation/fixtures/M03/OM9-L3-01-09-009/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M03/OM9-L3-01-09-009/OM9-L4-01-09-009-05.ui-review.json"
+      ],
+      "measured": {
+        "profile_face_area_mm2": 200.0
+      },
+      "tolerances": {
+        "profile_face_area_mm2": "1e-6"
+      },
+      "acceptance": "10×20 profile: face area 200 mm²; names contain faces/edges/vertices, each with a unique UUID; release then body/release returns StaleHandle; a rebuilt body does not resurrect the old handle"
+    },
+    "l4_evidence": {
+      "OM9-L4-01-09-009-01": "1/1",
+      "OM9-L4-01-09-009-02": "1/1",
+      "OM9-L4-01-09-009-03": "1/1",
+      "OM9-L4-01-09-009-04": "1/1",
+      "OM9-L4-01-09-009-05": "1/1"
+    }
+  }
 }

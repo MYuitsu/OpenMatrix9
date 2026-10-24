@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-003-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-01-07-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Ctrl+Shift+click picks the typed subobject and stores the exact path; four-view outlines prove the occurrence path without rematching geometry.",
+  "tests": [
+    "om9-app subobject_occurrences: 5 passed",
+    "om9-app acceptance_viewport_selection: 8 passed"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "l3": "OM9-L3-03-01-003",
+  "title": "Active Viewport Indicator",
+  "date": "2026-10-21",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "tests": [
+    "view_tab_restores_cmd_focus_and_preserves_numeric_draft",
+    "view_menu_restores_cmd_focus_and_preserves_numeric_draft"
+  ],
+  "acceptance": {
+    "viewport_layout": "3 passed",
+    "chrome_actions": "13 passed",
+    "viewport_title_menu": "17 passed"
+  },
+  "evidence": "implementation/evidence/M01/2026-10-21-l2-03-01-viewport-layout-recheck.json",
+  "log": "build/standalone-validation/ui-artifacts/m01-l2-03-01-20261021/acceptance.log",
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual M01-UI visual review pending."
+  ]
+}

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 //! Load installed Windows UI fonts once, retaining egui's portable fallbacks.
 //! Font files remain OS resources; they are not copied or redistributed.
-use eframe::egui::{self, FontDefinitions, FontFamily, FontId};
 #[cfg(windows)]
 use eframe::egui::FontData;
+use eframe::egui::{self, FontDefinitions, FontFamily, FontId};
 #[cfg(windows)]
 use std::sync::Arc;
 
@@ -21,20 +21,27 @@ pub(super) fn configure_fonts(ctx: &egui::Context) {
         let directory = std::path::PathBuf::from(windows).join("Fonts");
         for (file, name, family) in [
             ("segoeui.ttf", "om9-segoe-ui", FontFamily::Proportional),
-            ("seguisb.ttf", "om9-segoe-semibold", FontFamily::Name(SEMIBOLD.into())),
+            (
+                "seguisb.ttf",
+                "om9-segoe-semibold",
+                FontFamily::Name(SEMIBOLD.into()),
+            ),
             ("consola.ttf", "om9-consolas", FontFamily::Monospace),
         ] {
             if let Ok(bytes) = std::fs::read(directory.join(file)) {
                 let mut data = FontData::from_owned(bytes);
                 data.tweak.hinting = Some(true);
-                data.tweak.hinting_target = egui::epaint::text::HintingTarget::Smooth(
-                    egui::epaint::text::SmoothHinting {
+                data.tweak.hinting_target =
+                    egui::epaint::text::HintingTarget::Smooth(egui::epaint::text::SmoothHinting {
                         light: true,
                         ..Default::default()
-                    },
-                );
+                    });
                 fonts.font_data.insert(name.into(), Arc::new(data));
-                fonts.families.get_mut(&family).unwrap().insert(0, name.into());
+                fonts
+                    .families
+                    .get_mut(&family)
+                    .unwrap()
+                    .insert(0, name.into());
             }
         }
     }

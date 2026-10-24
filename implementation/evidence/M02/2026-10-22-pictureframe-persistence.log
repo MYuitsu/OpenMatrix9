@@ -1,0 +1,11 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.89s
+     Running tests\pictureframe_persistence.rs (L:/om9-target\debug\deps\pictureframe_persistence-13496d72115cab1d.exe)
+
+running 3 tests
+test a_bad_image_creates_no_quad ... ok
+test a_reference_image_round_trips_with_transform_opacity_and_calibration ... ok
+test a_picture_frame_binds_a_texture_and_paints_opacity ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+

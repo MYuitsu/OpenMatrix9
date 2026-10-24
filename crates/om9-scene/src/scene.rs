@@ -23,6 +23,8 @@ pub enum RenderBuffers {
     },
     Curve {
         points: Vec<Point3>,
+        /// Native parameters for evaluator-backed curves. Empty for exact
+        /// line polylines, which have no global native parameter binding.
         parameters: Vec<f64>,
     },
     Mesh {
@@ -101,12 +103,23 @@ impl SceneObject {
         let world = transform.point(centre)?;
         // A half longest side is not an enclosing sphere: it rejects box corners. Transform all
         // eight AABB corners so nonuniform scale, shear and previews remain conservative as well.
-        let mut radius=0.0f64;
+        let mut radius = 0.0f64;
         for corner in 0..8 {
-            let p=transform.point(std::array::from_fn(|axis|if corner&(1<<axis)==0 {min[axis]}else{max[axis]}))?;
-            radius=radius.max((0..3).map(|axis|(p[axis]-world[axis]).powi(2)).sum::<f64>().sqrt());
+            let p = transform.point(std::array::from_fn(|axis| {
+                if corner & (1 << axis) == 0 {
+                    min[axis]
+                } else {
+                    max[axis]
+                }
+            }))?;
+            radius = radius.max(
+                (0..3)
+                    .map(|axis| (p[axis] - world[axis]).powi(2))
+                    .sum::<f64>()
+                    .sqrt(),
+            );
         }
-        radius+=(0..3).map(|axis|world[axis].abs()).fold(1.0,f64::max)*f64::EPSILON*8.;
+        radius += (0..3).map(|axis| world[axis].abs()).fold(1.0, f64::max) * f64::EPSILON * 8.;
         Ok((world, radius))
     }
 }
@@ -260,6 +273,41 @@ fn metadata_leaf<'a>(
     }
     Ok((entity, permissions, unlocked))
 }
+/// The initial SDK's polyline is a connected, unreversed list of direct lines.
+/// Keep this admission check shared by the allocation plan and display cache;
+/// connecting arbitrary polycurve segments would invent geometry between gaps.
+fn connected_polyline_segments(curve: &Curve) -> Result<&[Curve]> {
+    let Curve::Polycurve {
+        segments,
+        reversed: false,
+    } = curve
+    else {
+        return Err(Error::Unsupported(
+            "polycurve display requires unreversed line segments",
+        ));
+    };
+    if segments.is_empty() {
+        return Err(Error::Unsupported(
+            "polycurve display requires line segments",
+        ));
+    }
+    let mut previous_end = None;
+    for segment in segments {
+        let Curve::Line { start, end, .. } = segment else {
+            return Err(Error::Unsupported(
+                "polycurve display requires direct line segments",
+            ));
+        };
+        if previous_end.is_some_and(|previous| previous != *start) {
+            return Err(Error::Unsupported(
+                "polycurve display requires connected line segments",
+            ));
+        }
+        previous_end = Some(*end);
+    }
+    Ok(segments)
+}
+
 fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
     match g {
         Geometry::Point(p) => {
@@ -309,6 +357,39 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
             Ok(RenderBuffers::Points {
                 points,
                 native_indices,
+            })
+        }
+        Geometry::Curve(curve @ Curve::Polycurve { .. }) => {
+            let segments = connected_polyline_segments(curve)?;
+            let count = segments
+                .len()
+                .checked_add(1)
+                .ok_or(Error::Overflow("polyline display vertices"))?;
+            usage.add(
+                Usage {
+                    points: count as u64,
+                    ..Usage::array::<Point3>(count)?
+                },
+                l,
+            )?;
+            let mut points = Vec::new();
+            points
+                .try_reserve_exact(count)
+                .map_err(|_| Error::Budget("polyline display allocation"))?;
+            for segment in segments {
+                let Curve::Line { start, end, .. } = segment else {
+                    unreachable!()
+                };
+                if points.is_empty() {
+                    points.push(*start);
+                }
+                points.push(*end);
+            }
+            // Exact corners, not a uniform sampling approximation. A polycurve
+            // has no global native domain; picking returns whole-object identity.
+            Ok(RenderBuffers::Curve {
+                points,
+                parameters: Vec::new(),
             })
         }
         Geometry::Curve(c) => {
@@ -402,8 +483,68 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
         Geometry::Hatch(h) => mesh_buffers(&h.display, usage, l),
         Geometry::Light(light) => cache(&Geometry::Point(light.display), usage, l),
         Geometry::NativeBrep(brep) => mesh_buffers(&brep.display, usage, l),
+        Geometry::Surface(surface) => surface_buffers(surface, usage, l),
         _ => Err(Error::Unsupported("representation display adapter")),
     }
+}
+/// Tessellate a NURBS surface for display and picking only. The exact surface
+/// remains the document geometry; this grid is never written back.
+fn surface_buffers(
+    surface: &om9_core::geometry::NurbsSurface,
+    usage: &mut Usage,
+    l: &Limits,
+) -> Result<RenderBuffers> {
+    const SAMPLES: usize = 12;
+    let [u0, u1] = surface.domain[0];
+    let [v0, v1] = surface.domain[1];
+    let mut vertices = Vec::with_capacity(SAMPLES * SAMPLES);
+    for i in 0..SAMPLES {
+        let u = u0 + (u1 - u0) * i as f64 / (SAMPLES - 1) as f64;
+        for j in 0..SAMPLES {
+            let v = v0 + (v1 - v0) * j as f64 / (SAMPLES - 1) as f64;
+            vertices.push(om9_core::surface_kernel::evaluate(surface, u, v, l)?);
+        }
+    }
+    let mut triangles = Vec::with_capacity(2 * (SAMPLES - 1) * (SAMPLES - 1));
+    for i in 0..SAMPLES - 1 {
+        for j in 0..SAMPLES - 1 {
+            let a = (i * SAMPLES + j) as u32;
+            let b = ((i + 1) * SAMPLES + j) as u32;
+            let c = ((i + 1) * SAMPLES + j + 1) as u32;
+            let d = (i * SAMPLES + j + 1) as u32;
+            triangles.push(([a, b, c], 0));
+            triangles.push(([a, c, d], 0));
+        }
+    }
+    let mut edges = Vec::new();
+    for i in 0..SAMPLES - 1 {
+        edges.push([(i * SAMPLES) as u32, ((i + 1) * SAMPLES) as u32]);
+        edges.push([
+            (i * SAMPLES + SAMPLES - 1) as u32,
+            ((i + 1) * SAMPLES + SAMPLES - 1) as u32,
+        ]);
+    }
+    for j in 0..SAMPLES - 1 {
+        edges.push([j as u32, (j + 1) as u32]);
+        edges.push([
+            ((SAMPLES - 1) * SAMPLES + j) as u32,
+            ((SAMPLES - 1) * SAMPLES + j + 1) as u32,
+        ]);
+    }
+    usage.add(
+        Usage {
+            points: vertices.len() as u64,
+            ..Usage::array::<Point3>(vertices.len())?
+        },
+        l,
+    )?;
+    usage.add(Usage::array::<([u32; 3], u32)>(triangles.len())?, l)?;
+    usage.add(Usage::array::<[u32; 2]>(edges.len())?, l)?;
+    Ok(RenderBuffers::Mesh {
+        vertices,
+        triangles,
+        edges,
+    })
 }
 fn mesh_buffers(
     m: &om9_core::geometry::Mesh,
@@ -558,9 +699,16 @@ impl Scene {
     /// Owned render preparation snapshot: immutable document/buffers are shared; mutable picking
     /// caches are not. No UI/session/native owner is sent to the preparation worker.
     pub fn render_snapshot(&self) -> Self {
-        Self { document:self.document.clone(),epoch:self.epoch,objects:self.objects.clone(),
-            diagnostics:self.diagnostics.clone(),limits:self.limits,buffers_usage:self.buffers_usage,
-            spatial:OnceLock::new(),spheres:OnceLock::new() }
+        Self {
+            document: self.document.clone(),
+            epoch: self.epoch,
+            objects: self.objects.clone(),
+            diagnostics: self.diagnostics.clone(),
+            limits: self.limits,
+            buffers_usage: self.buffers_usage,
+            spatial: OnceLock::new(),
+            spheres: OnceLock::new(),
+        }
     }
     /// Picking index for this scene epoch; built once from the occurrence spheres.
     pub fn spatial_index(&self) -> &crate::spatial::SpatialIndex {
@@ -656,6 +804,43 @@ impl Scene {
             let count = match &entity.geometry {
                 Geometry::Point(_) => 1,
                 Geometry::Curve(Curve::Line { .. }) => 2,
+                Geometry::Curve(Curve::Circle { .. }) => 720,
+                Geometry::Curve(Curve::Polycurve { segments, .. }) => segments.len() + 1,
+                Geometry::Curve(Curve::Nurbs(_)) => 257,
+                Geometry::Surface(surface) => {
+                    let mut local = Usage::default();
+                    surface_buffers(surface, &mut local, &self.limits)?;
+                    usage.add(Usage::array::<RenderBuffers>(1)?, &self.limits)?;
+                    usage.add(local, &self.limits)?;
+                    return Ok(usage);
+                }
+                Geometry::Mesh(mesh) => {
+                    let mut local = Usage::default();
+                    mesh_buffers(mesh, &mut local, &self.limits)?;
+                    usage.add(Usage::array::<RenderBuffers>(1)?, &self.limits)?;
+                    usage.add(local, &self.limits)?;
+                    return Ok(usage);
+                }
+                Geometry::Brep(shape) => {
+                    let display = &shape.display;
+                    usage.add(Usage::array::<RenderBuffers>(1)?, &self.limits)?;
+                    usage.add(
+                        Usage {
+                            points: display.points.len() as u64,
+                            ..Usage::array::<Point3>(display.points.len())?
+                        },
+                        &self.limits,
+                    )?;
+                    usage.add(
+                        Usage::array::<([u32; 3], u32)>(display.triangles.len())?,
+                        &self.limits,
+                    )?;
+                    usage.add(
+                        Usage::array::<[u32; 2]>(display.segments.len())?,
+                        &self.limits,
+                    )?;
+                    return Ok(usage);
+                }
                 _ => return Err(Error::Unsupported("plain root cache addition")),
             };
             usage.add(Usage::array::<RenderBuffers>(1)?, &self.limits)?;

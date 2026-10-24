@@ -1,0 +1,17 @@
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.26s
+     Running tests\acceptance_l2_01_07.rs (L:/om9-target\debug\deps\acceptance_l2_01_07-f142e501afdfdeca.exe)
+
+running 9 tests
+test a_hidden_or_unselectable_object_never_picks ... ok
+test a_face_hit_is_the_document_face_not_the_triangle_index ... ok
+test a_ray_through_the_box_returns_its_body_id_and_an_empty_ray_returns_nothing ... ok
+test a_click_on_the_shared_diagonal_still_hits_the_face ... ok
+test the_three_subobject_kinds_report_their_own_identifiers ... ok
+test a_face_that_disappears_after_a_rebuild_is_a_stale_miss ... ok
+test twenty_identical_picks_return_the_same_hit ... ok
+test two_objects_on_one_ray_are_both_candidates_in_every_publication ... ok
+test twenty_face_edge_vertex_picks_are_identical ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

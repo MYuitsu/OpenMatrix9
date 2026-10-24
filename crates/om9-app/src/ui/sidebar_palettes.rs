@@ -104,7 +104,67 @@ impl MatrixApp {
             );
             icon_index += 1;
             app.column_icon_edge = rect.width();
-            let _ = app.icon_slot(&mut child, key, false, key, None);
+            let snap_kind = snap_kind_for_icon(key);
+            let toggle = snap_kind.is_some()
+                || matches!(
+                    key,
+                    "OrthoSnapON" | "PlanarSnapON" | "ProjectSnapON" | "RhinoSmartTrackON"
+                );
+            let active = snap_kind.map_or_else(
+                || match key {
+                    "OrthoSnapON" => app.controller.ortho(),
+                    "PlanarSnapON" => app.controller.planar(),
+                    "ProjectSnapON" => app.controller.project(),
+                    "RhinoSmartTrackON" => app.smarttrack_enabled(),
+                    _ => false,
+                },
+                |kind| app.snap_enabled(kind),
+            );
+            let response = if toggle {
+                app.icon_toggle(&mut child, key, active, key)
+            } else {
+                app.icon_slot(&mut child, key, false, key, None)
+            };
+            if toggle && response.clicked() {
+                if let Some(kind) = snap_kind {
+                    let on = !app.snap_enabled(kind);
+                    app.set_snap_enabled(kind, on);
+                    app.status.info(&format!(
+                        "{} {}",
+                        kind.label(),
+                        if on { "on" } else { "off" }
+                    ));
+                } else {
+                    match key {
+                        "OrthoSnapON" => {
+                            let on = !app.controller.ortho();
+                            app.controller.set_ortho(on);
+                            app.status.info(if on { "Ortho on" } else { "Ortho off" });
+                        }
+                        "PlanarSnapON" => {
+                            let on = !app.controller.planar();
+                            app.controller.set_planar(on);
+                            app.status.info(if on { "Planar on" } else { "Planar off" });
+                        }
+                        "ProjectSnapON" => {
+                            let on = !app.controller.project();
+                            app.controller.set_project(on);
+                            app.status
+                                .info(if on { "Project on" } else { "Project off" });
+                        }
+                        "RhinoSmartTrackON" => {
+                            let on = !app.smarttrack_enabled();
+                            app.set_smarttrack_enabled(on);
+                            app.status.info(if on {
+                                "SmartTrack on"
+                            } else {
+                                "SmartTrack off"
+                            });
+                        }
+                        _ => {}
+                    }
+                }
+            }
         };
         match section {
             SectionId::Display => {
@@ -208,9 +268,88 @@ impl MatrixApp {
     }
 }
 
+fn snap_kind_for_icon(key: &str) -> Option<om9_scene::osnap::SnapKind> {
+    use om9_scene::osnap::SnapKind;
+    Some(match key {
+        "ToolsObjectSnapEnd" => SnapKind::End,
+        "ToolsObjectSnapMidpoint" => SnapKind::Mid,
+        "ToolsObjectSnapCenter" => SnapKind::Center,
+        "ToolsObjectSnapQuadrant" => SnapKind::Quadrant,
+        "ToolsObjectSnapPoint" => SnapKind::Point,
+        "ToolsObjectSnapIntersection" => SnapKind::Intersection,
+        "ToolsObjectSnapNear" => SnapKind::Near,
+        "ToolsObjectSnapTangentTo" => SnapKind::Tangent,
+        "ToolsObjectSnapPerpendicularTo" => SnapKind::Perpendicular,
+        "SnapOnSurface" | "SnapOnPolysurface" => SnapKind::Surface,
+        _ => return None,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn project_ortho_planar_and_smarttrack_palette_slots_toggle_their_state() {
+        let context = egui::Context::default();
+        let mut app = MatrixApp::new(Document::new("toggle slots")).unwrap();
+        let run = |app: &mut MatrixApp, section: SectionId, events: Vec<egui::Event>| {
+            app.rail_icon_rects.clear();
+            let mut output = context.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(311., 400.))),
+                    events,
+                    ..Default::default()
+                },
+                |ui| {
+                    ui.set_width(295.);
+                    app.icon_column = IconColumn::Left;
+                    app.fixed_sidebar_palette(ui, section);
+                },
+            );
+            output.textures_delta.clear();
+        };
+        let click = |app: &mut MatrixApp, section: SectionId, index: usize| {
+            run(app, section, vec![]);
+            let at = app.rail_icon_rects[index].center();
+            run(
+                app,
+                section,
+                vec![
+                    egui::Event::PointerMoved(at),
+                    egui::Event::PointerButton {
+                        pos: at,
+                        button: egui::PointerButton::Primary,
+                        pressed: true,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
+            run(
+                app,
+                section,
+                vec![egui::Event::PointerButton {
+                    pos: at,
+                    button: egui::PointerButton::Primary,
+                    pressed: false,
+                    modifiers: egui::Modifiers::NONE,
+                }],
+            );
+        };
+
+        assert!(app.snap_enabled(om9_scene::osnap::SnapKind::End));
+        click(&mut app, SectionId::Snaps, 8);
+        assert!(!app.snap_enabled(om9_scene::osnap::SnapKind::End));
+        assert!(!app.controller.project());
+        click(&mut app, SectionId::Snaps, 14);
+        assert!(app.controller.project());
+        click(&mut app, SectionId::Snaps, 12);
+        assert!(app.controller.ortho());
+        click(&mut app, SectionId::Snaps, 13);
+        assert!(app.controller.planar());
+        click(&mut app, SectionId::InfoSettings, 16);
+        assert!(!app.smarttrack_enabled());
+    }
 
     #[test]
     fn reference_slots_keep_counts_rows_and_group_gaps_at_every_dock_width() {

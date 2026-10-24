@@ -1,0 +1,97 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-003-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-01-13-003",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-exchange/src/import_dto.rs",
+      "crates/om9-core/src/units.rs",
+      "native/native_exchange.cpp"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 -- --ignored --test-threads=1 --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/suite.log",
+      "stdout_log_sha256": "1b20dcd1d3be8e8e8158f80829d0fd021da7671415f621cf5be50efbe2bb399f"
+    },
+    {
+      "argv": "cargo test -p om9-exchange -p om9-archive -p om9-3dm -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/exchange-archive-3dm.log",
+      "stdout_log_sha256": "d40e83a0da72d8aad3b479e1323892980c3308b114114c1a1cdd4a09d0c1c476"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/kernel-3dm-brep.log",
+      "stdout_log_sha256": "f522d1ca69ef848e12d36b8cd7a2b8c76605e6034776dde36f5beb5b47af3fca"
+    },
+    {
+      "argv": "cargo test -p om9-app --lib -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/app-lib.log",
+      "stdout_log_sha256": "51c584e669ca91fe4255aeca80400595d8962779509e801710e9f777f273f274"
+    },
+    {
+      "argv": "cargo clippy -p om9-app --lib --test l2_01_13 -j 2 -- -D warnings",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/clippy.log",
+      "stdout_log_sha256": "a442fe1ca03550abc98d4f4345b3cb734c1e3eb93d1d9ee09bd329c1cd2b40ea"
+    },
+    {
+      "argv": "rustfmt --edition 2024 --check crates/om9-app/src/session.rs crates/om9-app/src/session/files.rs crates/om9-app/tests/l2_01_13.rs",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/scoped-fmt.log",
+      "stdout_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "observed": {
+    "inch_model_unit": "Inch",
+    "inch_point_mm": [
+      25.4,
+      50.8,
+      76.2
+    ],
+    "unitless_without_resolution": "refused",
+    "conflicting_factor": "refused"
+  },
+  "expected": {
+    "inch_model_unit": "Inch",
+    "inch_point_mm": [
+      25.4,
+      50.8,
+      76.2
+    ],
+    "unitless_without_resolution": "refused",
+    "conflicting_factor": "refused"
+  },
+  "tolerances": {
+    "inch_point_mm": "1e-12 per coordinate (z measured 76.19999999999999)"
+  },
+  "artifact_paths": [
+    "crates/om9-exchange/src/import_dto.rs",
+    "crates/om9-core/src/units.rs",
+    "native/native_exchange.cpp"
+  ],
+  "artifact_sha256": {
+    "crates/om9-exchange/src/import_dto.rs": "52cd4784e1885b9d4fb648da73180e97bf87ecce049438a95bec81221dcea5f8",
+    "crates/om9-core/src/units.rs": "25d663a30f8ab4c6fb66797b4e38d48323921f013e09c18ce43a3528301dd21a",
+    "native/native_exchange.cpp": "8cf87d2ca10e785300232219f3742973ecbde4d6249dfb96d190498db27ef6c1"
+  }
+}

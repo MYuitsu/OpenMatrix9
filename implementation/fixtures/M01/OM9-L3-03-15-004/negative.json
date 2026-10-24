@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-15-004",
+  "case": "negative",
+  "oracle": "deleted captured geometry shows unavailable, not stale thumbnail",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

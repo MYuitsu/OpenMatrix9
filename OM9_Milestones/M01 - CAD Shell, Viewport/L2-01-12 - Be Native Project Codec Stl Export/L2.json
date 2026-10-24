@@ -139,5 +139,116 @@
       "id": "OM9-L3-01-12-010",
       "file": "M01 - CAD Shell, Viewport/L2-01-12 - Be Native Project Codec Stl Export/L3-010 - Project Roundtrip Regression Fixtures/l3.json"
     }
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-01-12",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M01",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "SOURCE-PRESENT codec/STL",
+      "sdk_signal": "EXPORT-BACKLOG + audit lifecycle",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Expose host file service; STL L3-008 thực thi ở M07, không nhầm folder với target.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-01-12-001",
+      "OM9-L3-01-12-002",
+      "OM9-L3-01-12-003",
+      "OM9-L3-01-12-004",
+      "OM9-L3-01-12-005",
+      "OM9-L3-01-12-006",
+      "OM9-L3-01-12-007",
+      "OM9-L3-01-12-008",
+      "OM9-L3-01-12-009",
+      "OM9-L3-01-12-010"
+    ],
+    "deferred_execution": [
+      {
+        "l3_id": "OM9-L3-01-12-008",
+        "execution_milestone": "M07",
+        "owner_unchanged": true
+      }
+    ]
+  },
+  "sdk_implementation_progress": [
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-12",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "First file-lifecycle export: project_state reads the last opened/saved path and the dirty comparison; save_project stages one atomic save that the Controller performs after the command commits through the existing file save path, reporting a failure as a warning while the document stays dirty. No document open/create/replace from a command.",
+      "public_api": [
+        "Host::project_state",
+        "Host::save_project"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-12-005"
+      ],
+      "l3_open": [
+        "plugin-driven open/create/Save As (intentionally host-only)",
+        "write-failure recovery through the plugin path",
+        "project load validation and document reload"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-12-project-state.md",
+        "docs/validation/2026-10-21-m01-01-12-project-state.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "A plugin cannot choose a save destination or replace the document."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-01-12",
+      "milestone": "M01",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Save As request: the plugin asks the host to start its own Save As flow after the command commits; the user chooses the destination and the host performs the atomic save. save and save-as cannot be combined, a busy/failed file operation is a warning, and the plugin never handles a path.",
+      "public_api": [
+        "Host::save_project_as"
+      ],
+      "l3_covered": [
+        "OM9-L3-01-12-005"
+      ],
+      "l3_open": [
+        "interactive path-dialog UI acceptance",
+        "write-failure recovery through the plugin path",
+        "plugin-driven open/create/replace (intentionally host-only)"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-12-save-as.md",
+        "docs/validation/2026-10-21-m01-01-12-save-as.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "The destination is chosen in the host dialog; the plugin cannot set a path."
+    }
+  ],
+  "sdk_export_plan_policy": {
+    "decided": "2026-10-21",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "field": "sdk_export_plan",
+    "applies_to": "L3 files of this owner that have a recorded SDK slice"
+  }
 }

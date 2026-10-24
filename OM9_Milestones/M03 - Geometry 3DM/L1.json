@@ -2,7 +2,7 @@
   "level": "L1",
   "id": "OM9-M03",
   "milestone": "M03",
-  "title": "Curve, Surface, Solid và trao đổi 3DM",
+  "title": "Curve, Surface, Solid v\u00e0 trao \u0111\u1ed5i 3DM",
   "planning_state": "NOT_STARTED",
   "planning_only": true,
   "module_count": 14,
@@ -71,7 +71,7 @@
     "M04": 1,
     "M08": 22
   },
-  "note": " Một số L3 có owner nằm tại milestone này nhưng được lên lịch thực hiện ở milestone khác; giữ ID và owner gốc.",
+  "note": " M\u1ed9t s\u1ed1 L3 c\u00f3 owner n\u1eb1m t\u1ea1i milestone n\u00e0y nh\u01b0ng \u0111\u01b0\u1ee3c l\u00ean l\u1ecbch th\u1ef1c hi\u1ec7n \u1edf milestone kh\u00e1c; gi\u1eef ID v\u00e0 owner g\u1ed1c.",
   "m03_l4_scope": {
     "l3_total_in_folder": 243,
     "l3_owned_by_m03": 220,
@@ -232,5 +232,266 @@
   "hosted_l4_note": "M08 keeps its canonical L3 ids and its L1 records l4_placed_by_milestone {M03: 44, M08: 177}; the 44 M08 L4 records are physically hosted in M03, so M03's physical L4 count is declared + 44.",
   "depends_on_milestones": [
     "M01"
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_MILESTONE_AND_OWNERS",
+    "responsibility": "M\u1ed7i operator Curve/Surface/Solid/Transform/Measure v\u00e0 3DM ph\u1ea3i n\u1ed1i public SDK trong c\u00f9ng l\u00e1t c\u1eaft c\u1ee7a owner. T\u1eadn d\u1ee5ng service n\u1ed9i b\u1ed9 tr\u01b0\u1edbc; operator thi\u1ebfu \u0111\u01b0\u1ee3c l\u00e0m c\u00f9ng adapter v\u00e0 plugin proof.",
+    "owner_ids": [
+      "OM9-L2-01-09",
+      "OM9-L2-01-10",
+      "OM9-L2-01-11",
+      "OM9-L2-01-13",
+      "OM9-L2-02-04",
+      "OM9-L2-02-05",
+      "OM9-L2-02-06",
+      "OM9-L2-03-08",
+      "OM9-L2-03-16",
+      "OM9-L2-03-17",
+      "OM9-L2-03-18",
+      "OM9-L2-03-19",
+      "OM9-L2-03-20",
+      "OM9-L2-04-01"
+    ],
+    "already_implemented_rule": "Add the missing public SDK contract/adapter/proof to the existing owner backlog; preserve validated core evidence and reuse its implementation.",
+    "not_yet_implemented_rule": "Deliver shared Rust service and SDK adapter/proof together inside the same canonical L3/L2 milestone owner; do not defer SDK to a separate delivery track.",
+    "host_internal_rule": "Keep ownership and private runtime resources in the host; document the reason and expose only a bounded service/DTO when needed.",
+    "completion_rule": "SDK-eligible feature delivery includes public DTO/wrapper, host dispatch/capability, shared service, atomicity/limits and external plugin evidence for each advertised target, alongside the existing owner acceptance contract."
+  },
+  "runtime_implementation": {
+    "l2_01_09_geometry_creation_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "owner": "OM9-L2-01-09",
+      "title": "01-be-occt-geometry-creation-ops",
+      "evidence": "implementation/evidence/M03 + implementation/design/M03 + implementation/fixtures/M03",
+      "l3_delivered": 9,
+      "l4_evidence": 47,
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_01_10_boolean_fillet_shell_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "owner": "OM9-L2-01-10",
+      "title": "02-be-occt-boolean-fillet-shell-ops",
+      "evidence": "implementation/evidence/M03 + implementation/design/M03 + implementation/fixtures/M03",
+      "l3_delivered": 9,
+      "l4_evidence": 50,
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_01_11_transforms_patterns_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "owner": "OM9-L2-01-11",
+      "title": "03-be-occt-transforms-and-pattern-ops",
+      "evidence": "implementation/evidence/M03 + implementation/design/M03 + implementation/fixtures/M03",
+      "l3_delivered": 8,
+      "l4_evidence": 41,
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_01_13_3dm_import_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-01-13",
+      "title": "14-febe-import-rhino-3dm",
+      "evidence": "implementation/evidence/M03/OM9-L3-01-13-* + implementation/design/M03/OM9-L3-01-13-* + implementation/fixtures/M03/OM9-L3-01-13-*",
+      "l3_delivered": 12,
+      "l4_evidence": 66,
+      "manual_gate": "M03-UI (L3-010 file picker, L3-011 import summary)",
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_02_04_curve_modeling_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-02-04",
+      "title": "04-febe-freeform-curve-modeling",
+      "evidence": "implementation/evidence/M03/OM9-L3-02-04-* + implementation/design/M03/OM9-L3-02-04-* + implementation/fixtures/M03/OM9-L3-02-04-*",
+      "l3_delivered": 12,
+      "l4_evidence": 63,
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_02_05_surface_workflows_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-02-05",
+      "title": "05-febe-freeform-surface-modeling",
+      "evidence": "implementation/evidence/M03/OM9-L3-02-05-* + design/fixtures",
+      "l3_delivered": 10,
+      "l4_evidence": 55,
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_02_06_transform_orient_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-02-06",
+      "title": "06-febe-rhino-transform-orient-workflows",
+      "evidence": "implementation/evidence/M03/OM9-L3-02-06-* + design/fixtures",
+      "l3_delivered": 6,
+      "l4_evidence": 31,
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_03_08_top11_2026_10_22": {
+      "date": "2026-10-23",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-03-08",
+      "title": "07-febe-matrix-top11-and-shortcut-actions",
+      "evidence": "implementation/evidence/M03/OM9-L3-03-08-* + implementation/design/M03/OM9-L3-03-08-* + implementation/fixtures/M03/OM9-L3-03-08-*",
+      "l3_delivered": 5,
+      "l3_deferred_to_m04": 1,
+      "l4_evidence": 26,
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_03_16_curve_menu_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-03-16",
+      "title": "08-febe-matrix-curve-menu-workflows",
+      "evidence": "implementation/evidence/M03/OM9-L3-03-16-* + design",
+      "l3_delivered": 58,
+      "l4_evidence": 174,
+      "functional": 2,
+      "disabled_visible_reason": 56,
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_03_17_surface_menu_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-03-17",
+      "title": "09-febe-matrix-surface-menu-workflows",
+      "evidence": "implementation/evidence/M03/OM9-L3-03-17-* + design/fixtures",
+      "l3_delivered": 38,
+      "l4_evidence": 114,
+      "enabled": 38,
+      "disabled_visible_reason": 0,
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "m03_l2_03_18_solid_menu_2026_10_23": {
+      "level": "L2",
+      "owner": "OM9-L2-03-18",
+      "title": "10-febe-matrix-solid-menu-workflows",
+      "date": "2026-10-23",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": [
+        "OM9_Milestones/M03 - Geometry 3DM/L2-03-18 - 10-febe/L2.json",
+        "implementation/evidence/M03/OM9-L2-03-18/om9-app-regression.log"
+      ],
+      "l4_evidence": {
+        "executed": 63,
+        "total": 63
+      },
+      "note": "21 solid commands bound to OCCT owners.",
+      "manual_gate": "M03-UI",
+      "full_l2_complete": false
+    },
+    "exact_ellipsoid_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "EXACT_GEOMETRY_VALIDATED_NATIVE_UI_OBSERVED_HUMAN_SIGNOFF_PENDING",
+      "construction": "Rust-authored rational biquadratic 9x5 sphere net with scaled poles; OCCT single-face closed solid; no GTransform fallback",
+      "measurement": "BRepGProp adaptive volume/area Eps=1e-12 on canonical stored B-Rep",
+      "evidence": [
+        "docs/validation/2026-10-23-exact-ellipsoid.md",
+        "implementation/evidence/M03/ellipsoid-exact-2026-10-23/receipt.json"
+      ],
+      "tests": {
+        "kernel": {
+          "passed": 69,
+          "failed": 0,
+          "ignored": 1
+        },
+        "app": {
+          "passed": 183,
+          "failed": 0,
+          "ignored": 0
+        },
+        "native-ui-fixture": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      },
+      "relative_volume_threshold": 1e-10,
+      "max_observed_relative_volume_error": 9.302e-12,
+      "manual_gate_promoted": false,
+      "human_approval": null
+    },
+    "solid_ui_followup_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "GEOMETRY_AND_CONTROLLER_VALIDATED_NATIVE_UI_PARTIALLY_OBSERVED_HUMAN_SIGNOFF_PENDING",
+      "evidence": [
+        "docs/validation/2026-10-23-solid-ui-followup.md",
+        "implementation/evidence/M03/solid-ui-followup-2026-10-23/receipt.json",
+        "implementation/evidence/M03/solid-ui-followup-2026-10-23/M03-UI-CHECKLIST.md"
+      ],
+      "tests": {
+        "kernel": {
+          "passed": 71,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "app_lib": {
+          "passed": 176,
+          "failed": 0
+        },
+        "solid": {
+          "passed": 7,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "solid_workflows": {
+          "passed": 8,
+          "failed": 0,
+          "ordinary_ignored": 1
+        },
+        "native_saved_files": {
+          "tests": 1,
+          "files": 3,
+          "passed": 1,
+          "failed": 0
+        }
+      },
+      "controller_measured_bindings": 21,
+      "current_native_ui_scenarios": [
+        "Text",
+        "Boolean Two Objects/U",
+        "Solid Extrude All with Undo/Redo"
+      ],
+      "prior_native_ui_scenario": "Ellipsoid; earlier executable fingerprint retained separately",
+      "exact_ellipsoid_max_relative_volume_error": 2.22e-15,
+      "relative_volume_threshold": 1e-10,
+      "measurement": "Canonical B-Rep VolumePropertiesGK Eps=1e-12; adaptive SurfaceProperties Eps=1e-12",
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "human_approval": null,
+      "remaining": [
+        "Human M03-UI review/signoff using the 21-row worksheet."
+      ]
+    }
+  }
 }

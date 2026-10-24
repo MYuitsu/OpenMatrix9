@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\l2_02_04.rs (L:\om9-target\debug\deps\l2_02_04-34b138616c292c92.exe)
+
+running 1 test
+g1_blend_length_mm=14.862666324708
+g2_blend_length_mm=15.243044351953
+test m03_02_04_007_blend_arcblend_and_match ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+

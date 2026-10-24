@@ -1,0 +1,43 @@
+{
+  "schema": "om9.m03.l2-01-11.l4.receipt.v1",
+  "l4": "OM9-L4-01-11-007-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-11-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crate": "om9-kernel",
+    "files": [
+      "crates/om9-kernel/src/transform_ops.rs",
+      "crates/om9-kernel/src/transform_bridge.cpp"
+    ],
+    "test": "crates/om9-kernel/tests/l2_01_11.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 m03_01_11_007 -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-11-007/OM9-L4-01-11-007-03.focused-test.log",
+      "stdout_log_sha256": "506cbe755ecf7c759aa7d15acad3a1606cd2452b2501ffdfbd2b16231d866e61"
+    }
+  ],
+  "observed": {
+    "orientation_distance_mm": 1.0
+  },
+  "expected": {
+    "orientation_distance_mm": 1.0
+  },
+  "effective_tolerance": {
+    "orientation_distance_mm": "1e-9"
+  },
+  "input_validation": [
+    "reference points must be distinct; three-point references must be non-collinear",
+    "the result is rigid: distances are preserved and the determinant is +1"
+  ],
+  "error_type": "transform_ops::TransformError (creation::CreationError)",
+  "rollback_behavior": "inputs are immutable values; a refused operation returns before a body exists",
+  "compile_receipt": "the crate, the C++ transform adapter and the focused test compile (exit 0)",
+  "worktree_state": "The recorded revision is HEAD; L2-01-11 changes were measured before commit."
+}

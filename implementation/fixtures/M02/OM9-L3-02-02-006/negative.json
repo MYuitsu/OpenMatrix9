@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-02-006",
+  "l3_id": "OM9-L3-02-02-006",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Bật cả chế độ không tạo điểm 3D lệch khỏi CPlane do thứ tự xử lý",
+  "expected": "A typed error or unchanged state; no document mutation and no cross-view CPlane leak.",
+  "evidence": [
+    "om9-app cplane_coordinate_input: 10 passed",
+    "om9-app chrome_actions: 13 passed"
+  ],
+  "status": "PASS"
+}

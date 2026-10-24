@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-10-005-04",
+  "l3": "OM9-L3-03-10-005",
+  "date": "2026-10-22",
+  "status": "INTEGRATED",
+  "source_paths": [
+    "crates/om9-app/src/transcript.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": "command_transcript 3 passed; command_sessions 6 passed",
+  "oracle": "history cannot overwrite mutable input/caret"
+}

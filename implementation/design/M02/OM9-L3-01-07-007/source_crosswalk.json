@@ -1,0 +1,24 @@
+{
+  "l3": "OM9-L3-01-07-007",
+  "title": "Generic Translation Rotation Scale Handles",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-scene/src/gumball_view.rs",
+    "crates/om9-core/src/gumball.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/session/gumball.rs"
+  ],
+  "tests": [
+    "om9-scene lib gumball_view: 13 passed",
+    "om9-app gumball_viewport: 3 passed",
+    "om9-app gumball_placement: 4 passed",
+    "om9-app gumball_interaction: 5 passed",
+    "om9-app gumball_numeric: 5 passed",
+    "om9-core gumball: 15 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.12-16; Rhino5 user guide pp.25-30 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-01-07-007-01"
+}

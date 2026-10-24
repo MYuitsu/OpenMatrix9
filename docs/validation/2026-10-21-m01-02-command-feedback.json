@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-21",
+  "status": "plugin_command_feedback_export_verified_windows",
+  "owner": "OM9-L2-01-02",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Exports command progress/warning reporting through the app's existing command event log (OM9-L3-01-02-010) instead of adding a second feedback surface.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "5b0fe8532ffd506bd22289c36273d819766cdb9d96770851143908eda5392b91",
+    "crates/om9-plugin-host/src/lib.rs": "bcd771b733a9ca8ed394c1b9c7c188492664271f517606caa08a9ef457559a7e",
+    "crates/om9-plugin-host/src/staged.rs": "15dfa0595d098191a78405de4e8814d2fa7d259539fb3e3fc4fd87cc2ba6ba2c",
+    "crates/om9-app/src/session/plugins.rs": "64d0ce9d8283a2f8a736b209c7a8d90cd17af251d20e3ddf1cf26dd9df0c567b",
+    "crates/om9-app/tests/plugin_native.rs": "b112c22bb2cc8077334e742744110c53f33d14062cadba604e456353bfabcbed",
+    "sdk/examples/hello-plugin/src/lib.rs": "7fa7b5a0fdd8553c5521c2d397da2a68f02b4da3839cdd6e78694bccf34591a5",
+    "sdk/examples/hello-plugin/descriptor.json": "347bfa08bba09f3a2aa5225ee719cccddefc9df125937ac42d7a6623fc483b0d",
+    "sdk/README.md": "fca7d3675a4c03e66b1fc4350ec0c82137454540da319f47a9fdd6b22c6fb0a2",
+    "sdk/API-INVENTORY.md": "7b288967562393fb3be67690bcd2b8e3f73b1a356874a0f71c16f8a5eb7b551e"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["progress", "warning"],
+    "public_types": ["MessageLevel", "PluginMessage"],
+    "shared_surface": "crates/om9-app/src/command_events.rs EventLog (Started/Progress/Warn/Finished)",
+    "error_codes": ["budget", "message"],
+    "limits": {
+      "messages_per_command": 32,
+      "message_bytes": 512
+    }
+  },
+  "asserted_semantics": [
+    "Reports are command feedback, not document state: no transaction, no Undo entry; a reporting-only command returns request=None.",
+    "A committed reporting command produces Started, its Progress/Warn reports in order, then Finished(Committed).",
+    "A refused command keeps Started then Finished(Refused) and its reports are discarded, because a failed invocation publishes nothing.",
+    "Reports are bounded: 32 per command, 512 bytes each, one line without control characters; exceeding a bound is a refusal rather than a truncation.",
+    "Plugin reports join the existing EventLog the Command line surface and observers already consume; no second feedback path is added."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "43 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "4 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "8 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-feedback",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8791 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "committed_sequence": [
+      "started",
+      "progress: feedback demo started",
+      "progress: feedback demo half way",
+      "warn: feedback demo warning",
+      "finished: committed"
+    ],
+    "refused_sequence": ["started", "finished: refused"],
+    "reports_staged_mutation": "none",
+    "document_unchanged": true,
+    "undo_len_after_reporting": 0,
+    "existing_redo_preserved": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1345936,
+      "sha256": "1baaf61b056088b66f2d5277a8a8fcea58b8b1fac7523dbc8ea4bf1989b7932a"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "154e548ed8a1d57a7b670a29cb1a8ed8825f2e706a5e7d31e7023b9d7ffc1530"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 123817,
+      "sha256": "777ae7dd6f78d0bb9b565152231ac3f34ee73638a8a9b6a6bae26c34bb8fdc35"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "0de84edd19c234705c7f21d2cfe64f34352ae303930cc43df0277d31a8e56917"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1344512,
+      "sha256": "d530169c584577488545042ab22f990a04b42483d0ca6e3b35dc46b428c6d29b"
+    },
+    "om9.exe": {
+      "bytes": 68510208,
+      "sha256": "fa5d117755823988204a563d16425710ea02146f04cdf62ace8117b4fa982b61"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-02-010"],
+    "open": [
+      "interactive prompts and point/object input sessions",
+      "option tokens, preview overlays and dynamic menu registration",
+      "observer callbacks across the ABI",
+      "failure-path diagnostic reports"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only reporting is exported; prompts, input sessions, option tokens, preview overlays and menus remain open.",
+    "A refused command discards its reports; failure-path diagnostics through the ABI are not claimed.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Take the next plan-named owner slice (OM9-L2-01-12 file lifecycle or the interactive prompt/input session work at M01 03-10/01-02)."
+}

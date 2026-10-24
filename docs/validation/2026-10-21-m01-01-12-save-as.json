@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-21",
+  "status": "save_as_request_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-12",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Second file-lifecycle SDK slice: the plugin requests the host Save As flow after commit; the user chooses the destination and the host performs the atomic save.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "65772d2074a442534960266862b55dd1307efb4e43c99edac0ca5a545ddb5a1c",
+    "crates/om9-plugin-host/src/staged.rs": "61402e6bcced0ff78c0c6912f1aecadca6849e18f64bb3ba685b4e947b99a469",
+    "crates/om9-plugin-host/src/lib.rs": "a8be96b23e765574132d630de4cd7c08c08b257e3a6655c5731e9f1c079bf2b2",
+    "crates/om9-app/src/session/plugins.rs": "659bcfaaca32110f0f8095c82ae5c57ce9ca6dcaafc93086fb2863cdbbd2fc66",
+    "crates/om9-app/tests/plugin_native.rs": "7fef5c88af11e6323b72441fab99e177c65ccd4ea921a760046f9258bafedc9f",
+    "sdk/examples/hello-plugin/src/lib.rs": "b20a6d7081264b3385bc96a944ab36719210019f5413904f868226c59928fa43",
+    "sdk/README.md": "d34c069b4ee8c16ebce7c1564f017ad6aa90b87f6c1684b650cf85e2e7279897",
+    "sdk/API-INVENTORY.md": "c8857dd674abc6c7b260cdf0fdd50a6b5a8c789508be96fed671946d110552ce"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["save_project_as"],
+    "shared_service": [
+      "om9_app::session::Controller::begin_file_operation(FileKind::SaveAs)",
+      "om9_archive::Archive::save"
+    ],
+    "error_codes": ["save", "busy"]
+  },
+  "asserted_semantics": [
+    "The plugin requests the host flow; it never sees, supplies or writes a path.",
+    "The transaction commits before the dialog starts; the document is consistent while the user chooses.",
+    "save_project and save_project_as are mutually exclusive in one command (save refusal).",
+    "Accepting the destination performs the same atomic archive save with fingerprint/receipt; the document is clean only after it.",
+    "A busy or failed host file operation is a Warn event and the committed command stays committed."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "55 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "15 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-save-as",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8813 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "save_as_operation_pending": true,
+    "operation_kind": "SaveAs",
+    "accepted_destination_saved": true,
+    "reopened_entity_count_matches": true,
+    "dirty_cleared": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1586644,
+      "sha256": "eccec1266f40a8d022ef45af7db3d297b0d5fb0edcf6731d7ae61a2e745298c2"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "0da51a8eae930e2f6a464b8696a672286316b48db5381a2cf27cbbf0c1cbb757"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 155972,
+      "sha256": "882813134d80454d7e502736ca99892cf38065a08dc073444b0307c904e66ee0"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "4afe7f59b611ac9a5421a855769cba89c238e1d1069f02914bf8b38cd07533bd"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1584640,
+      "sha256": "0632e5d4e503650a07c5d3044b8f05daf781a1653b0e340727b62be76fc8acec"
+    },
+    "om9.exe": {
+      "bytes": 68934144,
+      "sha256": "d20ec01887bfb920a257db03da5eac75ef7a9fafa618604fe61f9ef995686866"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-12-005 (atomic save requested through the host Save As flow)"],
+    "open": [
+      "interactive path-dialog UI acceptance",
+      "write-failure recovery through the plugin path",
+      "plugin-driven open/create/replace (intentionally host-only)"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "The path dialog itself is host UI; the native test accepted the destination programmatically.",
+    "Write-failure recovery was not re-exercised through the plugin path.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose document change notification at M01, or return to M02 for subobject/pick query services."
+}

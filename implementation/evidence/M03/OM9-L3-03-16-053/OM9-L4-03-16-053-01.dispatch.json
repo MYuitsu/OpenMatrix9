@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-053-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-053",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-053",
+  "source_command": "Silhouette",
+  "menu_icon": "CurveCurveFromObjectsSilhouette",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Silhouette; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-053/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-053/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-053/dispatch_contract.json": "139cbb05a5a366dc374a09afef86dfb4692dad43254f234880d0ef8870775c06",
+    "implementation/design/M03/OM9-L3-03-16-053/dispatch_contract.md": "cebacb77aadada73d5395e6a41bdf558e76611b4c4fd9892430210d5571fd7a0"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

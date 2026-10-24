@@ -1,0 +1,65 @@
+{
+  "schema": "om9.m03.l2-01-09.l4.receipt.v1",
+  "l4": "OM9-L4-01-09-002-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-09-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crate": "om9-kernel",
+    "files": [
+      "crates/om9-kernel/src/creation.rs",
+      "crates/om9-kernel/src/creation_bridge.cpp",
+      "crates/om9-kernel/src/brep_snapshot.hxx",
+      "crates/om9-kernel/src/brep_bridge.cpp",
+      "crates/om9-kernel/src/brep.rs"
+    ],
+    "test": "crates/om9-kernel/tests/l2_01_09.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_09 m03_01_09_002 -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-09-002/OM9-L4-01-09-002-03.focused-test.log",
+      "stdout_log_sha256": "d1a237d9f07827f68d7267f5760a65414239a430b6fe87a6207b2bb5c391f0bf"
+    }
+  ],
+  "observed": {
+    "extrusion_volume_mm3": 3000.0,
+    "open_extrusion_area_mm2": 1200.0
+  },
+  "expected": {
+    "extrusion_volume_mm3": 3000.0,
+    "open_extrusion_area_mm2": 1200.0
+  },
+  "effective_tolerance": {
+    "extrusion_volume_mm3": "1e-6",
+    "open_extrusion_area_mm2": "1e-5"
+  },
+  "input_validation": [
+    "closed profile: at least three points, simple, planar, non-degenerate; the explicit closing point is normalised away",
+    "open polyline: at least two distinct points; repeated points refused",
+    "extrusion direction finite and non-zero"
+  ],
+  "error_type": "creation::CreationError",
+  "rollback_behavior": "a refused input returns before a Brep exists; no body is published and no document/Undo state is written",
+  "compile_receipt": "cargo test --no-run compiles the crate, the C++ adapter and the focused test (exit 0)",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "artifact_paths": [
+    "crates/om9-kernel/src/creation.rs",
+    "crates/om9-kernel/src/creation_bridge.cpp",
+    "crates/om9-kernel/src/brep_snapshot.hxx",
+    "crates/om9-kernel/src/brep_bridge.cpp",
+    "crates/om9-kernel/tests/l2_01_09.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-kernel/src/creation.rs": "c0918492dca0b8501935993ca88749abb7e6b30155f092de5ebd5c8ed4f6125d",
+    "crates/om9-kernel/src/creation_bridge.cpp": "7b76f4cd2ec9a8980d60fbfc10e6636af89ab028e0e7a6bd162d452ed047c087",
+    "crates/om9-kernel/src/brep_snapshot.hxx": "b50814193b7b3570a083b2f23f357834ef3f2b6c3e43f5ffcfd955ed7a674e22",
+    "crates/om9-kernel/src/brep_bridge.cpp": "ecbd075b984ad191e6e4cc05266d9bfb9b9cf5417fd215d8f97fc69406c67c45",
+    "crates/om9-kernel/tests/l2_01_09.rs": "7957036d2766ee1090d84fd0f3039d52d4198034cf2898755a82933ebdd9dc43"
+  },
+  "worktree_state": "The recorded revision is HEAD; the L2-01-09 changes were measured in the dirty working tree before commit."
+}

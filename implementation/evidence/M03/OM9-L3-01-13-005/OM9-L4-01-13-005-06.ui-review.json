@@ -1,0 +1,63 @@
+{
+  "schema": "om9.m03.l2-01-13.ui-review.v1",
+  "task_id": "OM9-L4-01-13-005-06",
+  "l3_id": "OM9-L3-01-13-005",
+  "title": ".3dm Analytic And NURBS Curves",
+  "oracle": {
+    "positive": [
+      "line, circle, arc, polyline and rational NURBS curve survive export and reimport with the same variants",
+      "NURBS poles agree within 1e-12, weights and knots exactly",
+      "polyline segments keep their exact point sequence"
+    ],
+    "negative": [
+      "an unsupported/reversed polycurve metadata case is refused by the native bridge rather than flattened",
+      "a degenerate curve is rejected by the core curve admission"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTO_ONLY",
+    "date_utc": "2026-10-22",
+    "statement": "Every measured value in this record comes from the focused Rust run; no manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "import line/arc/NURBS/Polycurve without flattening"
+  },
+  "measured": {
+    "variants": [
+      "Line",
+      "Circle",
+      "Circle(arc)",
+      "Polycurve",
+      "Nurbs"
+    ],
+    "nurbs_pole_abs_tolerance": 1e-12
+  },
+  "tolerances": {
+    "nurbs_poles": "1e-12",
+    "weights_knots": "exact"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-app --test l2_01_13 m03_01_13_005 -- --ignored --exact --nocapture (exit 0)",
+    "regression: cargo test -p om9-app --test l2_01_13 -- --ignored --test-threads=1 --nocapture (14 passed)",
+    "crate suites: om9-exchange/om9-archive/om9-3dm, om9-kernel --features 3dm-brep, om9-app --lib (exit 0)",
+    "clippy: owned files warning-free (see regression receipt note)",
+    "format: scoped rustfmt --check exit 0",
+    "public source: python tools/public_source_audit.py exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-01-13-005/api.md",
+    "implementation/design/M03/OM9-L3-01-13-005/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-01-13-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-13-005/negative.json",
+    "implementation/evidence/M03/OM9-L3-01-13-005/"
+  ],
+  "gate": {
+    "scope": "AUTO_ONLY",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  },
+  "date": "2026-10-23"
+}

@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-05-002",
+  "l3_id": "OM9-L3-03-05-002",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Không có M05 Gem records thì hiển thị neutral placeholder và ghi DEFERRED_WAIT_M05",
+  "expected": "No document mutation, no invented gem material, no disabled category hiding model geometry, and a safe schema fallback.",
+  "evidence": [
+    "om9-app display cues: 6 passed"
+  ],
+  "status": "PASS"
+}

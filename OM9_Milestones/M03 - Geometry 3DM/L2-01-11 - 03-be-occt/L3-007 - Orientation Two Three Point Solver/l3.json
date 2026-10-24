@@ -139,7 +139,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE",
   "task_ids": [
     "OM9-L4-01-11-007-01",
     "OM9-L4-01-11-007-02",
@@ -315,6 +315,118 @@
     "priority_pilot": false,
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "TRANSFORM"
+  "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
+  "acceptance_category": "TRANSFORM",
+  "proposed_fixture": {
+    "fixture_id": "OM9-L3-01-11-007-POSITIVE",
+    "status": "RUNTIME_MEASURED_2026_10_22",
+    "positive": {
+      "input": {
+        "source": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0
+          ]
+        ],
+        "target": [
+          [
+            10,
+            0,
+            0
+          ],
+          [
+            10,
+            1,
+            0
+          ]
+        ]
+      },
+      "expect": {
+        "mapped_a": [
+          10,
+          0,
+          0
+        ],
+        "mapped_b": [
+          10,
+          1,
+          0
+        ],
+        "distance_mm": 1.0
+      }
+    },
+    "negative": {
+      "input": [
+        "A = B",
+        "source points collinear"
+      ],
+      "expect": "CreationError::Invalid; no transform"
+    },
+    "tolerance_policy": {
+      "orientation_distance_mm": "1e-9"
+    },
+    "rust_test_name": "m03_01_11_007"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "rigid orientation from two or three reference points",
+    "owner": {
+      "crate": "om9-kernel",
+      "files": [
+        "crates/om9-kernel/src/transform_ops.rs",
+        "crates/om9-kernel/src/transform_bridge.cpp",
+        "crates/om9-kernel/tests/l2_01_11.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-01-11-007/api.md",
+      "implementation/design/M03/OM9-L3-01-11-007/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-01-11-007/positive.json",
+      "implementation/fixtures/M03/OM9-L3-01-11-007/negative.json",
+      "implementation/evidence/M03/OM9-L3-01-11-007/OM9-L4-01-11-007-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-01-11-007/OM9-L4-01-11-007-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-01-11-007/OM9-L4-01-11-007-05.ui-review.json"
+    ],
+    "tests": [
+      "m03_01_11_007: passed",
+      "l2_01_11 suite: 11 passed"
+    ],
+    "human_approval": null,
+    "remaining": [],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "AUTO_ONLY",
+      "design": "implementation/design/M03/OM9-L3-01-11-007/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-01-11-007/positive.json",
+        "implementation/fixtures/M03/OM9-L3-01-11-007/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M03/OM9-L3-01-11-007/OM9-L4-01-11-007-05.ui-review.json"
+      ],
+      "measured": {
+        "orientation_distance_mm": 1.0
+      },
+      "tolerances": {
+        "orientation_distance_mm": "1e-9"
+      },
+      "acceptance": "A(0,0,0),B(1,0,0) → A′(10,0,0),B′(10,1,0): both points map exactly, distance 1 preserved; a three-point triangle maps all three points with determinant +1"
+    },
+    "l4_evidence": {
+      "OM9-L4-01-11-007-01": "1/1",
+      "OM9-L4-01-11-007-02": "1/1",
+      "OM9-L4-01-11-007-03": "1/1",
+      "OM9-L4-01-11-007-04": "1/1",
+      "OM9-L4-01-11-007-05": "1/1"
+    }
+  }
 }

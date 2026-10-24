@@ -1,0 +1,13 @@
+{
+  "l4": "OM9-L4-03-04-001-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-04-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Disabling End clears its marker and a matching one-shot; the marker disappears from the next frame.",
+  "tests": [
+    "om9-app sidebar_palettes toggle: 1 passed",
+    "om9-app osnap_ui: 3 passed",
+    "om9-app snap_panel_modes: 4 passed"
+  ]
+}

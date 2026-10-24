@@ -1,0 +1,17 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-004",
+  "fixture_id": "OM9-L3-03-08-004-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "explode of a native single curve",
+    "join of fewer than two curves, a gap, or different placements",
+    "split/trim without exactly one selected target",
+    "a cutting curve with no intersection",
+    "target and cutter in different placements or with the same id",
+    "split fraction at 0 or 1",
+    "trim with from >= to"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; document, selection and Undo journal unchanged",
+  "test": "m03_03_08_004"
+}

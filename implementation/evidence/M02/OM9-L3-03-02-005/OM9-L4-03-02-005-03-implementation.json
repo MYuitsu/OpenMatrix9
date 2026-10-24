@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-02-005-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-02-005",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "World bounds are gathered from transformed scene buffers; Camera::fit_bounds selects an ortho span or perspective distance with margin and a finite fallback for zero extent.",
+  "tests": [
+    "om9-app navigation_commands: 6 passed",
+    "om9-scene camera_fit: 4 passed"
+  ]
+}

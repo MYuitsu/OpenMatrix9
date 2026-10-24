@@ -1,0 +1,16 @@
+{
+  "l4": "OM9-L4-02-03-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-03-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "The BRep display tessellation is ray-hit nearest-first; the hit point and triangle normal form the surface candidate, so only trimmed display faces can snap.",
+  "source_paths": [
+    "crates/om9-scene/src/osnap.rs",
+    "crates/om9-core/src/brep.rs"
+  ],
+  "tests": [
+    "om9-app osnap BRep: 1 passed",
+    "om9-scene osnap: 11 passed"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "l3": "OM9-L3-01-07-004",
+  "title": "Selection Window And Crossing",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-scene/src/selection.rs",
+    "crates/om9-scene/src/scene.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "om9-scene selection_regressions: 7 passed",
+    "om9-app rubber_band: 2 passed",
+    "om9-app acceptance_viewport_selection: 8 passed",
+    "om9-app selection_overlay: 8 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.12-16; Rhino5 user guide pp.25-30 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-01-07-004-01"
+}

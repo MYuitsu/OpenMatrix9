@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-009",
+  "fixture_id": "OM9-L3-01-09-009-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "three collinear points",
+    "sphere r=-1 through the session",
+    "body(old_handle) after release"
+  ],
+  "expect": "CreationError::Invalid / CreationError::StaleHandle; live count stays unchanged on a refused build"
+}

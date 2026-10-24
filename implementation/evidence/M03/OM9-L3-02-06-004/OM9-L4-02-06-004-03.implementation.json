@@ -1,0 +1,94 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-06-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-core + om9-kernel + om9-app",
+    "files": [
+      "crates/om9-kernel/src/transform_ops.rs"
+    ],
+    "test": "crates/om9-core/tests/transform_sessions.rs + crates/om9-kernel/tests/l2_02_06.rs + app gumball suites"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_02_06 orientation_solver -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/L3-004k.log",
+      "stdout_log_sha256": "837ef17e521db93398775e28410c2337ce91bd69ca1559801859a2dd8b616e7c"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/kernel-l2_01_11.log",
+      "stdout_log_sha256": "8fdc1480a36cf1b76b0673287b988a73e01c3fc51a6e1dc7be2d38e429ad9576"
+    },
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-02-06-logs/kernel-l2_01_11.log",
+      "stdout_log_sha256": "8fdc1480a36cf1b76b0673287b988a73e01c3fc51a6e1dc7be2d38e429ad9576"
+    }
+  ],
+  "observed": {
+    "two_point_a": [
+      10.0,
+      20.0,
+      30.0
+    ],
+    "two_point_b": [
+      10.0,
+      21.0,
+      30.0
+    ],
+    "three_point_1": [
+      2.0,
+      4.0,
+      4.0
+    ],
+    "three_point_2": [
+      1.0,
+      3.0,
+      4.0
+    ]
+  },
+  "expected": {
+    "two_point_a": [
+      10.0,
+      20.0,
+      30.0
+    ],
+    "two_point_b": [
+      10.0,
+      21.0,
+      30.0
+    ],
+    "three_point_1": [
+      2.0,
+      4.0,
+      4.0
+    ],
+    "three_point_2": [
+      1.0,
+      3.0,
+      4.0
+    ]
+  },
+  "tolerances": {
+    "points": "1e-12"
+  },
+  "artifact_paths": [
+    "crates/om9-kernel/src/transform_ops.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-kernel/src/transform_ops.rs": "64925c4f9e63d2ef19c5568df42d89e31c512b1adcd69a3f5eccd960fba020f3"
+  }
+}

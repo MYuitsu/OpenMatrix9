@@ -1,0 +1,17 @@
+warning: function `line_fraction` is never used
+   --> crates\om9-core\src\curve_surface_ops.rs:274:4
+    |
+274 | fn line_fraction(line: &Curve, point: Point3) -> Result<f64> {
+    |    ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-core` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\l2_01_13.rs (L:\om9-target\debug\deps\l2_01_13-3c2a3bc9043a6e16.exe)
+
+running 1 test
+test m03_01_13_011 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 2.03s
+

@@ -1,0 +1,74 @@
+{
+  "schema": "om9.m03.l2-02-06.fixture.v1",
+  "l3_id": "OM9-L3-02-06-001",
+  "fixture_id": "OM9-L3-02-06-001-POSITIVE",
+  "units": "mm",
+  "input": {
+    "workflow": "Interactive Move Copy And Rotate",
+    "kind": "typed transform/orient session and analytic matrix oracle"
+  },
+  "expect": {
+    "move_preview": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        4.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rotate_angle_rad": 1.5707963267948966,
+    "copy_option": true
+  },
+  "tolerances": {
+    "matrix": "exact",
+    "angle_rad": "1e-12"
+  },
+  "measured_on_2026_10_22": {
+    "move_preview": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        4.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rotate_angle_rad": 1.5707963267948966,
+    "copy_option": true
+  }
+}

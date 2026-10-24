@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-009",
+  "fixture_id": "OM9-L3-02-04-009-POSITIVE",
+  "units": "mm",
+  "oracle": "(2,3,5) projects to (2,3,0) at distance 5; a line 1 mm above the plane pulls back with 1 mm deviation; crossing lines meet at (5,5); a chord cuts a circle twice; a piercing line meets the plane once",
+  "measured": {
+    "projection_distance_mm": 5.0,
+    "pullback_deviation_mm": 1.0
+  },
+  "tolerances": {
+    "projection_distance_mm": "1e-9",
+    "pullback_deviation_mm": "1e-6"
+  },
+  "test": "m03_02_04_009_project_pullback_and_intersections"
+}

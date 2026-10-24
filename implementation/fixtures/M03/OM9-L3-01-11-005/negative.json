@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-005",
+  "fixture_id": "OM9-L3-01-11-005-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "count 1",
+    "rail with a repeated point",
+    "NaN rail point"
+  ],
+  "expect": "CreationError::Invalid; no frame"
+}

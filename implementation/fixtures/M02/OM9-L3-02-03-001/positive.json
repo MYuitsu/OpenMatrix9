@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-03-001",
+  "l3_id": "OM9-L3-02-03-001",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Polyline 0-10mm snap END (10,0), MID (5,0); Circle tâm (5,5), radius 2 snap QUAD",
+  "expected": "The documented snap kind and world point with a stable object identity.",
+  "evidence": [
+    "om9-scene osnap: 11 passed",
+    "om9-app osnap UI: 3 passed"
+  ],
+  "status": "PASS"
+}

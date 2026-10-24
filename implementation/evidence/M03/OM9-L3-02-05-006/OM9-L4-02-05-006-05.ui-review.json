@@ -1,0 +1,54 @@
+{
+  "schema": "om9.m03.l2-02-05.ui-review.v1",
+  "task_id": "OM9-L4-02-05-006-05",
+  "l3_id": "OM9-L3-02-05-006",
+  "title": "Surface Rebuild Refit And Softedit",
+  "oracle": {
+    "positive": [
+      "a plane refit/rebuild to 3x3 degree 2 is still the same plane",
+      "softedit with delta z=1 moves the centre to z=0.2835 while the corners stay at z=0"
+    ],
+    "negative": [
+      "a refit grid that cannot hold the degree is refused",
+      "a zero softedit radius is refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The core surface oracle passes; the UI rail/profile/boundary selection, preview, commit/cancel and warning review is not signed by a human.",
+    "scope": "NURBS control-structure changes"
+  },
+  "measured": {
+    "refit_plane_corner_error": 0.0,
+    "softedit_centre_z": 0.28349364905389035,
+    "softedit_corner_z": 0.0
+  },
+  "tolerances": {
+    "refit": "1e-9",
+    "softedit": "smooth falloff, measured"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "core suite 16 passed; kernel suite 6 passed; core lib/kernel all exit 0",
+    "clippy and fmt exit 0",
+    "public source audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-05-006/api.md",
+    "implementation/design/M03/OM9-L3-02-05-006/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-006/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-006/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-05-006/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

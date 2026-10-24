@@ -5,6 +5,7 @@ pub mod affine;
 pub mod camera;
 pub mod grid;
 pub mod gumball_view;
+pub mod osnap;
 mod picking;
 pub mod scene;
 pub mod selection;

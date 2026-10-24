@@ -1,0 +1,43 @@
+{
+  "schema": "om9.m03.l2-03-08.l4.receipt.v1",
+  "l4": "OM9-L4-03-08-003-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-03-08-003",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "suite": "app lib + Top 11 suite + core Top 11 suite",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --no-default-features --lib --test top11 -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-03-08-003/OM9-L4-03-08-003-04.regression.log",
+      "stdout_log_sha256": "21c1dacf4ccd4e4c43c6b95dc45c6e6521c8d4e5b426099e43fcf879605d1836",
+      "passed": 180
+    },
+    {
+      "argv": "cargo test -p om9-core --test top11 -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "passed": 10
+    }
+  ],
+  "repeatable": "the action oracles are exact counts and tolerance-bounded geometry; the suite is deterministic here",
+  "observed": {
+    "mirror_delete_entities": 1.0,
+    "mirror_delete_start_x_mm": -1.0,
+    "mirror_copies": 2.0,
+    "mirrored_start_x_mm": -1.0,
+    "three_point_mirror_start_x_mm": -1.0,
+    "non_rigid_mirror_end_x_mm": -2.0,
+    "move_base_mm": "[5.0, -2.0, 0.0]",
+    "rotate_end_mm": "[6.123233995736766e-16, 10.0, 0.0]",
+    "brep_cutter_entities": 4.0,
+    "exact_brep_fractions": "[0.25, 0.75]",
+    "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+    "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+    "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+    "brep_mirror_volume_mm3": 24.0,
+    "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-05-005",
+  "l3_id": "OM9-L3-03-05-005",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Object hidden không hiển thị dù selected cũ và mode switch không mất selected IDs",
+  "expected": "No document mutation, no invented gem material, no disabled category hiding model geometry, and a safe schema fallback.",
+  "evidence": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app display_modes: 3 passed"
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-008-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-01-07-008",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Press starts a preview session; release commits exactly one Controller transaction and one Undo entry; Escape/lost focus/context change cancels without writing.",
+  "tests": [
+    "om9-app gumball_interaction: 5 passed",
+    "om9-app gumball_numeric: 5 passed"
+  ]
+}

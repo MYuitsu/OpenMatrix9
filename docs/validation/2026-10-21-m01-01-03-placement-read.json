@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-21",
+  "status": "object_placement_read_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Reads the staged placement when present, else the base entity placement.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "0809af1a29a2bf12dd6b5ce53fdec633340f3f199adcc8895aff8eb5629005d2",
+    "crates/om9-plugin-host/src/staged.rs": "f5c6b312c0275dc585fb86454cccc9b2dd37a003af17c0cfe3a6be678ea81df4",
+    "crates/om9-app/tests/plugin_native.rs": "fe9629b367cc8e267c2f9631a54fb7c179cc999346740318ad9f7d566125a765",
+    "sdk/examples/hello-plugin/src/lib.rs": "4203c2d1bd5f4599171e04bad20fe87d1375845d8da3aff722564fca6e880bbf",
+    "sdk/examples/hello-plugin/descriptor.json": "6065474ccb711cb111ffc1aeb83f33a84d8d15da9a952cf5244b8d71338e1051",
+    "sdk/README.md": "d012dbdaa01947617c3bf2959c45ceec61e79d193bf0e23425f7fe7b2a5dab65",
+    "sdk/API-INVENTORY.md": "7ce10310005d62f48d70ebcb2521a2a356424af5e9e93d38795c342010b055c1"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "object_placement"
+    ],
+    "error_codes": [
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Object-local matrix; no parent/instance composition.",
+    "Staged value wins inside the same command.",
+    "Reading stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "60 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "31 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-placement-read",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8851 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "rows": 4,
+    "identity_translation": 0.0,
+    "undo_len": 1
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1916713,
+      "sha256": "cc3da9d9c04601a7a09bbf66d0a91ef4ebc452ff96646cfb4778e97e9046b9c7"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "a567b1a5ba9709a46d61f0c70b078ed2a8758b20698e2b3aca47b1a2ffa47efb"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 185525,
+      "sha256": "b039f874e9301baf4a3c7790c32e0346c7207a95987f70e3241f6404aca0d0d9"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "951672de10bf292d1889359ce913e64d4160861fd9cdf2d52585b3bb52c4541d"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1913344,
+      "sha256": "bf8230ff0eff4df3faa304a93052ba0c32bbedad7269e14c33c18a7170508bf8"
+    },
+    "om9.exe": {
+      "bytes": 69488128,
+      "sha256": "d0e7cfed314a1f03e4fbab6631afbcf61ec3067a8a8a436fe42ff3a283fe7df3"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-002 (placement read)"
+    ],
+    "open": [
+      "instance/parent composition",
+      "gumball drag"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Object-local matrix only.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Return to M02 for subobject/pick query services, or record the remaining host edit paths."
+}

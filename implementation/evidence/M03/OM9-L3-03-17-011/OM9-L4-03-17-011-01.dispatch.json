@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-011-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-011",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-012",
+  "source_command": "Shrink Trimmed Surface",
+  "menu_icon": "SurfaceSurfaceEditToolsShrinkTrimmedSurface",
+  "owner_candidate": "OM9-L3-02-04-005",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-011/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-011/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-011/dispatch_contract.json": "114d788779cc197a3e715c240c668beda4e88e4596fbc0c751f7004aa201314a",
+    "implementation/design/M03/OM9-L3-03-17-011/source_crosswalk.json": "b85ef07af5405bca638b64631a4fa926a57acc6b9c6e66e00cc413d106a6a482"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m03.l2-02-05.ui-review.v1",
+  "task_id": "OM9-L4-02-05-005-06",
+  "l3_id": "OM9-L3-02-05-005",
+  "title": "Trim Split Untrim And Shrink Surface",
+  "oracle": {
+    "positive": [
+      "a 0.2..0.8 outer loop with a 0.4..0.6 inner loop validates and keeps the underlying surface identical",
+      "split at u=0.5 returns two trimmed halves whose loops stay on their side",
+      "shrink maps (0,0) of the sub-surface back to the source (0.2,0.2)",
+      "untrim returns the exact original surface"
+    ],
+    "negative": [
+      "a loop outside the domain is refused",
+      "an inner loop outside the outer loop is refused",
+      "a split at the domain boundary is refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The core surface oracle passes; the UI rail/profile/boundary selection, preview, commit/cancel and warning review is not signed by a human.",
+    "scope": "Rhino-like surface trimming preserving underlying NURBS"
+  },
+  "measured": {
+    "outer_points": 4,
+    "inner_loops": 1,
+    "split_left_outer": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        0.5,
+        1.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    "shrunk_corner_matches_source": true
+  },
+  "tolerances": {
+    "uv": "1e-12",
+    "underlying_geometry": "exact"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "core suite 16 passed; kernel suite 6 passed; core lib/kernel all exit 0",
+    "clippy and fmt exit 0",
+    "public source audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-05-005/api.md",
+    "implementation/design/M03/OM9-L3-02-05-005/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-005/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-05-005/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

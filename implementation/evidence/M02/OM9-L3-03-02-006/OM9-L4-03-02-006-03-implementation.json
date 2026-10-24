@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-02-006-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-02-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Workspace::default_camera is the single Home preset source; Camera::center_at shifts eye/target together; neither touches CPlane or document.",
+  "tests": [
+    "om9-app navigation_commands: 6 passed",
+    "om9-scene camera_fit: 4 passed"
+  ]
+}

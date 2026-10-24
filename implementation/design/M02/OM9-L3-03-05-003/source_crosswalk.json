@@ -1,0 +1,17 @@
+{
+  "l3": "OM9-L3-03-05-003",
+  "title": "Curve And Cutter Visibility Presets",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-app/src/display.rs",
+    "crates/om9-core/src/model.rs"
+  ],
+  "tests": [
+    "om9-app display cues: 6 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.63-70 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-05-003-01"
+}

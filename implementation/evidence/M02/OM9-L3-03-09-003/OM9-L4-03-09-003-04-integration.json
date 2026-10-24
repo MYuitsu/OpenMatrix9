@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-09-003-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-09-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The F6 action carries the exact command ID; enabled clicks use the shared invoke path, disabled clicks cannot dispatch.",
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ]
+}

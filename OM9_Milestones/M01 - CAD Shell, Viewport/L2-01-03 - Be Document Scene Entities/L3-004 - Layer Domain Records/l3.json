@@ -191,19 +191,132 @@
     }
   ],
   "runtime_implementation": {
-    "date": "2026-10-19",
-    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
-    "target": "standalone Rust OM9",
-    "scope": "Imported layer name/color/visible/locked/parent map to Layer records.",
-    "evidence": [
-      "implementation/design/M01/THREE-DM-HOST-ADAPTER.md",
-      "implementation/evidence/M01/2026-10-19-three-dm-native-host-checks.json",
-      "crates/om9-app/tests/three_dm_curve_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_brep_roundtrip.rs",
-      "crates/om9-app/tests/three_dm_native_roundtrip.rs",
-      "native/native_exchange.cpp"
+    "plugin_sdk_v1_layers": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "Layer domain records: SDK v1 lists layers with name, colour and effective visible/selectable/locked/current flags (including the command's staged layer records), creates a layer with an optional make-current, and updates one layer's name/colour/flags in the command's transaction.",
+      "public_api": [
+        "Host::layer_create",
+        "Host::layer_update",
+        "Host::set_current_layer",
+        "Host::assign_objects_to_layer",
+        "Host::layers"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-03-layers-sdk.md",
+        "docs/validation/2026-10-21-m01-03-layers-sdk.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "Output into a layer created by the same command is admitted; a layer whose flags change in that command still cannot receive output.",
+        "Groups, blocks/instances, change notification and snapshot/restore remain open.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_layer_order": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "layer_order_read_verified_windows",
+      "scope": "layer_order returns document.layer_order bottom-to-top and appends a layer created by the same command; read-only.",
+      "public_api": [
+        "Host::layer_order"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-layer-order.md",
+        "docs/validation/2026-10-21-m01-01-03-layer-order.json"
+      ],
+      "limitations": [
+        "Read-only; reorder not exposed.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_clear_current_layer": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "clear_current_layer_verified_windows",
+      "scope": "clear_current_layer stages SetCurrent { None } only when a current layer is set; layer records untouched; no-op stages no mutation; Undo restores.",
+      "public_api": [
+        "Host::clear_current_layer"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-clear-layer.md",
+        "docs/validation/2026-10-21-m01-01-03-clear-layer.json"
+      ],
+      "limitations": [
+        "Layer delete/reorder open.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_layer_info": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "single_layer_read_verified_windows_host_only",
+      "scope": "layer_info returns one LayerInfo from the shared list mapping; host tests prove equality with the list and the unknown-id refusal.",
+      "public_api": [
+        "Host::layer_info"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-layer-info.md",
+        "docs/validation/2026-10-21-m01-01-03-layer-info.json"
+      ],
+      "limitations": [
+        "No native command yet.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_layer_info_native": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "layer_info_native_command_verified_windows",
+      "scope": "LayerInfoDemo reads a layer created by LayerDemo through the packaged plugin; the DLL test asserts id/current/locked and the 35-test native suite passes.",
+      "public_api": [
+        "Host::layer_info"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-layer-info-native.json",
+        "docs/validation/2026-10-21-m01-01-03-layer-info.md"
+      ],
+      "limitations": [
+        "Layer delete/reorder open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::add_object",
+      "Host::assign_objects_to_layer",
+      "Host::clear_current_layer",
+      "Host::layer_create",
+      "Host::layer_info",
+      "Host::layer_order",
+      "Host::layer_update",
+      "Host::layers",
+      "Host::set_current_layer"
     ],
-    "human_approval": null,
-    "remaining": []
+    "implemented_slices": [
+      "plugin_sdk_v1_clear_current_layer",
+      "plugin_sdk_v1_layer_info",
+      "plugin_sdk_v1_layer_info_native",
+      "plugin_sdk_v1_layer_order",
+      "plugin_sdk_v1_layers"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-01-03-clear-layer.json",
+      "docs/validation/2026-10-21-m01-01-03-clear-layer.md",
+      "docs/validation/2026-10-21-m01-01-03-layer-info-native.json",
+      "docs/validation/2026-10-21-m01-01-03-layer-info.json",
+      "docs/validation/2026-10-21-m01-01-03-layer-info.md",
+      "docs/validation/2026-10-21-m01-01-03-layer-order.json",
+      "docs/validation/2026-10-21-m01-01-03-layer-order.md",
+      "docs/validation/2026-10-21-m01-02-created-layer-output.json",
+      "docs/validation/2026-10-21-m01-02-created-layer-output.md",
+      "docs/validation/2026-10-21-m01-03-layers-sdk.json",
+      "docs/validation/2026-10-21-m01-03-layers-sdk.md"
+    ]
   }
 }

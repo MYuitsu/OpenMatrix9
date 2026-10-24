@@ -30,18 +30,24 @@ fn a_wheel_burst_animates_and_zooms_toward_the_cursor() {
     frame(&mut app, &context, vec![]);
     let rect = app.view_rects[&ViewId::Perspective];
     let cursor = rect.center() + Vec2::new(120.0, 80.0);
-    let initial = app.controller.workspace.views[&ViewId::Perspective].camera.clone();
+    let initial = app.controller.workspace.views[&ViewId::Perspective]
+        .camera
+        .clone();
     let initial_radius = radius(&initial);
     let initial_target = initial.target;
 
     frame(&mut app, &context, vec![Event::PointerMoved(cursor)]);
     for _ in 0..8 {
-        frame(&mut app, &context, vec![Event::MouseWheel {
-            unit: egui::MouseWheelUnit::Point,
-            delta: Vec2::new(0.0, 120.0),
-            modifiers: Modifiers::NONE,
-            phase: egui::TouchPhase::Move,
-        }]);
+        frame(
+            &mut app,
+            &context,
+            vec![Event::MouseWheel {
+                unit: egui::MouseWheelUnit::Point,
+                delta: Vec2::new(0.0, 120.0),
+                modifiers: Modifiers::NONE,
+                phase: egui::TouchPhase::Move,
+            }],
+        );
         frame(&mut app, &context, vec![]);
     }
     // Let the transition finish.
@@ -49,7 +55,9 @@ fn a_wheel_burst_animates_and_zooms_toward_the_cursor() {
         frame(&mut app, &context, vec![]);
     }
 
-    let after = app.controller.workspace.views[&ViewId::Perspective].camera.clone();
+    let after = app.controller.workspace.views[&ViewId::Perspective]
+        .camera
+        .clone();
     assert!(after.revision > initial.revision);
     assert!(
         radius(&after) < initial_radius * 0.999,

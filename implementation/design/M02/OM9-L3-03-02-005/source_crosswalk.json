@@ -1,0 +1,19 @@
+{
+  "l3": "OM9-L3-03-02-005",
+  "title": "Zoom Extents And Selected",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-scene/src/camera.rs"
+  ],
+  "tests": [
+    "om9-app navigation_commands: 6 passed",
+    "om9-scene camera_fit: 4 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.12-16 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-02-005-01"
+}

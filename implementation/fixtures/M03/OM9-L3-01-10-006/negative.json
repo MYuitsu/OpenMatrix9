@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-006",
+  "fixture_id": "OM9-L3-01-10-006-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "radius 1000",
+    "radius 0",
+    "edge index 9999",
+    "open shell"
+  ],
+  "expect": "Kernel failure / Invalid; the source body is unchanged"
+}

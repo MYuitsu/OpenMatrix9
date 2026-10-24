@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-03-003",
+  "l3_id": "OM9-L3-03-03-003",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Esc popup không thay selection, stale ID lọc bỏ trước khi chọn",
+  "expected": "No locked/stale selection, no marquee from the dock, and no journal write on cancel/invalid input.",
+  "evidence": [
+    "om9-app pick_disambiguation: 5 passed",
+    "om9-app matrix_selection_sequence: 2 passed"
+  ],
+  "status": "PASS"
+}

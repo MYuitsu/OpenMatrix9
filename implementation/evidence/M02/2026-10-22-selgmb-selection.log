@@ -1,0 +1,10 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.48s
+     Running tests\matrix_selection_sequence.rs (L:/om9-target\debug\deps\matrix_selection_sequence-2cb8b92df7f2cb57.exe)
+
+running 2 tests
+test the_overlap_popup_names_the_type_and_layer_swatch ... ok
+test plain_click_replaces_shift_adds_and_ctrl_toggles ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.89s
+

@@ -1,0 +1,10 @@
+{
+  "l4_id": "OM9-L4-03-19-001-06",
+  "l3_id": "L3-001",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "tests": [
+    "cargo test -p om9-core --test utilities",
+    "cargo test -p om9-app --test utilities"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

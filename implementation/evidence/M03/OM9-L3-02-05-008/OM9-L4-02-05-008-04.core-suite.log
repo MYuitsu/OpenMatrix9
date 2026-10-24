@@ -1,0 +1,24 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\surface_ops.rs (L:\om9-target\debug\deps\surface_ops-2141b94b79e93132.exe)
+
+running 16 tests
+test m03_02_05_network_refuses_open_or_degenerate_corners ... ok
+test m03_02_05_planar_and_boundary_services_keep_the_underlying_surface ... ok
+test m03_02_05_split_and_shrink_keep_the_surface_domain_consistent ... ok
+test m03_02_05_rail_revolve_and_extrude_refuse_bad_input ... ok
+test m03_02_05_refit_and_softedit_change_only_the_control_structure ... ok
+test m03_02_05_trimming_preserves_the_underlying_nurbs_and_untrim_returns_it ... ok
+test m03_02_05_reverse_surface_maps_u_and_v_exactly ... ok
+test m03_02_05_network_builds_a_coons_patch_from_four_boundaries ... ok
+test m03_02_05_blend_surface_is_ruled_at_g0_and_hermite_at_g1_g2 ... ok
+test m03_02_05_match_surface_reaches_g0_g1_and_g2 ... ok
+{"offset_plane_z":2.5,"softedit_centre_z":0.28349364905389035,"split_left_outer":[[0.0,0.0],[0.5,0.0],[0.5,1.0],[0.0,1.0]],"status":"measured","trim_outer_points":4,"unroll_u":31.213484856999596,"unroll_v":8.0}
+test m03_02_05_unroll_preserves_plane_and_cylinder_arc_lengths ... ok
+test m03_02_05_receipt ... ok
+test m03_02_05_offset_and_normal_extrude_move_a_plane_by_the_distance ... ok
+test m03_02_05_rail_revolve_extrudes_and_follows_a_helix ... ok
+test m03_02_05_stress_large_grid_keeps_every_surface_valid ... ok
+test m03_02_05_sweep1_and_sweep2_keep_the_profile_and_rails ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

@@ -208,5 +208,42 @@
       "file": "M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/L3-005 - Jobbag Capture Current Selection/L4-05 - Acceptance Test/l4.json"
     }
   ],
-  "hardening_notes": "# OM9-L3-03-15-005 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-03-15`.\n- Luồng/đối tượng: jobbag capture selected entities.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-core/src/model.rs`.\n- API Rust dự kiến: `JobBag::capture(&Document,&Selection) -> Result<Slot, Error>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** slot preserves selected IDs with explicit snapshot semantics.\n- **Negative:** selection referencing deleted object is rejected.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n"
+  "hardening_notes": "# OM9-L3-03-15-005 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-03-15`.\n- Luồng/đối tượng: jobbag capture selected entities.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-core/src/model.rs`.\n- API Rust dự kiến: `JobBag::capture(&Document,&Selection) -> Result<Slot, Error>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** slot preserves selected IDs with explicit snapshot semantics.\n- **Negative:** selection referencing deleted object is rejected.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n",
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Capture selected objects into a Job Bag slot without mutating document geometry; empty selection explicitly refused.",
+    "owner": "crates/om9-app/src/project_manager.rs + crates/om9-app/src/session/jobbag.rs",
+    "tests": [
+      "project_manager 8 passed",
+      "project_manager_ui 3 passed",
+      "project_manager_persistence 2 passed"
+    ],
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-15/README.md",
+      "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M01-UI visual review pending.",
+      "Job Bag state is in-session; project-file embedding is not claimed."
+    ],
+    "last_verified": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "tests": {
+        "project_manager": "8 passed",
+        "project_manager_ui": "3 passed",
+        "project_manager_persistence": "2 passed",
+        "file_lifecycle": "20 passed",
+        "file_widgets": "21 passed",
+        "panel_ops": "33 passed",
+        "shell_docking": "10 passed"
+      },
+      "evidence": "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json",
+      "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-15-20261022/acceptance.log",
+      "note": "Job Bag state embedded as .om9 resource and restored on Open; Master restore live; manual M01-UI pending."
+    }
+  }
 }

@@ -1,0 +1,55 @@
+{
+  "schema": "om9.m03.l2-02-05.ui-review.v1",
+  "task_id": "OM9-L4-02-05-009-06",
+  "l3_id": "OM9-L3-02-05-009",
+  "title": "Surface UV Direction And Isocurve Handling",
+  "oracle": {
+    "positive": [
+      "reversed U/V surfaces agree with the source at 1e-12",
+      "the cylinder's u-iso-curve is the exact rational circle (degree 2, 9 poles)",
+      "the cylinder seam closes and (u=0,v) equals (u=1,v)"
+    ],
+    "negative": [
+      "a plane seam with distinct boundary rows is refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The core surface oracle passes; the UI rail/profile/boundary selection, preview, commit/cancel and warning review is not signed by a human.",
+    "scope": "seam, reverse direction, UV extraction"
+  },
+  "measured": {
+    "reverse_abs_error": 0.0,
+    "iso_degree": 2,
+    "iso_poles": 9,
+    "seam_periodic_u": true
+  },
+  "tolerances": {
+    "reverse": "1e-12",
+    "iso": "exact rational"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "core suite 16 passed; kernel suite 6 passed; core lib/kernel all exit 0",
+    "clippy and fmt exit 0",
+    "public source audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-05-009/api.md",
+    "implementation/design/M03/OM9-L3-02-05-009/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-009/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-009/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-05-009/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

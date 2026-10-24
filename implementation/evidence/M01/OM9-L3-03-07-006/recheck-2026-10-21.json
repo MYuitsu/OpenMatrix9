@@ -1,0 +1,27 @@
+{
+  "l3": "OM9-L3-03-07-006",
+  "title": "Main Menu Collapse Reorder And Float",
+  "date": "2026-10-21",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "tests": [
+    "panel_ops 33 passed",
+    "shell_docking 10 passed"
+  ],
+  "acceptance": {
+    "chrome_actions": "13 passed",
+    "left_stack_layers": "8 passed",
+    "panel_ops": "33 passed",
+    "shell_docking": "10 passed",
+    "dock_layout_default": "7 passed",
+    "dock_layout_persistence": "6 passed",
+    "command_sessions": "6 passed",
+    "command_options_and_repeat": "6 passed",
+    "startup_contract": "3 passed"
+  },
+  "evidence": "implementation/evidence/M01/2026-10-21-l2-03-07-menu-docking-recheck.json",
+  "log": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261021/acceptance.log",
+  "manual_gate": "M01-UI",
+  "remaining": [
+    "Manual M01-UI visual review pending."
+  ]
+}

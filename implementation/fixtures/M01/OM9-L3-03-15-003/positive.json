@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-15-003",
+  "case": "positive",
+  "oracle": "create/rename/select project rows with stable IDs",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

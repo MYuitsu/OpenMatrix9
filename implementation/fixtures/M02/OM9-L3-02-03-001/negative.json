@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-03-001",
+  "l3_id": "OM9-L3-02-03-001",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Candidate nằm ngoài screen radius không được chọn; radius 0 trả none",
+  "expected": "No fake candidate, no stale marker and no document mutation.",
+  "evidence": [
+    "om9-scene osnap: 11 passed",
+    "om9-app osnap UI: 3 passed"
+  ],
+  "status": "PASS"
+}

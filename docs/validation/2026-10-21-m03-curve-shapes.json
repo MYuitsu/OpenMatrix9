@@ -1,0 +1,151 @@
+{
+  "date": "2026-10-21",
+  "status": "ellipse_and_rectangle_construction_sdk_export_verified_windows",
+  "owner": "OM9-L2-02-04",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Completes the creation kinds of OM9-L3-02-04-002 for the plugin boundary with the owner's ellipse and rectangle builders.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "252fbc3eac850c2d6a52d0c780f0b8a03c2ae78408b248ba58934933057fd310",
+    "crates/om9-plugin-host/src/staged.rs": "b482cc7369f03d51f952a1ef6dec3cd675e0347cdba51fef89503eac5041e86d",
+    "crates/om9-app/tests/plugin_native.rs": "2c7369fb9f7be9729da148b1cfe0362c0a1428758e38bc30b15103c8e5650589",
+    "sdk/examples/hello-plugin/src/lib.rs": "1c36890a60ac000a0577cf5d948dcbd0c1f5a347fdf43b93b3fc455b62bcf59b",
+    "sdk/examples/hello-plugin/descriptor.json": "38e19bc6d4422d6256e1339a4b4787b32ef5a01d5a9c587a6c717d3c628d6ab8",
+    "sdk/README.md": "d43affd08a57eb7b9354b3ae32f831037b7a7d51088cc473c6689b829e1f26b5",
+    "sdk/API-INVENTORY.md": "ef057d0ae08e656324d665a836addee34a6ada8773fc796d6cc332d2e0e38edf"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["add_ellipse", "add_rectangle"],
+    "shared_service": [
+      "om9_core::curve_build::ellipse",
+      "om9_core::curve_build::rectangle"
+    ],
+    "error_codes": ["curve", "budget", "permission", "layer"]
+  },
+  "asserted_semantics": [
+    "The frame is caller-supplied and must be orthonormal (|x| = |y| = 1, x . y = 0); a malformed frame is a curve refusal, never silently re-orthonormalized.",
+    "Ellipses are exact rational-quadratic NURBS with radii along x and y; a non-positive radius is a curve refusal.",
+    "Rectangles are closed four-segment polycurves starting at origin, running width along x and height along y; curve_semantics reports them closed.",
+    "Both publish as one object in the command's single transaction and one Undo removes them."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "52 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "13 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-curve-shapes",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8807 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "ellipse_kind": "nurbs",
+    "ellipse_quarter_point": [0.0, 2.0, 0.0],
+    "rectangle_kind": "polycurve",
+    "rectangle_segments": 4,
+    "rectangle_closed": true,
+    "document_objects": 5,
+    "undo_units": 2,
+    "undo_restores_profile": true,
+    "redo_restores_shapes": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1564525,
+      "sha256": "00dcabf1cf03300f33d2e3220e4598e64a271fb1eb0aa9c0ba08379558adff33"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "a9eb8ed691db92d9702b4362f53ffcad29299e9b67e6d883bdaf0389ed0dfee0"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 150328,
+      "sha256": "65a96ced6037ed72fed59ee6cb3424b309bee0189c11ceb2f49044dd409e28e2"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "e233a78b3a02096b3879bd8b59ef44c3d0b37d7f968f1c4e4a38e209891ec92c"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1562624,
+      "sha256": "71cd718e0ae87f737db4e43356bf8bb6250672b8259e71866f2ae8bc2fa118aa"
+    },
+    "om9.exe": {
+      "bytes": 68908032,
+      "sha256": "74201f11464c4673a666bee86031a49796d9053848bcabbfa030536285af074e"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-02-04-002 (circle/arc/ellipse/polygon creation)"
+    ],
+    "open": [
+      "polygon-by-points helper",
+      "spiral and helix creation",
+      "control-point editing and rebuild",
+      "offset, fillet/blend and intersections",
+      "periodic/seam NURBS construction"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Polygon-by-points, spiral/helix and editing remain open.",
+    "Frames are caller-supplied orthonormal vectors; the SDK does not resolve a construction plane.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Take OM9-L2-01-12 file lifecycle, or add polygon-by-points at the same owner."
+}

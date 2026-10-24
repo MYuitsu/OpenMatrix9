@@ -303,5 +303,73 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "SURFACE_BREP"
+  "acceptance_category": "SURFACE_BREP",
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Sketch on surface/mesh cần cho plugin.",
+    "api": [],
+    "candidate_api": [
+      "sketch_on_surface(curve, surface)"
+    ],
+    "host_only": "Sketch engine ở host; SDK gọi và nhận kết quả."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "projected/on-surface construction workflows",
+    "owner": {
+      "crate": "om9-core",
+      "test": "crates/om9-core/tests/l2_02_04.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-02-04-012/api.md",
+      "implementation/design/M03/OM9-L3-02-04-012/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-02-04-012/positive.json",
+      "implementation/fixtures/M03/OM9-L3-02-04-012/negative.json",
+      "implementation/evidence/M03/OM9-L3-02-04-012/OM9-L4-02-04-012-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-02-04-012/OM9-L4-02-04-012-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-02-04-012/OM9-L4-02-04-012-05.ui-review.json",
+      "implementation/evidence/M03/OM9-L3-02-04-012/OM9-L4-02-04-012-05.acceptance.md"
+    ],
+    "tests": [
+      "m03_02_04_012: passed",
+      "l2_02_04 suite: 15 passed, 0 failed",
+      "om9-core suite: 447 passed, 0 failed (52 suites)",
+      "clippy -D warnings: exit 0",
+      "cargo fmt --all -- --check: exit 0",
+      "cargo check --workspace --all-targets -j 2: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "The surface sketch is a fitted 3D curve through surface points; a persistent UV-space curve record is not delivered.",
+      "Mesh projection is triangle-based over the admitted mesh record; no spatial index is built.",
+      "Manual M03-UI interactive acceptance is not performed by the implementer.",
+      "macOS runtime is unverified."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "manual_gate": "M03-UI",
+      "design": "implementation/design/M03/OM9-L3-02-04-012/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-02-04-012/positive.json",
+        "implementation/fixtures/M03/OM9-L3-02-04-012/negative.json"
+      ],
+      "measured": {
+        "surface_sketch_start": "[1.0, 2.0, 0.0]",
+        "two_view_point": "[0.0, 0.0, 0.0]"
+      }
+    },
+    "l4_evidence": {
+      "OM9-L4-02-04-012-01": "1/1",
+      "OM9-L4-02-04-012-02": "1/1",
+      "OM9-L4-02-04-012-03": "1/1",
+      "OM9-L4-02-04-012-04": "1/1",
+      "OM9-L4-02-04-012-05": "1/1"
+    }
+  }
 }

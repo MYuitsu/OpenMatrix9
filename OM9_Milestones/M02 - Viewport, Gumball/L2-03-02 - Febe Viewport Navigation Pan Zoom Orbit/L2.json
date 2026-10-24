@@ -87,6 +87,91 @@
       "manual_gate_promoted": false,
       "preview_mesh_policy": "LOD0 for all occurrences; resolution/MSAA adapt; certified decimation not integrated",
       "presentation_acceptance": "NOT_PROVED"
+    },
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Orbit, orthographic/Perspective pan, wheel zoom-to-cursor, Zoom Extents/Selected, Home/Center and title maximize/restore.",
+    "evidence": [
+      "implementation/design/M02/OM9-L2-03-02/README.md",
+      "implementation/evidence/M02/2026-10-22-l2-03-02-navigation-checks.json",
+      "crates/om9-scene/src/camera.rs",
+      "crates/om9-scene/src/workspace.rs",
+      "crates/om9-app/src/navigation.rs",
+      "crates/om9-app/src/session.rs",
+      "crates/om9-app/src/ui.rs"
+    ],
+    "l3_with_verified_supported_scope": 7,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI visual review of orbit/pan feel, fit/home/center and title maximize.",
+      "macOS runtime is unverified.",
+      "Presentation/performance acceptance remains open from the 2026-10-21 checkpoint."
+    ],
+    "manual_gate": "M02-UI",
+    "technical_scope_complete": true,
+    "latest_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "checks": "implementation/evidence/M02/2026-10-22-l2-03-02-navigation-checks.json",
+      "readme": "implementation/design/M02/OM9-L2-03-02/README.md",
+      "tests": {
+        "om9-core": "407 passed, 48 suites",
+        "om9-scene": "103 passed, 21 suites",
+        "om9-scene camera_fit": "4 passed",
+        "om9-app navigation_commands": "6 passed",
+        "om9-app navigation_drag": "3 passed",
+        "om9-app navigation regressions": "25 passed",
+        "om9-app gpu library": "148 passed",
+        "title menu/chrome": "17 + 13 passed",
+        "title maximize": "2 passed"
+      },
+      "l4_evidence": {
+        "OM9-L3-03-02-001": "5/5",
+        "OM9-L3-03-02-002": "5/5",
+        "OM9-L3-03-02-003": "5/5",
+        "OM9-L3-03-02-004": "5/5",
+        "OM9-L3-03-02-005": "5/5",
+        "OM9-L3-03-02-006": "5/5",
+        "OM9-L3-03-02-007": "5/5"
+      },
+      "manual_gate": "M02-UI"
     }
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-03-02",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M02",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "EVIDENCE-SCOPED; performance mở",
+      "sdk_signal": "EXPORT-BACKLOG + HOST-INTERNAL scheduler",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Xuất camera/view service theo nhu cầu; performance/manual nghiệm thu riêng.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-03-02-001",
+      "OM9-L3-03-02-002",
+      "OM9-L3-03-02-003",
+      "OM9-L3-03-02-004",
+      "OM9-L3-03-02-005",
+      "OM9-L3-03-02-006",
+      "OM9-L3-03-02-007"
+    ]
   }
 }

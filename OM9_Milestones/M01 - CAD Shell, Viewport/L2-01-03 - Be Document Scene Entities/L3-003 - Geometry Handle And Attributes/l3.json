@@ -189,5 +189,69 @@
       "id": "OM9-L4-01-03-003-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-03 - Be Document Scene Entities/L3-003 - Geometry Handle And Attributes/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "plugin_sdk_v1_attributes": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "Geometry handle and attributes: SDK v1 exposes the stored and effective attribute record (layer, colour, visible/hidden/selectable/locked, effective flags, revisions) and stages one attribute edit or one label edit per object in the command's transaction. Geometry itself remains read-only in this slice.",
+      "public_api": [
+        "Host::query_objects",
+        "Host::object_attributes",
+        "Host::set_object_attributes",
+        "Host::rename_object"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-03-attributes-sdk.md",
+        "docs/validation/2026-10-21-m01-03-attributes-sdk.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "One source write per object per command: transform, attributes and rename cannot be combined.",
+        "Layer CRUD/current/assignment, groups, blocks/instances and change notification remain open.",
+        "macOS execution unverified."
+      ]
+    },
+    "plugin_sdk_v1_mesh": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "mesh_creation_verified_windows",
+      "scope": "add_mesh publishes Mesh { vertices, faces } validated by Mesh::validate; out-of-range indices are a mesh refusal; normals/colors/UVs are not accepted in this version; one object in the command's single transaction.",
+      "public_api": [
+        "Host::add_mesh"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-mesh.md",
+        "docs/validation/2026-10-21-m01-01-03-mesh.json"
+      ],
+      "limitations": [
+        "Position/index geometry only; normals, colors and UVs are not exposed.",
+        "Mesh editing/booleans/repair remain open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::add_mesh",
+      "Host::object_attributes",
+      "Host::query_objects",
+      "Host::rename_object",
+      "Host::set_object_attributes"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_attributes",
+      "plugin_sdk_v1_mesh"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-01-03-mesh.json",
+      "docs/validation/2026-10-21-m01-01-03-mesh.md",
+      "docs/validation/2026-10-21-m01-03-attributes-sdk.json",
+      "docs/validation/2026-10-21-m01-03-attributes-sdk.md"
+    ]
+  }
 }

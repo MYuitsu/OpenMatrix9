@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-06-002",
+  "l3_id": "OM9-L3-03-06-002",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Scale âm/zero nếu không hỗ trợ bị từ chối, không phá aspect ratio bất ngờ",
+  "expected": "A typed refusal or explicit warning; no empty quad, no aspect corruption, no divide-by-zero and no unchecked hash.",
+  "evidence": [
+    "om9-app pictureframe unit: 6 passed"
+  ],
+  "status": "PASS"
+}

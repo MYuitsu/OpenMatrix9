@@ -92,6 +92,93 @@
     }
   ],
   "m03_l4_planned_count": 31,
-  "execution_state": "NOT_STARTED",
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+  "execution_state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "readiness_state": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-02-06",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED standalone",
+      "sdk_signal": "AUDIT-THEN-ROUTE → EXPORT/CO-IMPLEMENT",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Transform/orient sessions gọi shared geometry service; options/pivot/copy/preview qua SDK contract.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-02-06-001",
+      "OM9-L3-02-06-002",
+      "OM9-L3-02-06-003",
+      "OM9-L3-02-06-004",
+      "OM9-L3-02-06-005",
+      "OM9-L3-02-06-006"
+    ]
+  },
+  "product_crate": {
+    "session": "crates/om9-core/src/transform_session.rs",
+    "math": "crates/om9-kernel/src/transform_ops.rs",
+    "interactive": "crates/om9-core/src/gumball.rs + crates/om9-app/src/session/gumball.rs",
+    "tests": "core transform 8; kernel transform 3; prior l2_01_11 11; app gumball 17",
+    "state": "all six L3 have automated core/app evidence; the M03-UI reference-picker/preview workflow remains READY_FOR_REVIEW"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "Reference-point Move/Copy, signed-axis Rotate, Scale 1D/2D/3D, mirror and linear/polar array, two/three-point orient, SetPt/align and transaction-safe preview/cancel/Undo.",
+    "evidence": [
+      "implementation/design/M03/OM9-L2-02-06/README.md",
+      "implementation/evidence/M03/2026-10-22-l2-02-06-checks.json",
+      "implementation/evidence/M03/2026-10-22-l2-02-06-core-suite.log",
+      "implementation/evidence/M03/2026-10-22-l2-02-06-kernel-suite.log",
+      "crates/om9-core/src/transform_session.rs",
+      "crates/om9-core/tests/transform_sessions.rs",
+      "crates/om9-kernel/tests/l2_02_06.rs"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "All six M03-UI reference-picker/preview/commit/cancel workflows are unsigned.",
+      "Align/SetPt include translate, rotate, scale and rotate+scale variants; the UI target picker is still manual.",
+      "The three-point orientation frame composition was fixed to `target_frame^T * source_frame` and is covered by a non-identity rotation."
+    ],
+    "l3_with_verified_supported_scope": 6,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "manual_gate": "M03-UI",
+    "technical_scope_complete": true,
+    "latest_verification": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "checks": "implementation/evidence/M03/2026-10-22-l2-02-06-checks.json",
+      "tests": {
+        "core_transform": "8 passed; 0 failed",
+        "kernel_transform": "3 passed; 0 failed",
+        "l2_01_11": "11 passed; 0 failed",
+        "app_gumball": "17 passed; 0 failed",
+        "core_lib": "12 passed; 0 failed",
+        "kernel_all": "exit 0"
+      },
+      "l4_evidence": {
+        "OM9-L3-02-06-001": "5/5",
+        "OM9-L3-02-06-002": "5/5",
+        "OM9-L3-02-06-003": "5/5",
+        "OM9-L3-02-06-004": "5/5",
+        "OM9-L3-02-06-005": "5/5",
+        "OM9-L3-02-06-006": "6/6"
+      }
+    }
+  }
 }

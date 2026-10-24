@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-21",
+  "status": "circle_radius_sdk_export_verified_windows",
+  "owner": "OM9-L2-03-20",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Reads the native circle record radius; other curve kinds are refused instead of sampled.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "c4229bfea5903fce955a0bc738055617dd6367e179092c0f9ca3c9839b3aebb4",
+    "crates/om9-plugin-host/src/staged.rs": "1578bb5a58c107df0af430bc171b16c9bb0c7796de7697307c45e9027d6df9f2",
+    "crates/om9-app/tests/plugin_native.rs": "3cea93e874aa68c369f2d7cbc8d29d2e296ba2ca3e3e945567484ef24c519d33",
+    "sdk/examples/hello-plugin/src/lib.rs": "e03d829450f176b91e79ca0a69863dde4d777f6cb848f75001056a9bd4b1b5c4",
+    "sdk/examples/hello-plugin/descriptor.json": "352b44533c18f5893ee83663b2a02558158d3d96b9e71aa27ef164d1db7df843",
+    "sdk/README.md": "4f4056d82a0ad420f809fc5b3921a0fb681ead3279019db8a181002f5766deea",
+    "sdk/API-INVENTORY.md": "cc5b1ea45a95a8686d0bf49e40cec9e864a323cca014b8c77eb58416a1b71021"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "measure_curve_radius"
+    ],
+    "public_types": [
+      "MeasuredDistance"
+    ],
+    "error_codes": [
+      "unsupported",
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Only native circle geometry has a radius; line/NURBS/polycurve is unsupported.",
+    "The value is object-local millimetres and exactly the record radius (no sampling).",
+    "Reading stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "64 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "22 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-radius",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8831 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "circle_radius_mm": 5.0,
+    "undo_len": 1
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1772124,
+      "sha256": "0d80644f2ba73f8dcd9275f8fc2e524a2254e2ff14cb461654768ad7244bef92"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "d55757aa0f8d3a402045ed8597f2b6d68d69bad33f0c18ecc7b06b5129ef3047"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 174984,
+      "sha256": "5e216856a0a9a83e98ed658c4d0d781477f12b67ede8229d7cd40d2e10324489"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "935bf6ddf2ac2cb63149a5bbef5e26e5392ca4425a8f8fa24a00c53d901994d4"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1769472,
+      "sha256": "b823e62bc58e27cf25dfaa5668466a752294778abdcc2461096137271a4029ef"
+    },
+    "om9.exe": {
+      "bytes": 69362176,
+      "sha256": "025170586b15a33987a76ebc1d6b8fe0ed95b972deb4dbd28b491e839aeb1066"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-03-20-002 (angle and radius measurement)"
+    ],
+    "open": [
+      "ellipse/arc radius beyond the circle record",
+      "area/volume",
+      "statistics"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Circle record only.",
+    "Area/volume and statistics remain open.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Broaden the recorded feed to host commands, or return to M02 for subobject/pick query services."
+}

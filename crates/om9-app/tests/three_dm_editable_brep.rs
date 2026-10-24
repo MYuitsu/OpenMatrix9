@@ -58,10 +58,8 @@ fn rhino5_imports_all_breps_as_editable_and_exports_again() {
         ),
         1
     );
-    let target = std::env::temp_dir().join(format!(
-        "om9-rhino5-editable-{}.3dm",
-        uuid::Uuid::new_v4()
-    ));
+    let target =
+        std::env::temp_dir().join(format!("om9-rhino5-editable-{}.3dm", uuid::Uuid::new_v4()));
     host.export(&coordinator, id, &target, &Cancellation::default())
         .expect("editable export");
     assert!(std::fs::metadata(&target).unwrap().len() > 0);

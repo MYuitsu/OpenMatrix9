@@ -276,11 +276,8 @@ pub fn build_cluster_lod(mesh: &MeshData, group_size: usize) -> Vec<ClusterGroup
         for ratio in [0.5f32, 0.25, 0.1] {
             let target = ((current.triangle_count() as f32 * ratio) as usize).max(4);
             let locked = crate::qem::feature_locks(&current, 30.0);
-            let (next, error) = crate::qem::simplify_with_error_locked(
-                &current,
-                target,
-                Some(&locked),
-            );
+            let (next, error) =
+                crate::qem::simplify_with_error_locked(&current, target, Some(&locked));
             if next.triangle_count() >= current.triangle_count() {
                 break;
             }

@@ -1,0 +1,14 @@
+    Blocking waiting for file lock on package cache
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.35s
+     Running tests\utilities.rs (L:/om9-target\debug\deps\utilities-d9fc8923696f65a2.exe)
+
+running 5 tests
+test naked_edges_select_open_meshes ... ok
+test checked_repair_error_keeps_all_selected_objects_and_undo_unchanged ... ok
+test mesh_reduce_preserves_uv_and_material_sidecar ... ok
+test bounds_center_group_and_ungroup_are_undoable ... ok
+test mesh_from_nurbs_and_reduce_basic ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+

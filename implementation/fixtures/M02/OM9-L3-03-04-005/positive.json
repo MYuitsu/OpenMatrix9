@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-04-005",
+  "l3_id": "OM9-L3-03-04-005",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Shortcut đổi END/MID theo registry, trạng thái panel cập nhật cùng frame",
+  "expected": "The documented snap/Ortho/Planar/Project/SmartTrack state and marker.",
+  "evidence": [
+    "om9-app snap_panel_modes: 4 passed"
+  ],
+  "status": "PASS"
+}

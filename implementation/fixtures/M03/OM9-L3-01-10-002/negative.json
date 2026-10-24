@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-002",
+  "fixture_id": "OM9-L3-01-10-002-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "tampered source",
+    "open shell operand"
+  ],
+  "expect": "CreationError::Invalid; the argument is untouched"
+}

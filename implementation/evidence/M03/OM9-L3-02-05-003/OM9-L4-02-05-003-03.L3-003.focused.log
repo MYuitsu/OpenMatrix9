@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\surface_ops.rs (L:\om9-target\debug\deps\surface_ops-2141b94b79e93132.exe)
+
+running 2 tests
+test m03_02_05_rail_revolve_and_extrude_refuse_bad_input ... ok
+test m03_02_05_rail_revolve_extrudes_and_follows_a_helix ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+

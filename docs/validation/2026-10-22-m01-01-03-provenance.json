@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-22",
+  "status": "import_provenance_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Read-only mapping of Document::provenance plus the fixed enum string contract.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "de4dab04aeba65dc79aca1234bf6cb0aefe5145b8ad54ae6224941be073472ba",
+    "crates/om9-plugin-host/src/staged.rs": "a809f4c20c891b1f63490d602f7bee35c4d1d2d0a5404db3fb8dbde97ae37087",
+    "crates/om9-app/tests/plugin_native.rs": "9f7e60a1535c6d8ec65216940d9b409ae02970c6de5431ad4d33fc9943bc9ed2",
+    "sdk/examples/hello-plugin/src/lib.rs": "b16a8b44673bdf72069cfba70fd1c1f0c1fdd4138b45292dad24baefd2b07fe1",
+    "sdk/examples/hello-plugin/descriptor.json": "b06f1591aa55e24ee42dcd54b391c89e66c12c7ee016d8542e805c33e07ef815"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "object_provenance"
+    ],
+    "public_types": [
+      "ObjectProvenance"
+    ],
+    "error_codes": [
+      "id",
+      "missing"
+    ]
+  },
+  "asserted_semantics": [
+    "Complete-chain only; partial proof is null.",
+    "Fixed strings for mode/kind/disposition.",
+    "Lowercase hex sha256.",
+    "Reading stages no mutation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "66 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "37 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261022-plugin-sdk-provenance",
+      "result": "PASS, 10 commands",
+      "native_tests": 37,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8871 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "provenance_is_null_for_native_object": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1984837,
+      "sha256": "49b0dd05716a187a3edeb3f69031b73e1b5a8ac67e3222232ef8db089b5b22ac"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "7129acd705acdad31e570d24d47e2b2fd943b06d037dc72bb2a6739891b121f2"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 194715,
+      "sha256": "0d3a4089dc38315b7dff5010a2abd148de199bb9154cd91e53b0616b6d2b3628"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "bcf481f592148e9e277237e668476297a9ec8b4974aeb71823f5182fb42fdb8a"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1980928,
+      "sha256": "505ffa09b0ca0bf63891640eb51ee17da884fd99a7df1f3d45fbb289315e1d44"
+    },
+    "om9.exe": {
+      "bytes": 69638144,
+      "sha256": "b5888a156fe8a8d835ad6ecdecd8bed231bb13403a41522c6b35176e89b91180"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-013 (provenance read)"
+    ],
+    "open": [
+      "provenance write (host import flow)"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Read-only.",
+    "macOS host and plugin execution unverified.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Pick the next marked planned L3 whose core exists, or wrap is_object_pickable."
+}

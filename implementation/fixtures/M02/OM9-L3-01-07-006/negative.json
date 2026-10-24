@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G02-A-01-07-006",
+  "l3_id": "OM9-L3-01-07-006",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Object hidden hoặc đã xóa không còn outline sau scene refresh",
+  "expected": "An explicit miss/error or unchanged state; no stale selection and no nearby-geometry rematch.",
+  "evidence": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app subobject_occurrences: 5 passed",
+    "om9-app acceptance_viewport_selection: 8 passed"
+  ],
+  "status": "PASS"
+}

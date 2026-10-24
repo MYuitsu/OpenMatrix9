@@ -78,6 +78,24 @@ pub struct Ray {
     pub origin: Point3,
     pub direction: Point3,
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CPlanePreset {
+    Top,
+    Front,
+    Right,
+}
+
+impl CPlanePreset {
+    /// Right-handed axes for the world Top, Front and Right construction planes.
+    pub fn axes(self) -> (Point3, Point3) {
+        match self {
+            Self::Top => ([1., 0., 0.], [0., 1., 0.]),
+            Self::Front => ([1., 0., 0.], [0., 0., 1.]),
+            Self::Right => ([0., 1., 0.], [0., 0., 1.]),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CPlane {
@@ -95,6 +113,16 @@ impl CPlane {
             revision: 1,
         }
     }
+    /// The named world construction plane used by the jewellery views.
+    pub fn preset(preset: CPlanePreset) -> Self {
+        let (x, y) = preset.axes();
+        Self {
+            origin: [0.; 3],
+            x,
+            y,
+            revision: 1,
+        }
+    }
     pub fn new(origin: Point3, x: Point3, y: Point3) -> Result<Self> {
         let frame = Self {
             origin,
@@ -104,6 +132,63 @@ impl CPlane {
         };
         frame.validate()?;
         Ok(frame)
+    }
+    /// Move the plane origin without changing its axes.
+    pub fn with_origin(self, origin: Point3) -> Result<Self> {
+        self.validate()?;
+        let revision = self
+            .revision
+            .checked_add(1)
+            .ok_or(Error::Overflow("CPlane revision"))?;
+        let frame = Self {
+            origin,
+            revision,
+            ..self
+        };
+        frame.validate()?;
+        Ok(frame)
+    }
+    /// Rotate the plane axes about its own normal, right-handed in `x -> y`.
+    pub fn rotated(self, radians: f64) -> Result<Self> {
+        if !radians.is_finite() {
+            return Err(Error::Invalid("CPlane rotation"));
+        }
+        self.validate()?;
+        let (sin, cos) = radians.sin_cos();
+        let x = add(mul(self.x, cos), mul(self.y, sin));
+        let y = sub(mul(self.y, cos), mul(self.x, sin));
+        let revision = self
+            .revision
+            .checked_add(1)
+            .ok_or(Error::Overflow("CPlane revision"))?;
+        let frame = Self {
+            origin: self.origin,
+            x,
+            y,
+            revision,
+        };
+        frame.validate()?;
+        Ok(frame)
+    }
+    /// Build a plane from an origin and two points that define the local +X and +Y
+    /// directions. Collinear or coincident points are refused before any assignment.
+    pub fn from_three_points(origin: Point3, x_point: Point3, y_point: Point3) -> Result<Self> {
+        finite(origin)?;
+        finite(x_point)?;
+        finite(y_point)?;
+        let x_hint = sub(x_point, origin);
+        let y_hint = sub(y_point, origin);
+        let x = unit(x_hint)?;
+        let y_length = dot(y_hint, y_hint).sqrt();
+        if !y_length.is_finite() || y_length <= 0. {
+            return Err(Error::Invalid("CPlane frame points"));
+        }
+        let y_perpendicular = sub(y_hint, mul(x, dot(y_hint, x)));
+        if dot(y_perpendicular, y_perpendicular).sqrt() <= 1.0e-9 * y_length {
+            return Err(Error::Invalid("CPlane frame points"));
+        }
+        let y = unit(y_perpendicular)?;
+        Self::new(origin, x, y)
     }
     pub fn validate(self) -> Result<()> {
         finite(self.origin)?;
@@ -381,6 +466,72 @@ impl Camera {
             self.target[1] + radius * next_elevation.cos() * next_azimuth.sin(),
             self.target[2] + radius * next_elevation.sin(),
         ];
+        next.revision = self
+            .revision
+            .checked_add(1)
+            .ok_or(Error::Overflow("camera revision"))?;
+        next.validate()?;
+        *self = next;
+        Ok(())
+    }
+
+    /// Fit the current view direction to a world-space bounding sphere. The sphere is
+    /// expanded by `margin` and the projection is chosen from the supplied aspect ratio;
+    /// a zero-size bound remains finite because the caller supplies the fallback radius.
+    pub fn fit_bounds(
+        &mut self,
+        center: Point3,
+        radius: f64,
+        aspect: f64,
+        margin: f64,
+    ) -> Result<()> {
+        finite(center)?;
+        if !radius.is_finite() || radius <= 0. || !aspect.is_finite() || aspect <= 0. {
+            return Err(Error::Invalid("fit bounds"));
+        }
+        if !margin.is_finite() || margin < 1. {
+            return Err(Error::Invalid("fit margin"));
+        }
+        let direction = unit(sub(self.eye, self.target))?;
+        let mut next = self.clone();
+        next.target = center;
+        next.eye = match self.projection {
+            Projection::Orthographic { .. } => {
+                let distance = dot(sub(self.eye, self.target), sub(self.eye, self.target))
+                    .sqrt()
+                    .max(radius * 2.0);
+                add(center, mul(direction, distance))
+            }
+            Projection::Perspective { vertical_fov_rad } => {
+                let half_vertical = vertical_fov_rad * 0.5;
+                let half_horizontal = (half_vertical.tan() * aspect).atan();
+                let half = half_vertical.min(half_horizontal);
+                add(center, mul(direction, radius * margin / half.sin()))
+            }
+        };
+        match &mut next.projection {
+            Projection::Orthographic { vertical_span_mm } => {
+                *vertical_span_mm = 2.0 * radius * margin / aspect.min(1.0);
+            }
+            Projection::Perspective { .. } => {}
+        }
+        next.fit_clip(radius)?;
+        next.revision = self
+            .revision
+            .checked_add(1)
+            .ok_or(Error::Overflow("camera revision"))?;
+        next.validate()?;
+        *self = next;
+        Ok(())
+    }
+
+    /// Move the camera target and eye together, preserving rotation, projection and distance.
+    pub fn center_at(&mut self, target: Point3) -> Result<()> {
+        finite(target)?;
+        let shift = sub(target, self.target);
+        let mut next = self.clone();
+        next.eye = add(self.eye, shift);
+        next.target = target;
         next.revision = self
             .revision
             .checked_add(1)

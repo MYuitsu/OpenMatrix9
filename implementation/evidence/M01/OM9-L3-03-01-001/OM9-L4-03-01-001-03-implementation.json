@@ -1,0 +1,15 @@
+{
+  "l4": "OM9-L4-03-01-001-03",
+  "l3": "OM9-L3-03-01-001",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-scene/src/workspace.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "crates/om9-app/tests/viewport_layout.rs",
+    "crates/om9-app/tests/chrome_actions.rs"
+  ],
+  "oracle": "matrix_four_view_camera_presets_are_distinct_and_valid + four-view placement"
+}

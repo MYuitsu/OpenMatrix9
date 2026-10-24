@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-09-008",
+  "l3_id": "OM9-L3-03-09-008",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Click nút disabled không gọi M01 command engine và không mutate doc",
+  "expected": "A disabled action with a reason; no false Gem mode, no stub success, no dispatch or document mutation.",
+  "evidence": [
+    "om9-app f6 unit: 7 passed"
+  ],
+  "status": "PASS"
+}

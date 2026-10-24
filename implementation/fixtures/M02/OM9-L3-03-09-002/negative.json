@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-09-002",
+  "l3_id": "OM9-L3-03-09-002",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "No document hoặc command disabled phải được mô tả lý do",
+  "expected": "A disabled action with a reason; no false Gem mode, no stub success, no dispatch or document mutation.",
+  "evidence": [
+    "om9-app f6 unit: 7 passed",
+    "om9-app f6_context: 2 passed"
+  ],
+  "status": "PASS"
+}

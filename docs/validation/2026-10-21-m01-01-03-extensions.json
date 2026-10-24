@@ -1,0 +1,146 @@
+{
+  "date": "2026-10-21",
+  "status": "object_extension_slots_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Exports the document's named extension slots read/write with the owner's record validation and the one-source-write rule.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "ca61098b2e653b70a3061eadae33fa56b2b634289bb2ef65b66892e9022f2199",
+    "crates/om9-plugin-host/src/staged.rs": "9447505987261385688c03931e57e33aa39e68dfbb409d3ff4e3540f15223c54",
+    "crates/om9-app/tests/plugin_native.rs": "32af54adda5fe39a3cc4ed97212a5bdd301786369716ba645c9ffed334c175b0",
+    "sdk/examples/hello-plugin/src/lib.rs": "799ae219896aff80be195f4e13004e4fcabae8dc1a938c7c1af56d20eab90bf5",
+    "sdk/examples/hello-plugin/descriptor.json": "3c3db7c20e2ff08e5e2d6b8a47a353e056514c17bd8d5a8458a3782d533fe59a",
+    "sdk/README.md": "bea253bd54143a8afca0db1aab928f9a62506358210764ca3719f4f4ab9eca41",
+    "sdk/API-INVENTORY.md": "6648c732e2191e44b63529c921421771a60e4613078667a0fde69c2d381cba7d"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["object_extensions", "set_object_extension", "clear_object_extension"],
+    "public_types": ["ObjectExtension"],
+    "shared_service": [
+      "om9_core::model::Extension::new",
+      "om9_core::transaction::Mutation::Extension"
+    ],
+    "error_codes": ["extension", "budget", "conflict", "missing", "permission"]
+  },
+  "asserted_semantics": [
+    "A slot payload is verbatim JSON-object text with a positive version; a malformed payload, empty object or zero version is an extension refusal.",
+    "Reading merges base slots with the command's staged values; a cleared slot is absent, not null.",
+    "Writing a slot is a source write like placement/attributes/label/layer, so two write kinds on one object in one command conflict.",
+    "An object created by the same command cannot be tagged yet; its inserted record is stamped once.",
+    "Undo restores the previous slot value or removes the slot."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "56 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "16 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-extension",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8815 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "tagged_slot": "org.openmatrix9.demo",
+    "version": 1,
+    "payload": "{\"weight_g\":4.2}",
+    "persisted_to_document": true,
+    "undo_removes_slot": true,
+    "redo_restores_slot": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1659452,
+      "sha256": "6cd7c7f4de358104bbb5681b57ac523aa05e5ddf3f3232170871c2af4ae191a1"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "fff34373b84d997d314987fcb3b24441e4e9025c32c32f7c41a79a71e03d4f83"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 159269,
+      "sha256": "1d1e2fc7f4e0b7fbae92b4236639240067e25c3fef7228e15f2a3a1a8332543a"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "18d0bd2628399a021ccbd3576c65693305a6837eebd919c5654ce99ddb54be62"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1657344,
+      "sha256": "e94818fd4227e7f31812822cd4b11881e780ff3449aadf6ed76e5d10bbfde91b"
+    },
+    "om9.exe": {
+      "bytes": 69168128,
+      "sha256": "5ea3f195a73d72aef4409eead5c09cb11f1ce167736a6e64147b6a70105c1148"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-03-009 (jewelry semantic extension record read/write)"],
+    "open": [
+      "extension schema interpretation",
+      "tagging an object created in the same command",
+      "document change notification feed"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "The SDK returns the stored text; extension schemas are the plugin's own concern.",
+    "An object created in the same command must be tagged in a following command.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose change notification with a real recorded feed at M01 01-03, or return to M02 for subobject/pick query services."
+}

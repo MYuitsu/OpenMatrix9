@@ -50,6 +50,8 @@ fn fixture(hidden: bool) -> Fixture {
             ],
             normals: vec![],
             colors: vec![],
+
+            corner_uvs: Vec::new(),
         }),
         None,
     );

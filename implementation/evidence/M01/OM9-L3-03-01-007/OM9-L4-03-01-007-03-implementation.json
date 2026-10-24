@@ -1,0 +1,14 @@
+{
+  "l4": "OM9-L4-03-01-007-03",
+  "l3": "OM9-L3-03-01-007",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-scene/src/workspace.rs"
+  ],
+  "tests": [
+    "crates/om9-app/tests/chrome_actions.rs"
+  ],
+  "oracle": "view_tab_switches_active_and_maximized_view"
+}

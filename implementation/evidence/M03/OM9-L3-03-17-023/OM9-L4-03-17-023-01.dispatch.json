@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-023-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-023",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-024",
+  "source_command": "Variable Chamfer Surfaces",
+  "menu_icon": "SurfaceVariableFilletBlendChamferVariableChamferSurfaces",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-023/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-023/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-023/dispatch_contract.json": "d32c865662e81f0d7040e37d16a484094865a0319cba5fd1cbad4b63acc82179",
+    "implementation/design/M03/OM9-L3-03-17-023/source_crosswalk.json": "63d57558aaef9f0a48591a6fbace4e742a29e42d41c9e16d1f5ac59787b546ac"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

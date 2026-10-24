@@ -1,0 +1,62 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-13-001",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-core/src/three_dm.rs",
+      "crates/om9-exchange/src/import_dto.rs",
+      "native/native_exchange.cpp"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_001 -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/m03_01_13_001.focused.log",
+      "stdout_log_sha256": "2dde2e6fca0e565274b8ae8d44023c0db88b78fd86cbd62274948a716aec8979"
+    },
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_receipt -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/receipt.log",
+      "stdout_log_sha256": "7cc14fd37a5ab33b8935885cd590697bb335d8549488cd4f712c38b97199a893"
+    }
+  ],
+  "observed": {
+    "archive_version": 50,
+    "model_unit": "Millimeter",
+    "native_objects": 24,
+    "layers": 2
+  },
+  "expected": {
+    "archive_version": 50,
+    "model_unit": "Millimeter",
+    "native_objects": 24,
+    "layers": 2
+  },
+  "tolerances": {
+    "archive_version": "exact",
+    "model_unit": "exact"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/three_dm.rs",
+    "crates/om9-exchange/src/import_dto.rs",
+    "native/native_exchange.cpp"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/three_dm.rs": "d6b8e8784af4255d877bd79e5a4a55a5ce130fb8793cfa0d582d8e3a3b643a1e",
+    "crates/om9-exchange/src/import_dto.rs": "52cd4784e1885b9d4fb648da73180e97bf87ecce049438a95bec81221dcea5f8",
+    "native/native_exchange.cpp": "8cf87d2ca10e785300232219f3742973ecbde4d6249dfb96d190498db27ef6c1"
+  }
+}

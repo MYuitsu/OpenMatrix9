@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-017-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-017",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-117",
+  "source_command": "Surface Extrude All",
+  "menu_icon": "SurfaceGVDExtrudeAll",
+  "owner_candidate": "OM9-L3-01-09-002",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-017/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-017/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-017/dispatch_contract.json": "71d49fa09633f9a65c66ad603a781da9c2b66bba397256f64f7a6091435876db",
+    "implementation/design/M03/OM9-L3-03-17-017/source_crosswalk.json": "307bd0eaa5ebd925e45c876cef074398f0fcbf2a0eede5a13d3f1d79b26abe54"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

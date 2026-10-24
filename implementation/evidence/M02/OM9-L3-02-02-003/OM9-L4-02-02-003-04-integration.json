@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-02-02-003-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-02-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Controller::set_cplane_origin_rotation and set_cplane_from_three_points validate before replacing the active view plane; world geometry is untouched.",
+  "tests": [
+    "om9-app cplane_coordinate_input: 10 passed"
+  ]
+}

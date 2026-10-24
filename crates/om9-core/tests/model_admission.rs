@@ -75,6 +75,8 @@ fn mesh_and_cloud_have_distinct_master_types_and_ordered_channels() {
         faces: vec![vec![0, 1, 2]],
         normals: vec![],
         colors: vec![],
+
+        corner_uvs: Vec::new(),
     });
     assert!(mesh.validate(&Limits::default()).is_ok());
     let cloud = Geometry::Cloud(Cloud {
@@ -90,6 +92,8 @@ fn mesh_and_cloud_have_distinct_master_types_and_ordered_channels() {
         faces: vec![vec![0, 1, 2]],
         normals: vec![],
         colors: vec![],
+
+        corner_uvs: Vec::new(),
     });
     assert!(invalid.validate(&Limits::default()).is_err());
     let invalid = Geometry::Cloud(Cloud {

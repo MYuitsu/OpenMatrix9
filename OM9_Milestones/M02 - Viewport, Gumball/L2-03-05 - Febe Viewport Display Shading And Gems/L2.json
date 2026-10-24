@@ -65,5 +65,90 @@
       "id": "OM9-L3-03-05-006",
       "file": "M02 - Viewport, Gumball/L2-03-05 - Febe Viewport Display Shading And Gems/L3-006 - Display Settings Preview Presets/l3.json"
     }
-  ]
+  ],
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-03-05",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M02",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED standalone",
+      "sdk_signal": "AUDIT-THEN-ROUTE → EXPORT/CO-IMPLEMENT",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Display/material DTO và mode service; renderer/gem GPU resources vẫn host-owned.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-03-05-001",
+      "OM9-L3-03-05-002",
+      "OM9-L3-03-05-003",
+      "OM9-L3-03-05-004",
+      "OM9-L3-03-05-005",
+      "OM9-L3-03-05-006"
+    ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Wireframe/Shaded switch, gem semantic cue/neutral deferred, curve/cutter categories, backface parity, selection overlay and versioned display preset.",
+    "evidence": [
+      "implementation/design/M02/OM9-L2-03-05/README.md",
+      "implementation/evidence/M02/2026-10-22-l2-03-05-display-shading-gems-checks.json",
+      "crates/om9-app/src/display.rs",
+      "crates/om9-app/src/viewport_menu.rs",
+      "crates/om9-app/src/session.rs"
+    ],
+    "l3_with_verified_supported_scope": 6,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI visual review of shaded faces, gem token cues, cutter filtering, backfaces and preset reload.",
+      "macOS runtime is unverified.",
+      "Typed M05/M07 provider records are synthetic fixtures; production asset library and cutter generator are not claimed."
+    ],
+    "manual_gate": "M02-UI",
+    "technical_scope_complete": true,
+    "latest_verification": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "checks": "implementation/evidence/M02/2026-10-22-l2-03-05-display-shading-gems-checks.json",
+      "readme": "implementation/design/M02/OM9-L2-03-05/README.md",
+      "tests": {
+        "om9-app display_modes": "3 passed",
+        "display cues": "6 passed",
+        "display/selection regressions": "29 passed",
+        "om9-app gpu library": "155 passed",
+        "viewport_title_menu": "18 passed",
+        "om9-scene": "103 passed, 21 suites",
+        "display preset persistence": "2 passed",
+        "display/persistence/selection regressions": "33 passed",
+        "cargo fmt": "exit 0",
+        "om9-app clippy": "exit 0",
+        "workspace clippy": "exit 0"
+      },
+      "l4_evidence": {
+        "OM9-L3-03-05-001": "5/5",
+        "OM9-L3-03-05-002": "5/5",
+        "OM9-L3-03-05-003": "5/5",
+        "OM9-L3-03-05-004": "5/5",
+        "OM9-L3-03-05-005": "5/5",
+        "OM9-L3-03-05-006": "5/5"
+      },
+      "manual_gate": "M02-UI"
+    }
+  }
 }

@@ -1,0 +1,58 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-011-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-13-011",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-app/src/session/files.rs",
+      "crates/om9-app/src/ui/files.rs"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_011 -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/m03_01_13_011.focused.log",
+      "stdout_log_sha256": "81009dfcf703bbb0fd31f2bc516afc1c23af6409e6fbcbd72b632d76c8d1ca7e"
+    },
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_receipt -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/receipt.log",
+      "stdout_log_sha256": "7cc14fd37a5ab33b8935885cd590697bb335d8549488cd4f712c38b97199a893"
+    }
+  ],
+  "observed": {
+    "summary_prefix": "3DM import summary:",
+    "summary_count_labels": 10,
+    "last_diagnostic_is_summary": true,
+    "bad_archive_error_non_empty": true
+  },
+  "expected": {
+    "summary_prefix": "3DM import summary:",
+    "summary_count_labels": 10,
+    "last_diagnostic_is_summary": true,
+    "bad_archive_error_non_empty": true
+  },
+  "tolerances": {
+    "text": "exact prefix/labels"
+  },
+  "artifact_paths": [
+    "crates/om9-app/src/session/files.rs",
+    "crates/om9-app/src/ui/files.rs"
+  ],
+  "artifact_sha256": {
+    "crates/om9-app/src/session/files.rs": "799dcff9476c67488d5649de498742e0bf1af864a171ff85adbeb9ccf20c4fab",
+    "crates/om9-app/src/ui/files.rs": "1c7b6e3e973dbffa2196185a705a79fe98aec232757ebf31333f6aaad8be451f"
+  }
+}

@@ -36,6 +36,8 @@ fn cube() -> Mesh {
         ],
         normals: Vec::new(),
         colors: Vec::new(),
+
+        corner_uvs: Vec::new(),
     }
 }
 

@@ -151,3 +151,22 @@ fn nan_and_empty_numeric_inputs_commit_nothing_and_keep_the_gumball() {
     let moved = world(&controller, ids[0]);
     assert!((moved[0] - before[0] - 12.5).abs() < 1e-9, "{moved:?}");
 }
+
+#[test]
+fn a_twelve_point_five_millimetre_handle_input_is_exact_and_one_entry() {
+    let (mut controller, ids) = controller_with_points();
+    controller.select_objects(&ids).expect("select");
+    let before: Vec<[f64; 3]> = ids.iter().map(|id| world(&controller, *id)).collect();
+    let undo_before = controller.coordinator().undo_len();
+    controller.submit("MoveX 12.5").expect("MoveX");
+    assert_eq!(controller.coordinator().undo_len(), undo_before + 1);
+    for (id, before) in ids.iter().zip(before) {
+        let after = world(&controller, *id);
+        assert!(
+            (after[0] - before[0] - 12.5).abs() < 1e-9
+                && (after[1] - before[1]).abs() < 1e-9
+                && (after[2] - before[2]).abs() < 1e-9,
+            "{before:?} -> {after:?}"
+        );
+    }
+}

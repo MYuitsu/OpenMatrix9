@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-003",
+  "fixture_id": "OM9-L3-02-05-003-NEGATIVE",
+  "cases": [
+    "a zero axis direction is refused",
+    "fewer than four profile samples or two rail samples are refused"
+  ],
+  "invariants": [
+    "no partial surface is returned on refusal",
+    "no tessellation is substituted for the exact NURBS surface",
+    "the typed error reaches the caller"
+  ],
+  "measured_on_2026_10_22": "all listed negative cases pass in the focused logs"
+}

@@ -182,18 +182,24 @@
     "OM9-L4-02-01-003-05"
   ],
   "runtime_implementation": {
-    "date": "2026-10-19",
-    "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
-    "target": "standalone Rust OM9",
-    "scope": "Closed/planar classification under explicit tolerance policy.",
-    "evidence": [
-      "implementation/design/M01/OM9-L2-02-01/crosswalk.json",
-      "implementation/design/M01/OM9-L2-02-01/l4-matrix.json",
-      "implementation/design/M01/OM9-L2-02-01/oracles.json",
-      "crates/om9-core/tests/rhino_semantics.rs:191"
-    ],
-    "human_approval": null,
-    "remaining": []
+    "plugin_sdk_v1_curve_semantics": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "curve_semantics reports closedness (distance(first,last) <= tolerance over the owner's 33-sample curve), planarity (Newell-normal rule), endpoints and the tolerance used. The tolerance is explicit or comes from Document::effective_tolerance; a document that states none is a tolerance refusal and a curve at or below the tolerance is refused as degenerate, never reclassified.",
+      "public_api": [
+        "Host::curve_semantics",
+        "CurveSemantics"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-02-01-curve-definition.md",
+        "docs/validation/2026-10-21-m01-02-01-curve-definition.json"
+      ],
+      "limitations": [
+        "Partial scope only: seam/closure editing and surface rules remain open.",
+        "macOS execution unverified."
+      ]
+    }
   },
   "children_l4": [
     {
@@ -216,5 +222,21 @@
       "id": "OM9-L4-02-01-003-05",
       "file": "M01 - CAD Shell, Viewport/L2-02-01 - Be Rhino Nurbs Object Semantics/L3-003 - Open Closed And Planar Curve Rules/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::curve_definition",
+      "Host::curve_semantics"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_curve_semantics"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-02-01-curve-definition.json",
+      "docs/validation/2026-10-21-m01-02-01-curve-definition.md"
+    ]
+  }
 }

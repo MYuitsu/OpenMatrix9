@@ -272,5 +272,119 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "OM9-L3-03-19-006_2026_10_23": {
+      "date": "2026-10-23",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "l4_verified": 5,
+      "tests": {
+        "core_utilities": "6 passed; 0 failed",
+        "app_utilities": "4 passed; 0 failed",
+        "public_source_audit": "0 errors"
+      },
+      "manual_gate": "M03-UI"
+    },
+    "checked_mesh_prepass_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "CHECKED_PREPASS_REGRESSION_VALIDATED",
+      "scope": "Existing self-overlap prepass now returns a checked CSG result or error. Coplanar overlap is detected; shared boundaries are excluded. No deletion fallback. Later QEM/truncation is not certified by CSG.",
+      "evidence": [
+        "docs/validation/2026-10-23-mesh-csg.md",
+        "implementation/evidence/AFTER/mesh-csg-2026-10-23/receipt.json"
+      ],
+      "app_utilities": {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "suites_including_doctests": 1
+      },
+      "manual_gate_promoted": false
+    },
+    "mesh_csg_scaling_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "VALIDATED_BVH_SCALING_SLICE_NUMERICAL_LIMIT_RECORDED",
+      "scope": "Local cutter BVH, signed ray winding with solid-angle fallback, vertex and output embedding BVHs; default 25K/20M.",
+      "evidence": [
+        "docs/validation/2026-10-23-mesh-csg-scaling.md",
+        "implementation/evidence/AFTER/mesh-csg-scaling-2026-10-23/receipt.json"
+      ],
+      "tests": {
+        "core_regression": {
+          "passed": 512,
+          "failed": 0,
+          "ignored": 2,
+          "suites_including_doctests": 58
+        },
+        "app_utilities": {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "suites_including_doctests": 1
+        },
+        "explicit_release_benchmarks": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "suites_including_doctests": 1
+        }
+      },
+      "defaults": {
+        "max_triangles": 25000,
+        "max_fragments": 50000,
+        "max_work": 20000000,
+        "tolerance": 1e-08
+      },
+      "limitations": [
+        "Closed oriented triangle input and f64/tolerance restrictions retained.",
+        "16384-triangle curved fixture remains unsupported: CSG feature below tolerance; sources unchanged.",
+        "Dense intersections may still exhaust budgets; 25K is admission, not an unconditional success guarantee.",
+        "No new UI/SDK command, exact predicates, open-hole repair, production fixture or macOS certification."
+      ],
+      "manual_gate_promoted": false
+    },
+    "mesh_csg_curved_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "VALIDATED_CURVED16K_ORIGINAL_TOLERANCE",
+      "scope": "Finite-triangle normal-probe clearance corrects false sub-tolerance rejection; original 16384-triangle U/D/I and joined self-repair with UV seams pass.",
+      "tests": {
+        "core_regression": {
+          "passed": 514,
+          "failed": 0,
+          "ignored": 2,
+          "suites_including_doctests": 58
+        },
+        "app_utilities": {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "suites_including_doctests": 1
+        },
+        "release_geometry_including_benchmarks": {
+          "passed": 17,
+          "failed": 0,
+          "ignored": 0,
+          "suites_including_doctests": 1
+        }
+      },
+      "defaults_unchanged": {
+        "tolerance": 1e-08,
+        "max_triangles": 25000,
+        "max_fragments": 50000,
+        "max_work": 20000000
+      },
+      "output_triangles_union_and_repair": 15724,
+      "evidence": [
+        "docs/validation/2026-10-23-mesh-csg-curved.md",
+        "implementation/evidence/AFTER/mesh-csg-curved-2026-10-23/receipt.json"
+      ],
+      "limitations": [
+        "Bounded f64 kernel and closed oriented triangle input remain; no arbitrary production-mesh or exact-predicate certification.",
+        "Genuinely inadequate clearance, ambiguity, unsupported topology and exhausted budgets still fail explicitly.",
+        "New UI/SDK workflow, open-mesh repair and macOS remain outside this fix.",
+        "Combined app/core Clippy failed on unrelated needless_return in crates/om9-app/src/session/solid.rs:596; core Clippy passes."
+      ],
+      "manual_gate_promoted": false
+    }
+  }
 }

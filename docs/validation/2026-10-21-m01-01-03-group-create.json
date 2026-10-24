@@ -1,0 +1,149 @@
+{
+  "date": "2026-10-21",
+  "status": "group_create_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Stages one Mutation::GroupCreate at the base revision and includes it in staged group reads.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "0537aefc8db95a65c85d3f701aab0a6902e65ae838447576c251f0938ab0dbba",
+    "crates/om9-plugin-host/src/staged.rs": "0ec7a0ce9442e6f73ddc7e0c62d1d389411afe57f3c67dd4d87268b190909d93",
+    "crates/om9-app/tests/plugin_native.rs": "0d43de1a8495c5fde684ecd88dacfba269ff7b4ff097252961b6b45cba81015f",
+    "sdk/examples/hello-plugin/src/lib.rs": "27317dddff7ee651532549d7da15eeace7512e520d2403b9aa59fe4b2e0689cb",
+    "sdk/examples/hello-plugin/descriptor.json": "a742b4daa2fbb3cf951f7cebf295cf527a672af735efd1e44c56d63e967723ed",
+    "sdk/README.md": "4a8de55dbe3f6e429a571342809a2d3d450c8f4317c306a2a1073ff9c19ed7e2",
+    "sdk/API-INVENTORY.md": "2e7d53d43acf4620c4708ab6409b75ea617ff38800b82bf133db5cdc951ebd29"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "create_group"
+    ],
+    "error_codes": [
+      "group",
+      "missing",
+      "id"
+    ]
+  },
+  "asserted_semantics": [
+    "Members must exist and not be deleted.",
+    "One Mutation::GroupCreate at the base revision; one Undo removes it.",
+    "Staged groups appear in groups() reads.",
+    "Member order is preserved."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "62 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "33 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-group-create",
+      "result": "PASS, 10 commands",
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8856 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "groups": 1,
+    "members": 2,
+    "undo_len": 2,
+    "undo_removes_group": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1935327,
+      "sha256": "43c76344a50072e52f8663026aec8fa112eaf69567d452c435754bb8541afdf9"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "c7539da996dda06f6710d9fa91e425c96a334c231bd0672a577328195f6af93a"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 188498,
+      "sha256": "e7fd20038e0fc595267214998f613aa5a09a6d76688220de32b1692d9e35f892"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "a31c4bd17e8287b3480687b31c278370aba15d96444ec4b86326553626c5ccc2"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1931776,
+      "sha256": "fc4bb197f32f740ca6f378620a17e61920be9d4adb3673aa2b568b13fbd7e479"
+    },
+    "om9.exe": {
+      "bytes": 69529088,
+      "sha256": "72a3181df71b9316394b1a1d9e18e61ac08b00532479e4cda15fd7b661d97c6a"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-03-007 (group create)"
+    ],
+    "open": [
+      "group edit/dissolve",
+      "member add/remove",
+      "block instance graph"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "No group edit/dissolve.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose group membership edit/dissolve, or return to M02 for subobject/pick query services."
+}

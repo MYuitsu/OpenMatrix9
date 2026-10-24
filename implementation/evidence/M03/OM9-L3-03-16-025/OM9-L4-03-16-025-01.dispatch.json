@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-025-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-025",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-024",
+  "source_command": "Apply UV Curves",
+  "menu_icon": "CurveCurveFromObjectsApplyUVCurves",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Apply UV Curves; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-025/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-025/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-025/dispatch_contract.json": "5f0a0231d8c62b81f37f4a4efb075303b52fc957732fd001e2a4f78d97dd1a18",
+    "implementation/design/M03/OM9-L3-03-16-025/dispatch_contract.md": "66b610bea2fc27afc8308c9e20e93a0823ab9843de7d636a7a93deeb78922237"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

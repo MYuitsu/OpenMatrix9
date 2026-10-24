@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G03-B-03-09-007",
+  "l3_id": "OM9-L3-03-09-007",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Mở cạnh biên không render ra ngoài monitor hoặc giữ stale screen px DPI",
+  "expected": "A disabled action with a reason; no false Gem mode, no stub success, no dispatch or document mutation.",
+  "evidence": [
+    "om9-app f6 unit: 7 passed"
+  ],
+  "status": "PASS"
+}

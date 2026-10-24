@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-003",
+  "fixture_id": "OM9-L3-03-08-003-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "Move/Rotate/Mirror with an empty selection",
+    "mirror points that coincide or give a degenerate plane",
+    "mirror of a singular placement or an unsupported geometry kind",
+    "BRep mirror without the occt-brep feature",
+    "a pending command blocks another action"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; document, selection and Undo journal unchanged",
+  "test": "m03_03_08_003"
+}

@@ -1,0 +1,139 @@
+{
+  "date": "2026-10-21",
+  "status": "framed_circle_creation_sdk_export_verified_windows",
+  "owner": "OM9-L2-02-04",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Adds the framed full circle to the existing creation services; the curve record decides admission.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "ee4a5eeacea7b385f6e1a9e33430d98667519d089e776d6a188d0563295dfbd3",
+    "crates/om9-plugin-host/src/staged.rs": "75a82242aa945f1ec20c1e151ae6760bafd551a41b1b66d430ec2502fe98afad",
+    "crates/om9-app/tests/plugin_native.rs": "56f7370608b27789f91c625650fef2763282acc826fda988f14b4b62136f951a",
+    "sdk/examples/hello-plugin/src/lib.rs": "a1bc990ea9ee25ee9674bbbe174eb17b98448a1a5f5b9ee892d1f6ebc0d7a4f4",
+    "sdk/README.md": "310763d9dcd01636605e9489154a90015619247579cae6bcb7b9ff0e28d81ced",
+    "sdk/API-INVENTORY.md": "4f49834b86bf04f6d089edcb380e8d50cebf33ce127a4b8bca6d2346f8d12e67"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["add_circle_on_frame"],
+    "shared_service": ["om9_core::geometry::Curve::Circle", "shared add_output path"],
+    "error_codes": ["curve", "budget", "permission", "layer"]
+  },
+  "asserted_semantics": [
+    "The native parameter is the angle in radians with domain [0, tau], so evaluation and closed/planar semantics match the world-XY circle.",
+    "The frame must be orthonormal and the radius positive; a malformed frame is a curve refusal and is never silently re-orthonormalized.",
+    "The circle publishes as one object in the command's single transaction and one Undo removes it."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "58 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "17 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-frame-circle",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8819 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "framed_kind": "circle",
+    "document_objects": 7,
+    "undo_units": 2,
+    "undo_restores_profile": true,
+    "redo_restores_shapes": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1667742,
+      "sha256": "937d4e55ff7f3dad206f86d5c84e93243e9b1532e93647b6d83d62978809b1b1"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "1eb9fbbe7b361d238fad823bbb0700a4edbcad87e3920d229d0795da8a7b7c67"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 163869,
+      "sha256": "bd2a8460c700063e4e65d8e672683ebba6f74ddf6545ff4625dcda2dd85c2992"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "f0fb048903e5325fbc29d0388cca5035327dccc74e659fee50c6a9a9c55f1454"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1665536,
+      "sha256": "4885724d2a7a764f6de1bf95506910382cb3cc3e58881633ddd1af45b24b292d"
+    },
+    "om9.exe": {
+      "bytes": 69205504,
+      "sha256": "cb9843b4b3891c9d4979c474f24ae114726cbe89e331b00330d70937a3f5b52f"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-02-04-002 (circle creation on an arbitrary frame)"],
+    "open": [
+      "arbitrary-frame ellipse",
+      "spiral/helix creation",
+      "curve editing and rebuild",
+      "recorded change notification feed"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only the circle gained an arbitrary-frame variant; the ellipse still uses add_ellipse's frame.",
+    "Spiral/helix and curve editing remain open.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose the recorded change feed at M01 01-03 L3-011, or return to M02 for subobject/pick query services."
+}

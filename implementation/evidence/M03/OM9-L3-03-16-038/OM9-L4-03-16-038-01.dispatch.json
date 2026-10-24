@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-038-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-038",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-038",
+  "source_command": "Tween Curves",
+  "menu_icon": "CurveTweenCurves",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Tween Curves; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-038/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-038/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-038/dispatch_contract.json": "eacf745f29a0d9e34c090795ba92412b1cf62ea5d356c553b8628b67cbf2627a",
+    "implementation/design/M03/OM9-L3-03-16-038/dispatch_contract.md": "5e8f4a9244d0680b72c7e76c8303790544d164909e918504c98e5aecd31f70ba"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

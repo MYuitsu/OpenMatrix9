@@ -1,0 +1,51 @@
+{
+  "schema": "om9.m03.l2-03-08.l4.receipt.v1",
+  "l4": "OM9-L4-03-08-006-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-08-006",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crates": [
+      "om9-core",
+      "om9-app"
+    ],
+    "files": [
+      "crates/om9-core/src/top11.rs",
+      "crates/om9-app/src/ui/chrome.rs",
+      "crates/om9-app/src/icons.rs"
+    ],
+    "test": "crates/om9-app/tests/top11.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --no-default-features --test top11 m03_03_08_006 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-03-08-006/OM9-L4-03-08-006-03.focused-test.log",
+      "stdout_log_sha256": "f20bc74538c3d6ab505fb916939c27c448fd3bb5fe491068c2d32d9ac5b7e568"
+    }
+  ],
+  "observed": {
+    "top11_buttons": 11.0,
+    "ringrail_enabled": "false"
+  },
+  "expected": {
+    "top11_buttons": 11.0,
+    "ringrail_enabled": "false"
+  },
+  "effective_tolerance": {
+    "top11_buttons": "exact integer",
+    "ringrail_enabled": "false"
+  },
+  "input_validation": [
+    "selection/ids exist",
+    "finite points/fractions",
+    "one admitted transaction"
+  ],
+  "error_type": "om9_core::Error (Invalid/Unsupported/Budget/Overflow)",
+  "rollback_behavior": "a refused action returns before a transaction is prepared",
+  "compile_receipt": "om9-core and om9-app compile with the focused test (exit 0)",
+  "worktree_state": "The recorded revision is HEAD; L2-03-08 changes were measured before commit."
+}

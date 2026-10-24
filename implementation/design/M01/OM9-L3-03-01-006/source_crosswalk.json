@@ -1,0 +1,16 @@
+{
+  "l3": "OM9-L3-03-01-006",
+  "title": "Maximize And Restore Viewport Layout",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-scene/src/workspace.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "api": "Workspace::toggle_maximize + visible_views",
+  "tests": [
+    "crates/om9-app/tests/viewport_layout.rs"
+  ],
+  "manual_reference": "Matrix8 Book 1, Modeling in the Viewports (p22-26), F4 Center of the Universe",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

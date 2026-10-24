@@ -85,6 +85,157 @@
     }
   ],
   "m03_l4_planned_count": 37,
-  "execution_state": "NOT_STARTED",
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+  "execution_state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "readiness_state": "AUTOMATED_RUNTIME_READY_FOR_MANUAL_UI_REVIEW",
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-03-19",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED standalone",
+      "sdk_signal": "AUDIT-THEN-ROUTE → EXPORT/CO-IMPLEMENT",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Geometry/mesh health report DTO; ShowEdges visualization là command/input/UI, backend validity theo native BRep/Solid.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-03-19-001",
+      "OM9-L3-03-19-002",
+      "OM9-L3-03-19-003",
+      "OM9-L3-03-19-004",
+      "OM9-L3-03-19-005",
+      "OM9-L3-03-19-006",
+      "OM9-L3-03-19-007"
+    ]
+  },
+  "runtime_implementation": {
+    "l2_03_19_utilities_2026_10_23": {
+      "date": "2026-10-23",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "l3_with_verified_supported_scope": 7,
+      "l3_with_verified_disabled_fallback": 0,
+      "l4_implemented": 37,
+      "tests": {
+        "core_utilities": "6 passed; 0 failed",
+        "app_utilities": "4 passed; 0 failed",
+        "public_source_audit": "0 errors"
+      },
+      "evidence": "implementation/evidence/M03/2026-10-23-l2-03-19-checks.json",
+      "manual_gate": "M03-UI"
+    },
+    "checked_mesh_prepass_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "CHECKED_PREPASS_REGRESSION_VALIDATED",
+      "scope": "Existing self-overlap prepass now returns a checked CSG result or error. Coplanar overlap is detected; shared boundaries are excluded. No deletion fallback. Later QEM/truncation is not certified by CSG.",
+      "evidence": [
+        "docs/validation/2026-10-23-mesh-csg.md",
+        "implementation/evidence/AFTER/mesh-csg-2026-10-23/receipt.json"
+      ],
+      "app_utilities": {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "suites_including_doctests": 1
+      },
+      "manual_gate_promoted": false
+    },
+    "mesh_csg_scaling_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "VALIDATED_BVH_SCALING_SLICE_NUMERICAL_LIMIT_RECORDED",
+      "scope": "Local cutter BVH, signed ray winding with solid-angle fallback, vertex and output embedding BVHs; default 25K/20M.",
+      "evidence": [
+        "docs/validation/2026-10-23-mesh-csg-scaling.md",
+        "implementation/evidence/AFTER/mesh-csg-scaling-2026-10-23/receipt.json"
+      ],
+      "tests": {
+        "core_regression": {
+          "passed": 512,
+          "failed": 0,
+          "ignored": 2,
+          "suites_including_doctests": 58
+        },
+        "app_utilities": {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "suites_including_doctests": 1
+        },
+        "explicit_release_benchmarks": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "suites_including_doctests": 1
+        }
+      },
+      "defaults": {
+        "max_triangles": 25000,
+        "max_fragments": 50000,
+        "max_work": 20000000,
+        "tolerance": 1e-08
+      },
+      "limitations": [
+        "Closed oriented triangle input and f64/tolerance restrictions retained.",
+        "16384-triangle curved fixture remains unsupported: CSG feature below tolerance; sources unchanged.",
+        "Dense intersections may still exhaust budgets; 25K is admission, not an unconditional success guarantee.",
+        "No new UI/SDK command, exact predicates, open-hole repair, production fixture or macOS certification."
+      ],
+      "manual_gate_promoted": false
+    },
+    "mesh_csg_curved_2026_10_23": {
+      "date": "2026-10-23",
+      "status": "VALIDATED_CURVED16K_ORIGINAL_TOLERANCE",
+      "scope": "Finite-triangle normal-probe clearance corrects false sub-tolerance rejection; original 16384-triangle U/D/I and joined self-repair with UV seams pass.",
+      "tests": {
+        "core_regression": {
+          "passed": 514,
+          "failed": 0,
+          "ignored": 2,
+          "suites_including_doctests": 58
+        },
+        "app_utilities": {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "suites_including_doctests": 1
+        },
+        "release_geometry_including_benchmarks": {
+          "passed": 17,
+          "failed": 0,
+          "ignored": 0,
+          "suites_including_doctests": 1
+        }
+      },
+      "defaults_unchanged": {
+        "tolerance": 1e-08,
+        "max_triangles": 25000,
+        "max_fragments": 50000,
+        "max_work": 20000000
+      },
+      "output_triangles_union_and_repair": 15724,
+      "evidence": [
+        "docs/validation/2026-10-23-mesh-csg-curved.md",
+        "implementation/evidence/AFTER/mesh-csg-curved-2026-10-23/receipt.json"
+      ],
+      "limitations": [
+        "Bounded f64 kernel and closed oriented triangle input remain; no arbitrary production-mesh or exact-predicate certification.",
+        "Genuinely inadequate clearance, ambiguity, unsupported topology and exhausted budgets still fail explicitly.",
+        "New UI/SDK workflow, open-mesh repair and macOS remain outside this fix.",
+        "Combined app/core Clippy failed on unrelated needless_return in crates/om9-app/src/session/solid.rs:596; core Clippy passes."
+      ],
+      "manual_gate_promoted": false
+    }
+  }
 }

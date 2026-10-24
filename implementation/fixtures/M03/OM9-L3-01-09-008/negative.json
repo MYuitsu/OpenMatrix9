@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-008",
+  "fixture_id": "OM9-L3-01-09-008-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "edge 3 ends at (0,1.5,0) while edge 4 starts at (0,1,0)",
+    "single curve"
+  ],
+  "expect": "CreationError::Invalid; no patch"
+}

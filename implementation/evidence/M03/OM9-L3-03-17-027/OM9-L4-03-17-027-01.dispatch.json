@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-027-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-027",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-127",
+  "source_command": "Merge Surfaces",
+  "menu_icon": "SurfaceSurfaceEditToolsMerge",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-027/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-027/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-027/dispatch_contract.json": "9630e994686f8c8fd0f646a0cce4e22ddfcc2d500c31d3cf45bb2b395d8d0f97",
+    "implementation/design/M03/OM9-L3-03-17-027/source_crosswalk.json": "c0d7b7b9d761bae5b928b21b88a2874663f0ccbd12caafe9a9c543a6a19a05a1"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

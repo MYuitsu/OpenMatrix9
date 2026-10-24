@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-09-007-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-09-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "F6WindowPreference clamps logical points to the active content rect and keeps pin state; the popup applies the clamp before opening.",
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ]
+}

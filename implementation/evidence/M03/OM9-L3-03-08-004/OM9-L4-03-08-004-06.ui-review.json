@@ -1,0 +1,82 @@
+{
+  "schema": "om9.m03.l2-03-08.ui-review.v1",
+  "task_id": "OM9-L4-03-08-004-06",
+  "l3_id": "OM9-L3-03-08-004",
+  "title": "Top11 Explode Join Split Trim Actions",
+  "oracle": {
+    "positive": [
+      "join 1, explode 2; one cutter splits 3 objects; two cutters split 5 objects and trim leaves 4; a NURBS plane cuts one line into 2 new pieces; a BRep box cuts one line into 3 new pieces; an exact sphere/line cut returns fractions 0.25 and 0.75; Trim keeps the half starting at x=0; 50 stress cycles complete"
+    ],
+    "negative": [
+      "explode of a native single curve",
+      "join of fewer than two curves, a gap, or different placements",
+      "split/trim without exactly one selected target",
+      "a cutting curve with no intersection",
+      "target and cutter in different placements or with the same id",
+      "split fraction at 0 or 1",
+      "trim with from >= to"
+    ]
+  },
+  "manual_test_gate": "M03-UI",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "manual M03-UI gate pending",
+    "date_utc": "2026-10-23",
+    "statement": "The command/action oracle is asserted by focused Rust tests and every measured value comes from that run. No interactive window, menu or human geometry review is part of this automated receipt.",
+    "scope": "Top 11 command adapter, selection/kind availability, one transaction; no human review"
+  },
+  "measured": {
+    "multi_cutter_split_entities": 5.0,
+    "multi_cutter_trim_entities": 4.0,
+    "joined_entities": 1.0,
+    "exploded_entities": 2.0,
+    "split_entities": 3.0,
+    "trim_remaining_entities": 2.0,
+    "trim_kept_start_x_mm": 0.0,
+    "surface_cutter_entities": 3.0,
+    "stress_cycles": 50.0,
+    "brep_cutter_entities": 4.0,
+    "exact_brep_fractions": "[0.25, 0.75]",
+    "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+    "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+    "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+    "brep_mirror_volume_mm3": 24.0,
+    "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+  },
+  "tolerances": {
+    "joined_entities": "exact integer",
+    "exploded_entities": "exact integer",
+    "split_entities": "exact integer",
+    "trim_remaining_entities": "exact integer",
+    "trim_kept_start_x_mm": "1e-9",
+    "multi_cutter_split_entities": "exact integer",
+    "multi_cutter_trim_entities": "exact integer",
+    "surface_cutter_entities": "exact integer",
+    "brep_cutter_entities": "exact integer",
+    "exact_brep_fractions": "1e-6",
+    "exact_nurbs_polycurve_fractions": "1e-6",
+    "stress_cycles": "exact integer"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-app --no-default-features --test top11 m03_03_08_004 -- --nocapture (exit 0)",
+    "regression: cargo test -p om9-app --no-default-features --lib --test top11 -j 2 (195 passed)",
+    "core: cargo test -p om9-core --test top11 -j 2 (6 passed)",
+    "clippy and format: exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-03-08-004/api.md",
+    "implementation/design/M03/OM9-L3-03-08-004/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-03-08-004/positive.json",
+    "implementation/fixtures/M03/OM9-L3-03-08-004/negative.json",
+    "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_03_08_scope": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

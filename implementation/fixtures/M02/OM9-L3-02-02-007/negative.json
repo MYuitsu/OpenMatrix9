@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G02-B-02-02-007",
+  "l3_id": "OM9-L3-02-02-007",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Thay camera không thay đổi world tọa độ của điểm lưu",
+  "expected": "A typed error or unchanged state; no document mutation and no cross-view CPlane leak.",
+  "evidence": [
+    "om9-app cplane_coordinate_input: 10 passed",
+    "om9-scene coordinate_frame: 4 passed",
+    "om9-scene camera_grid: 5 passed"
+  ],
+  "status": "PASS"
+}

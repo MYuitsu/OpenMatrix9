@@ -1,0 +1,69 @@
+{
+  "schema": "om9.m03.l2-03-08.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-08-003",
+  "owner_l2_id": "OM9-L2-03-08",
+  "date": "2026-10-23",
+  "source_revision_qymcad_pinned": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+  "source_revision_qymcad_read": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "reviewed_upstream": [
+    {
+      "path": "crates/qymcad-part/src/bars/toolbar.rs",
+      "revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+      "review": "SYMBOL_INDEX_READ_AT_LOCAL_CHECKOUT",
+      "observed_symbols": [
+        "icon_tool",
+        "SketchMirror",
+        "SketchTrim",
+        "PartSplitBody",
+        "PartMirror"
+      ],
+      "observation": "QymCAD has its own workbench tool bars and enables tools from its BarCtx state; there is no Matrix Top 11 catalogue."
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/selection.rs",
+      "revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+      "review": "SYMBOL_INDEX_READ_AT_LOCAL_CHECKOUT",
+      "observed_symbols": [
+        "Sel",
+        "SketchSelection"
+      ],
+      "observation": "Selection is QymCAD document-model state, not an OM9 ObjectId set with document stamps."
+    },
+    {
+      "path": "crates/qymcad-core/src/model/sketch/corners.rs",
+      "revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+      "review": "SYMBOL_INDEX_READ_AT_LOCAL_CHECKOUT",
+      "observed_symbols": [
+        "fillet_curves",
+        "fillet_lines",
+        "offset_entities"
+      ],
+      "observation": "The curve edits are sketch-entity operations tied to QymCAD's Project/Id model."
+    }
+  ],
+  "local_owner": {
+    "crate": [
+      "om9-core",
+      "om9-app"
+    ],
+    "files": [
+      "crates/om9-core/src/top11.rs",
+      "crates/om9-app/src/session/top11.rs"
+    ],
+    "symbols": [
+      "om9_core::top11::translate_placements",
+      "om9_core::top11::rotate_placements",
+      "om9_core::top11::rotation",
+      "om9_core::top11::mirror_entities",
+      "om9_core::top11::MirrorOutcome",
+      "om9_app::session::top11::{Top11Pending, top11_accept_point}"
+    ]
+  },
+  "decision": "ADD",
+  "rationale": "QymCAD has sketch/part mirror and transform tool state, but no Matrix Top 11 command adapter over the OM9 document. The placement/reflection math is additive safe Rust.",
+  "not_reused": [
+    "QymCAD BarCtx/Hand UI state and its sketch Id document model.",
+    "QymCAD native/OCCT adapters; the Top 11 are host command adapters over OM9's document."
+  ],
+  "l3_scope": "Move and Rotate collect points through accept_world_point and commit placement transforms. Mirror supports Copy or Delete-Input and switches between the two-point vertical plane and a three-point arbitrary plane by typing 3Point while its prompt runs (or by the Mirror 3Point command). It bakes rigid or non-rigid placements: affine circles become NURBS ellipses, mesh/cloud normals and winding are transformed, and BRep bodies mirror through OCCT."
+}

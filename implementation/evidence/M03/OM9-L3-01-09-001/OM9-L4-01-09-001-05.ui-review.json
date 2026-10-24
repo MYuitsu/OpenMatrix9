@@ -1,0 +1,70 @@
+{
+  "schema": "om9.m03.l2-01-09.ui-review.v1",
+  "task_id": "OM9-L4-01-09-001-05",
+  "l3_id": "OM9-L3-01-09-001",
+  "title": "Analytic Solid Primitive Factories",
+  "oracle": {
+    "positive": [
+      "Box(10,20,30): volume 6000 mm³, bounds 10×20×30",
+      "Sphere(r=5): volume 4/3π·125",
+      "Cylinder(r=5,h=10), Cone(r1=5,r2=0,h=10), Torus(R=10,r=2), Ellipsoid(3,4,5), Pyramid(4 sides,R=10,h=10)",
+      "the canonical source reopens to the same measured solid"
+    ],
+    "negative": [
+      "radius 0 and NaN are refused",
+      "negative cylinder height is refused",
+      "zero box size is refused",
+      "torus tube >= ring is refused",
+      "pyramid with two sides is refused"
+    ]
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: AUTOMATED_EVIDENCE_ONLY (this L3 requires no human test)",
+    "date_utc": "2026-10-22",
+    "statement": "The L3 oracle is an exact OCCT B-Rep measured from the canonical source and asserted by a focused Rust test; every measured value in this record comes from that run. No manual UI or geometry review is part of this L3's acceptance gate.",
+    "scope": "geometry construction, typed refusal and ownership; no window, menu or human review"
+  },
+  "measured": {
+    "box_volume_mm3": 6000.0,
+    "sphere_volume_mm3": 523.598775598299,
+    "cylinder_volume_mm3": 785.398163397449,
+    "cone_volume_mm3": 261.79938779915,
+    "torus_volume_mm3": 789.568352087151,
+    "ellipsoid_volume_mm3": 251.217495107596,
+    "pyramid_volume_mm3": 666.666666666666
+  },
+  "tolerances": {
+    "box_volume_mm3": "1e-6",
+    "sphere_volume_mm3": "1e-6",
+    "cylinder_volume_mm3": "1e-6",
+    "cone_volume_mm3": "1e-6",
+    "torus_volume_mm3": "1e-6",
+    "ellipsoid_volume_mm3": "0.2 (general-transform BSpline approximation, measured error < 0.05%)",
+    "pyramid_volume_mm3": "1e-5"
+  },
+  "checks_run": [
+    "focused: cargo test -p om9-kernel --features 3dm-brep --test l2_01_09 m03_01_09_001 -- --exact (exit 0)",
+    "regression: cargo test -p om9-kernel --features 3dm-brep --test l2_01_09 (12 passed)",
+    "crate suite: cargo test -p om9-kernel --features 3dm-brep (all passed)",
+    "clippy: cargo clippy -p om9-kernel --features 3dm-brep --all-targets -- -D warnings (exit 0)",
+    "format: cargo fmt --all -- --check (exit 0)"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-01-09-001/api.md",
+    "implementation/design/M03/OM9-L3-01-09-001/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-01-09-001/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-09-001/negative.json",
+    "implementation/evidence/M03/OM9-L3-01-09-001/OM9-L4-01-09-001-03.focused-test.log",
+    "implementation/evidence/M03/OM9-L3-01-09-001/OM9-L4-01-09-001-04.regression.log"
+  ],
+  "gate": {
+    "m03_l2_01_09_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "om9.m03.l2-02-04.l4.receipt.v1",
+  "l4": "OM9-L4-02-04-007-04",
+  "role": "REGRESSION",
+  "l3": "OM9-L3-02-04-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "suite": "crates/om9-core/tests/l2_02_04.rs plus the full om9-core suite",
+  "commands": [
+    {
+      "argv": "cargo test -p om9-core -j 2",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-02-04-007/OM9-L4-02-04-007-04.regression.log",
+      "stdout_log_sha256": "1734243ad4c3d491adf036badefe8bf7ece6ba60c28c374827a3ea48cab55f9c",
+      "suites": 52,
+      "passed": 447,
+      "failed": 0
+    }
+  ],
+  "repeatable": "the focused oracles are analytic or tolerance-bounded and the suite is deterministic on this checkout",
+  "observed": {
+    "g1_blend_length_mm": 14.862666324708,
+    "g2_blend_length_mm": 15.243044351953
+  }
+}

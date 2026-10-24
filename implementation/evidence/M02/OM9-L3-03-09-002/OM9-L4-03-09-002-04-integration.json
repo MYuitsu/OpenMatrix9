@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-09-002-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-09-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The F6 popup renders the same registry IDs and dispatches them through InvocationOrigin::F6.",
+  "tests": [
+    "om9-app f6 unit: 7 passed",
+    "om9-app f6_context: 2 passed"
+  ]
+}

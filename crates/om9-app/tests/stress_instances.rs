@@ -83,10 +83,18 @@ fn generate_instance_stress_project() {
                 Geometry::Instance(id) => format!("Instance {id:?}"),
                 other => format!("{other:?}"),
             };
-            println!("entity {:?} label {:?} layer {:?} {kind}", entity.id, entity.label, entity.attributes.layer);
+            println!(
+                "entity {:?} label {:?} layer {:?} {kind}",
+                entity.id, entity.label, entity.attributes.layer
+            );
         }
         for definition in source_document.definitions.values() {
-            println!("definition {:?} label {:?} members {}", definition.id, definition.label, definition.members.len());
+            println!(
+                "definition {:?} label {:?} members {}",
+                definition.id,
+                definition.label,
+                definition.members.len()
+            );
             for member in &definition.members {
                 let kind = match &member.geometry {
                     Geometry::Brep(brep) => format!("Brep {} tris", brep.display.triangles.len()),
@@ -124,12 +132,9 @@ fn generate_instance_stress_project() {
                 for point in &mut display.points {
                     *point = placement.point(*point).expect("instance member point");
                 }
-                let brep = Brep::from_native(
-                    brep.source().to_string(),
-                    display,
-                    &Limits::default(),
-                )
-                .expect("transformed display binding");
+                let brep =
+                    Brep::from_native(brep.source().to_string(), display, &Limits::default())
+                        .expect("transformed display binding");
                 let mut member = member.clone();
                 member.geometry = Geometry::Brep(brep);
                 member.placement = Transform::identity();
@@ -157,7 +162,10 @@ fn generate_instance_stress_project() {
             _ => 0,
         })
         .sum();
-    assert!(triangles > 0, "the chosen geometry has no display tessellation");
+    assert!(
+        triangles > 0,
+        "the chosen geometry has no display tessellation"
+    );
 
     // Recentre the definition at its own bounds centre, so every occurrence spins around itself.
     let mut min = [f64::INFINITY; 3];
@@ -217,11 +225,27 @@ fn generate_instance_stress_project() {
         let x = (index % side) as f64 - half;
         let y = ((index / side) % side) as f64 - half;
         let z = (index / (side * side)) as f64 - half;
-        let spin = if identical { 0.0 } else { index as f64 * 2.399_963_229_728_653 };
-        let tilt = if identical { 0.0 } else { (index as f64 * 0.7).sin() * 0.35 };
-        let scale = if identical { scale } else { scale * (0.9 + 0.2 * ((index as f64 * 0.37).sin() * 0.5 + 0.5)) };
+        let spin = if identical {
+            0.0
+        } else {
+            index as f64 * 2.399_963_229_728_653
+        };
+        let tilt = if identical {
+            0.0
+        } else {
+            (index as f64 * 0.7).sin() * 0.35
+        };
+        let scale = if identical {
+            scale
+        } else {
+            scale * (0.9 + 0.2 * ((index as f64 * 0.37).sin() * 0.5 + 0.5))
+        };
         let jitter = |axis: usize| {
-            if identical { 0.0 } else { ((index * (7 + axis as i64 * 13)) % 100) as f64 / 100.0 - 0.5 }
+            if identical {
+                0.0
+            } else {
+                ((index * (7 + axis as i64 * 13)) % 100) as f64 / 100.0 - 0.5
+            }
         };
 
         let mut entity = Entity::new("bong 5X7", Geometry::Instance(definition_id), layer.id);

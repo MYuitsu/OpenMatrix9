@@ -1,0 +1,10 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.25s
+     Running tests\navigation_maximize.rs (L:/om9-target\debug\deps\navigation_maximize-fe271919595b8ecf.exe)
+
+running 2 tests
+test double_clicking_the_canvas_does_not_toggle_the_layout ... ok
+test double_clicking_a_title_maximizes_and_keeps_every_camera ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+

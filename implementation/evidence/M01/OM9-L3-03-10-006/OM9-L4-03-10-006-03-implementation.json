@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-10-006-03",
+  "l3": "OM9-L3-03-10-006",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/session.rs"
+  ],
+  "tests": "command_shortcuts 3 passed; command_options_and_repeat 6 passed",
+  "oracle": "Escape aborts and Enter/Space repeat only allowlisted command"
+}

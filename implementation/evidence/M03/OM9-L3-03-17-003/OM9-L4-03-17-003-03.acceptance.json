@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-003-03",
+  "role": "ACCEPTANCE",
+  "l3": "OM9-L3-03-17-003",
+  "date": "2026-10-23",
+  "status": "READY_FOR_REVIEW",
+  "manual_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "ui_state": "FUNCTIONAL",
+  "disabled_reason": "",
+  "human_approval": null,
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test surface_menu",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-03-17-logs/surface-menu.log",
+      "stdout_log_sha256": "fc187a7b5d404a097ffff645124216a76c112054ea7ffcc361f70e2680e11dcc"
+    }
+  ],
+  "artifact_paths": [
+    "implementation/evidence/M03/OM9-L3-03-17-003/OM9-L4-03-17-003-03.acceptance.md"
+  ]
+}

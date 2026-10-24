@@ -1,0 +1,13 @@
+{
+  "l4": "OM9-L4-03-01-004-03",
+  "l3": "OM9-L3-03-01-004",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "crates/om9-app/tests/chrome_actions.rs"
+  ],
+  "oracle": "f4_toggles_world_datum_without_mutating_document"
+}

@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\top11.rs (L:\om9-target\debug\deps\top11-0eff463d083938e7.exe)
+
+running 4 tests
+mirror_delete_entities=1
+mirror_delete_start_x_mm=-1.000000000000
+mirror_copies=2
+mirrored_start_x_mm=-1.000000000000
+three_point_mirror_start_x_mm=-1.000000000000
+test m03_03_08_003_mirror_delete_input_reflects_the_original_in_place ... ok
+test m03_03_08_003_mirror_collects_a_plane_and_creates_a_copy ... ok
+non_rigid_mirror_end_x_mm=-2.000000000000
+move_base_mm=[5.0, -2.0, 0.0]
+rotate_end_mm=[6.123233995736766e-16, 10.0, 0.0]
+test m03_03_08_003_three_point_plane_and_non_rigid_mirror ... ok
+test m03_03_08_003_move_and_rotate_collect_points_and_commit_placements ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+

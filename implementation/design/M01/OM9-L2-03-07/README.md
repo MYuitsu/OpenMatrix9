@@ -74,7 +74,23 @@ a two-button page column (drawn triangles, not font glyphs) steps the rows witho
   placement.
   This is automated evidence, not human sign-off.
 
-## Remaining
+## Recheck 2026-10-21
+
+Existing implementation rechecked after the dock was aligned to the Matrix9 300 px reference. All
+runtime checks passed (chrome 13, left stack 8, panel ops 33, shell docking 10, dock default 7,
+dock persistence 6, command sessions 6, options/repeat 6, startup 3). No menu/docking feature code
+was changed for this recheck; receipt:
+`implementation/evidence/M01/2026-10-21-l2-03-07-menu-docking-recheck.json`.
+
+## L4 artefacts 2026-10-22
+
+Per-L4 source crosswalks, API contracts, positive/negative fixtures, implementation, integration and
+acceptance artefacts now exist under `implementation/{design,fixtures,evidence}/M01/OM9-L3-03-07-*`.
+Dashboard counts are **5/5** for all eight L3 buckets. Tests re-ran on 2026-10-22: chrome_actions 13,
+left_stack_layers 8, panel_ops 33, shell_docking 10, dock default 7, dock persistence 6, command
+sessions 6, options/repeat 6, startup 3. The manual M01-UI gate remains unsigned.
+
+## Remaining'
 
 - Manual M01-UI visual review on the real Windows window is still required; no human sign-off is
   claimed.

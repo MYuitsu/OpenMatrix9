@@ -577,6 +577,44 @@ J brep_display_json(const ON_Brep& brep) {
   // supplied by the OCCT kernel bridge (R5-B); here we can only merge cached faces.
   if(!cached) meshes.clear();
   ON_Mesh merged;
+  if(meshes.empty()) {
+    // R5-A fallback: files written without cached render meshes have no
+    // ON_Brep::CreateMesh implementation in public openNURBS. Build a coarse,
+    // explicitly untrimmed surface proxy so the retained BRep is still visible
+    // in a build without OCCT. OCCT remains the exact/trimmed display path.
+    constexpr int proxy_samples = 8;
+    for(int fi=0; fi<brep.m_F.Count(); ++fi) {
+      const ON_BrepFace& face = brep.m_F[fi];
+      const ON_Surface* surface = face.SurfaceOf();
+      if(!surface) continue;
+      const ON_Interval u = surface->Domain(0);
+      const ON_Interval v = surface->Domain(1);
+      const int base = merged.m_V.Count();
+      for(int i=0; i<=proxy_samples; ++i) {
+        for(int j=0; j<=proxy_samples; ++j) {
+          const ON_3dPoint point = surface->PointAt(
+              u.ParameterAt(static_cast<double>(i)/proxy_samples),
+              v.ParameterAt(static_cast<double>(j)/proxy_samples));
+          if(static_cast<size_t>(merged.m_V.Count()) >= max_array)
+            throw std::runtime_error("native BRep proxy vertex budget");
+          merged.m_V.Append(ON_3fPoint(point));
+        }
+      }
+      for(int i=0; i<proxy_samples; ++i) {
+        for(int j=0; j<proxy_samples; ++j) {
+          if(static_cast<size_t>(merged.m_F.Count()) >= max_array)
+            throw std::runtime_error("native BRep proxy face budget");
+          ON_MeshFace quad;
+          const int at = base + i*(proxy_samples+1) + j;
+          quad.vi[0] = at;
+          quad.vi[1] = at + 1;
+          quad.vi[2] = at + proxy_samples + 2;
+          quad.vi[3] = at + proxy_samples + 1;
+          merged.m_F.Append(quad);
+        }
+      }
+    }
+  }
   for(const auto* mesh:meshes) {
     if(!mesh||mesh->VertexCount()<=0||mesh->FaceCount()<=0)continue;
     if(static_cast<size_t>(merged.VertexCount())+static_cast<size_t>(mesh->VertexCount())>max_array

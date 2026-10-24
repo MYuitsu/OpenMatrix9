@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-004",
+  "fixture_id": "OM9-L3-01-10-004-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "trim at x=50",
+    "trim with duplicate point",
+    "solid box input"
+  ],
+  "expect": "CreationError::Invalid; the face is untouched"
+}

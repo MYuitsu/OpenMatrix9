@@ -444,5 +444,28 @@
       "preview_mesh_policy": "LOD0 for all occurrences; resolution/MSAA adapt; certified decimation not integrated",
       "presentation_acceptance": "NOT_PROVED"
     }
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_MILESTONE_AND_OWNERS",
+    "responsibility": "Selection, picking, CPlane, snaps, view context và interaction services phải có public adapter trong cùng owner triển khai. Review UI và performance vẫn theo contract hiện có.",
+    "owner_ids": [
+      "OM9-L2-01-07",
+      "OM9-L2-02-02",
+      "OM9-L2-02-03",
+      "OM9-L2-03-02",
+      "OM9-L2-03-03",
+      "OM9-L2-03-04",
+      "OM9-L2-03-05",
+      "OM9-L2-03-06",
+      "OM9-L2-03-09"
+    ],
+    "already_implemented_rule": "Add the missing public SDK contract/adapter/proof to the existing owner backlog; preserve validated core evidence and reuse its implementation.",
+    "not_yet_implemented_rule": "Deliver shared Rust service and SDK adapter/proof together inside the same canonical L3/L2 milestone owner; do not defer SDK to a separate delivery track.",
+    "host_internal_rule": "Keep ownership and private runtime resources in the host; document the reason and expose only a bounded service/DTO when needed.",
+    "completion_rule": "SDK-eligible feature delivery includes public DTO/wrapper, host dispatch/capability, shared service, atomicity/limits and external plugin evidence for each advertised target, alongside the existing owner acceptance contract."
   }
 }

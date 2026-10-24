@@ -1,0 +1,95 @@
+{
+  "schema": "om9.m03.l2-03-08.l4.receipt.v1",
+  "l4": "OM9-L4-03-08-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-08-004",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crates": [
+      "om9-core",
+      "om9-app"
+    ],
+    "files": [
+      "crates/om9-core/src/top11.rs",
+      "crates/om9-app/src/session/top11.rs"
+    ],
+    "test": "crates/om9-app/tests/top11.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --no-default-features --test top11 m03_03_08_004 -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-03.focused-test.log",
+      "stdout_log_sha256": "4fddfbd2b21638a7c13518b82d00015c91d896fc9844bc2ff6b57f083a417f3b"
+    },
+    {
+      "argv": "cargo test -p om9-app --test top11_brep -- --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-03-08-004/OM9-L4-03-08-004-03b.brep-mirror.log",
+      "stdout_log_sha256": "331e7fb35a78a3f7b3a10e86bc97bf2cc87bf0f32df50d39f6f6a9dbef242a68"
+    }
+  ],
+  "observed": {
+    "multi_cutter_split_entities": 5.0,
+    "multi_cutter_trim_entities": 4.0,
+    "joined_entities": 1.0,
+    "exploded_entities": 2.0,
+    "split_entities": 3.0,
+    "trim_remaining_entities": 2.0,
+    "trim_kept_start_x_mm": 0.0,
+    "surface_cutter_entities": 3.0,
+    "stress_cycles": 50.0,
+    "brep_cutter_entities": 4.0,
+    "exact_brep_fractions": "[0.25, 0.75]",
+    "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+    "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+    "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+    "brep_mirror_volume_mm3": 24.0,
+    "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+  },
+  "expected": {
+    "multi_cutter_split_entities": 5.0,
+    "multi_cutter_trim_entities": 4.0,
+    "joined_entities": 1.0,
+    "exploded_entities": 2.0,
+    "split_entities": 3.0,
+    "trim_remaining_entities": 2.0,
+    "trim_kept_start_x_mm": 0.0,
+    "surface_cutter_entities": 3.0,
+    "stress_cycles": 50.0,
+    "brep_cutter_entities": 4.0,
+    "exact_brep_fractions": "[0.25, 0.75]",
+    "brep_non_rigid_mirror_bounds": "[-4.0000001, -1e-7, -1e-7, 1e-7, 3.0000001, 4.0000001]",
+    "brep_mirror_copy_bounds": "[-7.0000001, -1e-7, -1e-7, -4.9999999, 3.0000001, 4.0000001]",
+    "exact_nurbs_polycurve_fractions": "[0.25, 0.75]",
+    "brep_mirror_volume_mm3": 24.0,
+    "brep_mirror_local_bounds": "[-12.0000001, -1e-7, -1e-7, -9.9999999, 3.0000001, 4.0000001]"
+  },
+  "effective_tolerance": {
+    "joined_entities": "exact integer",
+    "exploded_entities": "exact integer",
+    "split_entities": "exact integer",
+    "trim_remaining_entities": "exact integer",
+    "trim_kept_start_x_mm": "1e-9",
+    "multi_cutter_split_entities": "exact integer",
+    "multi_cutter_trim_entities": "exact integer",
+    "surface_cutter_entities": "exact integer",
+    "brep_cutter_entities": "exact integer",
+    "exact_brep_fractions": "1e-6",
+    "exact_nurbs_polycurve_fractions": "1e-6",
+    "stress_cycles": "exact integer"
+  },
+  "input_validation": [
+    "selection/ids exist",
+    "finite points/fractions",
+    "one admitted transaction"
+  ],
+  "error_type": "om9_core::Error (Invalid/Unsupported/Budget/Overflow)",
+  "rollback_behavior": "a refused action returns before a transaction is prepared",
+  "compile_receipt": "om9-core and om9-app compile with the focused test (exit 0)",
+  "worktree_state": "The recorded revision is HEAD; L2-03-08 changes were measured before commit."
+}

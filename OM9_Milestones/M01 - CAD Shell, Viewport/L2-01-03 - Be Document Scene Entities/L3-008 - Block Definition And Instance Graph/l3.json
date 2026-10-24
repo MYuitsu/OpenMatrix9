@@ -213,6 +213,46 @@
       "native/native_exchange.cpp"
     ],
     "human_approval": null,
-    "remaining": []
+    "remaining": [],
+    "plugin_sdk_v1_blocks": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "block_definition_read_verified_windows",
+      "scope": "block_definitions maps document.definitions to BlockDefinitionInfo (id/label/member count/revision); read-only, no instance insertion or definition edit.",
+      "public_api": [
+        "Host::block_definitions"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-01-03-blocks.md",
+        "docs/validation/2026-10-21-m01-01-03-blocks.json"
+      ],
+      "limitations": [
+        "Read-only.",
+        "Instance graph open.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::block_definitions"
+    ],
+    "implemented_slices": [
+      "date",
+      "evidence",
+      "human_approval",
+      "plugin_sdk_v1_blocks",
+      "remaining",
+      "scope",
+      "status",
+      "target"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-01-03-blocks.json",
+      "docs/validation/2026-10-21-m01-01-03-blocks.md"
+    ]
   }
 }

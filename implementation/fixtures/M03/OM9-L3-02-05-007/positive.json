@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-007",
+  "fixture_id": "OM9-L3-02-05-007-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Surface Match Blend And Join Continuity",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "match_g0_gap_mm": 0.0,
+    "match_g1_angle_rad": "< 1e-3",
+    "match_g2_angle_rad": "< 1e-3",
+    "blend_midpoint": [
+      2.0,
+      1.0,
+      0.0
+    ],
+    "join_faces": 2,
+    "join_shells": 1
+  },
+  "tolerances": {
+    "gap_mm": "1e-9",
+    "angle_rad": "1e-3"
+  },
+  "measured_on_2026_10_22": {
+    "match_g0_gap_mm": 5.551115123125783e-17,
+    "match_g1_angle_rad": 0.00011999519952506682,
+    "match_g2_angle_rad": 2.1073424255447017e-08,
+    "blend_midpoint": [
+      2.0,
+      1.0,
+      0.0
+    ],
+    "join_faces": 2,
+    "join_shells": 1
+  }
+}

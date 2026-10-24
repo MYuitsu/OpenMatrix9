@@ -180,19 +180,40 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
-    "navigation_checkpoint_2026_10_21": {
-      "date": "2026-10-21",
-      "status": "implemented_automated_checks_passed_performance_acceptance_open",
-      "plan": "implementation/design/M01/VIEWPORT-NAVIGATION-IMPLEMENTATION-PLAN.md",
-      "evidence": [
-        "implementation/evidence/M01/2026-10-21-navigation-implementation.md"
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Wheel points feed a scalar analytic zoom response anchored at the cursor world point; camera zoom validates positive finite factors.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-03-02-003/api.md",
+      "implementation/evidence/M02/OM9-L3-03-02-003/OM9-L4-03-02-003-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-03-02-003/OM9-L4-03-02-003-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-03-02-003/OM9-L4-03-02-003-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app navigation_input: 1 passed",
+      "om9-app navigation_precision: 3 passed",
+      "om9-scene camera_fit: 4 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-03-02-003/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-03-02-003/positive.json",
+        "implementation/fixtures/M02/OM9-L3-03-02-003/negative.json"
       ],
-      "ledger_key": "viewport-navigation-runtime-2026-10-21",
-      "navigation_owner": "OM9-L2-03-02",
-      "render_owner": "OM9-L2-01-06",
-      "manual_gate_promoted": false,
-      "preview_mesh_policy": "LOD0 for all occurrences; resolution/MSAA adapt; certified decimation not integrated",
-      "presentation_acceptance": "NOT_PROVED"
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-03-02-003/OM9-L4-03-02-003-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-03-02-003/OM9-L4-03-02-003-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-03-02-003/OM9-L4-03-02-003-06-acceptance.md"
+      ],
+      "acceptance": "A wheel burst keeps the cursor world anchor at the same pixel; zero/NaN/negative zoom factors are typed errors."
     }
   }
 }

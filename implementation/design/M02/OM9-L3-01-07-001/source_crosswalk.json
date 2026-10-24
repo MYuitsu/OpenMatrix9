@@ -1,0 +1,22 @@
+{
+  "l3": "OM9-L3-01-07-001",
+  "title": "Screen Ray And Hit Test Query",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-scene/src/scene.rs",
+    "crates/om9-scene/src/picking.rs",
+    "crates/om9-scene/src/spatial.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "om9-scene acceptance_l2_01_07: 9 passed",
+    "om9-scene world_picking: 7 passed",
+    "om9-scene navigation_snapshot: 2 passed",
+    "om9-app brep_selection (gpu-sphere): 5 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.12-16; Rhino5 user guide pp.25-30 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-01-07-001-01"
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m03.l2-01-13.fixture.v1",
+  "l3_id": "OM9-L3-01-13-004",
+  "fixture_id": "OM9-L3-01-13-004-NEGATIVE",
+  "cases": [
+    "a layer snapshot with a missing parent, duplicate path, cycle or unknown object layer is refused"
+  ],
+  "invariants": [
+    "no partial document commit",
+    "no fabricated geometry or silently dropped unsupported field",
+    "the typed error reaches the caller/UI"
+  ],
+  "measured_on_2026_10_22": "all listed negative cases pass in the focused test"
+}

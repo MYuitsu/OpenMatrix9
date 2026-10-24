@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-21",
+  "status": "recorded_change_feed_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Records one bounded change batch per plugin command from the committed before/after documents and exposes it to the next command.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "a598dc7837cbfa0a0a64e8f0d5b8efb342415b6a7606389c7edddbdfc097d4ee",
+    "crates/om9-plugin-host/src/staged.rs": "e62495b8bde43fd2c029dd3000c5610775711bc2ea0ea5a1cbd25ac8b7dbfa93",
+    "crates/om9-plugin-host/src/lib.rs": "b01a7571f924abcaa5b2b948482e2f4d0b08f79b53593650324bdcbffeada820",
+    "crates/om9-app/src/session/plugins.rs": "d7fffea49f0e8e89dc58534382ca4f407ff379122f627685dda13e180403bd62",
+    "crates/om9-app/src/session.rs": "53c01b5ee91f2547587eccc71eae77389843460ff16c4f5bc8fb85d82419646c",
+    "crates/om9-app/tests/plugin_native.rs": "80ff3d7b425bc0277b2bc72b86a871764e9feb3b3dd4be7ae1d682f5c25b60d0",
+    "sdk/examples/hello-plugin/src/lib.rs": "17c31c765c736fe6c417b60123eccfebe55258babdf3253d6b2e598c188b23cc",
+    "sdk/examples/hello-plugin/descriptor.json": "78ad2afad85fe86f8b8c8a7d316bf690336dab20874ae4929a89c0c45b40b0b5",
+    "sdk/README.md": "c21bc742ee1e1c0ae25a1be257c0a1fed733fdbcbd144b226e02d9ee4f8470c8",
+    "sdk/API-INVENTORY.md": "9d0471243b28235f127ff7fb4af0dd641484c8e815c41712088b37a0fb0ad8c8"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["last_change"],
+    "public_types": ["ChangeEntry", "ProjectChange"],
+    "shared_service": ["om9_core::changes::ChangeBatch::between", "om9_core::changes::Change"],
+    "error_codes": ["id", "missing"]
+  },
+  "asserted_semantics": [
+    "The feed holds plugin-command changes only; host commands outside the plugin boundary are not recorded (use document_info().revision for those).",
+    "Revisions are real: from_revision/to_revision come from the before/after documents.",
+    "Entries use the change enum kinds (entity_added/removed/modified, layer_*, current_layer_changed, extension_changed) with the affected id when named.",
+    "Reading the feed stages no mutation."
+  ],
+  "batches": [
+    {"name": "sdk-and-host-tests", "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2", "result": "60 passed, 8 suites"},
+    {"name": "core-tests", "command": "rtk cargo test -p om9-core -j 2", "result": "403 passed, 47 suites"},
+    {"name": "controller-plugin-tests", "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2", "result": "5 passed, 135 filtered"},
+    {"name": "native-plugin-tests", "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored", "result": "19 passed"},
+    {"name": "packaged-sdk-validation", "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-change", "result": "PASS, 10 commands", "cold_project_hash_equal": true, "failed_commands_preserved_file": true, "standalone_sdk_build": true},
+    {"name": "product-feature-check", "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2", "result": "exit 0 (default features including occt-brep)"},
+    {"name": "public-source-audit", "command": "rtk python tools/public_source_audit.py", "result": "8823 source files, 511 icon bindings, 510 SVG, 0 errors"},
+    {"name": "format-and-whitespace", "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)", "result": "PASS"}
+  ],
+  "native_plugin_assertions": {
+    "empty_feed_before_first_command": true,
+    "cause": "edit",
+    "entity_added_entries": 3,
+    "revision_increases": true,
+    "undo_len_after_feed": 1
+  },
+  "artifacts": {
+    "hello.om9p": {"bytes": 1719118, "sha256": "839995334471bf0eae3d243b5cc035d89c26b9c833cc92399061cc10c2863477"},
+    "hello.om9": {"bytes": 2159, "sha256": "dc0fe00114f84b71756588c86c639f43d386117f16353533823422026a4d0df8"},
+    "openmatrix9-sdk-0.1.0.zip": {"bytes": 167383, "sha256": "8cc36d716fdbffa848d1c41b6144bc978aad3bf5cc048553badc620b0ceeb9e1"},
+    "om9-plugin.exe": {"bytes": 1661440, "sha256": "5ffb168d24650b9cfb5148bc87612810a2fec6606f4066c7ac278dc5cf9f527d"},
+    "om9_hello_plugin.dll": {"bytes": 1716736, "sha256": "e0a70e7674cafd4a9827087631d1a63f1f42650f3316be1e26e36cfc31fa62af"},
+    "om9.exe": {"bytes": 69255680, "sha256": "d95648ccc3edd5d453bd2fd9f15e13a33b775ff09800619854a653f1b4e5e16f"}
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-01-03-011 (recorded change feed at the plugin boundary)"],
+    "open": ["host-command feed", "group/feature producer entries", "longer history than one batch"]
+  },
+  "target_proof": {"windows_x64": "verified_external_plugin_and_host", "macos_arm64": "unverified", "macos_x64": "unverified"},
+  "limitations": [
+    "Only the last plugin command is recorded; host commands outside the plugin boundary are not in the feed.",
+    "One batch, not a long history.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Broaden the recorded feed to host commands, or return to M02 for subobject/pick query services."
+}

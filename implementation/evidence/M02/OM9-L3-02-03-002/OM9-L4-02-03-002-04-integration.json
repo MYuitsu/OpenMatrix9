@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-02-03-002-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-02-03-002",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Point snap also accepts a literal Point entity; near/intersection winners use the same candidate ranker and screen radius as the other snaps.",
+  "tests": [
+    "om9-app osnap UI: 3 passed"
+  ]
+}

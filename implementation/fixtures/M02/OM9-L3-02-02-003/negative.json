@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G02-B-02-02-003",
+  "l3_id": "OM9-L3-02-02-003",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Đầu vào 3 điểm thẳng hàng hoặc frame singular trả typed error",
+  "expected": "A typed error or unchanged state; no document mutation and no cross-view CPlane leak.",
+  "evidence": [
+    "om9-scene cplane_presets: 6 passed",
+    "om9-app cplane_coordinate_input: 10 passed"
+  ],
+  "status": "PASS"
+}

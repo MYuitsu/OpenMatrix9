@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-011",
+  "fixture_id": "OM9-L3-02-04-011-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "seam on an open curve",
+    "seam fraction at 0 or 1",
+    "non-positive divide length",
+    "length target above the curve length"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_011_curve_seams_directions_and_divisions"
+}

@@ -1,0 +1,39 @@
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `release` profile [optimized] target(s) in 57.30s
+     Running tests\mesh_csg.rs (L:/om9-target\release\deps\mesh_csg-46c2699bbc657f33.exe)
+
+running 17 tests
+test connected_self_crossing_pentagram_prism_rebuilds_material_boundary ... connected pentagram: input signed volume 5.877852522924732, repaired 4.490279765795853, expected 4.4902797657958535, triangles 100
+ok
+test coplanar_overlays_touching_faces_and_identical_solids_are_regularized ... ok
+test crossing_triangles_have_an_actual_intersection_segment ... ok
+test dense_curved_fixture_repairs_at_the_original_tolerance ... CURVED16K union_volume=5.70713209062495 intersection_volume=2.65811845179003 difference_volume=1.52450681941747 repair_volume=5.70713209062495 union_triangles=15724 repair_triangles=15724 work=11176806 elapsed_all_ms=1159.752
+ok
+test detection_ignores_shared_boundaries_and_finds_coplanar_area_overlap ... ok
+test disjoint_contained_and_inward_cavity_shells ... ok
+test independently_rotated_operands_satisfy_volume_conservation ... ok
+test invalid_open_nonmanifold_and_budget_inputs_leave_sources_unchanged ... ok
+test mesh_csg_curved_scaling_measurement ... CURVED input=1024 output=1956 work=707130 rays=23124 fallbacks=0 elapsed_ms=24.449
+CURVED input=4096 output=5360 work=2776992 rays=83896 fallbacks=0 elapsed_ms=85.774
+CURVED input=16384 output=15724 work=10930754 rays=322312 fallbacks=0 elapsed_ms=290.389
+ok
+test mesh_csg_scaling_measurement ... SCALING input=24 output=56 work=8677 elapsed_ms=0.568 result=PASS
+SCALING input=384 output=336 work=153820 elapsed_ms=5.927 result=PASS
+SCALING input=1536 output=1344 work=662482 elapsed_ms=23.674 result=PASS
+SCALING input=6144 output=5376 work=2967892 elapsed_ms=99.653 result=PASS
+SCALING input=24576 output=21504 work=12954642 elapsed_ms=439.812 result=PASS
+ok
+test mismatched_dense_coplanar_triangulations_rebuild_without_seam_holes ... ok
+test new_corners_interpolate_primary_uvs_and_retain_seams ... ok
+test overlapping_boxes_union_difference_intersection_are_closed_and_measured ... Union: 56 triangles, volume 15, work 8677
+Difference: 36 triangles, volume 6.999999999999999, work 6660
+Intersection: 16 triangles, volume 1.0000000000000002, work 4710
+ok
+test repair_rebuilds_the_union_of_crossing_shells_without_holes ... ok
+test rotated_offset_solid_pairs_keep_expected_volumes ... rotated translated pairs: 24 analytic boolean fixtures passed
+ok
+test scale_translation_and_reversed_winding_preserve_geometry ... ok
+test sloped_tetrahedra_boolean_matches_analytic_volumes ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.53s
+

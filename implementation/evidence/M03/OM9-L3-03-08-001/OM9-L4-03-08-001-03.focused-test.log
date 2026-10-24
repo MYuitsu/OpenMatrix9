@@ -1,0 +1,17 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running tests\top11.rs (L:\om9-target\debug\deps\top11-0eff463d083938e7.exe)
+
+running 3 tests
+duplicate_vertical_origin=[0.0, 0.0, 5.0]
+duplicate_base_copies=2
+duplicate_total_objects=3
+test m03_03_08_001_duplicate_base_point_places_multiple_copies_until_enter ... duplicate_entities=2
+duplicate_undo_redo_passed=true
+ok
+test m03_03_08_001_duplicate_is_in_place_one_undo_and_selects_the_copy ... ok
+duplicate_last_distance_y=10.0
+duplicate_last_direction_x=5.0
+test m03_03_08_001_duplicate_options_project_and_reuse_the_last_move ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.01s
+

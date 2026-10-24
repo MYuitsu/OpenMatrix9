@@ -1,0 +1,16 @@
+{
+  "l4": "OM9-L4-02-03-006-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-03-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "SmartTrack keeps at most two SnapAnchors, rebuilds CPlane-axis guide lines and infers an ephemeral intersection near the cursor.",
+  "source_paths": [
+    "crates/om9-scene/src/osnap.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "om9-scene osnap: 11 passed",
+    "om9-app osnap UI: 3 passed"
+  ]
+}

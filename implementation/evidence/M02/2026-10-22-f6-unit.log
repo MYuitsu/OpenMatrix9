@@ -1,0 +1,15 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 22.13s
+     Running unittests src\lib.rs (L:/om9-target\debug\deps\om9_app-32d496690914eb19.exe)
+
+running 7 tests
+test f6::tests::a_floating_window_is_clamped_inside_the_screen ... ok
+test f6::tests::general_actions_use_the_registry_and_are_not_duplicated ... ok
+test f6::tests::builder_prefill_is_typed_and_requires_its_provider ... ok
+test f6::tests::mixed_or_unknown_semantics_fall_back_to_general ... ok
+test f6::tests::empty_and_curve_and_solid_selections_get_distinct_contexts ... ok
+test f6::tests::gem_context_registers_but_disables_without_m05 ... ok
+test f6::tests::a_custom_menu_keeps_order_and_disables_a_deleted_command ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 161 filtered out; finished in 0.00s
+

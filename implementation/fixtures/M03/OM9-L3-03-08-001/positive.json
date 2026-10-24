@@ -1,0 +1,25 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-001",
+  "fixture_id": "OM9-L3-03-08-001-POSITIVE",
+  "units": "mm",
+  "oracle": "In Place: one line -> 2 objects and Undo/Redo; base flow: 2 copies at x=5 and x=10; Vertical projects (3,4,5) to (0,0,5); Use Last Distance turns a 5 mm y move into 10 mm; Use Last Direction turns it into 5 mm along x; From Last Point continues from the last destination",
+  "measured": {
+    "duplicate_vertical_origin": "[0.0, 0.0, 5.0]",
+    "duplicate_base_copies": 2.0,
+    "duplicate_total_objects": 3.0,
+    "duplicate_undo_redo_passed": "true",
+    "duplicate_last_distance_y": 10.0,
+    "duplicate_last_direction_x": 5.0
+  },
+  "tolerances": {
+    "duplicate_entities": "exact integer",
+    "duplicate_undo_redo_passed": "boolean assertion",
+    "duplicate_base_copies": "exact integer",
+    "duplicate_total_objects": "exact integer",
+    "duplicate_vertical_origin": "1e-9",
+    "duplicate_last_distance_y": "1e-9",
+    "duplicate_last_direction_x": "1e-9"
+  },
+  "test": "m03_03_08_001"
+}

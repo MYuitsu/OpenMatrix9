@@ -1,0 +1,288 @@
+{
+  "date": "2026-10-21",
+  "status": "initial_sdk_verified_windows",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "source_sha256": {
+    "Cargo.lock": "09aaf573b63b59ca38c1867b8525866c835c657b7937479f144ec1dfac1d53ac",
+    "Cargo.toml": "686cc59a41be3750d0f29d6a620fa4627add2500583a802779e4c69c881bc680",
+    "crates/om9-app/Cargo.toml": "fb122a024ab9bbbebdbe7b4004ee88f6309a8a84697efc0cbdfb8ac44c0f301e",
+    "crates/om9-app/src/main.rs": "60d3940ca543256c68214f664e6297bebd87fcbb9fa423922237aaccd668a46f",
+    "crates/om9-app/src/session.rs": "3251ae04cce3af2c19b30bd148a30a0743b169c202d17920ba523e305ba13d82",
+    "crates/om9-app/src/session/plugins.rs": "7ebce5e9dc7829bcf8fee785a30eb483a79b29bf0daca765dfb7666c5b5a5210",
+    "crates/om9-core/src/model.rs": "ae5de1b136dd1f49f62cb2e60d31a5c29b35b46554d1fa48bf4501cd47ce9085",
+    "crates/om9-core/src/transaction.rs": "8e343c5591ffa872e4a10853891f5120e723c9152b7177e2e756bea625a7917f",
+    "crates/om9-plugin-host/Cargo.toml": "d524788678f11d2c112af58d86ea99af9bd2b9299bda4c0c99b4a27c7bf499ec",
+    "crates/om9-plugin-host/src/bundle.rs": "f5335411a28c2553c1a076a3688535ec51b445c0677363adb0b0512c934bd747",
+    "crates/om9-plugin-host/src/lib.rs": "312fda01ad2c0ca32161152882f3694f49fe6fe14c47060434ed8fcdb329f821",
+    "crates/om9-plugin-host/src/main.rs": "9553dbeda4f3acba5d7255667532ca6b6ed2d1b76f4b7ca8f8f23bec502a0bd7",
+    "crates/om9-plugin-host/src/package.rs": "78cf4f4eec071595db5d09e5d14c461f3bb4207b24c13943b9aa5cadeb52e1f1",
+    "crates/om9-plugin-host/src/staged.rs": "dbcf8959c4d1c09230de0c24468e965f5e6f19f881a5af1bf440a281d38faec6",
+    "crates/om9-plugin-host/tests/bundle.rs": "d1858e0d5034fe230025321a6280e0844d222749581416a15037485fa35cf84e",
+    "crates/om9-plugin-host/tests/package.rs": "3e213be552f608a2963a886599f0431a37a1334eddae9e1f03d306ea5f5f5fae",
+    "crates/om9-scene/src/picking.rs": "d32b7e844ca80e8160a47a05ca6499b2c66ceec21ce3377cb93548c1dff3ea53",
+    "crates/om9-scene/src/scene.rs": "47653bfe4c3bd59ca32143d182027b0045ba70df22048916f62acd45738fce0c",
+    "crates/om9-scene/src/scene/admission.rs": "24c52ed5a45c49c73c4ca228b71f9c6f739932dbe5907d6195cd30e0a8f6638d",
+    "crates/om9-sdk/Cargo.toml": "b41e84a5804d98b7062e24290ee90fc9f64c38e6e9b599f3cac96627c7109c74",
+    "crates/om9-sdk/README.md": "8c1b4a7e98055b7b31ea1d1696bb67b37bd23524373e04fc8a74afbb5a801beb",
+    "crates/om9-sdk/include/om9_sdk.h": "4efa76bcdf57ef8fffe795be7a9c1f0baf82ee616042990972ac6a6d7e4d0cc4",
+    "crates/om9-sdk/src/abi.rs": "2d21c18355912f52642e5113fe5c1ca55e9d9b5c243fc73d42f660dfd578a11c",
+    "crates/om9-sdk/src/lib.rs": "04db19c0b813cbd89ed36f0fde7d66fc17c261b07c56b8687a3d5bcf48546cc0",
+    "crates/om9-sdk/tests/contract.rs": "1d1b51d54f0a7e0dfaa570142b1926125eceb8bbebfdd6ce77e37696ae2d6e6e",
+    "sdk/examples/hello-plugin/Cargo.toml": "4fea26cf69b13abf0052177969e75fa744e5be268ea6d88a738648bffdb28fe5",
+    "sdk/examples/hello-plugin/arguments.json": "702b9be9687c93d27358c8e203b88a5ff565b2f5404763de2765b62cb47d6f50",
+    "sdk/examples/hello-plugin/descriptor.json": "624c4252e1f1a2c58866e3d38ce3867b3f9ef45af7adf4a7bfa0e0926d4a04f4",
+    "sdk/examples/hello-plugin/src/lib.rs": "f8ff51da29664d67babb657510052da2ef0a1397fe3cb90f8ff8b2835f947d49",
+    "tools/validate_plugin_sdk.py": "681a9c4a6ec6f061d6e61733a1bc535830d7a2f8cc30fe4c87f44b371de9cf9f"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "--no-default-features",
+  "target": "x86_64-pc-windows-msvc",
+  "portable_regression": {
+    "passed": 509,
+    "suites": 73,
+    "exit_code": 0,
+    "command": "cargo test -p om9-core -p om9-scene -p om9-sdk -p om9-plugin-host --no-default-features -j 2"
+  },
+  "controller_regression": {
+    "passed": 4,
+    "exit_code": 0
+  },
+  "actual_native_plugin_regression": {
+    "passed": 3,
+    "exit_code": 0
+  },
+  "native_observed": {
+    "status": "PASS",
+    "target": "x86_64-pc-windows-msvc",
+    "commands": [
+      {
+        "name": "pack",
+        "command": [
+          "L:\\om9-target\\debug\\om9-plugin.exe",
+          "pack",
+          "H:\\OpenMatrix9\\sdk\\examples\\hello-plugin\\descriptor.json",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9p",
+          "x86_64-pc-windows-msvc=L:\\om9-target\\debug\\om9_hello_plugin.dll"
+        ],
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "name": "inspect-package",
+        "command": [
+          "L:\\om9-target\\debug\\om9-plugin.exe",
+          "inspect",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9p"
+        ],
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "name": "create",
+        "command": [
+          "L:\\om9-target\\debug\\om9.exe",
+          "--plugin-run",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9p",
+          "CreateProfile",
+          "H:\\OpenMatrix9\\sdk\\examples\\hello-plugin\\arguments.json",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9"
+        ],
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "name": "inspect-project",
+        "command": [
+          "L:\\om9-target\\debug\\om9.exe",
+          "--inspect",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9"
+        ],
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "name": "cancel",
+        "command": [
+          "L:\\om9-target\\debug\\om9.exe",
+          "--plugin-run-on",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9p",
+          "CreateProfile",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\cancel.json",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9"
+        ],
+        "exit_code": 1,
+        "expected_exit": 1
+      },
+      {
+        "name": "unknown-command",
+        "command": [
+          "L:\\om9-target\\debug\\om9.exe",
+          "--plugin-run-on",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9p",
+          "MissingCommand",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\cancel.json",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9"
+        ],
+        "exit_code": 1,
+        "expected_exit": 1
+      },
+      {
+        "name": "controller-tests",
+        "command": [
+          "rtk",
+          "cargo",
+          "test",
+          "-p",
+          "om9-app",
+          "--no-default-features",
+          "--lib",
+          "session::plugins",
+          "-j",
+          "2"
+        ],
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "name": "native-tests",
+        "command": [
+          "rtk",
+          "cargo",
+          "test",
+          "-p",
+          "om9-app",
+          "--no-default-features",
+          "--test",
+          "plugin_native",
+          "-j",
+          "2",
+          "--",
+          "--ignored"
+        ],
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "name": "sdk-bundle",
+        "command": [
+          "L:\\om9-target\\debug\\om9-plugin.exe",
+          "sdk-bundle",
+          "H:\\OpenMatrix9",
+          "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\openmatrix9-sdk-0.1.0.zip"
+        ],
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "name": "external-sdk-build",
+        "command": [
+          "rtk",
+          "cargo",
+          "build",
+          "--offline",
+          "--manifest-path",
+          "L:\\om9-target\\sdk-external-source\\sdk\\examples\\hello-plugin\\Cargo.toml",
+          "-j",
+          "2"
+        ],
+        "exit_code": 0,
+        "expected_exit": 0
+      }
+    ],
+    "artifacts": {
+      "hello.om9p": {
+        "path": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9p",
+        "bytes": 929188,
+        "sha256": "06811b55abde0871f56f3618df8e3800287186ad4b370acba59b1a84446024fb"
+      },
+      "hello.om9": {
+        "path": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\hello.om9",
+        "bytes": 2159,
+        "sha256": "4e8c2c6cbe8f1ed8b63f21a6355042a4904dc86bf4f6fb0639130b0dc97d923e"
+      },
+      "openmatrix9-sdk-0.1.0.zip": {
+        "path": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\openmatrix9-sdk-0.1.0.zip",
+        "bytes": 89628,
+        "sha256": "73f608ec46e3f9a050064c34787007be4d42ffefdf5590e1206abd1b637d12cc"
+      },
+      "om9-plugin.exe": {
+        "path": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\20261021-plugin-sdk\\native\\om9-plugin.exe",
+        "bytes": 1661952,
+        "sha256": "09460e39c61d85c95e8b5588d16b21fd0e02704317f092805c9d41f144c817e7"
+      },
+      "om9_hello_plugin.dll": {
+        "path": "L:\\om9-target\\debug\\om9_hello_plugin.dll",
+        "bytes": 928256,
+        "sha256": "1a98c6b17ab03cbb78ca99286aa00904dc58f1a4196a8cdc1a5f62d942ec8862"
+      },
+      "om9.exe": {
+        "path": "L:\\om9-target\\debug\\om9.exe",
+        "bytes": 67495424,
+        "sha256": "00fcce87f5111668df4a88935e3d01c42159482284fd46a9cc69e72111273e94"
+      }
+    },
+    "objects_created": 3,
+    "cold_project_hash_equal": true,
+    "failed_commands_preserved_file": true,
+    "standalone_sdk_build": true,
+    "macos_runtime_verified": false,
+    "interactive_ui_acceptance": "not performed",
+    "native_geometry_adapters": "not exercised"
+  },
+  "developer_artifacts": {
+    "openmatrix9-sdk-0.1.0.zip": {
+      "path": "build/sdk/openmatrix9-sdk-0.1.0.zip",
+      "bytes": 89719,
+      "sha256": "7f6ec5d321a89e31202201adb5e8ab35a92f6901e5dab95ac83461f683c47a03"
+    },
+    "hello-windows-x64.om9p": {
+      "path": "build/sdk/hello-windows-x64.om9p",
+      "bytes": 929700,
+      "sha256": "5c7d677968c335c3bd88ebd7a1a2e225bf26da60e39dfb5ddb6c5d6a97932a23"
+    },
+    "om9-plugin-windows-x64.exe": {
+      "path": "build/sdk/om9-plugin-windows-x64.exe",
+      "bytes": 1661952,
+      "sha256": "09460e39c61d85c95e8b5588d16b21fd0e02704317f092805c9d41f144c817e7"
+    },
+    "sdk_sources_identical_to_tested_bundle": true,
+    "external_sdk_plugin_run_objects": 3
+  },
+  "checks": {
+    "public_source_audit_errors": 0,
+    "focused_cargo_fmt": "PASS",
+    "git_diff_check": "PASS",
+    "skill_validation": "PASS",
+    "installed_skill_equal": true,
+    "artifact_retention": {
+      "command": "python tools/prune_build_artifacts.py --apply",
+      "removed_runs": 1,
+      "freed_mb": 26.9,
+      "kept_newest": 10,
+      "older_cited_runs_preserved": 56
+    }
+  },
+  "broad_app_regression": {
+    "status": "FAILED",
+    "failed": 2,
+    "file": "crates/om9-app/tests/dock_layout_default.rs",
+    "tests": [
+      "d1_reset_after_every_placement_kind_recreates_the_baseline",
+      "n1_to_n8_a_layout_that_cannot_be_honoured_resets_to_the_baseline"
+    ],
+    "observed": "reset returns 300px; oracle requires 360px",
+    "dock_source_or_test_changed_by_sdk": false,
+    "log": "build/standalone-validation/ui-artifacts/20261021-plugin-sdk/broad-regression.log"
+  },
+  "macos_runtime_verified": false,
+  "full_rhino_sdk_coverage": false,
+  "manual_gate_promoted": false,
+  "native_kernel_measurements_performed": false,
+  "next_document": "sdk/API-INVENTORY.md",
+  "next_action": "Expose one required future capability at its owner; port and test native macOS adapters before claiming Mac host execution."
+}

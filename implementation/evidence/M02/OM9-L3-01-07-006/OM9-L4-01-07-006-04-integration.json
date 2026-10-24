@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-006-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-01-07-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "integration": "Hover is ephemeral and cache-keyed by pointer/camera/scene epoch; the selected mesh/curve/point has a separate GPU highlight batch and clipped subobject outlines.",
+  "tests": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app subobject_occurrences: 5 passed"
+  ]
+}

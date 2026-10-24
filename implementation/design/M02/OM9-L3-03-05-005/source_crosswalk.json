@@ -1,0 +1,18 @@
+{
+  "l3": "OM9-L3-03-05-005",
+  "title": "Selection Highlight Overrides",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/selection_overlay.rs"
+  ],
+  "tests": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app display_modes: 3 passed"
+  ],
+  "manual_reference": "Matrix8 Book 1 pp.63-70 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-05-005-01"
+}

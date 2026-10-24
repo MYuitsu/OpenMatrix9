@@ -1,0 +1,98 @@
+{
+  "schema": "om9.m03.checks.v1",
+  "work_item": "m03-l2-02-05-surface-workflows-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-02-05",
+  "title": "05-febe-freeform-surface-modeling",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Audited the existing sweep/loft/revolve/extrude/patch services and added the missing portable surface workflows: four-sided network, rail revolve, trim/split/untrim/shrink, rebuild/refit/softedit, match/blend/join, offset/normal-extrude, reverse/seam and unroll. Added 16 core tests and 6 OCCT kernel tests plus a measured receipt.",
+  "audit_result": {
+    "existing_implementation": "PARTIAL_PORTABLE_SURFACE_KERNEL",
+    "gaps_found": [
+      "No four-sided curve network, rail revolve, trim/split/untrim/shrink, softedit, surface match/blend, surface offset, reverse/seam or unroll service.",
+      "No registered L2-02-05 acceptance test or per-L4 evidence package.",
+      "Milestone runtime status was NOT_STARTED/SPEC_HARDENED."
+    ],
+    "gaps_closed": "Added crates/om9-core/src/surface_ops.rs, 16 core tests, 6 kernel tests, per-L3 design/fixtures and one receipt per planned L4 role; updated L1/L2/L3 runtime records and the ledger."
+  },
+  "checks": [
+    {
+      "name": "core surface suite",
+      "command": "cargo test -p om9-core --test surface_ops -- --nocapture",
+      "result": "16 passed; 0 failed",
+      "log": "build/l2-02-05-logs/core-suite.log"
+    },
+    {
+      "name": "kernel surface suite",
+      "command": "cargo test -p om9-kernel --features 3dm-brep --test l2_02_05 -- --nocapture",
+      "result": "6 passed; 0 failed",
+      "log": "build/l2-02-05-logs/kernel-suite.log"
+    },
+    {
+      "name": "core library",
+      "command": "cargo test -p om9-core --lib -j 2",
+      "result": "12 passed; 0 failed",
+      "log": "build/l2-02-05-logs/core-lib.log"
+    },
+    {
+      "name": "kernel all",
+      "command": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+      "result": "exit 0",
+      "log": "build/l2-02-05-logs/kernel-suite-all.log"
+    },
+    {
+      "name": "clippy core",
+      "command": "cargo clippy -p om9-core --test surface_ops -j 2 -- -D warnings",
+      "result": "exit 0",
+      "log": "build/l2-02-05-logs/clippy-core.log"
+    },
+    {
+      "name": "clippy kernel",
+      "command": "cargo clippy -p om9-kernel --features 3dm-brep --test l2_02_05 -j 2 -- -D warnings",
+      "result": "exit 0",
+      "log": "build/l2-02-05-logs/clippy-kernel.log"
+    },
+    {
+      "name": "scoped format",
+      "command": "rustfmt --edition 2024 --check crates/om9-core/src/surface_ops.rs crates/om9-core/src/lib.rs crates/om9-core/tests/surface_ops.rs crates/om9-kernel/tests/l2_02_05.rs",
+      "result": "exit 0",
+      "log": "build/l2-02-05-logs/fmt.log"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "build/l2-02-05-logs/public-source-audit.log"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-02-05-001": "6/6",
+    "OM9-L3-02-05-002": "6/6",
+    "OM9-L3-02-05-003": "5/5",
+    "OM9-L3-02-05-004": "5/5",
+    "OM9-L3-02-05-005": "6/6",
+    "OM9-L3-02-05-006": "5/5",
+    "OM9-L3-02-05-007": "5/5",
+    "OM9-L3-02-05-008": "6/6",
+    "OM9-L3-02-05-009": "6/6",
+    "OM9-L3-02-05-010": "5/5"
+  },
+  "manual_gate": "M03-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "All ten M03-UI surface workflows (selection, preview, commit/cancel, warning) are unsigned.",
+    "Network is four-sided Coons; n-sided networks are not implemented.",
+    "Match is a boundary-row replacement with a measured angle, not a full optimization.",
+    "Seam is a C0 metadata closure, not a true periodic re-parameterization.",
+    "Unroll is an average arc-length planar map; exact developable unroll of a doubly curved surface is not claimed.",
+    "Portable surface offset is a sampled/refit approximation; exact offset remains the OCCT B-Rep service."
+  ],
+  "not_claimed": [
+    "Human M03-UI approval",
+    "macOS execution",
+    "Exact developable unroll",
+    "Full n-sided network"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-05-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-03-05-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "Wireframe and Shaded both switch only ViewState.mode/revision; Shaded is now an available menu action.",
+  "tests": [
+    "om9-app display_modes: 3 passed",
+    "om9-app viewport_title_menu: 18 passed"
+  ]
+}

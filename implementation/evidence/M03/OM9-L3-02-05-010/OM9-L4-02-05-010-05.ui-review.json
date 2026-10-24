@@ -1,0 +1,62 @@
+{
+  "schema": "om9.m03.l2-02-05.ui-review.v1",
+  "task_id": "OM9-L4-02-05-010-05",
+  "l3_id": "OM9-L3-02-05-010",
+  "title": "Surface Normal Extrude And Unroll",
+  "oracle": {
+    "positive": [
+      "a plane normal extrusion at 2.5 mm has z=2.5",
+      "a plane unroll measures 4x2 with z=0",
+      "a cylinder r=5 h=8 unrolls to width 31.2135 mm and height 8 mm",
+      "thickening a 4x2 patch by 0.5 mm closes a 4 mm3 solid"
+    ],
+    "negative": [
+      "an unroll grid with fewer than two samples is refused",
+      "a zero normal-extrude height is refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The core surface oracle passes; the UI rail/profile/boundary selection, preview, commit/cancel and warning review is not signed by a human.",
+    "scope": "special surface construction and editable output"
+  },
+  "measured": {
+    "normal_extrude_plane_z": 2.5,
+    "unroll_plane_size_mm": [
+      4.0,
+      2.0
+    ],
+    "unroll_cylinder_u_mm": 31.213484856999596,
+    "unroll_cylinder_v_mm": 8.0,
+    "thicken_volume_mm3": 3.999999999999972
+  },
+  "tolerances": {
+    "plane": "1e-9",
+    "unroll_u_mm": "5% (chord sampling)",
+    "volume_mm3": "0.05"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "core suite 16 passed; kernel suite 6 passed; core lib/kernel all exit 0",
+    "clippy and fmt exit 0",
+    "public source audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-05-010/api.md",
+    "implementation/design/M03/OM9-L3-02-05-010/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-010/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-010/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-05-010/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

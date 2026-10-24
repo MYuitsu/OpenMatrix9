@@ -1,0 +1,14 @@
+{
+  "fixture_id": "G02-A-01-07-002",
+  "l3_id": "OM9-L3-01-07-002",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Click ID A rồi Ctrl click ID B trả set {A,B}, toggle A trả {B}",
+  "expected": "The documented hit/selection is produced with the exact object/subobject key and no silent fallback.",
+  "evidence": [
+    "om9-app acceptance_selection_set: 6 passed",
+    "om9-core selection_state: 7 passed",
+    "om9-app selection_overlay: 8 passed"
+  ],
+  "status": "PASS"
+}

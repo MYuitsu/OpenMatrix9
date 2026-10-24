@@ -1,0 +1,63 @@
+{
+  "schema": "om9.m03.l2-02-05.ui-review.v1",
+  "task_id": "OM9-L4-02-05-007-05",
+  "l3_id": "OM9-L3-02-05-007",
+  "title": "Surface Match Blend And Join Continuity",
+  "oracle": {
+    "positive": [
+      "G0 match gap 5.55e-17 mm; G1 angle 1.20e-4 rad; G2 angle 2.11e-8 rad",
+      "G0/G1/G2 blends with straight tangents all pass through (2,1,0)",
+      "two 2x2 sheets join to 2 faces, 1 shell"
+    ],
+    "negative": [
+      "G1/G2 blend without tangents is refused",
+      "G2 match against a target with too few cross rows is refused",
+      "a boundary gap in the patch is refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The core surface oracle passes; the UI rail/profile/boundary selection, preview, commit/cancel and warning review is not signed by a human.",
+    "scope": "G0/G1/G2 matching with continuity feedback"
+  },
+  "measured": {
+    "match_g0_gap_mm": 5.551115123125783e-17,
+    "match_g1_angle_rad": 0.00011999519952506682,
+    "match_g2_angle_rad": 2.1073424255447017e-08,
+    "blend_midpoint": [
+      2.0,
+      1.0,
+      0.0
+    ],
+    "join_faces": 2,
+    "join_shells": 1
+  },
+  "tolerances": {
+    "gap_mm": "1e-9",
+    "angle_rad": "1e-3"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "core suite 16 passed; kernel suite 6 passed; core lib/kernel all exit 0",
+    "clippy and fmt exit 0",
+    "public source audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-05-007/api.md",
+    "implementation/design/M03/OM9-L3-02-05-007/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-007/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-05-007/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-05-007/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

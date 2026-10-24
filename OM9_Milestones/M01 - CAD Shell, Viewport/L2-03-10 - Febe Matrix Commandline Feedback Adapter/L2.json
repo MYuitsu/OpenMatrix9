@@ -76,30 +76,53 @@
     }
   ],
   "runtime_implementation": {
-    "appearance_update": {
-      "date": "2026-10-20",
-      "target": "standalone Rust OM9",
-      "status": "COMMAND_THEME_VALIDATED_MANUAL_UI_PENDING",
-      "scope": "Command appearance only: history, prompt, input, caret, selection, IME underline, option tokens and scrollbar widget colours.",
-      "colours": {
-        "history_background": "#01391C",
-        "input_background": "#005126",
-        "text_caret_ime": "#FDD880",
-        "selection": "#186C41"
-      },
-      "evidence": [
-        "implementation/evidence/M01/2026-10-20-command-green-gold.json"
-      ],
-      "limitation": "Appearance evidence only; no full L2/L3 command-completion promotion."
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Command-line entry/submit, interactive prompts, clickable option tokens, numeric/coordinate validation, readable history and Escape/repeat shortcuts.",
+    "evidence": [
+      "implementation/design/M01/OM9-L2-03-10/README.md",
+      "implementation/evidence/M01/2026-10-22-l2-03-10-commandline-feedback.json",
+      "crates/om9-app/src/transcript.rs",
+      "crates/om9-app/src/ui.rs",
+      "crates/om9-app/src/status_surface.rs"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M01-UI visual review pending."
+    ]
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-03-10",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M01",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "AUDIT-REQUIRED standalone",
+      "sdk_signal": "AUDIT-THEN-ROUTE → EXPORT/CO-IMPLEMENT",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
     },
-    "typography": {
-      "date": "2026-10-20",
-      "status": "TYPOGRAPHY_TESTED_NATIVE_CAPTURED_LAYOUT_ORACLE_MISMATCH",
-      "scope": "UI font rendering and category-label glyph quality; no colour or command behavior changes.",
-      "evidence": [
-        "implementation/evidence/M01/2026-10-20-smooth-fonts.json"
-      ],
-      "limitation": "All three native app processes exited successfully and each completed five command checks. Full layout oracle remains FAIL because its 22pt icon expectation disagrees with the captured 24pt executable. Concurrent icon-size work is outside this font change."
-    }
+    "owner_specific_task": "Prompt/number/options/message service dùng chung command session, không parser/dispatcher thứ hai.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-03-10-001",
+      "OM9-L3-03-10-002",
+      "OM9-L3-03-10-003",
+      "OM9-L3-03-10-004",
+      "OM9-L3-03-10-005",
+      "OM9-L3-03-10-006"
+    ]
   }
 }

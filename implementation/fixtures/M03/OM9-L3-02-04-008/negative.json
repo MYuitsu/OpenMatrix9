@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-008",
+  "fixture_id": "OM9-L3-02-04-008-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "fit control count not greater than degree",
+    "fit control count above the sample count",
+    "knot insertion outside the domain"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_008_rebuild_refit_and_knot_operations"
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m03.l2-02-06.l4.receipt.v1",
+  "l4": "OM9-L4-02-06-003-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-02-06-003",
+  "date": "2026-10-22",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-02-06-003/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-02-06-003/negative.json",
+  "fixture_sha256": {
+    "positive": "b7aeadf81177a5a30aad8aaa5854d2cff8b5bb35285597ad51a6aed39ee3f208",
+    "negative": "99920ef0e195cc4a3913116b76bfc62e3b4f95362bf6c0ab2240200ec0fd3209"
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-02-06-003/api.md",
+    "implementation/fixtures/M03/OM9-L3-02-06-003/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-003/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "mirror about x=0 maps (2,3,4) to (-2,3,4)",
+      "linear pattern count 3 spacing 1 gives X=0,1,2",
+      "polar pattern 4 full turn gives 90-degree stations without a seam duplicate"
+    ],
+    "negative": [
+      "zero mirror normal, zero/negative spacing and zero count are refused",
+      "polar count < 2 and zero total angle are refused"
+    ]
+  }
+}

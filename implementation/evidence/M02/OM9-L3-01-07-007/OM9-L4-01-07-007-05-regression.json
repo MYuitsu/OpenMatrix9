@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-01-07-007-05",
+  "role": "REGRESSION_STRESS",
+  "l3": "OM9-L3-01-07-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "regression": "every_mode_exposes_the_handles_it_draws; a_hidden_handle_cannot_be_grabbed; empty_space_is_not_a_handle; the_pivot_is_none_without_a_selection; a_locked_or_hidden_object_is_refused_and_not_stored.",
+  "tests": [
+    "om9-scene lib gumball_view: 13 passed",
+    "om9-core gumball: 15 passed"
+  ]
+}

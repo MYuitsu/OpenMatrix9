@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-008",
+  "fixture_id": "OM9-L3-01-11-008-POSITIVE",
+  "units": "mm",
+  "input": {
+    "definition": "box 10×10×10",
+    "count": 2,
+    "spacing_mm": [
+      10,
+      0,
+      0
+    ]
+  },
+  "expect": {
+    "instance_definitions": 1,
+    "instance_placements": 2,
+    "baked_bodies": 2
+  },
+  "measured_on_2026_10_22": {
+    "bake_instance_definitions": 1.0,
+    "bake_bodies": 2.0
+  }
+}

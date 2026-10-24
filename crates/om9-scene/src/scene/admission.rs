@@ -30,6 +30,21 @@ fn buffer_bound(geometry: &Geometry, limits: &Limits) -> Result<Option<Usage>> {
             usage.points = cloud.points.len() as u64;
         }
         Geometry::Curve(curve) => {
+            if matches!(curve, Curve::Polycurve { .. }) {
+                let segments = match connected_polyline_segments(curve) {
+                    Ok(segments) => segments,
+                    Err(Error::Unsupported(_)) => return Ok(None),
+                    Err(error) => return Err(error),
+                };
+                let count = segments
+                    .len()
+                    .checked_add(1)
+                    .ok_or(Error::Overflow("polyline display vertices"))?;
+                usage.add(Usage::array::<Point3>(count)?, limits)?;
+                usage.points = count as u64;
+                usage.check(limits)?;
+                return Ok(Some(usage));
+            }
             let segments = match curve {
                 Curve::Line { .. } => 1,
                 Curve::Nurbs(n) if !n.periodic => 256,

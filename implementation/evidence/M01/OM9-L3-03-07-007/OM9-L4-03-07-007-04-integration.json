@@ -1,0 +1,15 @@
+{
+  "l4": "OM9-L4-03-07-007-04",
+  "l3": "OM9-L3-03-07-007",
+  "date": "2026-10-22",
+  "status": "INTEGRATED",
+  "source_paths": [
+    "crates/om9-app/src/dock_layout.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": {
+    "dock_layout_default": "7 passed",
+    "dock_layout_persistence": "6 passed"
+  },
+  "oracle": "malformed schema/version or impossible size falls back atomically to the baseline"
+}

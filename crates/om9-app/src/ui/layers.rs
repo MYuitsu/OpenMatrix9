@@ -355,7 +355,18 @@ impl MatrixApp {
             if let Some(result) = action {
                 self.feedback(result);
             }
-            let help = match control {LayerControl::Name=>"Left: current layer. Advanced Shift+right: rename",LayerControl::Arrow=>"Assign selection; keep current layer",LayerControl::Swatch=>"Left: current. Right: select visible selectable members. Advanced Shift+right: color",LayerControl::Lock=>"Lock prevents pick/edit/output; keeps display",LayerControl::Visibility=>"Toggle layer visibility; preserve object Hidden/preferences",_=>""};
+            let help = match control {
+                LayerControl::Name => "Left: current layer. Advanced Shift+right: rename",
+                LayerControl::Arrow => "Assign selection; keep current layer",
+                LayerControl::Swatch => {
+                    "Left: current. Right: select visible selectable members. Advanced Shift+right: color"
+                }
+                LayerControl::Lock => "Lock prevents pick/edit/output; keeps display",
+                LayerControl::Visibility => {
+                    "Toggle layer visibility; preserve object Hidden/preferences"
+                }
+                _ => "",
+            };
             response.on_hover_text(format!("{name} — {}\n{help}", slot.category_label()));
         }
     }

@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m03.l2-02-06.ui-review.v1",
+  "task_id": "OM9-L4-02-06-001-05",
+  "l3_id": "OM9-L3-02-06-001",
+  "title": "Interactive Move Copy And Rotate",
+  "oracle": {
+    "positive": [
+      "Move (1,2,3) -> (4,6,8) previews translation (3,4,5)",
+      "Rotate 90 deg about Z maps (1,0,0) to (0,1,0)",
+      "the Copy flag survives preview/cancel"
+    ],
+    "negative": [
+      "NaN/INF references are refused",
+      "a zero rotate axis is refused",
+      "a malformed numeric transform leaves the document unchanged"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The transform-session and matrix oracles pass; the interactive selection/reference picker/preview/commit/cancel and warning review is not signed by a human.",
+    "scope": "reference point command state and preview"
+  },
+  "measured": {
+    "move_preview": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        4.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rotate_angle_rad": 1.5707963267948966,
+    "copy_option": true
+  },
+  "tolerances": {
+    "matrix": "exact",
+    "angle_rad": "1e-12"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "app gumball suites 17 passed (interaction 6, numeric 6, placement 4, cold 1)",
+    "core suite 8 passed; kernel suite 3 passed; kernel l2_01_11 11 passed",
+    "clippy/fmt/public audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-06-001/api.md",
+    "implementation/design/M03/OM9-L3-02-06-001/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-001/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-001/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-06-001/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "schema": "om9.m03.checks.v1",
+  "work_item": "m03-l2-02-06-transform-orient-2026-10-22",
+  "date": "2026-10-22",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-02-06",
+  "title": "06-febe-rhino-transform-orient-workflows",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Added the typed reference-point Move/Copy, Rotate and Scale 1D/2D/3D command sessions plus SetPt/align services, and fixed the three-point orientation frame composition (transpose order). Added 8 core tests, 3 kernel transform tests and 17 app gumball checks; the existing transform math is covered too.",
+  "audit_result": {
+    "existing_implementation": "GUMBALL_AND_TRANSFORM_MATH_PRESENT",
+    "gaps_found": [
+      "No typed reference-point Move/Copy/Rotate/Scale command session.",
+      "No Align/SetPt service.",
+      "Three-point orientation composed the frame in the transposed order; translation-only tests did not catch it.",
+      "No registered L2-02-06 acceptance/evidence package."
+    ],
+    "gaps_closed": "Added crates/om9-core/src/transform_session.rs, fixed transform_ops::orient_three_point, added focused tests and 31 L4 receipts, updated L1/L2/L3 runtime and the ledger."
+  },
+  "checks": [
+    {
+      "name": "core transform session suite",
+      "command": "cargo test -p om9-core --test transform_sessions -- --nocapture",
+      "result": "7 passed; 0 failed",
+      "log": "build/l2-02-06-logs/core-suite.log"
+    },
+    {
+      "name": "kernel transform suite",
+      "command": "cargo test -p om9-kernel --features 3dm-brep --test l2_02_06 -- --nocapture",
+      "result": "3 passed; 0 failed",
+      "log": "build/l2-02-06-logs/kernel-suite.log"
+    },
+    {
+      "name": "prior transform math",
+      "command": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 -- --nocapture",
+      "result": "11 passed; 0 failed",
+      "log": "build/l2-02-06-logs/kernel-l2_01_11.log"
+    },
+    {
+      "name": "app gumball suites",
+      "command": "cargo test -p om9-app --test gumball_interaction --test gumball_numeric --test gumball_placement --test gumball_cold -- --nocapture",
+      "result": "17 passed; 0 failed",
+      "log": "build/l2-02-06-logs/app-gumball.log"
+    },
+    {
+      "name": "core library",
+      "command": "cargo test -p om9-core --lib -j 2",
+      "result": "12 passed; 0 failed",
+      "log": "build/l2-02-06-logs/core-lib.log"
+    },
+    {
+      "name": "kernel all",
+      "command": "cargo test -p om9-kernel --features 3dm-brep -j 2",
+      "result": "exit 0",
+      "log": "build/l2-02-06-logs/kernel-all.log"
+    },
+    {
+      "name": "clippy owned",
+      "command": "cargo clippy -p om9-core --test transform_sessions -j 2; cargo clippy -p om9-kernel --features 3dm-brep --test l2_02_06 -j 2",
+      "result": "exit 0; no warning in owned files",
+      "log": "build/l2-02-06-logs/clippy-core-no-deny.log",
+      "note": "workspace `-D warnings` is blocked by an in-flight untracked om9-core top11 module, not this owner."
+    },
+    {
+      "name": "scoped format",
+      "command": "rustfmt --edition 2024 --check crates/om9-core/src/transform_session.rs crates/om9-core/tests/transform_sessions.rs crates/om9-kernel/tests/l2_02_06.rs crates/om9-kernel/src/transform_ops.rs",
+      "result": "exit 0",
+      "log": "build/l2-02-06-logs/fmt.log"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "build/l2-02-06-logs/public-source-audit.log"
+    }
+  ],
+  "l3_evidence": {
+    "OM9-L3-02-06-001": "5/5",
+    "OM9-L3-02-06-002": "5/5",
+    "OM9-L3-02-06-003": "5/5",
+    "OM9-L3-02-06-004": "5/5",
+    "OM9-L3-02-06-005": "5/5",
+    "OM9-L3-02-06-006": "6/6"
+  },
+  "manual_gate": "M03-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "All six M03-UI reference-picker/preview/commit/cancel workflows are unsigned.",
+    "Align/SetPt include translate, rotate, scale and rotate+scale variants; the UI target picker is still manual.",
+    "The orientation solver now uses `target_frame^T * source_frame`; a non-identity rotation is covered."
+  ],
+  "not_claimed": [
+    "Human M03-UI approval",
+    "macOS execution",
+    "Non-translate Align variants"
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-002",
+  "fixture_id": "OM9-L3-01-09-002-POSITIVE",
+  "units": "mm",
+  "input": {
+    "closed_profile_mm": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        0
+      ],
+      [
+        10,
+        20,
+        0
+      ],
+      [
+        0,
+        20,
+        0
+      ]
+    ],
+    "direction_mm": [
+      0,
+      0,
+      30
+    ],
+    "open_chain_mm": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        0
+      ],
+      [
+        10,
+        20,
+        0
+      ],
+      [
+        0,
+        20,
+        0
+      ]
+    ]
+  },
+  "expect": {
+    "solid_volume_mm3": 6000.0,
+    "open_shell_area_mm2": 1200.0,
+    "solids_for_open": 0
+  },
+  "measured_on_2026_10_22": {
+    "extrusion_volume_mm3": 3000.0,
+    "open_extrusion_area_mm2": 1200.0
+  }
+}

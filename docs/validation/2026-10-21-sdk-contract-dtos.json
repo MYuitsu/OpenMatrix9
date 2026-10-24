@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-21",
+  "status": "sdk_read_dto_contract_verified_windows",
+  "scope": "Wire-shape contract for the new read DTOs; no behaviour change.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "source_sha256": {
+    "crates/om9-sdk/tests/contract.rs": "af3f2f7b5f60190da25a77bddaad510dac0a75d5dc8abbb451e8f5f07e91eb34"
+  },
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "56 passed, 5 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-contract",
+      "result": "PASS, 10 commands",
+      "native_tests": 27
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the test file; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1850305,
+      "sha256": "16d1fa008821e586d4bb93564e00ce272072620d800a0210b7d3a479f2ed3243"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "52b1b0230313aaa5896d894fe2e2b41c508975e9a217c21cf0909a7819c06d56"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 180932,
+      "sha256": "a8bd3c421f28a3e312d645d40b056fe047ff467592991ec21b7594dce251b2c9"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "e1159401519a50f59d085ae6afcff391143d1c26c7a7195bb3b7fc7ae8098770"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1847296,
+      "sha256": "08ae1c23c335cb67f9620a0dad10439c6c46a51eead63dc7b505130a62001dac"
+    },
+    "om9.exe": {
+      "bytes": 69448192,
+      "sha256": "aede3f51d974580cbf54cd17c2b4ba562b9bd0ed8252bd9805c930770a8b8b0d"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [],
+    "note": "Contract hardening only; no owner L3 status change."
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "No behaviour change.",
+    "macOS host and plugin execution unverified.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Return to the plan's remaining owner slices or record the remaining host edit paths."
+}

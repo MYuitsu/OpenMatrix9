@@ -1,0 +1,69 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.24s
+     Running tests\navigation_commands.rs (L:/om9-target\debug\deps\navigation_commands-d760d31d2ffd5f38.exe)
+
+running 6 tests
+test center_moves_the_target_to_the_world_origin_and_preserves_rotation ... ok
+test home_restores_the_camera_preset_without_touching_cplane_layers_or_document ... ok
+test zoom_extents_fits_the_whole_scene_and_keeps_the_view_direction ... ok
+test view_commands_are_available_and_dispatch_through_the_session ... ok
+test zoom_selected_ignores_far_unselected_geometry ... ok
+test empty_scene_is_a_typed_fit_failure_and_a_point_keeps_a_finite_span ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\navigation_deadlines.rs (L:/om9-target\debug\deps\navigation_deadlines-aeb0bb53877809d4.exe)
+
+running 1 test
+test fractionally_early_vsync_does_not_double_the_camera_interval ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\navigation_drag.rs (L:/om9-target\debug\deps\navigation_drag-5b6fda4c998548f4.exe)
+
+running 3 tests
+test shift_right_drag_pans_perspective_without_rotating_it ... ok
+test perspective_right_drag_orbits_without_moving_target_or_model ... ok
+test orthographic_right_drag_pans_without_changing_zoom_or_model ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running tests\navigation_input.rs (L:/om9-target\debug\deps\navigation_input-f0039291fecc3310.exe)
+
+running 1 test
+test a_wheel_burst_animates_and_zooms_toward_the_cursor ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s
+
+     Running tests\navigation_lifecycle.rs (L:/om9-target\debug\deps\navigation_lifecycle-62d34a92a896f4a1.exe)
+
+running 8 tests
+test focus_loss_releases_owner_and_does_not_move_on_return ... ok
+test escape_stops_capture_and_later_pointer_motion_cannot_resume_it ... ok
+test high_dpi_panes_remain_inside_the_actual_canvas ... ok
+test disappearing_owner_and_dpi_layout_change_do_not_leave_capture_stuck ... ok
+test zoom_settles_with_no_input_and_preserves_screen_anchor ... ok
+test capture_crosses_other_panes_and_release_has_no_inertia ... ok
+test drag_interrupts_zoom_at_the_displayed_pose_and_cancels_unseen_tail ... ok
+test repeated_egui_layout_pass_does_not_apply_drag_twice ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.06s
+
+     Running tests\navigation_precision.rs (L:/om9-target\debug\deps\navigation_precision-6b55717318f5c45f.exe)
+
+running 3 tests
+test pole_crossing_input_cannot_flip_or_invalidate_the_camera ... ok
+test restoring_a_different_pose_with_the_same_revision_cancels_the_old_zoom ... ok
+test deep_zoom_anchor_stays_within_a_tenth_physical_pixel_at_large_coordinates ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\viewport_layout.rs (L:/om9-target\debug\deps\viewport_layout-a01d2ab054c4c36c.exe)
+
+running 3 tests
+test maximize_is_per_view_and_restores_all_four_views ... ok
+test matrix_four_view_camera_presets_are_distinct_and_valid ... ok
+test jewelry_grid_axes_follow_each_view_cplane ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

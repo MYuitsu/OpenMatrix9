@@ -187,5 +187,41 @@
     },
     "algorithm_and_coverage": "Persist catalog references, validate duplicates and aliases, no code cloning",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "CustomMenu stores command IDs only, deduplicates on load while preserving order, and resolves unknown IDs as disabled. The record is embedded as om9.f6.v1.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-03-09-005/api.md",
+      "implementation/evidence/M02/OM9-L3-03-09-005/OM9-L4-03-09-005-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-03-09-005/OM9-L4-03-09-005-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-03-09-005/OM9-L4-03-09-005-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app f6 unit: 7 passed",
+      "om9-app f6_context: 2 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-03-09-005/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-03-09-005/positive.json",
+        "implementation/fixtures/M02/OM9-L3-03-09-005/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-03-09-005/OM9-L4-03-09-005-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-03-09-005/OM9-L4-03-09-005-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-03-09-005/OM9-L4-03-09-005-06-acceptance.md"
+      ],
+      "acceptance": "Custom menu reload preserves order; a deleted command ID is disabled instead of dispatched."
+    }
   }
 }

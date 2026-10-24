@@ -1,12 +1,21 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 //! Face/edge picking smoke for a document produced by the editable 3DM import.
+//!
+//! Ignored by default because it needs an external editable-BRep `.om9` fixture:
+//!
+//! ```text
+//! OM9_THREE_DM_OM9=<absolute fixture.om9> cargo test -p om9-app --features occt-brep \
+//!     --test three_dm_brep_pick -- --ignored
+//! ```
+//!
+//! Generate the fixture with `om9 --import-3dm <source.3dm> <fixture.om9>`; the document must
+//! contain a BRep whose display has points and triangles. The 2026-10-22 run used
+//! `v5_my_brep.3dm` (a single "Twisted b-rep") imported through the paired native exchange.
 #![cfg(all(windows, feature = "occt-brep"))]
 
 use om9_app::session::{Controller, SelectedSubobject};
-use om9_core::{
-    budget::Limits,
-    geometry::Geometry,
-};use om9_scene::{
+use om9_core::{budget::Limits, geometry::Geometry};
+use om9_scene::{
     camera::{Camera, Viewport},
     scene::{PickIntent, PickKind},
 };
@@ -25,13 +34,8 @@ fn imported_brep_faces_and_edges_are_pickable() {
             let Geometry::Brep(brep) = &entity.geometry else {
                 return None;
             };
-            (!brep.display.points.is_empty() && !brep.display.triangles.is_empty()).then(|| {
-                (
-                    entity.clone(),
-                    entity.placement,
-                    brep.display.clone(),
-                )
-            })
+            (!brep.display.points.is_empty() && !brep.display.triangles.is_empty())
+                .then(|| (entity.clone(), entity.placement, brep.display.clone()))
         })
         .expect("editable Brep");
     let center = display.points.iter().fold([0.; 3], |acc, p| {
@@ -114,4 +118,3 @@ fn imported_brep_faces_and_edges_are_pickable() {
         .unwrap();
     assert!(!controller.subselection().is_empty());
 }
-

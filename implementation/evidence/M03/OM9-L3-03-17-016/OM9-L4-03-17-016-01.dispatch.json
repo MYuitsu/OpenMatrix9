@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-016-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-016",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-017",
+  "source_command": "Untrim",
+  "menu_icon": "SurfaceSurfaceEditToolsUntrim",
+  "owner_candidate": "OM9-L3-02-04-005",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-016/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-016/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-016/dispatch_contract.json": "47997ec3c27aadfb74d711df842946142e5a5f426ffe9157a8f6e2854a8f7247",
+    "implementation/design/M03/OM9-L3-03-17-016/source_crosswalk.json": "36fd353e5a58169dedca05c47f3a95a1af38ae4158be76693591ee15cf33260d"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

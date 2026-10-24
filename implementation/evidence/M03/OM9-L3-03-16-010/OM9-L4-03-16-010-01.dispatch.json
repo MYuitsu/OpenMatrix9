@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-010-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-010",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-010",
+  "source_command": "Refit to Tolerance",
+  "menu_icon": "CurveCurveEditToolsRefitToTolerance",
+  "owner_candidate": "OM9-L3-02-04-008",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Refit to Tolerance command session is not wired; owner candidate OM9-L3-02-04-008 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.json": "f17757d7ac7956566cff58d64977354cfb53c938ff7117e2e828ba1ebcf64653",
+    "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.md": "e14ca0895129e070d006b674f1a1457f6b11de87be5ad352f606b9cf442cca2c"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

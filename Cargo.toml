@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/om9-core", "crates/om9-archive", "crates/om9-app", "crates/om9-scene", "crates/om9-native-owner", "crates/om9-exchange", "crates/om9-kernel", "crates/om9-render", "crates/om9-3dm"]
+members = ["crates/om9-core", "crates/om9-archive", "crates/om9-app", "crates/om9-scene", "crates/om9-native-owner", "crates/om9-exchange", "crates/om9-kernel", "crates/om9-render", "crates/om9-3dm", "crates/om9-sdk", "crates/om9-plugin-host", "sdk/examples/hello-plugin"]
 resolver = "3"
 
 [workspace.package]

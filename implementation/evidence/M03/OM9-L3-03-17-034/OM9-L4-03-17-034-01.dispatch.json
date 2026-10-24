@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-034-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-034",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-134",
+  "source_command": "Unroll Surface",
+  "menu_icon": "SurfaceUnrollDevelopableSrf",
+  "owner_candidate": "OM9-L2-03-17",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-034/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-034/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-034/dispatch_contract.json": "1cc5d45fb4c46c86c7044552449a4a7304f02893529dd23eb9c31f9135c1f30f",
+    "implementation/design/M03/OM9-L3-03-17-034/source_crosswalk.json": "be6b11d86457c9b919626b177c642c9a76bd0e209c2abab5bbd2f873bee9836a"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

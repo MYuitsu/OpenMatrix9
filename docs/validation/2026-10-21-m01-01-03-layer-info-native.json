@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-21",
+  "status": "layer_info_native_command_verified_windows",
+  "owner": "OM9-L2-01-03",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Adds the LayerInfoDemo native command and DLL test that closes the host-only gap from the previous round.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-app/tests/plugin_native.rs": "67b7275a9059335c3f6c304f2189cbbd2a67b278ea379ff1ac1e70539f96d14d",
+    "sdk/examples/hello-plugin/src/lib.rs": "33c416c5e0597b9f96b5b27435b488a3671821f3c949295bc249cbcae037911d",
+    "sdk/examples/hello-plugin/descriptor.json": "8be534c6f058eadb4ecb18adc593220039a68e424165cfe04d2f16a28d79e5b2"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "64 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "35 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-layer-info-native",
+      "result": "PASS, 10 commands",
+      "native_tests": 35,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "layer_current": true,
+    "layer_locked": false,
+    "undo_len": 2
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1946252,
+      "sha256": "66aa8571638f768d07666aadf74751aee00aa0cc736828226e86611b9f808017"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "231fae305c66ccccaa909b5319bd15990130fcb5e002ab4aa270f0b898d7a354"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 191285,
+      "sha256": "e377c647ae8611d95763dfe7de330e9331c27e5fe0e2665a2e40b094ab6af091"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "74d9fd12a4991fc1911189cbfada9361a37b740465c9b9ccf5d3160283599b9d"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1942528,
+      "sha256": "24179d7e90b51dc10a007188be7dafebfbbbac9796e675808a7f9232077c8db9"
+    },
+    "om9.exe": {
+      "bytes": 69595648,
+      "sha256": "ab7a0e00283d4c43f67d749448bf02184d95aed76595261cf3baeef953015a91"
+    }
+  },
+  "limitations": [
+    "Layer delete/reorder still open.",
+    "macOS host and plugin execution unverified.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Return to M02 for subobject/pick query services, or record the remaining host edit paths."
+}

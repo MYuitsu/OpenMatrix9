@@ -1,0 +1,14 @@
+{
+  "l4": "OM9-L4-03-07-003-03",
+  "l3": "OM9-L3-03-07-003",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/command.rs"
+  ],
+  "tests": {
+    "chrome_actions": "13 passed"
+  },
+  "oracle": "hover tooltip names the command and right-click slot remains inert when unregistered"
+}

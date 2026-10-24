@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-07-003",
+  "case": "negative",
+  "oracle": "unregistered right-click does not invoke the left-click command or mutate the document",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

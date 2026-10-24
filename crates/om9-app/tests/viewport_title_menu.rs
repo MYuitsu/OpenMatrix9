@@ -7,7 +7,7 @@ use om9_app::{
 };
 use om9_core::model::Document;
 use om9_core::{Error, budget::Limits};
-use om9_scene::workspace::ViewId;
+use om9_scene::workspace::{DisplayMode, ViewId};
 
 fn frame(app: &mut MatrixApp, ctx: &egui::Context, events: Vec<Event>) -> egui::FullOutput {
     frame_size(app, ctx, events, Vec2::new(1280., 900.))
@@ -186,11 +186,7 @@ fn render_plugin_and_unimplemented_modes_refuse_without_changing_any_view_or_mod
     let before = c.coordinator().snapshot();
     let workspace = c.workspace.clone();
     let menu = c.capture_view_menu(ViewId::SideView).unwrap();
-    for mode in [
-        DisplayPreset::Shaded,
-        DisplayPreset::Rendered,
-        DisplayPreset::ClayooSculpt,
-    ] {
+    for mode in [DisplayPreset::Rendered, DisplayPreset::ClayooSculpt] {
         assert!(matches!(
             c.apply_view_menu(&menu, MenuAction::Preset(mode)),
             Err(Error::Unsupported(_))
@@ -701,4 +697,27 @@ fn outside_canvas_click_only_dismisses_popup_and_preserves_pending_point() {
     click(&mut app, &ctx, outside);
     assert_eq!(app.controller.document().entities.len(), 1);
     assert!(!app.controller.is_running());
+}
+
+#[test]
+fn shaded_switches_only_the_view_mode_and_keeps_the_model_and_journal() {
+    let mut c = Controller::new(Document::new("shaded mode"), Limits::default()).unwrap();
+    let menu = c.capture_view_menu(ViewId::Perspective).unwrap();
+    let before = c.coordinator().snapshot();
+    let entities = c.document().entities.clone();
+    c.apply_view_menu(&menu, MenuAction::Preset(DisplayPreset::Shaded))
+        .unwrap();
+    assert_eq!(
+        c.workspace.views[&ViewId::Perspective].mode,
+        DisplayMode::Shaded
+    );
+    assert_eq!(c.document().entities, entities);
+    assert_eq!(c.coordinator().snapshot(), before);
+    let menu = c.capture_view_menu(ViewId::Perspective).unwrap();
+    c.apply_view_menu(&menu, MenuAction::Preset(DisplayPreset::Wireframe))
+        .unwrap();
+    assert_eq!(
+        c.workspace.views[&ViewId::Perspective].mode,
+        DisplayMode::Wireframe
+    );
 }

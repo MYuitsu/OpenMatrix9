@@ -304,5 +304,73 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "NURBS_CURVE"
+  "acceptance_category": "NURBS_CURVE",
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "planned",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "note": "Blend/match continuity cần cho plugin.",
+    "api": [],
+    "candidate_api": [
+      "blend_curves(a, b, continuity)"
+    ],
+    "host_only": "Continuity ở host; SDK chọn mức."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "G0/G1/G2 connection controls",
+    "owner": {
+      "crate": "om9-core",
+      "test": "crates/om9-core/tests/l2_02_04.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-02-04-007/api.md",
+      "implementation/design/M03/OM9-L3-02-04-007/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-02-04-007/positive.json",
+      "implementation/fixtures/M03/OM9-L3-02-04-007/negative.json",
+      "implementation/evidence/M03/OM9-L3-02-04-007/OM9-L4-02-04-007-03.focused-test.log",
+      "implementation/evidence/M03/OM9-L3-02-04-007/OM9-L4-02-04-007-04.regression.log",
+      "implementation/evidence/M03/OM9-L3-02-04-007/OM9-L4-02-04-007-05.ui-review.json",
+      "implementation/evidence/M03/OM9-L3-02-04-007/OM9-L4-02-04-007-05.acceptance.md"
+    ],
+    "tests": [
+      "m03_02_04_007: passed",
+      "l2_02_04 suite: 15 passed, 0 failed",
+      "om9-core suite: 447 passed, 0 failed (52 suites)",
+      "clippy -D warnings: exit 0",
+      "cargo fmt --all -- --check: exit 0",
+      "cargo check --workspace --all-targets -j 2: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "Match is admitted for clamped non-rational NURBS records (a line is promoted to a NURBS); only the end span poles change.",
+      "ArcBlend is the line-line fillet arc; blending arbitrary curve pairs with an arc is not claimed.",
+      "Manual M03-UI interactive acceptance is not performed by the implementer.",
+      "macOS runtime is unverified."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "manual_gate": "M03-UI",
+      "design": "implementation/design/M03/OM9-L3-02-04-007/api.md",
+      "fixtures": [
+        "implementation/fixtures/M03/OM9-L3-02-04-007/positive.json",
+        "implementation/fixtures/M03/OM9-L3-02-04-007/negative.json"
+      ],
+      "measured": {
+        "g1_blend_length_mm": 14.862666324708,
+        "g2_blend_length_mm": 15.243044351953
+      }
+    },
+    "l4_evidence": {
+      "OM9-L4-02-04-007-01": "1/1",
+      "OM9-L4-02-04-007-02": "1/1",
+      "OM9-L4-02-04-007-03": "1/1",
+      "OM9-L4-02-04-007-04": "1/1",
+      "OM9-L4-02-04-007-05": "1/1"
+    }
+  }
 }

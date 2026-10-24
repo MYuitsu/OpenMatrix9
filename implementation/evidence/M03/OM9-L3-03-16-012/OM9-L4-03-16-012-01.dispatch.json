@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-012-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-012",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-012",
+  "source_command": "Adjustable Curve Blend",
+  "menu_icon": "CurveBlendCurvesBlendCrv",
+  "owner_candidate": "OM9-L3-02-04-007",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Adjustable Curve Blend command session is not wired; owner candidate OM9-L3-02-04-007 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-012/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-012/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-012/dispatch_contract.json": "7a645fbb055b584214b53402dd58bf61cc5de2c83de3d5c882f5a343ee4860c0",
+    "implementation/design/M03/OM9-L3-03-16-012/dispatch_contract.md": "1b372d7a3f32cfc5a78de4c1d8fbefcdac6afea38438fd4f992157ca8bfd9dbd"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

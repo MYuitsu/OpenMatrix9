@@ -208,5 +208,42 @@
     },
     "algorithm_and_coverage": "Điểm lưu world-space duy nhất; per-view camera/CPlane chỉ ảnh hưởng đọc/hiển thị",
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9",
+    "scope": "Document geometry stores only world points; ViewState carries an independent camera and CPlane per view.",
+    "evidence": [
+      "implementation/design/M02/OM9-L3-02-02-007/api.md",
+      "implementation/evidence/M02/OM9-L3-02-02-007/OM9-L4-02-02-007-03-implementation.json",
+      "implementation/evidence/M02/OM9-L3-02-02-007/OM9-L4-02-02-007-04-integration.json",
+      "implementation/evidence/M02/OM9-L3-02-02-007/OM9-L4-02-02-007-06-acceptance.md"
+    ],
+    "tests": [
+      "om9-app cplane_coordinate_input: 10 passed",
+      "om9-scene coordinate_frame: 4 passed",
+      "om9-scene camera_grid: 5 passed"
+    ],
+    "human_approval": null,
+    "remaining": [
+      "Manual M02-UI review pending; no human sign-off is claimed."
+    ],
+    "standalone_verification_2026_10_22": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED",
+      "manual_gate": "M02-UI",
+      "design": "implementation/design/M02/OM9-L3-02-02-007/api.md",
+      "fixtures": [
+        "implementation/fixtures/M02/OM9-L3-02-02-007/positive.json",
+        "implementation/fixtures/M02/OM9-L3-02-02-007/negative.json"
+      ],
+      "evidence": [
+        "implementation/evidence/M02/OM9-L3-02-02-007/OM9-L4-02-02-007-03-implementation.json",
+        "implementation/evidence/M02/OM9-L3-02-02-007/OM9-L4-02-02-007-04-integration.json",
+        "implementation/evidence/M02/OM9-L3-02-02-007/OM9-L4-02-02-007-06-acceptance.md"
+      ],
+      "acceptance": "The same world point remains identical through Top, Front and Perspective; changing the camera does not rewrite its coordinates."
+    }
   }
 }

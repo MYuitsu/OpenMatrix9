@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-001",
+  "fixture_id": "OM9-L3-02-04-001-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "empty or single-point polyline",
+    "degenerate line with coincident ends",
+    "polygon with fewer than three distinct points"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; no partial curve and no document mutation",
+  "test": "m03_02_04_001_line_polyline_point_creation"
+}

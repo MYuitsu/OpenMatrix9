@@ -1,0 +1,69 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-13-003",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-exchange/src/import_dto.rs",
+      "crates/om9-core/src/units.rs",
+      "native/native_exchange.cpp"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_003 -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/m03_01_13_003.focused.log",
+      "stdout_log_sha256": "89b1d35da80340f363edbd6c1fcac649fab7de13952e4b7bce0c07d027e068ab"
+    },
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_receipt -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/receipt.log",
+      "stdout_log_sha256": "7cc14fd37a5ab33b8935885cd590697bb335d8549488cd4f712c38b97199a893"
+    }
+  ],
+  "observed": {
+    "inch_model_unit": "Inch",
+    "inch_point_mm": [
+      25.4,
+      50.8,
+      76.2
+    ],
+    "unitless_without_resolution": "refused",
+    "conflicting_factor": "refused"
+  },
+  "expected": {
+    "inch_model_unit": "Inch",
+    "inch_point_mm": [
+      25.4,
+      50.8,
+      76.2
+    ],
+    "unitless_without_resolution": "refused",
+    "conflicting_factor": "refused"
+  },
+  "tolerances": {
+    "inch_point_mm": "1e-12 per coordinate (z measured 76.19999999999999)"
+  },
+  "artifact_paths": [
+    "crates/om9-exchange/src/import_dto.rs",
+    "crates/om9-core/src/units.rs",
+    "native/native_exchange.cpp"
+  ],
+  "artifact_sha256": {
+    "crates/om9-exchange/src/import_dto.rs": "52cd4784e1885b9d4fb648da73180e97bf87ecce049438a95bec81221dcea5f8",
+    "crates/om9-core/src/units.rs": "25d663a30f8ab4c6fb66797b4e38d48323921f013e09c18ce43a3528301dd21a",
+    "native/native_exchange.cpp": "8cf87d2ca10e785300232219f3742973ecbde4d6249dfb96d190498db27ef6c1"
+  }
+}

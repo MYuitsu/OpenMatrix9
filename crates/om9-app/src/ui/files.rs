@@ -255,6 +255,10 @@ impl MatrixApp {
                     for diagnostic in self.controller.file_diagnostics() {
                         self.transcript.append_history(diagnostic);
                     }
+                    if let Err(error) = self.reload_project_state() {
+                        self.transcript
+                            .append_history(&format!("project manager state: {error}"));
+                    }
                 }
                 self.transcript.set_prompt(self.controller.prompt());
                 self.focus_cmd = self.controller.file_operation().is_none();

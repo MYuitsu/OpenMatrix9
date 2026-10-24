@@ -1,0 +1,21 @@
+{
+  "schema": "om9.m03.l2-03-17.fixture.v1",
+  "l3_id": "OM9-L3-03-17-017",
+  "fixture_id": "OM9-L3-03-17-017-POSITIVE",
+  "command_id": "OM9-SURFACE-117",
+  "input": {
+    "entry": "Matrix Surface menu and command line",
+    "selection": "a compatible selected surface/curve profile as declared by the owner; no geometry is produced by the UI"
+  },
+  "expect": {
+    "same_command_id": true,
+    "enabled": true,
+    "ui_state": "FUNCTIONAL",
+    "no_fake_success": true
+  },
+  "measured_on_2026_10_23": {
+    "catalog_rows": 38,
+    "enabled_rows": 38,
+    "disabled_rows": 0
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-056-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-056",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-018",
+  "source_command": "Offset Normal to Surface",
+  "menu_icon": "CurveOffsetOffsetCrvNormalToSurface",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Offset Normal to Surface; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-056/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-056/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-056/dispatch_contract.json": "e26e102f0df83e9f0499a88f0049e8c6e651a5f254571e05d64f60fc20014e1b",
+    "implementation/design/M03/OM9-L3-03-16-056/dispatch_contract.md": "dd54d5b7463a9e5d39d2230830df97f412ee9d322b56ddd88d814fd8ef0e9316"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

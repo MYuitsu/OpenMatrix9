@@ -1,0 +1,15 @@
+{
+  "l4": "OM9-L4-03-07-005-04",
+  "l3": "OM9-L3-03-07-005",
+  "date": "2026-10-22",
+  "status": "INTEGRATED",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/ui/chrome.rs"
+  ],
+  "tests": {
+    "command_sessions": "6 passed",
+    "command_options_and_repeat": "6 passed"
+  },
+  "oracle": "empty/failed commands do not enter history; duplicate replay does not create extra slots"
+}

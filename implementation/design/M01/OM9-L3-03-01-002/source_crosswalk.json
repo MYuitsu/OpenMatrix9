@@ -1,0 +1,16 @@
+{
+  "l3": "OM9-L3-03-01-002",
+  "title": "Jewelry Viewport Camera Presets",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-scene/src/camera.rs",
+    "crates/om9-scene/src/workspace.rs"
+  ],
+  "api": "Camera::preset + Projection + CPlane",
+  "tests": [
+    "crates/om9-app/tests/viewport_layout.rs"
+  ],
+  "manual_reference": "Matrix8 Book 1, Modeling in the Viewports (p22-26), F4 Center of the Universe",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

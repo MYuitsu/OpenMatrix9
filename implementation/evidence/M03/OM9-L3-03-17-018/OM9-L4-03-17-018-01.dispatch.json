@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-018-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-018",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-019",
+  "source_command": "Rail Revolve",
+  "menu_icon": "SurfaceRailRevolve",
+  "owner_candidate": "OM9-L3-01-09-003",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-018/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-018/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-018/dispatch_contract.json": "25bb7c193be05feaa3a7e651bee888e4d5f900fbb9ca1bb60fb84dbebb96916e",
+    "implementation/design/M03/OM9-L3-03-17-018/source_crosswalk.json": "7216f76331bd4de07ad56a9ce5f4fc7edd8812a343688db239e9b9280f3bdc8f"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

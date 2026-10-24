@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-052-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-052",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-052",
+  "source_command": "Match",
+  "menu_icon": "CurveCurveEditToolsMatch",
+  "owner_candidate": "",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "no verified backend owner for Match; menu stays disabled",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-052/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-052/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-052/dispatch_contract.json": "8efcc945ce5969e7cfc8662077541dbcd970e772a97e271f0b6f033ec788d18b",
+    "implementation/design/M03/OM9-L3-03-16-052/dispatch_contract.md": "38d3ee9476b29e9022a92bbfe8bfdd7451de3ef0ad5e44a1bebd60176791e7c1"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

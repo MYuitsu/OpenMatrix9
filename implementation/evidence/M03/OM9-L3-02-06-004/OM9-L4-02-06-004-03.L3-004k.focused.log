@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\l2_02_06.rs (L:\om9-target\debug\deps\l2_02_06-f067a0f9fb3d3d0f.exe)
+
+running 1 test
+test m03_02_06_orientation_solver_maps_two_and_three_reference_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+

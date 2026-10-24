@@ -503,8 +503,11 @@ fn static_meshes_merge_into_a_handful_of_draws() {
     for index in 0..1000usize {
         let x = (index % 40) as f32 - 20.0;
         let y = (index / 40) as f32 - 12.0;
-        let row_major=translate(x*2.0,y*2.0,0.0);
-        batch.add_static(&cube,std::array::from_fn(|col|std::array::from_fn(|row|row_major[row][col])));
+        let row_major = translate(x * 2.0, y * 2.0, 0.0);
+        batch.add_static(
+            &cube,
+            std::array::from_fn(|col| std::array::from_fn(|row| row_major[row][col])),
+        );
     }
     let camera = Camera {
         eye: [0., -160., 120.],

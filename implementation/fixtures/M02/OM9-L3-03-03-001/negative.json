@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-03-001",
+  "l3_id": "OM9-L3-03-03-001",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Click đối tượng locked không tạo ID vào selection",
+  "expected": "No locked/stale selection, no marquee from the dock, and no journal write on cancel/invalid input.",
+  "evidence": [
+    "om9-app matrix_selection_sequence: 2 passed",
+    "om9-app acceptance_viewport_selection: 8 passed"
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-031-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-031",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-034",
+  "source_command": "Split at Isocurve",
+  "menu_icon": "SurfaceSurfaceEditToolsSplitatIsocurve",
+  "owner_candidate": "OM9-L3-02-04-005",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-031/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-031/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-031/dispatch_contract.json": "80b109a60ff7a7434d6b31b2d416e8d6a5bf176b33a4184a1bab0ec035183258",
+    "implementation/design/M03/OM9-L3-03-17-031/source_crosswalk.json": "7cb44fb35d33b1b69453a2e9e4ac68967c1a7b0eddd0c6540a7982105a49202c"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

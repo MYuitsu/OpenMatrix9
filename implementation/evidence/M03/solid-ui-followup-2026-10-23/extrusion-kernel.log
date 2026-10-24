@@ -1,0 +1,20 @@
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.16s
+     Running tests\extrusion.rs (L:/om9-target\debug\deps\extrusion-6feec21436fdbc50.exe)
+
+running 2 tests
+test exact_extrusion_refuses_open_nonplanar_and_disconnected_boundaries ... ok
+
+thread 'exact_extrusion_retains_rational_basis_and_reversal' (33976) panicked at crates\om9-kernel\tests\extrusion.rs:48:13:
+ellipse: 94.99995515997158
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test exact_extrusion_retains_rational_basis_and_reversal ... FAILED
+
+failures:
+
+failures:
+    exact_extrusion_retains_rational_basis_and_reversal
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p om9-kernel --test extrusion`

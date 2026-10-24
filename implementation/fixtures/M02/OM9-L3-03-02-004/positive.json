@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-02-004",
+  "l3_id": "OM9-L3-03-02-004",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Shift+right drag Perspective pan target mà không thay đổi rotation",
+  "expected": "The documented camera motion with the world/document unchanged where required.",
+  "evidence": [
+    "om9-app navigation_drag: 3 passed",
+    "om9-app navigation_lifecycle: 8 passed"
+  ],
+  "status": "PASS"
+}

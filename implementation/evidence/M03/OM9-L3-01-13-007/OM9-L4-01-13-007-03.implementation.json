@@ -1,0 +1,68 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-007-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-13-007",
+  "date": "2026-10-23",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "source_revision": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "worktree_state": "evidence recorded in the dirty worktree; the focused tests were run against these exact sources",
+  "owner": {
+    "crate": "om9-app + om9-exchange + om9-kernel",
+    "files": [
+      "crates/om9-core/src/model.rs",
+      "crates/om9-exchange/src/export_document.rs",
+      "native/native_exchange.cpp"
+    ],
+    "test": "crates/om9-app/tests/l2_01_13.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_007 -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/m03_01_13_007.focused.log",
+      "stdout_log_sha256": "b00c678b762589298633139fe95b4ecb63e296a5512879afd5efb5f8981ac73c"
+    },
+    {
+      "argv": "cargo test -p om9-app --test l2_01_13 m03_01_13_receipt -- --ignored --exact --nocapture",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "build/l2-01-13-logs/receipt.log",
+      "stdout_log_sha256": "7cc14fd37a5ab33b8935885cd590697bb335d8549488cd4f712c38b97199a893"
+    }
+  ],
+  "observed": {
+    "definitions": 1,
+    "definition_members": 1,
+    "instances": 2,
+    "instance_x_mm": [
+      0.0,
+      50.0
+    ]
+  },
+  "expected": {
+    "definitions": 1,
+    "definition_members": 1,
+    "instances": 2,
+    "instance_x_mm": [
+      0.0,
+      50.0
+    ]
+  },
+  "tolerances": {
+    "mesh": "exact",
+    "instance_x_mm": "1e-12"
+  },
+  "artifact_paths": [
+    "crates/om9-core/src/model.rs",
+    "crates/om9-exchange/src/export_document.rs",
+    "native/native_exchange.cpp"
+  ],
+  "artifact_sha256": {
+    "crates/om9-core/src/model.rs": "d471680a2d92858e4eac759e0a673101cdba84ea05db43d03f9df74b456abbe6",
+    "crates/om9-exchange/src/export_document.rs": "ef805f53870dcbf9d61b6d467ac414893f5cebec34021acd648e7b365714a900",
+    "native/native_exchange.cpp": "8cf87d2ca10e785300232219f3742973ecbde4d6249dfb96d190498db27ef6c1"
+  }
+}

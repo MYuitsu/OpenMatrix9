@@ -807,8 +807,8 @@ impl SceneBatch {
         let mut instance_bytes = Vec::with_capacity((visible.len() + 1) * 80);
         let append = |bytes: &mut Vec<u8>, model: [[f32; 4]; 4], tint: [f32; 4]| {
             for col in 0..4 {
-                for row in 0..4 {
-                    bytes.extend_from_slice(&model[row][col].to_le_bytes());
+                for row in &model {
+                    bytes.extend_from_slice(&row[col].to_le_bytes());
                 }
             }
             for value in tint {

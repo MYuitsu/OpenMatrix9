@@ -1,0 +1,36 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-003",
+  "fixture_id": "OM9-L3-01-11-003-POSITIVE",
+  "units": "mm",
+  "input": {
+    "box_mm": [
+      2,
+      3,
+      4
+    ],
+    "factors": [
+      2,
+      3,
+      4
+    ],
+    "mirror_factors": [
+      -1,
+      1,
+      1
+    ]
+  },
+  "expect": {
+    "volume_mm3": 576.0,
+    "sizes_mm": [
+      4,
+      9,
+      16
+    ],
+    "mirrored_volume_mm3": 24.0
+  },
+  "measured_on_2026_10_22": {
+    "scaled_volume_mm3": 576.0,
+    "scaled_size_x_mm": 4.0000002
+  }
+}

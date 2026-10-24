@@ -1,0 +1,23 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests\top11.rs (L:\om9-target\debug\deps\top11-0eff463d083938e7.exe)
+
+running 5 tests
+grip_points_on_line=2
+grip_mode_toggle_passed=true
+test m03_03_08_002_control_point_toggle_uses_f10_and_selection_only ... ok
+grip_drag_end_mm=[15.0, 2.0, 0.0]
+grip_drag_undo_passed=true
+test m03_03_08_002_grip_drag_moves_a_control_point_and_undo_restores_it ... ok
+circle_grip_radius=5.000000000000
+surface_control_grips=4
+surface_edit_reversed=true
+surface_edit_grips=4
+test m03_03_08_002_circle_and_surface_control_grips_reach_the_toolbar_adapter ... ok
+surface_edit_periodic=true
+test m03_03_08_002_surface_edit_grips_keep_periodic_and_reversed_records ... ok
+surface_edit_handles_96_ms=98.075
+surface_edit_move_96_ms=48.388
+test m03_03_08_002_surface_edit_grid_is_fast_through_the_adapter ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.22s
+

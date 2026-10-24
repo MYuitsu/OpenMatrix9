@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m03.l2-01-09.fixture.v1",
+  "l3_id": "OM9-L3-01-09-007",
+  "fixture_id": "OM9-L3-01-09-007-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "rail with a zero tangent",
+    "vertical profile against a z rail",
+    "coincident sweep2 rails",
+    "2 mm profile across a 3 mm separation"
+  ],
+  "expect": "CreationError::Invalid; no partial body"
+}

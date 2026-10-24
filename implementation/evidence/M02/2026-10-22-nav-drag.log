@@ -1,0 +1,11 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.02s
+     Running tests\navigation_drag.rs (L:/om9-target\debug\deps\navigation_drag-5b6fda4c998548f4.exe)
+
+running 3 tests
+test perspective_right_drag_orbits_without_moving_target_or_model ... ok
+test shift_right_drag_pans_perspective_without_rotating_it ... ok
+test orthographic_right_drag_pans_without_changing_zoom_or_model ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+

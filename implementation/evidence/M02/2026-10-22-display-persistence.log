@@ -1,0 +1,18 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.54s
+     Running tests\display_persistence.rs (L:/om9-target\debug\deps\display_persistence-20f554b3b43bee19.exe)
+
+running 2 tests
+test a_corrupt_display_preset_falls_back_without_losing_the_project ... ok
+test a_display_preset_is_embedded_and_restored_with_the_project ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\project_manager_persistence.rs (L:/om9-target\debug\deps\project_manager_persistence-d7b9b38ab12051cf.exe)
+
+running 2 tests
+test restore_master_live_replaces_the_document_atomically ... ok
+test jobbag_state_survives_save_and_reopen_inside_the_om9_file ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

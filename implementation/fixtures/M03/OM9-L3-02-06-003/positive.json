@@ -1,0 +1,34 @@
+{
+  "schema": "om9.m03.l2-02-06.fixture.v1",
+  "l3_id": "OM9-L3-02-06-003",
+  "fixture_id": "OM9-L3-02-06-003-POSITIVE",
+  "units": "mm",
+  "input": {
+    "workflow": "Interactive Mirror And Array",
+    "kind": "typed transform/orient session and analytic matrix oracle"
+  },
+  "expect": {
+    "mirror_point": [
+      -2.0,
+      3.0,
+      4.0
+    ],
+    "linear_placements": 3,
+    "polar_placements": 4,
+    "seam_duplicate": false
+  },
+  "tolerances": {
+    "point": "1e-12",
+    "angle": "1e-12"
+  },
+  "measured_on_2026_10_22": {
+    "mirror_point": [
+      -2.0,
+      3.0,
+      4.0
+    ],
+    "linear_placements": 3,
+    "polar_placements": 4,
+    "seam_duplicate": false
+  }
+}

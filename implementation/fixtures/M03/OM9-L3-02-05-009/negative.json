@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-009",
+  "fixture_id": "OM9-L3-02-05-009-NEGATIVE",
+  "cases": [
+    "a plane seam with distinct boundary rows is refused"
+  ],
+  "invariants": [
+    "no partial surface is returned on refusal",
+    "no tessellation is substituted for the exact NURBS surface",
+    "the typed error reaches the caller"
+  ],
+  "measured_on_2026_10_22": "all listed negative cases pass in the focused logs"
+}

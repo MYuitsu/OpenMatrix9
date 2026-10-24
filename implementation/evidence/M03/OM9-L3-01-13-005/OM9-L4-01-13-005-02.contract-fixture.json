@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m03.l2-01-13.l4.receipt.v1",
+  "l4": "OM9-L4-01-13-005-02",
+  "role": "CONTRACT_FIXTURE",
+  "l3": "OM9-L3-01-13-005",
+  "date": "2026-10-23",
+  "status": "FIXTURE_FROZEN",
+  "fixture_positive": "implementation/fixtures/M03/OM9-L3-01-13-005/positive.json",
+  "fixture_negative": "implementation/fixtures/M03/OM9-L3-01-13-005/negative.json",
+  "fixture_sha256": {
+    "positive": "33de45272f9428f3f7f2612537f9629178fa72f1748f8f22c959901720e6f9f5",
+    "negative": "c248742f53e3d23828d1ac9326b4c803913473f8ac6fd35cc5e4e5088b97d41c"
+  },
+  "generator": {
+    "source": "native/source_inventory_fixture.cpp",
+    "source_sha256": "461f3103859ee024b1f7bf1adb979fe6d3e8b1c4947b838d597901aab8d22dbc",
+    "binary": "build/source-fixture.exe",
+    "binary_sha256": "d315c6d35a94bad0d05cb4aeaff8a90ac6fd5437646ee6d006463c73386dc0d7",
+    "opennurbs_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+    "note": "The authored writer embeds openNURBS-generated component UUIDs, so regenerated archives are structurally identical but not byte-identical; each receipt records the SHA-256 of the archive actually read."
+  },
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-01-13-005/api.md",
+    "implementation/fixtures/M03/OM9-L3-01-13-005/positive.json",
+    "implementation/fixtures/M03/OM9-L3-01-13-005/negative.json"
+  ],
+  "oracle": {
+    "positive": [
+      "line, circle, arc, polyline and rational NURBS curve survive export and reimport with the same variants",
+      "NURBS poles agree within 1e-12, weights and knots exactly",
+      "polyline segments keep their exact point sequence"
+    ],
+    "negative": [
+      "an unsupported/reversed polycurve metadata case is refused by the native bridge rather than flattened",
+      "a degenerate curve is rejected by the core curve admission"
+    ]
+  }
+}

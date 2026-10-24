@@ -1,0 +1,47 @@
+{
+  "schema": "om9.m03.l2-01-11.l4.receipt.v1",
+  "l4": "OM9-L4-01-11-003-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-11-003",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "target": "standalone Rust OM9, Windows x64",
+  "owner": {
+    "crate": "om9-kernel",
+    "files": [
+      "crates/om9-kernel/src/transform_ops.rs",
+      "crates/om9-kernel/src/transform_bridge.cpp"
+    ],
+    "test": "crates/om9-kernel/tests/l2_01_11.rs"
+  },
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_11 m03_01_11_003 -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-11-003/OM9-L4-01-11-003-03.focused-test.log",
+      "stdout_log_sha256": "ec48000a9ab22aab079a1a562087221d071ade1e27d576476491bfd25cbe589b"
+    }
+  ],
+  "observed": {
+    "scaled_volume_mm3": 576.0,
+    "scaled_size_x_mm": 4.0000002
+  },
+  "expected": {
+    "scaled_volume_mm3": 576.0,
+    "scaled_size_x_mm": 4.0
+  },
+  "effective_tolerance": {
+    "scaled_volume_mm3": "1e-5",
+    "scaled_size_x_mm": "1e-5"
+  },
+  "input_validation": [
+    "every scale factor must be finite and non-zero",
+    "volume scales by |det|; a negative determinant is a mirror and is admitted",
+    "a singular (zero-factor) matrix is refused"
+  ],
+  "error_type": "transform_ops::TransformError (creation::CreationError)",
+  "rollback_behavior": "inputs are immutable values; a refused operation returns before a body exists",
+  "compile_receipt": "the crate, the C++ transform adapter and the focused test compile (exit 0)",
+  "worktree_state": "The recorded revision is HEAD; L2-01-11 changes were measured before commit."
+}

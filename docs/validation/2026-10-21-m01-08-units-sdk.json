@@ -1,0 +1,193 @@
+{
+  "date": "2026-10-21",
+  "status": "units_tolerance_sdk_export_verified_windows",
+  "owner": "OM9-L2-01-08",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "First implementation slice of the milestone-integrated SDK plan; delivered inside the existing units owner, not as a separate SDK phase.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "e0f718ba5be928a29a6c8da91349f78a9716fdcfbd41df56d845beb65717d97f",
+    "crates/om9-plugin-host/src/staged.rs": "9a992fb3e7bb7f831bfed3994fd9bea3515a99624ebcfb921b31b89ba0f45c66",
+    "crates/om9-app/tests/plugin_native.rs": "ed2d70f2ff80d594d971226cedf78ab4d760b3d2fca4ba8390d8652e694d73c3",
+    "sdk/examples/hello-plugin/src/lib.rs": "be6cc81a2c1495be8cc7df66575a02f41eded8097ac927376b334c5ed7afaf62",
+    "sdk/examples/hello-plugin/descriptor.json": "d5832256a6775dc8003f2e4c81be19992752f39ef0b3b7fdd97a7fcd192309b2",
+    "sdk/README.md": "e79fdecae8fde32634675e7a94e87789b213fb56bf8ff658441a0725ebed7947",
+    "sdk/API-INVENTORY.md": "058f7f6e2a17358f757c24a1e056563da30996ef31ed65e27ea7eba7a64cd288",
+    "tools/validate_plugin_sdk.py": "700272f4a97395e9221023707e0d68129442b6d693984ef5284782dbd9f4f111"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "document_units",
+      "parse_length",
+      "parse_angle",
+      "parse_coordinates"
+    ],
+    "public_types": [
+      "DocumentUnits",
+      "DocumentTolerance",
+      "LengthValue",
+      "AngleValue",
+      "Coordinates"
+    ],
+    "shared_service": [
+      "om9_core::units::LengthMm::parse",
+      "om9_core::units::AngleDeg::parse",
+      "om9_core::coords::parse_local",
+      "om9_core::model::Document::tolerance (read)"
+    ],
+    "error_codes": [
+      "unit",
+      "number",
+      "coordinate",
+      "budget"
+    ],
+    "numeric_text_bound_bytes": 256
+  },
+  "asserted_semantics": [
+    "A document that states no tolerance reports null; the host never substitutes the OM9 template policy.",
+    "A bare length number uses the document display unit; an explicit token (mm, cm, m, in, ft, um) carries its own unit; results are canonical millimetres.",
+    "A bare angle number, deg and ° are degrees; an explicit rad token converts; results are canonical degrees plus an explicit radian value.",
+    "parse_coordinates uses the command prompt grammar x,y[,z] in the display unit with z defaulting to zero; the result is a pre-CPlane millimetre tuple.",
+    "Non-finite or malformed text is a typed error, never zero; a refused host call poisons the invocation so no partial command publishes.",
+    "Reading units or parsing text stages no mutation: Undo/Redo stay empty and the document is unchanged."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "32 passed, 8 suites"
+    },
+    {
+      "name": "core-owner-contract-tests",
+      "command": "rtk cargo test -p om9-core --test l2_01_08_precision --test document_tolerance --test units_parameters --test coordinates -j 2",
+      "result": "32 passed, 4 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "4 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "4 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-units",
+      "result": "PASS, 10 commands (pack, inspect-package, create, inspect-project, cancel, unknown-command, controller-tests, native-tests, sdk-bundle, external-sdk-build)",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8781 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the four edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS; workspace-wide cargo fmt --all --check still reports pre-existing unrelated files"
+    }
+  ],
+  "native_plugin_assertions": {
+    "document": "Document::with_template_tolerance in millimetres",
+    "unit": "mm",
+    "millimeters_per_unit": 1.0,
+    "tolerance": {
+      "absolute_mm": 0.001,
+      "relative": 0.0001,
+      "angular_rad": "pi/180"
+    },
+    "one_inch_mm": 25.4,
+    "bare_mm": 2.5,
+    "right_degrees": 90.0,
+    "right_radians": "pi/2",
+    "coordinates_mm": [
+      10.0,
+      20.0,
+      30.0
+    ],
+    "capabilities_advertised": [
+      "document_units",
+      "parse_length",
+      "parse_angle",
+      "parse_coordinates"
+    ],
+    "undo_len_after_read_only_command": 0,
+    "redo_len_after_read_only_command": 0,
+    "document_unchanged": true,
+    "document_without_tolerance_reports_null": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1001990,
+      "sha256": "1beb2c6da29df0eea6e3c28703d49e1971b5bfb5e6356f6b34ae5eb1c009cee1"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "49bd1afa2438110faf5ae38a99c392fc3130b09e9c3b12beb11d4bfa0b2764df"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 97172,
+      "sha256": "259ad6d7d33a9bda00734a7a05285d1451b1881ae6ec5954b143f46dbcb73b91"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "275fd64e4a62aa0b4382033a0c94ddeab5413a9b1fb8cd8000e8ae12b9237923"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1000960,
+      "sha256": "5100e04e7d50ca4c215c3bc958a2b203afad459ee23f1f8bca4fbb3bb6c386a6"
+    },
+    "om9.exe": {
+      "bytes": 67564032,
+      "sha256": "843b47f7361d072dfea2a696c53a7738f2eda00be55a18b8e9417e308a14c30c"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-08-001",
+      "OM9-L3-01-08-002",
+      "OM9-L3-01-08-003",
+      "OM9-L3-01-08-007"
+    ],
+    "open": [
+      "OM9-L3-01-08-004",
+      "OM9-L3-01-08-005",
+      "OM9-L3-01-08-006"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Tolerance is read only; display/page unit mutation is not exposed.",
+    "Builder parameter values and range validation (L3-004/005/006) have no plugin surface yet.",
+    "Local-frame/CPlane resolution and interactive numeric input remain host-owned (M01 03-01, M02 02-02).",
+    "macOS host and plugin execution unverified; macOS package support is structural only.",
+    "Interactive UI acceptance was not performed; this batch is headless SDK/Controller plus CLI."
+  ],
+  "next_action": "Take the next plan-named owner slice (M01 OM9-L2-01-03 document attributes, or OM9-L3-01-08-004/005/006 builder parameter values) with a contract-first public adapter and the same external-plugin proof path."
+}

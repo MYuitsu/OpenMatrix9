@@ -1,0 +1,14 @@
+{
+  "l4": "OM9-L4-03-07-008-03",
+  "l3": "OM9-L3-03-07-008",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/command.rs"
+  ],
+  "tests": {
+    "chrome_actions": "13 passed"
+  },
+  "oracle": "unsupported authored actions stay visible with disabled styling and do not invoke"
+}

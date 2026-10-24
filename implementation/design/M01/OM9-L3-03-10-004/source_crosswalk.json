@@ -1,0 +1,14 @@
+{
+  "l3": "OM9-L3-03-10-004",
+  "title": "Numeric And Coordinate Feedback",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/option_parser.rs",
+    "crates/om9-app/src/session.rs"
+  ],
+  "tests": "command_options_and_repeat 6 passed; command_feedback_adapter 5 passed",
+  "manual_reference": "Matrix8 Book 1 command line/feedback pages",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-03-10-004-01"
+}

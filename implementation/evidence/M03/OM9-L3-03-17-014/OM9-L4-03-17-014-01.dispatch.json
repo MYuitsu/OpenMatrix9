@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-014-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-014",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-014",
+  "source_command": "Edge Curves",
+  "menu_icon": "SurfaceEdgeCurves",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-014/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-014/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-014/dispatch_contract.json": "7a79bf0d6c880f51c3a5e7f7d135a7a020dff99b1038db82d9827a69fff6e7e5",
+    "implementation/design/M03/OM9-L3-03-17-014/source_crosswalk.json": "9cc4b2d838b873ec421e1437feaa76c967277a6d924038f4ae439d56cb383bb1"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

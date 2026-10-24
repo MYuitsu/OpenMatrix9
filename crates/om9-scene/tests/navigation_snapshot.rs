@@ -18,6 +18,8 @@ fn capture(transform: Transform) -> Scene {
             faces: vec![vec![0, 1, 2]],
             normals: vec![],
             colors: vec![],
+
+            corner_uvs: Vec::new(),
         }),
         document.current_layer,
     );

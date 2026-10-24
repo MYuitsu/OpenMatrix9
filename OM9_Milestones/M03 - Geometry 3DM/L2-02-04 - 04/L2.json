@@ -126,5 +126,294 @@
   ],
   "m03_l4_planned_count": 63,
   "execution_state": "NOT_STARTED",
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED"
+  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-02-04",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "SOURCE-PRESENT operators; scope khác nhau",
+      "sdk_signal": "SDK-SUBSET + EXPORT-BACKLOG/CO-IMPLEMENT",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Line/polyline/full circle đã có; NURBS/evaluation/edit export có oracle; phần thiếu làm kèm SDK.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-02-04-001",
+      "OM9-L3-02-04-002",
+      "OM9-L3-02-04-003",
+      "OM9-L3-02-04-004",
+      "OM9-L3-02-04-005",
+      "OM9-L3-02-04-006",
+      "OM9-L3-02-04-007",
+      "OM9-L3-02-04-008",
+      "OM9-L3-02-04-009",
+      "OM9-L3-02-04-010",
+      "OM9-L3-02-04-011",
+      "OM9-L3-02-04-012"
+    ]
+  },
+  "sdk_implementation_progress": [
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-02-04",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Arc and interpolated-curve construction: add_arc uses curve_build::arc_through (circle with an increasing angle domain) and add_interpolated_curve uses curve_build::interpolate (odd degree 1..=11, chord-length or uniform knots). Both stage one object through the shared add-output path on the current layer, so permissions, budgets and the single transaction/Undo stay with the document owner.",
+      "public_api": [
+        "Host::add_arc",
+        "Host::add_interpolated_curve",
+        "KnotMode"
+      ],
+      "l3_covered": [
+        "OM9-L3-02-04-002",
+        "OM9-L3-02-04-003"
+      ],
+      "l3_open": [
+        "control-point NURBS creation and point/knot editing",
+        "ellipse and polygon creation helpers",
+        "offset, fillet/blend, rebuild and intersections",
+        "polycurve segment parameters and surface/BRep semantics"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-curve-construction.md",
+        "docs/validation/2026-10-21-m03-curve-construction.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Only arc-through-three-points and interpolated NURBS construction is exposed."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-02-04",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Control-point NURBS construction: add_nurbs_curve validates one weight per pole, poles + degree + 1 non-decreasing knots, finite positive weights and a clamped domain, then publishes through the shared output path. Periodic/reversed/seam construction is not exposed; control data is bounded.",
+      "public_api": [
+        "Host::add_nurbs_curve"
+      ],
+      "l3_covered": [
+        "OM9-L3-02-04-003"
+      ],
+      "l3_open": [
+        "periodic/reversed/seam NURBS construction",
+        "point/knot editing and rebuild",
+        "ellipse/polygon creation",
+        "offset, fillet/blend and intersections"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-nurbs-construction.md",
+        "docs/validation/2026-10-21-m03-nurbs-construction.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Static control-point records only; editing and periodic construction remain open."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-02-04",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Ellipse and rectangle creation: add_ellipse publishes a rational-quadratic NURBS ellipse (curve_build::ellipse) and add_rectangle publishes a closed four-segment polycurve (curve_build::rectangle) from a caller-supplied orthonormal frame; a malformed frame or non-positive size is a curve refusal. Both stage through the shared output path in one transaction.",
+      "public_api": [
+        "Host::add_ellipse",
+        "Host::add_rectangle"
+      ],
+      "l3_covered": [
+        "OM9-L3-02-04-002"
+      ],
+      "l3_open": [
+        "polygon-by-points helper",
+        "spiral and helix creation",
+        "control-point editing and rebuild",
+        "offset, fillet/blend and intersections"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-curve-shapes.md",
+        "docs/validation/2026-10-21-m03-curve-shapes.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Circle/arc/ellipse/rectangle creation only; polygon-by-points and editing remain open."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-02-04",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Polygon creation: add_polygon closes a point list through curve_build::polyline, appending the first point only when the caller did not repeat it; fewer than three distinct points, duplicate consecutive points or a zero-length edge are curve refusals. One transaction output and one Undo.",
+      "public_api": [
+        "Host::add_polygon"
+      ],
+      "l3_covered": [
+        "OM9-L3-02-04-002"
+      ],
+      "l3_open": [
+        "spiral and helix creation",
+        "control-point editing and rebuild",
+        "offset, fillet/blend and intersections"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-polygon.md",
+        "docs/validation/2026-10-21-m03-polygon.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Polygon stays a polycurve; spiral/helix and editing remain open."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-02-04",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Framed circle creation: add_circle_on_frame builds Curve::Circle on an orthonormal frame with domain [0,tau]; malformed frame or non-positive radius is a curve refusal; one transaction/Undo.",
+      "public_api": [
+        "Host::add_circle_on_frame"
+      ],
+      "l3_covered": [
+        "OM9-L3-02-04-002"
+      ],
+      "l3_open": [
+        "arbitrary-frame ellipse",
+        "spiral/helix creation",
+        "curve editing and rebuild"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-framed-circle.md",
+        "docs/validation/2026-10-21-m03-framed-circle.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Circle only; ellipse keeps its existing frame call."
+    },
+    {
+      "date": "2026-10-21",
+      "state": "PARTIAL_SDK_EXPORT_VERIFIED_WINDOWS",
+      "owner": "OM9-L2-02-04",
+      "milestone": "M03",
+      "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+      "scope": "Curve segment inspection and evaluation: list a polycurve's segments, evaluate one by index with the same local-mm/D0-D3/sample rules; nested polycurve and out-of-range index refused.",
+      "public_api": [
+        "Host::curve_segments",
+        "Host::evaluate_curve_segment"
+      ],
+      "l3_covered": [
+        "OM9-L3-02-04-005"
+      ],
+      "l3_open": [
+        "segment explode/split editing",
+        "nested polycurve flattening",
+        "arc direction segment edit"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m03-curve-segments.md",
+        "docs/validation/2026-10-21-m03-curve-segments.json"
+      ],
+      "target_proof": {
+        "windows_x64": "verified_external_plugin_and_host",
+        "macos_arm64": "unverified",
+        "macos_x64": "unverified"
+      },
+      "limits": "Read-only segment access."
+    }
+  ],
+  "sdk_export_plan_policy": {
+    "decided": "2026-10-21",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "field": "sdk_export_plan",
+    "applies_to": "L3 files of this owner that have a recorded SDK slice"
+  },
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "Twelve free-form curve owners: point/line/polyline creation, framed circle/arc/ellipse/polygon, interpolated and control-point NURBS, grips, join/explode/close/split, offset/fillet/chamfer, blend/ArcBlend/match, rebuild/refit/knot operations, project/pullback/intersections, duplicate edge/border/isocurve, seams/directions/divisions and sketch on surface/mesh/two views.",
+    "evidence": [
+      "implementation/design/M03/OM9-L2-02-04/README.md",
+      "implementation/design/M03/OM9-L2-02-04/W2-CURVE-KERNEL.md",
+      "implementation/evidence/M03/OM9-L3-02-04-001",
+      "implementation/evidence/M03/OM9-L3-02-04-002",
+      "implementation/evidence/M03/OM9-L3-02-04-003",
+      "implementation/evidence/M03/OM9-L3-02-04-004",
+      "implementation/evidence/M03/OM9-L3-02-04-005",
+      "implementation/evidence/M03/OM9-L3-02-04-006",
+      "implementation/evidence/M03/OM9-L3-02-04-007",
+      "implementation/evidence/M03/OM9-L3-02-04-008",
+      "implementation/evidence/M03/OM9-L3-02-04-009",
+      "implementation/evidence/M03/OM9-L3-02-04-010",
+      "implementation/evidence/M03/OM9-L3-02-04-011",
+      "implementation/evidence/M03/OM9-L3-02-04-012"
+    ],
+    "l3_with_verified_supported_scope": 12,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "technical_scope_complete": true,
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "Manual M03-UI interactive acceptance of the twelve curve owners is pending; the implementer does not self-sign it.",
+      "macOS runtime is unverified.",
+      "The new operators (join/split, offset/fillet/chamfer, blend/match, projection/intersection, seam/divide) are not yet exposed through SDK v1; the existing arc/interpolated/ellipse/polygon/circle/segment SDK entries remain the recorded partial export.",
+      "B-Rep edge duplication reads the display snapshot; the exact analytic OCCT edge curve adapter remains with the B-Rep owner."
+    ],
+    "latest_verification": {
+      "date": "2026-10-22",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "receipt": "implementation/evidence/M03/OM9-L3-02-04-001/OM9-L4-02-04-001-03.focused-test.log",
+      "tests": {
+        "l2_02_04": "15 passed, 0 failed (12 L3 + 3 integration stress)",
+        "om9-core suite": "447 passed, 0 failed (52 suites)",
+        "clippy": "exit 0",
+        "fmt": "exit 0",
+        "workspace check": "exit 0"
+      },
+      "l4_evidence": {
+        "OM9-L3-02-04-001": "5/5",
+        "OM9-L3-02-04-002": "5/5",
+        "OM9-L3-02-04-003": "6/6",
+        "OM9-L3-02-04-004": "5/5",
+        "OM9-L3-02-04-005": "6/6",
+        "OM9-L3-02-04-006": "6/6",
+        "OM9-L3-02-04-007": "5/5",
+        "OM9-L3-02-04-008": "5/5",
+        "OM9-L3-02-04-009": "5/5",
+        "OM9-L3-02-04-010": "5/5",
+        "OM9-L3-02-04-011": "5/5",
+        "OM9-L3-02-04-012": "5/5"
+      }
+    }
+  }
 }

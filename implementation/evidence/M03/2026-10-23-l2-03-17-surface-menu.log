@@ -1,0 +1,48 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests\surface_menu.rs (L:\om9-target\debug\deps\surface_menu-a54d54ca9421cfb4.exe)
+
+running 41 tests
+test enabled_rows_dispatch_and_the_remaining_rows_stay_visible_disabled ... ok
+test every_documented_surface_menu_row_has_one_stable_id_and_icon ... ok
+test four_rail_profile_metadata_round_trips_on_a_curve ... ok
+test shared_history_icons_keep_distinct_command_ids ... ok
+test a_zero_offset_is_refused_and_cancel_clears_the_prompt ... ok
+test cutting_plane_collects_three_points_and_commits_a_plane ... ok
+test plane_from_corners_collects_three_points_and_refuses_collinear_input ... ok
+test adjust_surface_seam_waits_for_axis_and_tolerance ... ok
+test planar_curves_build_a_surface_from_coplanar_curves ... ok
+test set_surface_tangent_waits_for_edge_and_direction ... ok
+test surface_edit_without_selection_or_with_a_curve_is_refused_without_a_transaction ... ok
+test match_surfaces_waits_for_edge_names_and_commits_one_surface ... ok
+test soft_edit_moves_nearby_poles_and_commits_one_surface ... ok
+test the_surface_catalog_covers_every_l3_owner ... ok
+test chamfer_surfaces_waits_for_a_setback ... ok
+test drape_builds_a_surface_over_selected_points ... ok
+test shrink_surface_waits_for_a_uv_subdomain ... ok
+test extend_surface_waits_for_edge_and_distance ... ok
+test split_at_isocurve_creates_two_surfaces_in_one_transaction ... ok
+test rebuild_and_unroll_run_from_a_selected_surface_and_commit_one_transaction ... ok
+test blend_and_loft_combine_two_selected_curves_into_one_surface ... ok
+test offset_and_extrude_normal_wait_for_distance_and_commit_one_surface ... ok
+test edge_curves_build_a_surface_from_two_or_four_edges ... ok
+test patch_builds_a_four_boundary_surface ... ok
+test tween_surfaces_waits_for_a_fraction_and_commits_one_surface ... ok
+test variable_offset_waits_for_two_distances_and_an_axis ... ok
+test untrim_removes_a_trim_extension_and_refuses_an_untrimmed_surface ... ok
+test variable_blend_waits_for_tangent_scales ... ok
+test fillet_and_variable_chamfer_strips_commit_surfaces ... ok
+test merge_surfaces_joins_two_matching_boundaries ... ok
+test profile_sweep_uses_the_sweep1_service ... ok
+test rail_revolve_waits_for_an_axis_and_commits_one_surface ... ok
+test extrude_all_creates_one_surface_per_curve ... ok
+test sweep_multi_creates_one_surface_per_profile_in_one_transaction ... ok
+test network_sweep1_and_sweep2_build_surfaces_from_ordered_curves ... ok
+test sweep2_slash_collects_two_alignment_points ... ok
+test sweep1_history_builds_a_multi_profile_brep_and_records_history ... ok
+test sweep4_resolves_rails_from_four_rail_profile_metadata ... ok
+test four_rail_profile_command_tags_profiles_then_sweep4_uses_them ... ok
+test sweep2_history_builds_a_two_rail_brep_and_records_history ... ok
+test sweep4_sews_four_rail_patches_into_a_polysurface ... ok
+
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.02s
+

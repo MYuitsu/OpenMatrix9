@@ -1,0 +1,47 @@
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.40s
+     Running tests\ellipsoid.rs (L:/om9-target\debug\deps\ellipsoid-68960f04f9cf5021.exe)
+
+running 1 test
+axes=[1.0, 1.0, 1.0] volume=4.188790204786 expected=4.188790204786 relative_error=1.332e-15 faces=1 naked_edges=0
+axes=[1.0, 1.0, 1.0] analytic_diameters=83 reload=PASS
+axes=[2.0, 3.0, 4.0] volume=100.530964914874 expected=100.530964914873 relative_error=1.776e-15 faces=1 naked_edges=0
+axes=[2.0, 3.0, 4.0] analytic_diameters=83 reload=PASS
+axes=[3.0, 4.0, 5.0] volume=251.327412287184 expected=251.327412287183 relative_error=2.220e-15 faces=1 naked_edges=0
+axes=[3.0, 4.0, 5.0] analytic_diameters=83 reload=PASS
+axes=[0.1, 0.2, 0.3] volume=0.025132741229 expected=0.025132741229 relative_error=1.998e-15 faces=1 naked_edges=0
+axes=[0.1, 0.2, 0.3] analytic_diameters=83 reload=PASS
+axes=[20.0, 0.5, 3.0] volume=125.663706143592 expected=125.663706143592 relative_error=1.998e-15 faces=1 naked_edges=0
+axes=[20.0, 0.5, 3.0] analytic_diameters=83 reload=PASS
+axes=[4.0, 3.0, 2.0] volume=100.530964914874 expected=100.530964914873 relative_error=1.776e-15 faces=1 naked_edges=0
+axes=[4.0, 3.0, 2.0] analytic_diameters=83 reload=PASS
+test ellipsoid_exact_volume_topology_and_surface ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.64s
+
+     Running tests\extrusion.rs (L:/om9-target\debug\deps\extrusion-6feec21436fdbc50.exe)
+
+running 2 tests
+test exact_extrusion_refuses_open_nonplanar_and_disconnected_boundaries ... ok
+ellipse exact side intersections: [0.25, 0.75]
+exact_extrusion ellipse height=-5 volume=94.247779607694
+ellipse exact side intersections: [0.25, 0.75]
+exact_extrusion ellipse height=5 volume=94.247779607694
+ellipse_reversed exact side intersections: [0.25, 0.75]
+exact_extrusion ellipse_reversed height=-5 volume=94.247779607694
+ellipse_reversed exact side intersections: [0.25, 0.75]
+exact_extrusion ellipse_reversed height=5 volume=94.247779607694
+
+thread 'exact_extrusion_retains_rational_basis_and_reversal' (26720) panicked at crates\om9-kernel\tests\extrusion.rs:43:84:
+called `Result::unwrap()` on an `Err` value: Invalid("unsupported periodic derivative continuity not yet certified")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test exact_extrusion_retains_rational_basis_and_reversal ... FAILED
+
+failures:
+
+failures:
+    exact_extrusion_retains_rational_basis_and_reversal
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+error: test failed, to rerun pass `-p om9-kernel --test extrusion`

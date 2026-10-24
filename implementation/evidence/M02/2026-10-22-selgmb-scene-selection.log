@@ -1,0 +1,16 @@
+    Blocking waiting for file lock on build directory
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 46.06s
+     Running tests\selection_regressions.rs (L:/om9-target\debug\deps\selection_regressions-11e62a65f62ff07f.exe)
+
+running 7 tests
+test hidden_and_locked_primitives_are_excluded_from_both_band_modes ... ok
+test a_clipped_segment_still_crosses_but_cannot_be_window_selected ... ok
+test crossing_takes_a_line_with_both_endpoints_outside_but_window_does_not ... ok
+test crossing_inside_a_large_face_does_not_need_a_vertex_or_edge_inside ... ok
+test an_edge_with_one_clipped_endpoint_keeps_its_document_key ... ok
+test perspective_edge_hit_reports_a_world_point_on_the_pointer_ray ... ok
+test a_quad_diagonal_is_a_face_hit_but_never_a_document_edge ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

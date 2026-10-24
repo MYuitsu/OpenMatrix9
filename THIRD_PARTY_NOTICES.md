@@ -1,5 +1,14 @@
 # Third-party notices
 
+The standalone plugin host/package tool uses `libloading` 0.8.9 (ISC,
+https://github.com/nagisa/rust_libloading/) and `zip` 9.0.5 (MIT,
+https://github.com/zip-rs/zip2). Their original notices are retained in
+`Resources/licenses/libloading-0.8.9-LICENSE` and
+`Resources/licenses/zip-9.0.5-LICENSE`. The public plugin SDK uses serde and
+serde_json under their upstream MIT/Apache-2.0 declarations; it contains no
+Rhino SDK headers, commercial runtime or recovered plugin code. Cargo.lock
+records the resolved standalone dependency versions.
+
 OpenMatrix9 uses FreeCAD's public APIs and inherits the project's existing
 LGPL-2.1-or-later declaration. FreeCAD is maintained by the FreeCAD contributors:
 https://github.com/FreeCAD/FreeCAD. Preserve copyright and license notices when

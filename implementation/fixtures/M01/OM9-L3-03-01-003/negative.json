@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-01-003",
+  "case": "negative",
+  "oracle": "inactive pane cannot change active view without a valid tab/menu target",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

@@ -1,0 +1,19 @@
+{
+  "l4": "OM9-L4-01-07-004-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-07-004",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "Projected polygon/clip containment and crossing tests over displayed segments and faces.",
+  "source_paths": [
+    "crates/om9-scene/src/selection.rs",
+    "crates/om9-scene/src/scene.rs",
+    "crates/om9-app/src/ui.rs"
+  ],
+  "tests": [
+    "om9-scene selection_regressions: 7 passed",
+    "om9-app rubber_band: 2 passed",
+    "om9-app acceptance_viewport_selection: 8 passed",
+    "om9-app selection_overlay: 8 passed"
+  ]
+}

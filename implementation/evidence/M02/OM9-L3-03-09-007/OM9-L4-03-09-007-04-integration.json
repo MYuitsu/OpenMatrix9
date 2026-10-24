@@ -1,0 +1,11 @@
+{
+  "l4": "OM9-L4-03-09-007-04",
+  "role": "INTEGRATE",
+  "l3": "OM9-L3-03-09-007",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "detail": "The dock stores the logical rect and pin state; reopening restores it when it fits, otherwise it is clamped inside the screen.",
+  "tests": [
+    "om9-app f6 unit: 7 passed"
+  ]
+}

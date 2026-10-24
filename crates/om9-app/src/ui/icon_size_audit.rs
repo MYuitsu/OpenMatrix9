@@ -260,15 +260,14 @@ fn icon_size_audit_all_categories_at_common_resolutions_and_scales() {
                 categories.len(),
                 tabs.len()
             );
-            for index in 0..tabs.len() {
+            for (index, tab) in tabs.iter().enumerate() {
                 app.toolbar_tab = index;
                 for _ in 0..2 {
                     frame(&mut app, &ctx, physical, ppp);
                 }
                 assert!(
                     app.toolbar_rect.unwrap().height() >= app.toolbar_icon_edge,
-                    "{label}/{}",
-                    tabs[index]
+                    "{label}/{tab}"
                 );
             }
             assert_eq!(app.view_rects.len(), 4, "{label}");

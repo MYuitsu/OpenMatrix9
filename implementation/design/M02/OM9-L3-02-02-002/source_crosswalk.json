@@ -1,0 +1,21 @@
+{
+  "l3": "OM9-L3-02-02-002",
+  "title": "CPlane Preset Worldtop Front Right",
+  "date": "2026-10-22",
+  "decision": "REUSE_EXISTING_OM9_RUST_IMPLEMENTATION",
+  "source_paths": [
+    "crates/om9-scene/src/camera.rs",
+    "crates/om9-scene/src/workspace.rs",
+    "crates/om9-app/src/viewport_menu.rs",
+    "crates/om9-app/src/session.rs"
+  ],
+  "tests": [
+    "om9-scene cplane_presets: 6 passed",
+    "om9-app cplane_menu: 1 passed",
+    "om9-app viewport_title_menu: 17 passed"
+  ],
+  "manual_reference": "Rhino5 user guide pp.37-43; Matrix8 Book 1 pp.12-16 (parent L2 range)",
+  "qymcad": "Reference only; no QymCAD build-time dependency and no pinned-source reuse claimed.",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "l4": "OM9-L4-02-02-002-01"
+}

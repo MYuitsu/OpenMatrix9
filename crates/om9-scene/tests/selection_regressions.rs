@@ -42,6 +42,8 @@ fn quad() -> Geometry {
         faces: vec![vec![0, 1, 2, 3]],
         normals: vec![],
         colors: vec![],
+
+        corner_uvs: Vec::new(),
     })
 }
 
@@ -135,6 +137,8 @@ fn perspective_edge_hit_reports_a_world_point_on_the_pointer_ray() {
         faces: vec![vec![0, 1, 2]],
         normals: vec![],
         colors: vec![],
+
+        corner_uvs: Vec::new(),
     }));
     let c = Camera::perspective([0., 0., 10.], [0.; 3], [0., 1., 0.], 45_f64.to_radians()).unwrap();
     let pointer = c.project([0., 0., -1.], v).unwrap().unwrap().screen;
@@ -157,6 +161,7 @@ fn an_edge_with_one_clipped_endpoint_keeps_its_document_key() {
         faces: vec![vec![0, 1, 2]],
         normals: vec![],
         colors: vec![],
+        corner_uvs: Vec::new(),
     }));
     c.near_mm = 1.;
     let pointer = c.project([0., 0., 5.5], v).unwrap().unwrap().screen;

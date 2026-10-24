@@ -1,0 +1,15 @@
+{
+  "l3": "OM9-L3-03-01-004",
+  "title": "F4 World Origin And Ring Center Display",
+  "date": "2026-10-22",
+  "decision": "REUSE",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs"
+  ],
+  "api": "MatrixApp::world_datum_visible + paint_world_datum",
+  "tests": [
+    "crates/om9-app/tests/chrome_actions.rs"
+  ],
+  "manual_reference": "Matrix8 Book 1, Modeling in the Viewports (p22-26), F4 Center of the Universe",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING"
+}

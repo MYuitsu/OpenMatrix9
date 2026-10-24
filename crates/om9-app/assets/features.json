@@ -1437,7 +1437,8 @@
     "id": "OM9-SOLID-012",
     "name": "Box",
     "command": "Box",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "Box3Point"
   },
   {
     "id": "OM9-SOLID-013",
@@ -1449,7 +1450,8 @@
     "id": "OM9-SOLID-014",
     "name": "Sphere",
     "command": "Sphere",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "Sphere2Point"
   },
   {
     "id": "OM9-SOLID-015",
@@ -2725,25 +2727,25 @@
   },
   {
     "id": "OM9-GEM-020",
-    "name": "Auto Pavé Builder",
+    "name": "Auto Pav\u00e9 Builder",
     "command": null,
     "module": "Placing Gems"
   },
   {
     "id": "OM9-GEM-021",
-    "name": "Pavé Builder",
+    "name": "Pav\u00e9 Builder",
     "command": null,
     "module": "Placing Gems"
   },
   {
     "id": "OM9-GEM-022",
-    "name": "Pavé Azure Builder",
+    "name": "Pav\u00e9 Azure Builder",
     "command": null,
     "module": "Placing Gems"
   },
   {
     "id": "OM9-GEM-023",
-    "name": "Pavé Prong Builder",
+    "name": "Pav\u00e9 Prong Builder",
     "command": null,
     "module": "Placing Gems"
   },
@@ -2797,7 +2799,7 @@
   },
   {
     "id": "OM9-GEM-032",
-    "name": "Pavé Sphere",
+    "name": "Pav\u00e9 Sphere",
     "command": "gvPaveSphere",
     "module": "Placing Gems"
   },

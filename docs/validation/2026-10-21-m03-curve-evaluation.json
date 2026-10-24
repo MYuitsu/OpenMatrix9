@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-21",
+  "status": "curve_information_and_evaluation_sdk_export_verified_windows",
+  "owner": "OM9-L2-02-01",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Exports the geometry owner's existing curve evaluator for line, circle/arc and NURBS; no second evaluator and no document mutation.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "504783b13712bb95b0b51337a8081dc780dc858848b758c5a6e8cf98e77ec5f3",
+    "crates/om9-plugin-host/src/staged.rs": "6240bf28c2e1e5a809261c030755dc5dc9bf3506e73f7dd443f1722232e34f45",
+    "crates/om9-app/tests/plugin_native.rs": "080d244974d34ca1506a0fdac699f2e13b25a4efd1393b8160b4cfd305e116f1",
+    "sdk/examples/hello-plugin/src/lib.rs": "9a4b08279543e9733ce7f7a2864b978a19da3a73c521932d1bf76b4bd796baa4",
+    "sdk/examples/hello-plugin/descriptor.json": "30b0be134f6afc08f794043ae90b4b01d91d5bca97d2b0fedaeab3e0f4a73569",
+    "sdk/README.md": "b12d6044a8db7886f67334244896477fc0c7c5ee61a31f989f1d2dafd1270503",
+    "sdk/API-INVENTORY.md": "ba675b78010109ce9acc84656f1572a9eb225c14dcb99c1ea9c1f6cb500ffd05"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["curve_info", "evaluate_curve"],
+    "public_types": ["CurveInfo", "CurveSample"],
+    "shared_service": [
+      "om9_core::evaluation::evaluate_curve",
+      "om9_core::evaluation::CurveEvaluator"
+    ],
+    "error_codes": ["curve", "unsupported", "budget", "id", "missing"],
+    "limits": {"samples": 1024, "max_order": 3}
+  },
+  "asserted_semantics": [
+    "Samples are object-local millimetres before the object placement; the plugin composes placement exactly once.",
+    "Parameters are native domain values, not 0..1 fractions; out-of-domain or non-finite values are a curve refusal.",
+    "Derivative order is D0-D3; a higher order is unsupported; at most 1024 samples per call.",
+    "Line, circle (including an arc angle domain) and NURBS evaluate through the owner's evaluator; a polycurve reports segment count and no single domain and is refused for evaluation.",
+    "Reading or evaluating a curve stages no mutation: document, scene and Undo are unchanged."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "47 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "10 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-curve",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8797 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "line_domain": [0.0, 1.0],
+    "line_midpoint": [5.0, 0.0, 0.0],
+    "line_derivative": [10.0, 0.0, 0.0],
+    "circle_midpoint": [-5.0, 0.0, 0.0],
+    "circle_derivative_magnitude": 5.0,
+    "polycurve_refused": true,
+    "document_unchanged": true,
+    "undo_len_after_create_profile": 1
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1436233,
+      "sha256": "16cc4181973e4aa03c975292f44a9ae4847a200860699ac7e8c2e998de3b6542"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "5f1b208af6dd346ca996becaed320e02fe98563943e1d80410fbd31773d0f396"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 132894,
+      "sha256": "03e72c15dfa863d7459de78ff988d802817f0bd72c341fbebc7680c7bc9ffbad"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "ec205138fcb9721437004a1719ab9d582b0ab118756619ff645c7b0a4caaa2e1"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1434624,
+      "sha256": "d287a6a6873f4a46d64e5e4b0a57ff5ff8bba053d9dd9e2a526627c5a3e2cadf"
+    },
+    "om9.exe": {
+      "bytes": 68653056,
+      "sha256": "df263dd29fc8ec3a6edfc5abf21e5b18cd6d216f869c9d328bf7dbc031a9d306"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-02-01-002 (curve identity and native-parameter evaluation)"],
+    "open": [
+      "curve construction, editing, offset, fillet/blend, rebuild and intersections",
+      "polycurve segment parameters",
+      "NURBS weights/knots read or write, seam and closure editing",
+      "surface and BRep semantics"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Only reading/evaluation of line, circle/arc and NURBS is exposed.",
+    "Polycurve segment parameters and NURBS weights/knots are not exposed.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Expose the remaining curve read services (weights/knots/seam/closure) at the same owner, or take OM9-L2-01-12 file lifecycle."
+}

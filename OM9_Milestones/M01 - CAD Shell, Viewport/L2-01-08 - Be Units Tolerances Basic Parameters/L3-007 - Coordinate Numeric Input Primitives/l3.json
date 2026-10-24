@@ -187,5 +187,47 @@
       "id": "OM9-L4-01-08-007-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-08 - Be Units Tolerances Basic Parameters/L3-007 - Coordinate Numeric Input Primitives/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "plugin_sdk_v1_units": {
+      "date": "2026-10-21",
+      "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
+      "status": "partial_sdk_export_verified_windows",
+      "scope": "SDK v1 exposes the command prompt's coordinate grammar (x,y or x,y,z in the display unit, z defaults to zero) as a pre-CPlane canonical millimetre tuple.",
+      "public_api": [
+        "Host::document_units",
+        "Host::parse_length",
+        "Host::parse_angle",
+        "Host::parse_coordinates"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-21-m01-08-units-sdk.md",
+        "docs/validation/2026-10-21-m01-08-units-sdk.json"
+      ],
+      "limitations": [
+        "Partial scope only: this entry does not close the L3.",
+        "Tolerance is read only; builder parameter values/range/serialization (L3-004/005/006) remain open.",
+        "Local-frame/CPlane resolution and interactive input remain host-owned.",
+        "macOS execution unverified."
+      ]
+    }
+  },
+  "sdk_export_plan": {
+    "decided": "2026-10-21",
+    "status": "exported_in_sdk_v1",
+    "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
+    "api": [
+      "Host::document_units",
+      "Host::parse_angle",
+      "Host::parse_coordinates",
+      "Host::parse_length"
+    ],
+    "implemented_slices": [
+      "plugin_sdk_v1_units"
+    ],
+    "evidence": [
+      "docs/validation/2026-10-21-m01-08-units-sdk.json",
+      "docs/validation/2026-10-21-m01-08-units-sdk.md"
+    ]
+  }
 }

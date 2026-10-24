@@ -1,0 +1,42 @@
+    Blocking waiting for file lock on build directory
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.19s
+     Running tests\mesh_csg.rs (L:/om9-target\debug\deps\mesh_csg-954de4fbad8a5c93.exe)
+
+running 16 tests
+test mesh_csg_curved_scaling_measurement ... ignored, explicit release-mode curved mesh scaling measurement
+test mesh_csg_scaling_measurement ... ignored, explicit release-mode scaling measurement
+test crossing_triangles_have_an_actual_intersection_segment ... ok
+test detection_ignores_shared_boundaries_and_finds_coplanar_area_overlap ... ok
+test sloped_tetrahedra_boolean_matches_analytic_volumes ... ok
+test invalid_open_nonmanifold_and_budget_inputs_leave_sources_unchanged ... ok
+Union: 56 triangles, volume 15, work 8677
+test repair_rebuilds_the_union_of_crossing_shells_without_holes ... ok
+test new_corners_interpolate_primary_uvs_and_retain_seams ... ok
+Difference: 36 triangles, volume 6.999999999999999, work 6660
+Intersection: 16 triangles, volume 1.0000000000000002, work 4710
+test overlapping_boxes_union_difference_intersection_are_closed_and_measured ... ok
+connected pentagram: input signed volume 5.877852522924732, repaired 4.490279765795853, expected 4.4902797657958535, triangles 100
+test connected_self_crossing_pentagram_prism_rebuilds_material_boundary ... ok
+test disjoint_contained_and_inward_cavity_shells ... ok
+test coplanar_overlays_touching_faces_and_identical_solids_are_regularized ... ok
+test scale_translation_and_reversed_winding_preserve_geometry ... ok
+test independently_rotated_operands_satisfy_volume_conservation ... ok
+rotated translated pairs: 24 analytic boolean fixtures passed
+test rotated_offset_solid_pairs_keep_expected_volumes ... ok
+test mismatched_dense_coplanar_triangulations_rebuild_without_seam_holes ... ok
+
+test result: ok. 14 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+     Running tests\utilities.rs (L:/om9-target\debug\deps\utilities-3e6d44531666489f.exe)
+
+running 6 tests
+test bounds_and_surface_mesh_are_available ... ok
+test dihedral_feature_edges_are_detected ... ok
+test self_intersection_detection_and_repair_refuse_open_crossing_faces ... ok
+test basic_mesh_reduction_drops_faces_and_merges_vertices ... ok
+test advanced_repair_removes_degenerate_duplicate_and_isolated_data ... ok
+test advanced_reduce_uses_qem_edge_collapse ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

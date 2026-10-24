@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m03.l2-02-04.fixture.v1",
+  "l3_id": "OM9-L3-02-04-008",
+  "fixture_id": "OM9-L3-02-04-008-POSITIVE",
+  "units": "mm",
+  "oracle": "circle rebuild radial deviation 1.7e-5 mm < 0.02 mm; one knot insertion adds one pole without moving 17 sampled points; degree elevates by one; 6-pole fit keeps 6 poles",
+  "measured": {
+    "rebuild_max_radial_deviation_mm": 1.6688046e-05,
+    "knot_inserted_poles": 5.0
+  },
+  "tolerances": {
+    "rebuild_max_radial_deviation_mm": "0.02",
+    "knot_inserted_poles": "exact integer"
+  },
+  "test": "m03_02_04_008_rebuild_refit_and_knot_operations"
+}

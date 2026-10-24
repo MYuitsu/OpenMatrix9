@@ -1,0 +1,19 @@
+    Blocking waiting for file lock on build directory
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+error: unneeded `return` statement
+   --> crates\om9-app\src\session\solid.rs:596:13
+    |
+596 |             return self.solid_preview_box(point);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_return
+    = note: `-D clippy::needless-return` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_return)]`
+help: remove `return`
+    |
+596 -             return self.solid_preview_box(point);
+596 +             self.solid_preview_box(point)
+    |
+
+error: could not compile `om9-app` (lib) due to 1 previous error

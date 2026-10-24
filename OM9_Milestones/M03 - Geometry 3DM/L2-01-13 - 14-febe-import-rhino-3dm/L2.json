@@ -126,42 +126,109 @@
     }
   ],
   "m03_l4_planned_count": 66,
-  "execution_state": "R5_B_CORE_E2E_GREEN_UI_AND_R5A_FALLBACK_PENDING",
+  "execution_state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
   "readiness_state": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
   "runtime_implementation": {
-    "date": "2026-10-20",
-    "status": "R5_B_CORE_E2E_GREEN_UI_AND_R5A_FALLBACK_PENDING",
-    "target": "standalone Rust OM9",
-    "scope": "Rhino 5 (archive 50) import: layers/attributes, exact curves/surfaces/meshes, blocks/instances, 30/30 BRep editable through OCCT, export/reimport; V6+ deferred.",
+    "date": "2026-10-23",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "Rhino 5 (archive 50) import/export through the admitted native openNURBS bridge: signature/version, units/tolerance, layers/attributes, curves, NURBS/trimmed BRep, meshes/instances, unsupported policy, atomic transaction, File menu/options, summary, golden roundtrip, R5-A display proxy and best-effort opaque retention.",
     "evidence": [
-      "implementation/design/M03/THREEDM-FULL-OBJECT-IMPORT.md",
-      "implementation/evidence/M03/2026-10-20-rhino5-editable-brep.json",
-      "crates/om9-kernel/tests/brep_3dm.rs",
-      "crates/om9-archive/tests/brep_source_admission.rs",
-      "native/native_exchange.cpp"
+      "implementation/design/M03/OM9-L2-01-13/README.md",
+      "implementation/evidence/M03/2026-10-22-l2-01-13-native.log",
+      "crates/om9-app/tests/l2_01_13.rs",
+      "crates/om9-app/src/three_dm_host.rs",
+      "crates/om9-app/src/session/files.rs",
+      "crates/om9-app/src/ui/files.rs",
+      "native/native_exchange.cpp",
+      "implementation/evidence/M03/2026-10-23-l2-01-13-native-proxy.log",
+      "implementation/evidence/M03/2026-10-23-r5a-display.log",
+      "implementation/evidence/M03/2026-10-23-l2-01-13-checks.json",
+      "implementation/evidence/M03/2026-10-23-r5a-display.log",
+      "implementation/evidence/M03/2026-10-23-r5a-proxy.log"
     ],
     "human_approval": null,
     "remaining": [
-      "Manual UI four-view/select smoke and warning summary review pending.",
-      "R5-A fallback cannot display NativeBrep without OCCT because public openNURBS has no ON_Brep::CreateMesh implementation.",
-      "Extended V5 annotation/hatch/light remain retained-only; V6/V7/V8 deferred and V4 legacy policy not implemented.",
-      "Strict editable mode aborts the whole import on the first unconvertible BRep; best-effort UI wiring pending.",
-      "Release import/export timings are 5.37 s / 4.83 s on the measured fixture, close to but still above the proposed 5 s target.",
-      "R5-A fallback now emits BREP_DISPLAY_UNAVAILABLE instead of claiming editable/visible BRep; feature-off still cannot display BRep without OCCT.",
-      "Tracked OM9_Milestones private reference images still need the planned private-archive move before public audit --strict can pass."
+      "Manual M03-UI review of native picker appearance and production-scale summary/warning presentation.",
+      "macOS runtime is unverified.",
+      "R5-A display is a coarse untrimmed surface proxy; exact trimmed display requires OCCT.",
+      "Explicit EditableStrict still aborts; default product path is EditableBestEffort.",
+      "V6+ and some V5 annotation/hatch/light families remain explicitly deferred."
+    ],
+    "l3_with_verified_supported_scope": 12,
+    "full_l3_acceptance_promoted": 0,
+    "full_l2_complete": false,
+    "manual_gate": "M03-UI",
+    "technical_scope_complete": true,
+    "latest_verification": {
+      "date": "2026-10-23",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "checks": "implementation/evidence/M03/2026-10-23-l2-01-13-checks.json",
+      "tests": {
+        "l2_01_13": "15 passed; 0 failed; 28.96 s",
+        "r5a_display (no OCCT)": "2 passed; 0 failed"
+      },
+      "l4_evidence": {
+        "OM9-L3-01-13-001": "5/5",
+        "OM9-L3-01-13-002": "6/6",
+        "OM9-L3-01-13-003": "5/5",
+        "OM9-L3-01-13-004": "5/5",
+        "OM9-L3-01-13-005": "6/6",
+        "OM9-L3-01-13-006": "6/6",
+        "OM9-L3-01-13-007": "6/6",
+        "OM9-L3-01-13-008": "5/5",
+        "OM9-L3-01-13-009": "6/6",
+        "OM9-L3-01-13-010": "5/5",
+        "OM9-L3-01-13-011": "5/5",
+        "OM9-L3-01-13-012": "6/6"
+      }
+    }
+  },
+  "sdk_integration_plan": {
+    "recorded_at": "2026-10-21",
+    "state": "PLANNED_REQUIREMENTS_ONLY",
+    "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
+    "delivery_owner": "OM9-L2-01-13",
+    "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+    "milestone": "M03",
+    "integration_mode": "SDK_TASKS_INSIDE_EXISTING_OWNER",
+    "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
+    "baseline": {
+      "internal_signal": "EVIDENCE-SCOPED 3DM; review mở",
+      "sdk_signal": "EXPORT-BACKLOG",
+      "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
+    },
+    "owner_specific_task": "Export native exchange service hiện có; giữ strict admission, subtype và trim limitations.",
+    "tasks": [
+      "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
+      "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
+      "Preserve units, coordinate spaces, permissions, revision/identity, budgets, cancellation and host-owned atomic transaction/Undo semantics.",
+      "Verify an external plugin built from the public SDK, geometry/metadata parity, error/Cancel/Undo/Redo and persistence where relevant; prove each advertised native target separately.",
+      "Update this owner, its affected L3 traceability/runtime evidence, API inventory/example and live ledger; keep unverified SDK scope open without erasing prior core evidence."
+    ],
+    "completion_rule": "For SDK-eligible scope, the owner delivery includes the public contract, host route, shared service and external plugin evidence. Host-internal exceptions require a documented ownership reason. Existing business/manual gates remain in force.",
+    "target_evidence_policy": "Windows and macOS execution are recorded separately; shared source or a package target entry does not prove macOS runtime.",
+    "applies_to_l3": [
+      "OM9-L3-01-13-001",
+      "OM9-L3-01-13-002",
+      "OM9-L3-01-13-003",
+      "OM9-L3-01-13-004",
+      "OM9-L3-01-13-005",
+      "OM9-L3-01-13-006",
+      "OM9-L3-01-13-007",
+      "OM9-L3-01-13-008",
+      "OM9-L3-01-13-009",
+      "OM9-L3-01-13-010",
+      "OM9-L3-01-13-011",
+      "OM9-L3-01-13-012"
     ]
+  },
+  "product_crate": {
+    "host": "crates/om9-app",
+    "transaction": "crates/om9-exchange",
+    "brep": "crates/om9-kernel",
+    "native": "native/native_exchange.cpp over pinned openNURBS eb92af3b",
+    "tests": "crates/om9-app/tests/l2_01_13.rs: 14 passed",
+    "state": "twelve L3 delivered on automated evidence; the two M03-UI L3 (file picker and summary warning) stay READY_FOR_REVIEW until a human signs"
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

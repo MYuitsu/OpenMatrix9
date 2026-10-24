@@ -143,6 +143,12 @@ pub const CUTTER_EXTENSION_SLOT: &str = "om9.cutter";
 /// Trimming loops over the entity's surface (OM9-L2-02-01 L3-005). The surface itself
 /// stays the entity geometry; the slot constrains the visible face.
 pub const TRIM_SURFACE_EXTENSION_SLOT: &str = "om9.trim.surface";
+/// Four rail profile metadata (OM9-L3-03-17-019): the profile curve keeps its
+/// geometry and records the four rails it was attached to plus its plane.
+pub const FOUR_RAIL_PROFILE_EXTENSION_SLOT: &str = "om9.four-rail-profile";
+/// Per-vertex UV channel and material name for a mesh; preserved through
+/// repair/reduction so the geometry can keep its mapping.
+pub const MESH_UV_EXTENSION_SLOT: &str = "om9.mesh.uv";
 /// Lightweight extrusion parameters (OM9-L2-02-01 L3-008); the profile stays the geometry.
 pub const EXTRUSION_EXTENSION_SLOT: &str = "om9.extrusion";
 pub fn extension_slot_known(slot: &str) -> bool {
@@ -153,6 +159,8 @@ pub fn extension_slot_known(slot: &str) -> bool {
             | HEAD_EXTENSION_SLOT
             | CUTTER_EXTENSION_SLOT
             | TRIM_SURFACE_EXTENSION_SLOT
+            | FOUR_RAIL_PROFILE_EXTENSION_SLOT
+            | MESH_UV_EXTENSION_SLOT
             | EXTRUSION_EXTENSION_SLOT
     )
 }
@@ -578,10 +586,16 @@ impl Document {
         self.owner_session = owner;
         Ok(())
     }
-    pub(crate) fn layer_permissions(
+    pub fn layer_permissions(&self, id: Option<LayerId>, snap_locked: bool) -> Result<Permissions> {
+        self.layer_permissions_with(id, snap_locked, |id| self.layers.get(&id))
+    }
+    /// The same layer-chain rule, resolved by a caller-supplied lookup so a staged
+    /// or proposed layer record can be evaluated before it is published.
+    pub fn layer_permissions_with<'l>(
         &self,
         id: Option<LayerId>,
         snap_locked: bool,
+        resolve: impl Fn(LayerId) -> Option<&'l Layer>,
     ) -> Result<Permissions> {
         let mut p = Permissions {
             visible: true,
@@ -595,7 +609,7 @@ impl Document {
             if !visited.insert(id) {
                 return Err(Error::Invalid("layer cycle"));
             }
-            let l = self.layers.get(&id).ok_or(Error::Missing("layer"))?;
+            let l = resolve(id).ok_or(Error::Missing("layer"))?;
             p.visible &= l.visible;
             p.selectable &= l.selectable && !l.locked;
             p.editable &= !l.locked;
@@ -613,11 +627,29 @@ impl Document {
         self.permissions_for_entity(e, snap_locked)
     }
     pub fn permissions_for_entity(&self, e: &Entity, snap_locked: bool) -> Result<Permissions> {
-        let mut p = self.layer_permissions(e.attributes.layer, snap_locked)?;
-        p.visible &= e.attributes.visible && !e.attributes.hidden;
-        p.selectable &= p.visible && e.attributes.selectable && !e.attributes.locked;
-        p.editable &= p.visible && !e.attributes.locked;
-        p.reference_snappable &= p.visible && (!e.attributes.locked || snap_locked);
+        self.permissions_for_attributes(&e.attributes, snap_locked)
+    }
+    /// Effective flags for one attributes record, so a staged record that is not
+    /// yet published can be evaluated with the same layer chain rules.
+    pub fn permissions_for_attributes(
+        &self,
+        attributes: &Attributes,
+        snap_locked: bool,
+    ) -> Result<Permissions> {
+        self.permissions_for_attributes_with(attributes, snap_locked, |id| self.layers.get(&id))
+    }
+    /// The same attributes rule with a caller-supplied layer lookup for staged layers.
+    pub fn permissions_for_attributes_with<'l>(
+        &self,
+        attributes: &Attributes,
+        snap_locked: bool,
+        resolve: impl Fn(LayerId) -> Option<&'l Layer>,
+    ) -> Result<Permissions> {
+        let mut p = self.layer_permissions_with(attributes.layer, snap_locked, resolve)?;
+        p.visible &= attributes.visible && !attributes.hidden;
+        p.selectable &= p.visible && attributes.selectable && !attributes.locked;
+        p.editable &= p.visible && !attributes.locked;
+        p.reference_snappable &= p.visible && (!attributes.locked || snap_locked);
         Ok(p)
     }
     /// Display identity of one object: name, colour and the effective

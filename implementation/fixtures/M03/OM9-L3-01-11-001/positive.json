@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m03.l2-01-11.fixture.v1",
+  "l3_id": "OM9-L3-01-11-001",
+  "fixture_id": "OM9-L3-01-11-001-POSITIVE",
+  "units": "mm",
+  "input": {
+    "point_mm": [
+      1,
+      2,
+      3
+    ],
+    "offset_mm": [
+      4,
+      -1,
+      2
+    ],
+    "box_mm": [
+      2,
+      3,
+      4
+    ],
+    "body_offset_mm": [
+      5,
+      0,
+      0
+    ]
+  },
+  "expect": {
+    "translated_point_mm": [
+      5,
+      1,
+      5
+    ],
+    "rotated_x_axis": [
+      0,
+      1,
+      0
+    ],
+    "body_volume_mm3": 24.0,
+    "body_bounds_x": [
+      5,
+      7
+    ]
+  },
+  "measured_on_2026_10_22": {
+    "translated_volume_mm3": 24.0
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "date": "2026-10-21",
+  "status": "document_tolerance_write_verified_windows_host_only",
+  "owner": "OM9-L2-01-08",
+  "milestone": "M01",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Stages Mutation::Tolerance with the owner's validation.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "b211a4cb8e54802f224540113fe93d8d6216561e8a75c0ed645e8ec75ff787f6",
+    "crates/om9-plugin-host/src/staged.rs": "b8809e1a97216f92499ac48037f7749970bb0ca76426b1a25c88f20677f76f5e",
+    "sdk/README.md": "4fe609f29b4f956f7fa49276e6cd453bb3f23c9bacd80cb0d79b5c3a062c2fef",
+    "sdk/API-INVENTORY.md": "fbaece320d1a2ab22820aff4a1fb594045c5cbc4689b087a864efc4656bd53a1"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": [
+      "set_document_tolerance"
+    ],
+    "error_codes": [
+      "tolerance",
+      "budget"
+    ]
+  },
+  "asserted_semantics": [
+    "Admission is Tolerance::try_new.",
+    "Mutation::Tolerance with expected_revision; one Undo restores.",
+    "Reading unchanged."
+  ],
+  "batches": [
+    {
+      "name": "sdk-tests",
+      "command": "rtk cargo test -p om9-sdk -j 2",
+      "result": "13 passed, 3 suites"
+    },
+    {
+      "name": "host-tests",
+      "command": "rtk cargo test -p om9-plugin-host -j 2",
+      "result": "65 passed, 5 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-tolerance-b",
+      "result": "PASS, 10 commands",
+      "native_tests": 35,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8863 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": [],
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1947276,
+      "sha256": "eb5275a13eb0afac1ccf0a3b9a349fec3afa4f741b2fb37a0c25825465b9bd86"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "e7fa20d9cafdf902b02d1c8ee013a83cc90afd6d24e7b565a5ef985aed61c88c"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 192418,
+      "sha256": "2599896756f48ed513bcb6d5fb6d955d47ae3f6e22c55979c6cf87c611bafdf3"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661952,
+      "sha256": "5b48e9f976faac913107b0ae485239ebc5cd1c552797c899d9e245bb85da34ec"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1943552,
+      "sha256": "8b7d93d703038fefce84fc99beb808d531407fcd9c8f1b627f46c203703eb9e9"
+    },
+    "om9.exe": {
+      "bytes": 69611520,
+      "sha256": "ef1056508aaffaec366685759705c41e7812c4323a3368db6475865b85448b33"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": [
+      "OM9-L3-01-08-003 (tolerance write)"
+    ],
+    "open": [
+      "native command",
+      "per-object tolerance"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "host_tests_only",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "No native command yet.",
+    "macOS host and plugin execution unverified.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Add a native tolerance command, or return to M02 for subobject/pick services."
+}

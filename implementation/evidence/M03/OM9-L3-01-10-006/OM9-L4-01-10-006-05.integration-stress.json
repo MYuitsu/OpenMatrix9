@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-01-10.l4.receipt.v1",
+  "l4": "OM9-L4-01-10-006-05",
+  "role": "INTEGRATION_STRESS",
+  "l3": "OM9-L3-01-10-006",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "fixture": "20-cube overlapping union chain and a fillet radius family (0.5/1/1.5/2 mm)",
+  "invariants": [
+    "the 20-cube chain volume is exactly 10.5 mm³ in one solid",
+    "every fillet result is a valid closed solid with no naked edge",
+    "the fillet volume decreases monotonically with the radius"
+  ],
+  "commands": [
+    {
+      "argv": "cargo test -p om9-kernel --features 3dm-brep --test l2_01_10 m03_01_10_stress_union_chain_and_fillet_family -- --exact",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/M03/OM9-L3-01-10-006/OM9-L4-01-10-006-05.stress.log",
+      "stdout_log_sha256": "8685eb2027e7ba0f22f019382ba393e17e3adf816dadd48dcf111f2607831b69"
+    }
+  ]
+}

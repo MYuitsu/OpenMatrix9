@@ -1,0 +1,7 @@
+{
+  "l3": "OM9-L3-03-15-007",
+  "case": "negative",
+  "oracle": "later edits do not mutate the captured Master",
+  "status": "PASS",
+  "date": "2026-10-22"
+}

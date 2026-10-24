@@ -18,6 +18,7 @@ description: Implement or specify OpenMatrix9 standalone Rust features using mil
 
 - 3DM, clipboard, CAD/mesh/cloud, worker60%: [rhino5-3dm-contract](references/rhino5-3dm-contract.md). Giữ semantics đã duyệt; old native scope là historical, milestone có representation/block gates riêng.
 - Box/Sphere `OM9-SOLID-012/014`: [solid-box-sphere-contract](references/solid-box-sphere-contract.md). Giữ correction Box mặc định, frames/Cube/FitPoints/AroundCurve/Tangent/chọn nghiệm; replay trên own geometry/identity.
+- Text và Boolean Two Objects `OM9-SOLID-008/004`: [solid-prompt-contract](references/solid-prompt-contract.md). Nội dung/Height, lựa chọn U/D/I, retry, Esc và dispatcher/transaction chung; người dùng duyệt 2026-10-23.
 - Document/cảnh `OM9-L2-01-03`: [document-scene-contract](references/document-scene-contract.md). Giữ định danh bền vững, envelope có kiểu, luật layer/khoá, group là lớp phủ, block dùng chung topology, extension slot có namespace, hợp đồng selection, batch thay đổi, snapshot/restore nguyên tử và provenance; owner duyệt 2026-10-17.
 
 ## Cập nhật nghiệp vụ sau khi code

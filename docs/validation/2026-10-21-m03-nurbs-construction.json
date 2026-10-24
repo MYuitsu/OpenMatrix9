@@ -1,0 +1,146 @@
+{
+  "date": "2026-10-21",
+  "status": "control_point_nurbs_construction_sdk_export_verified_windows",
+  "owner": "OM9-L2-02-04",
+  "milestone": "M03",
+  "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
+  "implementation_note": "Completes the control-point construction scope of OM9-L3-02-04-003 with the owner's NurbsCurve validation and the shared output path.",
+  "source_head": "831a2c4d3b76fb11aa83295e05746b36ea607300",
+  "working_tree_changes": true,
+  "untracked_sdk_sources": [
+    "crates/om9-sdk/",
+    "crates/om9-plugin-host/",
+    "sdk/",
+    "crates/om9-app/tests/plugin_native.rs",
+    "tools/validate_plugin_sdk.py"
+  ],
+  "source_sha256": {
+    "crates/om9-sdk/src/lib.rs": "efbf421818236d44d63b3b51d7ec03f3d98b06c996962b4287a7e51d5896effa",
+    "crates/om9-plugin-host/src/staged.rs": "140c2a52cdb0511e23a607f668dc96fc1e632b7a24acf32da30f5a006a92d4be",
+    "crates/om9-app/tests/plugin_native.rs": "0eeddc829bd09d7664a2e2f143df3e2755a463c35baa2227926c27274f5d735c",
+    "sdk/examples/hello-plugin/src/lib.rs": "d4cf39b5aa85eb86dc414b8a1ed25d3693d2676a4de6f99aeea45dc8ae32bd04",
+    "sdk/README.md": "687d37d70413cdf224a4db5bdc564f631580a408cdd849913042c5473e7cfe32",
+    "sdk/API-INVENTORY.md": "a7e94b48c3781bbfbf276c55c8a15136268c847ab7eaf20fc3fd280f1a1e61a8"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "app_features": "om9-app --no-default-features (standalone Controller/document/scene/archive; no OCCT adapter, no FreeCAD/Rhino host)",
+  "capabilities": {
+    "host_methods": ["add_nurbs_curve"],
+    "shared_service": ["om9_core::geometry::NurbsCurve::validate", "shared add_output path"],
+    "error_codes": ["curve", "budget", "permission", "layer"],
+    "limits": {"poles": 8192, "knots": 16384}
+  },
+  "asserted_semantics": [
+    "The record follows the document rule: one weight per pole, poles + degree + 1 non-decreasing knots, finite positive weights, and a clamped domain [knots[degree], knots[poles.len()]].",
+    "A malformed record (weight count, zero/oversized degree, short knots, negative weight) is a curve refusal and publishes nothing.",
+    "periodic/reversed/seam construction is not exposed.",
+    "The curve publishes as one object in the command's single transaction and one Undo removes it.",
+    "Control data is bounded, so a huge record is a budget refusal before allocation."
+  ],
+  "batches": [
+    {
+      "name": "sdk-and-host-tests",
+      "command": "rtk cargo test -p om9-sdk -p om9-plugin-host -j 2",
+      "result": "50 passed, 8 suites"
+    },
+    {
+      "name": "core-tests",
+      "command": "rtk cargo test -p om9-core -j 2",
+      "result": "403 passed, 47 suites"
+    },
+    {
+      "name": "controller-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --lib session::plugins -j 2",
+      "result": "5 passed, 135 filtered"
+    },
+    {
+      "name": "native-plugin-tests",
+      "command": "rtk cargo test -p om9-app --no-default-features --test plugin_native -j 2 -- --ignored",
+      "result": "11 passed"
+    },
+    {
+      "name": "packaged-sdk-validation",
+      "command": "rtk python tools/validate_plugin_sdk.py --target-dir L:/om9-target --output build/standalone-validation/ui-artifacts/20261021-plugin-sdk-nurbs-build",
+      "result": "PASS, 10 commands",
+      "objects_created": 3,
+      "cold_project_hash_equal": true,
+      "failed_commands_preserved_file": true,
+      "standalone_sdk_build": true
+    },
+    {
+      "name": "product-feature-check",
+      "command": "rtk cargo check -p om9-app -p om9-plugin-host -j 2",
+      "result": "exit 0 (default features including occt-brep)"
+    },
+    {
+      "name": "public-source-audit",
+      "command": "rtk python tools/public_source_audit.py",
+      "result": "8803 source files, 511 icon bindings, 510 SVG, 0 errors"
+    },
+    {
+      "name": "format-and-whitespace",
+      "command": "rustfmt --check on the edited Rust files; git diff --check (CRLF-aware)",
+      "result": "PASS"
+    }
+  ],
+  "native_plugin_assertions": {
+    "command": "CurveBuildDemo",
+    "control_nurbs_kind": "nurbs",
+    "control_nurbs_degree": 3,
+    "control_nurbs_poles": 4,
+    "document_objects": 6,
+    "undo_units": 2,
+    "undo_restores_profile": true,
+    "redo_restores_curves": true
+  },
+  "artifacts": {
+    "hello.om9p": {
+      "bytes": 1527463,
+      "sha256": "79991fab0cc9a7ee5556f47f595ddc7071016549d19ce649ce75091e6d941afc"
+    },
+    "hello.om9": {
+      "bytes": 2159,
+      "sha256": "55e2e156da5f5e7f1095015813cadf40d7fbd2bdc84f6f58b5465ceda380a2ec"
+    },
+    "openmatrix9-sdk-0.1.0.zip": {
+      "bytes": 143704,
+      "sha256": "a18c7d94dc363af9c6d1823bec861dd14a0a244e9c9d5471ee843f2adc7d69f6"
+    },
+    "om9-plugin.exe": {
+      "bytes": 1661440,
+      "sha256": "ce038afa60b7f6ffaa78b25c40dfb52f452d2696a36bdd6c526cf563a425dc91"
+    },
+    "om9_hello_plugin.dll": {
+      "bytes": 1525760,
+      "sha256": "fa6291066fa5b0a80f28be207c4aae0104ae245514f2b78ab080c8c9ccc25a53"
+    },
+    "om9.exe": {
+      "bytes": 68818432,
+      "sha256": "9da7c8be129615469ce23bd6345f7814cba390e69b4fddabcfc9f8e3530fe60e"
+    }
+  },
+  "l3_evidence_scope": {
+    "covered": ["OM9-L3-02-04-003 (interpolated and control-point NURBS construction)"],
+    "open": [
+      "periodic/reversed/seam NURBS construction",
+      "point/knot editing and rebuild",
+      "ellipse/polygon creation",
+      "offset, fillet/blend and intersections",
+      "polycurve segment parameters and surface/BRep semantics"
+    ]
+  },
+  "target_proof": {
+    "windows_x64": "verified_external_plugin_and_host",
+    "macos_arm64": "unverified",
+    "macos_x64": "unverified"
+  },
+  "limitations": [
+    "Static NURBS only: periodic/reversed/seam records are not exposed.",
+    "Curve editing, ellipse/polygon, offset/fillet/blend/rebuild remain open.",
+    "macOS host and plugin execution unverified; interactive UI acceptance was not performed.",
+    "No manual or M09 release gate was promoted."
+  ],
+  "next_action": "Take OM9-L2-01-12 file lifecycle, or continue curve editing at the curve owner."
+}

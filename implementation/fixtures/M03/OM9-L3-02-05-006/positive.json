@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m03.l2-02-05.fixture.v1",
+  "l3_id": "OM9-L3-02-05-006",
+  "fixture_id": "OM9-L3-02-05-006-POSITIVE",
+  "units": "mm",
+  "input": {
+    "surface": "Surface Rebuild Refit And Softedit",
+    "kind": "analytic/constructed NURBS fixture"
+  },
+  "expect": {
+    "refit_plane_corner_error": 0.0,
+    "softedit_centre_z": "> 0.2 and < 1.0",
+    "softedit_corner_z": 0.0
+  },
+  "tolerances": {
+    "refit": "1e-9",
+    "softedit": "smooth falloff, measured"
+  },
+  "measured_on_2026_10_22": {
+    "refit_plane_corner_error": 0.0,
+    "softedit_centre_z": 0.28349364905389035,
+    "softedit_corner_z": 0.0
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-05-005",
+  "l3_id": "OM9-L3-03-05-005",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Selected/hover outline vẫn nhìn rõ trong shaded/wireframe",
+  "expected": "The documented display cue with the model and journal unchanged.",
+  "evidence": [
+    "om9-app selection_overlay: 8 passed",
+    "om9-app display_modes: 3 passed"
+  ],
+  "status": "PASS"
+}

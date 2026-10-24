@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-16.l4.receipt.v1",
+  "task_id": "OM9-L4-03-16-005-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-16-005",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-CURVE-005",
+  "source_command": "Circle",
+  "menu_icon": "CurveCircleCenterRadius",
+  "owner_candidate": "OM9-L3-02-04-002",
+  "binding_state": "BLOCKED_OWNER",
+  "disabled_reason": "interactive Circle command session is not wired; owner candidate OM9-L3-02-04-002 is unverified",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-16-005/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-16-005/dispatch_contract.md"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-16-005/dispatch_contract.json": "a1448bee7a1e6a3229f4e491d81cd9b77bdf0de2b46240648b5c9ef2485d9f8f",
+    "implementation/design/M03/OM9-L3-03-16-005/dispatch_contract.md": "206a2d6b794ec1eb6effd7a55de7ba6dac35960f90ff838bc9460ae9c38af8c7"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

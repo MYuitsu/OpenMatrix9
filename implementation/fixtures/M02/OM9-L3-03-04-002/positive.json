@@ -1,0 +1,13 @@
+{
+  "fixture_id": "G03-B-03-04-002",
+  "l3_id": "OM9-L3-03-04-002",
+  "kind": "positive",
+  "date": "2026-10-22",
+  "oracle": "Ortho/Planar/Project toggle thay mode core và ký hiệu bật đúng",
+  "expected": "The documented snap/Ortho/Planar/Project/SmartTrack state and marker.",
+  "evidence": [
+    "om9-app sidebar_palettes toggle: 1 passed",
+    "om9-app snap_panel_modes: 4 passed"
+  ],
+  "status": "PASS"
+}

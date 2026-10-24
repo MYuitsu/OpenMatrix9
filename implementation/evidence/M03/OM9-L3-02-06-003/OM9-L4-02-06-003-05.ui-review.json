@@ -1,0 +1,60 @@
+{
+  "schema": "om9.m03.l2-02-06.ui-review.v1",
+  "task_id": "OM9-L4-02-06-003-05",
+  "l3_id": "OM9-L3-02-06-003",
+  "title": "Interactive Mirror And Array",
+  "oracle": {
+    "positive": [
+      "mirror about x=0 maps (2,3,4) to (-2,3,4)",
+      "linear pattern count 3 spacing 1 gives X=0,1,2",
+      "polar pattern 4 full turn gives 90-degree stations without a seam duplicate"
+    ],
+    "negative": [
+      "zero mirror normal, zero/negative spacing and zero count are refused",
+      "polar count < 2 and zero total angle are refused"
+    ]
+  },
+  "manual_test_gate": "M03-UI_MANUAL_SIGNOFF_PENDING",
+  "implementer": "agent session (implementer never signs)",
+  "reviewer": {
+    "status": "HUMAN_REVIEW_PENDING",
+    "role": "M03-UI manual workflow gate",
+    "date_utc": "2026-10-22",
+    "statement": "The transform-session and matrix oracles pass; the interactive selection/reference picker/preview/commit/cancel and warning review is not signed by a human.",
+    "scope": "choose plane/axis/count and generate preview"
+  },
+  "measured": {
+    "mirror_point": [
+      -2.0,
+      3.0,
+      4.0
+    ],
+    "linear_placements": 3,
+    "polar_placements": 4,
+    "seam_duplicate": false
+  },
+  "tolerances": {
+    "point": "1e-12",
+    "angle": "1e-12"
+  },
+  "checks_run": [
+    "core focused log(s) exit 0",
+    "app gumball suites 17 passed (interaction 6, numeric 6, placement 4, cold 1)",
+    "core suite 8 passed; kernel suite 3 passed; kernel l2_01_11 11 passed",
+    "clippy/fmt/public audit exit 0"
+  ],
+  "artefacts": [
+    "implementation/design/M03/OM9-L3-02-06-003/api.md",
+    "implementation/design/M03/OM9-L3-02-06-003/source_crosswalk.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-003/positive.json",
+    "implementation/fixtures/M03/OM9-L3-02-06-003/negative.json",
+    "implementation/evidence/M03/OM9-L3-02-06-003/"
+  ],
+  "gate": {
+    "scope": "M03-UI_MANUAL_SIGNOFF_PENDING",
+    "implementation_status_promoted": false,
+    "planning_state_modified": false,
+    "runtime_evidence_updated": true,
+    "human_approval": null
+  }
+}

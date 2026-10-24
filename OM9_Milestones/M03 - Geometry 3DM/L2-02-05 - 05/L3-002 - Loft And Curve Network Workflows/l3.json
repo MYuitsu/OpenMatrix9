@@ -154,7 +154,7 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
+  "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-02-05-002-01",
     "OM9-L4-02-05-002-02",
@@ -312,6 +312,49 @@
     "priority_pilot": false,
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "NURBS_CURVE"
+  "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
+  "acceptance_category": "NURBS_CURVE",
+  "runtime_implementation": {
+    "date": "2026-10-22",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "loft through ordered sections and four-sided Coons curve network",
+    "owner": {
+      "crate": "om9-core + om9-kernel",
+      "files": [
+        "crates/om9-core/src/surface_ops.rs",
+        "crates/om9-core/src/surface_kernel.rs",
+        "crates/om9-core/tests/surface_ops.rs",
+        "crates/om9-kernel/tests/l2_02_05.rs"
+      ],
+      "test": "crates/om9-core/tests/surface_ops.rs + crates/om9-kernel/tests/l2_02_05.rs"
+    },
+    "evidence": [
+      "implementation/design/M03/OM9-L3-02-05-002/api.md",
+      "implementation/design/M03/OM9-L3-02-05-002/source_crosswalk.json",
+      "implementation/fixtures/M03/OM9-L3-02-05-002/positive.json",
+      "implementation/fixtures/M03/OM9-L3-02-05-002/negative.json",
+      "implementation/evidence/M03/OM9-L3-02-05-002/",
+      "implementation/evidence/M03/2026-10-22-l2-02-05-checks.json"
+    ],
+    "tests": [
+      "core surface suite: 16 passed",
+      "kernel surface suite: 6 passed",
+      "crate suites: core lib 12 passed; kernel --features 3dm-brep exit 0"
+    ],
+    "l4_evidence": {
+      "OM9-L4-02-05-002-01": "1/1",
+      "OM9-L4-02-05-002-02": "1/1",
+      "OM9-L4-02-05-002-03": "1/1",
+      "OM9-L4-02-05-002-04": "1/1",
+      "OM9-L4-02-05-002-05": "1/1",
+      "OM9-L4-02-05-002-06": "1/1"
+    },
+    "human_approval": null,
+    "manual_gate": "M03-UI",
+    "remaining": [
+      "Network supports four-sided Coons patches; n-sided networks are not implemented.",
+      "The M03-UI workflow is not signed."
+    ]
+  }
 }

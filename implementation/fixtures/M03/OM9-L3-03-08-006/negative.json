@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m03.l2-03-08.fixture.v1",
+  "l3_id": "OM9-L3-03-08-006",
+  "fixture_id": "OM9-L3-03-08-006-NEGATIVE",
+  "units": "mm",
+  "cases": [
+    "no selection disables every button",
+    "non-curve selection disables the point toggles",
+    "one curve disables Join",
+    "Ring Rail never enables in M03"
+  ],
+  "expect": "typed Error::Invalid/Unsupported; document, selection and Undo journal unchanged",
+  "test": "m03_03_08_006"
+}

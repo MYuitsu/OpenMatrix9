@@ -1,0 +1,12 @@
+{
+  "fixture_id": "G02-B-02-03-003",
+  "l3_id": "OM9-L3-02-03-003",
+  "kind": "negative",
+  "date": "2026-10-22",
+  "oracle": "Điểm nằm trong circle không có tangent thực; không báo snap giả",
+  "expected": "No fake candidate, no stale marker and no document mutation.",
+  "evidence": [
+    "om9-scene osnap: 11 passed"
+  ],
+  "status": "PASS"
+}

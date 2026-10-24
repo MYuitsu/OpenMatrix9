@@ -20,7 +20,10 @@ use crate::{
     evaluation::{Parameter, evaluate_curve},
     geometry::{Curve, Geometry, NurbsCurve, NurbsSurface, Point3, Transform},
     identity::{DefinitionId, ObjectId},
-    model::{Document, EXTRUSION_EXTENSION_SLOT, Entity, Extension, TRIM_SURFACE_EXTENSION_SLOT},
+    model::{
+        Document, EXTRUSION_EXTENSION_SLOT, Entity, Extension, FOUR_RAIL_PROFILE_EXTENSION_SLOT,
+        MESH_UV_EXTENSION_SLOT, TRIM_SURFACE_EXTENSION_SLOT,
+    },
     surface_kernel::{self, SurfaceIso},
 };
 use serde::{Deserialize, Serialize};
@@ -502,6 +505,87 @@ impl TrimmedSurface {
     }
 }
 
+/* ---------------------------- four rail profile ---------------------------- */
+
+/// Four rail profile metadata. The curve itself remains `Geometry::Curve`; the
+/// slot records which four rails the profile was attached to and its plane.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FourRailProfile {
+    pub rails: [ObjectId; 4],
+    pub origin: [f64; 3],
+    pub normal: [f64; 3],
+    pub x_axis: [f64; 3],
+}
+
+impl FourRailProfile {
+    pub fn validate(&self, _limits: &Limits) -> Result<()> {
+        let mut unique = std::collections::BTreeSet::new();
+        for rail in self.rails {
+            if rail.is_nil() || !unique.insert(rail) {
+                return Err(Error::Invalid("four rail profile rails"));
+            }
+        }
+        for value in self
+            .origin
+            .iter()
+            .chain(self.normal.iter())
+            .chain(self.x_axis.iter())
+        {
+            if !value.is_finite() {
+                return Err(Error::Invalid("four rail profile plane"));
+            }
+        }
+        let normal = [self.normal[0], self.normal[1], self.normal[2]];
+        if normal[0].hypot(normal[1]).hypot(normal[2]) <= 1.0e-9 {
+            return Err(Error::Invalid("four rail profile normal"));
+        }
+        let x_axis = [self.x_axis[0], self.x_axis[1], self.x_axis[2]];
+        if x_axis[0].hypot(x_axis[1]).hypot(x_axis[2]) <= 1.0e-9 {
+            return Err(Error::Invalid("four rail profile x axis"));
+        }
+        Ok(())
+    }
+
+    pub fn to_extension(&self) -> Result<Extension> {
+        Ok(Extension {
+            version: 1,
+            payload: serde_json::to_string(self)
+                .map_err(|_| Error::Invalid("four rail profile payload"))?,
+        })
+    }
+
+    pub fn from_extension(extension: &Extension, limits: &Limits) -> Result<Self> {
+        let profile: Self = serde_json::from_str(&extension.payload)
+            .map_err(|_| Error::Invalid("four rail profile payload"))?;
+        profile.validate(limits)?;
+        Ok(profile)
+    }
+}
+
+pub fn four_rail_profile_of(entity: &Entity, limits: &Limits) -> Result<Option<FourRailProfile>> {
+    match entity.extensions.get(FOUR_RAIL_PROFILE_EXTENSION_SLOT) {
+        Some(extension) => Ok(Some(FourRailProfile::from_extension(extension, limits)?)),
+        None => Ok(None),
+    }
+}
+
+pub fn set_four_rail_profile(
+    entity: &mut Entity,
+    profile: &FourRailProfile,
+    limits: &Limits,
+) -> Result<()> {
+    profile.validate(limits)?;
+    if !matches!(entity.geometry, Geometry::Curve(_)) {
+        return Err(Error::Invalid("four rail profile requires curve geometry"));
+    }
+    entity.extensions.insert(
+        FOUR_RAIL_PROFILE_EXTENSION_SLOT.to_string(),
+        profile.to_extension()?,
+    );
+    Ok(())
+}
+
 pub fn trimmed_surface_of(entity: &Entity, limits: &Limits) -> Result<Option<TrimmedSurface>> {
     match entity.extensions.get(TRIM_SURFACE_EXTENSION_SLOT) {
         Some(extension) => Ok(Some(TrimmedSurface::from_extension(extension, limits)?)),
@@ -531,6 +615,100 @@ pub fn clear_trimmed_surface(entity: &mut Entity) {
     entity.extensions.remove(TRIM_SURFACE_EXTENSION_SLOT);
 }
 
+/* ---------------------------- mesh UV ------------------------------------ */
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MeshUv {
+    /// Legacy per-vertex channel, retained for backward compatibility.
+    #[serde(default)]
+    pub uvs: Vec<[f64; 2]>,
+    /// Per-corner UVs in 3DM order: face 0 corners, face 1 corners, ...
+    #[serde(default)]
+    pub corners: Vec<[f64; 2]>,
+    pub material: String,
+    #[serde(default)]
+    pub pbr: PbrMaterial,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PbrMaterial {
+    #[serde(default = "default_base_color")]
+    pub base_color: [f32; 4],
+    #[serde(default)]
+    pub metallic: f32,
+    #[serde(default = "default_roughness")]
+    pub roughness: f32,
+    #[serde(default)]
+    pub texture: Option<String>,
+}
+
+fn default_base_color() -> [f32; 4] {
+    [0.8, 0.8, 0.8, 1.0]
+}
+fn default_roughness() -> f32 {
+    0.5
+}
+impl Default for PbrMaterial {
+    fn default() -> Self {
+        Self {
+            base_color: default_base_color(),
+            metallic: 0.0,
+            roughness: default_roughness(),
+            texture: None,
+        }
+    }
+}
+
+impl MeshUv {
+    pub fn validate(&self, limits: &Limits) -> Result<()> {
+        for uv in self.uvs.iter().chain(&self.corners) {
+            if !uv[0].is_finite() || !uv[1].is_finite() {
+                return Err(Error::Invalid("mesh uv"));
+            }
+        }
+        if self.material.len() > limits.max_name_bytes {
+            return Err(Error::Budget("mesh material"));
+        }
+        if let Some(texture) = &self.pbr.texture
+            && texture.len() > limits.max_name_bytes
+        {
+            return Err(Error::Budget("mesh texture"));
+        }
+        Ok(())
+    }
+    pub fn to_extension(&self) -> Result<Extension> {
+        Ok(Extension {
+            version: 1,
+            payload: serde_json::to_string(self).map_err(|_| Error::Invalid("mesh uv payload"))?,
+        })
+    }
+    pub fn from_extension(extension: &Extension, limits: &Limits) -> Result<Self> {
+        let value: Self = serde_json::from_str(&extension.payload)
+            .map_err(|_| Error::Invalid("mesh uv payload"))?;
+        value.validate(limits)?;
+        Ok(value)
+    }
+}
+
+pub fn mesh_uv_of(entity: &Entity, limits: &Limits) -> Result<Option<MeshUv>> {
+    match entity.extensions.get(MESH_UV_EXTENSION_SLOT) {
+        Some(extension) => Ok(Some(MeshUv::from_extension(extension, limits)?)),
+        None => Ok(None),
+    }
+}
+
+pub fn set_mesh_uv(entity: &mut Entity, value: &MeshUv, limits: &Limits) -> Result<()> {
+    value.validate(limits)?;
+    if !matches!(entity.geometry, Geometry::Mesh(_)) {
+        return Err(Error::Invalid("mesh uv requires mesh geometry"));
+    }
+    entity
+        .extensions
+        .insert(MESH_UV_EXTENSION_SLOT.to_string(), value.to_extension()?);
+    Ok(())
+}
 /* ---------------------------- display isocurve ---------------------------- */
 
 /// An exact iso-curve of a surface that exists only for display. It is not a model edge, is not
@@ -1028,6 +1206,12 @@ pub fn validate_extension(slot: &str, payload: &str, limits: &Limits) -> Result<
         TRIM_SURFACE_EXTENSION_SLOT => {
             TrimmedSurface::from_extension(&extension, limits)?;
         }
+        FOUR_RAIL_PROFILE_EXTENSION_SLOT => {
+            FourRailProfile::from_extension(&extension, limits)?;
+        }
+        MESH_UV_EXTENSION_SLOT => {
+            MeshUv::from_extension(&extension, limits)?;
+        }
         EXTRUSION_EXTENSION_SLOT => {
             Extrusion::from_extension(&extension, 1.0e-6, limits)?;
         }
@@ -1058,4 +1242,3 @@ pub fn curve_endpoints(curve: &Curve, limits: &Limits) -> Result<[Point3; 2]> {
         *end.first().ok_or(Error::Invalid("curve endpoint"))?,
     ])
 }
-

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.m03.l2-03-17.l4.receipt.v1",
+  "task_id": "OM9-L4-03-17-022-01",
+  "role": "DISPATCH_CONTRACT",
+  "l3": "OM9-L3-03-17-022",
+  "date": "2026-10-23",
+  "status": "DOCUMENT_READY",
+  "command_id": "OM9-SURFACE-023",
+  "source_command": "Chamfer Surfaces",
+  "menu_icon": "SurfaceChamferSurfaces",
+  "owner_candidate": "",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
+  "artifact_paths": [
+    "implementation/design/M03/OM9-L3-03-17-022/dispatch_contract.json",
+    "implementation/design/M03/OM9-L3-03-17-022/source_crosswalk.json"
+  ],
+  "artifact_sha256": {
+    "implementation/design/M03/OM9-L3-03-17-022/dispatch_contract.json": "e99bc08e76a1f4d371eea3aec31b26fbae10d54142d5188b8b5c44bdfcb7031c",
+    "implementation/design/M03/OM9-L3-03-17-022/source_crosswalk.json": "09ee5d3186df0a8465ff1a8c53ea1b29ac3c22cdb42dff1e69b074d7f608f879"
+  },
+  "reviewer": "document review only; not a runtime feature claim"
+}

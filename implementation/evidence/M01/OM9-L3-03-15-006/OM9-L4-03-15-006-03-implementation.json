@@ -1,0 +1,12 @@
+{
+  "l4": "OM9-L4-03-15-006-03",
+  "l3": "OM9-L3-03-15-006",
+  "date": "2026-10-22",
+  "status": "IMPLEMENTED_AND_TESTED",
+  "source_paths": [
+    "crates/om9-app/src/session/jobbag.rs",
+    "crates/om9-app/src/project_manager.rs"
+  ],
+  "tests": "project_manager 8 passed; project_manager_ui 3 passed",
+  "oracle": "restore into one transaction with new IDs"
+}

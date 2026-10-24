@@ -1,0 +1,17 @@
+{
+  "l4": "OM9-L4-02-03-001-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-02-03-001",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "End, Mid, Center and Quadrant candidates are generated from exact line/circle geometry, projected once and filtered by the screen radius.",
+  "source_paths": [
+    "crates/om9-scene/src/osnap.rs",
+    "crates/om9-scene/src/scene.rs",
+    "crates/om9-scene/src/camera.rs"
+  ],
+  "tests": [
+    "om9-scene osnap: 11 passed",
+    "om9-app osnap UI: 3 passed"
+  ]
+}

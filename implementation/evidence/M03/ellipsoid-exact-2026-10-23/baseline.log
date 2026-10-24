@@ -1,0 +1,21 @@
+    Blocking waiting for file lock on build directory
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 22.47s
+     Running tests\ellipsoid.rs (L:/om9-target\debug\deps\ellipsoid-68960f04f9cf5021.exe)
+
+running 1 test
+axes=[1.0, 1.0, 1.0] volume=4.186958251793 expected=4.188790204786 relative_error=4.373e-4 faces=1 naked_edges=0
+
+thread 'ellipsoid_exact_volume_topology_and_surface' (58956) panicked at crates\om9-kernel\tests\ellipsoid.rs:31:9:
+assertion failed: (measured.volume_mm3 / expected - 1.0).abs() < 1e-10
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test ellipsoid_exact_volume_topology_and_surface ... FAILED
+
+failures:
+
+failures:
+    ellipsoid_exact_volume_topology_and_surface
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `-p om9-kernel --test ellipsoid`

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m03.l2-01-10.fixture.v1",
+  "l3_id": "OM9-L3-01-10-003",
+  "fixture_id": "OM9-L3-01-10-003-NEGATIVE",
+  "units": "mm",
+  "input": [
+    "disjoint box at x=50",
+    "touching box at x=10"
+  ],
+  "expect": "BooleanOutcome::Empty for disjoint; Empty or zero-volume/no-solid for contact"
+}

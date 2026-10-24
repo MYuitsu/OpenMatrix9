@@ -1,0 +1,21 @@
+{
+  "l4": "OM9-L4-01-07-008-03",
+  "role": "IMPLEMENT",
+  "l3": "OM9-L3-01-07-008",
+  "date": "2026-10-22",
+  "status": "AUTOMATED_TARGET_VALIDATED",
+  "implementation": "Begin/preview/commit/cancel through the M01 atomic transaction, snapshot and stable identities.",
+  "source_paths": [
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-core/src/gumball.rs",
+    "crates/om9-core/src/transaction.rs"
+  ],
+  "tests": [
+    "om9-app gumball_interaction: 5 passed",
+    "om9-app gumball_numeric: 5 passed",
+    "om9-app gumball_cold: 1 passed",
+    "om9-app selection_overlay: 8 passed",
+    "om9-scene affine_gesture: 5 passed",
+    "om9-core gumball: 15 passed"
+  ]
+}
