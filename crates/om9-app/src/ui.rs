@@ -2613,16 +2613,15 @@ impl MatrixApp {
             self.nav_document = Some(document);
         }
         let blocked = events.iter().any(|e| {
-                matches!(
-                    e,
-                    egui::Event::Key {
-                        key: Key::Escape,
-                        pressed: true,
-                        ..
-                    }
-                )
-            })
-            || self.viewport_menu_owns_frame
+            matches!(
+                e,
+                egui::Event::Key {
+                    key: Key::Escape,
+                    pressed: true,
+                    ..
+                }
+            )
+        }) || self.viewport_menu_owns_frame
             || self.gumball_session.is_some()
             || self.controller.layer_dialog().is_some()
             || self.controller.file_operation().is_some()
@@ -4811,6 +4810,27 @@ impl eframe::App for MatrixApp {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         self.show(ui);
         self.health_panel_ui(ui.ctx());
+        // Enter in the viewport finishes the running point command (Matrix/Rhino).
+        if self.controller.is_running()
+            && ui.ctx().memory(|memory| memory.focused().is_none())
+            && ui
+                .ctx()
+                .input_mut(|input| input.consume_key(Modifiers::NONE, Key::Enter))
+        {
+            self.submit_draft();
+        }
+        // Delete removes the selected objects when no text editor owns the keyboard.
+        if !self.controller.is_running()
+            && !self.controller.selected().is_empty()
+            && ui.ctx().memory(|memory| memory.focused().is_none())
+            && ui
+                .ctx()
+                .input_mut(|input| input.consume_key(Modifiers::NONE, Key::Delete))
+        {
+            let ids: Vec<_> = self.controller.selected().iter().copied().collect();
+            let result = self.controller.delete_objects(&ids).map(|_| ());
+            self.feedback(result);
+        }
         self.service_file_close_probe(ui.ctx(), frame);
         self.service_native_file_picker(ui.ctx(), frame);
         self.service_three_dm_picker(ui.ctx(), frame);

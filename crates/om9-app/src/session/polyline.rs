@@ -57,7 +57,9 @@ impl Controller {
             return Some(self.commit_polyline());
         }
         self.polyline_pending = Some(pending);
-        Some(Err(Error::Invalid("polyline accepts points, Close, Undo or Cancel")))
+        Some(Err(Error::Invalid(
+            "polyline accepts points, Close, Undo or Cancel",
+        )))
     }
 
     pub fn accept_polyline_point(&mut self, point: Point3) -> Result<(), Error> {
@@ -115,9 +117,6 @@ impl Controller {
         if pending.close {
             points.push(points[0]);
         }
-        points
-            .windows(2)
-            .map(|pair| [pair[0], pair[1]])
-            .collect()
+        points.windows(2).map(|pair| [pair[0], pair[1]]).collect()
     }
 }

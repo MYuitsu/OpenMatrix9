@@ -79,6 +79,20 @@ impl MatrixApp {
             self.transcript.recall_down();
             self.focus_cmd = true;
         }
+        // Delete removes the selection when the editor holds no draft. The
+        // command line normally keeps focus, so the global viewport handler
+        // cannot see this key first.
+        if focused
+            && !composing
+            && self.transcript.draft().is_empty()
+            && !self.controller.is_running()
+            && !self.controller.selected().is_empty()
+            && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Delete))
+        {
+            let ids: Vec<_> = self.controller.selected().iter().copied().collect();
+            let result = self.controller.delete_objects(&ids).map(|_| ());
+            self.feedback(result);
+        }
         if enter {
             self.submit_draft();
         } else if !focused
@@ -944,7 +958,8 @@ impl MatrixApp {
                 && circle_tokens.is_empty()
                 && rect_tokens.is_empty()
                 && !polyline_tokens.is_empty();
-            let is_rect = solid_tokens.is_empty() && circle_tokens.is_empty() && !rect_tokens.is_empty();
+            let is_rect =
+                solid_tokens.is_empty() && circle_tokens.is_empty() && !rect_tokens.is_empty();
             let is_circle = solid_tokens.is_empty() && !circle_tokens.is_empty();
             let tokens = if is_arc_blend {
                 arc_blend_tokens
@@ -1031,7 +1046,8 @@ impl MatrixApp {
                         ui.horizontal(|ui| {
                             for (label, command) in &tokens {
                                 let response = ui.small_button(*label);
-                                self.cmd_token_rects.insert((*label).to_owned(), response.rect);
+                                self.cmd_token_rects
+                                    .insert((*label).to_owned(), response.rect);
                                 if response.clicked() {
                                     clicked = Some(*command);
                                 }

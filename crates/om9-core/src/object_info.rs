@@ -118,11 +118,19 @@ impl Document {
                     Measurement::Size([2. * radius, 2. * radius, 0.]),
                     format!("radius {radius:.3}"),
                 ),
-                _ => (
-                    "Curve",
-                    Measurement::Unavailable("this curve has no measured size yet"),
-                    "curve".to_owned(),
-                ),
+                _ => match crate::utilities::bounds(&Geometry::Curve(curve.clone())) {
+                    Some(bounds) => {
+                        let detail = crate::curve_ops::arc_length(curve, limits)
+                            .map(|length| format!("length {length:.3}"))
+                            .unwrap_or_else(|_| "curve".to_owned());
+                        ("Curve", Measurement::Size(bounds.size()), detail)
+                    }
+                    None => (
+                        "Curve",
+                        Measurement::Unavailable("this curve has no measured size yet"),
+                        "curve".to_owned(),
+                    ),
+                },
             },
             Geometry::Surface(_) => (
                 "Surface",

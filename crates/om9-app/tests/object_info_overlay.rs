@@ -219,3 +219,34 @@ fn the_receipt_carries_the_same_line_the_overlay_paints() {
     assert_eq!(block["kind"], "Line");
     assert_eq!(block["label"], "Line · 10.000 × 4.000 × 0.000 · valid");
 }
+
+#[test]
+fn generic_polycurve_reports_bounds_and_length() {
+    use om9_core::geometry::Curve;
+    let curve = Curve::Polycurve {
+        segments: vec![
+            Curve::Line {
+                start: [0.0, 0.0, 0.0],
+                end: [10.0, 0.0, 0.0],
+                domain: [0.0, 1.0],
+            },
+            Curve::Line {
+                start: [10.0, 0.0, 0.0],
+                end: [10.0, 5.0, 0.0],
+                domain: [0.0, 1.0],
+            },
+        ],
+        reversed: false,
+    };
+    let (doc, id) = document_with(Geometry::Curve(curve));
+    let info = doc.object_info(id, &Limits::default()).expect("info");
+    assert_eq!(info.kind, "Curve");
+    match info.dimensions {
+        Measurement::Size(size) => {
+            assert!((size[0] - 10.0).abs() <= 1.0e-6);
+            assert!((size[1] - 5.0).abs() <= 1.0e-6);
+        }
+        Measurement::Unavailable(_) => panic!("curve bounds unavailable"),
+    }
+    assert!(info.detail.contains("length"));
+}
