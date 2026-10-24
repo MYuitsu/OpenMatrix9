@@ -56,6 +56,7 @@ Development Box clarification (2026-10-12): default two opposite base corners th
 - [Detailed installation](#installation)
 - [Progress](#progress)
 - [Release notes](#release-notes)
+- [Contributors](#contributors)
 - [License](#license)
 
 <a id="donate"></a>
@@ -223,6 +224,11 @@ rather than full features. Identifiers can repeat across groups. Consult the Rel
 - [Release 0.3.5-202610121520](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.5-202610121520): changes, downloads and release-specific limitations.
 - [Development checkpoints](docs/releases/2026-10-12-development.md): command tables, history and evidence moved from the README; includes Vietnamese notes.
 - [Ledger](docs/openmatrix9-progress.json) · [Native reports](docs/validation/) · [Milestone foundation](<OM9_Milestones/M01 - CAD Shell, Viewport/L1.json>).
+
+<a id="contributors"></a>
+## Contributors
+
+- [Jayhuynh](https://linktr.ee/Jayhuynh)
 
 <a id="license"></a>
 ## License
