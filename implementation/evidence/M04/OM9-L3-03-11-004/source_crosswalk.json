@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-11-004",
+  "title": "Builder Live Preview Lifecycle",
+  "owner": "om9-app builder preview (no document writes before Apply)",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [
+        "refresh",
+        "builder_adjust_field",
+        "builder_cancel"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [
+        "BuilderSession::refresh",
+        "BuilderSession::preview"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/tests/builder_controls.rs",
+      "symbols": [
+        "escape_after_preview_edits_leaves_the_document_bytewise_unchanged"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/tests/builder_panel.rs",
+      "symbols": [
+        "cancel_and_reset_leave_the_document_untouched"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3 skill/plan record is planning input; runtime behavior is established by the receipts."
+  ]
+}

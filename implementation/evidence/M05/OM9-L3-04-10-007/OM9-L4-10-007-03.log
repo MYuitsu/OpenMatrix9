@@ -1,0 +1,13 @@
+$ cargo test -p om9-app --test gem_placement -j 2 the_surface_tool_stands_the_gem_on_the_surface_normal
+# exit code: 0
+# captured: 2026-10-27T13:45:05Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test the_surface_tool_stands_the_gem_on_the_surface_normal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests\gem_placement.rs (cargo-target\debug\deps\gem_placement-6deb83edeedfcaef.exe)

@@ -21,6 +21,12 @@ use om9_scene::{
 };
 mod chrome;
 mod command;
+mod gem;
+mod gem_cluster;
+mod channel_cutters;
+mod gem_cutters;
+mod gem_edits;
+mod gem_pave;
 mod icon_resize_audit;
 #[cfg(test)]
 mod icon_size_audit;
@@ -233,6 +239,7 @@ pub struct MatrixApp {
     screen_icon_scale: f32,
     /// Toolbar icon edge after the responsive scale is applied.
     toolbar_icon_edge: f32,
+    toolbar_drawing: bool,
     current_ui_context: Option<egui::Context>,
     hover: Option<Point3>,
     /// The object-snap candidate under the cursor, and its transient SmartTrack anchors.
@@ -250,6 +257,11 @@ pub struct MatrixApp {
     ambiguous: Vec<om9_core::identity::ObjectId>,
     ambiguous_pos: Option<egui::Pos2>,
     ambiguous_epoch: u64,
+    ambiguous_difference_context: Option<(u64, bool)>,
+    ambiguous_pipe_context: Option<u64>,
+    ambiguous_extract_context: Option<(u64, ViewId, bool, Vec<om9_scene::scene::PickHit>)>,
+    ambiguous_sphere_context: Option<(u64, ViewId, Vec<om9_scene::scene::PickHit>)>,
+    ambiguous_slab_context: Option<(u64, ViewId, Vec<om9_scene::scene::PickHit>)>,
     /// The subobject picked with Ctrl+Shift+click, and which kind that gesture looks for.
     sub_object: Option<crate::session::SelectedSubobject>,
     sub_object_kind: om9_scene::scene::PickKind,
@@ -259,6 +271,8 @@ pub struct MatrixApp {
     hover_picked_at: Option<(egui::Pos2, u64, u64)>,
     pub audit: Option<UiAudit>,
     passes: u64,
+    /// Smoothed frames per second, shown in the status line.
+    fps: f32,
     adapter: String,
     pub f6_open: bool,
     pub f6_pinned: bool,
@@ -346,6 +360,16 @@ pub struct MatrixApp {
     gumball_basis: Option<GumballBasis>,
     /// Most recent Top 11 grip drag: the handle, its drag plane and the live point.
     grip_drag: Option<GripDrag>,
+    /// The builder field a viewport handle drag is moving (`OM9-L3-03-11-005`).
+    builder_handle_drag: Option<&'static str>,
+    /// The profile library window of the active builder (`OM9-L3-03-11-007`).
+    builder_profile_window: bool,
+    /// The Matrix History report window (`OM9-L3-03-13-003`).
+    history_window: bool,
+    /// The builder style browser window (`OM9-L3-03-12-002`).
+    builder_style_window: bool,
+    /// The name typed into the style browser's save field (`OM9-L3-03-12-004`).
+    builder_style_name: String,
     grip_cache: std::cell::RefCell<Option<GripCache>>,
     gpu_drawn_views: std::collections::BTreeSet<ViewId>,
     pub status: StatusSurface,
@@ -608,6 +632,11 @@ impl MatrixApp {
             gumball_last: None,
             gumball_basis: None,
             grip_drag: None,
+            builder_handle_drag: None,
+            builder_profile_window: false,
+            history_window: false,
+            builder_style_window: false,
+            builder_style_name: String::new(),
             grip_cache: std::cell::RefCell::new(None),
             gpu_drawn_views: std::collections::BTreeSet::new(),
             transcript: Transcript::new(),
@@ -643,6 +672,7 @@ impl MatrixApp {
             world_datum_visible: true,
             screen_icon_scale: 1.,
             toolbar_icon_edge: 22.,
+            toolbar_drawing: false,
             current_ui_context: None,
             hover: None,
             snap: None,
@@ -655,6 +685,11 @@ impl MatrixApp {
             ambiguous: Vec::new(),
             ambiguous_pos: None,
             ambiguous_epoch: 0,
+            ambiguous_difference_context: None,
+            ambiguous_pipe_context: None,
+            ambiguous_extract_context: None,
+            ambiguous_sphere_context: None,
+            ambiguous_slab_context: None,
             sub_object: None,
             sub_object_kind: om9_scene::scene::PickKind::Face,
             hover_object: None,
@@ -662,11 +697,18 @@ impl MatrixApp {
             hover_picked_at: None,
             audit: None,
             passes: 0,
+            fps: 0.0,
             adapter: "headless-egui".into(),
             f6_open: false,
             f6_pinned: false,
             f6_custom: crate::f6::CustomMenu::default(),
-            f6_providers: crate::f6::Providers::default(),
+            f6_providers: crate::f6::Providers {
+                // M04 owns the ring builder backend (OM9-L2-03-11 / OM9-L2-04-02).
+                m04_builder: true,
+                // M05 gem assets, loader, builders, positioner and Gem Properties.
+                m05_gem: true,
+                ..Default::default()
+            },
             sidebar_rect: None,
             toolbar_rect: None,
             icons: crate::icons::Icons::new(),
@@ -929,9 +971,15 @@ impl MatrixApp {
         self.stage_project_state()
     }
     fn feedback(&mut self, result: Result<()>) {
+        // A Measure read-out is the command's answer, so it is shown in the
+        // Command Line instead of the generic "Ready" (OM9-L3-03-20-005).
+        let measurement = self.controller.take_measurement_label();
         match result {
             Ok(()) => {
-                if self.controller.is_running() {
+                if let Some(label) = measurement {
+                    self.transcript.append_history(&label);
+                    self.status.info(&label);
+                } else if self.controller.is_running() {
                     let prompt = self.controller.prompt();
                     self.status
                         .info(&format!("{prompt} — type a value and press Enter"));
@@ -945,7 +993,16 @@ impl MatrixApp {
                 self.status.error(&message);
             }
         }
-        self.transcript.set_prompt(self.controller.prompt());
+        // Matrix History switches and the report speak through the same status line.
+        if let Some(notice) = self.controller.take_history_notice() {
+            self.transcript.append_history(&notice);
+            self.status.info(&notice);
+        }
+        if self.controller.take_history_window_request() {
+            self.history_window = true;
+        }
+        self.transcript
+            .set_prompt(&self.controller.prompt_with_options());
         self.focus_cmd = true;
     }
     /// Attach the application-scoped layout store. The real app uses
@@ -1244,10 +1301,6 @@ impl MatrixApp {
     }
 
     fn invoke(&mut self, id: &str, origin: InvocationOrigin) {
-        if let Some(result) = self.apply_view_command(id) {
-            self.feedback(result);
-            return;
-        }
         if crate::file_lifecycle::FileKind::from_feature(id).is_some_and(|kind| {
             matches!(
                 kind,
@@ -1258,7 +1311,21 @@ impl MatrixApp {
             self.feedback(Err(error));
             return;
         }
+        if let Some(result) = self.apply_view_command(id) {
+            self.feedback(result);
+            return;
+        }
+        // F6 "Builder": hand the selection to the M04 builder through the typed prefill.
+        if id == "BuilderPrefill" {
+            let result = self.builder_from_prefill();
+            self.feedback(result);
+            return;
+        }
+
         let result = self.controller.dispatch_effect(id, origin);
+        if result.is_ok() {
+            self.append_running_prompt();
+        }
         if result.is_ok() && !self.f6_pinned {
             self.f6_open = false;
         }
@@ -1270,16 +1337,66 @@ impl MatrixApp {
             other => self.feedback(other.map(|_| ())),
         }
     }
+    /// F6 "Builder" action: emit the typed prefill and open the mode the selection fits.
+    fn builder_from_prefill(&mut self) -> Result<()> {
+        use std::collections::BTreeSet;
+        let selection: BTreeSet<_> = self.controller.selected().iter().copied().collect();
+        let prefill = crate::f6::builder_prefill(
+            &selection,
+            [0.0; 3],
+            self.controller.document().context_revision,
+            self.f6_providers,
+        )?;
+        let kind = match prefill.selection.len() {
+            0 => om9_core::builder::BuilderKind::RingRail,
+            1 => om9_core::builder::BuilderKind::RailProfile,
+            _ => om9_core::builder::BuilderKind::RailSweep,
+        };
+        self.controller.begin_builder(kind)
+    }
+
+    fn append_running_prompt(&mut self) {
+        if self.controller.is_running() {
+            let prompt = self.controller.prompt();
+            self.transcript.append_history(&prompt);
+        }
+    }
+    fn submit_command_option(&mut self, option: crate::command_options::CommandOptionId) -> bool {
+        use crate::command_options::{CommandOptionEffect, CommandOptionInterface};
+        let prompt = self.controller.prompt().to_owned();
+        let result = self.controller.activate_command_option(option);
+        match result {
+            Ok(CommandOptionEffect::Draft(prefix)) => {
+                self.transcript.set_draft(&prefix);
+                self.focus_cmd = true;
+                false // Keep the newly staged draft after typed-name activation.
+            }
+            result => {
+                self.transcript
+                    .append_history(&format!("{prompt}{}", option.name()));
+                let result = result.map(|_| ());
+                let success = result.is_ok();
+                if success {
+                    self.append_running_prompt();
+                }
+                self.feedback(result);
+                self.focus_cmd = true;
+                success
+            }
+        }
+    }
     fn submit_draft(&mut self) {
+        use crate::command_options::CommandOptionInterface;
         let draft = self.transcript.draft().to_owned();
-        // The underlined letter of the Length option starts its typed assignment, exactly as p22 describes.
-        if self.controller.is_running() && draft.eq_ignore_ascii_case("l") {
-            self.transcript.set_draft("Length=");
-            self.focus_cmd = true;
+        if let Some(option) = self.controller.resolve_command_option(&draft) {
+            if self.submit_command_option(option) {
+                self.transcript.set_draft("");
+            }
             return;
         }
         let prompt = self.controller.prompt();
         self.transcript.append_history(&format!("{prompt}{draft}"));
+
         if crate::file_lifecycle::FileKind::from_command(&draft).is_some_and(|kind| {
             matches!(
                 kind,
@@ -1303,6 +1420,9 @@ impl MatrixApp {
         }
         let result = self.controller.submit_effect(&draft);
         if result.is_ok() {
+            self.append_running_prompt();
+        }
+        if result.is_ok() {
             self.transcript.record_command(&draft);
             // Echo the canonical feature id next to the typed alias (OM9-L3-03-10-001): the reader sees what
             // the command actually became, not only the words they typed.
@@ -1324,7 +1444,8 @@ impl MatrixApp {
                 let message = format!("unknown command: {name}");
                 self.transcript.append_history(&message);
                 self.status.error(&message);
-                self.transcript.set_prompt(self.controller.prompt());
+                self.transcript
+                    .set_prompt(&self.controller.prompt_with_options());
                 self.focus_cmd = true;
             }
             other => self.feedback(other.map(|_| ())),
@@ -1499,11 +1620,70 @@ impl MatrixApp {
         };
         let result = if self.ambiguous_epoch != self.controller.coordinator().epoch() {
             Err(Error::Stale("selection candidates"))
+        } else if let Some((run, view_id, hits)) = &self.ambiguous_slab_context {
+            if self.controller.solid_slab_pick_context() == Some(*run) {
+                hits.get(index).cloned().ok_or(Error::Invalid("Slab selection candidate")).and_then(|hit| {
+                    let rect = self.view_rects.get(view_id).ok_or(Error::Stale("pick viewport"))?;
+                    let viewport = om9_scene::camera::Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+                    let view = self.controller.workspace.views.get(view_id).ok_or(Error::Stale("pick view"))?;
+                    hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport)?;
+                    self.controller.solid_slab_pick_curve(hit.root)
+                })
+            } else { Err(Error::Stale("Slab selection candidates")) }
+        } else if let Some((run, view_id, hits)) = &self.ambiguous_sphere_context {
+            if self.controller.solid_sphere_edge_pick_context() == Some(*run) {
+                hits.get(index).cloned().ok_or(Error::Invalid("edge selection candidate"))
+                    .and_then(|hit| {
+                        let rect = self.view_rects.get(view_id).ok_or(Error::Stale("pick viewport"))?;
+                        let viewport = om9_scene::camera::Viewport {
+                            origin: [rect.min.x as f64, rect.min.y as f64],
+                            size: [rect.width() as f64, rect.height() as f64],
+                        };
+                        let view = self.controller.workspace.views.get(view_id).ok_or(Error::Stale("pick view"))?;
+                        hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport)?;
+                        self.controller.solid_sphere_pick_brep_edge(crate::session::SelectedSubobject::from_hit(&hit), hit.world_point)
+                    })
+            } else { Err(Error::Stale("Sphere selection candidates")) }
+        } else if let Some((run, view_id, remove, hits)) = &self.ambiguous_extract_context {
+            if self.controller.solid_extract_pick_context() == Some(*run) {
+                hits.get(index).cloned().ok_or(Error::Invalid("face selection candidate"))
+                    .and_then(|hit| {
+                        let rect = self.view_rects.get(view_id).ok_or(Error::Stale("pick viewport"))?;
+                        let viewport = om9_scene::camera::Viewport {
+                            origin: [rect.min.x as f64, rect.min.y as f64],
+                            size: [rect.width() as f64, rect.height() as f64],
+                        };
+                        let view = self.controller.workspace.views.get(view_id).ok_or(Error::Stale("pick view"))?;
+                        hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport)?;
+                        let reference = crate::session::SelectedSubobject::from_hit(&hit);
+                        if *remove { self.controller.solid_extract_remove_face(reference) }
+                        else { self.controller.solid_extract_pick_face(reference) }
+                    })
+            } else {
+                Err(Error::Stale("Extract Surface selection candidates"))
+            }
+        } else if let Some(run) = self.ambiguous_pipe_context {
+            if self.controller.solid_pipe_pick_context() == Some(run) {
+                self.controller.solid_pipe_pick_curve(id)
+            } else {
+                Err(Error::Stale("Pipe selection candidates"))
+            }
+        } else if let Some(context) = self.ambiguous_difference_context {
+            if self.controller.solid_boolean_pick_context() == Some(context) {
+                self.controller.solid_boolean_pick(id, false)
+            } else {
+                Err(Error::Stale("Boolean selection candidates"))
+            }
         } else {
             self.controller.select_objects(&[id])
         };
         self.ambiguous.clear();
         self.ambiguous_pos = None;
+        self.ambiguous_difference_context = None;
+        self.ambiguous_pipe_context = None;
+        self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
         result
     }
 
@@ -1524,6 +1704,29 @@ impl MatrixApp {
         (format!("{name} [{kind}]"), colour)
     }
 
+    fn ambiguous_face_row(&self, index: usize, id: &om9_core::identity::ObjectId) -> (String, Option<[u8; 4]>) {
+        let (label, colour) = self.ambiguous_row(id);
+        if let Some((_, _, hits)) = &self.ambiguous_sphere_context {
+            let edge = hits.get(index).and_then(|hit| {
+                let om9_scene::scene::Subelement::BrepEdge(key) = hit.subset else { return None };
+                self.controller.document().entities.get(id).and_then(|entity| match &entity.geometry {
+                    om9_core::geometry::Geometry::Brep(brep) => brep.display.edges.iter().position(|item| *item == key),
+                    _ => None,
+                })
+            });
+            return (format!("{label} · Edge{} · {}", edge.map_or("?".to_owned(), |i| (i+1).to_string()), &id.0.to_string()[..8]), colour);
+        }
+        let Some((_, _, _, hits)) = &self.ambiguous_extract_context else { return (label, colour) };
+        let face = hits.get(index).and_then(|hit| {
+            let om9_scene::scene::Subelement::BrepFace(face) = hit.subset else { return None };
+            self.controller.document().entities.get(id).and_then(|entity| match &entity.geometry {
+                om9_core::geometry::Geometry::Brep(brep) => brep.display.faces.iter().position(|item| *item == face),
+                _ => None,
+            })
+        });
+        (format!("{label} · face {} · {}", face.map_or("?".to_owned(), |i| i.to_string()), &id.0.to_string()[..8]), colour)
+    }
+
     /// The candidate labels, for tests and status reports.
     pub fn ambiguous_swatches(&self) -> Vec<Option<[u8; 4]>> {
         self.ambiguous
@@ -1536,7 +1739,8 @@ impl MatrixApp {
     pub fn ambiguous_labels(&self) -> Vec<String> {
         self.ambiguous
             .iter()
-            .map(|id| self.ambiguous_row(id).0)
+            .enumerate()
+            .map(|(index, id)| self.ambiguous_face_row(index, id).0)
             .collect()
     }
 
@@ -1549,7 +1753,7 @@ impl MatrixApp {
             .iter()
             .enumerate()
             .map(|(index, id)| {
-                let (label, colour) = self.ambiguous_row(id);
+                let (label, colour) = self.ambiguous_face_row(index, id);
                 (index, label, colour)
             })
             .collect();
@@ -1559,7 +1763,7 @@ impl MatrixApp {
             .order(egui::Order::Foreground)
             .show(ui.ctx(), |ui| {
                 egui::Frame::popup(ui.style()).show(ui, |ui| {
-                    ui.label("Select object");
+            ui.label(if self.ambiguous_sphere_context.is_some() { "Select edge" } else if self.ambiguous_extract_context.is_some() { "Select face" } else { "Select object" });
                     for (index, label, colour) in &rows {
                         let row = ui.horizontal(|ui| {
                             if let Some(colour) = colour {
@@ -1588,7 +1792,9 @@ impl MatrixApp {
                 });
             });
         if let Some(index) = chosen {
+            let is_pipe = self.ambiguous_pipe_context.is_some() || self.ambiguous_sphere_context.is_some() || self.ambiguous_slab_context.is_some();
             let result = self.choose_ambiguous(index);
+            if is_pipe && result.is_ok() { self.append_running_prompt(); }
             self.feedback(result);
         } else if ui.input(|i| {
             i.pointer.any_pressed()
@@ -1598,6 +1804,10 @@ impl MatrixApp {
         }) {
             self.ambiguous.clear();
             self.ambiguous_pos = None;
+            self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
+            self.ambiguous_pipe_context = None;
         }
     }
 
@@ -2001,7 +2211,62 @@ impl MatrixApp {
         }
     }
 
+    /// Live navigation facts for the headless replay receipt: whether a gesture owns the pointer,
+    /// how many camera poses are waiting to publish, and which gesture the last frame recorded.
+    pub fn navigation_probe(&self) -> serde_json::Value {
+        serde_json::json!({
+            "gesture": self.navigation.gesture.is_some(),
+            "pending_cameras": self.nav_cameras.len(),
+            "actions": self.nav_actions.values().copied().collect::<Vec<_>>(),
+            "render_due": self.nav_render_due,
+        })
+    }
+
+    /// Delete is a global viewport key: handle it before widgets can consume it, so a focused
+    /// command transcript or an open options popup cannot swallow it. A text draft keeps the key.
+    fn delete_selection_from_input(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
+        if self.controller.is_running()
+            || self.controller.selected().is_empty()
+            || !self.transcript.draft().is_empty()
+            || self.controller.layer_dialog().is_some()
+            || self.controller.file_operation().is_some()
+            || self.audit.is_some()
+        {
+            return;
+        }
+        // A real text field keeps Delete for editing; every other focus owner still deletes.
+        if ctx.egui_wants_keyboard_input()
+            && ctx.memory(|memory| memory.focused())
+                != Some(egui::Id::new("matrix-command-transcript"))
+        {
+            return;
+        }
+        let pressed = raw.events.iter().any(|event| {
+            matches!(event, egui::Event::Key { key: Key::Delete, pressed: true, modifiers, .. }
+                if !modifiers.any())
+        });
+        if !pressed {
+            return;
+        }
+        raw.events.retain(|event| {
+            !matches!(event, egui::Event::Key { key: Key::Delete, .. })
+        });
+        let ids: Vec<_> = self.controller.selected().iter().copied().collect();
+        let result = self.controller.delete_objects(&ids).map(|_| ());
+        self.feedback(result);
+    }
+
     pub fn show(&mut self, ui: &mut egui::Ui) {
+        // Smoothed frame rate for the status line; a bad first dt never shows "inf fps".
+        let dt = ui.input(|input| input.stable_dt);
+        if dt.is_finite() && dt > 0.0 {
+            let instant = 1.0 / dt;
+            self.fps = if self.fps > 0.0 {
+                self.fps * 0.9 + instant * 0.1
+            } else {
+                instant
+            };
+        }
         // The headless adapter has no raw_input_hook; preserve its events before CMD consumes Escape.
         if self.nav_frame_token != Some(ui.ctx().cumulative_frame_nr())
             && self.nav_raw_events.is_none()
@@ -2043,6 +2308,17 @@ impl MatrixApp {
                 (Key::E, om9_scene::osnap::SnapKind::End),
                 (Key::M, om9_scene::osnap::SnapKind::Mid),
             ] {
+                // Declared accelerators own their keys. Editors retain normal text.
+                use crate::command_options::CommandOptionInterface;
+                if ui.ctx().egui_wants_keyboard_input()
+                    || self.controller.command_options().iter().any(|option| {
+                        option.shortcut.is_some_and(|shortcut| {
+                            key.name().eq_ignore_ascii_case(&shortcut.to_string())
+                        })
+                    })
+                {
+                    continue;
+                }
                 if ui.input_mut(|input| input.consume_key(Modifiers::NONE, key)) {
                     self.set_snap_override(Some(kind));
                     self.status.info(&format!("{} one-shot", kind.label()));
@@ -2083,9 +2359,15 @@ impl MatrixApp {
             self.smarttrack.clear();
             if self.ambiguous_pos.take().is_some() {
                 self.ambiguous.clear();
-                ui.input_mut(|input| {
-                    input.consume_key(Modifiers::NONE, Key::Escape);
-                });
+                self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
+                self.ambiguous_pipe_context = None;
+                if !self.controller.is_running() {
+                    ui.input_mut(|input| {
+                        input.consume_key(Modifiers::NONE, Key::Escape);
+                    });
+                }
             } else {
                 let dragging = self.gumball_session.is_some() || self.band_start.is_some();
                 // Esc drops the gesture: nothing is committed, the selection stays as it was.
@@ -2100,14 +2382,9 @@ impl MatrixApp {
                 self.band_view = None;
                 // Escape ends a Top 11 prompt or grip display without touching the
                 // selection, matching the manual's Esc rule for those commands.
-                if self.controller.top11_pending().is_some()
-                    || self.controller.top11_grip_mode().is_some()
-                    || self.grip_drag.is_some()
-                {
+                if self.controller.top11_grip_mode().is_some() || self.grip_drag.is_some() {
                     self.grip_drag = None;
-                    self.controller.cancel();
-                    self.status.info("Top 11 cancelled");
-                } else if !dragging {
+                } else if !dragging && !self.controller.is_running() {
                     // No gesture in flight: Esc cancels the selection itself, which is the manual's rule.
                     self.controller.clear_selection();
                 }
@@ -2263,7 +2540,8 @@ impl MatrixApp {
                 self.controller.cancel();
                 self.hover = None;
                 self.transcript.set_draft("");
-                self.transcript.set_prompt(self.controller.prompt());
+                self.transcript
+                    .set_prompt(&self.controller.prompt_with_options());
                 self.focus_cmd = true;
             }
         }
@@ -2700,7 +2978,26 @@ impl MatrixApp {
                     cursor = Some(pos);
                     shift = modifiers.shift;
                     if !pressed && self.navigation.gesture.is_some_and(|g| g.button == button) {
+                        let finish_curve = !blocked
+                            && button == egui::PointerButton::Secondary
+                            && !modifiers.any()
+                            && self.navigation.gesture.is_some_and(|g| {
+                                !g.moved
+                                    && g.start.distance(pos) <= 4.0
+                                    && g.curve_command_run
+                                        == Some(self.controller.active_command_input_snapshot().run)
+                                    && panes
+                                        .iter()
+                                        .any(|(id, rect, _)| *id == g.view && rect.contains(pos))
+                            })
+                            && self
+                                .controller
+                                .running_feature()
+                                .is_some_and(|id| id.starts_with("OM9-CURVE-"));
                         self.navigation.end_drag();
+                        if finish_curve {
+                            self.submit_draft();
+                        }
                     }
                     if pressed
                         && !blocked
@@ -2729,11 +3026,22 @@ impl MatrixApp {
                         self.navigation.begin_drag(*id, button, pos, &v.camera, now);
                         if let Some(gesture) = self.navigation.gesture.as_mut() {
                             gesture.pan = shift;
+                            if self
+                                .controller
+                                .running_feature()
+                                .is_some_and(|id| id.starts_with("OM9-CURVE-"))
+                            {
+                                gesture.curve_command_run =
+                                    Some(self.controller.active_command_input_snapshot().run);
+                            }
                         }
                     }
                 }
                 egui::Event::PointerMoved(pos) => {
                     cursor = Some(pos);
+                    if let Some(g) = self.navigation.gesture.as_mut() {
+                        g.moved |= g.start.distance(pos) > 4.0;
+                    }
                     if let Some(g) = self.navigation.gesture {
                         if let Some((_, rect, _)) = panes.iter().find(|p| p.0 == g.view) {
                             let vp = Viewport {
@@ -2976,6 +3284,7 @@ impl MatrixApp {
                 self.controller.selected(),
                 self.controller.selection_state().revision,
                 self.controller.preview_revision(),
+                self.controller.solid_boolean_two_hidden_sources(),
                 close,
             );
             if port.final_complete() {
@@ -3024,19 +3333,183 @@ impl MatrixApp {
             );
         }
         self.paint_picture_frames(&painter, &view, viewport, rect);
-        self.selection_frame(ui, id, &view, viewport, rect);
-        self.object_info_label(ui, &view, viewport, rect);
-        self.subselection_overlay(ui, &view, viewport, rect);
-        self.top11_grip_overlay(ui, &view, viewport, rect);
-        self.top11_grip_drag_ui(ui, &response, &view, viewport);
-        self.gumball_ui(ui, &response, &view, viewport, rect);
+        if self.controller.solid_boolean_two_hidden_sources().is_none() {
+            self.selection_frame(ui, id, &view, viewport, rect);
+            self.object_info_label(ui, &view, viewport, rect);
+            self.subselection_overlay(ui, &view, viewport, rect);
+            self.top11_grip_overlay(ui, &view, viewport, rect);
+            self.top11_grip_drag_ui(ui, &response, &view, viewport);
+            self.gumball_ui(ui, &response, &view, viewport, rect);
+        }
+        self.builder_handles_ui(ui, &response, &view, viewport, rect);
         self.selection_band(ui, &response, &view, viewport, rect);
-        if id == self.controller.workspace.active && !self.navigation.moving(id) {
+        if self.controller.solid_boolean_two_hidden_sources().is_none()
+            && id == self.controller.workspace.active && !self.navigation.moving(id) {
             self.hover_frame(ui, &response, &view, viewport, rect);
             self.ambiguous_popup(ui);
         }
-        self.paint_osnap(&painter, id, &view, viewport);
+        if self.controller.solid_boolean_two_hidden_sources().is_none() {
+            self.paint_osnap(&painter, id, &view, viewport);
+        }
+        if let Some((body, _mode)) = self.controller.solid_boolean_two_preview() {
+            for &[a, b, _] in &body.display.segments {
+                if let (Some(&a), Some(&b)) = (body.display.points.get(a as usize), body.display.points.get(b as usize)) {
+                    paint_line(&painter, &view.camera, viewport, a, b, [0, 200, 130, 255], 1.5);
+                }
+            }
+        }
+        if let Some((body, placement)) = self.controller.solid_fillet_preview() {
+            for &[a, b, _] in &body.display.segments {
+                if let (Some(&a), Some(&b)) = (body.display.points.get(a as usize), body.display.points.get(b as usize))
+                    && let (Ok(a), Ok(b)) = (placement.point(a), placement.point(b)) {
+                    paint_line(&painter, &view.camera, viewport, a, b, [0, 200, 130, 255], 1.5);
+                }
+            }
+            for (_, world, radius, active) in self.controller.solid_fillet_handles() {
+                if let Ok(Some(point)) = view.camera.project(world, viewport) {
+                    let center = egui::Pos2::new(point.screen[0] as f32, point.screen[1] as f32);
+                    if rect.contains(center) {
+                        painter.circle_filled(center, 5.0, if active { Color32::YELLOW } else { Color32::LIGHT_GREEN });
+                        if self.controller.solid_fillet_show_radius() {
+                            painter.text(center + Vec2::new(7.0, -7.0), egui::Align2::LEFT_BOTTOM,
+                                format!("{radius}"), egui::FontId::proportional(11.0), Color32::LIGHT_GREEN);
+                        }
+                    }
+                }
+            }
+        }
+        self.gem_preview_ui(ui, &view, viewport, rect);
+        self.gem_cluster_preview_ui(ui, &view, viewport, rect);
+        self.gem_pave_preview_ui(ui, &view, viewport, rect);
+        self.gem_cutters_preview_ui(ui, &view, viewport, rect);
+        self.row_cutters_preview_ui(ui, &view, viewport, rect);
+        self.gem_map_overlay_ui(ui, &view, viewport, rect);
+        // Annotation text is derived from the typed record, never parsed from line geometry.
+        for entity in self.controller.document().entities.values() {
+            if !entity.extensions.contains_key(om9_core::annotation::SLOT) {
+                continue;
+            }
+            if !self
+                .controller
+                .document()
+                .permissions(entity.id, false)
+                .is_ok_and(|p| p.visible)
+            {
+                continue;
+            }
+            if let Ok(record) = om9_core::annotation::Annotation::read(entity)
+                .and_then(|r| r.placed(entity.placement))
+                && let Ok(layout) = record.layout(self.controller.coordinator().limits())
+                && let Ok(Some(p)) = view.camera.project(record.text_point, viewport)
+            {
+                let top = std::array::from_fn(|i| {
+                    record.text_point[i] + record.y[i] * record.style.height_mm
+                });
+                let height = view
+                    .camera
+                    .project(top, viewport)
+                    .ok()
+                    .flatten()
+                    .map(|q| {
+                        ((q.screen[0] - p.screen[0]).powi(2) + (q.screen[1] - p.screen[1]).powi(2))
+                            .sqrt() as f32
+                    })
+                    .unwrap_or(13.)
+                    .clamp(7., 96.);
+                painter.text(
+                    egui::pos2(p.screen[0] as f32, p.screen[1] as f32),
+                    egui::Align2::CENTER_CENTER,
+                    layout.text,
+                    egui::FontId::proportional(height),
+                    Color32::from_rgb(225, 235, 240),
+                );
+            }
+        }
         if let Some(point) = self.hover {
+            if let Ok(Some((record, layout))) = self.controller.annotation_preview(point) {
+                for [a, b] in layout.lines {
+                    paint_line(
+                        &painter,
+                        &view.camera,
+                        viewport,
+                        a,
+                        b,
+                        [0, 140, 100, 255],
+                        1.5,
+                    );
+                }
+                if let Ok(Some(p)) = view.camera.project(record.text_point, viewport) {
+                    let top = std::array::from_fn(|i| {
+                        record.text_point[i] + record.y[i] * record.style.height_mm
+                    });
+                    let height = view
+                        .camera
+                        .project(top, viewport)
+                        .ok()
+                        .flatten()
+                        .map(|q| {
+                            ((q.screen[0] - p.screen[0]).powi(2)
+                                + (q.screen[1] - p.screen[1]).powi(2))
+                            .sqrt() as f32
+                        })
+                        .unwrap_or(13.)
+                        .clamp(7., 96.);
+                    painter.text(
+                        egui::pos2(p.screen[0] as f32, p.screen[1] as f32),
+                        egui::Align2::CENTER_CENTER,
+                        layout.text,
+                        egui::FontId::proportional(height),
+                        Color32::from_rgb(130, 240, 175),
+                    );
+                }
+            }
+            if let Ok(Some((label, wire))) = self.controller.measure_preview(point) {
+                for [a, b] in wire {
+                    paint_line(
+                        &painter,
+                        &view.camera,
+                        viewport,
+                        a,
+                        b,
+                        [0, 140, 100, 255],
+                        1.5,
+                    );
+                }
+                if let Ok(Some(p)) = view.camera.project(point, viewport) {
+                    painter.text(
+                        egui::pos2(p.screen[0] as f32 + 12., p.screen[1] as f32 - 15.),
+                        egui::Align2::LEFT_BOTTOM,
+                        &label,
+                        egui::FontId::proportional(13.),
+                        Color32::from_rgb(130, 240, 175),
+                    );
+                }
+            }
+            if let Ok(wire) = self
+                .controller
+                .transform_preview(point, self.transcript.draft())
+            {
+                for [a, b] in wire {
+                    if a == b
+                        && let Ok(Some(p)) = view.camera.project(a, viewport)
+                    {
+                        painter.circle_filled(
+                            egui::pos2(p.screen[0] as f32, p.screen[1] as f32),
+                            3.,
+                            Color32::from_rgb(0, 200, 130),
+                        );
+                    }
+                    paint_line(
+                        &painter,
+                        &view.camera,
+                        viewport,
+                        a,
+                        b,
+                        [0, 200, 130, 255],
+                        1.5,
+                    );
+                }
+            }
             if let Ok(Some((a, b))) = self.controller.preview(point) {
                 paint_line(
                     &painter,
@@ -3231,14 +3704,17 @@ impl MatrixApp {
             && response.hovered()
             && let Some(pos) = response.hover_pos()
         {
+            if self.controller.solid_cube_needs_corner() { self.hover = None; self.snap = None; }
             let world = view
                 .camera
                 .ray([pos.x as f64, pos.y as f64], viewport)
                 .and_then(|ray| {
                     if let Some(point) = self.controller.box_height_ray_point(&ray) {
                         Ok(Some(point))
+                    } else if self.controller.solid_cube_needs_corner() {
+                        ray.intersect_plane(view.cplane)
                     } else {
-                        ray.intersect_plane(self.controller.input_plane())
+                        ray.intersect_plane(self.controller.slab_offset_input_plane().or_else(|| self.controller.solid_cone_input_plane()).unwrap_or_else(||self.controller.input_plane()))
                     }
                 });
             if let Ok(Some(world)) = world {
@@ -3277,7 +3753,298 @@ impl MatrixApp {
             if response.clicked() {
                 self.controller.workspace.active = id;
                 if self.controller.is_running() {
-                    if self.controller.top11_needs_object() {
+                    if self.controller.solid_boolean_two_preview_mode().is_some() {
+                        let result = self.controller.submit("Next");
+                        if result.is_ok() {
+                            self.append_running_prompt();
+                        }
+                        self.feedback(result);
+                    } else if self.controller.solid_fillet_adding_handle() {
+                        let mut handle_hits: Vec<_> = if self.controller.solid_fillet_copying_to_target() {
+                            self.controller.solid_fillet_handles().into_iter().filter_map(|(index, world, _, _)| {
+                                let projected = view.camera.project(world, viewport).ok().flatten()?;
+                                let distance = pos.distance(egui::Pos2::new(projected.screen[0] as f32, projected.screen[1] as f32));
+                                (distance <= 8.0).then_some((index, distance))
+                            }).collect()
+                        } else { Vec::new() };
+                        handle_hits.sort_by(|a, b| a.1.total_cmp(&b.1));
+                        if !handle_hits.is_empty() {
+                            let result = self.controller.solid_fillet_copy_to_hit(&handle_hits);
+                            if result.is_ok() { self.append_running_prompt(); }
+                            self.feedback(result);
+                            self.focus_cmd = false;
+                            return;
+                        }
+                        let candidates = self.controller.scene().and_then(|scene| {
+                            scene.pick_kind_all([pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                pick_tolerance(ui), PickIntent::Select, om9_scene::scene::PickKind::Edge)
+                                .ok().map(|hits| hits.into_iter().filter(|hit| {
+                                    hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok() &&
+                                    self.controller.subselection().contains(&crate::session::SelectedSubobject::from_hit(hit))
+                                }).collect::<Vec<_>>())
+                        }).unwrap_or_default();
+                        let result = match candidates.as_slice() {
+                            [hit] => self.controller.solid_fillet_add_handle(crate::session::SelectedSubobject::from_hit(hit), hit.world_point),
+                            [] => Err(Error::Missing("selected fillet edge under the pointer")),
+                            _ => Err(Error::Invalid("ambiguous fillet edges")),
+                        };
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result);
+                        self.focus_cmd = false;
+                    } else if self.controller.solid_fillet_preview().is_some() {
+                        let mut hits: Vec<_> = self.controller.solid_fillet_handles().into_iter().filter_map(|(index, world, _, _)| {
+                            let projected = view.camera.project(world, viewport).ok().flatten()?;
+                            let distance = pos.distance(egui::Pos2::new(projected.screen[0] as f32, projected.screen[1] as f32));
+                            (distance <= 8.0).then_some((index, distance))
+                        }).collect();
+                        hits.sort_by(|a, b| a.1.total_cmp(&b.1));
+                        let result = self.controller.solid_fillet_select_hit(&hits);
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result);
+                        self.focus_cmd = true;
+                    } else if self.controller.solid_slab_needs_curve() {
+                        let candidates = self.controller.scene().and_then(|scene| {
+                            scene.pick_all([pos.x as f64, pos.y as f64], &view.camera, viewport, pick_tolerance(ui), PickIntent::Select)
+                                .ok().map(|hits| hits.into_iter().filter(|hit| hit.path.is_empty() &&
+                                    hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok() &&
+                                    matches!(self.controller.document().entities.get(&hit.root).map(|e| &e.geometry), Some(om9_core::geometry::Geometry::Curve(_)))
+                                ).collect::<Vec<_>>())
+                        }).unwrap_or_default();
+                        if candidates.len() > 1 {
+                            self.ambiguous = candidates.iter().map(|hit| hit.root).collect(); self.ambiguous_pos = Some(pos);
+                            self.ambiguous_epoch = self.controller.coordinator().epoch();
+                            self.ambiguous_pipe_context = None; self.ambiguous_difference_context = None;
+                            self.ambiguous_extract_context = None; self.ambiguous_sphere_context = None;
+                            self.ambiguous_slab_context = self.controller.solid_slab_pick_context().map(|run| (run, id, candidates));
+                            self.focus_cmd = true; return;
+                        }
+                        let result = match candidates.as_slice() {
+                            [hit] => self.controller.solid_slab_pick_curve(hit.root),
+                            [] => Err(Error::Missing("curve under the pointer")),
+                            _ => Err(Error::Invalid("ambiguous Slab curves")),
+                        };
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result); self.focus_cmd = false;
+                    } else if self.controller.solid_sphere_brep_edge_stage() == 3 {
+                        let candidates = self.controller.scene().and_then(|scene| {
+                            scene.pick_all([pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                pick_tolerance(ui), PickIntent::Select).ok().map(|hits| hits.into_iter().filter(|hit|
+                                    hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok() &&
+                                    self.controller.solid_sphere_is_source_curve(hit)
+                                ).collect::<Vec<_>>())
+                        }).unwrap_or_default();
+                        let result = match candidates.as_slice() {
+                            [hit] => self.controller.accept_world_point(hit.world_point),
+                            [] => Err(Error::Missing("selected curve under the pointer")),
+                            _ => Err(Error::Invalid("ambiguous selected curve")),
+                        };
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result);
+                        self.focus_cmd = false;
+                    } else if self.controller.solid_sphere_brep_edge_stage() != 0 {
+                        let candidates = self.controller.scene().and_then(|scene| {
+                            scene.pick_kind_all([pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                pick_tolerance(ui), PickIntent::Select, om9_scene::scene::PickKind::Edge)
+                                .ok().map(|hits| hits.into_iter().filter(|hit|
+                                    matches!(hit.subset, om9_scene::scene::Subelement::BrepEdge(_)) &&
+                                    hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok() &&
+                                    (self.controller.solid_sphere_brep_edge_stage() == 1 ||
+                                     self.controller.solid_sphere_is_source_edge(&crate::session::SelectedSubobject::from_hit(hit)))
+                                ).collect::<Vec<_>>())
+                        }).unwrap_or_default();
+                        if candidates.len() > 1 && self.controller.solid_sphere_brep_edge_stage() == 1 {
+                            self.ambiguous = candidates.iter().map(|hit| hit.root).collect();
+                            self.ambiguous_pos = Some(pos);
+                            self.ambiguous_epoch = self.controller.coordinator().epoch();
+                            self.ambiguous_difference_context = None;
+                            self.ambiguous_pipe_context = None;
+                            self.ambiguous_extract_context = None;
+                            self.ambiguous_sphere_context = self.controller.solid_sphere_edge_pick_context().map(|run| (run, id, candidates));
+                            self.focus_cmd = true;
+                            return;
+                        }
+                        let result = match candidates.as_slice() {
+                            [hit] => self.controller.solid_sphere_pick_brep_edge(crate::session::SelectedSubobject::from_hit(hit), hit.world_point),
+                            [] if self.controller.solid_sphere_brep_edge_stage() == 1 => {
+                                let curves = self.controller.scene().and_then(|scene| {
+                                    scene.pick_all([pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                        pick_tolerance(ui), PickIntent::Select).ok().map(|hits| hits.into_iter().filter(|hit|
+                                            hit.path.is_empty() && hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok() &&
+                                            matches!(self.controller.document().entities.get(&hit.root).map(|e| &e.geometry), Some(om9_core::geometry::Geometry::Curve(_)))
+                                        ).map(|hit| hit.root).fold(Vec::new(), |mut ids, id| { if !ids.contains(&id) { ids.push(id); } ids }))
+                                }).unwrap_or_default();
+                                match curves.as_slice() {
+                                    [id] => self.controller.solid_sphere_pick_curve(*id),
+                                    [] => Err(Error::Missing("curve or B-Rep edge under the pointer")),
+                                    _ => Err(Error::Invalid("ambiguous curves: isolate the intended object")),
+                                }
+                            },
+                            [] => Err(Error::Missing("B-Rep edge under the pointer")),
+                            _ => Err(Error::Invalid("ambiguous edges: isolate the intended object")),
+                        };
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result);
+                        self.focus_cmd = false;
+                    } else if self.controller.solid_fillet_needs_edge() {
+                        let candidates = self.controller.scene().and_then(|scene| {
+                            scene.pick_kind_all(
+                                [pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                pick_tolerance(ui), PickIntent::Select, om9_scene::scene::PickKind::Edge,
+                            ).ok().map(|hits| hits.into_iter().filter(|hit| hit.revalidate_in_view(
+                                self.controller.coordinator(), &view.camera, viewport
+                            ).is_ok()).collect::<Vec<_>>())
+                        }).unwrap_or_default();
+                        let result = match candidates.as_slice() {
+                            [hit] => self.controller.solid_fillet_pick_edge(crate::session::SelectedSubobject::from_hit(hit)),
+                            [] => Err(Error::Missing("B-Rep edge under the pointer")),
+                            _ => Err(Error::Invalid("ambiguous edges: isolate the intended object")),
+                        };
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result);
+                        self.focus_cmd = false;
+                    } else if self.controller.solid_face_needs_pick() {
+                        let remove = ui.input(|input| input.modifiers.ctrl);
+                        let candidates = self.controller.scene().and_then(|scene| {
+                            scene.pick_kind_all(
+                                [pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                pick_tolerance(ui), PickIntent::Select, om9_scene::scene::PickKind::Face,
+                            ).ok().map(|hits| hits.into_iter().filter(|hit| hit.revalidate_in_view(
+                                self.controller.coordinator(), &view.camera, viewport
+                            ).is_ok()).collect::<Vec<_>>())
+                        }).unwrap_or_default();
+                        if candidates.len() > 1 {
+                            self.ambiguous = candidates.iter().map(|hit| hit.root).collect();
+                            self.ambiguous_pos = Some(pos);
+                            self.ambiguous_epoch = self.controller.coordinator().epoch();
+                            self.ambiguous_difference_context = None;
+                            self.ambiguous_pipe_context = None;
+                            self.ambiguous_extract_context = self.controller.solid_extract_pick_context().map(|run| (
+                                run, id, remove, candidates
+                            ));
+                            self.focus_cmd = true;
+                            return;
+                        }
+                        self.ambiguous.clear();
+                        self.ambiguous_pos = None;
+                        self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
+                        let result = match candidates.first() {
+                            Some(hit) => {
+                                let reference = crate::session::SelectedSubobject::from_hit(hit);
+                                if remove { self.controller.solid_extract_remove_face(reference) }
+                                else { self.controller.solid_extract_pick_face(reference) }
+                            },
+                            None => Err(Error::Missing("B-Rep face under the pointer")),
+                        };
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result);
+                        self.focus_cmd = false;
+                    } else if self.controller.solid_pipe_needs_curve() {
+                        if self.controller.solid_pipe_chain_selecting() {
+                            let edges = self.controller.scene().and_then(|scene| {
+                                scene.pick_kind_all([pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                    pick_tolerance(ui), PickIntent::Select, om9_scene::scene::PickKind::Edge)
+                                    .ok().map(|hits| hits.into_iter().filter(|hit|
+                                        matches!(hit.subset, om9_scene::scene::Subelement::BrepEdge(_)) &&
+                                        hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok()
+                                    ).collect::<Vec<_>>())
+                            }).unwrap_or_default();
+                            if !edges.is_empty() {
+                                let result = match edges.as_slice() {
+                                    [hit] => self.controller.solid_pipe_pick_edge(crate::session::SelectedSubobject::from_hit(hit)),
+                                    _ => Err(Error::Invalid("ambiguous B-Rep edges")),
+                                };
+                                if result.is_ok() { self.append_running_prompt(); }
+                                self.feedback(result);
+                                self.focus_cmd = false;
+                                return;
+                            }
+                        }
+                        let candidates = self.controller.scene().and_then(|scene| {
+                            scene.pick_all(
+                                [pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                pick_tolerance(ui), PickIntent::Select,
+                            ).ok().map(|hits| hits.into_iter().filter(|hit| {
+                                hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok()
+                                    && matches!(self.controller.document().entities.get(&hit.root).map(|e| &e.geometry), Some(om9_core::geometry::Geometry::Curve(_)))
+                            }).map(|hit| hit.root).fold(Vec::new(), |mut ids, id| {
+                                if !ids.contains(&id) { ids.push(id); }
+                                ids
+                            }))
+                        }).unwrap_or_default();
+                        if candidates.len() > 1 {
+                            self.ambiguous = candidates;
+                            self.ambiguous_pos = Some(pos);
+                            self.ambiguous_epoch = self.controller.coordinator().epoch();
+                            self.ambiguous_pipe_context = self.controller.solid_pipe_pick_context();
+                            self.ambiguous_difference_context = None;
+                            self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
+                            self.focus_cmd = true;
+                            return;
+                        }
+                        self.ambiguous.clear();
+                        self.ambiguous_pos = None;
+                        self.ambiguous_pipe_context = None;
+                        self.ambiguous_difference_context = None;
+                        self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
+                        let result = match candidates.len() {
+                            0 => Err(Error::Missing("curve under the pointer")),
+                            _ => self.controller.solid_pipe_pick_curve(candidates[0]),
+                        };
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result);
+                        self.focus_cmd = false;
+                    } else if self.controller.solid_boolean_needs_object() {
+                        let candidates = self.controller.scene().and_then(|scene| {
+                            scene.pick_all(
+                                [pos.x as f64, pos.y as f64],
+                                &view.camera,
+                                viewport,
+                                pick_tolerance(ui),
+                                PickIntent::Select,
+                            ).ok().map(|hits| hits.into_iter().filter(|hit| {
+                                hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok()
+                            }).map(|hit| hit.root).collect::<Vec<_>>())
+                        }).unwrap_or_default();
+                        let ctrl = ui.input(|input| input.modifiers.ctrl);
+                        if candidates.len() > 1 && !ctrl {
+                            self.ambiguous = candidates;
+                            self.ambiguous_pos = Some(pos);
+                            self.ambiguous_epoch = self.controller.coordinator().epoch();
+                            self.ambiguous_difference_context = self.controller.solid_boolean_pick_context();
+                            self.ambiguous_pipe_context = None;
+                            self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
+                            self.focus_cmd = true;
+                            return;
+                        }
+                        self.ambiguous.clear();
+                        self.ambiguous_pos = None;
+                        self.ambiguous_difference_context = None;
+                        self.ambiguous_pipe_context = None;
+                        self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
+                        let picked = candidates.first().copied();
+                        let result = match picked {
+                            Some(id) => self.controller.solid_boolean_pick(id, ctrl),
+                            None => Err(Error::Missing("B-Rep solid under the pointer")),
+                        };
+                        if result.is_ok() {
+                            self.append_running_prompt();
+                        }
+                        self.feedback(result);
+                        self.focus_cmd = false;
+                        if let Some(focus) = ui.ctx().memory(|memory| memory.focused()) {
+                            ui.ctx().memory_mut(|memory| memory.surrender_focus(focus));
+                        }
+                    } else if self.controller.top11_needs_object() {
                         let picked = self.controller.scene().and_then(|scene| {
                             scene
                                 .pick_all(
@@ -3291,6 +4058,9 @@ impl MatrixApp {
                                 .and_then(|hits| hits.into_iter().next().map(|hit| hit.root))
                         });
                         let result = match picked {
+                            Some(object) if ui.input(|input| input.modifiers.ctrl) => {
+                                self.controller.top11_remove_object(object)
+                            }
                             Some(object) => self.controller.top11_accept_object(object),
                             None => Err(Error::Missing("cutting curve under the pointer")),
                         };
@@ -3322,6 +4092,7 @@ impl MatrixApp {
                                 let plane = self.controller.input_plane();
                                 let _ = self.smarttrack.push(&candidate, plane);
                             }
+                            self.append_running_prompt();
                         }
                         self.feedback(result);
                         // After a viewport pick the keyboard belongs to the viewport, so the
@@ -3367,6 +4138,11 @@ impl MatrixApp {
                         self.ambiguous = list.clone();
                         self.ambiguous_pos = Some(pos);
                         self.ambiguous_epoch = self.controller.coordinator().epoch();
+                        self.ambiguous_difference_context = None;
+                        self.ambiguous_pipe_context = None;
+                        self.ambiguous_extract_context = None;
+            self.ambiguous_sphere_context = None;
+            self.ambiguous_slab_context = None;
                         self.focus_cmd = true;
                         return;
                     }
@@ -3874,6 +4650,103 @@ impl MatrixApp {
                     .ok()
             })
             .unwrap_or_default()
+    }
+
+    /// Builder viewport handles (`OM9-L3-03-11-005`/`OM9-L3-04-02-009`): one square per
+    /// handle at its preview position. Dragging along the handle axis edits the same field
+    /// the panel edits, so a drag and a typed value can never disagree.
+    fn builder_handles_ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        response: &egui::Response,
+        view: &om9_scene::workspace::ViewState,
+        viewport: Viewport,
+        rect: Rect,
+    ) {
+        let handles = self.controller.builder_handles();
+        if handles.is_empty() {
+            self.builder_handle_drag = None;
+            return;
+        }
+        let painter = ui.painter().with_clip_rect(rect);
+        let pointer = ui.input(|input| input.pointer.hover_pos());
+        let mut projected = Vec::with_capacity(handles.len());
+        for handle in handles {
+            if let Ok(Some(point)) = view.camera.project(handle.position, viewport) {
+                projected.push((
+                    handle,
+                    egui::pos2(point.screen[0] as f32, point.screen[1] as f32),
+                ));
+            }
+        }
+        let nearest = pointer.and_then(|pointer| {
+            projected
+                .iter()
+                .map(|(handle, position)| (handle.field, *position, pointer.distance(*position)))
+                .filter(|(_, _, distance)| *distance <= 11.0)
+                .min_by(|a, b| a.2.total_cmp(&b.2))
+        });
+        if response.drag_started() {
+            self.builder_handle_drag = nearest.map(|(field, _, _)| field);
+        }
+        let mut adjusted: Option<Result<()>> = None;
+        if let Some(field) = self.builder_handle_drag {
+            if response.dragged()
+                && let Some((handle, position)) =
+                    projected.iter().find(|(handle, _)| handle.field == field)
+                && let Ok(Some(plus)) = view.camera.project(
+                    [
+                        handle.position[0] + handle.axis[0],
+                        handle.position[1] + handle.axis[1],
+                        handle.position[2] + handle.axis[2],
+                    ],
+                    viewport,
+                )
+            {
+                let axis = egui::vec2(
+                    plus.screen[0] as f32 - position.x,
+                    plus.screen[1] as f32 - position.y,
+                );
+                let length = axis.length();
+                if length > 0.5 {
+                    let delta = ui.input(|input| input.pointer.delta());
+                    let millimetres = (delta.x * axis.x + delta.y * axis.y) as f64 / length as f64;
+                    let millimetres = millimetres * handle.scale;
+                    if millimetres.abs() > 0.0 {
+                        adjusted = Some(self.controller.builder_adjust_field(field, millimetres));
+                    }
+                }
+            }
+            if response.drag_stopped() {
+                self.builder_handle_drag = None;
+            }
+        }
+        if let Some(result) = adjusted {
+            self.feedback(result);
+        }
+        for (handle, position) in &projected {
+            let active = self.builder_handle_drag == Some(handle.field);
+            let colour = if active {
+                Color32::from_rgb(255, 214, 102)
+            } else {
+                Color32::from_rgb(45, 212, 191)
+            };
+            let square = Rect::from_center_size(*position, Vec2::splat(9.0));
+            painter.rect_filled(square, 1.0, Color32::from_black_alpha(120));
+            painter.rect_stroke(
+                square,
+                1.0,
+                Stroke::new(1.5, colour),
+                egui::StrokeKind::Outside,
+            );
+            painter.text(
+                *position + Vec2::new(8.0, -8.0),
+                egui::Align2::LEFT_BOTTOM,
+                format!("{} {:.2}", handle.label, handle.value),
+                egui::FontId::proportional(11.0),
+                colour,
+            );
+        }
     }
 
     fn gumball_ui(
@@ -4810,6 +5683,12 @@ impl eframe::App for MatrixApp {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         self.show(ui);
         self.health_panel_ui(ui.ctx());
+        self.gem_window_ui(ui.ctx());
+        self.gem_cluster_window_ui(ui.ctx());
+        self.gem_pave_window_ui(ui.ctx());
+        self.gem_cutters_window_ui(ui.ctx());
+        self.row_cutters_window_ui(ui.ctx());
+        self.gem_edits_window_ui(ui.ctx());
         // Enter in the viewport finishes the running point command (Matrix/Rhino).
         if self.controller.is_running()
             && ui.ctx().memory(|memory| memory.focused().is_none())
@@ -4835,8 +5714,11 @@ impl eframe::App for MatrixApp {
         self.service_native_file_picker(ui.ctx(), frame);
         self.service_three_dm_picker(ui.ctx(), frame);
     }
+
+
     fn raw_input_hook(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
         self.nav_frame_started = std::time::Instant::now();
+        self.delete_selection_from_input(ctx, raw);
         let mut audit_input = || {
             if self.audit.as_ref().is_some_and(|audit| audit.occurrences) && self.passes >= 2 {
                 self.occurrence_audit_input(ctx, raw);
@@ -5669,3 +6551,43 @@ mod icon_tests {
         );
     }
 }
+
+#[cfg(test)]
+mod delete_key_tests {
+    use super::*;
+    use om9_core::geometry::{Curve, Geometry};
+    use om9_core::model::Entity;
+
+    #[test]
+    fn delete_from_raw_input_removes_the_selection() {
+        let mut document = Document::new("delete key");
+        let line = Entity::new(
+            "line",
+            Geometry::Curve(Curve::Line {
+                start: [0., 0., 0.],
+                end: [10., 0., 0.],
+                domain: [0., 10.],
+            }),
+            None,
+        );
+        let id = line.id;
+        document.entities.insert(id, line);
+        let mut app = MatrixApp::new(document).expect("app");
+        app.controller.select_objects(&[id]).expect("selection");
+        let context = egui::Context::default();
+        let mut raw = egui::RawInput {
+            events: vec![egui::Event::Key {
+                key: Key::Delete,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            }],
+            ..Default::default()
+        };
+        app.delete_selection_from_input(&context, &mut raw);
+        assert!(app.controller.document().entities.is_empty(), "Delete removes the object");
+        assert!(raw.events.is_empty(), "the handled Delete is consumed");
+    }
+}
+

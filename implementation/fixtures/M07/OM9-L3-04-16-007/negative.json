@@ -1,0 +1,17 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-16-007",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "Remove with the boolean off",
+      "input": "Preserve=Remove with Boolean=Off",
+      "expect": "Invalid(\"cutter preserve needs a boolean\") and the preview survives"
+    },
+    {
+      "case": "unknown answer",
+      "input": "Preserve=maybe",
+      "expect": "Invalid(\"cutter preserve option\")"
+    }
+  ]
+}

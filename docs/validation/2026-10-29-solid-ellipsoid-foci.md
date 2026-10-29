@@ -1,0 +1,9 @@
+# Ellipsoid FromFoci and MarkFoci — 2026-10-29
+
+The normalized manual describes choosing two foci and a point on the base ellipse; its MarkFoci option places point objects at the focus locations. The recovered menu inventory maps `SolidEllipsoidFromFoci` to `_Ellipsoid _FromFoci`. That binding does not establish the original numeric solver or defaults.
+
+OM9 accepts FromFoci through its mode alias, option and `_Ellipsoid _FromFoci`. It projects the second focus and ellipse point into the CPlane captured at the first focus, uses half the sum of the distances as the semi-major axis, computes the semi-minor axis from the focal distance, and takes a third-axis point or positive radius. This projection, the default MarkFoci=No, and rejection of coincident foci are OM9 interpretations. Invalid or degenerate picks keep the valid prior inputs. MarkFoci=Yes creates the solid and two focus points together in one transaction; Undo and Redo apply to all three.
+
+Windows `CARGO_TARGET_DIR=L:/om9-target`, `-j 2`: seven focused Ellipsoid controller tests passed, one existing desktop fixture ignored. New cases cover the three dispatch routes, translated geometry, independent analytical volume, invalid retry, selection Undo, MarkFoci, atomic Undo/Redo and an output budget failure with successful retry. Three simulated viewport workflows cover Center, Diameter and FromFoci, including side-view third-axis selection and Undo. One shared-option fixture verified MarkFoci via keyboard, pointer and typed routes at the normal test-thread stack size. An initial nested-dispatch version overflowed that stack; the final inline CMD path avoids the nested dispatch and passed without an increased stack.
+
+No real desktop or Matrix original solver/defaults were validated. General numeric extremes, live preview, Corner and AroundCurve remain open; the recovered separate From Foci menu entry is not yet present in the standalone palette.

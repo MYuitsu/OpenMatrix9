@@ -1,0 +1,24 @@
+$ cargo test -p om9-core --lib settings::head -j 2
+
+--- stdout ---
+
+running 12 tests
+test settings::head::tests::an_unknown_profile_is_a_typed_error ... ok
+test settings::head::tests::metal_inside_the_pavilion_is_refused_by_name ... ok
+test settings::head::tests::a_prong_base_below_the_culet_is_refused_by_name ... ok
+test settings::head::tests::seat_frames_are_stable_and_on_the_girdle ... ok
+test settings::head::tests::non_round_girdles_build_and_keep_prong_symmetry ... ok
+test settings::head::tests::the_half_bezel_band_replaces_the_prongs_and_ignores_the_profile ... ok
+test settings::head::tests::a_basket_head_builds_closed_prongs_and_rails ... ok
+test settings::head::tests::an_overall_edit_rebuilds_every_prong ... ok
+test settings::head::tests::a_level_four_edit_touches_only_the_selected_prong ... ok
+test settings::head::tests::a_rebuild_is_deterministic_and_a_new_gem_replaces_the_ids ... ok
+test settings::head::tests::a_user_bezier_section_drives_the_prongs ... ok
+test settings::head::tests::the_seat_cut_removes_stone_under_the_girdle ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 159 filtered out; finished in 0.18s
+
+
+--- stderr ---
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src\lib.rs (cargo-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)

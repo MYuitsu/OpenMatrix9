@@ -128,5 +128,74 @@
       "OM9-L3-04-13-008",
       "OM9-L3-04-13-009"
     ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-28",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+    "scope": "Typed gem instance edit/report owner: partial attribute edits, mask-based Match Attributes, a versioned gem style store, geometry regeneration from the stored record, numbered map rows, count/weight aggregation and an attribute history that keeps the GemId and the om9.gem.placement link",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "tests": [
+        "crates/om9-core/tests/gem_edits.rs",
+        "crates/om9-app/tests/gem_edits.rs",
+        "crates/om9-app/src/ui/gem_edits.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M05/OM9-L2-04-13/observed.json",
+      "implementation/evidence/M05/OM9-L2-04-13/README.md",
+      "implementation/evidence/M05/OM9-L2-04-13/core-gem-edits.log",
+      "implementation/evidence/M05/OM9-L2-04-13/app-gem-edits.log",
+      "implementation/evidence/M05/OM9-L2-04-13/workspace-check.log"
+    ],
+    "notes": "Sửa gem là dữ liệu thuần rồi commit một transaction; GemId, object id và link om9.gem.placement được giữ qua mọi lần sửa. Style ghi atomic vào store có version. Reporter dùng volume lưới × density theo bảng vật liệu và đối chiếu công thức thương mại ±15%, in rõ 'NOT A CERTIFICATE'. Gem Map có overlay đánh số trong viewport kèm cửa sổ key. 9 L3 đều còn gate M05-UI.",
+    "l3_coverage": {
+      "OM9-L3-04-13-001": "automated_verified_manual_gate_open",
+      "OM9-L3-04-13-002": "automated_verified_manual_gate_open",
+      "OM9-L3-04-13-003": "automated_verified_manual_gate_open",
+      "OM9-L3-04-13-004": "automated_verified_manual_gate_open",
+      "OM9-L3-04-13-005": "automated_verified_manual_gate_open",
+      "OM9-L3-04-13-006": "automated_verified_manual_gate_open",
+      "OM9-L3-04-13-007": "automated_verified_manual_gate_open",
+      "OM9-L3-04-13-008": "automated_verified_manual_gate_open",
+      "OM9-L3-04-13-009": "automated_verified_manual_gate_open"
+    },
+    "l4": {
+      "planned": 27,
+      "artifacts": 27,
+      "receipts": [
+        "OM9-L4-13-001-03",
+        "OM9-L4-13-002-03",
+        "OM9-L4-13-003-03",
+        "OM9-L4-13-004-03",
+        "OM9-L4-13-005-03",
+        "OM9-L4-13-006-03",
+        "OM9-L4-13-007-03",
+        "OM9-L4-13-008-03",
+        "OM9-L4-13-009-03"
+      ]
+    },
+    "tests": [
+      "core gem_edits: exit 0",
+      "app gem_edits: exit 0",
+      "app gem map overlay: exit 0",
+      "workspace check: exit 0",
+      "clippy: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M05-UI",
+    "remaining": [
+      "All nine L3 keep the M05-UI manual gate open: no human has reviewed the edit/report commands on screen and no reviewer signature is claimed.",
+      "Only Windows x64 was exercised in this run.",
+      "The app test binaries link OCCT, so the run needs the OCCT bin and VC runtime directories on PATH; that environment requirement is recorded, not hidden.",
+      "CARGO_TARGET_DIR is H:/OpenMatrix9/cargo-target because this sandbox denies writes to the L:/om9-target directory named in AGENTS.md.",
+      "The clippy gate runs with `--cap-lints warn` and is scoped to the files this task owns: the shared checkout also contains concurrent in-flight work whose deny-by-default clippy error (settings/bezel.rs) would otherwise stop the whole batch; those diagnostics are listed in clippy_foreign_warnings.",
+      "The Gem Map overlay is automated-tested as projection data (one numbered caption per visible stone, captions clamped inside the viewport, off-screen stones skipped) and is painted in the committed viewport path; human pixel acceptance still needs the M05-UI pass.",
+      "The reporter's mass is the closed mesh volume × the material density from the gemological table, cross-checked against the published trade formula inside a ±15% band; it stays a computed value and the report prints `NOT A CERTIFICATE`, because only a gemologist can certify a stone."
+    ]
   }
 }

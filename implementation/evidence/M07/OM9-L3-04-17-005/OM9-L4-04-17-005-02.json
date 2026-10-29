@@ -1,0 +1,70 @@
+{
+  "schema": "om9.evidence.domain.v1",
+  "l4": "OM9-L4-04-17-005-02",
+  "l3": "OM9-L3-04-17-005",
+  "recorded_at": "2026-10-28",
+  "status": "DOMAIN_INTEGRATION_RECORDED",
+  "implementation": [
+    "cutters::channel::ChannelEnd",
+    "cutters::channel::ChannelMiddle",
+    "cutters::channel::ChannelParams::ends",
+    "cutters::channel::ChannelParams::validate"
+  ],
+  "design": [
+    "implementation/design/M07/OM9-L3-04-17-005/source_crosswalk.json",
+    "implementation/design/M07/OM9-L3-04-17-005/api.md"
+  ],
+  "fixtures": [
+    "implementation/fixtures/M07/OM9-L3-04-17-005/positive.json",
+    "implementation/fixtures/M07/OM9-L3-04-17-005/negative.json"
+  ],
+  "positive_cases": [
+    {
+      "case": "every end profile",
+      "input": "Start/End = Square, Round, Taper",
+      "expect": "each end keeps the row frame and removes material (taper and round are smaller than square)"
+    },
+    {
+      "case": "per-end depth",
+      "input": "StartDepth=0.30, EndDepth=2.00",
+      "expect": "the deep end is at the last stone; Flip moves it to the first"
+    },
+    {
+      "case": "Mirror makes the channel symmetric",
+      "input": "Mirror=on then Flip=ab",
+      "expect": "the same body (the flip cannot change a symmetric channel)"
+    },
+    {
+      "case": "the middle profile",
+      "input": "Middle=Wide / Deep",
+      "expect": "one extra station and a larger volume"
+    }
+  ],
+  "negative_cases": [
+    {
+      "case": "an unknown profile",
+      "input": "Start=Bevel",
+      "expect": "Invalid(\"channel end profile\")"
+    },
+    {
+      "case": "an unknown middle profile",
+      "input": "Middle=Slant",
+      "expect": "Invalid(\"channel middle profile\")"
+    },
+    {
+      "case": "a negative spacing",
+      "input": "Spacing=-1",
+      "expect": "Invalid(\"channel height\")"
+    },
+    {
+      "case": "an end depth below the minimum",
+      "input": "StartDepth=0",
+      "expect": "Invalid(\"channel end depth\")"
+    }
+  ],
+  "limitations": [
+    "Mirror picks the wider of the two end profiles for both ends and the deeper of the two caps; it does not invent a third profile.",
+    "Flip swaps A and B; the A/B ends are the first and last station of the row as selected, so the selection order is the orientation.",
+    "The manual's profile IDs are mapped to three typed end profiles (Square, Round, Taper); a user profile library is not part of this owner."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "expect": {
+    "closed": true,
+    "min_wall_mm": ">= wall - epsilon"
+  },
+  "input": "diameter 18 mm, band 6 mm, wall 3.5 mm, ridge 3.0 x 4.0 mm"
+}

@@ -1,0 +1,8 @@
+{
+  "expect": {
+    "closed": true,
+    "top": "outer surface pushed out at theta 0",
+    "volume": "> the plain band"
+  },
+  "input": "diameter 18 mm, band 6 mm, wall 2.4 mm, top 8x10 mm, shoulder 2 mm"
+}

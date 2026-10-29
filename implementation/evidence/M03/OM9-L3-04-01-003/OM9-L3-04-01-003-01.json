@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-003-01",
+  "l3_id": "OM9-L3-04-01-003",
+  "kind": "Automated Runtime",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Scale1D: golden case 'box 10x10x10 at the world origin, base point 0,0,0, factor 3' -> the far corner moves from (10,10,10) to (30,10,10)",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_003_scale1d_grows_only_along_the_cplane_x"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

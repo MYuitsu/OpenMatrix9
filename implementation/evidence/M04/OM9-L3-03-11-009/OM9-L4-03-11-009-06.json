@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-11-009",
+  "title": "Builder F6 And Commandline Input Binding",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "983486aa08d3f2c77011a92ef9bc8c4ca375029167db5e832f922ddd5c3c8145",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "both dispatch the same builder service and event flow",
+    "negative": "typed error; no builder session is opened"
+  },
+  "l4_id": "OM9-L4-03-11-009-06",
+  "role": "ACCEPTANCE",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/builder_controls.rs",
+    "crates/om9-app/tests/f6_context.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "the_f6_prefill_and_the_command_line_reach_the_same_builder_service"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "6ad454aa73c51b40e5308e9f5b782c9e07d59ffbed04984c880771ccf167650f",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "the_f6_prefill_and_the_command_line_reach_the_same_builder_service",
+      "package": "om9-app",
+      "binary": "builder_controls"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "f6_context",
+        "-j",
+        "2",
+        "f6_uses_the_selected_class_and_empty_general_context"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "9bb2338df0781da139b63510fecc21e05f6f67c4387a0bf8a0e319e514626c32",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s"
+      ],
+      "test": "f6_uses_the_selected_class_and_empty_general_context",
+      "package": "om9-app",
+      "binary": "f6_context"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --test builder_style -j 2 a_gem_style_cannot_be_applied_to_a_ring_builder
+# exit code: 0
+# captured: 2026-10-27T02:48:42Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_gem_style_cannot_be_applied_to_a_ring_builder ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)
+
+$ cargo test -p om9-app --test builder_styles -j 2 a_style_for_another_mode_is_listed_disabled_and_refused
+# exit code: 0
+# captured: 2026-10-27T02:48:43Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_style_for_another_mode_is_listed_disabled_and_refused ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.33s
+     Running tests\builder_styles.rs (L:\om9-target\debug\deps\builder_styles-c54c9038cd98df6e.exe)

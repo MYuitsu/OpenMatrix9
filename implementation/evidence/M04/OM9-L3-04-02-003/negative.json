@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-003",
+  "kind": "negative",
+  "expected": "a missing rail input is refused; a zero-length or degenerate tangent is refused before a preview is built",
+  "verified_by": [
+    "a_profile_placer_moves_the_section_along_the_rail_and_rolls_it_without_flipping",
+    "a_profile_placer_refuses_a_missing_rail_selection",
+    "the_profile_placer_and_outside_rail_icons_open_the_existing_builder_modes"
+  ]
+}

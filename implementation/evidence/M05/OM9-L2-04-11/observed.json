@@ -1,0 +1,143 @@
+{
+  "schema": "om9.m05.l2_gem_evidence.v1",
+  "l2_id": "OM9-L2-04-11",
+  "title": "Gem Halo Cluster Baguette Layouts",
+  "date": "2026-10-27",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "code": [
+    "crates/om9-core/src/gem_cluster.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/tests/gem_cluster.rs",
+    "crates/om9-app/src/session/gem_cluster.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem_cluster.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/gem_cluster_panel.rs"
+  ],
+  "checks": [
+    {
+      "artifact": "core-gem-cluster.log",
+      "command": "cargo test -p om9-core --test gem_cluster -j 2",
+      "exit_code": 0,
+      "sha256": "b71f80be1c3fb83373fce4ce90a5b08196a84f6cf624f2b5956a74c8647c277d"
+    },
+    {
+      "artifact": "app-gem-cluster-panel.log",
+      "command": "cargo test -p om9-app --test gem_cluster_panel -j 2",
+      "exit_code": 0,
+      "sha256": "2e3aa9735608f0207685eee0427ec7dbb8e7ecbf4afb0acaf0a0e7347c108fdd"
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": "cargo check --workspace --all-targets -j 2",
+      "exit_code": 0,
+      "sha256": "a31cb546bba3be44a7d3f2f899bd3cc2b23dc51fd7850e8ddc8e65cbc483a8de"
+    },
+    {
+      "artifact": "clippy-gem-cluster-lib.log",
+      "command": "cargo clippy -p om9-core -p om9-app -p om9-kernel --lib -j 2 -- -D warnings",
+      "exit_code": 0,
+      "sha256": "a2a06df3ac31ff0318f4310bbcfc2610ff48ba825b4c0ff013935dbd23e8722d"
+    },
+    {
+      "artifact": "clippy-core-test.log",
+      "command": "cargo clippy -p om9-core --test gem_cluster -j 2 -- -D warnings",
+      "exit_code": 0,
+      "sha256": "f126b9714f53a2ac40072681621d661e2831a3e7a4c996602405df40d98a22e5"
+    },
+    {
+      "artifact": "clippy-app-test.log",
+      "command": "cargo clippy -p om9-app --test gem_cluster_panel -j 2 -- -D warnings",
+      "exit_code": 0,
+      "sha256": "3ec6bcfebaf2d5d7773d16465f373bd267d3d8679c89845be44de0f9620d2f79"
+    }
+  ],
+  "l3": {
+    "OM9-L3-04-11-001": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-11-001-03"
+      ],
+      "fixture_manifest_sha256": "a34ec89332363f8e3ff56444c4f72733c5c440a59e3aac1f937d6e452a0981b7",
+      "tests": [
+        "crates/om9-core/tests/gem_cluster.rs",
+        "crates/om9-app/tests/gem_cluster_panel.rs"
+      ]
+    },
+    "OM9-L3-04-11-002": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-11-002-03"
+      ],
+      "fixture_manifest_sha256": "a34ec89332363f8e3ff56444c4f72733c5c440a59e3aac1f937d6e452a0981b7",
+      "tests": [
+        "crates/om9-core/tests/gem_cluster.rs",
+        "crates/om9-app/tests/gem_cluster_panel.rs"
+      ]
+    },
+    "OM9-L3-04-11-003": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-11-003-03"
+      ],
+      "fixture_manifest_sha256": "a34ec89332363f8e3ff56444c4f72733c5c440a59e3aac1f937d6e452a0981b7",
+      "tests": [
+        "crates/om9-core/tests/gem_cluster.rs",
+        "crates/om9-app/tests/gem_cluster_panel.rs"
+      ]
+    },
+    "OM9-L3-04-11-004": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-11-004-03"
+      ],
+      "fixture_manifest_sha256": "a34ec89332363f8e3ff56444c4f72733c5c440a59e3aac1f937d6e452a0981b7",
+      "tests": [
+        "crates/om9-core/tests/gem_cluster.rs",
+        "crates/om9-app/tests/gem_cluster_panel.rs"
+      ]
+    },
+    "OM9-L3-04-11-005": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-11-005-03"
+      ],
+      "fixture_manifest_sha256": "a34ec89332363f8e3ff56444c4f72733c5c440a59e3aac1f937d6e452a0981b7",
+      "tests": [
+        "crates/om9-core/tests/gem_cluster.rs",
+        "crates/om9-app/tests/gem_cluster_panel.rs"
+      ]
+    },
+    "OM9-L3-04-11-006": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-11-006-03"
+      ],
+      "fixture_manifest_sha256": "a34ec89332363f8e3ff56444c4f72733c5c440a59e3aac1f937d6e452a0981b7",
+      "tests": [
+        "crates/om9-core/tests/gem_cluster.rs",
+        "crates/om9-app/tests/gem_cluster_panel.rs"
+      ]
+    },
+    "OM9-L3-04-11-007": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-11-007-03"
+      ],
+      "fixture_manifest_sha256": "a34ec89332363f8e3ff56444c4f72733c5c440a59e3aac1f937d6e452a0981b7",
+      "tests": [
+        "crates/om9-core/tests/gem_cluster.rs",
+        "crates/om9-app/tests/gem_cluster_panel.rs"
+      ]
+    }
+  },
+  "uncertainties": [
+    "The seven builders keep the M05-UI manual gate open: no human has reviewed the windows or preview on screen.",
+    "Viewport control handles and the locked F4 guide gem (Show Guide) are not drawn; their operations exist in the builder window and typed command line, so the manual gate must judge the missing direct-manipulation layer.",
+    "Channel/prong metal geometry belongs to M06/M07; this owner records the parameters only.",
+    "Halo style presets (Load) need an authored style catalogue that does not exist yet."
+  ]
+}

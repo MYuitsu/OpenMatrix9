@@ -1,0 +1,37 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-11-006",
+  "title": "Builder Handle And Panel Bidirectional Sync",
+  "owner": "om9-app Controller revision/set_field_at",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [
+        "builder_revision",
+        "builder_set_field_at",
+        "builder_adjust_field"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "symbols": [
+        "captured revision on painted widgets"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/tests/builder_controls.rs",
+      "symbols": [
+        "a_stale_panel_event_cannot_overwrite_a_newer_handle_drag"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3 skill/plan record is planning input; runtime behavior is established by the receipts."
+  ]
+}

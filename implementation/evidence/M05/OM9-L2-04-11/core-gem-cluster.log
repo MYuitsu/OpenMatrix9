@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\gem_cluster.rs (L:\om9-target\debug\deps\gem_cluster-30d5f7aeaf18cc2d.exe)
+
+running 12 tests
+test a_cluster_uses_the_start_angle_and_the_positive_down_z_offset ... ok
+test orient_to_gem_reuses_the_exact_gem_basis ... ok
+test a_broken_feature_record_is_refused ... ok
+test cluster_degree_rotates_each_stone_about_its_tangent ... ok
+test a_halo_that_cannot_fit_is_refused_instead_of_overlapping ... ok
+test a_halo_ring_closes_on_itself_and_the_spacing_is_realized ... ok
+test halo_fix_position_pins_the_first_stone_at_twelve_oclock ... ok
+test the_feature_survives_a_document_json_round_trip ... ok
+test one_tapered_baguette_measures_the_two_wall_fractions ... ok
+test a_baguette_channel_spans_the_walls_and_tapers_toward_the_end ... ok
+test gems_between_two_curves_are_round_and_touch_both_walls ... ok
+test flipping_and_banking_the_channel_changes_the_frame_not_the_footprint ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

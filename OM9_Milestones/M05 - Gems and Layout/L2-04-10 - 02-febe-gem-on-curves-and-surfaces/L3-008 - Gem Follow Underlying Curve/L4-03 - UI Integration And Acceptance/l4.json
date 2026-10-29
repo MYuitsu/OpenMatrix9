@@ -18,6 +18,23 @@
   "estimated_scope": null,
   "source_code_implementation_verified": false,
   "purpose": "update gems when underlying curve/surface changes",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-008 - Gem Follow Underlying Curve/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 2,
+    "implementation_l4": null
+  },
   "parent_goal": "update gems when underlying curve/surface changes",
   "inputs": [
     "existing placement link and edited source geometry version"
@@ -450,7 +467,10 @@
       "stage": "3. Đặt đá theo curve - cả bốn biến thể và khác biệt giữa chúng",
       "why_for_this_task": "Đi theo curve bên dưới: điểm đến là điểm trên curve dịch theo trục y cục bộ của frame, và pháp tuyến được đo LẠI từ điểm đã dịch.",
       "om9_backend": "pure Rust cho phân bố, nội suy và trật tự transform; openNURBS/OCCT cho frame, hộp bao và curve",
-      "steps_cited": [4, 5],
+      "steps_cited": [
+        4,
+        5
+      ],
       "algorithm_steps": [
         "S3. Dựng offset đặt đá theo placement method (Culet/Girdle/Table) dưới dạng một phép dịch z trong hệ viên đá.",
         "S4. Với mỗi viên: xác định chỉ số, nội suy tuyến tính đường kính và offset, dịch điểm theo trục y của frame, đo lại pháp tuyến nếu phương pháp yêu cầu, dựng frame 3 điểm."
@@ -478,4 +498,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

@@ -4,6 +4,240 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-17",
   "title": "Surface · Profile Sweep — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Sweep 1",
+        "Sweep 1 History",
+        "Sweep 2",
+        "Sweep 2 History",
+        "Sweep Multi",
+        "Profile Sweep"
+      ],
+      "option_count": 6
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Surface",
+      "command": "Sweep",
+      "option": "Profile Sweep",
+      "root_group": false,
+      "path": [
+        "Surface",
+        "Sweep"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "line rail length 10mm with aligned 2×3mm profile",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-17 - 09-febe/L3-005 - Surface · Profile Sweep - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Sweep 1",
+        "command_id": "SurfaceSweepSweep1Rail",
+        "script": "! _Sweep1",
+        "alt_script": "! _Sweep1 _C",
+        "alt_label": "Sweep 1 ChainEdges",
+        "covered_by_l3": "OM9-L3-03-17-001",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sweep 1",
+          "typed_forms": [
+            "Sweep 1"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Sweep 1 History",
+        "command_id": "SurfaceSweepSweep1RailHistory",
+        "script": "! _gvSweepHistory",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-17-002",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sweep 1 History",
+          "typed_forms": [
+            "Sweep 1 History"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Sweep 2",
+        "command_id": "SurfaceSweepSweep2Rails",
+        "script": "! _Sweep2",
+        "alt_script": "! _Sweep2 _C",
+        "alt_label": "Sweep 2 ChainEdges",
+        "covered_by_l3": "OM9-L3-03-17-003",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sweep 2",
+          "typed_forms": [
+            "Sweep 2"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Sweep 2 History",
+        "command_id": "SurfaceSweepSweep2RailsHistory",
+        "script": "! _gvSweep2History",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-17-004",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sweep 2 History",
+          "typed_forms": [
+            "Sweep 2 History"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Sweep Multi",
+        "command_id": "SurfaceSweepSweepMultiRail",
+        "script": "! _gvfourSweep",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-17-030",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sweep Multi",
+          "typed_forms": [
+            "Sweep Multi"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Profile Sweep",
+        "command_id": "SurfaceSweepProfileSweep",
+        "script": "! _gvProfileSweep",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-17-005",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Profile Sweep",
+          "typed_forms": [
+            "Profile Sweep"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [],
+    "missing": [
+      "input:line rail length 10mm with aligned 2×3mm profile: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-17-005-04"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E06",
@@ -122,13 +356,25 @@
       "depends_on_task_ids": [
         "OM9-L4-03-17-005-02"
       ]
+    },
+    {
+      "id": "OM9-L4-03-17-005-04",
+      "title": "Parameter Implementation — Surface · Profile Sweep — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-17 - 09-febe/L3-005 - Surface · Profile Sweep - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-17-005-01",
+        "OM9-L4-03-17-005-02",
+        "OM9-L4-03-17-005-03"
+      ]
     }
   ],
   "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-03-17-005-01",
     "OM9-L4-03-17-005-02",
-    "OM9-L4-03-17-005-03"
+    "OM9-L4-03-17-005-03",
+    "OM9-L4-03-17-005-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -300,12 +546,12 @@
       "implementation/fixtures/M03/OM9-L3-03-17-005/positive.json",
       "implementation/fixtures/M03/OM9-L3-03-17-005/negative.json",
       "implementation/evidence/M03/OM9-L3-03-17-005/",
-      "implementation/evidence/M03/2026-10-23-l2-03-17-checks.json"
+      "implementation/evidence/M03/2026-10-26-l2-03-17-checks.json"
     ],
     "tests": [
-      "cargo test -p om9-app --test surface_menu: 41 passed",
+      "cargo test -p om9-app --test surface_menu: 62 passed",
       "functional selected-surface Rebuild/Unroll: one surface and one Undo",
-      "disabled reason catalog: 3 rows verified"
+      "menu and command line resolve to the same command id for all 38 rows"
     ],
     "l4_evidence": {
       "OM9-L4-03-17-005-01": "1/1",

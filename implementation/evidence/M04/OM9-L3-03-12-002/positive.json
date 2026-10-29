@@ -1,0 +1,15 @@
+{
+  "expect": {
+    "enabled": [
+      "Classic 2.2",
+      "Signet 3.0"
+    ],
+    "rows": 3
+  },
+  "library": [
+    "Classic 2.2",
+    "Signet 3.0",
+    "Brilliant Gem 1.9"
+  ],
+  "mode": "ring_rail"
+}

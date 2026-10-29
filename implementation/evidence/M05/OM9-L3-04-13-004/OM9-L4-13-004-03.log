@@ -1,0 +1,26 @@
+$ cargo test -p om9-app --test gem_edits -j 2 save_and_load_style_roundtrip_through_the_style_file
+# exit code: 0
+# captured: 2026-10-28T04:07:36Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test save_and_load_style_roundtrip_through_the_style_file ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.02s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\gem_edits.rs (cargo-target\debug\deps\gem_edits-bb31322b60f9f8c2.exe)
+$ cargo test -p om9-app --test gem_edits -j 2 save_style_refuses_a_name_the_shared_store_would_reject
+# exit code: 0
+# captured: 2026-10-28T04:07:36Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test save_style_refuses_a_name_the_shared_store_would_reject ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\gem_edits.rs (cargo-target\debug\deps\gem_edits-bb31322b60f9f8c2.exe)

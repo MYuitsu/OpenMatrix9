@@ -36,6 +36,251 @@ fn controller_with_box() -> (Controller, om9_core::identity::ObjectId) {
 }
 
 #[test]
+fn top11_explode_brep_creates_faces_in_one_undo() {
+    let (mut c, id) = controller_with_box();
+    c.select_objects(&[id]).unwrap();
+    c.top11_invoke(om9_core::top11::Top11Action::Explode)
+        .unwrap();
+    assert!(!c.document().entities.contains_key(&id));
+    assert_eq!(c.document().entities.len(), 6);
+    let mut total_area = 0.0;
+    for face in c.document().entities.values() {
+        assert_eq!(face.placement, Transform::translation([5.0, 0.0, 0.0]));
+        let Geometry::Brep(brep) = &face.geometry else {
+            panic!("expected face BRep")
+        };
+        let measure = creation::measure(brep, c.coordinator().limits()).unwrap();
+        assert_eq!(measure.faces, 1);
+        total_area += measure.area_mm2;
+    }
+    assert!((total_area - 52.0).abs() < 1e-6, "{total_area}");
+    assert_eq!(c.coordinator().undo_len(), 1);
+    c.undo().unwrap();
+    assert_eq!(c.document().entities.len(), 1);
+    assert!(c.document().entities.contains_key(&id));
+}
+
+#[test]
+fn explode_single_face_rejects_without_mutating_document() {
+    let face = om9_kernel::editing::extract_face(
+        &box_brep(),
+        0,
+        creation::DEFAULT_DEFLECTION_MM,
+        &Limits::default(),
+    )
+    .unwrap();
+    let mut doc = Document::new("single face");
+    let entity = Entity::new("face", Geometry::Brep(face), None);
+    let id = entity.id;
+    doc.entities.insert(id, entity);
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.select_objects(&[id]).unwrap();
+    let before = c.document().clone();
+    assert!(c.submit("Explode").is_err());
+    assert_eq!(c.document(), &before);
+    assert_eq!(c.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn top11_join_adjacent_brep_faces_and_undo() {
+    let source = box_brep();
+    let mut doc = Document::with_template_tolerance("join adjacent faces");
+    let mut ids = Vec::new();
+    for index in [0, 2] {
+        let face = om9_kernel::editing::extract_face(
+            &source,
+            index,
+            creation::DEFAULT_DEFLECTION_MM,
+            &Limits::default(),
+        )
+        .unwrap();
+        let mut entity = Entity::new("face", Geometry::Brep(face), None);
+        entity.placement = Transform::translation([5., 0., 0.]);
+        ids.push(entity.id);
+        doc.entities.insert(entity.id, entity);
+    }
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.select_objects(&ids).unwrap();
+    c.top11_invoke(om9_core::top11::Top11Action::Join).unwrap();
+    assert_eq!(c.document().entities.len(), 1);
+    let joined = c.document().entities.values().next().unwrap();
+    assert_eq!(joined.placement, Transform::translation([5., 0., 0.]));
+    let Geometry::Brep(brep) = &joined.geometry else {
+        panic!("expected BRep")
+    };
+    let measure = creation::measure(brep, c.coordinator().limits()).unwrap();
+    assert_eq!(measure.faces, 2);
+    assert_eq!(measure.naked_edges, 6);
+    assert_eq!(c.coordinator().undo_len(), 1);
+    c.undo().unwrap();
+    assert_eq!(c.document().entities.len(), 2);
+    assert!(ids.iter().all(|id| c.document().entities.contains_key(id)));
+    c.redo().unwrap();
+    assert_eq!(c.document().entities.len(), 1);
+    assert!(ids.iter().all(|id| !c.document().entities.contains_key(id)));
+}
+
+#[test]
+fn top11_join_disconnected_faces_keeps_both_without_undo() {
+    let source = box_brep();
+    let mut doc = Document::with_template_tolerance("disconnected faces");
+    let mut ids = Vec::new();
+    for index in [0, 1] {
+        let face = om9_kernel::editing::extract_face(
+            &source,
+            index,
+            creation::DEFAULT_DEFLECTION_MM,
+            &Limits::default(),
+        )
+        .unwrap();
+        let entity = Entity::new("face", Geometry::Brep(face), None);
+        ids.push(entity.id);
+        doc.entities.insert(entity.id, entity);
+    }
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.select_objects(&ids).unwrap();
+    let before = c.document().clone();
+    assert!(c.submit("Join").is_err());
+    assert_eq!(c.document(), &before);
+    assert_eq!(c.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn top11_join_faces_with_different_placements_and_undo() {
+    let source = box_brep();
+    let limits = Limits::default();
+    let face_a =
+        om9_kernel::editing::extract_face(&source, 0, creation::DEFAULT_DEFLECTION_MM, &limits)
+            .unwrap();
+    let face_b =
+        om9_kernel::editing::extract_face(&source, 2, creation::DEFAULT_DEFLECTION_MM, &limits)
+            .unwrap();
+    let shifted = om9_kernel::transform_ops::transform_brep(
+        &face_b,
+        &Transform::translation([-5., 0., 0.]),
+        creation::DEFAULT_DEFLECTION_MM,
+        &limits,
+    )
+    .unwrap();
+    let a = Entity::new("face a", Geometry::Brep(face_a), None);
+    let mut b = Entity::new("face b", Geometry::Brep(shifted), None);
+    b.placement = Transform::translation([5., 0., 0.]);
+    let ids = [a.id, b.id];
+    let mut doc = Document::with_template_tolerance("join placed faces");
+    doc.entities.insert(a.id, a);
+    doc.entities.insert(b.id, b);
+    let mut c = Controller::new(doc, limits).unwrap();
+    c.select_objects(&ids).unwrap();
+    c.submit("Join").unwrap();
+    let joined = c.document().entities.values().next().unwrap();
+    let Geometry::Brep(brep) = &joined.geometry else {
+        panic!("BRep")
+    };
+    let world = om9_kernel::transform_ops::transform_brep(
+        brep,
+        &joined.placement,
+        creation::DEFAULT_DEFLECTION_MM,
+        c.coordinator().limits(),
+    )
+    .unwrap();
+    let measures = creation::measure(&world, c.coordinator().limits()).unwrap();
+    assert_eq!(measures.faces, 2);
+    assert_eq!(measures.naked_edges, 6);
+    c.undo().unwrap();
+    assert_eq!(c.document().entities.len(), 2);
+    assert!(ids.iter().all(|id| c.document().entities.contains_key(id)));
+}
+
+#[test]
+fn top11_join_without_document_tolerance_is_atomic() {
+    let source = box_brep();
+    let mut doc = Document::new("missing tolerance");
+    let mut ids = Vec::new();
+    for index in [0, 2] {
+        let face = om9_kernel::editing::extract_face(
+            &source,
+            index,
+            creation::DEFAULT_DEFLECTION_MM,
+            &Limits::default(),
+        )
+        .unwrap();
+        let entity = Entity::new("face", Geometry::Brep(face), None);
+        ids.push(entity.id);
+        doc.entities.insert(entity.id, entity);
+    }
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.select_objects(&ids).unwrap();
+    let before = c.document().clone();
+    assert!(c.submit("Join").is_err());
+    assert_eq!(c.document(), &before);
+    assert_eq!(c.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn top11_join_three_faces_finds_connected_order_and_undo_redo() {
+    let source = box_brep();
+    let mut doc = Document::with_template_tolerance("three faces");
+    let mut ids = Vec::new();
+    for index in [0, 1, 2] {
+        let face = om9_kernel::editing::extract_face(
+            &source,
+            index,
+            creation::DEFAULT_DEFLECTION_MM,
+            &Limits::default(),
+        )
+        .unwrap();
+        let entity = Entity::new("face", Geometry::Brep(face), None);
+        ids.push(entity.id);
+        doc.entities.insert(entity.id, entity);
+    }
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.select_objects(&ids).unwrap();
+    c.submit("Join").unwrap();
+    assert_eq!(c.document().entities.len(), 1);
+    let joined = c.document().entities.values().next().unwrap();
+    let Geometry::Brep(brep) = &joined.geometry else {
+        panic!("BRep")
+    };
+    let measure = creation::measure(brep, c.coordinator().limits()).unwrap();
+    assert_eq!(measure.faces, 3);
+    assert_eq!(measure.naked_edges, 8);
+    assert_eq!(c.coordinator().undo_len(), 1);
+    c.undo().unwrap();
+    assert_eq!(c.document().entities.len(), 3);
+    assert!(ids.iter().all(|id| c.document().entities.contains_key(id)));
+    c.redo().unwrap();
+    assert_eq!(c.document().entities.len(), 1);
+}
+
+#[test]
+fn top11_join_three_faces_with_disconnected_member_is_atomic() {
+    let source = box_brep();
+    let mut doc = Document::with_template_tolerance("disconnected member");
+    let mut ids = Vec::new();
+    for index in [0, 1, 2] {
+        let face = om9_kernel::editing::extract_face(
+            &source,
+            index,
+            creation::DEFAULT_DEFLECTION_MM,
+            &Limits::default(),
+        )
+        .unwrap();
+        let mut entity = Entity::new("face", Geometry::Brep(face), None);
+        if index == 1 {
+            entity.placement = Transform::translation([100., 0., 0.]);
+        }
+        ids.push(entity.id);
+        doc.entities.insert(entity.id, entity);
+    }
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.select_objects(&ids).unwrap();
+    let before = c.document().clone();
+    assert!(c.submit("Join").is_err());
+    assert_eq!(c.document(), &before);
+    assert_eq!(c.coordinator().undo_len(), 0);
+}
+
+#[test]
 fn brep_mirror_deletes_input_in_place_and_keeps_one_undo() {
     let (mut c, id) = controller_with_box();
     c.select_objects(&[id]).unwrap();

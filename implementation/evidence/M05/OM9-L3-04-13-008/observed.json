@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_edits_evidence.v1",
+  "l3_id": "OM9-L3-04-13-008",
+  "title": "Gem Reporter Count And Weight",
+  "command": "BuilderGemReporter / gvGemReport",
+  "scope": "`gem_edits::gem_report(records, Option<density>)`; `gem_edits::MATERIAL_DENSITIES` / `material_density(name)`; `gem_edits::weight_formula(spec)`; `gem_edits::gem_weight(spec, density)`; `gem_edits::validate_density`; `BuilderGemReporter` session",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "count and computed mass grouped by shape/cut/size/material, cross-checked against the trade formula and labelled as a computed value, read-only",
+  "negative": "an impossible density is a typed refusal; an unknown material density is reported as an assumption instead of a silent diamond basis",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-13-008-03"
+    ],
+    "fixture_manifest_sha256": "fc50ad93ad06d80184d659c9c518103a300f107e2f9f5ce04af3ad27d4fcaf1c"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/tests/gem_edits.rs"
+  ],
+  "test": "the_reporter_aggregates_count_and_calculated_mass"
+}

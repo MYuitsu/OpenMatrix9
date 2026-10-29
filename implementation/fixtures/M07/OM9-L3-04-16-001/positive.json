@@ -1,0 +1,28 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-16-001",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderGemCutter",
+  "cases": [
+    {
+      "case": "round brilliant, one stone, default Gem mode",
+      "input": "GemSpec::round(6.5, 4.03) at the origin, GemCutterParams::for_gem",
+      "expect": "one closed cutter body, min_clearance_mm >= 0, volume_mm3 > 0"
+    },
+    {
+      "case": "Azure mode drops the upper seat",
+      "input": "the same stone with Mode=Azure",
+      "expect": "closed body whose volume is smaller than Gem mode (no upper seat rings)"
+    },
+    {
+      "case": "Advanced mode publishes all five builders",
+      "input": "the same stone with Mode=Advanced",
+      "expect": "closed body; Rotation1..5 and YScale1..5 reach rings 0..4"
+    },
+    {
+      "case": "the staged preview owns nothing",
+      "input": "dispatch BuilderGemCutter on one selected gem",
+      "expect": "document entity count unchanged until Enter; Undo after Enter restores it"
+    }
+  ]
+}

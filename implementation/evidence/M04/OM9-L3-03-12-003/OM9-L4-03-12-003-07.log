@@ -1,0 +1,13 @@
+$ cargo test -p om9-core --test builder_style -j 2 a_style_missing_the_mandatory_profile_input_is_refused
+# exit code: 0
+# captured: 2026-10-27T02:48:35Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_style_missing_the_mandatory_profile_input_is_refused ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)

@@ -4,6 +4,42 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-04-01",
   "title": "Transform menu action availability",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "Controlled test project containing the object selection required for Transform menu action availability",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-042 - Transform menu action availability/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:Controlled test project containing the object selection required for Transform menu action availability: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
@@ -297,5 +333,72 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "OM9-L3-04-01-042_2026_10_26": {
+      "date": "2026-10-26",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "All 41 catalogued Transform rows answer Controller::availability from one table and carry the authored menu/icon key: 39 rows run a body, 2 stay visible and disabled with a recorded reason (Solid Points ON, Make Down Facing) because their own contracts say no owner service exists. The parity test reads the authored MainMenu.ini block, assets/features.json and icons.rs.",
+      "l4_verified": 1,
+      "tests": {
+        "app_transform_menu": "50 passed; 0 failed",
+        "core_deform": "10 passed; 0 failed",
+        "core_cage": "4 passed; 0 failed"
+      },
+      "evidence": [
+        "implementation/design/M03/OM9-L3-04-01-042",
+        "implementation/fixtures/M03/OM9-L3-04-01-042",
+        "implementation/evidence/M03/OM9-L3-04-01-042"
+      ],
+      "manual_gate": "M03-UI"
+    },
+    "measure_annotation_transform_corrections_2026_10_27": {
+      "date": "2026-10-27",
+      "state": "AUTOMATED_SCOPE_VERIFIED_MANUAL_UI_GATE_OPEN",
+      "evidence": "docs/validation/2026-10-26-measure-completion/README.md",
+      "checks": [
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "core-regressions"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "scene-regressions"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "final-focused"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "build"
+        }
+      ],
+      "test_counts_by_batch": {
+        "core-regressions": 88,
+        "scene-regressions": 12,
+        "final-focused": 69,
+        "build": 0,
+        "annotation-ui-subset": 3
+      },
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "scope": "All 41 catalog rows retain stable ids/authored bindings; 16 implemented, 3 blocked, 22 M08-deferred."
+    }
+  },
+  "runtime_traceability": {
+    "measure_annotation_transform_corrections_2026_10_27": {
+      "implementation": "All 41 catalog rows retain stable ids/authored bindings; 16 implemented, 3 blocked, 22 M08-deferred.",
+      "tests": "docs/validation/2026-10-26-measure-completion/final-focused.log",
+      "manual_ui": "See runtime-launch.json; no human acceptance signature"
+    }
+  }
 }

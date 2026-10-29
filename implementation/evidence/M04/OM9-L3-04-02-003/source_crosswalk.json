@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-02-003",
+  "title": "Profile Placer On Rail",
+  "owner": "om9-app Controller ring/profile tools over om9-core producer chain",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/producers.rs",
+      "symbols": [
+        "RailProfileProducer",
+        "ratio_parameter",
+        "angle_parameter"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/curve_ops.rs",
+      "symbols": [
+        "point_at",
+        "tangent_at"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [
+        "BuilderKind::RailProfile",
+        "profile_center_and_normal"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/ring_tools.rs",
+      "symbols": [
+        "PROFILE_PLACER"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "Position is a Ratio in 0..1 and roll is an Angle in degrees; both are optional so older recipes replay at position 0 / roll 0.",
+    "The third builder handle carries scale 0.01 because the value is a ratio, not millimetres."
+  ]
+}

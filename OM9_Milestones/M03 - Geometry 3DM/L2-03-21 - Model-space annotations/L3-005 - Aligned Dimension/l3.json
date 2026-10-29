@@ -1,0 +1,111 @@
+{
+  "level": "L3",
+  "id": "OM9-L3-03-21-005",
+  "milestone": "M03",
+  "parent_l2_id": "OM9-L2-03-21",
+  "title": "Aligned Dimension",
+  "feature_id": "OM9-MEASURE-009",
+  "command_alias": "DimAligned",
+  "planning_state": "IMPLEMENTED_WITH_SCOPED_AUTOMATED_EVIDENCE",
+  "specification": {
+    "schema_version": "om9.l3.v1",
+    "l3_id": "OM9-L3-03-21-005",
+    "module_id": "OM9-L2-03-21",
+    "implementation_role": "model_space_annotation",
+    "goal": "Aligned Dimension through shared typed annotation owner",
+    "contract": "implementation/design/M03/measure-completion-20261026/ANNOTATION-CONTRACT.md",
+    "invariants": [
+      "Preserve catalog ids/icons",
+      "Shared menu/CMD owner",
+      "Preview is read-only",
+      "One atomic object edit/Undo",
+      "Persist semantics in native OM9",
+      "Do not claim Rhino drafting interchange"
+    ],
+    "implementation_category": "UI_COMMAND",
+    "test_coverage_status": "SCOPED_AUTOMATED_PASS_MANUAL_OPEN"
+  },
+  "children_l4": [
+    {
+      "id": "OM9-L4-03-21-005-01",
+      "file": "M03 - Geometry 3DM/L2-03-21 - Model-space annotations/L3-005 - Aligned Dimension/L4-01 - Model and geometry/l4.json"
+    },
+    {
+      "id": "OM9-L4-03-21-005-02",
+      "file": "M03 - Geometry 3DM/L2-03-21 - Model-space annotations/L3-005 - Aligned Dimension/L4-02 - Menu and command interaction/l4.json"
+    },
+    {
+      "id": "OM9-L4-03-21-005-03",
+      "file": "M03 - Geometry 3DM/L2-03-21 - Model-space annotations/L3-005 - Aligned Dimension/L4-03 - Acceptance and persistence/l4.json"
+    }
+  ],
+  "runtime_implementation": {
+    "measure_annotation_transform_corrections_2026_10_27": {
+      "date": "2026-10-27",
+      "state": "AUTOMATED_SCOPE_VERIFIED_MANUAL_UI_GATE_OPEN",
+      "evidence": "docs/validation/2026-10-26-measure-completion/README.md",
+      "checks": [
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "core-regressions"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "scene-regressions"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "final-focused"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "build"
+        }
+      ],
+      "test_counts_by_batch": {
+        "core-regressions": 88,
+        "scene-regressions": 12,
+        "final-focused": 69,
+        "build": 0,
+        "annotation-ui-subset": 3
+      },
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "scope": "Aligned Dimension"
+    },
+    "OM9-L3-03-21-005_2026_10_27": {
+      "date": "2026-10-27",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "three typed points place an aligned dimension: the value is the true distance between the witness points, measured along their own direction.",
+      "owner_services": [
+        "crates/om9-core/src/annotation.rs",
+        "crates/om9-app/src/session/annotation.rs"
+      ],
+      "l4_verified": [
+        "OM9-L3-03-21-005-01"
+      ],
+      "tests": {
+        "app_annotation": "8 passed; 0 failed",
+        "app_annotation_ui": "3 passed; 0 failed"
+      },
+      "evidence": [
+        "implementation/design/M03/OM9-L3-03-21-005/README.md",
+        "implementation/fixtures/M03/OM9-L3-03-21-005/positive.json",
+        "implementation/evidence/M03/OM9-L3-03-21-005/OM9-L3-03-21-005-01.json"
+      ],
+      "manual_gate": "M03-UI"
+    }
+  },
+  "sdk_export_plan": {
+    "state": "HOST_INTERNAL_NO_NEW_SDK_EXPORT",
+    "reason": "No plugin API is required by this UI command."
+  }
+}

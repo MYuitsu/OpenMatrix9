@@ -4,6 +4,482 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-16",
   "title": "Curve · Line — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Single Line",
+        "Line Segments",
+        "Through Points",
+        "Perpendicular from Curve",
+        "Perpendicular to 2 Curves",
+        "Tangent from Curve",
+        "Tangent to 2 Curves",
+        "Tangent, Perpendicular",
+        "Angled",
+        "Bisector",
+        "From 4 Points",
+        "Normal to Surface",
+        "Vertical to C-Plane"
+      ],
+      "option_count": 13
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Curve",
+      "command": "Line",
+      "option": "Single Line",
+      "root_group": false,
+      "path": [
+        "Curve",
+        "Line"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "start (0,0,0), end (3,4,0) mm",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-16 - 08/L3-002 - Curve · Line - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Single Line",
+        "command_id": "CurveLineSingleLine",
+        "script": "! _Line",
+        "alt_script": "! _Line _BothSides",
+        "alt_label": "Line Both Sides",
+        "covered_by_l3": "OM9-L3-03-16-002",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Single Line",
+          "typed_forms": [
+            "Single Line"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Line Segments",
+        "command_id": "CurveLineLineSegments",
+        "script": "! _Lines",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Line Segments",
+          "typed_forms": [
+            "Line Segments"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Through Points",
+        "command_id": "CurveLineThroughPt",
+        "script": "! _LineThroughPt",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Through Points",
+          "typed_forms": [
+            "Through Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Perpendicular from Curve",
+        "command_id": "CurveLinePerpendicularfromCurve",
+        "script": "! _Line _Perpendicular",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Perpendicular from Curve",
+          "typed_forms": [
+            "Perpendicular from Curve"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Perpendicular to 2 Curves",
+        "command_id": "CurveLinePerpendicularto2Curves",
+        "script": "! _Line _Perpendicular",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Perpendicular to 2 Curves",
+          "typed_forms": [
+            "Perpendicular to 2 Curves"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Tangent from Curve",
+        "command_id": "CurveLineTangentfromCurve",
+        "script": "! _Line _Tangent",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Tangent from Curve",
+          "typed_forms": [
+            "Tangent from Curve"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Tangent to 2 Curves",
+        "command_id": "CurveLineTangentto2Curves",
+        "script": "! _Line _Tangent",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Tangent to 2 Curves",
+          "typed_forms": [
+            "Tangent to 2 Curves"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Tangent, Perpendicular",
+        "command_id": "CurveLineTangentPerpendicular",
+        "script": "! _Line _Tangent",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Tangent, Perpendicular",
+          "typed_forms": [
+            "Tangent, Perpendicular"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Angled",
+        "command_id": "CurveLineAngled",
+        "script": "! _Line _Angled",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Angled",
+          "typed_forms": [
+            "Angled"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Bisector",
+        "command_id": "CurveLineBisector",
+        "script": "! _Line _Bisector",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Bisector",
+          "typed_forms": [
+            "Bisector"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "From 4 Points",
+        "command_id": "CurveLineFrom4Points",
+        "script": "! _Line _FourPoint",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "From 4 Points",
+          "typed_forms": [
+            "From 4 Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Normal to Surface",
+        "command_id": "CurveLineNormalToSurface",
+        "script": "! _Line _Normal",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Normal to Surface",
+          "typed_forms": [
+            "Normal to Surface"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Vertical to C-Plane",
+        "command_id": "CurveLineVerticaltoCPlane",
+        "script": "! _Line _Vertical",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Vertical to C-Plane",
+          "typed_forms": [
+            "Vertical to C-Plane"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Line Segments",
+      "Through Points",
+      "Perpendicular from Curve",
+      "Perpendicular to 2 Curves",
+      "Tangent from Curve",
+      "Tangent to 2 Curves",
+      "Tangent, Perpendicular",
+      "Angled",
+      "Bisector",
+      "From 4 Points",
+      "Normal to Surface",
+      "Vertical to C-Plane"
+    ],
+    "missing": [
+      "option:Line Segments: type/default/range/unit/prompt",
+      "option:Through Points: type/default/range/unit/prompt",
+      "option:Perpendicular from Curve: type/default/range/unit/prompt",
+      "option:Perpendicular to 2 Curves: type/default/range/unit/prompt",
+      "option:Tangent from Curve: type/default/range/unit/prompt",
+      "option:Tangent to 2 Curves: type/default/range/unit/prompt",
+      "option:Tangent, Perpendicular: type/default/range/unit/prompt",
+      "option:Angled: type/default/range/unit/prompt",
+      "option:Bisector: type/default/range/unit/prompt",
+      "option:From 4 Points: type/default/range/unit/prompt",
+      "option:Normal to Surface: type/default/range/unit/prompt",
+      "option:Vertical to C-Plane: type/default/range/unit/prompt",
+      "input:start (0,0,0), end (3,4,0) mm: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-16-002-04"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E04",
@@ -121,13 +597,25 @@
       "depends_on_task_ids": [
         "OM9-L4-03-16-002-02"
       ]
+    },
+    {
+      "id": "OM9-L4-03-16-002-04",
+      "title": "Parameter Implementation — Curve · Line — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-002 - Curve · Line - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-16-002-01",
+        "OM9-L4-03-16-002-02",
+        "OM9-L4-03-16-002-03"
+      ]
     }
   ],
   "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-03-16-002-01",
     "OM9-L4-03-16-002-02",
-    "OM9-L4-03-16-002-03"
+    "OM9-L4-03-16-002-03",
+    "OM9-L4-03-16-002-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -278,10 +766,10 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
-    "date": "2026-10-23",
+    "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
-    "scope": "functional command session for Line/Point",
+    "scope": "one cataloged command id shared by the Matrix Curve menu row and the command line, with an interactive Rust session and verified geometry",
     "owner": {
       "crate": "om9-app",
       "files": [
@@ -299,12 +787,12 @@
       "implementation/fixtures/M03/OM9-L3-03-16-002/positive.json",
       "implementation/fixtures/M03/OM9-L3-03-16-002/negative.json",
       "implementation/evidence/M03/OM9-L3-03-16-002/",
-      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json"
+      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json",
+      "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/receipt.json"
     ],
     "tests": [
-      "cargo test -p om9-app --test curve_menu: 4 passed",
-      "Line/Point geometry smoke: passed",
-      "disabled reason catalog: 56 rows verified"
+      "cargo test -p om9-app --test curve_menu: 5 passed (58-row id/icon/label/script/menu-dispatch parity)",
+      "cargo test -p om9-app (curve command regressions): 320 passed, 0 failed"
     ],
     "l4_evidence": {
       "OM9-L4-03-16-002-01": "1/1",
@@ -315,6 +803,15 @@
     "manual_gate": "M03-UI",
     "remaining": [
       "Human M03-UI click/preview review is unsigned."
-    ]
+    ],
+    "menu_binding": {
+      "date": "2026-10-26",
+      "feature": "OM9-CURVE-002",
+      "menu_label": "Line",
+      "menu_icon": "CurveLineSingleLine",
+      "documented_script": "Line",
+      "binding_state": "Implemented",
+      "same_id_menu_and_commandline": true
+    }
   }
 }

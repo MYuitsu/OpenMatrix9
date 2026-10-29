@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-09-002",
+  "title": "Gem Reference Mesh And B-Rep Assets",
+  "cases": [
+    "no binary Matrix gemstone assets are read, copied or shipped",
+    "a custom profile with zero area is refused before any mesh exists",
+    "an open mesh is detected by the exact-two-edges-per-edge oracle",
+    "the kernel adapter refuses an open triangle mesh (each edge must have two face ancestors) instead of sealing it",
+    "a sewn result with more than one shell is refused",
+    "`BRep=Yes` returns a typed error when the conversion is impossible; it never falls back to a mesh body silently"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

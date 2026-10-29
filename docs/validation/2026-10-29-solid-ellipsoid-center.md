@@ -1,0 +1,9 @@
+# Ellipsoid center and axes — 2026-10-29
+
+The normalized Matrix manual describes selecting the center and ends of three axes. The recovered menu export maps `SolidEllipsoidFromCenter` to `_Ellipsoid` and its right click to `_Ellipsoid _D`; the export does not specify the geometric solver or input-plane behavior.
+
+Standalone OM9 previously accepted three numeric semi-axes only. Menu and CMD now also accept a center and three axis points. The first axis is projected into the construction plane captured at the center; the second is measured along its in-plane perpendicular; the third is measured along the plane normal. Axis endpoints may also be entered as a positive number after the center, or as world coordinates `x,y,z`. This projection and numeric behavior is an OM9 interpretation, not recovered Matrix solver evidence. The previous three-number route remains available.
+
+The exact rational ellipsoid is created in local coordinates and given a rigid placement; commit is one document transaction. Invalid axes retain prior inputs; input Undo removes the last point. A side viewport can pick the third axis using the camera ray through a plane containing the normal.
+
+Windows `CARGO_TARGET_DIR=L:/om9-target`, `-j 2`: the full `solid` integration suite passed 74 tests, with one pre-existing native-UI fixture ignored. New controller checks exercise menu/CMD, translated and rotated axes, a tilted CPlane, typed radii, invalid retry, analytical volume and Undo. The focused egui viewport test passed, including simulated top-view base picks, side-view third-axis pick and document Undo. Eight Truncated Cone viewport regressions passed after modifying the shared input-plane handling. The current actual desktop, GPU preview, original Matrix defaults, arbitrary point constraints, diameter/right-click, Corner, FromFoci, AroundCurve and MarkFoci are not established by this evidence. No ellipsoid live wire preview has been added.

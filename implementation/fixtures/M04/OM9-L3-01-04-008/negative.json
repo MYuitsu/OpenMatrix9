@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-008",
+  "case": "negative",
+  "input": "delete the parent while a child is rebuilding asynchronously",
+  "expected": "Error::Busy and the document is unchanged",
+  "tests": [
+    "deleting_the_parent_marks_the_child_broken_and_reports_the_policy_choices",
+    "detach_and_remove_policies_leave_no_dangling_reference",
+    "a_delete_during_an_async_rebuild_is_refused_not_raced"
+  ]
+}

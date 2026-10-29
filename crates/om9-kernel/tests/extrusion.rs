@@ -75,6 +75,57 @@ fn exact_extrusion_retains_rational_basis_and_reversal() {
 }
 
 #[test]
+fn certified_periodic_rational_cubic_has_continuous_jet_and_extrudes() {
+    use om9_core::geometry::NurbsCurve;
+    let limits=Limits::default();
+    let curve=Curve::Nurbs(NurbsCurve {
+        degree:3,poles:vec![[4.,0.,0.],[0.,4.,0.],[-4.,0.,0.],[0.,-4.,0.],[4.,0.,0.],[0.,4.,0.],[-4.,0.,0.]],
+        weights:vec![1.,0.7,1.3,0.9,1.,0.7,1.3],knots:(0..=10).map(|v|v as f64).collect(),
+        domain:[3.,7.],periodic:true,reversed:false,seam:None,
+    });
+    let a=curve_ops::fraction_derivatives(&curve,0.,2,&limits).unwrap();
+    let b=curve_ops::fraction_derivatives(&curve,1.,2,&limits).unwrap();
+    for k in 0..=2 {for axis in 0..3 {assert!((a[k][axis]-b[k][axis]).abs()<1e-9,"D{k} {a:?} {b:?}");}}
+    assert!(curve_ops::fraction_derivatives(&curve,0.,3,&limits).is_err());
+    let points=curve_ops::sample_curve(&curve,4097,&limits).unwrap();
+    let area=0.5*points.windows(2).map(|p|p[0][0]*p[1][1]-p[1][0]*p[0][1]).sum::<f64>().abs();
+    for reversed in [false,true] {
+        let source=if reversed {curve_ops::reverse_curve(&curve,&limits).unwrap()} else {curve.clone()};
+        let body=extrusion::solid(&source,[0.,0.,2.],0.01,&limits).unwrap();
+        let m=creation::measure(&body,&limits).unwrap();
+        assert!(m.closed && m.solids==1);assert!((m.volume_mm3-2.*area).abs()<1e-4,"{m:?} area {area}");
+    }
+    let Curve::Nurbs(mut doubled)=curve else {unreachable!()};
+    doubled.knots=vec![0.,1.,2.,2.,4.,5.,6.,6.,8.,9.,10.];doubled.domain=[2.,6.];
+    let doubled=Curve::Nurbs(doubled);
+    let a=curve_ops::fraction_derivatives(&doubled,0.,1,&limits).unwrap();
+    let b=curve_ops::fraction_derivatives(&doubled,1.,1,&limits).unwrap();
+    for k in 0..=1 {for axis in 0..3 {assert!((a[k][axis]-b[k][axis]).abs()<1e-9,"D{k} {a:?} {b:?}");}}
+    assert!(curve_ops::fraction_derivatives(&doubled,0.,2,&limits).is_err());
+    assert!(curve_ops::validate_ring_rail(&doubled,1e-7,&limits).is_ok());
+    assert!(extrusion::planar_face(&doubled,0.01,&limits).is_ok());
+    let points=curve_ops::sample_curve(&doubled,4097,&limits).unwrap();
+    let area=0.5*points.windows(2).map(|p|p[0][0]*p[1][1]-p[1][0]*p[0][1]).sum::<f64>().abs();
+    for reversed in [false,true] {for height in [-2.,2.] {
+        let source=if reversed {curve_ops::reverse_curve(&doubled,&limits).unwrap()} else {doubled.clone()};
+        let body=extrusion::solid(&source,[0.,0.,height],0.01,&limits).unwrap();let m=creation::measure(&body,&limits).unwrap();
+        assert!(m.closed && m.solids==1);assert!((m.volume_mm3-2.*area).abs()<1e-4,"{m:?} area {area}");
+    }}
+    for (base,scale) in [(10.,0.01),(10.,1000.),(0.,1e-9),(1e6,1e-4)] {
+        let Curve::Nurbs(mut scaled)=doubled.clone() else {unreachable!()};
+        for knot in &mut scaled.knots {*knot=base+*knot*scale;}scaled.domain=scaled.domain.map(|u|base+u*scale);
+        let curve=Curve::Nurbs(scaled);let body=extrusion::solid(&curve,[0.,0.,2.],0.01,&limits).unwrap();
+        let m=creation::measure(&body,&limits).unwrap_or_else(|e|panic!("base {base} scale {scale}: {e:?}"));
+        assert!((m.volume_mm3-2.*area).abs()<1e-4,"base {base} scale {scale} {m:?}");
+    }
+    let Curve::Nurbs(mut moved)=doubled.clone() else {unreachable!()};
+    for p in &mut moved.poles {p[0]+=100.;p[1]-=200.;p[2]+=30.;}
+    let body=extrusion::solid(&Curve::Nurbs(moved),[0.,0.,-2.],0.01,&limits).unwrap();
+    let m=creation::measure(&body,&limits).unwrap();
+    assert!((m.volume_mm3-2.*area).abs()<1e-4,"translated {m:?}");
+}
+
+#[test]
 fn exact_extrusion_refuses_open_nonplanar_and_disconnected_boundaries() {
     let limits = Limits::default();
     let open = Curve::Line {

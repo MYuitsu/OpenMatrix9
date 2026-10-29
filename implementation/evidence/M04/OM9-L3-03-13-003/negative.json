@@ -1,0 +1,9 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-003",
+  "kind": "negative",
+  "expected": "the phantom stale reference survives save/reopen and is still reported instead of being dropped",
+  "verified_by": [
+    "the_report_names_a_missing_input_and_survives_a_reopen"
+  ]
+}

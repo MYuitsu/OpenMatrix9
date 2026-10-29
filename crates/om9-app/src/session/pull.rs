@@ -57,7 +57,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Tolerance=") {
-            let Some(tolerance) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(tolerance) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.pull_pending = Some(pending);
                 return Some(Err(Error::Invalid("tolerance must be positive")));
             };
@@ -79,11 +83,7 @@ impl Controller {
             Ok(pullback) => pullback,
             Err(error) => return Some(Err(error)),
         };
-        Some(self.commit_geometry(
-            PULL,
-            "Pull",
-            Geometry::Curve(Curve::Nurbs(pullback.curve)),
-        ))
+        Some(self.commit_geometry(PULL, "Pull", Geometry::Curve(Curve::Nurbs(pullback.curve))))
     }
 
     pub fn pull_option_tokens(&self) -> Vec<(&'static str, &'static str)> {

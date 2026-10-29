@@ -2,21 +2,23 @@
   "schema": "om9.m03.l2-03-16.fixture.v1",
   "l3_id": "OM9-L3-03-16-003",
   "fixture_id": "OM9-L3-03-16-003-POSITIVE",
-  "command_id": "OM9-CURVE-103",
+  "command_id": "OM9-CURVE-003",
   "input": {
     "entry": "Matrix Curve menu and command line",
     "selection": "none; the command prompts for its points"
   },
   "expect": {
     "same_command_id": true,
-    "enabled": false,
-    "ui_state": "DISABLED_VISIBLE_REASON",
+    "enabled": true,
+    "ui_state": "ENABLED",
     "one_transaction": true
   },
-  "measured_on_2026_10_23": {
+  "verified_on_2026_10_26": {
     "catalog_rows": 58,
-    "enabled_rows": 2,
-    "disabled_rows": 56,
-    "line_point_smoke": "passed"
+    "enabled_rows": 58,
+    "disabled_rows": 0,
+    "menu_label": "Interp Curve",
+    "documented_script": "InterpCrv",
+    "tests": "320 passed; 0 failed"
   }
 }

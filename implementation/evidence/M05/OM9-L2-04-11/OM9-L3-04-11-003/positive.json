@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-11-003",
+  "title": "Baguette Channel Layout",
+  "cases": [
+    "a straight channel spans the wall gap and lays stones at the requested pitch",
+    "taper < 1 builds a tapered trapezoid profile while keeping Baguette/Gem identity",
+    "banking rolls the frame about the channel direction; Flip reverses the width axis",
+    "Middle centres an odd row; Point A/B trim the start and end"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

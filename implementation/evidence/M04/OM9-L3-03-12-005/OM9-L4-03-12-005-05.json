@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-12-005",
+  "title": "Builder Style Mode And Shape Filter",
+  "generated_at_utc": "2026-10-27T02:48:42Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the Builder Styles window at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "3cade1ae72f5e19ac02eadc40091d1634c96f3c259ea93cadb861322065c86f1",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "the ring mode enables the two ring styles and disables the gem one",
+    "negative": "a gem style and a foreign-parameter style are refused by the ring builder"
+  },
+  "l4_id": "OM9-L4-03-12-005-05",
+  "role": "REGRESSION",
+  "kind": "regression",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/builder_style.rs",
+    "crates/om9-app/tests/builder_styles.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2b22562d5bf27b3bed990378eaecae6f298b366b0d3f8046743b5c7904db8c27",
+      "summary": [
+        "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ],
+      "test": null,
+      "package": "om9-core",
+      "binary": "builder_style"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "f85bbdaca6b739d931f49acafad554aef2940160a9b54050b525065cc9003e89",
+      "summary": [
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ],
+      "test": null,
+      "package": "om9-app",
+      "binary": "builder_styles"
+    }
+  ],
+  "manual_gate_note": "Regression Tests: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

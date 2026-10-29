@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-021-01",
+  "l3_id": "OM9-L3-04-01-021",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "ReleaseFromCage: golden case 'mesh caged and edited, then released from the object -> the om9.cage slot is gone and the vertex positions are byte-identical to the caged ones'",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_021_release_from_cage_keeps_the_geometry"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-12-005",
+  "title": "Pave Sphere Layout",
+  "scope": "opens Pavé Sphere with no mandatory surface",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": [
+    "Count or X/T produce a Fibonacci sphere layout on the typed radius",
+    "Removal None/A/B are typed and change the realized count",
+    "Gem Size and Minimum Size stay within the plan",
+    "Radius and Count have viewport handles through the shared builder-handle route",
+    "Apply inserts the sphere stones without needing a surface selection"
+  ],
+  "negative": [
+    "a radius smaller than the stone is refused",
+    "a zero count and zero X/T are refused",
+    "more than MAX_PAVE_GEMS stones is a typed Budget error"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-12-005-03"
+    ],
+    "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_pave.rs",
+    "crates/om9-app/tests/gem_pave_panel.rs"
+  ]
+}

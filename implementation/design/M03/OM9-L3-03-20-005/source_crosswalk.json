@@ -1,0 +1,15 @@
+{
+  "l3_id": "OM9-L3-03-20-005",
+  "title": "Measurement Label And Command Feedback",
+  "owner": "OM9-L2-03-20",
+  "date": "2026-10-26",
+  "sources": [
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-20 - 12-febe-matrix/L3-005 - Measurement Label And Command Feedback/l3.json",
+    "crates/om9-app/src/session/measure.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/measure.rs",
+    "crates/om9-app/tests/measure_ui.rs"
+  ],
+  "qymcad_source_paths_verified": []
+}

@@ -1,0 +1,57 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-04-008-01",
+  "l3_id": "OM9-L3-01-04-008",
+  "l3_title": "Delete Parent Or Change Input Policy",
+  "owner_module_id": "OM9-L2-01-04",
+  "milestone": "M04",
+  "gate": "AUTO_ONLY",
+  "goal": "behaviour for missing inputs and changed output topology",
+  "positive_oracle": "parent curve deleted; a child uses its semantic rail reference -> child marked broken; the report offers KeepBroken/DetachDependents/RemoveDependents and the chosen policy leaves no dangling reference",
+  "negative_oracle": "delete the parent while a child is rebuilding asynchronously -> Error::Busy and the document is unchanged",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "source_dirty": true,
+  "checkout": "QymCAD/ (vendored subtree of the main repository; no independent .git)",
+  "method": "bounded file reads with line numbers; decisions are OM9-owned and no upstream code is copied",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-part/src/topology.rs",
+      "line": 25,
+      "observed_symbols": [
+        "delete feature together with its body, clear the caches and rebuild"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the cascade is mechanical and has no user policy; OM9 reports the broken children and lets the caller choose repair/removal",
+      "om9_owner": "om9-core/src/associative.rs (delete_source_input)"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/edits.rs",
+      "line": 209,
+      "observed_symbols": [
+        "a node with nothing to rebuild from is counted as changed, marked, and a rebuild of nothing is started"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "nothing names the missing input; OM9 keeps Unresolved('source missing') and lists it in the report",
+      "om9_owner": "om9-core/src/history_ops.rs + associative.rs"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/jobs.rs",
+      "line": 99,
+      "observed_symbols": [
+        "a rebuild starts only when no job is in hand, so no job is dropped while the window works"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the exclusion is job-level; OM9 states it per feature with RebuildActivity and refuses the delete with Error::Busy",
+      "om9_owner": "om9-core/src/associative.rs (RebuildActivity)"
+    }
+  ],
+  "implemented_api": [
+    "crates/om9-core/src/associative.rs: BrokenInputPolicy, BrokenDependency, DeleteSourceReport, RebuildActivity, delete_source_input, drop_references_of"
+  ],
+  "reuse_decision": "ADAPT the rebuild/dirty/persistent-id ideas; ADD the typed durable ports, the persisted semantic reference and the content baselines.",
+  "evidence": [
+    "crates/om9-core/tests/associative_rebuild.rs (deleting_the_parent_marks_the_child_broken_and_reports_the_policy_choices, detach_and_remove_policies_leave_no_dangling_reference, a_delete_during_an_async_rebuild_is_refused_not_raced)",
+    "implementation/fixtures/M04/OM9-L3-01-04-008/positive.json",
+    "implementation/fixtures/M04/OM9-L3-01-04-008/negative.json"
+  ]
+}

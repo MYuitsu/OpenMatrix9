@@ -1,0 +1,16 @@
+# parameter contract for OM9-L3-01-04-003
+
+The L3 parameter contract in l3.json is DOMAIN_ONLY with option_count = 0: this L3 adds
+no user-facing command option. Its inputs are the recorded feature graph itself
+(typed ports, parameters owned by the builder recipe, dirty state), so there is no
+command line option table to implement in this owner.
+
+Verified behaviour:
+
+- `FeaturePort::validate` refuses an empty role or an empty/duplicate geometry kind set.
+- The baseline includes `input_ports` and `parameters` in its content hash, so a
+  parameter change is visible to the regression fixture.
+- `RecomputeCache` keys on the parameter map, so a parameter edit is a cache miss even
+  before the recipe revision moves.
+
+Tests: editing_the_source_dirties_b_and_d_then_c_in_topological_order, a_cycle_is_refused_instead_of_being_ordered_or_planned

@@ -1,0 +1,60 @@
+{
+  "schema": "om9.evidence.implement.v1",
+  "l4": "OM9-L4-04-17-001-03",
+  "l3": "OM9-L3-04-17-001",
+  "recorded_at": "2026-10-28",
+  "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+  "changed_files": [
+    "crates/om9-core/src/cutters/channel.rs",
+    "crates/om9-core/src/cutters/mod.rs",
+    "crates/om9-app/src/session/channel_cutters.rs"
+  ],
+  "implementation": [
+    "cutters::channel::ChannelParams",
+    "cutters::channel::build_row",
+    "cutters::channel::ChannelCutter",
+    "cutters::sweep",
+    "session::channel_cutters::RowCutterSession"
+  ],
+  "command_options": [
+    "Width=<mm>",
+    "Depth=<mm>",
+    "Height=<mm>",
+    "Wall=<mm>",
+    "Spacing=<mm>",
+    "Start=Square|Round|Taper",
+    "End=Square|Round|Taper",
+    "StartDepth=<mm>",
+    "EndDepth=<mm>",
+    "Mirror=on|off",
+    "Flip=ab|ba",
+    "Middle=None|Wide|Deep",
+    "Boolean=off|on|one",
+    "Preserve=preserve|remove",
+    "Reset",
+    "Enter",
+    "Cancel"
+  ],
+  "verification": {
+    "commands": [
+      "cargo test -p om9-core --test channel_cutters the_channel_builder_sweeps_one_closed_trench_through_the_row",
+      "cargo test -p om9-app --test channel_cutters the_channel_icon_stages_a_preview_and_enter_commits_one_transaction",
+      "cargo test -p om9-app --test channel_cutters every_row_command_resolves_from_the_typed_line_and_needs_a_gem"
+    ],
+    "results": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": 0,
+      "cargo test -p om9-core --test channel_cutters -j 2": "10 passed",
+      "cargo test -p om9-app --test channel_cutters -j 2": "7 passed",
+      "cargo test -p om9-core -j 2": "911 passed, 0 failed",
+      "cargo test -p om9-app --lib -j 2": "202 passed, 2 failed (ui::icon_size_audit, pre-existing)",
+      "cargo test -p om9-app --test gem_cutters -j 2": "7 passed, 0 failed",
+      "cargo test -p om9-app --test head_commands -j 2": "9 passed, 0 failed"
+    }
+  },
+  "limitations": [
+    "The channel is a swept 4-corner prism (one station per stone plus two end caps), not a B-Rep solid.",
+    "A channel narrower than its widest stone is refused instead of clipped: the stones sit in the channel it cuts.",
+    "The end profiles shape the two end caps only; the middle section (Middle=Wide|Deep) is a third profile."
+  ]
+}

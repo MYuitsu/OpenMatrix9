@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-006",
+  "title": "Gem Profile Curve And Guides",
+  "command": "BuilderGemProfile / BuilderGemGuides / gvGemProfile / gvGemGuides",
+  "scope": "`gem_placement::profile_and_guides`; `GemStation::table_point`; `GemPlacementTool::{Profile, Guides}`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "profile, girdle and per-stone guide curves built from the placement",
+  "negative": "too few stones and degenerate guides are typed refusals",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-006-03"
+    ],
+    "fixture_manifest_sha256": "e3bc58adca799f023954f64c01aae13e631255cb128493005734cab4604a2d62"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "profile_and_guides_insert_construction_curves"
+}

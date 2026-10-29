@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-006",
+  "case": "positive",
+  "input": "preview rail diameter 18->19->20 without Apply",
+  "expected": "committed document id/geometry/hash unchanged; one Apply yields only the final value",
+  "tests": [
+    "preview_edits_never_touch_the_committed_document_until_one_apply",
+    "escape_discards_transient_nodes_and_a_moved_base_is_refused"
+  ]
+}

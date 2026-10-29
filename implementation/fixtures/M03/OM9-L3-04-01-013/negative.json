@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-013",
+  "case": "a selection with no link, or with links that are already broken",
+  "expected": "a selection with no link, or with links that are already broken -> Error::Invalid(\"selection has no live Smart Flow link\")",
+  "test": "m03_04_01_014_smart_flow_break_marks_the_link_broken"
+}

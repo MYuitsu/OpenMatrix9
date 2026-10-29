@@ -3,7 +3,285 @@
   "id": "OM9-L3-03-18-013",
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-18",
-  "title": "Solid \u00b7 Sphere \u2014 menu binding",
+  "title": "Solid · Sphere — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Sphere",
+        "Sphere 2 Points",
+        "Sphere 3 Points",
+        "Sphere 4 Points",
+        "Around Curve",
+        "Tangent to Curves",
+        "Fit Sphere to Points"
+      ],
+      "option_count": 7
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Solid",
+      "command": "Sphere",
+      "option": "Sphere",
+      "root_group": false,
+      "path": [
+        "Solid",
+        "Sphere"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "center origin, radius 5 mm",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid · Sphere - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Sphere",
+        "command_id": "SolidSphereCenterRadius",
+        "script": "! _Sphere",
+        "alt_script": "! _Sphere _P",
+        "alt_label": "Sphere 2 Points",
+        "covered_by_l3": "OM9-L3-03-18-013",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sphere",
+          "typed_forms": [
+            "Sphere"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Sphere 2 Points",
+        "command_id": "SolidSphere2Points",
+        "script": "! _Sphere _2Point",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sphere 2 Points",
+          "typed_forms": [
+            "Sphere 2 Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Sphere 3 Points",
+        "command_id": "SolidSphere3Points",
+        "script": "! _Sphere _3Point",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sphere 3 Points",
+          "typed_forms": [
+            "Sphere 3 Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Sphere 4 Points",
+        "command_id": "SolidSphere4Points",
+        "script": "! _Sphere _4Point",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Sphere 4 Points",
+          "typed_forms": [
+            "Sphere 4 Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Around Curve",
+        "command_id": "SolidSphereAroundCurve",
+        "script": "! _Sphere _AroundCurve",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Around Curve",
+          "typed_forms": [
+            "Around Curve"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Tangent to Curves",
+        "command_id": "SolidSphereTangenttoCurves",
+        "script": "! _Sphere _Tangent",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Tangent to Curves",
+          "typed_forms": [
+            "Tangent to Curves"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Fit Sphere to Points",
+        "command_id": "SolidSphereFitSpheretoPoints",
+        "script": "! _Sphere _FitPoints",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Fit Sphere to Points",
+          "typed_forms": [
+            "Fit Sphere to Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Sphere 2 Points",
+      "Sphere 3 Points",
+      "Sphere 4 Points",
+      "Around Curve",
+      "Tangent to Curves",
+      "Fit Sphere to Points"
+    ],
+    "missing": [
+      "option:Sphere 2 Points: type/default/range/unit/prompt",
+      "option:Sphere 3 Points: type/default/range/unit/prompt",
+      "option:Sphere 4 Points: type/default/range/unit/prompt",
+      "option:Around Curve: type/default/range/unit/prompt",
+      "option:Tangent to Curves: type/default/range/unit/prompt",
+      "option:Fit Sphere to Points: type/default/range/unit/prompt",
+      "input:center origin, radius 5 mm: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-18-013-04"
+  },
   "planning_state": "IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E04",
@@ -13,7 +291,7 @@
     "l3_id": "OM9-L3-03-18-013",
     "capability_id": "cap.03-18.solid-command-sphere",
     "stable_owner_key": "OM9-L2-03-18/solid-command-sphere",
-    "title": "Solid \u00b7 Sphere \u2014 menu binding",
+    "title": "Solid · Sphere — menu binding",
     "slug": "solid-command-sphere",
     "module_id": "OM9-L2-03-18",
     "module_path": "specs/03-ms03-curve-surface-solid-3dm/10-febe-matrix-solid-menu-workflows/",
@@ -25,10 +303,10 @@
     "delivery": "mainline",
     "status": "L3_SPEC_WITH_L4_PLANNED_NOT_EXECUTED",
     "origin_source_taxonomy": "03-matrix8-book1",
-    "goal": "Bind menu/commandline for documented Solid Tools command \u201cSphere\u201d; reuse owning geometry service rather than reimplement its algorithm",
+    "goal": "Bind menu/commandline for documented Solid Tools command “Sphere”; reuse owning geometry service rather than reimplement its algorithm",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
-    "parent_scope": "Solid menu ph\u00f9 h\u1ee3p trang s\u1ee9c: primitives, bool, extrusion, shell, text geometry",
-    "parent_exclusions": "Kh\u00f4ng th\u00eam c\u01a1 kh\u00ed thu\u1ea7n t\u00fay Boss/Rib/Slab d\u1ea1ng feature chuy\u00ean bi\u1ec7t.",
+    "parent_scope": "Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geometry",
+    "parent_exclusions": "Không thêm cơ khí thuần túy Boss/Rib/Slab dạng feature chuyên biệt.",
     "depends_on_module_ids": [
       "OM9-L2-01-09",
       "OM9-L2-03-07"
@@ -68,18 +346,18 @@
       "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
     },
     "acceptance_tests_auto": [
-      "Automated: valid input exercises \u201cSolid \u00b7 Sphere \u2014 menu binding\u201d without panic, leaked handle or stale scene reference.",
+      "Automated: valid input exercises “Solid · Sphere — menu binding” without panic, leaked handle or stale scene reference.",
       "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
       "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
     ],
     "acceptance_tests_manual": [
-      "Manual gate M03: run OpenMatrix9 UI; perform \u201cSolid \u00b7 Sphere \u2014 menu binding\u201d; observe preview/feedback and commit/cancel behavior.",
+      "Manual gate M03: run OpenMatrix9 UI; perform “Solid · Sphere — menu binding”; observe preview/feedback and commit/cancel behavior.",
       "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
     ],
     "requires_manual_test": true,
     "manual_test_gate": "M03-UI",
     "invariants": [
-      "No `90-after` dependency for any M01\u2013M09 deliverable.",
+      "No `90-after` dependency for any M01–M09 deliverable.",
       "No implementation may be assumed from QymCAD until source paths are checked.",
       "Existing document IDs/layer flags/units/history remain consistent after operation.",
       "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
@@ -98,15 +376,15 @@
   "children_l4": [
     {
       "id": "OM9-L4-03-18-013-01",
-      "title": "Dispatch Contract \u2014 Solid \u00b7 Sphere \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid \u00b7 Sphere - menu binding/L4-01 - Command Dispatch Contract/l4.json",
+      "title": "Dispatch Contract — Solid · Sphere — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid · Sphere - menu binding/L4-01 - Command Dispatch Contract/l4.json",
       "role": "DISPATCH_CONTRACT",
       "depends_on_task_ids": []
     },
     {
       "id": "OM9-L4-03-18-013-02",
-      "title": "Wire Ui \u2014 Solid \u00b7 Sphere \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid \u00b7 Sphere - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
+      "title": "Wire Ui — Solid · Sphere — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid · Sphere - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
       "role": "WIRE_UI",
       "depends_on_task_ids": [
         "OM9-L4-03-18-013-01",
@@ -115,11 +393,22 @@
     },
     {
       "id": "OM9-L4-03-18-013-03",
-      "title": "Acceptance \u2014 Solid \u00b7 Sphere \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid \u00b7 Sphere - menu binding/L4-03 - Acceptance and Evidence/l4.json",
+      "title": "Acceptance — Solid · Sphere — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid · Sphere - menu binding/L4-03 - Acceptance and Evidence/l4.json",
       "role": "ACCEPTANCE",
       "depends_on_task_ids": [
         "OM9-L4-03-18-013-02"
+      ]
+    },
+    {
+      "id": "OM9-L4-03-18-013-04",
+      "title": "Parameter Implementation — Solid · Sphere — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid · Sphere - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-18-013-01",
+        "OM9-L4-03-18-013-02",
+        "OM9-L4-03-18-013-03"
       ]
     }
   ],
@@ -127,7 +416,8 @@
   "task_ids": [
     "OM9-L4-03-18-013-01",
     "OM9-L4-03-18-013-02",
-    "OM9-L4-03-18-013-03"
+    "OM9-L4-03-18-013-03",
+    "OM9-L4-03-18-013-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -161,17 +451,17 @@
     ],
     "api_owner_resolution_status": "CANDIDATE_REQUIRES_LOCAL_TEST",
     "technical_decisions": [
-      "Matrix menu item ch\u1ec9 dispatch qua qymcad/src/command_catalog.rs / command bus; kh\u00f4ng t\u1ea1o m\u1ed9t kernel thao t\u00e1c song song.",
-      "D\u00f9ng c\u00f9ng command descriptor, typed options v\u00e0 selection gi\u1eefa menu, command line v\u00e0 toolbar; ki\u1ec3m tra disable state khi backend v\u1eafng m\u1eb7t.",
-      "N\u1ebfu kh\u00f4ng c\u00f3 owner L3 x\u00e1c minh \u0111\u01b0\u1ee3c, tr\u1ea1ng th\u00e1i BLOCKED_OWNER, kh\u00f4ng coi m\u1ed9t menu item render th\u00e0nh PASS.",
-      "\u1ee8ng vi\u00ean owner L3: OM9-L3-01-09-001; ph\u1ea3i ki\u1ec3m ch\u1ee9ng API v\u00e0 test tr\u01b0\u1edbc khi b\u1eadt menu."
+      "Matrix menu item chỉ dispatch qua qymcad/src/command_catalog.rs / command bus; không tạo một kernel thao tác song song.",
+      "Dùng cùng command descriptor, typed options và selection giữa menu, command line và toolbar; kiểm tra disable state khi backend vắng mặt.",
+      "Nếu không có owner L3 xác minh được, trạng thái BLOCKED_OWNER, không coi một menu item render thành PASS.",
+      "Ứng viên owner L3: OM9-L3-01-09-001; phải kiểm chứng API và test trước khi bật menu."
     ],
     "fixture_design": {
       "case_id": "OM9-L3-03-18-013-GOLDEN",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "input": {
-        "command": "Solid \u00b7 Sphere \u2014 menu binding",
-        "purpose": "Bind menu/commandline for documented Solid Tools command \u201cSphere\u201d; reuse owning geometry service rather than reimplement its algorithm",
+        "command": "Solid · Sphere — menu binding",
+        "purpose": "Bind menu/commandline for documented Solid Tools command “Sphere”; reuse owning geometry service rather than reimplement its algorithm",
         "units": "mm",
         "document": "empty_or_specific_fixture",
         "command_id_to_define": "M03.sphere",
@@ -198,9 +488,9 @@
     "golden_test_design": {
       "fixture_id": "OM9-L3-03-18-013-POSITIVE",
       "input": "center origin, radius 5 mm",
-      "positive_assertions": "valid BRep sphere V\u2248523.5987756 mm\u00b3",
+      "positive_assertions": "valid BRep sphere V≈523.5987756 mm³",
       "negative_fixture_id": "OM9-L3-03-18-013-NEGATIVE",
-      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "rust_test_name_to_create": "m03_03_18_013"
     },
@@ -245,8 +535,8 @@
       "expected_positive_fixture_ref": "OM9-L3-03-18-013-POSITIVE",
       "expected_negative_fixture_ref": "OM9-L3-03-18-013-NEGATIVE",
       "source_golden_input_from_parent": "center origin, radius 5 mm",
-      "parent_golden_positive_oracle": "valid BRep sphere V\u2248523.5987756 mm\u00b3",
-      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+      "parent_golden_positive_oracle": "valid BRep sphere V≈523.5987756 mm³",
+      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
       "independent_domain_example_proposed_not_always_applicable": "command invoked with valid selection and chosen options, and with no selection/locked layer/unavailable backend",
       "domain_specific_assertions_to_select_when_applicable": [
         "command ID resolves to one backend handler or explicit disabled fallback",
@@ -278,6 +568,96 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "trimmed_arc_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-trimmed-arc.md",
+      "tests": "52 Sphere controller tests passed, including four trimmed-arc sphere fixtures.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "curve_world_hit_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-curve-world-hit.md",
+      "tests": "51 Sphere controller tests and five simulated viewport tests passed, including an elevated curve world hit.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "ambiguous_source_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-ambiguous-source.md",
+      "tests": "Four simulated viewport tests passed, including popup choice and stale-session rejection for coincident boxes.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "overlapping_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-overlapping-edge.md",
+      "tests": "Three simulated viewport tests passed, including overlapping projected edges from coincident boxes.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "viewport_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-viewport-edge.md",
+      "tests": "51 Sphere controller tests and two simulated viewport tests passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "circular_brep_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-circular-brep-edge.md",
+      "tests": "50 Sphere controller tests and 60 feature-enabled OCCT kernel editing tests passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "straight_brep_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-straight-brep-edge.md",
+      "tests": "49 Sphere controller tests passed; straight box edge fraction, pick, preview, stale source and Undo checked.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "aroundcurve_fraction_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-aroundcurve-fraction-preview.md",
+      "tests": "48 Sphere controller tests passed; translated circle fraction, preview, volume and Undo checked.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "aroundcurve_pick_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-aroundcurve-pick.md",
+      "tests": "47 Sphere controller tests passed, including five projected-pick fixtures.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "placed_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-placed-curve.md",
+      "tests": "46 Sphere controller tests passed; a targeted test also passed after adding the rotation fixture.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "tangent_units_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-tangent-units.md",
+      "tests": "45 Sphere controller tests, including five centimeter Tangent fixtures, and one three-route simulated Radius test passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "three_point_radius_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-3point-radius.md",
+      "tests": "44 Sphere controller tests, one three-route option test and one simulated viewport test passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "units_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-units.md",
+      "tests": "43 Sphere controller tests, including 30 unit/input fixtures, and one 3-route simulated Radius option test passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "variants_menu_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-menu-variants.md",
+      "tests": "40 Sphere controller and 28 simulated chrome action tests passed; Solid icon and public-source audits passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "sphere_retry_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-retry-preview.md",
+      "tests": "38 Sphere controller tests including retry, preview, volume and Undo.",
+      "desktop_and_original_behavior_verified": false
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-014",

@@ -1,0 +1,21 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 24.18s
+     Running tests\solid_workflows.rs (L:/om9-target\debug\deps\solid_workflows-398d44b418c911f2.exe)
+
+running 1 test
+
+thread 'remaining_primitive_menu_prompts_produce_analytic_volumes' (43248) panicked at crates\om9-app\tests\solid_workflows.rs:248:9:
+assertion `left == right` failed
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test remaining_primitive_menu_prompts_produce_analytic_volumes ... FAILED
+
+failures:
+
+failures:
+    remaining_primitive_menu_prompts_produce_analytic_volumes
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-app --test solid_workflows`

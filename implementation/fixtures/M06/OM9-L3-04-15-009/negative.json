@@ -1,0 +1,15 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-15-009",
+  "cases": [
+    {
+      "input": "Ends= on a closed row",
+      "error": "invalid end mode on closed row"
+    },
+    {
+      "input": "Ends=Three",
+      "error": "invalid prong ends option"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

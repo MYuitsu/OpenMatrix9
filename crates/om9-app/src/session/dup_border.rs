@@ -44,10 +44,8 @@ impl Controller {
                 }
             }
             Geometry::Brep(brep) => {
-                let edges = om9_core::curve_surface_ops::boundary_edges(
-                    &brep,
-                    self.coordinator.limits(),
-                )?;
+                let edges =
+                    om9_core::curve_surface_ops::boundary_edges(&brep, self.coordinator.limits())?;
                 if edges.is_empty() {
                     return Err(Error::Invalid("B-Rep has no boundary edges"));
                 }

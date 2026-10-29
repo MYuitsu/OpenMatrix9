@@ -1,0 +1,50 @@
+{
+  "schema": "om9.evidence.implement.v1",
+  "l4": "OM9-L4-04-17-004-03",
+  "l3": "OM9-L3-04-17-004",
+  "recorded_at": "2026-10-28",
+  "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+  "changed_files": [
+    "crates/om9-core/src/cutters/brightcut.rs",
+    "crates/om9-app/src/session/channel_cutters.rs",
+    "crates/om9-app/src/ui/channel_cutters.rs"
+  ],
+  "implementation": [
+    "cutters::brightcut::BrightParams::for_gem",
+    "cutters::brightcut::build_single",
+    "cutters::brightcut::BrightMode::Single"
+  ],
+  "command_options": [
+    "Height=<mm>",
+    "Length=<mm>",
+    "Scale2D=<percent>",
+    "Count=<n>",
+    "Angle=<degrees>",
+    "Depth=<mm>",
+    "Boolean=off|on|one",
+    "Preserve=preserve|remove",
+    "Reset",
+    "Enter",
+    "Cancel"
+  ],
+  "verification": {
+    "commands": [
+      "cargo test -p om9-core --test channel_cutters the_bright_cutter_builds_one_closed_facet_per_count",
+      "cargo test -p om9-core --test channel_cutters the_bright_2d_scale_and_angle_are_typed_controls"
+    ],
+    "results": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": 0,
+      "cargo test -p om9-core --test channel_cutters -j 2": "10 passed",
+      "cargo test -p om9-app --test channel_cutters -j 2": "7 passed",
+      "cargo test -p om9-core -j 2": "911 passed, 0 failed",
+      "cargo test -p om9-app --lib -j 2": "202 passed, 2 failed (ui::icon_size_audit, pre-existing)",
+      "cargo test -p om9-app --test gem_cutters -j 2": "7 passed, 0 failed",
+      "cargo test -p om9-app --test head_commands -j 2": "9 passed, 0 failed"
+    }
+  },
+  "limitations": [
+    "The facet is a block whose inner edge sits on the girdle and whose outer edge is Length away; the top face carries the bright angle.",
+    "A facet that would sink below its own bottom is deepened instead of refused: the cutter has to contain its facet."
+  ]
+}

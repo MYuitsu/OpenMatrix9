@@ -1,0 +1,17 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-008",
+  "cases": [
+    {
+      "input": "r=10 circle rail and a sphere whose placement is 14 mm from the axis",
+      "expect": "commit moves the object onto the rail (radial 10 within 1e-6) and keeps its identity",
+      "oracle": "om9-app tests/settings_commands.rs::pull_to_rail_moves_a_selected_mesh_onto_the_rail"
+    }
+  ],
+  "automated_tests": [
+    "pull_to_rail_needs_a_selected_circle_rail",
+    "pull_to_rail_moves_a_selected_mesh_onto_the_rail",
+    "settings::rail::tests",
+    "tests/settings_family.rs::one_row_drives_every_setting_part"
+  ]
+}

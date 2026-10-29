@@ -1,0 +1,23 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-15-004",
+  "cases": [
+    {
+      "input": "Mode=Curve without a picked curve",
+      "error": "missing metal piece curve"
+    },
+    {
+      "input": "Border=On before any channel border is committed",
+      "error": "missing metal piece channel border"
+    },
+    {
+      "input": "no gem selected",
+      "error": "missing gem row selection"
+    },
+    {
+      "input": "Wall=-1",
+      "error": "invalid metal piece wall"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

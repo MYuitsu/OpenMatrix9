@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_edits_evidence.v1",
+  "l3_id": "OM9-L3-04-13-001",
+  "title": "Gem Positioner",
+  "command": "BuilderGemPositioner / gvGemPositioner",
+  "scope": "`om9_app::session::gem` positioner (`BuilderGemPositioner`); `Controller::gem_apply` positioner branch; `gem_record` on the target",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "handle move/rotate/scale on one instance, identity preserved",
+  "negative": "a non-gem or a shared definition is a typed refusal",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-13-001-03"
+    ],
+    "fixture_manifest_sha256": "2e4ea00ac366d5459c93f162e803ed9667eb073a8e603ee1225f6f0f479466c2"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/tests/gem_edits.rs"
+  ],
+  "test": "the_positioner_moves_and_rotates_the_instance_in_place"
+}

@@ -1,0 +1,41 @@
+$ cargo test -p om9-core --lib -j 2 ring_builder::tests::an_eternity_band_builds_a_closed_solid_with_twelve_frames_and_no_gem_solids
+# exit code: 0
+# captured: 2026-10-27T09:34:46Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test ring_builder::tests::an_eternity_band_builds_a_closed_solid_with_twelve_frames_and_no_gem_solids ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 130 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)
+
+$ cargo test -p om9-core --test ring_family -j 2 an_eternity_band_commits_a_closed_solid_and_keeps_stones_as_frames
+# exit code: 0
+# captured: 2026-10-27T09:34:46Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test an_eternity_band_commits_a_closed_solid_and_keeps_stones_as_frames ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family.rs (L:\om9-target\debug\deps\ring_family-96685c27dfebd318.exe)
+
+$ cargo test -p om9-kernel --features 3dm-brep --test ring_family_brep -j 2 every_ring_kind_sews_into_one_closed_brep_matching_the_mesh_volume
+# exit code: 0
+# captured: 2026-10-27T09:34:48Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test every_ring_kind_sews_into_one_closed_brep_matching_the_mesh_volume ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.62s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\ring_family_brep.rs (L:\om9-target\debug\deps\ring_family_brep-978ce2d9e95264df.exe)

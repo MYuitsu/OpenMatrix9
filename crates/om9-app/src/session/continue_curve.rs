@@ -64,7 +64,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Degree=") {
-            let Some(degree) = value.parse::<usize>().ok().filter(|value| (1..=11).contains(value)) else {
+            let Some(degree) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (1..=11).contains(value))
+            else {
                 self.continue_curve_pending = Some(pending);
                 return Some(Err(Error::Invalid("degree must be 1..11")));
             };
@@ -74,7 +78,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.continue_curve_pending = Some(pending);
-            return Some(Err(Error::Invalid("ContinueCurve accepts points, Undo or Enter")));
+            return Some(Err(Error::Invalid(
+                "ContinueCurve accepts points, Undo or Enter",
+            )));
         }
         if pending.points.len() < 2 {
             self.continue_curve_pending = Some(pending);

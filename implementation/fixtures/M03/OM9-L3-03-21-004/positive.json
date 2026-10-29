@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-004",
+  "case": "two witness points on a 45 degree diagonal",
+  "expected": "two witness points on a 45 degree diagonal -> the label reports the diagonal length and the text turns with it",
+  "test": "crates/om9-app/tests/annotation.rs::five_dimension_families_have_independent_value_oracles_and_one_undo"
+}

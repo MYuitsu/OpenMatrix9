@@ -4,6 +4,216 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-17",
   "title": "Surface · Cutting Plane — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Plane from Corners",
+        "3 Points",
+        "Vertical",
+        "Through Points",
+        "Cutting Plane"
+      ],
+      "option_count": 5
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Surface",
+      "command": "Plane",
+      "option": "Cutting Plane",
+      "root_group": false,
+      "path": [
+        "Surface",
+        "Plane"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "box 10×20×30 and visual plane z=15; test clipped draw result without changing BRep",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-17 - 09-febe/L3-036 - Surface · Cutting Plane - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Plane from Corners",
+        "command_id": "SurfacePlaneCornertoCorner",
+        "script": "! _Plane",
+        "alt_script": "! _Plane _P",
+        "alt_label": "Plane Center",
+        "covered_by_l3": "OM9-L3-03-17-015",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Plane from Corners",
+          "typed_forms": [
+            "Plane from Corners"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "3 Points",
+        "command_id": "SurfacePlane3Points",
+        "script": "! _Plane 3Point",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "3 Points",
+          "typed_forms": [
+            "3 Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Vertical",
+        "command_id": "SurfacePlaneVertical",
+        "script": "! _Plane Vertical",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Vertical",
+          "typed_forms": [
+            "Vertical"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Through Points",
+        "command_id": "SurfacePlaneThroughPoints",
+        "script": "! _PlaneThroughPt",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Through Points",
+          "typed_forms": [
+            "Through Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Cutting Plane",
+        "command_id": "SurfacePlaneCuttingPlane",
+        "script": "! _CutPlane",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-17-036",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Cutting Plane",
+          "typed_forms": [
+            "Cutting Plane"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "3 Points",
+      "Vertical",
+      "Through Points"
+    ],
+    "missing": [
+      "option:3 Points: type/default/range/unit/prompt",
+      "option:Vertical: type/default/range/unit/prompt",
+      "option:Through Points: type/default/range/unit/prompt",
+      "input:box 10×20×30 and visual plane z=15; test clipped draw result without changing BRep: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-17-036-04"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E06",
@@ -121,13 +331,25 @@
       "depends_on_task_ids": [
         "OM9-L4-03-17-036-02"
       ]
+    },
+    {
+      "id": "OM9-L4-03-17-036-04",
+      "title": "Parameter Implementation — Surface · Cutting Plane — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-17 - 09-febe/L3-036 - Surface · Cutting Plane - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-17-036-01",
+        "OM9-L4-03-17-036-02",
+        "OM9-L4-03-17-036-03"
+      ]
     }
   ],
   "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-03-17-036-01",
     "OM9-L4-03-17-036-02",
-    "OM9-L4-03-17-036-03"
+    "OM9-L4-03-17-036-03",
+    "OM9-L4-03-17-036-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -296,12 +518,12 @@
       "implementation/fixtures/M03/OM9-L3-03-17-036/positive.json",
       "implementation/fixtures/M03/OM9-L3-03-17-036/negative.json",
       "implementation/evidence/M03/OM9-L3-03-17-036/",
-      "implementation/evidence/M03/2026-10-23-l2-03-17-checks.json"
+      "implementation/evidence/M03/2026-10-26-l2-03-17-checks.json"
     ],
     "tests": [
-      "cargo test -p om9-app --test surface_menu: 41 passed",
+      "cargo test -p om9-app --test surface_menu: 62 passed",
       "functional selected-surface Rebuild/Unroll: one surface and one Undo",
-      "disabled reason catalog: 3 rows verified"
+      "menu and command line resolve to the same command id for all 38 rows"
     ],
     "l4_evidence": {
       "OM9-L4-03-17-036-01": "1/1",

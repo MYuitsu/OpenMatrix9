@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"style schema\")",
+      "schema": "om9.builder_style.v9"
+    },
+    {
+      "expect": "Invalid(\"style parameter\")",
+      "parameter": "unknown_name"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-17-002",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderMicroProngCutter",
+  "cases": [
+    {
+      "case": "three stones",
+      "input": "Count=0",
+      "expect": "one closed scallop in each of the two gaps"
+    },
+    {
+      "case": "an explicit count",
+      "input": "Count=4",
+      "expect": "four scallops evenly spaced along the row"
+    },
+    {
+      "case": "a leaning scallop",
+      "input": "Angle=25",
+      "expect": "the scallop is sheared along the row tangent and stays closed"
+    }
+  ]
+}

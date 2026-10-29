@@ -1,0 +1,87 @@
+$ cargo clippy -p om9-core -p om9-app --all-targets -j 2
+# exit code: 0
+# captured: 2026-10-27T13:44:58Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+warning: unused variable: `gem`
+  --> crates\om9-app\tests\head_commands.rs:82:26
+   |
+82 |     let (mut controller, gem) = gem_controller(6.0);
+   |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:102:26
+    |
+102 |     let (mut controller, gem) = gem_controller(6.0);
+    |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:129:30
+    |
+129 |         let (mut controller, gem) = gem_controller(6.0);
+    |                              ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:155:26
+    |
+155 |     let (mut controller, gem) = gem_controller(6.0);
+    |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: `om9-app` (test "head_commands") generated 4 warnings (run `cargo clippy --fix --test "head_commands" -p om9-app -- ` to apply 4 suggestions)
+warning: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\settings\bezel.rs:466:9
+    |
+466 |         params.edge_profile = "Nonexistent".to_string();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `settings::bezel::BezelParams { edge_profile: "Nonexistent".to_string(), ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\settings\bezel.rs:465:9
+    |
+465 |         let mut params = BezelParams::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+    = note: `#[warn(clippy::field_reassign_with_default)]` on by default
+
+warning: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\settings\bezel.rs:479:9
+    |
+479 |         params.boolean = true;
+    |         ^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `settings::bezel::BezelParams { boolean: true, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\settings\bezel.rs:478:9
+    |
+478 |         let mut params = BezelParams::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+
+warning: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\settings\bezel.rs:488:9
+    |
+488 |         params.angle_deg = 15.0;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `settings::bezel::BezelParams { angle_deg: 15.0, shear_rails: true, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\settings\bezel.rs:487:9
+    |
+487 |         let mut params = BezelParams::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+
+warning: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\settings\bezel.rs:522:9
+    |
+522 |         bad.count = 200;
+    |         ^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `settings::bezel::ScallopParams { count: 200, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\settings\bezel.rs:521:9
+    |
+521 |         let mut bad = ScallopParams::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+
+warning: `om9-core` (lib test) generated 4 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.40s

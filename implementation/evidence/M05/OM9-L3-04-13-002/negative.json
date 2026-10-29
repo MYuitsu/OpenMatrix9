@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-13-002",
+  "title": "Gem Control And Size Edits",
+  "cases": [
+    "a non-gem selection opens nothing (`Invalid(\"gem edit needs gems\")`)",
+    "an option the Control tool does not consume (`Mask=`) is a typed refusal",
+    "a size the schema refuses keeps the session open for correction"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

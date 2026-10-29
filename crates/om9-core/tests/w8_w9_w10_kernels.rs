@@ -328,11 +328,10 @@ fn a_cage_refuses_a_malformed_record() {
         cage.evaluate([f64::INFINITY, 0.5, 0.5], &limits()),
         Err(Error::Invalid("nonfinite coordinate"))
     );
-    // Inversion is native: the kernel says so instead of guessing.
-    assert_eq!(
-        capture_parameters(&[[0.0; 3]]),
-        Err(Error::Unsupported("cage parameter inversion"))
-    );
+    // Inversion is implemented: a point inside the cage inverts to its parameters.
+    let parameters = capture_parameters(&cage, &[[0.0; 3]], &limits()).unwrap();
+    assert_eq!(parameters.len(), 1);
+    assert!(parameters[0].iter().all(|value| value.is_finite()));
 }
 
 #[test]

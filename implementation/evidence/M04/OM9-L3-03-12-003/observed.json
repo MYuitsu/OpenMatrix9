@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m04.l3_builder_style_evidence.v1",
+  "l3_id": "OM9-L3-03-12-003",
+  "title": "Builder Style Apply And Preview",
+  "scope": "BuilderStyle::apply (preview only, reports applied/ignored) Controller::builder_apply_style + builder_refresh Style= command line",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "applying_a_style_changes_the_preview_only_and_cancel_keeps_the_baseline",
+    "a_style_missing_the_mandatory_profile_input_is_refused",
+    "applying_a_style_changes_the_preview_only"
+  ],
+  "fixture": "live style A width 2.2 -> style B width 3.0 -> Cancel",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the Builder Styles browser and its gestures; no reviewer signature is claimed.",
+  "logs": [
+    "core-builder-style.log",
+    "app-builder-styles.log",
+    "workspace-check.log"
+  ],
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-03-12-003-03",
+      "OM9-L4-03-12-003-04",
+      "OM9-L4-03-12-003-05",
+      "OM9-L4-03-12-003-06",
+      "OM9-L4-03-12-003-07"
+    ],
+    "fixture_manifest_sha256": "58c6f4c02a3616bb5a69b2884af7a4c8d6d5c1972d4caa2cf288ff3c1f24c259"
+  }
+}

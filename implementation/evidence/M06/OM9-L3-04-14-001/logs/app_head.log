@@ -1,0 +1,21 @@
+$ cargo test -p om9-app --test head_commands -j 2
+
+--- stdout ---
+
+running 9 tests
+test a_selection_without_a_gem_is_refused_by_name ... ok
+test cancel_discards_the_preview_without_touching_the_document ... ok
+test the_three_bezel_modes_build_and_the_boolean_cuts_a_finger_rail ... ok
+test the_half_bezel_toggle_replaces_the_prongs_and_keeps_rails ... ok
+test the_head_icon_stages_a_basket_and_enter_commits_prongs_and_rails ... ok
+test a_level_four_edit_changes_only_its_prong_in_the_preview ... ok
+test the_seat_cut_opens_the_stone_and_undo_restores_it ... ok
+test scallop_cutters_commit_and_stay_out_of_the_settings_mass ... ok
+test the_bezier_profile_is_saved_and_resolved_by_name ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+
+--- stderr ---
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running tests\head_commands.rs (cargo-target\debug\deps\head_commands-1af9cd0a72e9a43c.exe)

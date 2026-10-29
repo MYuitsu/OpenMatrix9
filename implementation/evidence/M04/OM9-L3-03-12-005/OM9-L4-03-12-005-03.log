@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --test builder_style -j 2 the_builder_tags_filter_a_style_to_one_mode
+# exit code: 0
+# captured: 2026-10-27T02:48:40Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_builder_tags_filter_a_style_to_one_mode ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)
+
+$ cargo test -p om9-core --test builder_style -j 2 a_style_ignores_parameters_of_another_mode_and_reports_them
+# exit code: 0
+# captured: 2026-10-27T02:48:40Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_style_ignores_parameters_of_another_mode_and_reports_them ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)

@@ -1,0 +1,102 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-004",
+  "title": "Custom Rail And Advanced Rail",
+  "generated_at_utc": "2026-10-27T04:25:55Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "95b87e442ddab7a436dbe61c9b9cc3aa30d81097ea9dac458167386435626bb4",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "a closed rational-quadratic ellipse rail (9 x 6) validates as closed/planar/non-self-intersecting and a builder sweep over it produces a surface with continuous frames",
+    "negative": "an open line is refused with ring rail not closed; a bow-tie polyline is refused with ring rail self-intersection; the advanced icon refuses an open rail without inserting geometry"
+  },
+  "l4_id": "OM9-L4-04-02-004-04",
+  "role": "INTEGRATE",
+  "kind": "integration",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/curve_ops.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/surface_kernel.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/ring_tools.rs",
+    "crates/om9-core/tests/ring_tools.rs",
+    "crates/om9-app/tests/ring_tools.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "a_custom_rail_must_be_closed_planar_and_non_self_intersecting"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "e2f81b71bfc864c9b65dee5f5975948d1f39c9b5b110adf8bc32c3482399822a",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s"
+      ],
+      "test": "a_custom_rail_must_be_closed_planar_and_non_self_intersecting",
+      "package": "om9-core",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "616f886513a898ed91692a2832b00356aee43740103d69263f6b75d6f3157402",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s"
+      ],
+      "test": "a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one",
+      "package": "om9-core",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_custom_rail_icon_records_a_validated_closed_rail_and_refuses_an_open_one"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "af448834c17ace2c2029b8be12a8e91fc5823e3cdb180ff7ff4f31afe1d3255c",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_custom_rail_icon_records_a_validated_closed_rail_and_refuses_an_open_one",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

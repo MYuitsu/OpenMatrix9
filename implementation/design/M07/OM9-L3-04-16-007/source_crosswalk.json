@@ -1,0 +1,56 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3": "OM9-L3-04-16-007",
+  "title": "Cutter Body Preserve Remove Option",
+  "recorded_at": "2026-10-28",
+  "manual": {
+    "filename": "reference/text/m8book2__p272-274__creating-cutters.md",
+    "pdf_pages_1based": [
+      272,
+      274
+    ],
+    "printed_pages": [
+      498,
+      500
+    ]
+  },
+  "feature": "BuilderGemCutter",
+  "commands": [
+    "BuilderGemCutter",
+    "BuilderGemCutterLibrary"
+  ],
+  "rust_owner": [
+    "crates/om9-app/src/session/gem_cutters.rs",
+    "crates/om9-core/src/cutters/boolean.rs"
+  ],
+  "symbols": [
+    "cutters::boolean::CutterKeep",
+    "cutters::boolean::CutterCut::keep_cutters",
+    "session::gem_cutters::GemCutterSession::keep",
+    "Controller::gem_cutter_commit"
+  ],
+  "reuse_decision": {
+    "decision": "ADD",
+    "reason": "Audit: the Cutters chapter had no cutter command at all. The M06 scallop builder (settings::bezel::build_scallop) sweeps one edge profile and the gem_pave azure curves are placement curves, so neither is a cutter body service. The M07 owner adds the cutter kernel once and the app dispatches to it; no second gem/settings store is created.",
+    "reuses": [
+      "OM9-L2-04-09 (gem::GemSpec, gem::profile_points, gem::girdle_outline)",
+      "OM9-L2-01-10 (geometry::Transform, closed-mesh admission)",
+      "OM9-L2-04-14 (settings::head::GemGirdle, settings::bezel::ScallopParams for the shared gvBezelCutter)",
+      "mesh_csg::mesh_boolean (the one mesh CSG service)"
+    ]
+  },
+  "previous_code_audit": [
+    "crates/om9-app/src/menu_catalog.rs CUTTERS already lists BuilderGemCutter and BuilderGemCutterLibrary, but session.rs did not resolve, dispatch or prompt for either id.",
+    "crates/om9-app/src/display.rs CutterRecord { kind, seat } and CUTTER_EXTENSION_SLOT already existed, so the display filter expected a payload nobody wrote.",
+    "crates/om9-app/src/icons.rs already maps cutters-minimal/BuilderGemCutter(.Library).svg.",
+    "crates/om9-core/src/settings/bezel.rs owned BuilderBezelCutter (Scallop Bezel) with a swept edge profile; the Cutters chapter's dimensional controls were absent."
+  ],
+  "tests": [
+    "cargo test -p om9-app --test gem_cutters the_interactive_boolean_cuts_the_metal_and_the_preserve_answer_removes_the_bodies",
+    "cargo test -p om9-app --test gem_cutters a_removed_body_without_a_boolean_is_refused_and_the_preview_survives",
+    "cargo test -p om9-core --lib cutters::boolean"
+  ],
+  "limitations": [
+    "The answer applies to the cut transaction only; a cutter committed with the boolean off always stays as its own body."
+  ]
+}

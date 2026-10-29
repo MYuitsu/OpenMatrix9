@@ -6,7 +6,7 @@
   "command_id": "OM9-CURVE-037",
   "menu_icon": "CurveCurveEditToolsCurveBoolean",
   "owner_candidate": "OM9-L3-01-10-001",
-  "decision": "BLOCKED_OWNER",
+  "decision": "IMPLEMENTED",
   "reviewed_upstream": [
     {
       "path": "crates/qymcad/src/command_catalog.rs",
@@ -39,5 +39,7 @@
       "Controller::availability"
     ]
   },
-  "rationale": "interactive Curve Boolean command session is not wired; owner candidate OM9-L3-01-10-001 is unverified"
+  "rationale": "the local Curve menu binding dispatches the Rust command session; the documented Matrix command spelling is accepted as an alias",
+  "menu_label": "Curve Boolean",
+  "documented_script": "CurveBoolean"
 }

@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-010-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-010",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-010",
   "source_command": "Refit to Tolerance",
   "menu_icon": "CurveCurveEditToolsRefitToTolerance",
   "owner_candidate": "OM9-L3-02-04-008",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Refit to Tolerance command session is not wired; owner candidate OM9-L3-02-04-008 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.json": "f17757d7ac7956566cff58d64977354cfb53c938ff7117e2e828ba1ebcf64653",
-    "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.md": "e14ca0895129e070d006b674f1a1457f6b11de87be5ad352f606b9cf442cca2c"
+    "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.json": "041317bd1a3f10779ca599e0189b734d67065891bb07c5a863eb8d1cc069a58d",
+    "implementation/design/M03/OM9-L3-03-16-010/dispatch_contract.md": "071517702d34a4cfa28b38539505eb5bcbbe05b8f4e0b5180fe84b2a5d90e232"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "FitCrv"
 }

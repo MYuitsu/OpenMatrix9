@@ -1,0 +1,54 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-12-003",
+  "title": "Builder Style Apply And Preview",
+  "owner": "om9-core builder_style + om9-app builder session/panel",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/builder_style.rs",
+      "symbols": [
+        "BuilderStyle::apply",
+        "StyleApply::summary",
+        "Controller::builder_apply_style",
+        "Style=<name>"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/tests/builder_style.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/tests/builder_styles.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "source_audit": {
+    "path": "QymCAD/",
+    "result": "NO_BUILDER_STYLE_MODULE",
+    "detail": "No builder-style/preset module exists under QymCAD/crates; the only `preset` hits are unrelated dialog/extrude code. Decision: ADD in Rust, reusing the OM9 builder session and producer preset vocabulary."
+  },
+  "planning_inputs": [
+    "OM9_Milestones/M04 - Builder and History/L2-03-12 - 03-febe-matrix-builder-styles-and-presets/L2.json",
+    "matrix8_book_1.pdf printed pages 20-21 (pdf 30-31) referenced by the L3 handoff"
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3 skill/plan record is planning input; runtime behavior is established by the receipts.",
+    "The source audit is a checkout inspection, not a QymCAD implementation reuse claim."
+  ]
+}

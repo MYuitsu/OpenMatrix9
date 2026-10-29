@@ -1,0 +1,195 @@
+# external plugin runtime: hello-plugin HistoryDemo through the packaged host
+# captured: 2026-10-27T02:22:42.1281201+07:00
+# binaries: L:/om9-target/debug/{om9.exe,om9-plugin.exe,om9_hello_plugin.dll}
+# PATH included L:/om9-target/debug for the OCCT/runtime DLLs.
+
+$ L:/om9-target/debug/om9-plugin.exe pack sdk/examples/hello-plugin/descriptor.json build/m04-l2-01-04-evidence/external/hello.om9p x86_64-pc-windows-msvc=L:/om9-target/debug/om9_hello_plugin.dll
+exit 0
+{
+  "format_version": 1,
+  "plugin": {
+    "id": "org.openmatrix9.hello",
+    "name": "OM9 SDK example",
+    "version": "0.1.0",
+    "sdk_version": 1,
+    "commands": [
+      {
+        "id": "CreateProfile",
+        "title": "Create example profile"
+      },
+      {
+        "id": "MoveSelection",
+        "title": "Move selected objects"
+      },
+      {
+        "id": "DeleteSelection",
+        "title": "Delete selected objects"
+      },
+      {
+        "id": "UnitsReport",
+        "title": "Report typed units and tolerance"
+      },
+      {
+        "id": "AttributesDemo",
+        "title": "Edit attributes of two objects"
+      },
+      {
+        "id": "LayerDemo",
+        "title": "Create a layer and assign an object"
+      },
+      {
+        "id": "ParameterDemo",
+        "title": "Validate typed builder parameters"
+      },
+      {
+        "id": "FeedbackDemo",
+        "title": "Report progress and warnings"
+      },
+      {
+        "id": "SelectionDemo",
+        "title": "Write the selection"
+      },
+      {
+        "id": "CurveDemo",
+        "title": "Read curve information and samples"
+      },
+      {
+        "id": "CurveBuildDemo",
+        "title": "Build an arc and a spline"
+      },
+      {
+        "id": "MeasureDemo",
+        "title": "Measure a distance and an angle"
+      },
+      {
+        "id": "CurveShapeDemo",
+        "title": "Build an ellipse and a rectangle"
+      },
+      {
+        "id": "ProjectDemo",
+        "title": "Read project state and request a save"
+      },
+      {
+        "id": "ExtensionDemo",
+        "title": "Tag an object with an extension slot"
+      },
+      {
+        "id": "PlacementDemo",
+        "title": "Set an object placement matrix"
+      },
+      {
+        "id": "MeshDemo",
+        "title": "Create a quad mesh"
+      },
+      {
+        "id": "ChangeDemo",
+        "title": "Read the recorded change batch"
+      },
+      {
+        "id": "BoundsDemo",
+        "title": "Measure an object bounding box"
+      },
+      {
+        "id": "LengthDemo",
+        "title": "Measure a curve length"
+      },
+      {
+        "id": "RadiusDemo",
+        "title": "Measure a circle radius"
+      },
+      {
+        "id": "SummaryDemo",
+        "title": "Count objects by geometry kind"
+      },
+      {
+        "id": "LabelDemo",
+        "title": "Report a measurement label"
+      },
+      {
+        "id": "LayerOrderDemo",
+        "title": "Read the layer order"
+      },
+      {
+        "id": "AreaDemo",
+        "title": "Measure a mesh area"
+      },
+      {
+        "id": "GroupsDemo",
+        "title": "List document groups"
+      },
+      {
+        "id": "BlocksDemo",
+        "title": "List block definitions"
+      },
+      {
+        "id": "ClearLayerDemo",
+        "title": "Clear the current layer"
+      },
+      {
+        "id": "PlacementReadDemo",
+        "title": "Read an object placement"
+      },
+      {
+        "id": "InfoDemo",
+        "title": "Read one object record"
+      },
+      {
+        "id": "GroupCreateDemo",
+        "title": "Create a group from members"
+      },
+      {
+        "id": "GroupDeleteDemo",
+        "title": "Delete a group"
+      },
+      {
+        "id": "LayerInfoDemo",
+        "title": "Read one layer record"
+      },
+      {
+        "id": "ToleranceDemo",
+        "title": "Set the document tolerance"
+      },
+      {
+        "id": "ProvenanceDemo",
+        "title": "Read import provenance"
+      },
+      {
+        "id": "PickableDemo",
+        "title": "Test if an object is pickable"
+      },
+      {
+        "id": "HistoryDemo",
+        "title": "Read associative history and its rebuild plan"
+      }
+    ]
+  },
+  "libraries": {
+    "x86_64-pc-windows-msvc": {
+      "path": "native/x86_64-pc-windows-msvc/plugin.dll",
+      "sha256": "d087b123ff6f3b748052f9e137d6875eddc9c4cf8c9d0ee15c1f3b0c2f1b6d17"
+    }
+  }
+}
+
+
+$ L:/om9-target/debug/om9.exe --plugin-run build/m04-l2-01-04-evidence/external/hello.om9p CreateProfile sdk/examples/hello-plugin/arguments.json build/m04-l2-01-04-evidence/external/history.om9
+exit 0
+# printed the project inspection; three objects created (the command result is not echoed by the CLI).
+
+$ L:/om9-target/debug/om9.exe --plugin-run-on build/m04-l2-01-04-evidence/external/hello.om9p HistoryDemo sdk/examples/hello-plugin/arguments.json build/m04-l2-01-04-evidence/external/history.om9 build/m04-l2-01-04-evidence/external/history.om9
+exit 0
+# HistoryDemo called history_list, history_dependencies, history_rebuild_plan and (no features)
+# skipped history_provenance; the host answered every call and the document stayed valid.
+# The project contains no recorded feature, so this run proves the route and the public SDK
+# surface; non-empty list/dependencies/provenance/plan are covered by the plugin-host tests.
+
+project_sha256_before: n/a
+
+# HistoryDemo leaves the document's persistent projection unchanged:
+#   om9.exe --inspect history-before.om9 -> document_sha256 badf2728664ee27e3983fdaec5d1661240c016ea9762620a8d085ec432e5d7c4
+#   om9.exe --inspect history-after.om9  -> document_sha256 badf2728664ee27e3983fdaec5d1661240c016ea9762620a8d085ec432e5d7c4
+# The file bytes differ only in the runtime session fields the host writes on every save
+# (the validator records the same distinction between file digest and document projection).
+# The project has no recorded feature, so this run proves the route and the public SDK surface;
+# non-empty list/dependencies/provenance/plan are covered by the plugin-host unit tests
+# (staged::tests::history_queries_report_typed_ports_states_provenance_and_plan).

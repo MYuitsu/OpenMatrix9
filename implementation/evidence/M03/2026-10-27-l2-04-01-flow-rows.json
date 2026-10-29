@@ -1,0 +1,70 @@
+{
+  "schema": "om9.evidence.batch.v1",
+  "date": "2026-10-27",
+  "l2_id": "OM9-L2-04-01",
+  "title": "Transform flow rows: Flow Along Curve, Flow Along Surface, Splop",
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03_UI_PENDING",
+  "kernel": {
+    "module": "crates/om9-core/src/deform.rs",
+    "public_api": [
+      "deform::flow_along_curve",
+      "deform::flow_along_surface",
+      "deform::splop",
+      "deform::mapped"
+    ]
+  },
+  "rows": [
+    {
+      "l3_id": "OM9-L3-04-01-027",
+      "feature": "OM9-TRANSFORM-027",
+      "command": "Flow",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs",
+        "crates/om9-core/src/curve_ops.rs",
+        "crates/om9-core/src/curve_surface_ops.rs",
+        "crates/om9-core/src/transform_session.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_027_flow_along_curve_carries_geometry_onto_the_target_path",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-027/OM9-L3-04-01-027-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-028",
+      "feature": "OM9-TRANSFORM-028",
+      "command": "FlowAlongSrf",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs",
+        "crates/om9-core/src/curve_surface_ops.rs",
+        "crates/om9-core/src/surface_kernel.rs",
+        "crates/om9-core/src/transform_session.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_028_flow_along_surface_maps_the_source_parameters_onto_the_target",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-028/OM9-L3-04-01-028-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-029",
+      "feature": "OM9-TRANSFORM-029",
+      "command": "Splop",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs",
+        "crates/om9-core/src/curve_surface_ops.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_029_splop_wraps_the_selection_onto_the_surface",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-029/OM9-L3-04-01-029-01.json"
+    }
+  ],
+  "totals": {
+    "catalogued_rows": 41,
+    "implemented_rows": 32,
+    "disabled_rows": 9,
+    "tests": {
+      "app_transform_menu": "40 passed; 0 failed",
+      "core_deform": "7 passed; 0 failed"
+    }
+  },
+  "notes": [
+    "the flow rows write geometry through deform::mapped, so every geometry kind with control points is supported and a solid is refused",
+    "the source frame is named by a picked point because the selection is a set with no pick order",
+    "the M08-owned rows keep their planning state, their owner milestone and their own manual gate"
+  ]
+}

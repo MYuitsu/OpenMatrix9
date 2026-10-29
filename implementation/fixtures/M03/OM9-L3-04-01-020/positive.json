@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-020",
+  "case": "10 x 10 x 10 mesh, cage around it, corner 8 (the maximum) moved by (10,0,0)",
+  "expected": "10 x 10 x 10 mesh, cage around it, corner 8 (the maximum) moved by (10,0,0) -> the corner at (10,10,10) lands on (20,10,10) and every other vertex holds still, one Undo entry",
+  "test": "m03_04_01_020_cage_edit_moves_the_attached_geometry"
+}

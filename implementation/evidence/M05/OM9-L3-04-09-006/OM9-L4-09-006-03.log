@@ -1,0 +1,29 @@
+$ cargo test -p om9-app --test gem_panel -j 2 the_positioner_moves_and_rotates_the_instance_in_place
+# exit code: 0
+# captured: 2026-10-27T09:23:31Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_positioner_moves_and_rotates_the_instance_in_place ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.59s
+
+    Blocking waiting for file lock on build directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)
+
+$ cargo test -p om9-app --test gem_panel -j 2 the_positioner_duplicates_with_one_shared_definition
+# exit code: 0
+# captured: 2026-10-27T09:23:48Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_positioner_duplicates_with_one_shared_definition ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.63s
+
+    Blocking waiting for file lock on build directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.56s
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)

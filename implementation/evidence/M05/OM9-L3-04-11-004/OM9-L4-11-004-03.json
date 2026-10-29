@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-11-004",
+  "l4_id": "OM9-L4-11-004-03",
+  "title": "Tapered Baguettes Between Two Curves",
+  "generated_at_utc": "2026-10-27T13:36:48Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the builder window at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "b1a0bd7bbc2f2e9fd7cf4cf5e6b8f10092b8af06c3c0c6c68dbb55e30bccdf10",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "one stone is measured between Point A and Point B on the first wall",
+    "negative": "a zero-length span is refused"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_cluster.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/tests/gem_cluster.rs",
+    "crates/om9-app/src/session/gem_cluster.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem_cluster.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/gem_cluster_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "gem_cluster",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "1ce41236ea737b53003a1bc6c0e4f51ca6137b63e67078d038f62d3ba8cbfa8a",
+      "summary": [
+        "test result: ok. 12 passed; 0 failed"
+      ],
+      "test": "crates/om9-core/tests/gem_cluster.rs",
+      "package": "om9-core",
+      "binary": "gem_cluster"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_cluster_panel",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "3e47ceebc61b6a0b166ad5da848332a68147c36df1af495fe51c4dde8234badf",
+      "summary": [
+        "test result: ok. 11 passed; 0 failed"
+      ],
+      "test": "crates/om9-app/tests/gem_cluster_panel.rs",
+      "package": "om9-app",
+      "binary": "gem_cluster_panel"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

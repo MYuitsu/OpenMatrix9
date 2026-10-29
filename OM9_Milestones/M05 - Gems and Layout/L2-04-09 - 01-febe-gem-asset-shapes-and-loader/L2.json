@@ -124,5 +124,68 @@
       "OM9-L3-04-09-007",
       "OM9-L3-04-09-008"
     ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-27",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+    "scope": "Typed gem cut/shape/dimension schema, procedural closed meshes and canonical size library, loader/emerald/baguette/custom/positioner commands, F6 gem properties, Gem 01 layer routing, the girdle/table/facet reference API, the viewport preview overlay and the mesh->B-Rep adapter (`BRep=Yes` default, `BRep=No` keeps the mesh)",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-kernel",
+        "om9-app"
+      ],
+      "tests": [
+        "crates/om9-core/tests/gem_assets.rs",
+        "crates/om9-kernel/tests/gem_brep.rs",
+        "crates/om9-app/tests/gem_panel.rs",
+        "crates/om9-app/src/ui/gem.rs (preview_tests)"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M05/OM9-L2-04-09/observed.json",
+      "implementation/evidence/M05/OM9-L2-04-09/README.md",
+      "implementation/evidence/M05/OM9-L2-04-09/core-gem-assets.log",
+      "implementation/evidence/M05/OM9-L2-04-09/app-gem-panel.log",
+      "implementation/evidence/M05/OM9-L2-04-09/kernel-gem-brep.log",
+      "implementation/evidence/M05/OM9-L2-04-09/workspace-check.log"
+    ],
+    "notes": "Gem body là mesh kín do entity sở hữu, có oracle closed/volume của ring_builder; khi kernel OCCT bật, Apply lưu Geometry::Brep sewn từ chính mesh đó (BRep=No giữ mesh), preview được vẽ trong viewport trước khi Apply. Không copy asset Matrix. settings::gems::GemStone/GemRow là input của prong/channel chứ không phải record này.",
+    "l3_coverage": {
+      "OM9-L3-04-09-001": "automated_verified_auto_only",
+      "OM9-L3-04-09-002": "automated_verified_auto_only",
+      "OM9-L3-04-09-003": "automated_verified_manual_gate_open",
+      "OM9-L3-04-09-004": "automated_verified_manual_gate_open",
+      "OM9-L3-04-09-005": "automated_verified_manual_gate_open",
+      "OM9-L3-04-09-006": "automated_verified_manual_gate_open",
+      "OM9-L3-04-09-007": "automated_verified_manual_gate_open",
+      "OM9-L3-04-09-008": "automated_verified_auto_only"
+    },
+    "l4": {
+      "planned": 21,
+      "artifacts": 21,
+      "receipts": [
+        "OM9-L4-09-003-03",
+        "OM9-L4-09-004-03",
+        "OM9-L4-09-005-03",
+        "OM9-L4-09-006-03",
+        "OM9-L4-09-007-03"
+      ]
+    },
+    "tests": [
+      "core gem_assets: exit 0",
+      "app gem_panel: exit 0",
+      "workspace check: exit 0",
+      "clippy: exit 0",
+      "kernel gem_brep: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M05-UI",
+    "remaining": [
+      "The five UI L3 keep the M05-UI manual gate open: no human has reviewed the gem window or the viewport preview on screen and no reviewer signature is claimed.",
+      "The gem B-Rep conversion requires the OCCT SDK; `BRep=No` keeps the portable mesh body, and only Windows x64 was exercised in this run.",
+      "The sewn B-Rep is planar-facet topology of the authored gem; analytic curved faces and gem-specific surface editing belong to a later kernel owner."
+    ]
   }
 }

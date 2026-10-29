@@ -1,0 +1,26 @@
+﻿[
+    {
+        "target_dir":  "L:/om9-target",
+        "exit_code":  0,
+        "parallelism":  2,
+        "check":  "core-regressions"
+    },
+    {
+        "target_dir":  "L:/om9-target",
+        "exit_code":  0,
+        "parallelism":  2,
+        "check":  "scene-regressions"
+    },
+    {
+        "target_dir":  "L:/om9-target",
+        "exit_code":  0,
+        "parallelism":  2,
+        "check":  "final-focused"
+    },
+    {
+        "target_dir":  "L:/om9-target",
+        "exit_code":  0,
+        "parallelism":  2,
+        "check":  "build"
+    }
+]

@@ -1,0 +1,53 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-03-21-001-01",
+  "milestone": "M03",
+  "parent_l3_id": "OM9-L3-03-21-001",
+  "title": "Model and geometry",
+  "planning_state": "IMPLEMENTED_WITH_SCOPED_AUTOMATED_EVIDENCE",
+  "runtime_implementation": {
+    "measure_annotation_transform_corrections_2026_10_27": {
+      "date": "2026-10-27",
+      "state": "AUTOMATED_SCOPE_VERIFIED_MANUAL_UI_GATE_OPEN",
+      "evidence": "docs/validation/2026-10-26-measure-completion/README.md",
+      "checks": [
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "core-regressions"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "scene-regressions"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "final-focused"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "build"
+        }
+      ],
+      "test_counts_by_batch": {
+        "core-regressions": 88,
+        "scene-regressions": 12,
+        "final-focused": 69,
+        "build": 0,
+        "annotation-ui-subset": 3
+      },
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false
+    }
+  },
+  "contract": "implementation/design/M03/measure-completion-20261026/ANNOTATION-CONTRACT.md",
+  "acceptance_gate": "M03-UI",
+  "gate_closed": false
+}

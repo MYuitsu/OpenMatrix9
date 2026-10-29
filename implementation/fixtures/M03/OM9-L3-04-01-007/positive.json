@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-007",
+  "case": "box 10x0x0 at the world origin, center 0,0,0, angle 90",
+  "expected": "the body point (10,0,0) moves onto (0,10,0)",
+  "test": "m03_04_01_007_rotate_3d_turns_ninety_degrees_about_the_cplane_normal"
+}

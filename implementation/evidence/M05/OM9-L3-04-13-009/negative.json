@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-13-009",
+  "title": "Gem Attribute History And ID Preservation",
+  "cases": [
+    "an unreadable placement link is reported as `no placement link`, not invented",
+    "a non-gem selection opens no history session"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

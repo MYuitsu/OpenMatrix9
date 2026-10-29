@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-007",
+  "kind": "positive",
+  "input": "ring inside diameter 18 mm; target 19 mm; non-historical resizer mode",
+  "expected": "new output ring radius 9.5 mm (inside diameter 19), original ring still radius 9 mm; undo removes only the output",
+  "verified_by": [
+    "a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness",
+    "outside_rail_and_resizer_apply_independent_outputs"
+  ],
+  "receipts": [
+    {
+      "test": "a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2",
+        "a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "ffda1bf447f2783b481699f330ee3f84f321b757ed86b34be17f85dfaee105ff"
+    },
+    {
+      "test": "outside_rail_and_resizer_apply_independent_outputs",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "outside_rail_and_resizer_apply_independent_outputs"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "05743d0000ee3ac8319cedc8f03c24965da89dbd4a85a131322607ec050dad0a"
+    }
+  ]
+}

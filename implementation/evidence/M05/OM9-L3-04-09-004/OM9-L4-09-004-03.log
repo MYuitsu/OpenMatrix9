@@ -1,0 +1,27 @@
+$ cargo test -p om9-app --test gem_panel -j 2 the_custom_builder_uses_a_closed_planar_profile
+# exit code: 0
+# captured: 2026-10-27T09:23:21Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_custom_builder_uses_a_closed_planar_profile ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.95s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)
+
+$ cargo test -p om9-app --test gem_panel -j 2 the_custom_builder_refuses_an_open_or_non_planar_curve
+# exit code: 0
+# captured: 2026-10-27T09:23:22Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_custom_builder_refuses_an_open_or_non_planar_curve ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)

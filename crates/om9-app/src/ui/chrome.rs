@@ -149,6 +149,16 @@ impl MatrixApp {
                 "Help",
             ] {
                 let menu=ui.menu_button(name, |ui| match name {
+                    "Dimension"=>{
+                        for (label,feature) in ["Horizontal Dimension","Vertical Dimension","Angle Dimension","Rotated Dimension","Aligned Dimension","Diameter Dimension","Radial Dimension","Leader","Text Block","Edit Dimension","Edit Text","Dimension Options","Recenter Dimension Text"].into_iter().zip(crate::session::annotation::FEATURES){
+                            if ui.button(label).clicked(){self.invoke(feature,InvocationOrigin::Menu);ui.close();}
+                        }
+                    }
+                    "Analyze" => {
+                        for (label,feature) in [("Area",crate::session::measure::AREA),("Volume",crate::session::measure::VOLUME),("Object Summary",crate::session::measure::OBJECT_SUMMARY)] {
+                            if ui.button(label).clicked(){self.invoke(feature,InvocationOrigin::Menu);ui.close();}
+                        }
+                    }
                     "Tools" => {
                         // Super Select (OM9-L3-03-14-006): typed filters, the manual's tool.
                         for (label, key, filter) in [
@@ -529,6 +539,44 @@ impl MatrixApp {
         self.icon_slot(ui, name, enabled, help, None)
     }
 
+    fn top11_icon(&mut self, ui: &mut egui::Ui, name: &str) -> egui::Response {
+        let action = om9_core::top11::Top11Action::from_icon(name).expect("Top 11 icon");
+        let state = self
+            .controller
+            .top11_availability()
+            .into_iter()
+            .find(|state| state.action == action)
+            .expect("Top 11 state");
+        let tooltip = if state.enabled {
+            action.label().to_string()
+        } else {
+            format!("{}: {}", action.label(), state.reason)
+        };
+        let response = self.icon(ui, name, state.enabled, &tooltip);
+        if response.clicked() {
+            self.top11_action(name);
+        }
+        response
+    }
+
+    fn subd_flyout(&mut self, ui: &mut egui::Ui, name: &str) {
+        let response = self.icon(ui, name, true, name);
+        egui::Popup::menu(&response).width(260.).show(|ui| {
+            ui.set_max_height(360.);
+            egui::ScrollArea::vertical()
+                .id_salt(("subd-flyout", name))
+                .max_height(350.)
+                .show(ui, |ui| {
+                    for icon in subd_flyout_items(name) {
+                        ui.horizontal(|ui| {
+                            self.feature_icon(ui, "", icon);
+                            ui.label(subd_label(icon));
+                        });
+                    }
+                });
+        });
+    }
+
     /// A clickable icon whose active state is drawn as a bright frame instead of
     /// being disabled: snap toggles must stay clickable while they are off.
     pub(super) fn icon_toggle(
@@ -598,7 +646,8 @@ impl MatrixApp {
             ],
             Stroke::new(1., Color32::from_white_alpha(if enabled { 65 } else { 28 })),
         );
-        self.icons.paint(ui, rect.shrink(1.5), name);
+        let inset = if self.toolbar_drawing { 1.125 } else { 1.5 };
+        self.icons.paint(ui, rect.shrink(inset), name);
         match self.icon_column {
             IconColumn::Left => self.rail_icon_rects.push(rect),
             IconColumn::Right => self.right_dock_icon_rects.push(rect),
@@ -622,6 +671,14 @@ impl MatrixApp {
         response
     }
     fn feature_icon(&mut self, ui: &mut egui::Ui, id: &str, name: &str) {
+        if matches!(name, "SolidBooleanSplit" | "SolidCreateSolid") {
+            let enabled = Controller::availability(name).is_ok();
+            let label = if name == "SolidBooleanSplit" { "Boolean Split" } else { "Create Solid" };
+            if self.icon(ui, name, enabled, label).clicked() {
+                self.invoke(name, InvocationOrigin::Menu);
+            }
+            return;
+        }
         let curve = crate::curve_menu::by_icon(name);
         let surface = crate::surface_menu::by_icon(name);
         let catalog_feature = curve
@@ -650,7 +707,7 @@ impl MatrixApp {
             let help = if enabled {
                 feature
                     .as_ref()
-                    .map_or(name, |f| f.name.as_str())
+                    .map_or(if name == "SolidGVDMultiPipe" { "Solid Multi Pipe" } else { name }, |f| f.name.as_str())
                     .to_owned()
             } else {
                 catalog_reason
@@ -658,10 +715,14 @@ impl MatrixApp {
                     .unwrap_or("operation unavailable")
                     .to_owned()
             };
-            let right = feature
+            let right = if name == "SolidExtractSurface" {
+                Some("SolidExtractSurfaceCopy")
+            } else if name == "SolidPipe" {
+                Some("SolidPipeChain")
+            } else { feature
                 .as_ref()
                 .and_then(|f| f.right_click.as_deref())
-                .filter(|command| Controller::availability(command).is_ok());
+                .filter(|command| Controller::availability(command).is_ok()) };
             if self.icon_slot(ui, name, enabled, &help, right).clicked() {
                 self.invoke(&actual, InvocationOrigin::Menu);
             }
@@ -959,6 +1020,25 @@ impl MatrixApp {
                 if palette.is_empty() {
                     ui.label(format!("{palette_name} menu has no pinned commands"));
                 }
+                // Matrix keeps Top 11 immediately below the main menu, above
+                // DISPLAY. Fit all eleven buttons on one row at the current rail width.
+                let saved_edge = self.column_icon_edge;
+                let gap = 1.;
+                self.column_icon_edge = ((ui.available_width() - 10. * gap) / 11.)
+                    .max(0.)
+                    .min(saved_edge);
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = gap;
+                    for name in toolbar_palette("Top 11") {
+                        let response = self.top11_icon(ui, name);
+                        ui.ctx().memory_mut(|memory| {
+                            memory
+                                .data
+                                .insert_temp(egui::Id::new(("top11-sidebar", name)), response.rect);
+                        });
+                    }
+                });
+                self.column_icon_edge = saved_edge;
                 ui.ctx()
                     .memory_mut(|memory| memory.data.insert_temp(top_id, top));
             }
@@ -1176,51 +1256,448 @@ impl MatrixApp {
             }
         });
     }
-    /// BUILDERS: the reserved area in the space below the Project Manager. M04
-    /// owns the real builder; M01 keeps the slot visible and non-interactive.
+    /// BUILDERS: the builder panel in the space below the Project Manager. The tab row
+    /// switches modes and each tab keeps its own parameters; the active tab paints its typed
+    /// fields, the preview summary, Apply/Reset/Cancel, the profile library button and the
+    /// handle read-outs.
     fn builder_slot_ui(&mut self, ui: &mut egui::Ui) {
+        self.builder_slot_rect = Some(ui.max_rect());
         ui.horizontal_wrapped(|ui| {
-            let response = ui
-                .add_enabled(false, egui::Button::new("Builder (reserved)"))
-                .on_hover_text(
-                    "Builders open in the space below the Project Manager; M04 implements them",
-                );
-            self.builder_slot_rect = Some(response.rect);
-        });
-        ui.horizontal_wrapped(|ui| {
-            ui.vertical(|ui| {
-                ui.label("Gem");
-                let (rect, response) = ui.allocate_exact_size(Vec2::new(104., 76.), Sense::hover());
-                ui.painter().rect_filled(rect, 0, Color32::from_gray(53));
-                self.icons.paint(ui, rect.shrink(16.), "Emerald");
-                response.on_hover_text("No active gem; builder operation unavailable");
-            });
-            ui.add_space(36.);
-            ui.vertical(|ui| {
-                for name in ["New Emerald", "Size ▾", "Show Diag.", "Reset"] {
-                    ui.add_enabled(false, egui::Button::new(name))
-                        .on_hover_text("Emerald builder operation unavailable");
+            ui.label(egui::RichText::new("BUILDERS").strong());
+            for (kind, active) in self.controller.builder_tabs() {
+                let response = ui
+                    .add(
+                        egui::Button::new(kind.title())
+                            .selected(active)
+                            .min_size(Vec2::new(0., 18.)),
+                    )
+                    .on_hover_text(match kind {
+                        om9_core::builder::BuilderKind::RingRail => {
+                            "Ring rail from a finger diameter"
+                        }
+                        om9_core::builder::BuilderKind::RailProfile => {
+                            "Profile on the selected rail"
+                        }
+                        om9_core::builder::BuilderKind::RailSweep => {
+                            "Sweep the selected profile along the rail"
+                        }
+                        om9_core::builder::BuilderKind::OutsideRail => {
+                            "Offset rail outside the selected rail"
+                        }
+                        om9_core::builder::BuilderKind::RingResizer => {
+                            "Resize a ring rail to a new diameter"
+                        }
+                        _ => "Ring builder mode",
+                    });
+                if response.clicked() && !active {
+                    let result = self.controller.switch_builder(kind);
+                    self.feedback(result);
                 }
-            });
-        });
-        ui.horizontal_wrapped(|ui| {
-            for name in ["Emerald", "Scale", "Move", "Rotate", "Gem"] {
-                self.icon(ui, name, false, "Builder parameter");
             }
         });
-        ui.horizontal_wrapped(|ui| {
-            ui.add_enabled(
-                false,
-                egui::Slider::new(&mut 0.5f32, 0.0..=1.0).show_value(false),
+        let fields = self.controller.builder_field_views();
+        if fields.is_empty() {
+            ui.label("Select a rail curve and choose a builder tab");
+            return;
+        }
+        if let Some(summary) = self.controller.builder_summary() {
+            ui.label(summary);
+        }
+        if !self.controller.builder_editable() {
+            ui.label(
+                egui::RichText::new("Read-only: the builder input is on a locked layer")
+                    .color(Color32::from_rgb(235, 170, 80)),
             );
-            ui.label("LENGTH");
-            ui.add_enabled(false, egui::Button::new("0.5 mm"));
+        }
+        // A read-only session paints its values but no enabled edit control, so a typed edit
+        // cannot even be attempted (`OM9-L3-03-11-005`).
+        let editable = self.controller.builder_editable();
+        for field in fields {
+            if let Some((selected, choices)) = field.choice {
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(field.label);
+                    let mut chosen = selected.clone();
+                    egui::ComboBox::from_id_salt(("builder-choice", field.name))
+                        .selected_text(chosen.clone())
+                        .show_ui(ui, |ui| {
+                            for choice in &choices {
+                                ui.selectable_value(&mut chosen, choice.clone(), choice);
+                            }
+                        });
+                    if chosen != selected {
+                        let result = self.controller.builder_set_field(
+                            field.name,
+                            om9_core::request::Value::Choice(chosen),
+                        );
+                        self.feedback(result);
+                    }
+                    if field.name == "preset" && ui.button("Library…").clicked() {
+                        self.builder_profile_window = true;
+                    }
+                });
+            } else if let Some(mut value) = field.boolean {
+                if ui
+                    .add_enabled(editable, egui::Checkbox::new(&mut value, field.label))
+                    .changed()
+                {
+                    let result = self
+                        .controller
+                        .builder_set_field(field.name, om9_core::request::Value::Boolean(value));
+                    self.feedback(result);
+                }
+            } else {
+                ui.horizontal_wrapped(|ui| {
+                    let mut value = field.value;
+                    let revision = self.controller.builder_revision();
+                    let step = field.step.unwrap_or(0.1);
+                    let suffix = match field.dimension {
+                        om9_core::request::Dimension::Length => " mm",
+                        om9_core::request::Dimension::Angle => " deg",
+                        om9_core::request::Dimension::Ratio => "",
+                        om9_core::request::Dimension::Count => "",
+                    };
+                    let response = ui.add_enabled(
+                        editable,
+                        egui::DragValue::new(&mut value)
+                            .speed(step)
+                            .range(field.min..=field.max)
+                            .suffix(suffix),
+                    );
+                    ui.label(field.label);
+                    if response.changed() {
+                        // A panel edit is refused if a handle drag already moved the same
+                        // field since this widget was painted (`OM9-L3-03-11-006`).
+                        let editing = om9_core::request::Value::Quantity {
+                            value,
+                            dimension: field.dimension,
+                        };
+                        let result = match revision {
+                            Some(revision) => self
+                                .controller
+                                .builder_set_field_at(field.name, editing, revision),
+                            None => self.controller.builder_set_field(field.name, editing),
+                        };
+                        self.feedback(result);
+                    }
+                    // A slider moves in whole steps of the field's own step, so 2.0 -> 2.5
+                    // lands on 2.5 mm in the widget, the model and the preview
+                    // (`OM9-L3-03-11-003`).
+                    if let (Some(ratio), Some(_step)) = (field.ratio, field.step) {
+                        let span = (field.max - field.min).max(1.0e-9);
+                        let mut ratio = ratio;
+                        let response = ui.add_enabled(
+                            editable,
+                            egui::Slider::new(&mut ratio, 0.0..=1.0)
+                                .step_by(step / span)
+                                .show_value(false),
+                        );
+                        if response.changed() {
+                            let result = self.controller.builder_set_slider(field.name, ratio);
+                            self.feedback(result);
+                        }
+                    }
+                });
+            }
+        }
+        ui.horizontal_wrapped(|ui| {
+            if ui
+                .add_enabled(editable, egui::Button::new("Apply"))
+                .clicked()
+            {
+                let result = self.controller.builder_apply();
+                self.feedback(result);
+            }
+            if ui
+                .add_enabled(editable, egui::Button::new("Reset"))
+                .clicked()
+            {
+                let result = self.controller.builder_reset();
+                self.feedback(result);
+            }
+            if ui.button("Cancel").clicked() {
+                self.controller.builder_cancel();
+            }
+            if ui.button("Styles…").clicked() {
+                self.builder_style_window = true;
+            }
         });
+        if let Some(applied) = self.controller.builder_applied_style() {
+            ui.label(format!("style: {applied}"));
+        }
+        ui.horizontal_wrapped(|ui| {
+            for handle in self.controller.builder_handles() {
+                ui.label(format!("{} {:.2} mm", handle.label, handle.value));
+            }
+        });
+        self.builder_profile_window_ui(ui);
+        self.history_window_ui(ui);
+        self.builder_style_window_ui(ui);
+    }
+
+    /// The Matrix History report (`OM9-L3-03-13-003`, `-004`, `-005`): the recorded
+    /// features, their state, the broken rows, and per-row Edit/Clear actions.
+    fn history_window_ui(&mut self, ui: &mut egui::Ui) {
+        if !self.history_window {
+            return;
+        }
+        let entries = self.controller.history_entries();
+        let mut record = self.controller.history_record_enabled();
+        let mut update = self.controller.history_update_enabled();
+        let mut chosen_record: Option<bool> = None;
+        let mut chosen_update: Option<bool> = None;
+        let mut edit: Option<om9_core::identity::ObjectId> = None;
+        let mut clear: Option<om9_core::identity::ObjectId> = None;
+        let mut open = true;
+        egui::Window::new("History")
+            .id(egui::Id::new("om9-history-report"))
+            .open(&mut open)
+            .resizable(true)
+            .show(ui.ctx(), |ui| {
+                ui.horizontal(|ui| {
+                    if ui.checkbox(&mut record, "Record").changed() {
+                        chosen_record = Some(record);
+                    }
+                    if ui.checkbox(&mut update, "Update").changed() {
+                        chosen_update = Some(update);
+                    }
+                    ui.label(format!("{} features", entries.len()));
+                });
+                if entries.is_empty() {
+                    ui.label("No recorded feature in this document");
+                } else {
+                    ui.label(
+                        "Edit rebuilds the selected feature from its recorded recipe; Clear detaches \
+                         its history but keeps the geometry.",
+                    );
+                }
+                egui::Grid::new("om9-history-grid")
+                    .striped(true)
+                    .show(ui, |ui| {
+                        ui.label("Feature");
+                        ui.label("Recipe");
+                        ui.label("State");
+                        ui.label("Problem");
+                        ui.label("");
+                        ui.end_row();
+                        for entry in &entries {
+                            ui.label(&entry.command);
+                            ui.label(entry.recipe.to_string());
+                            ui.label(format!("{:?}", entry.state));
+                            ui.label(&entry.detail);
+                            ui.horizontal(|ui| {
+                                if ui.small_button("Edit").clicked() {
+                                    edit = entry.outputs.first().copied();
+                                }
+                                if ui.small_button("Clear").clicked() {
+                                    clear = entry.outputs.first().copied();
+                                }
+                            });
+                            ui.end_row();
+                        }
+                    });
+            });
+        self.history_window = open;
+        if let Some(value) = chosen_record {
+            let result = self.controller.set_history_record(value).map(|_| ());
+            self.feedback(result);
+        }
+        if let Some(value) = chosen_update {
+            let result = self.controller.set_history_update(value).map(|_| ());
+            self.feedback(result);
+        }
+        if let Some(object) = edit {
+            let result = self.controller.begin_builder_from_history(object).map(|_| ());
+            self.feedback(result);
+        }
+        if let Some(object) = clear {
+            let result = self.controller.clear_object_history(object).map(|_| ());
+            self.feedback(result);
+        }
+    }
+
+    /// The builder style browser (`OM9-L3-03-12-002` … `-006`).
+    ///
+    /// One row per style: a thumbnail (or its placeholder), the name, an Apply that loads the
+    /// parameters into the preview only, and a save field that snapshots the current session
+    /// under a new user name. An entry for another mode stays visible but disabled, so the
+    /// list explains a refusal instead of hiding it.
+    fn builder_style_window_ui(&mut self, ui: &mut egui::Ui) {
+        if !self.builder_style_window {
+            return;
+        }
+        let rows = self.controller.builder_styles();
+        let let_editable = self.controller.builder_editable();
+        let source = self
+            .controller
+            .builder_style_path()
+            .map(|path| path.display().to_string());
+        let mut chosen: Option<String> = None;
+        let mut saved: Option<String> = None;
+        let mut matched = false;
+        let mut open = true;
+        egui::Window::new("Builder Styles")
+            .id(egui::Id::new("om9-builder-styles"))
+            .open(&mut open)
+            .resizable(false)
+            .default_width(260.0)
+            .show(ui.ctx(), |ui| {
+                for row in &rows {
+                    ui.horizontal(|ui| {
+                        // A missing or corrupt thumbnail paints the placeholder square with
+                        // its fallback icon; the row is never dropped for it.
+                        let (rect, _) =
+                            ui.allocate_exact_size(Vec2::new(14., 14.), egui::Sense::hover());
+                        let fill = if row.fallback {
+                            Color32::from_gray(205)
+                        } else {
+                            Color32::from_rgb(214, 238, 228)
+                        };
+                        ui.painter().rect_filled(rect, 2.0, fill);
+                        let label = if row.applied {
+                            format!("{} *", row.name)
+                        } else {
+                            row.name.clone()
+                        };
+                        let hover = if row.enabled {
+                            format!("Load {} into the preview", row.name)
+                        } else {
+                            format!("{} is not compatible with this builder", row.name)
+                        };
+                        let button = egui::Button::new(label).selected(row.applied);
+                        if ui
+                            .add_enabled(let_editable && row.enabled, button)
+                            .on_hover_text(hover)
+                            .clicked()
+                        {
+                            chosen = Some(row.name.clone());
+                        }
+                        if row.builtin {
+                            ui.small("-");
+                        } else {
+                            ui.small("user");
+                        }
+                    });
+                }
+                if rows.is_empty() {
+                    ui.label("Open a builder to list its styles");
+                }
+                ui.separator();
+                ui.horizontal(|ui| {
+                    ui.label("Save as");
+                    ui.add(
+                        egui::TextEdit::singleline(&mut self.builder_style_name)
+                            .desired_width(120.0)
+                            .hint_text("Classic 2.5"),
+                    );
+                    if ui
+                        .add_enabled(let_editable, egui::Button::new("Save"))
+                        .clicked()
+                    {
+                        saved = Some(self.builder_style_name.clone());
+                    }
+                });
+                if ui
+                    .button("Match selected attributes")
+                    .on_hover_text("Copy width/height/material from the selected design entity")
+                    .clicked()
+                {
+                    matched = true;
+                }
+                match &source {
+                    Some(path) => {
+                        ui.label(format!("user file: {path}"));
+                    }
+                    None => {
+                        ui.label("user styles: this session (set OM9_STYLE_LIBRARY to persist)");
+                    }
+                }
+                if let Some(error) = self.controller.builder_style_error() {
+                    ui.colored_label(Color32::from_rgb(200, 120, 40), error);
+                }
+            });
+        if let Some(name) = chosen {
+            let result = self.controller.builder_apply_style(&name);
+            self.feedback(result.map(|_| ()));
+        }
+        if let Some(name) = saved
+            && !name.trim().is_empty()
+        {
+            let result = self.controller.builder_save_style(&name);
+            match result {
+                Ok(summary) => {
+                    self.builder_style_name.clear();
+                    self.feedback(Ok(()));
+                    self.status.info(&summary);
+                }
+                Err(error) => {
+                    self.feedback(Err(error));
+                }
+            }
+        }
+        if matched {
+            let result = self.controller.builder_match_attributes();
+            match result {
+                Ok(summary) => {
+                    self.feedback(Ok(()));
+                    self.status.info(&summary);
+                }
+                Err(error) => {
+                    self.feedback(Err(error));
+                }
+            }
+        }
+        self.builder_style_window = open;
+    }
+
+    /// The profile library window: one row per preset with the selected state and a Remove
+    /// action. Choosing only changes the builder preview; the document is untouched.
+    fn builder_profile_window_ui(&mut self, ui: &mut egui::Ui) {
+        if !self.builder_profile_window {
+            return;
+        }
+        let presets = self.controller.builder_presets();
+        let selected = self.controller.builder_selected_preset();
+        let mut chosen: Option<String> = None;
+        let mut removed: Option<String> = None;
+        let mut open = true;
+        egui::Window::new("Profile Library")
+            .id(egui::Id::new("om9-builder-profile-library"))
+            .open(&mut open)
+            .resizable(false)
+            .show(ui.ctx(), |ui| {
+                for preset in &presets {
+                    ui.horizontal(|ui| {
+                        let is_selected = selected == Some(*preset);
+                        if ui
+                            .add(egui::Button::new(preset.label()).selected(is_selected))
+                            .clicked()
+                        {
+                            chosen = Some(preset.name().to_string());
+                        }
+                        if ui.small_button("Remove").clicked() {
+                            removed = Some(preset.name().to_string());
+                        }
+                    });
+                }
+                if presets.is_empty() {
+                    ui.label("No profile left in this library");
+                }
+            });
+        if let Some(name) = chosen {
+            let result = self.controller.builder_set_preset(&name);
+            self.feedback(result);
+        }
+        if let Some(name) = removed {
+            let result = self.controller.builder_remove_preset(&name);
+            self.feedback(result);
+        }
+        self.builder_profile_window = open;
     }
     pub(super) fn toolbars_ui(&mut self, ui: &mut egui::Ui) {
         self.toolbar_icon_edge = (dock_layout::ICON_BASE_EDGE * self.screen_icon_scale)
             .clamp(dock_layout::ICON_MIN_EDGE, 32.)
-            .round();
+            .round()
+            * 0.75;
         self.column_icon_edge = self.toolbar_icon_edge;
         self.file_toolbar_rects.clear();
         self.toolbar_rect = Some(ui.max_rect());
@@ -1254,6 +1731,7 @@ impl MatrixApp {
             Color32::from_rgb(248, 250, 252),
         );
         let tab = TABS[self.toolbar_tab];
+        self.toolbar_drawing = true;
         egui::ScrollArea::horizontal()
             .id_salt(("toolbar-palette", tab))
             .max_height(self.toolbar_icon_edge + 2.)
@@ -1267,6 +1745,33 @@ impl MatrixApp {
                         ui.weak(format!("{tab} tools unavailable"));
                     }
                     for name in palette {
+                        if matches!(
+                            (tab, *name),
+                            ("Emboss", "Emboss Resources")
+                                | ("Sculpt", "Sculpt Brush")
+                                | ("SubD", "SubD Primitives")
+                                | ("SubD", "SubD Hotkeys Settings")
+                                | ("SubD", "SubD Elements")
+                                | ("Visibility", "Visibility Lock Objects")
+                                | ("Visibility", "Visibility Invert and Hide Control Points")
+                                | ("Visibility", "Visibility Add Clipping Plane")
+                                | ("Visibility", "Visibility Hide A")
+                                | ("Display", "Display Render Mesh Settings")
+                        ) {
+                            ui.add_space(6.);
+                        }
+                        #[cfg(test)]
+                        {
+                            let rect = Rect::from_min_size(
+                                ui.next_widget_position(),
+                                Vec2::splat(self.column_icon_edge),
+                            );
+                            ui.ctx().memory_mut(|memory| {
+                                memory
+                                    .data
+                                    .insert_temp(egui::Id::new(("toolbar-test", tab, name)), rect);
+                            });
+                        }
                         match *name {
                             "New" | "Open" | "Save" => {
                                 let kind = crate::file_lifecycle::FileKind::from_command(name)
@@ -1302,33 +1807,35 @@ impl MatrixApp {
                                     name,
                                 );
                             }
-                            _ if tab == "Top 11" => {
-                                let Some(action) = om9_core::top11::Top11Action::from_icon(name)
-                                else {
-                                    continue;
-                                };
-                                let state = self
-                                    .controller
-                                    .top11_availability()
-                                    .into_iter()
-                                    .find(|state| state.action == action)
-                                    .expect("top 11 state");
-                                let tooltip = if state.enabled {
-                                    action.label().to_string()
-                                } else {
-                                    format!("{}: {}", action.label(), state.reason)
-                                };
-                                if self.icon(ui, name, state.enabled, &tooltip).clicked() {
-                                    self.top11_action(name);
+                            "Wireframe" | "Shaded" if tab == "Display" => {
+                                use crate::viewport_menu::{DisplayPreset, MenuAction};
+                                let enabled = !self.controller.is_running();
+                                if self.icon(ui, name, enabled, name).clicked() {
+                                    let action = MenuAction::Preset(if *name == "Wireframe" {
+                                        DisplayPreset::Wireframe
+                                    } else {
+                                        DisplayPreset::Shaded
+                                    });
+                                    let result = self.controller
+                                        .capture_view_menu(self.controller.workspace.active)
+                                        .and_then(|capture| self.controller.apply_view_menu(&capture, action));
+                                    self.feedback(result);
                                 }
                             }
+                            _ if tab == "Top 11" => {
+                                self.top11_icon(ui, name);
+                            }
+                            _ if tab == "SubD" && subd_flyout_items(name).next().is_some() => {
+                                self.subd_flyout(ui, name);
+                            }
                             _ => {
-                                self.icon(ui, name, false, name);
+                                self.feature_icon(ui, "", name);
                             }
                         }
                     }
                 });
             });
+        self.toolbar_drawing = false;
         egui::ScrollArea::horizontal()
             .id_salt("workspace-view-tabs")
             .max_height(19.)
@@ -1649,36 +2156,198 @@ impl MatrixApp {
 fn category_palette(category: &str) -> &'static [&'static str] {
     crate::menu_catalog::category(category).unwrap_or(&[])
 }
+fn subd_flyout_items(name: &str) -> impl Iterator<Item = &'static &'static str> {
+    let items: &'static [&'static str] = match name {
+        "SubD Primitives" => &[
+            "ClayooPrimitivesPlane", "ClayooPrimitivesBox", "ClayooPrimitivesTorus",
+            "ClayooPrimitivesSphere", "ClayooPrimitivesCylinder", "ClayooPrimitivesCone",
+        ],
+        "SubD Creation" => &[
+            "ClayooCreationAppendFace", "ClayooCreationFromCurve", "ClayooCreationFrom2Curves",
+            "ClayooCreationLoft", "ClayooCreationSweep1Rail", "ClayooCreationSweep2Rails",
+            "ClayooCreationPipe", "ClayooCreationRevolve", "ClayooCreateIsocurves",
+            "ClayooCreationRing", "ClayooCreationSignetRing", "ClayooCreationClayooBezel",
+            "ClayooCreationFromSurface", "ClayooCreationFromMesh", "ClayooCreationFromTSplines",
+            "ClayooCreationToNurbs", "ClayooCreationClayooLibrary",
+        ],
+        "SubD Edition" => &[
+            "ClayooEditDivide", "ClayooEditSplitSides", "ClayooEditMatch", "ClayooEditExtract",
+            "ClayooEditOffset", "ClayooEditInset", "ClayooEditExtrude", "ClayooEditWeld",
+            "ClayooEditCollapse", "ClayooEditBridge", "ClayooEditFill", "ClayooEditShell",
+            "ClayooEditKnife", "ClayooEditWrap", "ClayooEditSymmetry", "ClayooEditFlipNormals",
+            "ClayooEditCrease", "ClayooEditProjectToPlane", "ClayooEditSubdivisionLevel", "ClayooEditItem",
+        ],
+        "SubD Selection" => &[
+            "ClayooSelectionSelectAll", "ClayooSelectionSelectNone", "ClayooSelectionInvertSelection",
+            "ClayooSelectionSelectCreased", "ClayooSelectionSelectNaked", "ClayooSelectionSelectCoplanar",
+            "ClayooSelectionPaintSelection", "ClayooSelectionGrowSelection", "ClayooSelectionShrink",
+            "ClayooSelectUV", "ClayooSelectionSelectRing", "ClayooSelectionSelectLoop",
+            "ClayooSelectionSetPlane", "ClayooSelectionResetPlane", "ClayooSelectionSelectionSets",
+        ],
+        _ => &[],
+    };
+    items.iter()
+}
+fn subd_label(icon: &str) -> String {
+    let name = icon
+        .strip_prefix("ClayooPrimitives")
+        .or_else(|| icon.strip_prefix("ClayooCreation"))
+        .or_else(|| icon.strip_prefix("ClayooSelection"))
+        .or_else(|| icon.strip_prefix("ClayooEdit"))
+        .or_else(|| icon.strip_prefix("Clayoo"))
+        .unwrap_or(icon);
+    let mut result = String::new();
+    for ch in name.chars() {
+        if ch.is_ascii_uppercase() && !result.is_empty() {
+            result.push(' ');
+        }
+        result.push(ch);
+    }
+    result
+}
 fn toolbar_palette(tab: &str) -> &'static [&'static str] {
     match tab {
         "Standard" => &[
             "New",
             "Open",
             "Save",
+            "FilePrint",
+            "Standard Document Properties",
+            "Standard Cut",
+            "Standard Copy",
+            "Standard Paste",
             "Undo",
+            "Standard Pan",
+            "Standard Rotate View",
+            "ViewZoomZoomDynamic",
+            "ViewZoomZoomWindow",
+            "Fit",
+            "ViewZoomZoomSelected",
+            "Standard Undo View",
+            "Standard Four Views",
+            "Standard Right View",
+            "Standard CPlane Origin",
+            "Standard Object Snaps",
+            "Standard Select All",
+            "Standard Hide Objects",
+            "Standard Lock Objects",
+            "Layers",
+            "ObjectProperties",
+            "Standard Shade",
+            "Shaded",
+            "Standard Render",
+            "Standard Spotlight",
+            "RhinoOptions",
+            "Standard Linear Dimension",
+            "Standard Help",
             "Redo",
             "Line",
             "Point",
             "Circle",
             "Rectangle",
         ],
-        "Set View" => &["Fit"],
-        "Display" => &["Wireframe", "Shaded", "Grid", "Properties"],
-        "Visibility" => &["Layers", "LayerShow", "LayerHide", "LayerLock"],
+        "Set View" => &[
+            "ViewZoomZoomDynamic",
+            "Fit",
+            "ViewZoomZoomWindow",
+            "ViewZoomZoomSelected",
+            "ViewZoomZoom1To1",
+            "ViewManager",
+        ],
+        "Display" => &[
+            "Wireframe", "Shaded", "Standard Shade", "Display Rendered Viewport",
+            "Dial_Ghosted", "Display X-Ray Viewport", "Dial_Tech Shade",
+            "Display Pen Viewport", "Display Artistic Viewport", "Display Render Mesh Settings",
+            "Display Flat Shade", "ShadeSelectedOnlyON", "Display Object Shading", "ViewCaptureToFile",
+            "Visibility Add Clipping Plane", "Visibility Disable Clipping Plane", "Display Panel",
+        ],
+        "Visibility" => &[
+            "Visibility Hide Objects",
+            "Visibility Show Objects",
+            "Visibility Show Selected Objects",
+            "Visibility Invert Selection and Hide",
+            "Visibility Swap Hidden Objects",
+            "Visibility Lock Objects",
+            "Visibility Unlock Objects",
+            "Visibility Unlock Selected Objects",
+            "Visibility Invert Selection and Lock",
+            "Visibility Swap Locked Objects",
+            "Visibility Invert and Hide Control Points",
+            "Visibility Hide Control Points",
+            "Visibility Add Clipping Plane",
+            "Visibility Disable Clipping Plane",
+            "Visibility Hide A",
+            "Visibility Hide B",
+            "Visibility Hide C",
+            "Visibility Hide Custom",
+        ],
         "Transform" => category_palette("Transform"),
         "Curve Tools" => category_palette("Curve"),
         "Surface Tools" => category_palette("Surface"),
         "Solid Tools" => category_palette("Solid"),
+        "Mesh Tools" => &[
+            "MeshMeshRepairToolsAlignMeshVertices",
+            "MeshMeshRepairToolsFillHole",
+            "MeshMeshRepairToolsFillHoles",
+            "MeshApplyMeshUVN",
+            "MeshMeshEditToolsCollapseReduceVertexCount",
+            "MeshMeshEditToolsExtractRenderMesh",
+            "MeshFromNURBSObject",
+        ],
         "Render Tools" => category_palette("Render"),
+        "Drafting" => &[
+            "OthersMeasureDimHorizontal",
+            "OthersMeasureDimVertical",
+            "DimensionAlignedDimension",
+            "DimensionRotatedDimension",
+            "DimensionAngleDimension",
+            "DimensionRadialDimension",
+            "DimensionDiameterDimension",
+            "DimensionTextBlock",
+            "DimensionLeader",
+            "DimensionRecenterDimensionText",
+            "DimensionMake2DDrawing",
+        ],
+        "SubD" => &[
+            "SubD Edit Mode",
+            "SubD Primitives",
+            "SubD Creation",
+            "SubD Edition",
+            "SubD Selection",
+            "SubD Hotkeys Settings",
+            "SubD Settings",
+            "SubD Help",
+            "SubD Report Feedback",
+            "SubD Elements",
+        ],
+        "Emboss" => &[
+            "Clay Emboss",
+            "Emboss Resources",
+            "Emboss Texture Creator",
+            "Emboss Raster to Vector",
+            "Emboss Text on Curve",
+            "Emboss Decimator",
+        ],
+        "Sculpt" => &[
+            "Sculpt",
+            "Sculpt Brush",
+            "Sculpt Crease",
+            "Sculpt Flatten",
+            "Sculpt Inflate",
+            "Sculpt Pinch",
+            "Sculpt Smooth",
+            "Sculpt Twist",
+            "Sculpt Drag",
+        ],
         "Tools" => category_palette("Tools"),
         "Settings" => category_palette("Setting"),
         "Top 11" => &[
             "Duplicate",
+            "EditPoints",
+            "ControlPoints",
             "Mirror",
             "Move",
             "Rotate",
-            "EditPoints",
-            "ControlPoints",
             "Explode",
             "Join",
             "Split",
@@ -2013,11 +2682,511 @@ mod chrome_tests {
     }
 
     #[test]
+    fn added_toolbar_groups_use_real_authored_icon_bindings() {
+        let mut app = MatrixApp::new(Document::new("toolbar groups")).unwrap();
+        for tab in [
+            "Set View",
+            "Display",
+            "Visibility",
+            "Mesh Tools",
+            "Drafting",
+            "SubD",
+            "Emboss",
+            "Sculpt",
+        ] {
+            let palette = toolbar_palette(tab);
+            assert!(!palette.is_empty(), "{tab}");
+            for icon in palette {
+                assert!(crate::icons::icon_name(icon).is_some(), "{tab}: {icon}");
+            }
+            app.toolbar_tab = TABS.iter().position(|item| *item == tab).unwrap();
+            narrow_frame(&mut app, false);
+        }
+        assert_eq!(
+            toolbar_palette("Emboss"),
+            &[
+                "Clay Emboss",
+                "Emboss Resources",
+                "Emboss Texture Creator",
+                "Emboss Raster to Vector",
+                "Emboss Text on Curve",
+                "Emboss Decimator",
+            ]
+        );
+        assert_eq!(
+            crate::icons::feature_for("Emboss Resources"),
+            Some("OM9-EMBOSS-014")
+        );
+        assert_eq!(
+            crate::icons::feature_for("Emboss Decimator"),
+            Some("OM9-EMBOSS-015")
+        );
+        assert_eq!(
+            toolbar_palette("Sculpt"),
+            &[
+                "Sculpt",
+                "Sculpt Brush",
+                "Sculpt Crease",
+                "Sculpt Flatten",
+                "Sculpt Inflate",
+                "Sculpt Pinch",
+                "Sculpt Smooth",
+                "Sculpt Twist",
+                "Sculpt Drag",
+            ]
+        );
+        assert!(
+            toolbar_palette("Sculpt")
+                .iter()
+                .all(|name| crate::icons::feature_for(name).is_none())
+        );
+        assert!(app.controller.document().entities.is_empty());
+        assert_eq!(app.controller.coordinator().undo_len(), 0);
+    }
+
+    #[test]
     fn top11_tab_renders_without_mutating_the_document() {
         let mut app = MatrixApp::new(Document::new("top11 chrome")).unwrap();
         app.toolbar_tab = TABS.iter().position(|tab| *tab == "Top 11").unwrap();
         narrow_frame(&mut app, false);
         assert!(app.controller.document().entities.is_empty());
         assert_eq!(app.controller.coordinator().undo_len(), 0);
+    }
+
+    #[test]
+    fn command_toolbar_slots_are_75_percent_of_previous_responsive_size() {
+        let mut app = MatrixApp::new(Document::new("toolbar size")).unwrap();
+        let context = egui::Context::default();
+        for size in [Vec2::new(1280., 720.), Vec2::new(1920., 1080.)] {
+            for _ in 0..3 {
+                window_frame(&mut app, &context, size, vec![]);
+            }
+            let previous = (dock_layout::ICON_BASE_EDGE * app.screen_icon_scale)
+                .clamp(dock_layout::ICON_MIN_EDGE, 32.)
+                .round();
+            assert!((app.toolbar_icon_edge - previous * 0.75).abs() < 0.01);
+            let new = app.file_toolbar_rects[&crate::file_lifecycle::FileKind::New];
+            assert!((new.width() - previous * 0.75).abs() < 0.01);
+            assert!(((new.width() - 2.25) - (previous - 3.) * 0.75).abs() < 0.01);
+        }
+    }
+
+    #[test]
+    fn standard_toolbar_new_unavailable_icons_render_without_dispatch() {
+        assert_eq!(&toolbar_palette("Standard")[..32], &[
+            "New", "Open", "Save", "FilePrint", "Standard Document Properties",
+            "Standard Cut", "Standard Copy", "Standard Paste", "Undo", "Standard Pan",
+            "Standard Rotate View", "ViewZoomZoomDynamic", "ViewZoomZoomWindow", "Fit",
+            "ViewZoomZoomSelected", "Standard Undo View", "Standard Four Views", "Standard Right View",
+            "Standard CPlane Origin", "Standard Object Snaps", "Standard Select All", "Standard Hide Objects",
+            "Standard Lock Objects", "Layers", "ObjectProperties", "Standard Shade", "Shaded",
+            "Standard Render", "Standard Spotlight", "RhinoOptions", "Standard Linear Dimension", "Standard Help",
+        ]);
+        for name in &toolbar_palette("Standard")[..32] {
+            assert!(crate::icons::icon_name(name).is_some(), "missing icon for {name}");
+        }
+        let mut app = MatrixApp::new(Document::new("standard toolbar")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Standard").unwrap();
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        for name in [
+            "Standard Document Properties",
+            "Standard Cut",
+            "Standard Copy",
+            "Standard Paste",
+            "Standard Pan",
+            "Standard Rotate View",
+            "Standard Undo View",
+            "Standard Four Views",
+            "Standard Right View",
+            "Standard CPlane Origin",
+            "Standard Object Snaps",
+            "Standard Select All",
+            "Standard Hide Objects",
+            "Standard Lock Objects",
+            "Standard Shade",
+            "Standard Render",
+            "Standard Spotlight",
+            "Standard Linear Dimension",
+            "Standard Help",
+        ] {
+            assert!(crate::icons::icon_name(name).is_some(), "{name}");
+            assert!(crate::icons::feature_for(name).is_none(), "{name}");
+            let rect: Rect = context.memory(|m| {
+                m.data
+                    .get_temp(egui::Id::new(("toolbar-test", "Standard", &name)))
+                    .unwrap()
+            });
+            window_frame(&mut app, &context, size, pointer(rect.center(), true));
+            window_frame(&mut app, &context, size, pointer(rect.center(), false));
+            assert!(!app.controller.is_running(), "{name}");
+            assert!(app.controller.document().entities.is_empty(), "{name}");
+        }
+    }
+
+    #[test]
+    fn visibility_toolbar_keeps_reference_order_and_unavailable_commands_inert() {
+        let names = toolbar_palette("Visibility");
+        assert_eq!(names, &[
+            "Visibility Hide Objects", "Visibility Show Objects", "Visibility Show Selected Objects",
+            "Visibility Invert Selection and Hide", "Visibility Swap Hidden Objects",
+            "Visibility Lock Objects", "Visibility Unlock Objects", "Visibility Unlock Selected Objects",
+            "Visibility Invert Selection and Lock", "Visibility Swap Locked Objects",
+            "Visibility Invert and Hide Control Points", "Visibility Hide Control Points",
+            "Visibility Add Clipping Plane", "Visibility Disable Clipping Plane",
+            "Visibility Hide A", "Visibility Hide B", "Visibility Hide C", "Visibility Hide Custom",
+        ]);
+        let mut app = MatrixApp::new(Document::new("visibility toolbar")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Visibility").unwrap();
+        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
+        for name in names {
+            assert!(crate::icons::icon_name(name).is_some(), "{name}");
+            assert!(crate::icons::feature_for(name).is_none(), "{name}");
+            let rect: Rect = context.memory(|m| m.data.get_temp(egui::Id::new(("toolbar-test", "Visibility", name))).unwrap());
+            window_frame(&mut app, &context, size, pointer(rect.center(), true));
+            window_frame(&mut app, &context, size, pointer(rect.center(), false));
+            assert!(!app.controller.is_running(), "{name}");
+            assert!(app.controller.document().entities.is_empty(), "{name}");
+        }
+    }
+
+    #[test]
+    fn display_toolbar_switches_only_active_view_with_existing_view_owner() {
+        use om9_scene::workspace::DisplayMode;
+        assert_eq!(toolbar_palette("Display"), &[
+            "Wireframe", "Shaded", "Standard Shade", "Display Rendered Viewport",
+            "Dial_Ghosted", "Display X-Ray Viewport", "Dial_Tech Shade",
+            "Display Pen Viewport", "Display Artistic Viewport", "Display Render Mesh Settings",
+            "Display Flat Shade", "ShadeSelectedOnlyON", "Display Object Shading", "ViewCaptureToFile",
+            "Visibility Add Clipping Plane", "Visibility Disable Clipping Plane", "Display Panel",
+        ]);
+        let mut app = MatrixApp::new(Document::new("display toolbar")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Display").unwrap();
+        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
+        let target = app.controller.workspace.active;
+        let original = app.controller.workspace.views.clone();
+        for (name, mode) in [("Shaded", DisplayMode::Shaded), ("Wireframe", DisplayMode::Wireframe)] {
+            let rect: Rect = context.memory(|m| m.data.get_temp(egui::Id::new(("toolbar-test", "Display", &name))).unwrap());
+            window_frame(&mut app, &context, size, pointer(rect.center(), true));
+            window_frame(&mut app, &context, size, pointer(rect.center(), false));
+            assert_eq!(app.controller.workspace.views[&target].mode, mode, "{name}");
+            for (id, view) in &original {
+                if *id != target { assert_eq!(app.controller.workspace.views[id], *view); }
+            }
+            assert_eq!(app.controller.coordinator().undo_len(), 0);
+        }
+    }
+
+    #[test]
+    fn display_toolbar_new_unavailable_buttons_are_inert() {
+        let mut app = MatrixApp::new(Document::new("display disabled")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Display").unwrap();
+        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
+        for name in ["Display Rendered Viewport", "Display X-Ray Viewport", "Display Pen Viewport", "Display Artistic Viewport", "Display Render Mesh Settings", "Display Flat Shade", "Display Object Shading", "Display Panel"] {
+            assert!(crate::icons::feature_for(name).is_none(), "{name}");
+            let rect: Rect = context.memory(|m| m.data.get_temp(egui::Id::new(("toolbar-test", "Display", &name))).unwrap());
+            window_frame(&mut app, &context, size, pointer(rect.center(), true));
+            window_frame(&mut app, &context, size, pointer(rect.center(), false));
+            assert!(!app.controller.is_running(), "{name}");
+            assert!(app.controller.document().entities.is_empty(), "{name}");
+        }
+    }
+
+    #[test]
+    fn solid_unimplemented_rib_and_slab_remain_unavailable() {
+        for name in ["SolidRib", "SolidSlab"] {
+            assert!(crate::menu_catalog::SOLID.contains(&name), "{name}");
+            let feature = crate::icons::feature_for(name).expect("palette binding");
+            assert!(Controller::availability(feature).is_err(), "{name}");
+        }
+    }
+
+    #[test]
+    fn emboss_toolbar_unsupported_buttons_do_not_dispatch() {
+        let mut app = MatrixApp::new(Document::new("emboss toolbar")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Standard").unwrap();
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Emboss").unwrap();
+        window_frame(&mut app, &context, size, vec![]);
+        let rects: Vec<Rect> = toolbar_palette("Emboss")
+            .iter()
+            .map(|name| {
+                context.memory(|m| {
+                    m.data
+                        .get_temp(egui::Id::new(("toolbar-test", "Emboss", name)))
+                        .unwrap()
+                })
+            })
+            .collect();
+        assert!(rects[1].left() - rects[0].right() > rects[2].left() - rects[1].right());
+        for (name, rect) in toolbar_palette("Emboss").iter().zip(rects) {
+            if let Some(feature) = crate::icons::feature_for(name) {
+                assert!(Controller::availability(feature).is_err(), "{name}");
+            }
+            let at = rect.center();
+            window_frame(&mut app, &context, size, pointer(at, true));
+            window_frame(&mut app, &context, size, pointer(at, false));
+            assert!(
+                !app.controller.is_running(),
+                "{name} dispatched unexpectedly"
+            );
+            assert!(app.controller.document().entities.is_empty(), "{name}");
+            assert_eq!(app.controller.coordinator().undo_len(), 0, "{name}");
+        }
+    }
+
+    #[test]
+    fn sculpt_toolbar_retains_reference_separator() {
+        let mut app = MatrixApp::new(Document::new("sculpt toolbar")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Sculpt").unwrap();
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rects: Vec<Rect> = toolbar_palette("Sculpt")
+            .iter()
+            .map(|name| {
+                context.memory(|m| {
+                    m.data
+                        .get_temp(egui::Id::new(("toolbar-test", "Sculpt", name)))
+                        .unwrap()
+                })
+            })
+            .collect();
+        assert!(rects[1].left() - rects[0].right() > rects[2].left() - rects[1].right());
+    }
+
+    #[test]
+    fn subd_flyouts_preserve_catalog_and_open_from_toolbar() {
+        let names = ["SubD Primitives", "SubD Creation", "SubD Edition", "SubD Selection"];
+        let all: Vec<_> = names.iter().flat_map(|name| subd_flyout_items(name).copied()).collect();
+        let original: std::collections::BTreeSet<_> = crate::menu_catalog::SUBD.iter().copied().collect();
+        let grouped: std::collections::BTreeSet<_> = all.iter().copied().collect();
+        assert_eq!(grouped, original);
+        assert_eq!(all.len(), grouped.len(), "every original icon appears exactly once");
+
+        let mut app = MatrixApp::new(Document::new("subd toolbar")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "SubD").unwrap();
+        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
+        for name in names {
+            let rect: Rect = context.memory(|m| m.data.get_temp(egui::Id::new(("toolbar-test", "SubD", &name))).unwrap());
+            window_frame(&mut app, &context, size, pointer(rect.center(), true));
+            window_frame(&mut app, &context, size, pointer(rect.center(), false));
+            assert!(egui::Popup::is_any_open(&context), "{name} opens a flyout");
+            assert!(!app.controller.is_running());
+            egui::Popup::close_all(&context);
+            window_frame(&mut app, &context, size, vec![]);
+        }
+    }
+
+    #[test]
+    fn set_view_partial_toolbar_renders_and_unavailable_buttons_do_not_dispatch() {
+        let mut app = MatrixApp::new(Document::new("set view toolbar")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Set View").unwrap();
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rects: Vec<Rect> = toolbar_palette("Set View")
+            .iter()
+            .map(|name| {
+                context.memory(|m| {
+                    m.data
+                        .get_temp(egui::Id::new(("toolbar-test", "Set View", name)))
+                        .unwrap()
+                })
+            })
+            .collect();
+        for (name, rect) in toolbar_palette("Set View").iter().zip(rects) {
+            if let Some(feature) = crate::icons::feature_for(name) {
+                assert!(Controller::availability(feature).is_err(), "{name}");
+            }
+            window_frame(&mut app, &context, size, pointer(rect.center(), true));
+            window_frame(&mut app, &context, size, pointer(rect.center(), false));
+            assert!(!app.controller.is_running(), "{name}");
+            assert!(app.controller.document().entities.is_empty(), "{name}");
+        }
+    }
+
+    #[test]
+    fn top11_sidebar_is_one_ordered_row_above_display() {
+        let mut app = MatrixApp::new(Document::new("top11 sidebar")).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let names = toolbar_palette("Top 11");
+        assert_eq!(names.len(), 11);
+        let rects: Vec<Rect> = names
+            .iter()
+            .map(|name| {
+                context.memory(|memory| {
+                    memory
+                        .data
+                        .get_temp(egui::Id::new(("top11-sidebar", name)))
+                        .expect("sidebar icon")
+                })
+            })
+            .collect();
+        let sidebar = app.sidebar_content_rect.unwrap();
+        let display = app.section_rect("display").unwrap();
+        for rect in &rects {
+            assert!(rect.left() >= sidebar.left() && rect.right() <= sidebar.right());
+            assert!(rect.bottom() <= display.top());
+            assert_eq!(rect.top(), rects[0].top());
+        }
+        assert!(
+            rects
+                .windows(2)
+                .all(|pair| pair[0].right() <= pair[1].left())
+        );
+        assert_eq!(
+            names[..6],
+            [
+                "Duplicate",
+                "EditPoints",
+                "ControlPoints",
+                "Mirror",
+                "Move",
+                "Rotate"
+            ]
+        );
+        assert!(app.controller.document().entities.is_empty());
+    }
+
+    #[test]
+    fn top11_multi_split_cmd_undo_redo_from_clean_document() {
+        let mut app = MatrixApp::new(Document::new("split ui history")).unwrap();
+        let mut ids = Vec::new();
+        for (start, end) in [
+            ("-10,0,0", "10,0,0"),
+            ("-10,4,0", "10,4,0"),
+            ("0,-5,0", "0,10,0"),
+        ] {
+            let before = app
+                .controller
+                .document()
+                .entities
+                .keys()
+                .copied()
+                .collect::<std::collections::BTreeSet<_>>();
+            app.controller.submit("Line").unwrap();
+            app.controller.submit(start).unwrap();
+            app.controller.submit(end).unwrap();
+            ids.push(
+                *app.controller
+                    .document()
+                    .entities
+                    .keys()
+                    .find(|id| !before.contains(id))
+                    .unwrap(),
+            );
+        }
+        app.controller.select_objects(&ids[..2]).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let split = context.memory(|memory| {
+            memory
+                .data
+                .get_temp::<Rect>(egui::Id::new(("top11-sidebar", &"Split")))
+                .expect("sidebar Split icon")
+                .center()
+        });
+        window_frame(&mut app, &context, size, pointer(split, true));
+        window_frame(&mut app, &context, size, pointer(split, false));
+        assert!(app.controller.top11_needs_object(), "Split sidebar click");
+        app.controller.top11_accept_object(ids[2]).unwrap();
+        app.controller.submit("").unwrap();
+        assert_eq!(app.controller.document().entities.len(), 5);
+        assert_eq!(app.controller.coordinator().undo_len(), 4);
+
+        app.focus_cmd = true;
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let enter = || egui::Event::Key {
+            key: egui::Key::Enter,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: Modifiers::NONE,
+        };
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![egui::Event::Text("Undo".into())],
+        );
+        window_frame(&mut app, &context, size, vec![enter()]);
+        assert_eq!(
+            app.controller.document().entities.len(),
+            3,
+            "CMD Undo restores both original targets"
+        );
+        assert!(
+            ids.iter()
+                .all(|id| app.controller.document().entities.contains_key(id))
+        );
+        assert_eq!(app.controller.coordinator().undo_len(), 3);
+        assert_eq!(app.controller.coordinator().redo_len(), 1);
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![egui::Event::Text("Redo".into())],
+        );
+        window_frame(&mut app, &context, size, vec![enter()]);
+        assert_eq!(
+            app.controller.document().entities.len(),
+            5,
+            "CMD Redo restores all split pieces"
+        );
+        assert_eq!(app.controller.coordinator().undo_len(), 4);
+        assert_eq!(app.controller.coordinator().redo_len(), 0);
+
+        // Use the actual widget rectangles, independent of toolbar order or scaling.
+        app.toolbar_tab = TABS.iter().position(|tab| *tab == "Standard").unwrap();
+        window_frame(&mut app, &context, size, vec![]);
+        let undo: Rect = context.memory(|m| {
+            m.data
+                .get_temp(egui::Id::new(("toolbar-test", "Standard", &"Undo")))
+                .unwrap()
+        });
+        let undo = undo.center();
+        window_frame(&mut app, &context, size, pointer(undo, true));
+        window_frame(&mut app, &context, size, pointer(undo, false));
+        assert_eq!(app.controller.document().entities.len(), 3, "toolbar Undo");
+        assert_eq!(app.controller.coordinator().redo_len(), 1);
+        let redo: Rect = context.memory(|m| {
+            m.data
+                .get_temp(egui::Id::new(("toolbar-test", "Standard", &"Redo")))
+                .unwrap()
+        });
+        let redo = redo.center();
+        window_frame(&mut app, &context, size, pointer(redo, true));
+        window_frame(&mut app, &context, size, pointer(redo, false));
+        assert_eq!(app.controller.document().entities.len(), 5, "toolbar Redo");
+        assert_eq!(app.controller.coordinator().redo_len(), 0);
     }
 }

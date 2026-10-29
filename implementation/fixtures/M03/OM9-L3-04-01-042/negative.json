@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-042",
+  "case": "ask availability for `OM9-TRANSFORM-007` (Bend)",
+  "expected": "`Unsupported(\"Scheduled for M08 ...\")`, so the row is visible and disabled instead of failing on click",
+  "test": "m03_04_01_042_every_catalogued_row_is_enabled_or_refused_with_a_reason"
+}

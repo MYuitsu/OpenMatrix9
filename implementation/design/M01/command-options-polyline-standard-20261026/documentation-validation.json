@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "scope": "Documentation/source inventory consistency only; no product implementation or runtime acceptance claimed.",
+  "date": "2026-10-26",
+  "group_count": 39,
+  "registered_provider_count": 37,
+  "controller_pending_fields": 57,
+  "additional_pending_fields": 19,
+  "owner_cards_checked": 39,
+  "task_packages": 13,
+  "acceptance_templates": 50,
+  "acceptance_executions": 0,
+  "source_hashes_checked": 51,
+  "local_links_checked": 46,
+  "errors": [],
+  "authoring_checks": {
+    "public_source_audit": {
+      "exit_code": 0,
+      "source_files": 12458,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    },
+    "git_diff_check": {
+      "exit_code": 0
+    },
+    "production_rust_or_native_tests": "Not run: documentation-only task, production sources unchanged.",
+    "skill_changes": false
+  }
+}

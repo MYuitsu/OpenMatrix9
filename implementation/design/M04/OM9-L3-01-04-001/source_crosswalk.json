@@ -1,0 +1,58 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-04-001-01",
+  "l3_id": "OM9-L3-01-04-001",
+  "l3_title": "Feature Record And Typed Dependency Edges",
+  "owner_module_id": "OM9-L2-01-04",
+  "milestone": "M04",
+  "gate": "AUTO_ONLY",
+  "goal": "stable feature graph node with typed inputs and outputs",
+  "positive_oracle": "nodes rail->profile->sweep; typed GeometryRef vs ScalarMm -> 3 nodes, edges follow typed IO; a curve fed into ScalarMm is rejected",
+  "negative_oracle": "feed CurveRef into ScalarMm input; a port role or output kind that does not match -> Invalid('object bound to scalar input'), Invalid('typed input port role'), Invalid('typed feature output')",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "source_dirty": true,
+  "checkout": "QymCAD/ (vendored subtree of the main repository; no independent .git)",
+  "method": "bounded file reads with line numbers; decisions are OM9-owned and no upstream code is copied",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-core/src/feature.rs",
+      "line": 1,
+      "observed_symbols": [
+        "feature timeline model; references use stable ids only, never indices"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "no typed input/output port on a node: a feature is an ordered timeline entry, so a curve fed into a scalar parameter is refused by the command layer, not recorded on the node",
+      "om9_owner": "om9-core/src/history.rs (Recipe.input_ports/output_ports) + associative.rs (typed_edges)"
+    },
+    {
+      "path": "crates/qymcad-core/src/feature.rs",
+      "line": 27,
+      "observed_symbols": [
+        "FaceKey { index, centroid, normal, id }: positional index plus a geometric fingerprint"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the fingerprint idea returns as SubshapeSignature; OM9 attaches it to a reference, not to every node",
+      "om9_owner": "om9-core/src/associative.rs (SubshapeSignature)"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/rebuild.rs",
+      "line": 246,
+      "observed_symbols": [
+        "pub fn regenerate_all(rc: &mut RebuildCtx): rebuilds the timeline nodes the scheduler marked"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "no persisted dependency edge: the node order is the timeline order, not a DAG the document can validate after reload",
+      "om9_owner": "om9-core/src/history.rs (execution_order) + associative.rs (DependencyEdge)"
+    }
+  ],
+  "implemented_api": [
+    "crates/om9-core/src/associative.rs: PortKind, FeaturePort, record_feature, typed_edges, validate_typed_ports",
+    "crates/om9-core/src/history.rs: Recipe.input_ports / Recipe.output_ports (serde default, skipped when empty)"
+  ],
+  "reuse_decision": "ADAPT the rebuild/dirty/persistent-id ideas; ADD the typed durable ports, the persisted semantic reference and the content baselines.",
+  "evidence": [
+    "crates/om9-core/tests/associative_rebuild.rs (typed_edges_follow_the_declared_io_and_link_producers, a_curve_in_a_scalar_input_and_a_wrong_output_type_are_refused, a_legacy_recipe_without_ports_is_reported_untyped_never_guessed, record_feature_enforces_identity_document_and_output_ownership)",
+    "implementation/fixtures/M04/OM9-L3-01-04-001/positive.json",
+    "implementation/fixtures/M04/OM9-L3-01-04-001/negative.json"
+  ]
+}

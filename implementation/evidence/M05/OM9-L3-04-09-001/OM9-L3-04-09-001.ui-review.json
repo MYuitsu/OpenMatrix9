@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.ui_review.v1",
+  "l3_id": "OM9-L3-04-09-001",
+  "manual_test_gate": "AUTO_ONLY",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "automated evidence",
+    "name": null
+  },
+  "statement": "This backend L3 has no human-facing gate in its own record. Acceptance rests on the automated checks listed in observed.json."
+}

@@ -215,6 +215,38 @@
         "OM9-L3-01-10-008": "5/5",
         "OM9-L3-01-10-009": "5/5"
       }
+    },
+    "solid_split_foundation_2026_10_28": {
+      "status": "ONE_SOLID_PARTITION_FOUNDATION_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "full_boolean_split_command": false,
+      "manual_gate_promoted": false
+    },
+    "solid_split_sets_2026_10_28": {
+      "status": "MULTI_SOLID_SET_PARTITION_KERNEL_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "full_boolean_split_command": false,
+      "manual_gate_promoted": false
+    },
+    "boolean_split_brep_command_2026_10_28": {
+      "status": "BREP_BOOLEAN_SPLIT_COMMAND_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Surface-only, compound and mesh inputs",
+        "F6, desktop and human UI acceptance",
+        "General topology, peak memory and performance"
+      ]
+    },
+    "create_solid_regions_2026_10_28": {
+      "status": "BREP_CREATE_SOLID_REGIONS_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false,
+      "remaining": [
+        "General topology and native peak-memory/performance",
+        "F6, SDK, History and human desktop UI",
+        "Non-BRep categories"
+      ]
     }
   }
 }

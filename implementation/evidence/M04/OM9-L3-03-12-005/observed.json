@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m04.l3_builder_style_evidence.v1",
+  "l3_id": "OM9-L3-03-12-005",
+  "title": "Builder Style Mode And Shape Filter",
+  "scope": "StyleFamily::matches + BuilderKind::tag/from_tag/is_ring_builder BuilderStyle::compatible/targets/missing_required StyleEntry.enabled + disabled rows in the window",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "a_gem_style_cannot_be_applied_to_a_ring_builder",
+    "the_builder_tags_filter_a_style_to_one_mode",
+    "a_style_ignores_parameters_of_another_mode_and_reports_them",
+    "a_style_for_another_mode_is_listed_disabled_and_refused"
+  ],
+  "fixture": "ring mode Band vs Signet with mutually exclusive preset types",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the Builder Styles browser and its gestures; no reviewer signature is claimed.",
+  "logs": [
+    "core-builder-style.log",
+    "app-builder-styles.log",
+    "workspace-check.log"
+  ],
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-03-12-005-03",
+      "OM9-L4-03-12-005-04",
+      "OM9-L4-03-12-005-05",
+      "OM9-L4-03-12-005-06"
+    ],
+    "fixture_manifest_sha256": "3cade1ae72f5e19ac02eadc40091d1634c96f3c259ea93cadb861322065c86f1"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-002",
+  "title": "Outside Ring Rail Generator",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "beedd678e932d8f7fbc83b5ff543c30671e2f4bde60bc98ef7bdc8ebc3dcb340",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "outer circle radius 11 mm, same centre/frame, closed domain, source rail untouched",
+    "negative": "typed rejection (field domain / Unsupported(non-circular rail)); committed document unchanged"
+  },
+  "l4_id": "OM9-L4-04-02-002-05",
+  "role": "REGRESSION",
+  "kind": "regression",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-core/tests/builder_session.rs",
+    "crates/om9-app/tests/builder_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2",
+        "an_outside_rail_offsets_a_closed_circular_rail_only"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "911a7a0ef4558de97536056f1d6eab2a0433339c65de80c9fb3714c4cb86d0da",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "an_outside_rail_offsets_a_closed_circular_rail_only",
+      "package": "om9-core",
+      "binary": "builder_session"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "outside_rail_and_resizer_apply_independent_outputs"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "095499530a326b80c3a84629de93101fb43235523da3016d5e9844d8140e8834",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s"
+      ],
+      "test": "outside_rail_and_resizer_apply_independent_outputs",
+      "package": "om9-app",
+      "binary": "builder_panel"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

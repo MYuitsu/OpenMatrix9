@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-009-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-009",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-009",
   "source_command": "Rebuild",
   "menu_icon": "OthersCurveRebuild",
   "owner_candidate": "OM9-L3-02-04-008",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Rebuild command session is not wired; owner candidate OM9-L3-02-04-008 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-009/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-009/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-009/dispatch_contract.json": "528bac4d698f7984877e53115355f5176fd25a6d18bf3f180badb5a8f1429d85",
-    "implementation/design/M03/OM9-L3-03-16-009/dispatch_contract.md": "90aa95460067c83b52886b2c6bea217fda77bc0a8fe2bf987a39a2d18d129ab2"
+    "implementation/design/M03/OM9-L3-03-16-009/dispatch_contract.json": "1c9470d0e05829a5ef740ebb4805c26b76d2ed9276a5be518cb7bcccb73d2473",
+    "implementation/design/M03/OM9-L3-03-16-009/dispatch_contract.md": "315fe689124c6d2bcc0ec74e53c761b7338103c4d4d0de09592af9b9823fe96b"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Rebuild"
 }

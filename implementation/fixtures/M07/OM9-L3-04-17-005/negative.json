@@ -1,0 +1,27 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-17-005",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "an unknown profile",
+      "input": "Start=Bevel",
+      "expect": "Invalid(\"channel end profile\")"
+    },
+    {
+      "case": "an unknown middle profile",
+      "input": "Middle=Slant",
+      "expect": "Invalid(\"channel middle profile\")"
+    },
+    {
+      "case": "a negative spacing",
+      "input": "Spacing=-1",
+      "expect": "Invalid(\"channel height\")"
+    },
+    {
+      "case": "an end depth below the minimum",
+      "input": "StartDepth=0",
+      "expect": "Invalid(\"channel end depth\")"
+    }
+  ]
+}

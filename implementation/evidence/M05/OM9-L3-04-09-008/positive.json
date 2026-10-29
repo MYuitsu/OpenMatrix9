@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-09-008",
+  "title": "Gem Facet Outline Girdle Reference API",
+  "cases": [
+    "girdle/table/culet references are closed and finite",
+    "crown and pavilion facet normals point outward from the facet midpoint",
+    "the same name returns the same points on every call (stable, index-free)",
+    "the reference is bound to the record's GemId"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-11-001",
+  "title": "Halo Builder",
+  "cases": [
+    "a requested spacing that cannot fit is refused (no squeeze)",
+    "more than MAX_ACCENTS is a typed Budget error",
+    "a nil/duplicate child GemId is refused by the feature record"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

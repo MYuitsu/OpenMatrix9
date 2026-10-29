@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-12-007",
+  "title": "Pave Region Controls And Preview",
+  "scope": "key=value options, Apply/Enter, Cancel/Esc, Reset",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": [
+    "margin/border, density and angle change the candidate set interactively",
+    "the preview chooses Stones or the nearest-neighbour Framework",
+    "the same options work from the typed command line and the window",
+    "Apply is one transaction; Reset restores the typed defaults"
+  ],
+  "negative": [
+    "an unknown option is a typed error and the session stays open",
+    "a parameter outside its range is refused, not clamped silently",
+    "closing or canceling the window drops the preview without document changes"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-12-007-03"
+    ],
+    "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_pave.rs",
+    "crates/om9-app/tests/gem_pave_panel.rs"
+  ]
+}

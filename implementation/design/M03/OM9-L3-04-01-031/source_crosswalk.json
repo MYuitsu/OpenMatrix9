@@ -1,0 +1,16 @@
+{
+  "l3_id": "OM9-L3-04-01-031",
+  "title": "Transform · Scale By Plane — menu binding",
+  "owner": "OM9-L2-04-01",
+  "date": "2026-10-26",
+  "sources": [
+    "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-031 - Transform · Scale By Plane - menu binding/l3.json",
+    "crates/om9-app/src/session/transform.rs",
+    "crates/om9-app/src/transform_menu.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-core/src/gumball.rs",
+    "crates/om9-core/src/transform_session.rs",
+    "crates/om9-app/tests/transform_menu.rs"
+  ],
+  "qymcad_source_paths_verified": []
+}

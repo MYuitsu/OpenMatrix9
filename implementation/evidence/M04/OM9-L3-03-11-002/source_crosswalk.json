@@ -1,0 +1,40 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-11-002",
+  "title": "Builder Mode Tabs And Context",
+  "owner": "om9-app builder panel + om9-core BuilderSession",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [
+        "BuilderKind",
+        "BuilderSession::new",
+        "BuilderSession::fields"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [
+        "switch_builder",
+        "builder_tabs",
+        "builder_selection",
+        "builder_saved"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "symbols": [
+        "builder_slot_ui tab row"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3 skill/plan record is planning input; runtime behavior is established by the receipts."
+  ]
+}

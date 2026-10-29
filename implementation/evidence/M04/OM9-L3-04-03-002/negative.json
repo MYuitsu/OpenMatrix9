@@ -1,0 +1,16 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"ring wall\")",
+      "thickness_mm": 0.1
+    },
+    {
+      "expect": "Invalid(\"ring signet top\")",
+      "top_length_mm": 40.0
+    },
+    {
+      "expect": "Invalid(\"ring shoulder\")",
+      "shoulder_mm": 0.0
+    }
+  ]
+}

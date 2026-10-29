@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-022",
+  "case": "count below two",
+  "expected": "`Error::Invalid(\"array count\")` at its own prompt; the run keeps the prompt and no transaction is opened",
+  "test": "m03_04_01_022_array_along_curve_spaces_copies_by_arc_length"
+}

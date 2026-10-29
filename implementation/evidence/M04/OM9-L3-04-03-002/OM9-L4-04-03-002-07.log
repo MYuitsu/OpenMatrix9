@@ -1,0 +1,41 @@
+$ cargo test -p om9-core --lib -j 2 ring_builder::tests::a_signet_ring_refuses_a_negative_wall_and_a_self_intersecting_top
+# exit code: 0
+# captured: 2026-10-27T09:35:14Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test ring_builder::tests::a_signet_ring_refuses_a_negative_wall_and_a_self_intersecting_top ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 130 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)
+
+$ cargo test -p om9-app --test ring_family_panel -j 2 an_invalid_ring_parameter_is_refused_and_the_document_stays_empty
+# exit code: 0
+# captured: 2026-10-27T09:35:17Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test an_invalid_ring_parameter_is_refused_and_the_document_stays_empty ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 3.05s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running tests\ring_family_panel.rs (L:\om9-target\debug\deps\ring_family_panel-7d33ae66eb23707a.exe)
+
+$ cargo test -p om9-kernel --features 3dm-brep --test ring_family_brep -j 2 a_ring_body_with_a_missing_face_is_refused_instead_of_published_open
+# exit code: 0
+# captured: 2026-10-27T09:35:18Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_ring_body_with_a_missing_face_is_refused_instead_of_published_open ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.18s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family_brep.rs (L:\om9-target\debug\deps\ring_family_brep-978ce2d9e95264df.exe)

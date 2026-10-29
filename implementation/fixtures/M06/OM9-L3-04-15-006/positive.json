@@ -1,0 +1,18 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-006",
+  "cases": [
+    {
+      "input": "10 mm line, Spacing=1",
+      "expect": "11 beads (two ends plus every mm) committed as closed bodies",
+      "oracle": "om9-app tests/settings_commands.rs::bead_on_curve_commits_the_run_along_the_selected_curve"
+    }
+  ],
+  "automated_tests": [
+    "bead_on_curve_commits_the_run_along_the_selected_curve",
+    "bead_count_drives_the_run_and_spacing_returns_to_auto",
+    "a_refused_bead_count_keeps_the_staged_command",
+    "settings::bead::tests",
+    "tests/settings_family.rs::one_row_drives_every_setting_part"
+  ]
+}

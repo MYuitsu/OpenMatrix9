@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-008",
+  "kind": "positive",
+  "input": "re-evaluate the swept band after a ring size or profile edit",
+  "expected": "a RingRail -> RailProfile -> RailSweep chain rebuilds once when the ring diameter changes from 18 to 19 mm; the dependent sweep gets a new geometry revision and the plan is clean",
+  "verified_by": [
+    "a_ring_size_edit_rebuilds_the_profile_and_one_dirty_sweep",
+    "a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one"
+  ],
+  "notes": [
+    "This build uses the OCCT registry, so the committed sweep is a B-Rep; the core reference backend test covers the analytic surface variant.",
+    "The chain is A -> B -> C: a ring edit re-stamps the profile against the new rail revision, then the sweep against the new profile revision.",
+    "A failed profile rebuild is reported as RecomputeOutcome::Failed and the sweep keeps its last committed geometry revision."
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-02-009",
+  "title": "Rail And Profile Viewport Handles",
+  "owner": "om9-app Controller ring/profile tools over om9-core producer chain",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [
+        "BuilderHandle",
+        "BuilderKind::RailProfile handles",
+        "scale"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "symbols": [
+        "builder handle drag"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "symbols": [
+        "handle read-outs"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "Handle drag deltas are projected millimetres times the handle scale; the position handle scales by 0.01 so one projected millimetre is 0.01 of the rail.",
+    "Apply is the only insert path: Cancel clears the session without a mutation."
+  ]
+}

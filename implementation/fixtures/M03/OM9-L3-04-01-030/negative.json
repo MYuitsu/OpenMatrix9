@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-030",
+  "case": "position text `5,6`",
+  "expected": "`Error::Invalid` from the coordinate parser; the object keeps its placement",
+  "test": "m03_04_01_030_set_points_moves_the_selection_to_the_typed_point"
+}

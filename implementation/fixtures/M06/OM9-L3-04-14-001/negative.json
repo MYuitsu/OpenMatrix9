@@ -1,0 +1,19 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-14-001",
+  "cases": [
+    {
+      "input": "Head drop below the culet",
+      "error": "invalid head prong below pavilion"
+    },
+    {
+      "input": "Metal body inside the pavilion",
+      "error": "invalid head metal inside pavilion"
+    },
+    {
+      "input": "Selection without a gem",
+      "error": "missing head gem selection"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

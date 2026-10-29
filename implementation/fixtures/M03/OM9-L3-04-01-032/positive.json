@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-032",
+  "case": "box 0..2, base (0,0,0), direction (1,0,0), factor 2",
+  "expected": "box 0..2, base (0,0,0), direction (1,0,0), factor 2 -> the far corner moves to (4,2,2) and the centre to (2,1,1), one Undo entry",
+  "test": "m03_04_01_032_stretch_scales_along_the_picked_direction"
+}

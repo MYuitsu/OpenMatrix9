@@ -1,0 +1,48 @@
+$ cargo test -p om9-core --test builder_session -j 2
+# exit code: 0
+# captured: 2026-10-27T09:35:13Z
+# target dir: L:\om9-target
+
+
+running 8 tests
+test the_field_list_is_typed_and_the_panel_never_sees_a_bare_number ... ok
+test a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness ... ok
+test a_rail_profile_builder_reads_the_selected_rail_and_exposes_two_handles ... ok
+test a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle ... ok
+test an_outside_rail_offsets_a_closed_circular_rail_only ... ok
+test the_profile_library_switches_shape_and_refuses_a_removed_preset ... ok
+test a_committed_builder_plan_inserts_entity_recipe_and_result_in_one_undoable_step ... ok
+test a_rail_sweep_builder_previews_a_surface_and_keeps_the_selection_roles ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\builder_session.rs (L:\om9-target\debug\deps\builder_session-348c808c86c05bee.exe)
+
+$ cargo test -p om9-core --test builder_style -j 2
+# exit code: 0
+# captured: 2026-10-27T09:35:14Z
+# target dir: L:\om9-target
+
+
+running 15 tests
+test a_missing_or_corrupt_thumbnail_falls_back_without_dropping_the_style ... ok
+test a_profile_reference_name_is_translated_to_the_builder_preset ... ok
+test a_source_without_a_declared_slot_or_with_a_wrong_type_is_refused ... ok
+test a_gem_style_cannot_be_applied_to_a_ring_builder ... ok
+test the_builder_tags_filter_a_style_to_one_mode ... ok
+test a_style_missing_the_mandatory_profile_input_is_refused ... ok
+test a_style_ignores_parameters_of_another_mode_and_reports_them ... ok
+test the_browser_lists_every_style_for_the_mode_and_disables_the_incompatible ... ok
+test matching_attributes_copies_only_the_declared_attributes_and_keeps_the_identity ... ok
+test an_unknown_schema_version_or_an_invalid_numeric_is_refused ... ok
+test a_style_name_cannot_be_a_path_or_control_text ... ok
+test applying_a_style_changes_the_preview_only_and_cancel_keeps_the_baseline ... ok
+test saving_a_user_style_leaves_the_defaults_untouched_and_refuses_a_duplicate_name ... ok
+test a_style_roundtrip_keeps_the_values_their_unit_and_the_schema ... ok
+test the_user_library_roundtrips_through_a_file_and_reports_a_refused_write ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)

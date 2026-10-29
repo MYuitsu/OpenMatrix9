@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-012",
+  "case": "the same frame rule as Smart Flow: two surfaces and at least one object",
+  "expected": "the same frame rule as Smart Flow: two surfaces and at least one object",
+  "test": "m03_04_01_012_smart_flow_rigid_moves_the_frame"
+}

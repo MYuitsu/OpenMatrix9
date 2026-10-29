@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-006",
+  "title": "Gem Profile Curve And Guides",
+  "cases": [
+    "the profile curve through the table points and the girdle curve are both inserted",
+    "one guide segment is generated per placed stone",
+    "the guide curves are ordinary editable document curves"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

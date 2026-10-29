@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-004",
+  "case": "positive",
+  "input": "profile references a named edge; rebuild the rail with the same semantic identifier and a 0.01 mm move",
+  "expected": "the reference resolves to the same intended edge after the allowed edit; the bound id is unchanged",
+  "tests": [
+    "a_semantic_reference_survives_an_allowed_edit_and_refuses_ambiguity",
+    "a_detached_feature_cannot_keep_a_semantic_reference"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-007",
+  "cases": [
+    {
+      "input": "plane, Scale=2",
+      "expect": "one bead with diameter 2.0 and the surface normal as its axis",
+      "oracle": "om9-app tests/settings_commands.rs::bead_on_surface_places_one_bead_on_the_picked_uv"
+    }
+  ],
+  "automated_tests": [
+    "bead_on_surface_places_one_bead_on_the_picked_uv",
+    "settings::bead::tests::surface_bead",
+    "tests/settings_family.rs::one_row_drives_every_setting_part"
+  ]
+}

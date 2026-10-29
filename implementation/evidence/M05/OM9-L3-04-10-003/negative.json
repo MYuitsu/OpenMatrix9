@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-003",
+  "title": "Gem Count On Curve",
+  "cases": [
+    "a 5 mm line cannot host a 6 mm stone: `fits` is false and the tool refuses",
+    "a negative gap or allowance is refused by parameter validation"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-13-007",
+  "title": "Gem Map Viewport Overlay",
+  "cases": [
+    "a non-finite placement point is `Invalid(\"gem map point\")`",
+    "more rows than the report budget is a `Budget` refusal"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

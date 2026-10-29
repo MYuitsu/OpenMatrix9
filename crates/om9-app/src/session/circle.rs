@@ -108,7 +108,9 @@ impl Controller {
                 "area" | "a" => "Area",
                 _ => {
                     self.circle_pending = Some(pending);
-                    return Some(Err(Error::Invalid("Size must be Radius, Diameter, Circumference or Area")));
+                    return Some(Err(Error::Invalid(
+                        "Size must be Radius, Diameter, Circumference or Area",
+                    )));
                 }
             };
             pending.size = size;
@@ -133,7 +135,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Degree=") {
-            let Some(degree) = value.parse::<usize>().ok().filter(|value| (1..=11).contains(value)) else {
+            let Some(degree) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (1..=11).contains(value))
+            else {
                 self.circle_pending = Some(pending);
                 return Some(Err(Error::Invalid("degree must be 1..11")));
             };
@@ -168,7 +174,11 @@ impl Controller {
         }
         if pending.mode == "Tangent" {
             if let Some(value) = text.trim().strip_prefix("Radius=") {
-                let Some(radius) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+                let Some(radius) = value
+                    .parse::<f64>()
+                    .ok()
+                    .filter(|value| value.is_finite() && *value > 0.0)
+                else {
                     self.circle_pending = Some(pending);
                     return Some(Err(Error::Invalid("radius must be positive")));
                 };
@@ -191,7 +201,11 @@ impl Controller {
                 return Some(Ok(()));
             }
             if let Some(value) = text.trim().strip_prefix("Solution=") {
-                let Some(solution) = value.parse::<usize>().ok().filter(|value| (1..=4).contains(value)) else {
+                let Some(solution) = value
+                    .parse::<usize>()
+                    .ok()
+                    .filter(|value| (1..=4).contains(value))
+                else {
                     self.circle_pending = Some(pending);
                     return Some(Err(Error::Invalid("solution must be 1..4")));
                 };
@@ -212,7 +226,9 @@ impl Controller {
                     return Some(Ok(()));
                 }
                 self.circle_pending = Some(pending);
-                return Some(Err(Error::Invalid("Tangent accepts Radius=, Solution= or Enter")));
+                return Some(Err(Error::Invalid(
+                    "Tangent accepts Radius=, Solution= or Enter",
+                )));
             }
             let Some(radius) = pending.radius else {
                 self.circle_pending = Some(pending);
@@ -238,7 +254,9 @@ impl Controller {
             } else if pending.tangent_curves.len() == 1 {
                 let Some(point) = pending.tangent_point else {
                     self.circle_pending = Some(pending);
-                    return Some(Err(Error::Invalid("Tangent needs a point or a second line")));
+                    return Some(Err(Error::Invalid(
+                        "Tangent needs a point or a second line",
+                    )));
                 };
                 match tangent_line_point_circle(
                     &pending.tangent_curves[0],
@@ -253,7 +271,9 @@ impl Controller {
                 }
             } else {
                 self.circle_pending = Some(pending);
-                return Some(Err(Error::Invalid("Tangent needs a line and a point or two lines")));
+                return Some(Err(Error::Invalid(
+                    "Tangent needs a line and a point or two lines",
+                )));
             };
             self.circle_rebuild = Some((pending.deformable, pending.degree, pending.point_count));
             self.circle_pending = None;
@@ -264,7 +284,11 @@ impl Controller {
                 self.circle_pending = Some(pending);
                 return Some(Err(Error::Invalid("AroundCurve needs OnCurve=fraction")));
             };
-            let Some(fraction) = value.parse::<f64>().ok().filter(|value| (0.0..=1.0).contains(value)) else {
+            let Some(fraction) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| (0.0..=1.0).contains(value))
+            else {
                 self.circle_pending = Some(pending);
                 return Some(Err(Error::Invalid("OnCurve fraction must be 0..1")));
             };
@@ -272,14 +296,16 @@ impl Controller {
                 self.circle_pending = Some(pending);
                 return Some(Err(Error::Invalid("select a curve before AroundCurve")));
             };
-            let point = match om9_core::curve_ops::point_at(&path, fraction, self.coordinator.limits()) {
-                Ok(point) => point,
-                Err(error) => return Some(Err(error)),
-            };
-            let tangent = match om9_core::curve_ops::tangent_at(&path, fraction, self.coordinator.limits()) {
-                Ok(tangent) => tangent,
-                Err(error) => return Some(Err(error)),
-            };
+            let point =
+                match om9_core::curve_ops::point_at(&path, fraction, self.coordinator.limits()) {
+                    Ok(point) => point,
+                    Err(error) => return Some(Err(error)),
+                };
+            let tangent =
+                match om9_core::curve_ops::tangent_at(&path, fraction, self.coordinator.limits()) {
+                    Ok(tangent) => tangent,
+                    Err(error) => return Some(Err(error)),
+                };
             pending.points.push(point);
             pending.normal = Some(tangent);
             self.circle_pending = Some(pending);
@@ -292,8 +318,9 @@ impl Controller {
                     return Some(Err(Error::Invalid("FitPoints needs at least three points")));
                 }
                 let points = pending.points.clone();
-                self.circle_rebuild = Some((pending.deformable, pending.degree, pending.point_count));
-            self.circle_pending = None;
+                self.circle_rebuild =
+                    Some((pending.deformable, pending.degree, pending.point_count));
+                self.circle_pending = None;
                 let (center, x, y, radius) = match fit_circle(&points) {
                     Ok(fit) => fit,
                     Err(error) => return Some(Err(error)),
@@ -301,9 +328,13 @@ impl Controller {
                 return Some(self.commit_circle_center(center, x, y, radius));
             }
             self.circle_pending = Some(pending);
-            return Some(Err(Error::Invalid("FitPoints accepts points, Undo or Enter")));
+            return Some(Err(Error::Invalid(
+                "FitPoints accepts points, Undo or Enter",
+            )));
         }
-        if matches!(pending.mode, "Center" | "Vertical" | "AroundCurve") && pending.points.len() == 1 {
+        if matches!(pending.mode, "Center" | "Vertical" | "AroundCurve")
+            && pending.points.len() == 1
+        {
             let trimmed = text.trim();
             let (raw, size) = if let Some(value) = trimmed.strip_prefix("Radius=") {
                 (value, "Radius")
@@ -366,17 +397,13 @@ impl Controller {
                 self.circle_pending = Some(pending);
                 return Err(Error::Invalid("select a curve before AroundCurve"));
             };
-            let (fraction, projected, _) =
-                om9_core::curve_surface_ops::closest_point_on_curve(
-                    &path,
-                    point,
-                    self.coordinator.limits(),
-                )?;
-            let tangent = om9_core::curve_ops::tangent_at(
+            let (fraction, projected, _) = om9_core::curve_surface_ops::closest_point_on_curve(
                 &path,
-                fraction,
+                point,
                 self.coordinator.limits(),
             )?;
+            let tangent =
+                om9_core::curve_ops::tangent_at(&path, fraction, self.coordinator.limits())?;
             pending.points.push(projected);
             pending.normal = Some(tangent);
             self.circle_pending = Some(pending);
@@ -388,26 +415,36 @@ impl Controller {
                 let center = pending.points[0];
                 let point = pending.points[1];
                 let plane = self.input_plane();
-                let d = [point[0] - center[0], point[1] - center[1], point[2] - center[2]];
+                let d = [
+                    point[0] - center[0],
+                    point[1] - center[1],
+                    point[2] - center[2],
+                ];
                 let z = [
                     plane.x[1] * plane.y[2] - plane.x[2] * plane.y[1],
                     plane.x[2] * plane.y[0] - plane.x[0] * plane.y[2],
                     plane.x[0] * plane.y[1] - plane.x[1] * plane.y[0],
                 ];
                 let dot_dz = d[0] * z[0] + d[1] * z[1] + d[2] * z[2];
-                let horizontal = [d[0] - z[0] * dot_dz, d[1] - z[1] * dot_dz, d[2] - z[2] * dot_dz];
+                let horizontal = [
+                    d[0] - z[0] * dot_dz,
+                    d[1] - z[1] * dot_dz,
+                    d[2] - z[2] * dot_dz,
+                ];
                 let normal = [
                     horizontal[1] * z[2] - horizontal[2] * z[1],
                     horizontal[2] * z[0] - horizontal[0] * z[2],
                     horizontal[0] * z[1] - horizontal[1] * z[0],
                 ];
-                let radius = (horizontal[0].powi(2) + horizontal[1].powi(2) + horizontal[2].powi(2)).sqrt();
+                let radius =
+                    (horizontal[0].powi(2) + horizontal[1].powi(2) + horizontal[2].powi(2)).sqrt();
                 if radius <= 1e-9 {
                     self.circle_pending = Some(pending);
                     return Err(Error::Invalid("circle radius must be positive"));
                 }
-                self.circle_rebuild = Some((pending.deformable, pending.degree, pending.point_count));
-            self.circle_pending = None;
+                self.circle_rebuild =
+                    Some((pending.deformable, pending.degree, pending.point_count));
+                self.circle_pending = None;
                 self.commit_circle_normal(center, normal, radius)
             }
             "Center" if pending.points.len() >= 2 => {
@@ -418,15 +455,17 @@ impl Controller {
                     return Err(Error::Invalid("circle radius must be positive"));
                 }
                 let plane = self.input_plane();
-                self.circle_rebuild = Some((pending.deformable, pending.degree, pending.point_count));
-            self.circle_pending = None;
+                self.circle_rebuild =
+                    Some((pending.deformable, pending.degree, pending.point_count));
+                self.circle_pending = None;
                 self.commit_circle_center(center, plane.x, plane.y, radius)
             }
             "TwoPoint" if pending.points.len() >= 2 => {
                 let a = pending.points[0];
                 let b = pending.points[1];
-                self.circle_rebuild = Some((pending.deformable, pending.degree, pending.point_count));
-            self.circle_pending = None;
+                self.circle_rebuild =
+                    Some((pending.deformable, pending.degree, pending.point_count));
+                self.circle_pending = None;
                 self.commit_circle_diameter(a, b)
             }
             "FitPoints" => {
@@ -437,8 +476,9 @@ impl Controller {
                 let a = pending.points[0];
                 let b = pending.points[1];
                 let c = pending.points[2];
-                self.circle_rebuild = Some((pending.deformable, pending.degree, pending.point_count));
-            self.circle_pending = None;
+                self.circle_rebuild =
+                    Some((pending.deformable, pending.degree, pending.point_count));
+                self.circle_pending = None;
                 let (center, x, y, radius) = circumcircle(a, b, c)?;
                 self.commit_circle_center(center, x, y, radius)
             }
@@ -480,11 +520,9 @@ impl Controller {
             return circle_ring(center, x, y, radius, 64);
         };
         let rebuilt = Curve::Nurbs(rebuilt);
-        let Ok(points) = om9_core::surface_kernel::sample_curve(
-            &rebuilt,
-            64,
-            self.coordinator.limits(),
-        ) else {
+        let Ok(points) =
+            om9_core::surface_kernel::sample_curve(&rebuilt, 64, self.coordinator.limits())
+        else {
             return circle_ring(center, x, y, radius, 64);
         };
         points.windows(2).map(|pair| [pair[0], pair[1]]).collect()
@@ -503,9 +541,15 @@ impl Controller {
         let normal = [normal[0] / norm, normal[1] / norm, normal[2] / norm];
         let plane = self.input_plane();
         let mut x = [
-            plane.x[0] - normal[0] * (plane.x[0] * normal[0] + plane.x[1] * normal[1] + plane.x[2] * normal[2]),
-            plane.x[1] - normal[1] * (plane.x[0] * normal[0] + plane.x[1] * normal[1] + plane.x[2] * normal[2]),
-            plane.x[2] - normal[2] * (plane.x[0] * normal[0] + plane.x[1] * normal[1] + plane.x[2] * normal[2]),
+            plane.x[0]
+                - normal[0]
+                    * (plane.x[0] * normal[0] + plane.x[1] * normal[1] + plane.x[2] * normal[2]),
+            plane.x[1]
+                - normal[1]
+                    * (plane.x[0] * normal[0] + plane.x[1] * normal[1] + plane.x[2] * normal[2]),
+            plane.x[2]
+                - normal[2]
+                    * (plane.x[0] * normal[0] + plane.x[1] * normal[1] + plane.x[2] * normal[2]),
         ];
         let mut x_norm = (x[0].powi(2) + x[1].powi(2) + x[2].powi(2)).sqrt();
         if x_norm <= 1e-12 {
@@ -566,8 +610,16 @@ impl Controller {
         if length <= 1e-9 {
             return Err(Error::Invalid("circle diameter must be positive"));
         }
-        let center = [(a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5];
-        let x = [diameter[0] / length, diameter[1] / length, diameter[2] / length];
+        let center = [
+            (a[0] + b[0]) * 0.5,
+            (a[1] + b[1]) * 0.5,
+            (a[2] + b[2]) * 0.5,
+        ];
+        let x = [
+            diameter[0] / length,
+            diameter[1] / length,
+            diameter[2] / length,
+        ];
         let plane = self.input_plane();
         let normal = [
             plane.x[1] * plane.y[2] - plane.x[2] * plane.y[1],
@@ -735,8 +787,13 @@ impl Controller {
             }
             "TwoPoint" if pending.points.len() == 1 => {
                 let first = pending.points[0];
-                let diameter = [point[0] - first[0], point[1] - first[1], point[2] - first[2]];
-                let length = (diameter[0].powi(2) + diameter[1].powi(2) + diameter[2].powi(2)).sqrt();
+                let diameter = [
+                    point[0] - first[0],
+                    point[1] - first[1],
+                    point[2] - first[2],
+                ];
+                let length =
+                    (diameter[0].powi(2) + diameter[1].powi(2) + diameter[2].powi(2)).sqrt();
                 if length <= 1e-9 {
                     return Vec::new();
                 }
@@ -745,7 +802,11 @@ impl Controller {
                     (first[1] + point[1]) * 0.5,
                     (first[2] + point[2]) * 0.5,
                 ];
-                let x = [diameter[0] / length, diameter[1] / length, diameter[2] / length];
+                let x = [
+                    diameter[0] / length,
+                    diameter[1] / length,
+                    diameter[2] / length,
+                ];
                 let plane = self.input_plane();
                 let normal = [
                     plane.x[1] * plane.y[2] - plane.x[2] * plane.y[1],
@@ -778,15 +839,24 @@ impl Controller {
                     plane.x[2] * plane.y[0] - plane.x[0] * plane.y[2],
                     plane.x[0] * plane.y[1] - plane.x[1] * plane.y[0],
                 ];
-                let d = [point[0] - center[0], point[1] - center[1], point[2] - center[2]];
+                let d = [
+                    point[0] - center[0],
+                    point[1] - center[1],
+                    point[2] - center[2],
+                ];
                 let axial = d[0] * z[0] + d[1] * z[1] + d[2] * z[2];
-                let horizontal = [d[0] - z[0] * axial, d[1] - z[1] * axial, d[2] - z[2] * axial];
+                let horizontal = [
+                    d[0] - z[0] * axial,
+                    d[1] - z[1] * axial,
+                    d[2] - z[2] * axial,
+                ];
                 let normal = [
                     horizontal[1] * z[2] - horizontal[2] * z[1],
                     horizontal[2] * z[0] - horizontal[0] * z[2],
                     horizontal[0] * z[1] - horizontal[1] * z[0],
                 ];
-                let radius = (horizontal[0].powi(2) + horizontal[1].powi(2) + horizontal[2].powi(2)).sqrt();
+                let radius =
+                    (horizontal[0].powi(2) + horizontal[1].powi(2) + horizontal[2].powi(2)).sqrt();
                 if radius <= 1e-9 {
                     return Vec::new();
                 }
@@ -795,7 +865,11 @@ impl Controller {
                     return Vec::new();
                 }
                 let normal = [normal[0] / norm, normal[1] / norm, normal[2] / norm];
-                let x = [horizontal[0] / radius, horizontal[1] / radius, horizontal[2] / radius];
+                let x = [
+                    horizontal[0] / radius,
+                    horizontal[1] / radius,
+                    horizontal[2] / radius,
+                ];
                 let mut y = [
                     normal[1] * x[2] - normal[2] * x[1],
                     normal[2] * x[0] - normal[0] * x[2],
@@ -831,7 +905,13 @@ impl Controller {
     }
 }
 
-fn circle_ring(center: Point3, x: Point3, y: Point3, radius: f64, steps: usize) -> Vec<[Point3; 2]> {
+fn circle_ring(
+    center: Point3,
+    x: Point3,
+    y: Point3,
+    radius: f64,
+    steps: usize,
+) -> Vec<[Point3; 2]> {
     let point_at = |angle: f64| {
         let (sin, cos) = angle.sin_cos();
         [
@@ -867,8 +947,10 @@ fn tangent_line_circle(
         Curve::Line { start, end, .. } => (start, end),
         _ => return Err(Error::Invalid("Tangent needs two line curves")),
     };
-    let d1 = unit([a1[0] - a0[0], a1[1] - a0[1], a1[2] - a0[2]]).ok_or(Error::Invalid("tangent line"))?;
-    let d2 = unit([b1[0] - b0[0], b1[1] - b0[1], b1[2] - b0[2]]).ok_or(Error::Invalid("tangent line"))?;
+    let d1 = unit([a1[0] - a0[0], a1[1] - a0[1], a1[2] - a0[2]])
+        .ok_or(Error::Invalid("tangent line"))?;
+    let d2 = unit([b1[0] - b0[0], b1[1] - b0[1], b1[2] - b0[2]])
+        .ok_or(Error::Invalid("tangent line"))?;
     let n1 = unit(cross(d1, normal)).ok_or(Error::Invalid("tangent frame"))?;
     let n2 = unit(cross(d2, normal)).ok_or(Error::Invalid("tangent frame"))?;
     let denominator = dot(cross(d1, d2), normal);
@@ -894,7 +976,11 @@ fn tangent_line_circle(
     let center = centers[(solution - 1).min(centers.len() - 1)];
     let mut x = [plane_x[0], plane_x[1], plane_x[2]];
     let dot = dot(x, normal);
-    x = [x[0] - normal[0] * dot, x[1] - normal[1] * dot, x[2] - normal[2] * dot];
+    x = [
+        x[0] - normal[0] * dot,
+        x[1] - normal[1] * dot,
+        x[2] - normal[2] * dot,
+    ];
     let x = unit(x).ok_or(Error::Invalid("tangent frame"))?;
     let y = unit(cross(normal, x)).ok_or(Error::Invalid("tangent frame"))?;
     Ok((center, x, y))
@@ -921,7 +1007,11 @@ fn tangent_line_point_circle(
             start[1] + n[1] * radius * sign,
             start[2] + n[2] * radius * sign,
         ];
-        let w = [offset[0] - point[0], offset[1] - point[1], offset[2] - point[2]];
+        let w = [
+            offset[0] - point[0],
+            offset[1] - point[1],
+            offset[2] - point[2],
+        ];
         let along = dot(w, d);
         let disc = along * along - (dot(w, w) - radius * radius);
         if disc < 0.0 {
@@ -929,7 +1019,11 @@ fn tangent_line_point_circle(
         }
         let root = disc.sqrt();
         for t in [-along - root, -along + root] {
-            let center = [offset[0] + d[0] * t, offset[1] + d[1] * t, offset[2] + d[2] * t];
+            let center = [
+                offset[0] + d[0] * t,
+                offset[1] + d[1] * t,
+                offset[2] + d[2] * t,
+            ];
             centers.push(center);
         }
     }
@@ -957,7 +1051,7 @@ fn unit(vector: Point3) -> Option<Point3> {
     }
 }
 
-fn fit_circle(points: &[Point3]) -> Result<(Point3, Point3, Point3, f64), Error> {
+pub(super) fn fit_circle(points: &[Point3]) -> Result<(Point3, Point3, Point3, f64), Error> {
     if points.len() < 3 {
         return Err(Error::Invalid("FitPoints needs at least three points"));
     }
@@ -970,7 +1064,11 @@ fn fit_circle(points: &[Point3]) -> Result<(Point3, Point3, Point3, f64), Error>
     let mut best = [0.0; 3];
     let mut best_len = 0.0;
     for point in points {
-        let delta = [point[0] - centroid[0], point[1] - centroid[1], point[2] - centroid[2]];
+        let delta = [
+            point[0] - centroid[0],
+            point[1] - centroid[1],
+            point[2] - centroid[2],
+        ];
         let length = delta[0].powi(2) + delta[1].powi(2) + delta[2].powi(2);
         if length > best_len {
             best_len = length;
@@ -985,7 +1083,11 @@ fn fit_circle(points: &[Point3]) -> Result<(Point3, Point3, Point3, f64), Error>
     let mut v = [0.0; 3];
     let mut v_len = 0.0;
     for point in points {
-        let delta = [point[0] - centroid[0], point[1] - centroid[1], point[2] - centroid[2]];
+        let delta = [
+            point[0] - centroid[0],
+            point[1] - centroid[1],
+            point[2] - centroid[2],
+        ];
         let dot = delta[0] * u[0] + delta[1] * u[1] + delta[2] * u[2];
         let residual = [
             delta[0] - u[0] * dot,
@@ -1011,7 +1113,11 @@ fn fit_circle(points: &[Point3]) -> Result<(Point3, Point3, Point3, f64), Error>
     let mut matrix = [[0.0f64; 3]; 3];
     let mut rhs = [0.0f64; 3];
     for point in points {
-        let delta = [point[0] - centroid[0], point[1] - centroid[1], point[2] - centroid[2]];
+        let delta = [
+            point[0] - centroid[0],
+            point[1] - centroid[1],
+            point[2] - centroid[2],
+        ];
         let x = delta[0] * u[0] + delta[1] * u[1] + delta[2] * u[2];
         let y = delta[0] * v[0] + delta[1] * v[1] + delta[2] * v[2];
         let row = [2.0 * x, 2.0 * y, 1.0];
@@ -1041,9 +1147,8 @@ fn fit_circle(points: &[Point3]) -> Result<(Point3, Point3, Point3, f64), Error>
 
 fn solve3(mut a: [[f64; 3]; 3], mut b: [f64; 3]) -> Option<[f64; 3]> {
     for column in 0..3 {
-        let pivot = (column..3).max_by(|left, right| {
-            a[*left][column].abs().total_cmp(&a[*right][column].abs())
-        })?;
+        let pivot = (column..3)
+            .max_by(|left, right| a[*left][column].abs().total_cmp(&a[*right][column].abs()))?;
         if a[pivot][column].abs() <= 1e-18 {
             return None;
         }
@@ -1088,11 +1193,7 @@ fn distance(a: Point3, b: Point3) -> f64 {
     ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2) + (a[2] - b[2]).powi(2)).sqrt()
 }
 
-fn circumcircle(
-    a: Point3,
-    b: Point3,
-    c: Point3,
-) -> Result<(Point3, Point3, Point3, f64), Error> {
+fn circumcircle(a: Point3, b: Point3, c: Point3) -> Result<(Point3, Point3, Point3, f64), Error> {
     let u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
     let v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
     let n = [

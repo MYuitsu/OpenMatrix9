@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-09-004",
+  "title": "Gem Custom Shape From Profile",
+  "cases": [
+    "a 6 mm circle profile becomes a 63-point closed profile and a 6 mm gem",
+    "the applied record keeps `spec.profile` and the derived length/width",
+    "facet count / crown angle / bulge edits change the preview only until Apply"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

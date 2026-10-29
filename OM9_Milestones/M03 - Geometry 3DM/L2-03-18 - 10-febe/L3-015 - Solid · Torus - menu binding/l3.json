@@ -3,7 +3,504 @@
   "id": "OM9-L3-03-18-015",
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-18",
-  "title": "Solid \u00b7 Torus \u2014 menu binding",
+  "title": "Solid · Torus — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "ROOT_GROUP",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE_ROOT_GROUP",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "ROOT_MENU_COMMAND",
+      "option_order": [],
+      "option_count": 15
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Solid",
+      "command": "(root)",
+      "option": "Torus",
+      "root_group": true,
+      "path": [
+        "Solid",
+        "(root)"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "explicit typed selection and deterministic numerical inputs for Torus",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid · Torus - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Cylinder",
+        "command_id": "SolidCylinder",
+        "script": "! _Cylinder",
+        "alt_script": "! _Cylinder _P",
+        "alt_label": "Cylinder 2 Point",
+        "covered_by_l3": "OM9-L3-03-18-016",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Cylinder",
+          "typed_forms": [
+            "Cylinder"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Cone",
+        "command_id": "SolidCone",
+        "script": "! _Cone",
+        "alt_script": "! _Cone _P",
+        "alt_label": "Cone 2 Point",
+        "covered_by_l3": "OM9-L3-03-18-019",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Cone",
+          "typed_forms": [
+            "Cone"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Truncated Cone",
+        "command_id": "SolidTruncatedCone",
+        "script": "! _TCone",
+        "alt_script": "! _TCone _P",
+        "alt_label": "Truncated Cone 2 Point",
+        "covered_by_l3": "OM9-L3-03-18-020",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Truncated Cone",
+          "typed_forms": [
+            "Truncated Cone"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Pyramid",
+        "command_id": "SolidPyramid",
+        "script": "! _Pyramid",
+        "alt_script": "! _Pyramid _Numsides=5 _S",
+        "alt_label": "Pyramid Star",
+        "covered_by_l3": "OM9-L3-03-18-018",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Pyramid",
+          "typed_forms": [
+            "Pyramid"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Tube",
+        "command_id": "SolidTube",
+        "script": "! _Tube",
+        "alt_script": "! _Tube _P",
+        "alt_label": "Tube 2 Point",
+        "covered_by_l3": "OM9-L3-03-18-017",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Tube",
+          "typed_forms": [
+            "Tube"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Pipe",
+        "command_id": "SolidPipe",
+        "script": "! _Pipe",
+        "alt_script": "! _Pipe _C",
+        "alt_label": "Pipe ChainEdges",
+        "covered_by_l3": "OM9-L3-03-18-011",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Pipe",
+          "typed_forms": [
+            "Pipe"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Solid Multi Pipe",
+        "command_id": "SolidGVDMultiPipe",
+        "script": "! _Pipe _Multiple",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Solid Multi Pipe",
+          "typed_forms": [
+            "Solid Multi Pipe"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Slab",
+        "command_id": "SolidSlab",
+        "script": "! _Slab",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Slab",
+          "typed_forms": [
+            "Slab"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Torus",
+        "command_id": "SolidTorus",
+        "script": "! _Torus",
+        "alt_script": "! _Torus _P",
+        "alt_label": "Torus 2 Point",
+        "covered_by_l3": "OM9-L3-03-18-015",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Torus",
+          "typed_forms": [
+            "Torus"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Text...",
+        "command_id": "SolidText",
+        "script": "! _TextObject",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-18-008",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Text...",
+          "typed_forms": [
+            "Text..."
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Boss",
+        "command_id": "SolidBoss",
+        "script": "! _Boss",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Boss",
+          "typed_forms": [
+            "Boss"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Rib",
+        "command_id": "SolidRib",
+        "script": "! _Rib",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Rib",
+          "typed_forms": [
+            "Rib"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Shell",
+        "command_id": "SolidShell",
+        "script": "! _Shell",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-18-021",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Shell",
+          "typed_forms": [
+            "Shell"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Cap Planar",
+        "command_id": "SolidCapPlanarHoles",
+        "script": "! _Cap",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-18-005",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Cap Planar",
+          "typed_forms": [
+            "Cap Planar"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Extract Surface",
+        "command_id": "SolidExtractSurface",
+        "script": "! _ExtractSrf",
+        "alt_script": "! _ExtractSrf _Copy=Yes",
+        "alt_label": "Extract Surface Copy",
+        "covered_by_l3": "OM9-L3-03-18-006",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Extract Surface",
+          "typed_forms": [
+            "Extract Surface"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [],
+    "missing": [
+      "input:explicit typed selection and deterministic numerical inputs for Torus: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
@@ -13,7 +510,7 @@
     "l3_id": "OM9-L3-03-18-015",
     "capability_id": "cap.03-18.solid-command-torus",
     "stable_owner_key": "OM9-L2-03-18/solid-command-torus",
-    "title": "Solid \u00b7 Torus \u2014 menu binding",
+    "title": "Solid · Torus — menu binding",
     "slug": "solid-command-torus",
     "module_id": "OM9-L2-03-18",
     "module_path": "specs/03-ms03-curve-surface-solid-3dm/10-febe-matrix-solid-menu-workflows/",
@@ -25,10 +522,10 @@
     "delivery": "mainline",
     "status": "L3_SPEC_WITH_L4_PLANNED_NOT_EXECUTED",
     "origin_source_taxonomy": "03-matrix8-book1",
-    "goal": "Bind menu/commandline for documented Solid Tools command \u201cTorus\u201d; reuse owning geometry service rather than reimplement its algorithm",
+    "goal": "Bind menu/commandline for documented Solid Tools command “Torus”; reuse owning geometry service rather than reimplement its algorithm",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
-    "parent_scope": "Solid menu ph\u00f9 h\u1ee3p trang s\u1ee9c: primitives, bool, extrusion, shell, text geometry",
-    "parent_exclusions": "Kh\u00f4ng th\u00eam c\u01a1 kh\u00ed thu\u1ea7n t\u00fay Boss/Rib/Slab d\u1ea1ng feature chuy\u00ean bi\u1ec7t.",
+    "parent_scope": "Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geometry",
+    "parent_exclusions": "Không thêm cơ khí thuần túy Boss/Rib/Slab dạng feature chuyên biệt.",
     "depends_on_module_ids": [
       "OM9-L2-01-09",
       "OM9-L2-01-10",
@@ -70,18 +567,18 @@
       "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
     },
     "acceptance_tests_auto": [
-      "Automated: valid input exercises \u201cSolid \u00b7 Torus \u2014 menu binding\u201d without panic, leaked handle or stale scene reference.",
+      "Automated: valid input exercises “Solid · Torus — menu binding” without panic, leaked handle or stale scene reference.",
       "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
       "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
     ],
     "acceptance_tests_manual": [
-      "Manual gate M03: run OpenMatrix9 UI; perform \u201cSolid \u00b7 Torus \u2014 menu binding\u201d; observe preview/feedback and commit/cancel behavior.",
+      "Manual gate M03: run OpenMatrix9 UI; perform “Solid · Torus — menu binding”; observe preview/feedback and commit/cancel behavior.",
       "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
     ],
     "requires_manual_test": true,
     "manual_test_gate": "M03-UI",
     "invariants": [
-      "No `90-after` dependency for any M01\u2013M09 deliverable.",
+      "No `90-after` dependency for any M01–M09 deliverable.",
       "No implementation may be assumed from QymCAD until source paths are checked.",
       "Existing document IDs/layer flags/units/history remain consistent after operation.",
       "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
@@ -99,15 +596,15 @@
   "children_l4": [
     {
       "id": "OM9-L4-03-18-015-01",
-      "title": "Dispatch Contract \u2014 Solid \u00b7 Torus \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid \u00b7 Torus - menu binding/L4-01 - Command Dispatch Contract/l4.json",
+      "title": "Dispatch Contract — Solid · Torus — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid · Torus - menu binding/L4-01 - Command Dispatch Contract/l4.json",
       "role": "DISPATCH_CONTRACT",
       "depends_on_task_ids": []
     },
     {
       "id": "OM9-L4-03-18-015-02",
-      "title": "Wire Ui \u2014 Solid \u00b7 Torus \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid \u00b7 Torus - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
+      "title": "Wire Ui — Solid · Torus — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid · Torus - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
       "role": "WIRE_UI",
       "depends_on_task_ids": [
         "OM9-L4-03-18-015-01",
@@ -116,8 +613,8 @@
     },
     {
       "id": "OM9-L4-03-18-015-03",
-      "title": "Acceptance \u2014 Solid \u00b7 Torus \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid \u00b7 Torus - menu binding/L4-03 - Acceptance and Evidence/l4.json",
+      "title": "Acceptance — Solid · Torus — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid · Torus - menu binding/L4-03 - Acceptance and Evidence/l4.json",
       "role": "ACCEPTANCE",
       "depends_on_task_ids": [
         "OM9-L4-03-18-015-02"
@@ -162,17 +659,17 @@
     ],
     "api_owner_resolution_status": "CANDIDATE_REQUIRES_LOCAL_TEST",
     "technical_decisions": [
-      "Matrix menu item ch\u1ec9 dispatch qua qymcad/src/command_catalog.rs / command bus; kh\u00f4ng t\u1ea1o m\u1ed9t kernel thao t\u00e1c song song.",
-      "D\u00f9ng c\u00f9ng command descriptor, typed options v\u00e0 selection gi\u1eefa menu, command line v\u00e0 toolbar; ki\u1ec3m tra disable state khi backend v\u1eafng m\u1eb7t.",
-      "N\u1ebfu kh\u00f4ng c\u00f3 owner L3 x\u00e1c minh \u0111\u01b0\u1ee3c, tr\u1ea1ng th\u00e1i BLOCKED_OWNER, kh\u00f4ng coi m\u1ed9t menu item render th\u00e0nh PASS.",
-      "\u1ee8ng vi\u00ean owner L3: OM9-L3-01-09-001; ph\u1ea3i ki\u1ec3m ch\u1ee9ng API v\u00e0 test tr\u01b0\u1edbc khi b\u1eadt menu."
+      "Matrix menu item chỉ dispatch qua qymcad/src/command_catalog.rs / command bus; không tạo một kernel thao tác song song.",
+      "Dùng cùng command descriptor, typed options và selection giữa menu, command line và toolbar; kiểm tra disable state khi backend vắng mặt.",
+      "Nếu không có owner L3 xác minh được, trạng thái BLOCKED_OWNER, không coi một menu item render thành PASS.",
+      "Ứng viên owner L3: OM9-L3-01-09-001; phải kiểm chứng API và test trước khi bật menu."
     ],
     "fixture_design": {
       "case_id": "OM9-L3-03-18-015-GOLDEN",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "input": {
-        "command": "Solid \u00b7 Torus \u2014 menu binding",
-        "purpose": "Bind menu/commandline for documented Solid Tools command \u201cTorus\u201d; reuse owning geometry service rather than reimplement its algorithm",
+        "command": "Solid · Torus — menu binding",
+        "purpose": "Bind menu/commandline for documented Solid Tools command “Torus”; reuse owning geometry service rather than reimplement its algorithm",
         "units": "mm",
         "document": "empty_or_specific_fixture",
         "command_id_to_define": "M03.torus",
@@ -201,7 +698,7 @@
       "input": "explicit typed selection and deterministic numerical inputs for Torus",
       "positive_assertions": "valid exact BRep and explicit positive volume/shape status",
       "negative_fixture_id": "OM9-L3-03-18-015-NEGATIVE",
-      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "rust_test_name_to_create": "m03_03_18_015"
     },
@@ -247,7 +744,7 @@
       "expected_negative_fixture_ref": "OM9-L3-03-18-015-NEGATIVE",
       "source_golden_input_from_parent": "explicit typed selection and deterministic numerical inputs for Torus",
       "parent_golden_positive_oracle": "valid exact BRep and explicit positive volume/shape status",
-      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
       "independent_domain_example_proposed_not_always_applicable": "command invoked with valid selection and chosen options, and with no selection/locked layer/unavailable backend",
       "domain_specific_assertions_to_select_when_applicable": [
         "command ID resolves to one backend handler or explicit disabled fallback",
@@ -279,6 +776,42 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "vertical_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-vertical.md",
+      "tests": "Ten Torus controller tests, simulated Vertical viewport and shared option routes passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "wire_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-wire-preview.md",
+      "tests": "Nine Torus controller tests and four simulated viewport workflows passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "around_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-around-curve.md",
+      "tests": "Seven Torus tests, simulated viewport and option routes, two cone and four Ellipsoid AroundCurve regressions passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "three_point_radius_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-three-point-radius.md",
+      "tests": "Five Torus, three viewport, two cone Radius and thirteen Ellipsoid tests passed; one desktop fixture ignored.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "three_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-three-point.md",
+      "tests": "Three controller tests, two simulated viewport workflows and shared option routes passed.",
+      "desktop_and_original_behavior_verified": false
+    },
+    "center_two_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-center.md",
+      "tests": "Two controller tests, simulated viewport, secondary click and shared option routes passed.",
+      "desktop_and_original_behavior_verified": false
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-015",

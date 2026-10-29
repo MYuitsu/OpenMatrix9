@@ -1,0 +1,16 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-005",
+  "cases": [
+    {
+      "input": "3 stones, Offset=0.3",
+      "expect": "one left and one right guide curve committed as Curve entities, longer than the stone chain",
+      "oracle": "om9-app tests/settings_commands.rs::the_channel_border_commits_two_guide_curves"
+    }
+  ],
+  "automated_tests": [
+    "the_channel_border_commits_two_guide_curves",
+    "settings::channel_border::tests",
+    "tests/settings_family.rs::one_row_drives_every_setting_part"
+  ]
+}

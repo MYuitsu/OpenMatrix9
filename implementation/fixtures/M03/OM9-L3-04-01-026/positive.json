@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-026",
+  "case": "box 1x1x1 at the world origin, 2 columns, 3 rows, spacing 10 / 20",
+  "expected": "six objects in total (source plus five copies)",
+  "test": "m03_04_01_026_array_creates_the_requested_grid"
+}

@@ -1,0 +1,5 @@
+# Pyramid reference ambiguity — 2026-10-29
+
+The normalized page 237 is explicitly marked as sharing a two-column boundary with neighboring sections. The Tube page 236–237 transcription repeats the same page 237 content, and page 236 already contains descriptions for the same base-circle and direction options. The page 237 AroundCurve text says “base circle”, whereas the Pyramid section describes a polygon. Consequently this extraction alone cannot attribute the direction-option and Solid descriptions to Pyramid. The recovered Matrix menu mapping delegates left click to `_Pyramid` and right click to its five-point star macro; that binding does not prove the underlying Rhino command's available options or defaults.
+
+The OM9 open-shell and AroundCurve tests remain valid evidence of OM9 behavior, but the earlier assertion that the normalized source establishes these particular Pyramid options is withdrawn. Their evidence records and skill contract now distinguish the source ambiguity from the observed implementation. The source page is preserved unchanged. Original Matrix behavior and exact column attribution remain open, as do the other Solid commands.

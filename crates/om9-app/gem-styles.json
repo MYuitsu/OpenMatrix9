@@ -1,0 +1,27 @@
+{
+  "schema": "om9.gem_style_file.v1",
+  "version": 1,
+  "styles": [
+    {
+      "schema": "om9.gem_style.v1",
+      "version": 1,
+      "name": "Round Six",
+      "edit": {
+        "cut": "diamond",
+        "shape": "round",
+        "length_mm": 6.0,
+        "width_mm": 6.0,
+        "depth_mm": 3.9000000000000004,
+        "girdle_mm": 0.12,
+        "corner_mm": 0.0,
+        "material": "diamond",
+        "color": [
+          180,
+          180,
+          180,
+          255
+        ]
+      }
+    }
+  ]
+}

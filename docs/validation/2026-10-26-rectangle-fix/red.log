@@ -1,0 +1,39 @@
+
+running 5 tests
+test bad_input_and_degenerate_pick_can_retry_then_undo_redo_and_cancel ... FAILED
+test typed_world_corners_ignore_cplane_origin_and_project_off_plane_height ... FAILED
+test square_and_fixed_length_keep_the_cursor_side ... FAILED
+test typed_first_and_relative_second_corner_share_the_coordinate_parser ... FAILED
+test corners_keep_all_four_drag_directions_in_shifted_and_rotated_cplanes ... FAILED
+
+failures:
+
+failures:
+    bad_input_and_degenerate_pick_can_retry_then_undo_redo_and_cancel
+    corners_keep_all_four_drag_directions_in_shifted_and_rotated_cplanes
+    square_and_fixed_length_keep_the_cursor_side
+    typed_first_and_relative_second_corner_share_the_coordinate_parser
+    typed_world_corners_ignore_cplane_origin_and_project_off_plane_height
+
+test result: FAILED. 0 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.55s
+     Running tests\rectangle_regressions.rs (L:/om9-target\debug\deps\rectangle_regressions-b4f591b69c8d8953.exe)
+
+thread 'bad_input_and_degenerate_pick_can_retry_then_undo_redo_and_cancel' (39560) panicked at crates\om9-app\tests\rectangle_regressions.rs:111:23:
+called `Result::unwrap()` on an `Err` value: Invalid("rectangle needs a first corner")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'typed_world_corners_ignore_cplane_origin_and_project_off_plane_height' (13448) panicked at crates\om9-app\tests\rectangle_regressions.rs:84:24:
+called `Result::unwrap()` on an `Err` value: Invalid("rectangle needs a first corner")
+
+thread 'typed_first_and_relative_second_corner_share_the_coordinate_parser' (24408) panicked at crates\om9-app\tests\rectangle_regressions.rs:73:29:
+called `Result::unwrap()` on an `Err` value: Invalid("rectangle needs a first corner")
+
+thread 'square_and_fixed_length_keep_the_cursor_side' (17100) panicked at crates\om9-app\tests\rectangle_regressions.rs:33:9:
+preview [[[3.0, 7.0, 0.0], [13.0, 7.0, 0.0]], [[13.0, 7.0, 0.0], [13.0, 27.0, 0.0]], [[13.0, 27.0, 0.0], [3.0, 27.0, 0.0]], [[3.0, 27.0, 0.0], [3.0, 7.0, 0.0]]] must contain [-7.0, -13.0, 0.0]
+
+thread 'corners_keep_all_four_drag_directions_in_shifted_and_rotated_cplanes' (4176) panicked at crates\om9-app\tests\rectangle_regressions.rs:33:9:
+preview [[[3.0, 7.0, 4.0], [13.0, 7.0, 4.0]], [[13.0, 7.0, 4.0], [13.0, 27.0, 4.0]], [[13.0, 27.0, 4.0], [3.0, 27.0, 4.0]], [[3.0, 27.0, 4.0], [3.0, 7.0, 4.0]]] must contain [-7.0, 27.0, 4.0]
+error: test failed, to rerun pass `-p om9-app --test rectangle_regressions`

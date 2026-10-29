@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-004",
+  "case": "X factor 0",
+  "expected": "`Error::Invalid(\"scale factor\")` at the X prompt, so the remaining factors are never collected",
+  "test": "m03_04_01_004_scale_non_uniform_applies_three_factors"
+}

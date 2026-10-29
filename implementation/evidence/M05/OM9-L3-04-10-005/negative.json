@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-005",
+  "title": "Gem On Curve Multi",
+  "cases": [
+    "one selected curve is refused for the multi tool",
+    "a curve that cannot host the stone is refused and no partial run is committed"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

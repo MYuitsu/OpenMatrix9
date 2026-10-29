@@ -1,0 +1,59 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3": "OM9-L3-04-17-005",
+  "title": "Channel Cutter Profile And End Controls",
+  "recorded_at": "2026-10-28",
+  "manual": {
+    "filename": "OM9_Milestones/M07 - Cutters/L2-04-17 - 02-febe-channel-microprong-brightcut-cutters/reference/text/m8book2__p272-274__creating-cutters.md",
+    "pdf_pages_1based": [
+      272,
+      274
+    ],
+    "printed_pages": [
+      498,
+      500
+    ]
+  },
+  "feature": "BuilderChannelBuilder",
+  "commands": [
+    "BuilderChannelBuilder"
+  ],
+  "rust_owner": [
+    "crates/om9-core/src/cutters/channel.rs",
+    "crates/om9-app/src/session/channel_cutters.rs",
+    "crates/om9-app/src/ui/channel_cutters.rs"
+  ],
+  "symbols": [
+    "cutters::channel::ChannelEnd",
+    "cutters::channel::ChannelMiddle",
+    "cutters::channel::ChannelParams::ends",
+    "cutters::channel::ChannelParams::validate"
+  ],
+  "reuse_decision": {
+    "decision": "ADD",
+    "reason": "Audit: the Cutters chapter had no channel/micro-prong/bright-cut command at all. The menu catalog already listed the four icons and display.rs already expected an om9.cutter payload, but no session resolved or built them, and the M06 scallop owner sweeps one edge profile rather than a stone row. This owner adds the row cutter kernel once and the app dispatches to it.",
+    "reuses": [
+      "OM9-L2-04-16 (cutters::{sweep, loft, solid, volume_mm3}, boolean::{apply, BooleanMode, CutterKeep}, the om9.cutter record)",
+      "OM9-L2-04-09 (gem::GemSpec + the gem owner's om9.gem record)",
+      "OM9-L2-01-10 (geometry::Transform placement)",
+      "OM9-L2-04-15 (the prong/channel metal owner that consumes these cutters)"
+    ]
+  },
+  "previous_code_audit": [
+    "menu_catalog::CUTTERS listed BuilderChannelBuilder, BuilderMicroProngCutter, BuilderBrightCutChannel and BuilderBrightCutter, and icons.rs bound all four SVGs.",
+    "display.rs CutterRecord { kind, seat } and CUTTER_EXTENSION_SLOT existed with no writer.",
+    "session.rs resolved none of the four ids: a click fell through the unsupported-command path.",
+    "crates/om9-core/src/cutters/ had the gem, library, bezel and boolean kernels but no row cutter geometry."
+  ],
+  "tests": [
+    "cargo test -p om9-core --test channel_cutters the_channel_end_profiles_shape_the_caps",
+    "cargo test -p om9-core --test channel_cutters the_channel_mirror_and_flip_swap_the_ends",
+    "cargo test -p om9-core --test channel_cutters the_channel_middle_profile_adds_a_station",
+    "cargo test -p om9-app --test channel_cutters the_channel_options_reach_the_cutter_and_a_bad_width_is_refused"
+  ],
+  "limitations": [
+    "Mirror picks the wider of the two end profiles for both ends and the deeper of the two caps; it does not invent a third profile.",
+    "Flip swaps A and B; the A/B ends are the first and last station of the row as selected, so the selection order is the orientation.",
+    "The manual's profile IDs are mapped to three typed end profiles (Square, Round, Taper); a user profile library is not part of this owner."
+  ]
+}

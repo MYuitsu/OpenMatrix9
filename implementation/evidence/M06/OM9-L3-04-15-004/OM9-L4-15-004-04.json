@@ -1,0 +1,102 @@
+{
+  "schema": "om9.regression_acceptance.v1",
+  "task_id": "OM9-L4-15-004-04",
+  "l3_id": "OM9-L3-04-15-004",
+  "title": "Metal Piece From Gems",
+  "oracles": [
+    {
+      "input": "2 stones, Mode=Top",
+      "expect": "preview reports a cutter and Enter commits the metal bodies with a recorded volume",
+      "oracle": "om9-app tests/settings_commands.rs::metal_piece_top_mode_stages_a_cutter_and_commits_bodies"
+    },
+    {
+      "input": "8 stones, ClosedOutside",
+      "expect": "closed ring, watertight metal bodies",
+      "oracle": "om9-core tests/settings_family.rs::the_closed_row_builds_a_closed_metal_ring_and_keeps_the_prong_order"
+    }
+  ],
+  "refusals": [
+    {
+      "input": "Mode=Curve without a picked curve",
+      "error": "missing metal piece curve"
+    },
+    {
+      "input": "Border=On before any channel border is committed",
+      "error": "missing metal piece channel border"
+    },
+    {
+      "input": "no gem selected",
+      "error": "missing gem row selection"
+    },
+    {
+      "input": "Wall=-1",
+      "error": "invalid metal piece wall"
+    }
+  ],
+  "tests": [
+    "settings::metal_piece::tests",
+    "tests/settings_family.rs::an_unsupported_metal_mode_is_a_typed_refusal_not_a_different_body"
+  ],
+  "runs": [
+    {
+      "command": "cargo check -p om9-core -j 2",
+      "exit_code": 0,
+      "seconds": 2.08,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/check-core.log",
+      "at": "2026-10-27T08:59:11+00:00"
+    },
+    {
+      "command": "cargo check -p om9-app -j 2",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/check-app.log",
+      "at": "2026-10-27T08:59:11+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core --lib -j 2 settings::",
+      "exit_code": 0,
+      "seconds": 2.93,
+      "tests_passed": 90,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/core-settings.log",
+      "at": "2026-10-27T08:59:14+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core --test settings_family -j 2",
+      "exit_code": 0,
+      "seconds": 4.41,
+      "tests_passed": 14,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/core-family.log",
+      "at": "2026-10-27T08:59:18+00:00"
+    },
+    {
+      "command": "cargo test -p om9-app --test settings_commands -j 2",
+      "exit_code": 0,
+      "seconds": 40.86,
+      "tests_passed": 24,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/app-settings.log",
+      "at": "2026-10-27T08:59:59+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core -j 2",
+      "exit_code": 0,
+      "seconds": 56.63,
+      "tests_passed": 781,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/core-all.log",
+      "at": "2026-10-27T09:00:56+00:00"
+    }
+  ],
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "manual_test_gate": "OM9-L3-04-15-004: UI preview/commit/cancel on the OpenMatrix9 window is still human work",
+    "note": "automated Rust tests only; the M06-UI gate is not signed here"
+  },
+  "git_head": "71852257e59f4117c3b3bfca73f047ac546f76c2"
+}

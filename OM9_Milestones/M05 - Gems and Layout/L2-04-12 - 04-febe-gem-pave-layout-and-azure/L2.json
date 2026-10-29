@@ -85,7 +85,7 @@
       "target_implementation_milestone": "M05"
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED",
+  "l4_status": "AUTOMATED_EVIDENCE_READY_MANUAL_GATE_OPEN",
   "planned_l4_count_m05": 24,
   "sdk_integration_plan": {
     "recorded_at": "2026-10-21",
@@ -121,5 +121,58 @@
       "OM9-L3-04-12-007",
       "OM9-L3-04-12-008"
     ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-28",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+    "scope": "Auto/Manual Pavé, Azure, Prong, Sphere, Gem Springs, region/preview controls and the persisted pavé history refresh: typed plans in om9-core::gem_pave, six builder commands plus the region/preview and refresh behaviour in om9-app, and one-transaction Apply/Undo.",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M05/OM9-L2-04-12/observed.json",
+      "implementation/evidence/M05/OM9-L2-04-12/README.md",
+      "implementation/evidence/M05/OM9-L2-04-12/core-gem-pave.log",
+      "implementation/evidence/M05/OM9-L2-04-12/app-gem-pave-panel.log",
+      "implementation/evidence/M05/OM9-L2-04-12/workspace-check.log",
+      "implementation/evidence/M05/OM9-L2-04-12/clippy-gem-pave-lib.log",
+      "implementation/evidence/M05/OM9-L2-04-12/MANUAL_UI_CHECKLIST.md",
+      "implementation/evidence/M05/OM9-L2-04-12/workspace-all-targets-blocked.log",
+      "implementation/evidence/M05/OM9-L2-04-12/clippy-strict-blocked.log"
+    ],
+    "notes": "Pavé/azure/prong/sphere/spring plans are typed and reuse om9_core::gem/surface_kernel; không duplicate gem placement primitive. Auto/Manual nhận curve attractor, closed edge curves và saved styles. Azure profiles là curve kín, prong curves là marker; metal cutting/prong solids thuộc M06/M07. Feature om9.gem.pave giữ host, params, child GemIds/UVs, manual count và source ids; Refresh resolve source, báo conflict thay vì bỏ stone. Sphere có Radius/Count viewport handles. Gate M05-UI của 8 L3 còn mở; checklist thủ công ở MANUAL_UI_CHECKLIST.md, không có chữ ký reviewer. Scoped lib/test checks pass; full workspace-all-targets và strict clippy đang bị chặn bởi module cutters/gem_cutters concurrent (log blocked giữ exit 1, không báo PASS giả).",
+    "l3_coverage": {
+      "OM9-L3-04-12-001": "automated_verified_manual_gate_open",
+      "OM9-L3-04-12-002": "automated_verified_manual_gate_open",
+      "OM9-L3-04-12-003": "automated_verified_manual_gate_open",
+      "OM9-L3-04-12-004": "automated_verified_manual_gate_open",
+      "OM9-L3-04-12-005": "automated_verified_manual_gate_open",
+      "OM9-L3-04-12-006": "automated_verified_manual_gate_open",
+      "OM9-L3-04-12-007": "automated_verified_manual_gate_open",
+      "OM9-L3-04-12-008": "automated_verified_manual_gate_open"
+    },
+    "l4": {
+      "planned": 24,
+      "artifacts": 24,
+      "receipts": [
+        "OM9-L4-12-001-03",
+        "OM9-L4-12-002-03",
+        "OM9-L4-12-003-03",
+        "OM9-L4-12-004-03",
+        "OM9-L4-12-005-03",
+        "OM9-L4-12-006-03",
+        "OM9-L4-12-007-03",
+        "OM9-L4-12-008-03"
+      ]
+    },
+    "manual_ui_checklist": "implementation/evidence/M05/OM9-L2-04-12/MANUAL_UI_CHECKLIST.md"
   }
 }

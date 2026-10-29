@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-023",
+  "case": "spacing 0",
+  "expected": "`Error::Invalid(\"array spacing\")`; copies are never stacked on the source",
+  "test": "m03_04_01_023_array_linear_spaces_the_copies_along_the_plane_x"
+}

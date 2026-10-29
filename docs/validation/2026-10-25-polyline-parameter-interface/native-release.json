@@ -1,0 +1,18 @@
+{
+  "status": "PASSED_SCOPED_OWN_APP_UI_REPLAY",
+  "manual_gate_signed": false,
+  "launch": {
+    "pid": 39648,
+    "binary": "L:\\om9-target\\release\\om9.exe",
+    "sha256": "f6b75cee2f871c1ba816928cae1dbf426994cdd719c56d20f2fd4ddfca0a75a4",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\polyline-parameter-interface-release-20261025"
+  },
+  "observed": [
+    "Typed Polyline starts",
+    "Viewport point exposes Length",
+    "Click Length requests numeric input",
+    "Numeric 5 updates Length=5 immediately",
+    "Escape returns to idle Command; release window left open"
+  ],
+  "stderr": ""
+}

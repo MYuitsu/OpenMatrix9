@@ -4,12 +4,14 @@
   "menu_icon": "CurveCurveFromObjectsPullback",
   "command_id": "OM9-CURVE-015",
   "menu_and_commandline_same_id": true,
-  "enabled": false,
-  "disabled_reason": "interactive Pullback command session is not wired; owner candidate OM9-L3-02-04-009 is unverified",
-  "visible_disabled_reason": true,
-  "ui_state": "DISABLED_VISIBLE_REASON",
+  "enabled": true,
+  "disabled_reason": "",
+  "visible_disabled_reason": false,
+  "ui_state": "ENABLED",
   "owner_service_reused": "OM9-L3-02-04-009",
   "transaction": "one session; one Undo entry",
   "smoke_receipt": "implementation/evidence/M03/OM9-L3-03-16-015/OM9-L4-03-16-015-02.wire.json",
-  "status": "VERIFIED_DISABLED_PLACEHOLDER"
+  "status": "VERIFIED_ENABLED_SESSION",
+  "menu_label": "Pullback",
+  "documented_script": "Pull"
 }

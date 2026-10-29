@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_edits_evidence.v1",
+  "l3_id": "OM9-L3-04-13-007",
+  "title": "Gem Map Viewport Overlay",
+  "command": "BuilderGemMap / gvGemMap",
+  "scope": "`gem_edits::gem_map(entries)`; `gem_edits::map_line(entry)`; `ui::gem_edits::gem_map_labels(rows, camera, viewport, rect)`; `MatrixApp::gem_map_overlay_ui` / `gem_map_window`; `BuilderGemMap` session",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "numbered map rows from the live world placement, painted as numbered captions with girdle sizes in the viewport plus a matching key window, read-only",
+  "negative": "a non-finite point or an oversized map is a typed refusal; an off-screen stone is omitted from the overlay instead of being mis-pinned",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-13-007-03"
+    ],
+    "fixture_manifest_sha256": "d2bb405f79939923effd565d6b3c84de2f00d0156a0dc2fa8f054257b648ea2a"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/tests/gem_edits.rs"
+  ],
+  "test": "the_map_numbers_the_selected_stones_without_touching_the_document"
+}

@@ -4,6 +4,51 @@
   "milestone": "M05",
   "parent_l2_id": "OM9-L2-04-09",
   "title": "Gem Reference Mesh And B-Rep Assets",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "planning/M00/SOURCE_AUDIT_V012.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-002 - Gem Reference Mesh And B-Rep Assets/L4-01 - Source Map/l4.json#l4.inputs"
+      },
+      {
+        "raw": "validated GemSpec and a freely licensed/procedurally generated asset descriptor",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-002 - Gem Reference Mesh And B-Rep Assets/L4-01 - Source Map/l4.json#l4.proposed_contract.input"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:planning/M00/SOURCE_AUDIT_V012.md: type/default/range",
+      "input:validated GemSpec and a freely licensed/procedurally generated asset descriptor: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M05",
   "execution_stage": "E10",
@@ -102,5 +147,30 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED"
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "task_ids": [
+    "OM9-L4-09-002-01",
+    "OM9-L4-09-002-02"
+  ],
+  "runtime_implementation": {
+    "date": "2026-10-27",
+    "status": "AUTOMATED_VERIFIED_AUTO_ONLY",
+    "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-kernel",
+        "om9-app"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M05/OM9-L3-04-09-002/observed.json",
+      "implementation/evidence/M05/OM9-L3-04-09-002/source_crosswalk.json",
+      "implementation/evidence/M05/OM9-L3-04-09-002/api.md",
+      "implementation/evidence/M05/OM9-L3-04-09-002/positive.json",
+      "implementation/evidence/M05/OM9-L3-04-09-002/negative.json"
+    ],
+    "manual_gate": "AUTO_ONLY",
+    "notes": "the canonical library is authored/procedural and every asset is a closed solid; every cut family converts to one valid B-Rep with the same volume, the committed body is that B-Rep, and the open tool shows a world-space preview before Apply; no Matrix asset is copied; zero-area profiles and open meshes are refused; kernel sewing refuses open/multi-shell input; `BRep=Yes` never falls back to a mesh body silently"
+  }
 }

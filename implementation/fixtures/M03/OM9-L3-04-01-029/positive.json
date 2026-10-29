@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-029",
+  "case": "10 x 10 plane at z=0, curve (1,1,2)->(3,1,2)",
+  "expected": "10 x 10 plane at z=0, curve (1,1,2)->(3,1,2) -> the ends land on (1,1,0) and (3,1,0), one Undo entry",
+  "test": "m03_04_01_029_splop_wraps_the_selection_onto_the_surface"
+}

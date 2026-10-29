@@ -1,0 +1,8 @@
+$ cargo clippy -p om9-kernel --all-targets --no-deps -j 2 -- -D warnings
+# exit code: 0
+# captured: 2026-10-26T22:05:58Z
+# target dir: L:\om9-target
+
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 16.40s

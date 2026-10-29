@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-008",
+  "case": "a bend direction parallel to the axis",
+  "expected": "a bend direction parallel to the axis -> Error::Invalid(\"bend direction is the axis\"); a zero or non-finite angle -> refused at its own prompt and the run continues on the same question",
+  "test": "m03_04_01_deform_rows_refuse_a_solid"
+}

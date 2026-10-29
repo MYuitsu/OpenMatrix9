@@ -1,0 +1,28 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-17-005",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderChannelBuilder",
+  "cases": [
+    {
+      "case": "every end profile",
+      "input": "Start/End = Square, Round, Taper",
+      "expect": "each end keeps the row frame and removes material (taper and round are smaller than square)"
+    },
+    {
+      "case": "per-end depth",
+      "input": "StartDepth=0.30, EndDepth=2.00",
+      "expect": "the deep end is at the last stone; Flip moves it to the first"
+    },
+    {
+      "case": "Mirror makes the channel symmetric",
+      "input": "Mirror=on then Flip=ab",
+      "expect": "the same body (the flip cannot change a symmetric channel)"
+    },
+    {
+      "case": "the middle profile",
+      "input": "Middle=Wide / Deep",
+      "expect": "one extra station and a larger volume"
+    }
+  ]
+}

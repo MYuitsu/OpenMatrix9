@@ -1,0 +1,33 @@
+$ cargo check --workspace --all-targets -j 2
+# exit code: 0
+# captured: 2026-10-27T13:44:57Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+warning: unused variable: `gem`
+  --> crates\om9-app\tests\head_commands.rs:82:26
+   |
+82 |     let (mut controller, gem) = gem_controller(6.0);
+   |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:102:26
+    |
+102 |     let (mut controller, gem) = gem_controller(6.0);
+    |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:129:30
+    |
+129 |         let (mut controller, gem) = gem_controller(6.0);
+    |                              ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:155:26
+    |
+155 |     let (mut controller, gem) = gem_controller(6.0);
+    |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: `om9-app` (test "head_commands") generated 4 warnings (run `cargo fix --test "head_commands" -p om9-app` to apply 4 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.37s

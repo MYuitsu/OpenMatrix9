@@ -1,0 +1,63 @@
+{
+  "schema": "om9.evidence.batch.v1",
+  "date": "2026-10-27",
+  "l2_id": "OM9-L2-04-01",
+  "owner_l3_id": "OM9-L3-04-08-005",
+  "title": "Transform cage family: Create Cage, Cage Edit, ReleaseFromCage",
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03_UI_PENDING",
+  "kernel": {
+    "module": "crates/om9-core/src/cage.rs",
+    "public_api": [
+      "cage::box_corners",
+      "cage::box_cage",
+      "cage::cage_from_corners",
+      "cage::box_mesh",
+      "cage::mesh_corners",
+      "cage::displacement",
+      "cage::capture_parameters",
+      "cage::Cage::invert",
+      "cage::Cage::with_corner"
+    ],
+    "document_schema": "om9.cage extension slot (registered in model::extension_slot_known)"
+  },
+  "rows": [
+    {
+      "l3_id": "OM9-L3-04-01-020",
+      "feature": "OM9-TRANSFORM-020",
+      "command": "CageEdit",
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_020_cage_edit_moves_the_attached_geometry",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-020/OM9-L3-04-01-020-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-021",
+      "feature": "OM9-TRANSFORM-022",
+      "command": "ReleaseFromCage",
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_021_release_from_cage_keeps_the_geometry",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-021/OM9-L3-04-01-021-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-041",
+      "feature": "OM9-TRANSFORM-041",
+      "command": "Cage",
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_041_create_cage_wraps_the_selection_in_a_box",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-041/OM9-L3-04-01-041-01.json"
+    }
+  ],
+  "totals": {
+    "catalogued_rows": 41,
+    "implemented_rows": 36,
+    "disabled_rows": 5,
+    "tests": {
+      "app_transform_menu": "46 passed; 0 failed",
+      "core_cage": "4 passed; 0 failed",
+      "core_deform": "9 passed; 0 failed"
+    }
+  },
+  "notes": [
+    "the cage is a mesh object plus one semantic extension, so it persists, moves and undoes like any other object; no new geometry kind was added",
+    "Cage Edit is exact for repeated edits: each point keeps its parameter in the cage before the edit, so the displacement is incremental and never composes errors",
+    "box cages only in the portable kernel: a non-box cage is refused by name instead of approximated",
+    "the 4 Smart Flow rows stay disabled; their owner OM9-L2-04-05 is still planned"
+  ]
+}

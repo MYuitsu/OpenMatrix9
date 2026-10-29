@@ -4,6 +4,233 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-16",
   "title": "Curve · Tween Curves — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "ROOT_GROUP",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE_ROOT_GROUP",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "ROOT_MENU_COMMAND",
+      "option_order": [],
+      "option_count": 6
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Curve",
+      "command": "(root)",
+      "option": "Tween Curves",
+      "root_group": true,
+      "path": [
+        "Curve",
+        "(root)"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "analytic line/circle or degree-3 spline with control points, domain and tolerance",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-16 - 08/L3-038 - Curve · Tween Curves - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Conic",
+        "command_id": "CurveConic",
+        "script": "! _Conic",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Conic",
+          "typed_forms": [
+            "Conic"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Helix",
+        "command_id": "CurveHelix",
+        "script": "! _Helix",
+        "alt_script": "! _Helix _A",
+        "alt_label": "Helix Around Curve",
+        "covered_by_l3": "OM9-L3-03-16-030",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Helix",
+          "typed_forms": [
+            "Helix"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Spiral",
+        "command_id": "CurveSpiral",
+        "script": "! _Spiral",
+        "alt_script": "! _Spiral _F",
+        "alt_label": "Spiral Flat",
+        "covered_by_l3": "OM9-L3-03-16-029",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Spiral",
+          "typed_forms": [
+            "Spiral"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Curve from 2 Views",
+        "command_id": "CurveCurveFrom2Views",
+        "script": "! _Crv2View",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-014",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Curve from 2 Views",
+          "typed_forms": [
+            "Curve from 2 Views"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Cross-Section Profiles",
+        "command_id": "CurveCrossSectionProfiles",
+        "script": "! _CSec",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-044",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Cross-Section Profiles",
+          "typed_forms": [
+            "Cross-Section Profiles"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Tween Curves",
+        "command_id": "CurveTweenCurves",
+        "script": "! _TweenCurves",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-038",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Tween Curves",
+          "typed_forms": [
+            "Tween Curves"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [],
+    "missing": [
+      "input:analytic line/circle or degree-3 spline with control points, domain and tolerance: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E05",
@@ -274,10 +501,10 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
-    "date": "2026-10-23",
+    "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
-    "scope": "cataloged command id with verified visible disabled reason; no interactive session yet",
+    "scope": "one cataloged command id shared by the Matrix Curve menu row and the command line, with an interactive Rust session and verified geometry",
     "owner": {
       "crate": "om9-app",
       "files": [
@@ -295,12 +522,12 @@
       "implementation/fixtures/M03/OM9-L3-03-16-038/positive.json",
       "implementation/fixtures/M03/OM9-L3-03-16-038/negative.json",
       "implementation/evidence/M03/OM9-L3-03-16-038/",
-      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json"
+      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json",
+      "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/receipt.json"
     ],
     "tests": [
-      "cargo test -p om9-app --test curve_menu: 4 passed",
-      "Line/Point geometry smoke: passed",
-      "disabled reason catalog: 56 rows verified"
+      "cargo test -p om9-app --test curve_menu: 5 passed (58-row id/icon/label/script/menu-dispatch parity)",
+      "cargo test -p om9-app (curve command regressions): 320 passed, 0 failed"
     ],
     "l4_evidence": {
       "OM9-L4-03-16-038-01": "1/1",
@@ -310,8 +537,16 @@
     "human_approval": null,
     "manual_gate": "M03-UI",
     "remaining": [
-      "No interactive command session yet; the menu is disabled with a visible reason.",
-      "Human M03-UI review is unsigned."
-    ]
+      "Human M03-UI click/preview review is unsigned."
+    ],
+    "menu_binding": {
+      "date": "2026-10-26",
+      "feature": "OM9-CURVE-038",
+      "menu_label": "Tween Curves",
+      "menu_icon": "CurveTweenCurves",
+      "documented_script": "TweenCurves",
+      "binding_state": "Implemented",
+      "same_id_menu_and_commandline": true
+    }
   }
 }

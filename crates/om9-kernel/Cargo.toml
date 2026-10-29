@@ -20,3 +20,13 @@ uuid.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true
+
+# The 3DM conversion symbols live behind the `3dm-brep` feature; a test binary that links the
+# whole crate needs it enabled.
+[[test]]
+name = "star_pyramid"
+required-features = ["3dm-brep"]
+
+[[test]]
+name = "gem_brep"
+required-features = ["3dm-brep"]

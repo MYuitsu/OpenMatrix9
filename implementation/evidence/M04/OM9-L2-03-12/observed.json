@@ -1,0 +1,283 @@
+{
+  "schema": "om9.m04.builder_styles.v1",
+  "recorded_at_utc": "2026-10-27T02:48:26Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "scope": [
+    "versioned style file om9.builder_style.v1 with typed parameters and explicit defaults",
+    "style browser: one row per style for the open mode, thumbnail or placeholder fallback",
+    "preview-only apply: style -> session fields -> preview, document untouched until Apply",
+    "user saves in their own list/file; built-ins are read-only and never rewritten",
+    "mode/family filter: incompatible styles are listed disabled and refused on apply",
+    "attribute matching from a declared source slot, keeping entity identity",
+    "UI: Builder Styles window with rows, selected marker, Save field and Match action",
+    "command line: Style=<name>, StyleSave=<name>, StyleMatch"
+  ],
+  "code": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/builder_style.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/tests/builder_styles.rs",
+    "tools/record_m04_l2_03_12_styles.py"
+  ],
+  "checks": [
+    {
+      "artifact": "core-builder-style.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "artifact": "core-builder-regression.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_controls",
+        "--test",
+        "builder_session",
+        "--test",
+        "history_mutation",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "artifact": "app-builder-styles.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "--test",
+        "builder_panel",
+        "--test",
+        "builder_controls",
+        "--test",
+        "builder_slot",
+        "--test",
+        "top11",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.60s",
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s",
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s"
+      ]
+    },
+    {
+      "artifact": "occt-chain.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-kernel",
+        "--features",
+        "3dm-brep",
+        "--test",
+        "associative_history",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.87s"
+      ]
+    },
+    {
+      "artifact": "clippy-core-lib.log",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-core",
+        "--lib",
+        "--no-deps",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "summary": []
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": [
+        "cargo",
+        "check",
+        "--workspace",
+        "--all-targets",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": []
+    }
+  ],
+  "l3_coverage": [
+    {
+      "l3": "OM9-L3-03-12-001",
+      "title": "Builder Style Param Snapshot Schema",
+      "state": "automated_verified_manual_gate_open",
+      "code": [
+        "om9_core::builder_style::StyleValue/StyleFile/BuilderStyle",
+        "STYLE_SCHEMA = om9.builder_style.v1",
+        "BuilderStyle::snapshot/defaults_of/validate",
+        "profile_choice: profile_ref design names -> builder preset choices"
+      ],
+      "tests": [
+        "a_style_roundtrip_keeps_the_values_their_unit_and_the_schema",
+        "an_unknown_schema_version_or_an_invalid_numeric_is_refused",
+        "a_profile_reference_name_is_translated_to_the_builder_preset"
+      ],
+      "fixture": "typed style v1: mode=band,width_mm=2.2,profile_ref=basic_round"
+    },
+    {
+      "l3": "OM9-L3-03-12-002",
+      "title": "Builder Style Browser And Thumbnail",
+      "state": "automated_verified_manual_gate_open",
+      "code": [
+        "StyleLibrary::styles_for + StyleEntry",
+        "StyleThumbnail::for_style (authored icon or placeholder)",
+        "Controller::builder_styles + the Builder Styles window"
+      ],
+      "tests": [
+        "the_browser_lists_every_style_for_the_mode_and_disables_the_incompatible",
+        "a_missing_or_corrupt_thumbnail_falls_back_without_dropping_the_style",
+        "the_browser_lists_the_styles_of_the_open_mode"
+      ],
+      "fixture": "style library 3 styles, filter ring mode"
+    },
+    {
+      "l3": "OM9-L3-03-12-003",
+      "title": "Builder Style Apply And Preview",
+      "state": "automated_verified_manual_gate_open",
+      "code": [
+        "BuilderStyle::apply (preview only, reports applied/ignored)",
+        "Controller::builder_apply_style + builder_refresh",
+        "Style= command line"
+      ],
+      "tests": [
+        "applying_a_style_changes_the_preview_only_and_cancel_keeps_the_baseline",
+        "a_style_missing_the_mandatory_profile_input_is_refused",
+        "applying_a_style_changes_the_preview_only"
+      ],
+      "fixture": "live style A width 2.2 -> style B width 3.0 -> Cancel"
+    },
+    {
+      "l3": "OM9-L3-03-12-004",
+      "title": "Builder Style Save New Name",
+      "state": "automated_verified_manual_gate_open",
+      "code": [
+        "StyleLibrary::save_user/remove_user (built-ins read-only)",
+        "validate_style_name, StyleLibrary::save_to/load_from",
+        "Controller::builder_save_style + StyleSave= command line"
+      ],
+      "tests": [
+        "saving_a_user_style_leaves_the_defaults_untouched_and_refuses_a_duplicate_name",
+        "a_style_name_cannot_be_a_path_or_control_text",
+        "the_user_library_roundtrips_through_a_file_and_reports_a_refused_write",
+        "saving_a_style_adds_a_user_row_without_rewriting_the_defaults",
+        "user_styles_roundtrip_through_the_configured_file"
+      ],
+      "fixture": "user style name Classic 2.5 saved in user space"
+    },
+    {
+      "l3": "OM9-L3-03-12-005",
+      "title": "Builder Style Mode And Shape Filter",
+      "state": "automated_verified_manual_gate_open",
+      "code": [
+        "StyleFamily::matches + BuilderKind::tag/from_tag/is_ring_builder",
+        "BuilderStyle::compatible/targets/missing_required",
+        "StyleEntry.enabled + disabled rows in the window"
+      ],
+      "tests": [
+        "a_gem_style_cannot_be_applied_to_a_ring_builder",
+        "the_builder_tags_filter_a_style_to_one_mode",
+        "a_style_ignores_parameters_of_another_mode_and_reports_them",
+        "a_style_for_another_mode_is_listed_disabled_and_refused"
+      ],
+      "fixture": "ring mode Band vs Signet with mutually exclusive preset types"
+    },
+    {
+      "l3": "OM9-L3-03-12-006",
+      "title": "Builder Style Match Attributes",
+      "state": "automated_verified_manual_gate_open",
+      "code": [
+        "BuilderStyle::match_attributes over declared extension slots om9.rail/om9.head",
+        "STYLE_ATTRIBUTES (width_mm/height_mm/material) with types kept",
+        "Controller::builder_match_attributes + StyleMatch command line"
+      ],
+      "tests": [
+        "matching_attributes_copies_only_the_declared_attributes_and_keeps_the_identity",
+        "a_source_without_a_declared_slot_or_with_a_wrong_type_is_refused",
+        "matching_attributes_copies_from_the_selection_and_keeps_the_ids"
+      ],
+      "fixture": "source ring has width=3, material=synthetic, height=2"
+    }
+  ],
+  "manual_gate": "OPEN: M04-UI — no reviewer signature, no pointer-frame evidence for the window",
+  "uncertainties": [
+    "The user style file location comes from OM9_STYLE_LIBRARY; without it the user list lives for the session only — no default user directory was chosen.",
+    "Thumbnails are authored icon keys with a placeholder fallback; no raster thumbnail cache is implemented.",
+    "Only the five ring builders exist, so a gem-family style is always listed disabled; the gem builder belongs to another owner.",
+    "The Builder Styles window is painted by egui, but no screenshot/pointer frame records it.",
+    "macOS runtime is unverified; the evidence is Windows x64 only."
+  ],
+  "not_claimed": [
+    "Human acceptance of the style browser, the apply/save gestures and the match action.",
+    "Persistence into a default user directory or a resource-pack thumbnail store."
+  ],
+  "l4": {
+    "receipts": 27,
+    "per_l3": {
+      "OM9-L3-03-12-001": 5,
+      "OM9-L3-03-12-002": 4,
+      "OM9-L3-03-12-003": 5,
+      "OM9-L3-03-12-004": 5,
+      "OM9-L3-03-12-005": 4,
+      "OM9-L3-03-12-006": 4
+    },
+    "artefact_names": [
+      "source_crosswalk.json",
+      "api.md",
+      "positive.json",
+      "negative.json",
+      "OM9-L4-<l3>-<role>.json"
+    ],
+    "note": "Every receipt records a command that ran here with its exit code and output hash; the acceptance receipts stay READY_FOR_REVIEW with signature null."
+  }
+}

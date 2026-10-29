@@ -1,0 +1,7 @@
+# Torus AroundCurve — 2026-10-29
+
+The normalized Torus reference discusses AroundCurve, but its extracted text interleaves adjacent Cylinder material and does not establish the original solver. OM9 now accepts `Torus AroundCurve` or the command option: choose one curve, pick the center or enter `OnCurve=0..1`, then choose the ring and tube radii. The base plane is normal to the transformed tangent, using the existing Truncated Cone/Ellipsoid frame builder. Projection of the active CPlane axis and the radius semantics are OM9 interpretations.
+
+The source remains in the document; its stamp is checked before subsequent picks and commit. Deleted or changed source is rejected. Nearest-point picking requires a similarity placement; the parameter path evaluates the transformed tangent. Undo removes the resulting torus in one transaction.
+
+Windows `CARGO_TARGET_DIR=L:/om9-target`, `-j 2`: seven Torus controller tests passed, including translated line, translated circle, tangent direction, analytic volume, source preservation, deleted-source refusal and Undo. One simulated viewport fixture covered curve and center picking, and one option fixture covered keyboard, pointer and typed activation. Two Truncated Cone and four Ellipsoid AroundCurve regressions passed. General curves, changed-source fixture, non-similarity nearest-point input, actual desktop, live preview and original Matrix behavior remain unverified.

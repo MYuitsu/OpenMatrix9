@@ -1,0 +1,51 @@
+{
+  "schema": "om9.evidence.implement.v1",
+  "l4": "OM9-L4-04-17-005-03",
+  "l3": "OM9-L3-04-17-005",
+  "recorded_at": "2026-10-28",
+  "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+  "changed_files": [
+    "crates/om9-core/src/cutters/channel.rs",
+    "crates/om9-app/src/session/channel_cutters.rs",
+    "crates/om9-app/src/ui/channel_cutters.rs"
+  ],
+  "implementation": [
+    "cutters::channel::ChannelEnd",
+    "cutters::channel::ChannelMiddle",
+    "cutters::channel::ChannelParams::ends",
+    "cutters::channel::ChannelParams::validate"
+  ],
+  "command_options": [
+    "Start=Square|Round|Taper",
+    "End=Square|Round|Taper",
+    "StartDepth=<mm>",
+    "EndDepth=<mm>",
+    "Mirror=on|off",
+    "Flip=ab|ba",
+    "Middle=None|Wide|Deep",
+    "Spacing=<mm>"
+  ],
+  "verification": {
+    "commands": [
+      "cargo test -p om9-core --test channel_cutters the_channel_end_profiles_shape_the_caps",
+      "cargo test -p om9-core --test channel_cutters the_channel_mirror_and_flip_swap_the_ends",
+      "cargo test -p om9-core --test channel_cutters the_channel_middle_profile_adds_a_station",
+      "cargo test -p om9-app --test channel_cutters the_channel_options_reach_the_cutter_and_a_bad_width_is_refused"
+    ],
+    "results": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": 0,
+      "cargo test -p om9-core --test channel_cutters -j 2": "10 passed",
+      "cargo test -p om9-app --test channel_cutters -j 2": "7 passed",
+      "cargo test -p om9-core -j 2": "911 passed, 0 failed",
+      "cargo test -p om9-app --lib -j 2": "202 passed, 2 failed (ui::icon_size_audit, pre-existing)",
+      "cargo test -p om9-app --test gem_cutters -j 2": "7 passed, 0 failed",
+      "cargo test -p om9-app --test head_commands -j 2": "9 passed, 0 failed"
+    }
+  },
+  "limitations": [
+    "Mirror picks the wider of the two end profiles for both ends and the deeper of the two caps; it does not invent a third profile.",
+    "Flip swaps A and B; the A/B ends are the first and last station of the row as selected, so the selection order is the orientation.",
+    "The manual's profile IDs are mapped to three typed end profiles (Square, Round, Taper); a user profile library is not part of this owner."
+  ]
+}

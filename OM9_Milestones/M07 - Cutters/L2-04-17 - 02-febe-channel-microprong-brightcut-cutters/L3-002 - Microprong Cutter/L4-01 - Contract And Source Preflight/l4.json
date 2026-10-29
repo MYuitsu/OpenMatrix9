@@ -35,6 +35,93 @@
     }
   ],
   "purpose": "Chốt hình học scalloped và controlling params theo manual, không lẫn cutter vs decorative setting; đảm bảo không xâm phạm stone keepout.",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "IMPLEMENTED",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M07 - Cutters/L2-04-17 - 02-febe-channel-microprong-brightcut-cutters/L3-002 - Microprong Cutter/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 3,
+    "implementation_l4": null,
+    "parent_l3": "OM9-L3-04-17-002",
+    "command_options": [
+      {
+        "option": "Radius=",
+        "unit": "mm",
+        "description": "the scallop radius",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Depth=",
+        "unit": "mm",
+        "description": "the scallop depth below the girdle",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Height=",
+        "unit": "mm",
+        "description": "the scallop height above the girdle",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Count=",
+        "unit": "count",
+        "description": "0 = one scallop per gap",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Spacing=",
+        "unit": "mm",
+        "description": "the inset between scallops",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Angle=",
+        "unit": "degrees",
+        "description": "the lean of the scallop along the row",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Boolean=",
+        "unit": "enum:off,on,one",
+        "description": "cut the selected metal bodies",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Preserve=",
+        "unit": "enum:preserve,remove",
+        "description": "keep or remove the committed cutter bodies",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Reset",
+        "unit": "",
+        "description": "restore the row defaults",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Enter",
+        "unit": "",
+        "description": "commit one transaction",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      },
+      {
+        "option": "Cancel",
+        "unit": "",
+        "description": "drop the preview",
+        "evidence": "implementation/design/M07/OM9-L3-04-17-002/api.md"
+      }
+    ],
+    "missing": []
+  },
   "inputs": [
     "Canonical L3: specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/002-febe-microprong-cutter/l3.json",
     "Owner module: specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/module.json",
@@ -348,14 +435,20 @@
       "stage": "8. Cutter - PHÁT HIỆN: không có thuật toán cutter trong mã",
       "why_for_this_task": "Microprong cutter: cùng đường đi dữ liệu-thư-viện; không có thuật toán microprong trong mã managed ở tiền lệ.",
       "om9_backend": "OCCT cho boolean trừ; pure Rust cho việc chọn cutter, kiểm tra và lưu vết",
-      "steps_cited": [1, 2, 3],
+      "steps_cited": [
+        1,
+        2,
+        3
+      ],
       "algorithm_steps": [
         "C1. Chọn cutter từ thư viện (dữ liệu), hoặc chọn một cutter đã có trong document.",
         "C2. Định vị cutter so với đá hoặc so với vành; phần định vị dùng lại các hàm định hướng và biến đổi chung, không có hàm riêng cho cutter.",
         "C3. Áp phép trừ bằng boolean của nhân hình học, không phải bằng thuật toán của Matrix."
       ],
       "source_file": "MatrixData/MatrixBoolean.cs",
-      "source_methods": ["MatrixBoolean"],
+      "source_methods": [
+        "MatrixBoolean"
+      ],
       "boundaries_carried": [
         "KẾT LUẬN NÀY LÀ ÂM TÍNH: không tìm thấy thuật toán cutter trong mã, nhưng tôi chưa mở thư viện dữ liệu cutter để xem định dạng thật của biên dạng.",
         "Chưa đọc lệnh xem trước trong thư mục Test, nên cách áp cutter tương tác là chưa rõ.",
@@ -366,4 +459,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

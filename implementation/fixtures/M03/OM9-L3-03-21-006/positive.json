@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-006",
+  "case": "circle of radius 5 at (2,2)",
+  "expected": "circle of radius 5 at (2,2) -> the label reads 10, and editing the circle's radius later does not silently re-write the stored annotation",
+  "test": "crates/om9-app/tests/annotation.rs::diameter_and_radius_use_the_placed_circle_and_keep_source"
+}

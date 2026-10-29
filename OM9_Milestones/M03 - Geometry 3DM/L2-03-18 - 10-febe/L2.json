@@ -4,7 +4,7 @@
   "milestone": "M03",
   "title": "10-febe-matrix-solid-menu-workflows",
   "planning_state": "RUNTIME_IMPLEMENTED_MANUAL_UI_PENDING",
-  "scope": "Solid menu ph\u00f9 h\u1ee3p trang s\u1ee9c: primitives, bool, extrusion, shell, text geometry",
+  "scope": "Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geometry",
   "source_original_path": "specs/03-ms03-curve-surface-solid-3dm/10-febe-matrix-solid-menu-workflows/module.json",
   "definition": {
     "module_id": "OM9-L2-03-18",
@@ -14,8 +14,8 @@
     "delivery": "mainline",
     "original_l1": "03-matrix8-book1",
     "legacy_v07_path": "specs/03-matrix8-book1/18-febe-matrix-solid-menu-workflows/",
-    "scope": "Solid menu ph\u00f9 h\u1ee3p trang s\u1ee9c: primitives, bool, extrusion, shell, text geometry",
-    "exclude": "Kh\u00f4ng th\u00eam c\u01a1 kh\u00ed thu\u1ea7n t\u00fay Boss/Rib/Slab d\u1ea1ng feature chuy\u00ean bi\u1ec7t.",
+    "scope": "Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geometry",
+    "exclude": "Không thêm cơ khí thuần túy Boss/Rib/Slab dạng feature chuyên biệt.",
     "manual_references": [
       {
         "manual_id": "book1",
@@ -51,107 +51,107 @@
   "children_l3": [
     {
       "id": "OM9-L3-03-18-001",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-001 - Solid \u00b7 Boolean Union - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-001 - Solid · Boolean Union - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-002",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-002 - Solid \u00b7 Boolean Difference - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-002 - Solid · Boolean Difference - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-003",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid \u00b7 Boolean Intersection - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid · Boolean Intersection - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-004",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-004 - Solid \u00b7 Boolean Two Objects - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-004 - Solid · Boolean Two Objects - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-005",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-005 - Solid \u00b7 Cap Planar - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-005 - Solid · Cap Planar - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-006",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-006 - Solid \u00b7 Extract Surface - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-006 - Solid · Extract Surface - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-007",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid \u00b7 Fillet Edge - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid · Fillet Edge - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-008",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-008 - Solid \u00b7 Text - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-008 - Solid · Text - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-009",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-009 - Solid \u00b7 Extrude Curve Straight - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-009 - Solid · Extrude Curve Straight - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-010",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-010 - Solid \u00b7 Solid Extrude All - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-010 - Solid · Solid Extrude All - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-011",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-011 - Solid \u00b7 Pipe - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-011 - Solid · Pipe - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-012",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-012 - Solid \u00b7 Box - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-012 - Solid · Box - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-013",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid \u00b7 Sphere - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-013 - Solid · Sphere - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-014",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-014 - Solid \u00b7 Ellipsoid - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-014 - Solid · Ellipsoid - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-015",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid \u00b7 Torus - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid · Torus - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-016",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-016 - Solid \u00b7 Cylinder - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-016 - Solid · Cylinder - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-017",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-017 - Solid \u00b7 Tube - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-017 - Solid · Tube - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-018",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-018 - Solid \u00b7 Pyramid - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-018 - Solid · Pyramid - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-019",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-019 - Solid \u00b7 Cone - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-019 - Solid · Cone - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-020",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-020 - Solid \u00b7 Truncated Cone - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-020 - Solid · Truncated Cone - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     },
     {
       "id": "OM9-L3-03-18-021",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-021 - Solid \u00b7 Shell - menu binding/l3.json",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-021 - Solid · Shell - menu binding/l3.json",
       "target_implementation_milestone": "M03"
     }
   ],
@@ -169,10 +169,10 @@
     "scope_rule": "All SDK-eligible child L3 are delivered with their public adapter; host-internal/governance work records an explicit reason instead of exposing private state.",
     "baseline": {
       "internal_signal": "AUDIT-REQUIRED standalone",
-      "sdk_signal": "AUDIT-THEN-ROUTE \u2192 EXPORT/CO-IMPLEMENT",
+      "sdk_signal": "AUDIT-THEN-ROUTE → EXPORT/CO-IMPLEMENT",
       "qualification": "Planning baseline only; source presence and runtime metadata are not new execution evidence."
     },
-    "owner_specific_task": "T\u1eebng Solid menu L3 n\u1ed1i selected native BRep/Solid ops v\u00e0 SDK; kh\u00f4ng qu\u1ea3ng c\u00e1o c\u1ea3 nh\u00f3m t\u1eeb box/sphere.",
+    "owner_specific_task": "Từng Solid menu L3 nối selected native BRep/Solid ops và SDK; không quảng cáo cả nhóm từ box/sphere.",
     "tasks": [
       "Audit exact L3 source and standalone evidence; reuse the existing Rust service where present. Do not infer completion from planning metadata.",
       "For an SDK-eligible feature, implement public DTO/wrapper/capability and host dispatch in the same owner delivery as the application service; existing completed core code receives an explicit SDK retrofit task here.",
@@ -207,6 +207,1091 @@
     ]
   },
   "runtime_implementation": {
+    "rib_development_session_2026_10_29": {
+      "id": "solid-rib-development-session-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-rib-development-session.md",
+      "tests": "62 kernel tests and 3 focused app tests passed; public source audit clean",
+      "full_command": false,
+      "limitations": "Hidden disjoint linear multi-curve session; documented options and public integration remain open."
+    },
+    "rib_straight_planar_foundation_2026_10_29": {
+      "id": "solid-rib-straight-planar-foundation-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-rib-straight-planar-foundation.md",
+      "tests": "61 kernel l2_01_10 tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "periodic_knot_certification_scale_2026_10_29": {
+      "id": "solid-periodic-knot-certification-scale-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-periodic-knot-certification-scale.md",
+      "tests": "9 core, 3 kernel extrusion, 32 Slab controller/core and 16 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "periodic_double_seam_parameter_scale_2026_10_29": {
+      "id": "solid-periodic-double-seam-parameter-scale-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-periodic-double-seam-parameter-scale.md",
+      "tests": "3 kernel extrusion, 32 Slab controller/core and 16 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "periodic_double_seam_viewport_2026_10_29": {
+      "id": "solid-periodic-double-seam-viewport-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-periodic-double-seam-viewport.md",
+      "tests": "3 kernel extrusion and 16 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "periodic_double_seam_extrusion_2026_10_29": {
+      "id": "solid-periodic-double-seam-extrusion-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-periodic-double-seam-extrusion.md",
+      "tests": "3 kernel extrusion, 32 Slab controller/core and 15 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "periodic_repeated_seam_evaluation_2026_10_29": {
+      "id": "solid-periodic-repeated-seam-evaluation-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-periodic-repeated-seam-evaluation.md",
+      "tests": "9 core curve_ops, 9 core curve_oracles, 3 kernel extrusion, 31 Slab and 15 simulated viewport tests passed; one expected native tessellation failure remains",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_certified_periodic_nurbs_2026_10_29": {
+      "id": "solid-slab-certified-periodic-nurbs-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-certified-periodic-nurbs.md",
+      "tests": "9 core, 2 kernel, 31 Slab controller/core and 15 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_shifted_seam_viewport_2026_10_29": {
+      "id": "solid-slab-shifted-seam-viewport-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-shifted-seam-viewport.md",
+      "tests": "14 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_closed_nurbs_shifted_seam_2026_10_29": {
+      "id": "solid-slab-closed-nurbs-shifted-seam-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-closed-nurbs-shifted-seam.md",
+      "tests": "30 controller/core and 13 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_closed_nurbs_preview_guard_2026_10_29": {
+      "id": "solid-slab-closed-nurbs-preview-guard-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-closed-nurbs-preview-guard.md",
+      "tests": "29 controller/core and 13 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_closed_nurbs_session_2026_10_29": {
+      "id": "solid-slab-closed-nurbs-session-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-closed-nurbs-session.md",
+      "tests": "28 controller/core and 13 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_closed_nurbs_publication_2026_10_29": {
+      "id": "solid-slab-closed-nurbs-publication-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-closed-nurbs-publication.md",
+      "tests": "27 controller/core and 12 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_closed_nurbs_foundation_2026_10_29": {
+      "id": "solid-slab-closed-nurbs-foundation-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-closed-nurbs-foundation.md",
+      "tests": "26 Slab controller/core and 12 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_concave_closed_options_2026_10_29": {
+      "id": "solid-slab-concave-closed-options-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-concave-closed-options.md",
+      "tests": "25 Slab controller/core tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_closed_polyline_session_2026_10_29": {
+      "id": "solid-slab-closed-polyline-session-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-closed-polyline-session.md",
+      "tests": "24 controller/core and 12 simulated viewport tests, no-default cargo check passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_closed_polyline_publication_2026_10_29": {
+      "id": "solid-slab-closed-polyline-publication-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-closed-polyline-publication.md",
+      "tests": "23 controller/core and 11 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_closed_polyline_foundation_2026_10_29": {
+      "id": "solid-slab-closed-polyline-foundation-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-closed-polyline-foundation.md",
+      "tests": "22 controller/core and 11 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_collinear_segments_2026_10_29": {
+      "id": "solid-slab-collinear-segments-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-collinear-segments.md",
+      "tests": "21 Slab controller/core and 11 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_degree_one_viewport_2026_10_29": {
+      "id": "solid-slab-degree-one-viewport-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-degree-one-viewport.md",
+      "tests": "11 simulated viewport tests and no-default cargo check passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_degree_one_nurbs_2026_10_29": {
+      "id": "solid-slab-degree-one-nurbs-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-degree-one-nurbs.md",
+      "tests": "20 controller and 10 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nurbs_ambiguous_pick_2026_10_29": {
+      "id": "solid-slab-nurbs-ambiguous-pick-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nurbs-ambiguous-pick.md",
+      "tests": "19 controller and 10 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nurbs_competing_spans_2026_10_29": {
+      "id": "solid-slab-nurbs-competing-spans-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nurbs-competing-spans.md",
+      "tests": "18 controller and 10 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nurbs_knot_pick_2026_10_29": {
+      "id": "solid-slab-nurbs-knot-pick-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nurbs-knot-pick.md",
+      "tests": "17 controller and 10 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nurbs_knot_preview_2026_10_29": {
+      "id": "solid-slab-nurbs-knot-preview-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nurbs-knot-preview.md",
+      "tests": "17 controller and 10 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nurbs_plane_inference_2026_10_29": {
+      "id": "solid-slab-nurbs-plane-inference-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nurbs-plane-inference.md",
+      "tests": "17 controller and 10 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nurbs_planarity_2026_10_29": {
+      "id": "solid-slab-nurbs-planarity-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nurbs-planarity.md",
+      "tests": "17 controller and 10 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_reversed_nurbs_2026_10_29": {
+      "id": "solid-slab-reversed-nurbs-2026-10-29",
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-reversed-nurbs.md",
+      "tests": "16 controller and 10 simulated viewport tests passed",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nurbs_session_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nurbs-session.md",
+      "tests": "Fifteen Slab controller and nine simulated viewport tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nurbs_publication_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nurbs-publication.md",
+      "tests": "Fourteen Slab controller tests passed, including measured rational quadratic NURBS and nonplanar rejection.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_arc_session_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-arc-session.md",
+      "tests": "Thirteen Slab controller and eight simulated viewport tests passed; no-OCCT cargo check passed with warnings.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_arc_publication_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-arc-publication.md",
+      "tests": "Twelve Slab controller tests and no-OCCT cargo check passed; targeted arc fixture passed independently.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_circle_session_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-circle-session.md",
+      "tests": "Eleven Slab controller and seven simulated viewport tests passed; no-OCCT cargo check passed with warnings.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_circle_publication_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-circle-publication.md",
+      "tests": "Ten Slab controller tests passed; targeted circle test passed after adding nonuniform-placement rejection.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_source_plane_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-source-plane.md",
+      "tests": "Nine Slab controller and six simulated viewport tests passed; no-OCCT cargo check passed with warnings.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_source_pick_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-source-pick.md",
+      "tests": "Eight Slab controller and five simulated viewport tests passed; no-OCCT cargo check passed with warnings.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_distance_throughpoint_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-distance-throughpoint.md",
+      "tests": "Eight Slab controller tests and three simulated viewport tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_nearest_segment_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-nearest-segment.md",
+      "tests": "Seven Slab controller tests and two simulated viewport tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_point_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-point-preview.md",
+      "tests": "Six Slab controller tests, one simulated viewport test, and no-OCCT cargo check passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "solid_no_occt_build_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-no-occt-build.md",
+      "tests": "No-default cargo check and one no-OCCT safety test passed; default OCCT Sphere 52, Box 36 and Slab 5 passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_staged_development_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-staged-development.md",
+      "tests": "Five Slab tests passed on default OCCT; no-default-features check failed with 20 Sphere/Box errors.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_internal_publication_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-internal-publication.md",
+      "tests": "Four Slab tests passed including world bounds, Undo/Redo, stale and unsupported source rejection.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_polyline_foundation_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-polyline-foundation.md",
+      "tests": "Two Slab foundation tests passed, including measured mitered BRep and invalid/budget fixtures.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "slab_line_foundation_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-slab-line-foundation.md",
+      "tests": "Four measured OCCT BRep cases plus invalid inputs and icon availability passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_trimmed_arc_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-trimmed-arc.md",
+      "tests": "52 Sphere controller tests passed, including four trimmed-arc sphere fixtures.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_curve_world_hit_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-curve-world-hit.md",
+      "tests": "51 Sphere controller tests and five simulated viewport tests passed, including an elevated curve world hit.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_ambiguous_source_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-ambiguous-source.md",
+      "tests": "Four simulated viewport tests passed, including popup choice and stale-session rejection for coincident boxes.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_overlapping_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-overlapping-edge.md",
+      "tests": "Three simulated viewport tests passed, including overlapping projected edges from coincident boxes.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_viewport_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-viewport-edge.md",
+      "tests": "51 Sphere controller tests and two simulated viewport tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_circular_brep_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-circular-brep-edge.md",
+      "tests": "50 Sphere controller tests and 60 feature-enabled OCCT kernel editing tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_straight_brep_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-straight-brep-edge.md",
+      "tests": "49 Sphere controller tests passed; straight box edge fraction, pick, preview, stale source and Undo checked.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_aroundcurve_fraction_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-aroundcurve-fraction-preview.md",
+      "tests": "48 Sphere controller tests passed; translated circle fraction, preview, volume and Undo checked.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_aroundcurve_pick_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-aroundcurve-pick.md",
+      "tests": "47 Sphere controller tests passed, including five projected-pick fixtures.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_placed_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-placed-curve.md",
+      "tests": "46 Sphere controller tests passed; a targeted test also passed after adding the rotation fixture.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_tangent_units_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-tangent-units.md",
+      "tests": "45 Sphere controller tests, including five centimeter Tangent fixtures, and one three-route simulated Radius test passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_3point_radius_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-3point-radius.md",
+      "tests": "44 Sphere controller tests, one three-route option test and one simulated viewport test passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_units_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-units.md",
+      "tests": "43 Sphere controller tests, including 30 unit/input fixtures, and one 3-route simulated Radius option test passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_variants_menu_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-menu-variants.md",
+      "tests": "40 Sphere controller and 28 simulated chrome action tests passed; Solid icon and public-source audits passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "box_cube_viewport_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-box-cube-viewport.md",
+      "tests": "Two simulated Cube cross-view fixtures and 36 Box controller tests passed; 3 Box viewport regressions passed before expansion.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "box_unit_routes_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-box-unit-routes.md",
+      "tests": "One 18-fixture unit/route test and one 3-route simulated Width option test passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "box_units_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-box-units.md",
+      "tests": "35 Box controller tests and 2 simulated viewport regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "box_cube_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-box-cube-preview.md",
+      "tests": "33 Box controller tests and 27 simulated chrome action tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "box_edge_width_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-box-edge-width.md",
+      "tests": "30 Box and 38 Sphere controller tests plus one simulated Vertical viewport test passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "box_cplane_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-box-cplane.md",
+      "tests": "28 Box controller tests and 56 Solid input regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "box_signed_pick_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-box-signed-pick.md",
+      "tests": "26 Box controller tests and one simulated negative-height viewport test passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "box_variants_menu_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-box-menu-variants.md",
+      "tests": "24 Box controller tests and 27 simulated chrome action tests passed; Solid icon and public-source audits passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "multi_pipe_menu_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-multi-pipe-menu.md",
+      "tests": "One simulated viewport geometry route test and 26 simulated chrome action tests passed; Solid icon and public-source audits passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pyramid_around_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-pyramid-around-curve.md",
+      "tests": "Thirteen Pyramid controller, eight option-route and six simulated viewport tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pyramid_open_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-pyramid-open.md",
+      "tests": "Eleven Pyramid controller, seven option-route and five simulated viewport tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "wide_stack_regression_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-wide-regression.md",
+      "tests": "Solid 130 passed/1 ignored; options 68 passed; simulated viewport 100 passed; internal input regressions 56 passed; targeted stack regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "cone_basic_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-cone-basic.md",
+      "tests": "Five Cone controller tests, one simulated viewport and right-click, eleven option-route tests, nine Cylinder, twelve Tube and 25 Truncated Cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pyramid_star_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-pyramid-star.md",
+      "tests": "Two OCCT/openNURBS SDK kernel tests, ten Pyramid controller tests, six option-route tests, four simulated viewport workflows, one simulated right-click and twelve Tube regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pyramid_edge_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-pyramid-edge.md",
+      "tests": "Eight Pyramid controller tests, three simulated viewport workflows, four option-route tests and twelve Tube regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pyramid_circumscribed_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-pyramid-circumscribed.md",
+      "tests": "Five Pyramid controller tests, two simulated viewport workflows, two option-route tests and twelve Tube regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pyramid_inscribed_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-pyramid-inscribed.md",
+      "tests": "Three Pyramid controller tests, one simulated viewport workflow, one NumSides option-route test and twelve Tube regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "tube_area_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-tube-area.md",
+      "tests": "Twelve Tube controller tests, one simulated viewport Area workflow, seven option-route tests and two Truncated Cone area regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "tube_wall_thickness_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-tube-wall-thickness.md",
+      "tests": "Eleven Tube controller tests, one simulated viewport WallThickness workflow, six option-route tests and 25 Truncated Cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "tube_bothsides_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-tube-both-sides.md",
+      "tests": "Nine Tube controller tests, one simulated viewport BothSides workflow, five option-route tests and 25 Truncated Cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "tube_tangent_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-tube-tangent-point.md",
+      "tests": "Eight Tube controller tests, five simulated viewport workflows, four option-route tests and two Truncated Cone tangent regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "tube_fit_around_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-tube-fit-around.md",
+      "tests": "Seven Tube controller tests, four simulated viewport workflows, three option-route tests and 25 Truncated Cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "tube_radius_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-tube-radius-preview.md",
+      "tests": "Four Tube controller tests, two simulated viewport tests, one right-click test, one option-route test, nine Cylinder and 25 Truncated Cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "tube_basic_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-tube-basic.md",
+      "tests": "Two Tube controller tests, one simulated viewport workflow and nine Cylinder regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "cylinder_center_return_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-cylinder-center-return.md",
+      "tests": "Six Cylinder option tests including 15 mode/route combinations, and nine Cylinder controller tests passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "cylinder_wire_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-cylinder-wire-preview.md",
+      "tests": "Nine Cylinder controller tests, five simulated viewport workflows and 25 Truncated Cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "cylinder_tangent_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-cylinder-tangent-point.md",
+      "tests": "Eight Cylinder tests, simulated viewport, shared option and two cone tangent regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "cylinder_fit_points_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-cylinder-fit-points.md",
+      "tests": "Seven controller tests, simulated viewport, shared option and six cone fit regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "cylinder_around_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-cylinder-around-curve.md",
+      "tests": "Five controller tests, simulated viewport, shared option and two cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "cylinder_three_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-cylinder-three-point.md",
+      "tests": "Three controller tests, two viewport workflows, shared option and 25 cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "cylinder_center_two_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-cylinder-center.md",
+      "tests": "Two controller tests, viewport, secondary click, Solid option and 25 cone regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "torus_vertical_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-vertical.md",
+      "tests": "Ten Torus controller tests, simulated Vertical viewport and shared option routes passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "torus_wire_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-wire-preview.md",
+      "tests": "Nine Torus controller tests and four simulated viewport workflows passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "torus_around_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-around-curve.md",
+      "tests": "Seven Torus tests, simulated viewport and option routes, two cone and four Ellipsoid AroundCurve regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "torus_three_point_radius_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-three-point-radius.md",
+      "tests": "Five Torus, three viewport, two cone Radius and thirteen Ellipsoid tests passed; one desktop fixture ignored.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "torus_three_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-three-point.md",
+      "tests": "Three controller tests, two simulated viewport workflows and shared option routes passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "torus_center_two_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-torus-center.md",
+      "tests": "Two controller tests, simulated viewport, secondary click and shared option routes passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "ellipsoid_wire_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-ellipsoid-wire-preview.md",
+      "tests": "Thirteen focused controller tests, one ignored; simulated Corner viewport preview and Undo passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "ellipsoid_around_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-ellipsoid-around-curve.md",
+      "tests": "Three controller tests, viewport selection, shared option routes and two cone AroundCurve regressions passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "ellipsoid_corner_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-ellipsoid-corner.md",
+      "tests": "Eight Ellipsoid controller tests, one ignored; four simulated viewport workflows and Corner shared option routes passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "ellipsoid_foci_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-ellipsoid-foci.md",
+      "tests": "Seven Ellipsoid controller tests, one ignored; three simulated viewport workflows and shared option routes passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "ellipsoid_diameter_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-ellipsoid-diameter.md",
+      "tests": "Five Ellipsoid controller tests, one ignored; secondary-click and two simulated viewport workflows passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "ellipsoid_center_axes_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-ellipsoid-center.md",
+      "tests": "74 Solid controller tests passed, one ignored; one simulated viewport axis workflow passed.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "sphere_retry_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-sphere-retry-preview.md",
+      "tests": "38 Sphere controller tests; invalid input retry, translated wire preview, volume and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_straight_thick_wire_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Four straight Pipe workflows, Local/Global reversed inner/outer radii and Round poles; simulated viewport and Cancel.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_straight_round_wire_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Local/Global endpoint poles, measured committed volume and Undo, simulated viewport.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_straight_body_wire_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Local/Global quarter-section radii and confirmation, no transaction/Cancel, two section workflows and simulated viewport point route.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_chain_edge_preview_cache_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "28 Pipe viewport simulations and chain rejection workflow; repeated preview and deleted-source invalidation; no measured latency.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_chain_section_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Bent line-chain thin/Thick endpoint preview and volume, BRep-edge and mixed-chain station simulated viewport, Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_multiple_station_section_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Eight Multiple workflows, arc station workflow and simulated viewport; first-reference and active-station section rings, Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_endpoint_section_preview_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Two preview workflows including point budget, placed-circle fixture and simulated viewport point route; transaction and measured body checks.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_multiple_round_retained_usage_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Eight Multiple workflows including output-count atomic refusal; retained-memory threshold and native peak unmeasured.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_global_round_open_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Quarter-arc Local/Global Round thin/Thick volumes and viewport; Local NURBS two stations with Round, Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_multiple_round_stations_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Mixed quarter-arc/line with Flat/None/Round and either order, Round closed-member atomic rejection, viewport and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_round_station_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "One intermediate station, Local/Global, straight/quarter-arc, body plus hemisphere volumes, viewport and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_local_round_open_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Quarter-arc Local Round thin/Thick volumes, translated source, viewport and Undo; sampled endpoint directions.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_local_round_straight_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Hemisphere bounds/volume both directions; five Local workflows, four kernel Pipe fixtures, simulated viewport; Local Round thin/Thick volume and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_local_multiple_stations_fixture_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Two out-of-order stations on nonuniform-speed quadratic NURBS, analytic piecewise smoothstep volume within 0.3%, selection and document Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_local_station_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "One intermediate station on line and quarter arc, Flat/None, independent smoothstep volume, viewport and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_local_thick_varying_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Line and quarter arc Local Thick Flat/None, independent smoothstep volumes, coincident-wall rejection/retry, viewport and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_local_varying_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Straight smoothstep-integral volume, quarter arc Flat/None, simulated viewport, Global/Local shared option routes and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_multiple_nurbs_station_mapping_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Seven Multiple workflows; two stations on nonuniform NURBS/line, analytic volumes, arc/line Cap=None in both orders and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_multiple_mixed_stations_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Six Multiple and two single-curve station workflows, one simulated viewport; mixed arc/line in either order, closed member rejection and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_multiple_straight_stations_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Five Multiple workflows and one simulated viewport; different rail lengths, normalized station, mixed-source atomic rejection and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_multiple_point_input_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Four Multiple workflows and one simulated viewport; two line rails, circle-first mixed pair, Diameter, shared radii and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_nonuniform_nurbs_stations_fixture_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Two stations on one nonuniform-speed quadratic NURBS, analytic length-based volume within 0.3%, distinguished from parameter interpolation, Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_multiple_curve_stations_fixture_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Two arc stations out of order, Undo, Flat volume, None topology, closed curve and non-similarity rejection.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_curve_stations_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Arc and quadratic NURBS station volume, duplicate rejection, point and numeric radius, Undo and simulated viewport.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_global_nurbs_caps_fixture_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "One quadratic non-rational NURBS, varying thin/Thick, Cap=Flat/None, approximate volume, topology and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_thick_open_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Quarter-arc varying hollow volume, open walls, viewport selection and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_global_open_curve_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Quarter-circle unequal radii and independent volume, CMD/menu and viewport, closed-curve rejection/retry and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_arc_nurbs_endpoint_fixture_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Quarter circle and quadratic non-rational NURBS, distinct endpoint tangents, translated placement, volume within 3%, closure and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_curve_endpoint_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "32 focused Pipe workflows, one simulated viewport; exact torus volume in two frames, Radius/Diameter, invalid tangent point and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "pipe_diameter_point_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
+      "tests": "Straight point fixtures in Radius and Diameter, Thick and intermediate station volume, simulated viewport and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "truncated_cone_source_deletion_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "25 focused workflow and 8 simulated viewport tests passed; source deletion invalidates preview and commit for AroundCurve and Tangent.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "truncated_cone_input_integrity_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "24 focused workflow, 8 simulated viewport and 9 option-interface tests passed; selected modes cannot be bypassed and Tangent cannot accept an unresolved base radius.",
+      "full_command": false,
+      "manual_gate_promoted": false
+    },
+    "truncated_cone_tangent_point_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_TANGENT_POINT_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "Both line sides, placed circle, out-of-plane/collinear rejection, preview, Undo, shared options and simulated viewport.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Multi-curve tangencies and general curve/kink projection", "None/Vertical options and source-staleness runtime", "Original Matrix solver and actual desktop"]
+    },
+    "truncated_cone_around_curve_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_AROUND_CURVE_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "Placed line/circle tangent frame, point and parameter selection, nonuniform parameter path, signed height, shared options, simulated viewport and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General curve nearest accuracy, kink tangents and source-staleness runtime", "Tangent and None/Vertical options", "Original Matrix solver and actual desktop"]
+    },
+    "truncated_cone_fit_points_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_FIT_POINTS_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "Placed point/mesh/NURBS controls, independent algebraic fit, bounded selection, retry/Undo, preview, shared option routes and simulated viewport.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Individual control/vertex selection and general 3D fit accuracy", "Tangent, AroundCurve and None/Vertical", "Original Matrix solver and actual desktop"]
+    },
+    "truncated_cone_solid_option_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_SOLID_OPTION_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "Open and closed analytic area/volume and topology, signed height, equal radii, cancel/Undo, shared option routes and simulated viewport.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Tangent, FitPoints, AroundCurve and None/Vertical", "Very small scale, near-equal radii and native memory", "Original Matrix Solid semantics and actual desktop"]
+    },
+    "truncated_cone_base_area_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_BASE_AREA_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "Square-centimeter independent volume, Area assignment and invalid retry, Radius/Diameter switching, Undo and shared keyboard/token/typed option routes.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Tangent, FitPoints, AroundCurve, None/Vertical and Solid", "General preview", "Original Matrix solver and actual desktop"]
+    },
+    "truncated_cone_three_point_radius_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_THREE_POINT_RADIUS_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "Both analytic center branches, numeric and point radius, invalid retry, Front CPlane, preview, Undo, shared option routes and simulated viewport.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Tangent, FitPoints, AroundCurve, Area, None/Vertical and Solid", "General numerical robustness", "Original Matrix solver and actual desktop"]
+    },
+    "truncated_cone_three_point_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_THREE_POINT_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "3Point circumcircle, collinear rejection, signed geometry, Front CPlane preview, Undo, CMD, shared option routes and simulated viewport.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["3Point Radius suboption, Tangent, FitPoints, AroundCurve, Area, None/Vertical and Solid", "General preview accuracy", "Original Matrix solver and actual desktop"]
+    },
+    "truncated_cone_two_point_preview_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_TWO_POINT_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "CMD and menu 2Point, icon secondary click, shared option routes, endpoint Undo, signed preview and cross-viewport height simulation.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["3Point, Tangent, FitPoints, AroundCurve, Area, None/Vertical and Solid", "General preview accuracy", "Original Matrix solver and actual desktop"]
+    },
+    "truncated_cone_staged_2026_10_28": {
+      "status": "PARTIAL_TRUNCATED_CONE_STAGED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-truncated-cone.md",
+      "tests": "CMD coordinates, signed height and Front CPlane, Diameter option routes, invalid retry, menu dispatch, simulated viewport base/top picks and Undo.",
+      "full_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Other documented base modes, direction and Solid options", "Preview and viewport height click", "Original Matrix defaults, solver and actual desktop"]
+    },
+    "boss_cylinder_oblique_curves_2026_10_28": {
+      "status": "PARTIAL_BOSS_CYLINDER_OBLIQUE_CURVES_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 60 kernel editing, targeted translated menu/CMD controller and simulated circle viewport Undo passed; circle and ellipse both directions match independent area within 2e-5 mm²; finite-end crossing rejected.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Other oblique curves and near-axis directions", "Matrix original direction and topology", "Native memory and actual desktop"]
+    },
+    "boss_cylinder_oblique_2026_10_28": {
+      "status": "PARTIAL_BOSS_CYLINDER_OBLIQUE_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 59 kernel editing, 57 workflows and 50 simulated viewport tests passed; one native UI fixture ignored. Independent area in both directions, finite-end and partial-join rejection, translated menu/CMD and simulated viewport Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Other oblique curves and near-axis directions", "Matrix original direction and topology", "Native memory and actual desktop"]
+    },
+    "union_selection_deleteinput_2026_10_28": {
+      "status": "BREP_SELECTION_OPTIONS_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false
+    },
+    "difference_fused_sets_deleteinput_2026_10_28": {
+      "status": "BREP_GROUP_SEMANTICS_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false
+    },
+    "difference_group_selection_2026_10_28": {
+      "status": "PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false
+    },
+    "multi_brep_union_2026_10_28": {
+      "status": "PRESELECTED_BREPS_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false
+    },
+    "boolean_operand_order_2026_10_28": {
+      "status": "TWO_PRESELECTED_OPERANDS_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false
+    },
+    "solid_input_audit_2026_10_28": {
+      "status": "PARTIAL_AUTOMATED_CHECKS_PASSED_FULL_REVIEW_OPEN",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "scope": "Pyramid side validation and pre-commit prompt retry; Boolean Difference operand-order finding",
+      "manual_gate_promoted": false
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "l3_evidence": {
@@ -249,6 +1334,278 @@
     ],
     "full_l2_complete": false,
     "manual_gate": "M03-UI",
-    "manual_gate_promoted": false
+    "manual_gate_promoted": false,
+    "intersection_staged_sets_2026_10_28": {
+      "status": "BREP_STAGED_SETS_OPTIONS_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false
+    },
+    "boolean_two_objects_selection_2026_10_28": {
+      "status": "BREP_VIEWPORT_SELECTION_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Five-state preview/cycling and DeleteInput",
+        "Other input categories and actual desktop/human UI"
+      ]
+    },
+    "boolean_two_objects_reverse_xor_2026_10_28": {
+      "status": "BREP_REVERSE_XOR_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Preview and cycling with explicit acceptance",
+        "DeleteInput and non-BRep inputs",
+        "Actual desktop and human UI acceptance"
+      ]
+    },
+    "boolean_two_objects_preview_2026_10_28": {
+      "status": "BREP_PREVIEW_CYCLING_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Temporarily hide input display during preview",
+        "Dialog parity and non-BRep inputs",
+        "Actual desktop and human UI acceptance"
+      ]
+    },
+    "boolean_two_objects_visibility_2026_10_28": {
+      "status": "TRANSIENT_GPU_MASK_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Actual desktop and human UI acceptance",
+        "Dialog parity and non-BRep input"
+      ]
+    },
+    "split_create_visible_disabled_2026_10_28": {
+      "status": "VISIBLE_DISABLED_OPERATIONS_MISSING",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false
+    },
+    "solid_split_foundation_2026_10_28": {
+      "status": "ONE_SOLID_PARTITION_FOUNDATION_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "full_boolean_split_command": false,
+      "manual_gate_promoted": false
+    },
+    "solid_split_sets_2026_10_28": {
+      "status": "MULTI_SOLID_SET_PARTITION_KERNEL_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "full_boolean_split_command": false,
+      "manual_gate_promoted": false
+    },
+    "boolean_split_brep_command_2026_10_28": {
+      "status": "BREP_BOOLEAN_SPLIT_COMMAND_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Surface-only, compound and mesh inputs",
+        "F6, desktop and human UI acceptance",
+        "General topology, peak memory and performance"
+      ]
+    },
+    "boss_cylinder_smooth_polycurve_2026_10_28": {
+      "status": "PARTIAL_BOSS_CYLINDER_SMOOTH_POLYCURVE_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 58 editing, 16 creation, 2 extrusion, 56 workflows and 49 simulated viewport tests passed; one native UI fixture ignored. Kernel and targeted app rerun passed after no-op optimization.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General nested/periodic/trimmed polycurves and output topology", "Other curved boundaries, native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_cylinder_smooth_nurbs_2026_10_28": {
+      "status": "PARTIAL_BOSS_CYLINDER_SMOOTH_NURBS_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 21 core curve-build, 57 editing, 16 creation, 2 extrusion, 55 workflows and 48 simulated viewport tests passed; one native UI fixture ignored. Uniform/nonuniform geometry and independent area, direction, budget and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Trimmed/periodic/discontinuous NURBS and split output topology", "General curved boundaries, native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_cylinder_ellipse_bezier_2026_10_28": {
+      "status": "PARTIAL_BOSS_CYLINDER_ELLIPSE_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 56 editing, 16 creation, 2 extrusion, 54 workflows and 47 simulated viewport tests passed; one native UI fixture ignored. Uniform/nonuniform ellipse area, direction, output limit and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General NURBS knots and output topology", "Curved boundary generality, native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_cylinder_circle_2026_10_28": {
+      "status": "PARTIAL_BOSS_CYLINDER_CIRCLE_ELLIPSE_MEASUREMENT_OPEN",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 54 editing, 16 creation, 2 extrusion, 54 workflows and 47 simulated viewport tests passed; one native UI fixture ignored. Independent areas, opposite-side direction probes and ellipse atomic refusal.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Cylinder-clipped NURBS wall area integration", "General cylindrical/curved boundaries, native memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_cylinder_multi_polygon_2026_10_28": {
+      "status": "PARTIAL_BOSS_CYLINDER_MULTI_POLYGON_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 52 kernel editing, 16 creation, 2 extrusion, 52 workflows and 46 simulated viewport tests passed; one native UI fixture ignored. Same/opposite-side, overlap rejection, controller atomicity and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Curved profiles, oblique direction, general cylindrical/curved boundary", "Native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_cylinder_polygon_2026_10_28": {
+      "status": "PARTIAL_BOSS_CYLINDER_POLYGON_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 51 editing, 16 creation, 2 extrusion, 51 workflows and 45 simulated viewport tests passed; one native UI fixture ignored. Analytical area, opposite-side direction probes, invalid input and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General cylindrical/curved boundaries and direction choice", "Native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_polycurve_projected_hull_2026_10_28": {
+      "status": "PARTIAL_BOSS_POLYCURVE_HULL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 50 editing, 16 creation, 2 extrusion, 50 workflows and 44 simulated viewport tests passed; one native UI fixture ignored. Four-segment ellipse and mixed curve areas, crossing rejection and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General polycurves and conservative bounds", "Curved/bent boundary, native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_nurbs_projected_hull_2026_10_28": {
+      "status": "PARTIAL_BOSS_NURBS_PROJECTED_HULL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 48 editing, 16 creation, 2 extrusion, 49 workflows and 43 simulated viewport tests passed; one native UI fixture ignored. Targeted kernel/controller/viewport rerun passed after inconsistent-bound guard.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General NURBS and conservative bounds", "Curved/bent boundary, native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_inclined_curves_2026_10_28": {
+      "status": "PARTIAL_BOSS_INCLINED_CURVE_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 47 editing, 16 creation, 2 extrusion, 48 workflows and 42 simulated viewport tests passed; one native UI fixture ignored. Circle/ellipse both directions, independent area and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General curves and conservative near-plane refusal", "Curved/bent boundary, native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_inclined_plane_polygon_2026_10_28": {
+      "status": "PARTIAL_BOSS_INCLINED_POLYGON_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 45 editing, 16 creation, 2 extrusion, 47 workflows and 41 simulated viewport tests passed; one native UI fixture ignored. Both directions, analytical area, Undo and invalid input rejection.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Curved profiles on inclined boundary; curved or bent boundaries", "Native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_coplanar_polysurface_2026_10_28": {
+      "status": "PARTIAL_BOSS_COPLANAR_POLYSURFACE_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 43 editing, 16 creation, 2 extrusion, 46 workflows and 40 simulated viewport tests passed; one native UI fixture ignored. Kernel and targeted app rerun passed after checked-count follow-up.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General shell topology, bent or curved boundary", "Native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_nurbs_span_direction_2026_10_28": {
+      "status": "PARTIAL_BOSS_NURBS_SPAN_DIRECTION_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: full scene suite, 45 workflows and 39 simulated viewport tests passed; one native UI fixture ignored. Four direction combinations, short knot spans and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General display error and many-span performance", "Curved boundary and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_extrusion_area_subdivision_2026_10_28": {
+      "status": "PARTIAL_EXTRUSION_AREA_SUBDIVISION_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: 42 kernel editing, 16 creation, 2 extrusion, 45 workflows and 39 simulated viewport tests passed; one native UI fixture ignored. Bezier and three ellipse independent area checks within 1e-7 mm².",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Other surface families and shared-face compounds", "Native peak memory and performance", "Boss general geometry and desktop"]
+    },
+    "boss_nurbs_line_polycurve_2026_10_28": {
+      "status": "PARTIAL_BOSS_NURBS_LINE_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Windows -j 2: full scene suite, 45 Solid workflows and 39 simulated viewport tests passed; one native UI fixture ignored. Both directions and Undo; area differs ~0.000367 mm² from independent oracle.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General NURBS display error and area measurement", "Curved boundary, native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_polycurve_incremental_budget_2026_10_28": {
+      "status": "PARTIAL_SCENE_BUDGET_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "tests": "Windows -j 2: full scene suite, 44 Solid workflows and 38 simulated viewport tests passed; one native UI fixture ignored. Incremental reservation equals actual mixed arc/line cache points.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General Boss geometry", "Native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_arc_line_polycurve_2026_10_28": {
+      "status": "PARTIAL_BOSS_ARC_LINE_POLYCURVE_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "Full scene suite, 41 kernel editing, 2 exact extrusion, 44 workflows and 38 simulated viewport passed; 1 native UI fixture ignored. Both orientations, analytical area and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General polycurve display and curved boundary", "Native peak memory and original behavior", "Actual icon click and desktop"]
+    },
+    "boss_ellipse_area_followup_2026_10_28": {
+      "status": "PARTIAL_EXTRUSION_AREA_CONTINUITY_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "40 kernel editing, 16 creation, 2 exact extrusion, 43 workflows and 37 simulated viewport passed; 1 native UI fixture ignored. Three ellipse wall areas within 3e-5 mm² of independent perimeter integral.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Residual integration error and other surface families", "Shared-face compounds and native peak memory", "Boss general geometry and desktop"]
+    },
+    "boss_planar_nurbs_2026_10_28": {
+      "status": "PARTIAL_BOSS_PLANAR_NURBS_AREA_DISCREPANCY",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "39 kernel editing, 2 exact extrusion, 43 workflows and 37 simulated viewport passed; 1 native UI fixture ignored. Ellipse face/topology/Undo pass, wall area differs from independent analytic perimeter by 0.3312 mm².",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Resolve ellipse wall area discrepancy", "General NURBS/polycurve and curved boundary", "Actual icon click and desktop"]
+    },
+    "boss_circular_profiles_2026_10_28": {
+      "status": "PARTIAL_BOSS_CIRCLE_POLYGON_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "38 kernel editing, 2 exact extrusion, 42 workflows and 36 simulated viewport passed; 1 native UI fixture ignored. Mixed circle/polygon analytical area and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["General curves and curved boundaries", "Cumulative native peak memory", "Actual icon click and desktop"]
+    },
+    "boss_multiple_profiles_2026_10_28": {
+      "status": "PARTIAL_BOSS_MULTI_POLYGON_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "36 kernel editing, 41 workflows and 35 simulated viewport passed; 1 native UI fixture ignored. Multiple profile topology/area, selection and document Undo, overlap atomic refusal.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Curved profiles/boundaries and overlap semantics", "Cumulative native peak memory", "Actual icon click and desktop"]
+    },
+    "boss_planar_command_2026_10_28": {
+      "status": "PARTIAL_BOSS_POLYGON_PLANAR_COMMAND_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "40 workflows, 34 simulated viewport and two focused option tests passed; 1 native UI fixture ignored. Menu/CMD, translated inputs, boundary replacement and Undo.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Multiple profiles and curved geometry", "General placement and original options", "Icon click and desktop acceptance"]
+    },
+    "boss_planar_brep_foundation_2026_10_28": {
+      "status": "PARTIAL_KERNEL_PLANAR_BREP_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "35 kernel editing, 16 creation and one app workflow smoke passed. Existing planar BRep with hole, area/topology, source preservation and invalid cases.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Application selection and placement, multiple profiles", "Curved profiles and boundary", "Atomic publication, Undo and desktop"]
+    },
+    "boss_parallel_polygon_foundation_2026_10_28": {
+      "status": "PARTIAL_KERNEL_PARALLEL_POLYGON_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "34 kernel editing, 16 creation and 38 app workflows passed; 1 native UI fixture ignored. Two signed directions, joined topology, invalid cases and repaired closed/open extrusion.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Selected BRep and general profiles/boundaries", "Command selection, atomic publication and Undo", "Original solver and desktop"]
+    },
+    "boss_surface_trim_foundation_2026_10_28": {
+      "status": "PARTIAL_KERNEL_SURFACE_TRIM_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-boss-source-map.md",
+      "tests": "31 kernel editing tests passed with 3dm-brep; planar and cylindrical boundary cut, disjoint/empty/invalid cases and source immutability.",
+      "full_boss_command": false,
+      "manual_gate_promoted": false,
+      "remaining": ["Choose and trim extrusion walls, join the boundary", "Command selection, atomic publication and Undo", "General topology and actual desktop"]
+    },
+    "create_solid_regions_2026_10_28": {
+      "status": "BREP_CREATE_SOLID_REGIONS_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false,
+      "remaining": [
+        "General topology and native peak-memory/performance",
+        "F6, SDK, History and human desktop UI",
+        "Non-BRep categories"
+      ]
+    }
   }
 }

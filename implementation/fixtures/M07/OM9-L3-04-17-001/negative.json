@@ -1,0 +1,32 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-17-001",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "a channel narrower than its stone",
+      "input": "Width=2.0 with a 6.5 mm stone",
+      "expect": "Invalid(\"channel width\")"
+    },
+    {
+      "case": "a trench deeper than the stone allows",
+      "input": "Depth=9.0",
+      "expect": "Invalid(\"channel depth\")"
+    },
+    {
+      "case": "coincident stones",
+      "input": "two centres 0.001 mm apart",
+      "expect": "Invalid(\"channel row\")"
+    },
+    {
+      "case": "an unknown option",
+      "input": "Width=wide",
+      "expect": "Invalid(\"channel width\")"
+    }
+  ]
+}

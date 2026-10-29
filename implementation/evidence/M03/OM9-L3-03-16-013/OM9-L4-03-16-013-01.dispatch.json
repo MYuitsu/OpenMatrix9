@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-013-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-013",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-013",
   "source_command": "Curve from 2 Views",
   "menu_icon": "CurveCurveFrom2Views",
   "owner_candidate": "OM9-L3-02-04-003",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Curve from 2 Views command session is not wired; owner candidate OM9-L3-02-04-003 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-013/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-013/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-013/dispatch_contract.json": "1f04ed37192925022c1783433407b51c288816ac5fb57d3ac05195bf22bafcca",
-    "implementation/design/M03/OM9-L3-03-16-013/dispatch_contract.md": "313c9d7ad056ca4a620e75faf3a91f9a668b6fc31bd66db4d5551a12d83dad9c"
+    "implementation/design/M03/OM9-L3-03-16-013/dispatch_contract.json": "f606b8df3b82251983f9b61d90f0d0444bb51f1298824f25d012d9cbdfd3eb8a",
+    "implementation/design/M03/OM9-L3-03-16-013/dispatch_contract.md": "a86e495edf1d459b98417ba796514deff761f6e5dd4b5dbd8cc5a33daf3e8da6"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Crv2View"
 }

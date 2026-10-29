@@ -35,6 +35,23 @@
     }
   ],
   "purpose": "Use existing OCCT split & Boolean services; automatic cutter bounds include model with margin derived from fixture, not a hardcoded infinity.",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M07 - Cutters/L2-04-18 - 03-febe-ring-finger-plane-quad-cutters/L3-002 - Plane And Cube Cutters/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 3,
+    "implementation_l4": null
+  },
   "inputs": [
     "Canonical L3: specs/07-ms07-cutters-manufacturing-check/03-febe-ring-finger-plane-quad-cutters/002-febe-plane-and-cube-cutters/l3.json",
     "Owner module: specs/07-ms07-cutters-manufacturing-check/03-febe-ring-finger-plane-quad-cutters/module.json",
@@ -379,14 +396,20 @@
       "stage": "8. Cutter - PHÁT HIỆN: không có thuật toán cutter trong mã",
       "why_for_this_task": "Cutter mặt phẳng và khối: dụng cụ cắt ở đây là hình học sơ cấp chứ không phải profile thư viện, nhưng phép áp vẫn là boolean của nhân hình học.",
       "om9_backend": "OCCT cho boolean trừ; pure Rust cho việc chọn cutter, kiểm tra và lưu vết",
-      "steps_cited": [1, 2, 3],
+      "steps_cited": [
+        1,
+        2,
+        3
+      ],
       "algorithm_steps": [
         "C1. Chọn cutter từ thư viện (dữ liệu), hoặc chọn một cutter đã có trong document.",
         "C2. Định vị cutter so với đá hoặc so với vành; phần định vị dùng lại các hàm định hướng và biến đổi chung, không có hàm riêng cho cutter.",
         "C3. Áp phép trừ bằng boolean của nhân hình học, không phải bằng thuật toán của Matrix."
       ],
       "source_file": "MatrixData/MatrixBoolean.cs",
-      "source_methods": ["MatrixBoolean"],
+      "source_methods": [
+        "MatrixBoolean"
+      ],
       "boundaries_carried": [
         "KẾT LUẬN NÀY LÀ ÂM TÍNH: không tìm thấy thuật toán cutter trong mã, nhưng tôi chưa mở thư viện dữ liệu cutter để xem định dạng thật của biên dạng.",
         "Chưa đọc lệnh xem trước trong thư mục Test, nên cách áp cutter tương tác là chưa rõ.",
@@ -397,4 +420,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

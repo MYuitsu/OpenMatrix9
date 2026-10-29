@@ -1,0 +1,103 @@
+$ cargo test -p om9-core --lib -j 2 settings::
+
+--- stdout ---
+
+running 90 tests
+test settings::bead::tests::a_negative_spacing_is_refused ... ok
+test settings::bead::tests::a_start_after_the_end_is_refused ... ok
+test settings::bead::tests::a_bead_uv_outside_the_domain_is_refused ... ok
+test settings::associative::tests::a_duplicate_feature_key_is_refused_by_the_shared_owner ... ok
+test settings::associative::tests::an_empty_feature_id_is_refused ... ok
+test settings::channel_border::tests::a_smooth_corner_replaces_the_sharp_vertex ... ok
+test settings::channel_border::tests::a_closed_row_builds_two_closed_loops ... ok
+test settings::channel_border::tests::a_line_extension_adds_one_point_and_an_arc_adds_several ... ok
+test settings::channel_border::tests::an_extension_name_round_trips ... ok
+test settings::channel_border::tests::an_invalid_corner_angle_is_refused ... ok
+test settings::bead::tests::a_vertical_offset_lifts_the_bead_off_the_surface ... ok
+test settings::channel_border::tests::the_border_is_a_valid_curve_not_a_solid ... ok
+test settings::channel_border::tests::snap_to_corners_keeps_the_original_vertex_count ... ok
+test settings::channel_border::tests::the_side_offset_moves_the_border_off_the_girdle ... ok
+test settings::channel_border::tests::the_v_offset_lifts_the_border_off_the_girdle_plane ... ok
+test settings::gems::tests::a_closed_row_needs_three_stones ... ok
+test settings::gems::tests::a_closed_row_wraps_the_last_junction ... ok
+test settings::gems::tests::a_reversed_row_keeps_the_same_stones ... ok
+test settings::gems::tests::a_straight_row_spaces_stones_by_diameter_plus_gap ... ok
+test settings::gems::tests::duplicate_stone_ids_are_refused ... ok
+test settings::gems::tests::overlapping_stones_are_refused ... ok
+test settings::gems::tests::rails_sit_one_radius_each_side_of_the_centres ... ok
+test settings::gems::tests::the_side_direction_is_left_of_travel ... ok
+test settings::gems::tests::zero_spacing_means_touching_stones_with_a_zero_gap ... ok
+test settings::bead::tests::a_bead_on_a_plane_uses_the_surface_normal_and_the_scale ... ok
+test settings::metal_piece::tests::a_border_for_another_row_shape_is_refused ... ok
+test settings::metal_piece::tests::a_border_driven_piece_follows_the_border_curve ... ok
+test settings::metal_piece::tests::a_row_jump_is_a_typed_discontinuity ... ok
+test settings::metal_piece::tests::a_zero_wall_is_refused ... ok
+test settings::metal_piece::tests::a_closed_mode_requires_a_closed_row ... ok
+test settings::metal_piece::tests::curve_mode_follows_the_border_it_is_given ... ok
+test settings::metal_piece::tests::an_end_offset_extends_the_wall_past_the_last_stone ... ok
+test settings::metal_piece::tests::outside_mirrors_into_two_bodies_and_inside_is_one_u_channel ... ok
+test settings::metal_piece::tests::the_wall_handle_sits_one_half_wall_outside_the_offset ... ok
+test settings::metal_piece::tests::the_end_treatment_narrows_the_terminal_station ... ok
+test settings::metal_piece::tests::top_mode_is_a_cutter_and_is_never_reported_as_metal ... ok
+test settings::prong::tests::a_closed_row_has_no_end_prongs_and_no_duplicate_at_the_seam ... ok
+test settings::prong::tests::a_negative_spacing_is_refused ... ok
+test settings::prong::tests::a_gem_north_layout_places_prongs_around_each_stone ... ok
+test settings::metal_piece::tests::every_open_mode_builds_a_closed_body_or_a_typed_refusal ... ok
+test settings::associative::tests::a_feature_rebuilds_from_the_shared_row ... ok
+test settings::associative::tests::mass_uses_the_shared_material_registry ... ok
+test settings::associative::tests::a_multi_feature_mass_report_groups_by_material ... ok
+test settings::prong::tests::a_prong_on_surface_outside_the_domain_is_refused ... ok
+test settings::prong::tests::a_single_stone_row_is_not_supported ... ok
+test settings::prong::tests::a_reversed_row_keeps_the_same_prong_count ... ok
+test settings::prong::tests::a_prong_height_below_the_manual_minimum_is_refused ... ok
+test settings::prong::tests::a_positive_taper_narrows_the_top_and_negative_widens_it ... ok
+test settings::prong::tests::an_empty_edit_is_refused ... ok
+test settings::prong::tests::an_end_mode_on_a_closed_row_is_refused ... ok
+test settings::prong::tests::a_prong_on_a_plane_uses_the_surface_normal ... ok
+test settings::prong::tests::an_edit_can_move_a_gem_prong_along_the_girdle ... ok
+test settings::prong::tests::an_end_prong_has_no_girdle_angle_to_edit ... ok
+test settings::prong::tests::an_out_of_order_site_list_is_refused ... ok
+test settings::prong::tests::closed_row_predicate_matches_the_row_shape ... ok
+test settings::prong::tests::end_modes_override_the_style_on_an_open_row ... ok
+test settings::associative::tests::a_prong_edit_updates_the_feature_volume_and_one_body ... ok
+test settings::prong::tests::every_documented_style_names_a_layout_and_round_trips_its_name ... ok
+test settings::prong::tests::the_gem_flow_default_places_shared_prongs_once_per_junction ... ok
+test settings::prong::tests::prong_spacing_controls_the_pair_offset ... ok
+test settings::prong::tests::the_editor_changes_one_prong_and_leaves_the_others ... ok
+test settings::prong::tests::the_even_position_offsets_the_metal_from_north_and_south ... ok
+test settings::rail::tests::a_deform_pull_keeps_the_axial_height ... ok
+test settings::rail::tests::a_point_on_the_rail_axis_is_a_typed_refusal ... ok
+test settings::rail::tests::a_rail_projects_a_point_radially ... ok
+test settings::rail::tests::a_range_excludes_a_pull_outside_the_window ... ok
+test settings::rail::tests::a_deform_mesh_pull_puts_every_vertex_on_the_cylinder ... ok
+test settings::rail::tests::a_rigid_pull_lands_on_the_rail_and_reports_the_move ... ok
+test settings::tests::a_cut_profile_is_not_silently_wound_inside_out ... ok
+test settings::associative::tests::removing_a_stone_removes_only_its_prong_ids ... ok
+test settings::tests::a_degenerate_profile_is_refused ... ok
+test settings::tests::a_frame_refuses_a_non_orthogonal_triple ... ok
+test settings::tests::a_swept_open_section_is_capped_and_closed ... ok
+test settings::rail::tests::a_rigid_mesh_pull_preserves_the_shape ... ok
+test settings::metal_piece::tests::curve_mode_follows_the_picked_curve ... ok
+test settings::associative::tests::sites_volume_and_reflow_agree_with_the_set_builder ... ok
+test settings::tests::a_revolved_section_is_closed_and_has_the_expected_volume ... ok
+test settings::prong::tests::every_built_prong_is_a_closed_solid_with_a_positive_volume ... ok
+test settings::associative::tests::adding_a_stone_adds_prongs_and_keeps_the_existing_ids ... ok
+test settings::associative::tests::an_unchanged_rebuild_is_reported_as_unchanged ... ok
+test settings::bead::tests::a_mirrored_run_is_symmetric_about_the_span_middle ... ok
+test settings::bead::tests::a_start_and_end_position_limit_the_run ... ok
+test settings::associative::tests::a_closed_row_feature_round_trips ... ok
+test settings::bead::tests::a_z_offset_moves_the_beads_off_the_curve ... ok
+test settings::prong::tests::a_filleted_prong_keeps_a_closed_top ... ok
+test settings::bead::tests::a_tapered_run_changes_the_bead_size_along_the_curve ... ok
+test settings::bead::tests::beads_are_spaced_by_the_requested_pitch ... ok
+test settings::bead::tests::a_guide_curve_plus_pick_matches_the_distance_helper ... ok
+test settings::bead::tests::every_bead_body_is_a_closed_sphere ... ok
+test settings::bead::tests::the_f4_direction_points_at_world_center_and_down_points_down ... ok
+
+test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 41 filtered out; finished in 0.04s
+
+
+--- stderr ---
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.83s
+     Running unittests src\lib.rs (cargo-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)

@@ -87,6 +87,7 @@ impl super::Controller {
         for id in stale {
             self.selection.remove(&id);
         }
+        self.selection_order.retain(|id| self.selection.contains(id));
         self.selection_revision = self.selection_revision.saturating_add(1);
         true
     }
@@ -101,6 +102,21 @@ impl super::Controller {
         }
         self.observers.push(observer);
         self.observers.len() - 1
+    }
+    /// Keep the typed change ring for readers that poll it instead of subscribing (the MCP
+    /// text surface). The sink itself does nothing; the retained baseline is what produces
+    /// `last_document_change`. It diffs the document on every publication, which is why the
+    /// interactive application never enables it by default.
+    pub fn record_changes(&mut self) {
+        struct Keep;
+        impl DocumentObserver for Keep {
+            fn document_changed(&mut self, _batch: &ChangeBatch) -> Result<()> {
+                Ok(())
+            }
+        }
+        if !self.is_recording_changes() {
+            self.add_document_observer(Box::new(Keep));
+        }
     }
     /// True while a baseline is retained, i.e. while changes are being recorded.
     pub fn is_recording_changes(&self) -> bool {

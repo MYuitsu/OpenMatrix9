@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --test ring_family -j 2 a_signet_preset_roundtrip_recreates_the_parameters_and_the_solid
+# exit code: 0
+# captured: 2026-10-27T09:35:43Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_signet_preset_roundtrip_recreates_the_parameters_and_the_solid ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family.rs (L:\om9-target\debug\deps\ring_family-96685c27dfebd318.exe)
+
+$ cargo test -p om9-app --test ring_family_panel -j 2 a_signet_style_preset_applies_to_the_signet_builder
+# exit code: 0
+# captured: 2026-10-27T09:35:46Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_signet_style_preset_applies_to_the_signet_builder ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 2.57s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\ring_family_panel.rs (L:\om9-target\debug\deps\ring_family_panel-7d33ae66eb23707a.exe)

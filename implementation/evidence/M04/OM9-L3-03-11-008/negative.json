@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-008",
+  "kind": "negative",
+  "input": "double Enter; Reset then Undo",
+  "expected": "the second Enter is a no-op; Reset creates no journal entry",
+  "verified_by": [
+    "double_enter_applies_once_and_reset_creates_no_journal_entry",
+    "a_parameter_edit_and_its_recompute_are_two_undoable_steps"
+  ],
+  "document_unchanged": true
+}

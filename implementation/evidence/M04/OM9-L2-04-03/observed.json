@@ -1,0 +1,224 @@
+{
+  "schema": "om9.m04.ring_family.v1",
+  "recorded_at_utc": "2026-10-27T09:34:46Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "scope": [
+    "Eternity band: closed band solid plus 12 stone placement frames, no gem solid",
+    "Signet ring: closed body with a smooth top pad and two shoulders",
+    "Raised band: outward ridge with a positive section thickness",
+    "Award ring: wider top than the signet, same typed parameter set",
+    "Presets: builder_style record roundtrip through the user file",
+    "History: resize 18 -> 19 mm updates the same owner id, undo/redo restores",
+    "Final validation: closed solid accepted, open/thin model refused",
+    "Builder modes registered in the panel, the command line and the OCCT registry",
+    "B-Rep: the OCCT adapter sews the same sections into one closed solid (product build)",
+    "Viewport handles: diameter/width/wall plus the kind's pad, ridge or stone grip"
+  ],
+  "code": [
+    "crates/om9-core/src/ring_builder.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/ring_family.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/tests/ring_family_panel.rs",
+    "crates/om9-kernel/src/associative.rs",
+    "crates/om9-kernel/src/creation.rs",
+    "crates/om9-kernel/src/creation_bridge.cpp",
+    "crates/om9-kernel/tests/ring_family_brep.rs"
+  ],
+  "checks": [
+    {
+      "artifact": "core-ring-unit.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--lib",
+        "-j",
+        "2",
+        "ring_builder::tests"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 123 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "artifact": "core-ring-family.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_family",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+      ]
+    },
+    {
+      "artifact": "core-builder-regression.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "--test",
+        "builder_style",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "artifact": "app-ring-family.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_family_panel",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.74s"
+      ]
+    },
+    {
+      "artifact": "kernel-ring-brep.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-kernel",
+        "--test",
+        "ring_family_brep",
+        "--features",
+        "3dm-brep",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.87s"
+      ]
+    },
+    {
+      "artifact": "app-builder-regression.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.47s",
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ]
+    },
+    {
+      "artifact": "clippy-core-lib.log",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-core",
+        "--lib",
+        "--no-deps",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings",
+        "-A",
+        "clippy::type_complexity"
+      ],
+      "exit_code": 0,
+      "summary": []
+    },
+    {
+      "artifact": "kernel-clippy.log",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-kernel",
+        "--all-targets",
+        "--features",
+        "3dm-brep",
+        "--no-deps",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "summary": []
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": [
+        "cargo",
+        "check",
+        "--workspace",
+        "--all-targets",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": []
+    }
+  ],
+  "manual_gate": "OPEN: M04-UI — no reviewer signature, no pointer-frame evidence",
+  "uncertainties": [
+    "The B-Rep is a closed solid of planar triangles sewn from the sampled sections (chord error about 5 um at 96 segments), not a NURBS surface; a later surface rebuild must pass the same inspect_geometry gate.",
+    "Gem solids are out of scope: the Eternity builder publishes placement frames only (M05 gem integration).",
+    "The builtin style vocabulary still speaks rail-profile width/height; a ring-preset vocabulary (stone count, top pad) is a business-rule change that needs approval.",
+    "Handles cover diameter, width, wall and one kind-specific grip (stone, ridge or shoulder); stone count and shoulder taper have no grip because they are not a single silhouette distance.",
+    "clippy runs with `-A clippy::type_complexity` because one concurrent session's in-flight file (crates/om9-core/src/curve_ops.rs:600) trips that lint; no ring-family file needs the allow.",
+    "macOS runtime is unverified; the evidence is Windows x64 only."
+  ],
+  "not_claimed": [
+    "Human acceptance of the four builders and their panels (M04-UI gate).",
+    "A smooth NURBS or boolean-fused B-Rep: the committed body is a single closed shell of planar triangles."
+  ],
+  "l4": {
+    "receipts": 34,
+    "per_l3": {
+      "OM9-L3-04-03-001": 5,
+      "OM9-L3-04-03-002": 5,
+      "OM9-L3-04-03-003": 5,
+      "OM9-L3-04-03-004": 5,
+      "OM9-L3-04-03-005": 4,
+      "OM9-L3-04-03-006": 5,
+      "OM9-L3-04-03-007": 5
+    },
+    "note": "Every receipt records a command that ran here with its exit code and output hash; acceptance receipts stay READY_FOR_REVIEW with signature null."
+  }
+}

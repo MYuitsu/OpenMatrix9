@@ -1,0 +1,39 @@
+$ cargo test -p om9-app --test gem_panel -j 2 the_positioner_moves_and_rotates_the_instance_in_place
+# exit code: 0
+# captured: 2026-10-28T04:07:33Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test the_positioner_moves_and_rotates_the_instance_in_place ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.57s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running tests\gem_panel.rs (cargo-target\debug\deps\gem_panel-2401e69851f3ef48.exe)
+$ cargo test -p om9-app --test gem_panel -j 2 the_positioner_duplicates_with_one_shared_definition
+# exit code: 0
+# captured: 2026-10-28T04:07:32Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test the_positioner_duplicates_with_one_shared_definition ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.65s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests\gem_panel.rs (cargo-target\debug\deps\gem_panel-2401e69851f3ef48.exe)
+$ cargo test -p om9-app --test gem_panel -j 2 the_positioner_refuses_a_non_gem
+# exit code: 0
+# captured: 2026-10-28T04:07:33Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test the_positioner_refuses_a_non_gem ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests\gem_panel.rs (cargo-target\debug\deps\gem_panel-2401e69851f3ef48.exe)

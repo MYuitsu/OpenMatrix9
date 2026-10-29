@@ -624,6 +624,147 @@ pub fn unroll(
     interpolate_grid(&planar, samples, [1, 1], limits)
 }
 
+/* ------------------------------------ smash --------------------------------- */
+
+/// A flattened surface plus the flattening distortion measured on the sampling grid.
+#[derive(Debug, Clone)]
+pub struct Smash {
+    pub surface: NurbsSurface,
+    /// Largest relative difference between a sampled cell's 3D length and the length
+    /// the flattening gives it. Zero means the sampling stayed isometric (developable
+    /// input); a doubly curved input reports the measured stretch instead of failing.
+    pub stretch: f64,
+}
+
+/// Flatten a surface to the XY plane, accepting an input [`unroll`] only approximates.
+///
+/// Rhino's `Smash` is the unroll that ignores developability: the flattened geometry is
+/// the same arc-length map as [`unroll`], but the command never claims an isometric
+/// result and reports the measured stretch instead of refusing a doubly curved surface.
+/// The stretch is a sampling-level measure (each sampled cell's 3D chord against its
+/// flattened length), not a curvature integral.
+pub fn smash(surface: &NurbsSurface, samples: [usize; 2], limits: &Limits) -> Result<Smash> {
+    surface.validate(limits)?;
+    if samples[0] < 3 || samples[1] < 3 {
+        return Err(Error::Invalid("smash samples"));
+    }
+    let flat = unroll(surface, samples, limits)?;
+    let points = sample_surface(surface, samples, limits)?;
+    let planar_step = |first: Point3, second: Point3| -> f64 {
+        let dx = first[0] - second[0];
+        let dy = first[1] - second[1];
+        (dx * dx + dy * dy).sqrt()
+    };
+    let mut stretch = 0.0_f64;
+    for i in 1..samples[0] {
+        for j in 0..samples[1] {
+            let chord = distance(points[(i - 1) * samples[1] + j], points[i * samples[1] + j]);
+            let planar = planar_step(
+                flat.poles[(i - 1) * flat.size[1] + j],
+                flat.poles[i * flat.size[1] + j],
+            );
+            if planar > 1e-12 {
+                stretch = stretch.max((chord / planar - 1.0).abs());
+            }
+        }
+    }
+    for j in 1..samples[1] {
+        for i in 0..samples[0] {
+            let chord = distance(points[i * samples[1] + j - 1], points[i * samples[1] + j]);
+            let planar = planar_step(
+                flat.poles[i * flat.size[1] + j - 1],
+                flat.poles[i * flat.size[1] + j],
+            );
+            if planar > 1e-12 {
+                stretch = stretch.max((chord / planar - 1.0).abs());
+            }
+        }
+    }
+    Ok(Smash {
+        surface: flat,
+        stretch,
+    })
+}
+
+/* ------------------------------ refit to tolerance ------------------------------ */
+
+/// A surface refit by [`refit_to_tolerance`] with the measured worst-case deviation.
+#[derive(Debug, Clone)]
+pub struct SurfaceRefit {
+    pub surface: NurbsSurface,
+    pub degree: [usize; 2],
+    pub size: [usize; 2],
+    /// Largest sampled distance between the source surface and the refit.
+    pub deviation: f64,
+}
+
+/// Refit a surface to the smallest regular grid that stays inside `tolerance`.
+///
+/// The source is sampled on a fixed 9×9 parameter grid; every candidate is built with
+/// [`surface_kernel::refit`] and measured on the same parameters, so the reported
+/// deviation is a sampling-level bound, not a guarantee for every interior point. The
+/// search is bounded (degree 1..=3, 4..=24 poles per direction) and returns the first
+/// candidate that meets the tolerance; a tolerance that bounded grid cannot represent is
+/// refused instead of growing without limit.
+pub fn refit_to_tolerance(
+    surface: &NurbsSurface,
+    tolerance: f64,
+    limits: &Limits,
+) -> Result<SurfaceRefit> {
+    surface.validate(limits)?;
+    if !tolerance.is_finite() || tolerance <= 0.0 {
+        return Err(Error::Invalid("refit tolerance"));
+    }
+    const GRID: usize = 9;
+    let mut targets = Vec::with_capacity(GRID * GRID);
+    for i in 0..GRID {
+        let u = sample_parameter(surface, 0, i, GRID);
+        for j in 0..GRID {
+            let v = sample_parameter(surface, 1, j, GRID);
+            targets.push((u, v, surface_kernel::evaluate(surface, u, v, limits)?));
+        }
+    }
+    const SIZES: [usize; 8] = [4, 6, 8, 10, 12, 16, 20, 24];
+    for degree in 1..=3 {
+        for size in SIZES {
+            if size <= degree {
+                continue;
+            }
+            // A candidate the refit cannot build is skipped so the search can still find a
+            // larger grid; budget/overflow failures stay fatal.
+            let candidate =
+                match surface_kernel::refit(surface, [degree, degree], [size, size], limits) {
+                    Ok(candidate) => candidate,
+                    Err(Error::Invalid(_)) => continue,
+                    Err(error) => return Err(error),
+                };
+            let mut deviation = 0.0_f64;
+            for (u, v, target) in &targets {
+                let fitted = surface_kernel::evaluate(&candidate, *u, *v, limits)?;
+                deviation = deviation.max(distance(fitted, *target));
+            }
+            if deviation <= tolerance {
+                return Ok(SurfaceRefit {
+                    surface: candidate,
+                    degree: [degree, degree],
+                    size: [size, size],
+                    deviation,
+                });
+            }
+        }
+    }
+    Err(Error::Invalid("refit cannot meet the tolerance"))
+}
+
+fn sample_parameter(surface: &NurbsSurface, axis: usize, index: usize, count: usize) -> f64 {
+    let [low, high] = surface.domain[axis];
+    if count <= 1 {
+        low
+    } else {
+        low + (high - low) * index as f64 / (count - 1) as f64
+    }
+}
+
 /* ----------------------------- rail revolve --------------------------------- */
 
 fn rotate_around_axis(point: Point3, origin: Point3, axis: Point3, angle: f64) -> Point3 {

@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-007",
+  "case": "positive",
+  "input": "valid ring rail, then a parameter the producer refuses",
+  "expected": "recompute fails, the previous geometry/published result/cache entry are retained, the feature is Failed(reason)",
+  "tests": [
+    "a_successful_rebuild_updates_geometry_published_result_and_cache",
+    "a_failed_rebuild_keeps_the_last_good_geometry_result_and_cache_entry",
+    "a_producer_that_breaks_the_recorded_output_set_creates_no_corrupt_node"
+  ]
+}

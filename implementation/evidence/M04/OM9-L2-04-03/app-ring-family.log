@@ -1,0 +1,18 @@
+$ cargo test -p om9-app --test ring_family_panel -j 2
+# exit code: 0
+# captured: 2026-10-27T09:34:25Z
+# target dir: L:\om9-target
+
+
+running 5 tests
+test the_ring_handles_move_the_same_fields_the_panel_edits ... ok
+test the_ring_family_opens_from_the_command_line_and_lists_its_parameters ... ok
+test a_signet_style_preset_applies_to_the_signet_builder ... ok
+test an_invalid_ring_parameter_is_refused_and_the_document_stays_empty ... ok
+test an_eternity_band_applies_a_closed_solid_in_one_undoable_step ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.74s
+
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.81s
+     Running tests\ring_family_panel.rs (L:\om9-target\debug\deps\ring_family_panel-7d33ae66eb23707a.exe)

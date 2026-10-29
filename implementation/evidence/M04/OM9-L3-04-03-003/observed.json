@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m04.l3_ring_family_evidence.v1",
+  "l3_id": "OM9-L3-04-03-003",
+  "title": "Raised Band Builder",
+  "scope": "`ring_builder::build(Raised)` `BuilderKind::RaisedBand` `RingParams::validate` Handle `raised`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "closed raised band with a positive section thickness",
+  "negative": "a ridge as deep as the wall is refused",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the ring builder panel and gestures; no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-04-03-003-03",
+      "OM9-L4-04-03-003-04",
+      "OM9-L4-04-03-003-05",
+      "OM9-L4-04-03-003-07",
+      "OM9-L4-04-03-003-06"
+    ],
+    "fixture_manifest_sha256": "8e14b6b03617cec4a70794409aa77138691dbaf2c8aab8e54402db29ea29a921"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_edits_evidence.v1",
+  "l3_id": "OM9-L3-04-13-003",
+  "title": "Gem Match Attributes",
+  "command": "OthersMatchAttributes / gvMatchAttributes",
+  "scope": "`gem_edits::MatchMask`; `gem_edits::match_attributes(source, targets, mask)`; `OthersMatchAttributes` session",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "masked copy from the first selected stone with target identity kept",
+  "negative": "an empty or unknown mask and a single selection are refusals",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-13-003-03"
+    ],
+    "fixture_manifest_sha256": "faa75cc00774ec8e4b256c2c146980cd506ec304654cd9011b628facbeb45d07"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/tests/gem_edits.rs"
+  ],
+  "test": "match_attributes_copies_geometry_from_the_first_selected_stone"
+}

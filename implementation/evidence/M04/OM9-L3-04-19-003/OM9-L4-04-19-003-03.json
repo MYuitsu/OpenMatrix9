@@ -1,0 +1,100 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-19-003",
+  "title": "Metal Estimated Mass Calculation",
+  "generated_at_utc": "2026-10-27T07:12:44Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "AUTO_ONLY",
+  "signature": null,
+  "not_claimed": [
+    "a human signature",
+    "a visual builder-panel review"
+  ],
+  "fixture_manifest_sha256": "24f65afcc84109185efeb06fec978b6330ea24cb7b648054cb2ae63e82686aba",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "100 mm^3 at 10.0 g/cm^3 gives 1.0 g (100/1000*10) and 0.643 dwt; a 10,000 kg/m^3 material is converted to 10 g/cm^3 before the same calculation",
+    "negative": "a kg/m^3 number read as g/cm^3 is refused by the density guard; a missing material and non-positive volume are refused"
+  },
+  "l4_id": "OM9-L4-04-19-003-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/metal_weight.rs",
+    "crates/om9-app/src/session/metal.rs",
+    "crates/om9-app/src/session/measure.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-core/tests/metal_weight.rs",
+    "crates/om9-app/tests/metal_weights.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "a_kg_m3_density_is_converted_before_it_is_used"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "b04022961dcb4b2baefde4aa399b4bec6cecd82dd3e6f1bb6ee877bb88416e66",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "a_kg_m3_density_is_converted_before_it_is_used",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "mass_is_volume_over_one_thousand_times_density_in_grams_and_dwt"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "b8e26b543e4e0b997a5baa4abf1e5474ead476155b3743eead5198af95d5fece",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "mass_is_volume_over_one_thousand_times_density_in_grams_and_dwt",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "metal_weights",
+        "-j",
+        "2",
+        "the_command_line_matches_the_icon_and_accepts_a_material"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "044d24be93586038c0757a64d7b4ee5d29cc2780f20c9350415fb05831a92af2",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.02s"
+      ],
+      "test": "the_command_line_matches_the_icon_and_accepts_a_material",
+      "package": "om9-app",
+      "binary": "metal_weights"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+
+running 9 tests
+test stale_options_are_refused_and_value_activation_does_not_mutate_owner ... ok
+test line_length_snapshot_uses_the_input_unit_without_rescaling_geometry ... ok
+test line_prompt_carries_its_options_inline ... ok
+test collisions_are_unique_numeric_input_and_paste_are_preserved ... ok
+test accelerators_do_not_repeat_or_interrupt_ime_drafts_and_other_editors ... ok
+test line_repeat_slot_never_leaks_options_into_polyline ... ok
+test fixed_choices_refresh_the_selected_value_on_every_input_route ... ok
+test numeric_options_keep_invalid_draft_and_commit_actual_geometry_once ... ok
+test commands_share_keyboard_pointer_and_typed_activation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.64s
+
+
+running 7 tests
+test interp_snapshot_carries_degree_and_close ... ok
+test top11_duplicate_flags_are_typed_values ... ok
+test rebuild_and_polygon_snapshots_carry_typed_values ... ok
+test helix_and_spiral_snapshots_carry_typed_owner_values ... ok
+test snapshots_expose_typed_values_not_only_labels ... ok
+test primitive_snapshots_carry_typed_owner_values ... ok
+test angle_and_divide_snapshots_carry_typed_values ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 5 tests
+test every_row_dispatches_to_its_session ... ok
+test menu_label_and_documented_script_resolve_to_the_same_command ... ok
+test every_documented_curve_menu_row_has_one_stable_id_and_icon ... ok
+test line_and_point_commands_still_create_geometry_through_the_same_ids ... ok
+test every_row_reaches_the_dispatch_entry_from_the_menu ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 16 tests
+test rectangle_three_point_preview_uses_the_edge_frame ... ok
+test rectangle_center_preview_is_centered ... ok
+test rectangle_preview_has_four_edges ... ok
+test rectangle_preview_follows_the_active_cplane ... ok
+test rectangle_vertical_preview_uses_the_vertical_edge ... ok
+test rectangle_square_uses_the_shared_option_snapshot ... ok
+test rectangle_width_and_height_commit_after_enter ... ok
+test rectangle_center_mode_uses_the_center_and_doubles_the_extent ... ok
+test rectangle_follows_the_active_cplane ... ok
+test rectangle_three_point_mode_uses_edge_then_width ... ok
+test rectangle_two_corners_match ... ok
+test rectangle_three_point_accepts_numeric_width ... ok
+test rectangle_vertical_mode_uses_a_vertical_edge ... ok
+test rectangle_square_option_uses_the_longer_side ... ok
+test rectangle_accepts_length_option ... ok
+test rectangle_three_point_accepts_numeric_height ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 5 tests
+test typed_first_and_relative_second_corner_share_the_coordinate_parser ... ok
+test typed_world_corners_ignore_cplane_origin_and_project_off_plane_height ... ok
+test square_and_fixed_length_keep_the_cursor_side ... ok
+test bad_input_and_degenerate_pick_can_retry_then_undo_redo_and_cancel ... ok
+test corners_keep_all_four_drag_directions_in_shifted_and_rotated_cplanes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 34.56s
+     Running tests\command_options_interface.rs (L:/om9-target\debug\deps\command_options_interface-002cd866143f863f.exe)
+     Running tests\command_values.rs (L:/om9-target\debug\deps\command_values-682dbf160fbc3510.exe)
+     Running tests\curve_menu.rs (L:/om9-target\debug\deps\curve_menu-771ed5d423c291b2.exe)
+     Running tests\rect.rs (L:/om9-target\debug\deps\rect-642ca4d04402cd07.exe)
+     Running tests\rectangle_regressions.rs (L:/om9-target\debug\deps\rectangle_regressions-b4f591b69c8d8953.exe)

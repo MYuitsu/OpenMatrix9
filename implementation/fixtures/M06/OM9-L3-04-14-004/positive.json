@@ -1,0 +1,32 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-14-004",
+  "cases": [
+    {
+      "input": "each of the three modes with the default section (Boolean=On)",
+      "expect": "one closed notched ring with positive volume, a Finger Rail body and a measured removed volume",
+      "oracle": "om9-core src/settings/bezel.rs::the_three_modes_build_a_closed_ring"
+    },
+    {
+      "input": "Edge profile names Chamfer, Round, Step, Knife",
+      "expect": "every library entry builds; an unknown name is a typed edge profile error",
+      "oracle": "om9-core src/settings/bezel.rs::the_edge_profile_is_read_from_the_library"
+    },
+    {
+      "input": "Boolean=On vs Boolean=Off on the same ring",
+      "expect": "the Boolean ring loses the finger rail volume and stays closed; Boolean=Off keeps the solid ring",
+      "oracle": "om9-core src/settings/bezel.rs::the_boolean_cuts_the_finger_rail_groove_out_of_the_ring"
+    },
+    {
+      "input": "Bezel Builder icon, Mode=Bezel",
+      "expect": "one notched Bezel body with the om9.settings.bezel payload and one Finger Rail body",
+      "oracle": "om9-app tests/head_commands.rs::the_three_bezel_modes_build_and_the_boolean_cuts_a_finger_rail"
+    }
+  ],
+  "automated_tests": [
+    "the_three_bezel_modes_build_and_the_boolean_cuts_a_finger_rail",
+    "the_three_modes_build_a_closed_ring",
+    "the_edge_profile_is_read_from_the_library",
+    "the_boolean_cuts_the_finger_rail_groove_out_of_the_ring"
+  ]
+}

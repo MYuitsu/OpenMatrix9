@@ -1,0 +1,7 @@
+# Slab degree-one NURBS — 2026-10-29
+
+The hidden Slab session and publication path now convert continuous open, nonperiodic degree-one NURBS to their exact piecewise-linear geometry using evaluated domain endpoints and active interior knots. Rational positive weights, reversed traversal, trimmed domains and world placement are respected. Discontinuous interior knots, closed and periodic sources are refused. The existing polyline path supplies side selection, miter joins, preview and extrusion.
+
+A translated, rational L-shaped degree-one fixture tests both traversal directions through controller preview, point acceptance, a closed solid with measured volume 54 mm³, Undo and Redo. Additional assertions check both directions of a trimmed rational domain and reject a discontinuous source. Existing knot-aware smooth-path regressions now use equivalent degree-two piecewise-linear NURBS, so they continue exercising the separate sampled/refined path. With `CARGO_TARGET_DIR=L:\om9-target` and `-j 2`, `cargo test -j 2 -p om9-app --test solid solid_slab_` passed 20 tests and `cargo test -j 2 -p om9-app --test solid_difference_ui viewport_slab_development_` passed 10 simulated viewport tests.
+
+The degree-one fixture has not been run through actual desktop UI; public Slab remains disabled. General higher-degree cornered curves, global offset topology and original Matrix behavior remain open.

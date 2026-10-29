@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-003",
+  "case": "vertex (0,0), rays along +X and +Y",
+  "expected": "vertex (0,0), rays along +X and +Y -> the label reads 90",
+  "test": "crates/om9-app/tests/annotation.rs::five_dimension_families_have_independent_value_oracles_and_one_undo"
+}

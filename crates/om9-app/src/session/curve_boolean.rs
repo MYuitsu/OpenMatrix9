@@ -33,11 +33,7 @@ impl Controller {
         {
             return result;
         }
-        let curve = om9_core::curve_ops::join_curves(
-            &curves,
-            1e-6,
-            self.coordinator.limits(),
-        )?;
+        let curve = om9_core::curve_ops::join_curves(&curves, 1e-6, self.coordinator.limits())?;
         self.commit_geometry(CURVE_BOOLEAN, "CurveBoolean", Geometry::Curve(curve))
     }
 
@@ -50,10 +46,9 @@ impl Controller {
         }
         let first_samples = om9_core::surface_kernel::sample_curve(first, 128, limits).ok()?;
         let second_samples = om9_core::surface_kernel::sample_curve(second, 128, limits).ok()?;
-        let intersections = om9_core::curve_surface_ops::curve_curve_intersections(
-            first, second, 1e-6, limits,
-        )
-        .ok()?;
+        let intersections =
+            om9_core::curve_surface_ops::curve_curve_intersections(first, second, 1e-6, limits)
+                .ok()?;
         if intersections.is_empty() {
             let first_mid = om9_core::curve_ops::point_at(first, 0.5, limits).ok()?;
             let second_mid = om9_core::curve_ops::point_at(second, 0.5, limits).ok()?;
@@ -79,8 +74,10 @@ impl Controller {
         }
         let mut first_fractions: Vec<f64> =
             intersections.iter().map(|hit| hit.first_fraction).collect();
-        let mut second_fractions: Vec<f64> =
-            intersections.iter().map(|hit| hit.second_fraction).collect();
+        let mut second_fractions: Vec<f64> = intersections
+            .iter()
+            .map(|hit| hit.second_fraction)
+            .collect();
         first_fractions.sort_by(f64::total_cmp);
         second_fractions.sort_by(f64::total_cmp);
         first_fractions.dedup_by(|a, b| (*a - *b).abs() < 1e-9);

@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-007",
+  "kind": "negative",
+  "input": "remove the selected profile preset mid-selection",
+  "expected": "preview drops; refresh and Apply return Missing(profile preset)",
+  "verified_by": [
+    "the_profile_library_switches_shape_and_refuses_a_removed_preset",
+    "the_profile_library_changes_the_preview_and_the_applied_shape",
+    "the_preset_can_be_chosen_from_the_command_line"
+  ],
+  "document_unchanged": true
+}

@@ -1,0 +1,13 @@
+{
+  "l4_id": "OM9-L3-04-01-017-01",
+  "l3_id": "OM9-L3-04-01-017",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Orient on Curve: golden case 'path (0,0,0)->(10,0,0), box 0..2, point (5,2,0) -> the reference point snaps to (5,0,0) and the local X axis is (1,0,0), one Undo entry'",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_017_orient_on_curve_follows_the_tangent",
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_reference_rows_refuse_a_selection_without_their_reference"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

@@ -66,7 +66,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Scale1=") {
-            let Some(scale) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(scale) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.blend_pending = Some(pending);
                 return Some(Err(Error::Invalid("Scale1 must be positive")));
             };
@@ -75,7 +79,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Scale2=") {
-            let Some(scale) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(scale) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.blend_pending = Some(pending);
                 return Some(Err(Error::Invalid("Scale2 must be positive")));
             };
@@ -85,7 +93,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.blend_pending = Some(pending);
-            return Some(Err(Error::Invalid("Blend accepts Scale1=, Scale2=, Enter or Cancel")));
+            return Some(Err(Error::Invalid(
+                "Blend accepts Scale1=, Scale2=, Enter or Cancel",
+            )));
         }
         let first = match om9_core::surface_kernel::sample_curve(
             &pending.first,
@@ -111,8 +121,10 @@ impl Controller {
         let b = second[0];
         let after = second[1];
         let length = distance(a, b).max(1e-6);
-        let tangent_a = unit([a[0] - before[0], a[1] - before[1], a[2] - before[2]]).unwrap_or([1.0, 0.0, 0.0]);
-        let tangent_b = unit([after[0] - b[0], after[1] - b[1], after[2] - b[2]]).unwrap_or([1.0, 0.0, 0.0]);
+        let tangent_a =
+            unit([a[0] - before[0], a[1] - before[1], a[2] - before[2]]).unwrap_or([1.0, 0.0, 0.0]);
+        let tangent_b =
+            unit([after[0] - b[0], after[1] - b[1], after[2] - b[2]]).unwrap_or([1.0, 0.0, 0.0]);
         let points = [
             a,
             [
@@ -136,12 +148,12 @@ impl Controller {
             Ok(curve) => curve,
             Err(error) => return Some(Err(error)),
         };
-        let label = if pending.feature == MATCH { "Match" } else { "Blend" };
-        Some(self.commit_geometry(
-            pending.feature,
-            label,
-            Geometry::Curve(Curve::Nurbs(curve)),
-        ))
+        let label = if pending.feature == MATCH {
+            "Match"
+        } else {
+            "Blend"
+        };
+        Some(self.commit_geometry(pending.feature, label, Geometry::Curve(Curve::Nurbs(curve))))
     }
 
     pub fn blend_option_tokens(&self) -> Vec<(&'static str, &'static str)> {

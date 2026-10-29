@@ -1,0 +1,8 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"ring stone spacing\")",
+      "parameter": "40 stones on an 8 mm band"
+    }
+  ]
+}

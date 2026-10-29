@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-13-002",
+  "title": "Matrix History Update Toggle",
+  "owner": "om9-app Controller history API over om9-core HistoryGraph",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-app/src/session/history.rs",
+      "symbols": [
+        "Controller::set_history_update",
+        "Controller::apply_history_parameter"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [
+        "Controller::recompute_history",
+        "Controller::recompute_history_inner"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/history_ops.rs",
+      "symbols": [
+        "refresh_inputs",
+        "broken_links",
+        "plan_recompute"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/sidebar_palettes.rs",
+      "symbols": [
+        "GVHistoryUpdateON"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "recompute_history walks plan_recompute in execution order after the edited recipe; refresh_inputs re-stamps a Dirty consumer against the source as it is now, because the old stamp names the previous geometry revision.",
+    "Re-enabling update validates execution_order (cycles) and broken_links (missing input/output) before the flag flips."
+  ]
+}

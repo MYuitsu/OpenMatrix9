@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-09-003",
+  "title": "Gem Loader Shape Cut Size Picker",
+  "cases": [
+    "preview builds a closed mesh and the document revision does not change",
+    "Apply inserts exactly one gem in one Undo step; redo keeps the ObjectId",
+    "Shape=Oval, Size=8x6, Depth=4.2, Cut=Cabochon are applied to the typed spec",
+    "replacing a selected gem keeps its ObjectId and GemId",
+    "KeepOriginal=Yes keeps 6.5 x 6.5 x 3.95 while changing the shape",
+    "the viewport preview is a world-space closed mesh committed with Origin=1,2,3",
+    "the committed body is one editable B-Rep with the mesh volume; BRep=No keeps the portable mesh"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

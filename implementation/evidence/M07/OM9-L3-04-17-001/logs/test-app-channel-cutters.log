@@ -1,0 +1,16 @@
+=== cargo test -p om9-app --test channel_cutters -j 2 ===
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.02s
+     Running tests\channel_cutters.rs (L:\om9-target\debug\deps\channel_cutters-9e609822b3504de1.exe)
+
+running 7 tests
+test a_boolean_without_a_metal_body_is_refused_and_keeps_the_preview ... ok
+test the_channel_options_reach_the_cutter_and_a_bad_width_is_refused ... ok
+test every_row_command_resolves_from_the_typed_line_and_needs_a_gem ... ok
+test the_channel_icon_stages_a_preview_and_enter_commits_one_transaction ... ok
+test the_bright_cutter_rings_one_stone_and_the_channel_mirrors_the_row ... ok
+test micro_prong_builds_one_scallop_per_gap_and_records_the_count ... ok
+test the_interactive_boolean_cuts_every_selected_metal_body ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

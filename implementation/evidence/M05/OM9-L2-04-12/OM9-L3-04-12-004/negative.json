@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-12-004",
+  "title": "Pave Prong Layout",
+  "cases": [
+    "a prong layout without any selected gem is refused",
+    "a negative height or zero size is refused",
+    "more than the prong cap is a typed Budget error"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

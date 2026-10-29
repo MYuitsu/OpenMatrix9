@@ -1,0 +1,15 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-14-008",
+  "cases": [
+    {
+      "input": "Seat count 2",
+      "error": "invalid seat count"
+    },
+    {
+      "input": "Seat angle 90",
+      "error": "invalid seat angle"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

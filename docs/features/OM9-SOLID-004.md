@@ -28,3 +28,26 @@ are in [implementation ledger](../openmatrix9-progress.json).
 Status: `partially_implemented`, `validated_supported_slice`. Source edits do
 not recompute snapshot results. Live Matrix History, annotation/block/cage
 adapters, document-tolerance compatibility and exhaustive topology remain open.
+
+## Standalone checkpoint — 2026-10-28
+
+The current standalone Rust command accepts BRep picks while running, with at
+most two newly picked objects and Undo of the last pick. The current U/D/I
+implementation executes immediately and deletes inputs; it does not yet meet
+the documented five-state preview/cycling or DeleteInput contract. The earlier
+FreeCAD slice above is historical and does not prove those standalone features.
+See the [Solid audit](../validation/2026-10-28-solid-audit.md).
+
+The additional BRep results B−A and symmetric difference are now available as
+operation actions and measured by automated tests. They still execute
+immediately and delete inputs; preview/cycling and DeleteInput remain open.
+
+The later standalone checkpoint in the audit supersedes that last paragraph:
+five-state BRep wire preview, Next/viewport cycling, Enter confirmation and
+DeleteInput are now partially implemented and automatically exercised. The
+preview does not yet hide input display; human desktop acceptance and the
+other geometry categories are still open.
+
+The subsequent transient-visibility checkpoint in the audit adds GPU source
+masking during preview and restoration without document visibility edits.
+Real desktop and human UI acceptance remain open.

@@ -1,0 +1,184 @@
+{
+  "schema": "om9.m05.l2_gem_placement_evidence.v1",
+  "l2_id": "OM9-L2-04-10",
+  "title": "Gems On Curves And Surfaces",
+  "date": "2026-10-27",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "code": [
+    "crates/om9-core/src/gem_placement.rs",
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/src/session/gem_placement.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/tests/gem_placement.rs",
+    "tools/record_m05_l2_04_10_gem_placement.py"
+  ],
+  "checks": [
+    {
+      "artifact": "core-gem-placement.log",
+      "command": "cargo test -p om9-core --test gem_placement -j 2",
+      "exit_code": 0,
+      "sha256": "ccbdb03d8f5b6d56d724389c3f9c527e77122e87a05bdd62c7540754ce4de2d5"
+    },
+    {
+      "artifact": "app-gem-placement.log",
+      "command": "cargo test -p om9-app --test gem_placement -j 2",
+      "exit_code": 0,
+      "sha256": "893883bf407cc651cb96ed26ba650a78ebe76f26e89698b37c62deb0d190dc8a"
+    },
+    {
+      "artifact": "core-gem-assets-regression.log",
+      "command": "cargo test -p om9-core --test gem_assets -j 2",
+      "exit_code": 0,
+      "sha256": "520d9cf62adfe962f89ad1619e5eee2f88dc894a069e1a14197bf4d55dd7bc0f"
+    },
+    {
+      "artifact": "app-gem-panel-regression.log",
+      "command": "cargo test -p om9-app --test gem_panel -j 2",
+      "exit_code": 0,
+      "sha256": "041c8ab74296583c2f7ad6f629f5871980c8952f68cc08943647f422eab16241"
+    },
+    {
+      "artifact": "core-transaction-regression.log",
+      "command": "cargo test -p om9-core --test atomic_transactions --test transaction_scopes -j 2",
+      "exit_code": 0,
+      "sha256": "41b0dca5c2ce5b25dae2d8de0e3671c97864acd08b261228a9423808886866c6"
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": "cargo check --workspace --all-targets -j 2",
+      "exit_code": 0,
+      "sha256": "ef24bb64d66a726fa2132efeb90b199fd974fb000d0ee35ef1d501411c2ae63a"
+    },
+    {
+      "artifact": "clippy-gem-placement.log",
+      "command": "cargo clippy -p om9-core -p om9-app --all-targets -j 2",
+      "exit_code": 0,
+      "sha256": "9ab65a63c893c40c82de59b815bc54dad8be4cabb5d2eb01ac1263f077faa314"
+    }
+  ],
+  "l3": {
+    "OM9-L3-04-10-001": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-001-03"
+      ],
+      "fixture_manifest_sha256": "0405959b2912aaec70277c216e3485360ba06cb88eb8dee6ae0a156fb88f499d",
+      "command": "BuilderGemOnCrv / gvGemOnCrv",
+      "test": "the_row_previews_without_an_object_and_applies_in_one_transaction"
+    },
+    "OM9-L3-04-10-002": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-002-03"
+      ],
+      "fixture_manifest_sha256": "9f6e9f49324d6b512ea125c39d06d0b9f18b09c4381d70326ad8539aaf2df159",
+      "command": "BuilderGemOnCrvAdvanced / gvGemOnCrvAdvanced",
+      "test": "the_advanced_tool_tapers_the_row_from_the_start_size_to_the_end_size"
+    },
+    "OM9-L3-04-10-003": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-003-03"
+      ],
+      "fixture_manifest_sha256": "5e534ef47a4c18dad83da4d10733c5e6ee16e84a01639109522140d5369bc1d5",
+      "command": "BuilderGemCountOnCrv / gvGemCountOnCrv",
+      "test": "the_count_tool_fits_the_row_between_the_curve_ends"
+    },
+    "OM9-L3-04-10-004": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-004-03"
+      ],
+      "fixture_manifest_sha256": "bd7c91a9cdb9c49c524c5994142ba9a280a53ef8f6dccde3397f1b716446691f",
+      "command": "BuilderGemListOnCrv / gvGemListOnCrv",
+      "test": "the_list_tool_places_heterogeneous_stones_in_order"
+    },
+    "OM9-L3-04-10-005": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-005-03"
+      ],
+      "fixture_manifest_sha256": "ffbaf87573bbe742d2dcfa6a1247223b745e835ffd0b5cd60b1a2caff034b567",
+      "command": "BuilderGemOnCrvMulti / gvGemOnCrvMulti",
+      "test": "the_multi_tool_places_one_run_per_curve_in_one_transaction"
+    },
+    "OM9-L3-04-10-006": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-006-03"
+      ],
+      "fixture_manifest_sha256": "e3bc58adca799f023954f64c01aae13e631255cb128493005734cab4604a2d62",
+      "command": "BuilderGemProfile / BuilderGemGuides / gvGemProfile / gvGemGuides",
+      "test": "profile_and_guides_insert_construction_curves"
+    },
+    "OM9-L3-04-10-007": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-007-03"
+      ],
+      "fixture_manifest_sha256": "124c936339f96a3e2633be47bb4204f3d18a4e1813e768d4b5e879dd35d7a00c",
+      "command": "BuilderGemOnSurface / gvGemOnSurface",
+      "test": "the_surface_tool_stands_the_gem_on_the_surface_normal"
+    },
+    "OM9-L3-04-10-008": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-008-03"
+      ],
+      "fixture_manifest_sha256": "d758cc7368e68786eb97a7d9b7b2b206e842a8ad493af3f27caff57f602b278e",
+      "command": "BuilderGemFollow / gvGemFollow",
+      "test": "follow_marks_gems_whose_source_is_gone_as_conflicts_instead_of_moving_them"
+    },
+    "OM9-L3-04-10-009": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-009-03"
+      ],
+      "fixture_manifest_sha256": "5fb0cd0d67b8853029c6d92f61f13575b22614eea2c39694b4d03b7376dff895",
+      "command": "BuilderGVDGemFlow / gvGemFlow",
+      "test": "flow_carries_the_same_stones_onto_a_target_curve"
+    },
+    "OM9-L3-04-10-010": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-010-03"
+      ],
+      "fixture_manifest_sha256": "04b2dec954ad81e92eb5fc0e4c9c3ebdd4a2ef7e1ddc830667107ab40be6eeb0",
+      "command": "BuilderGVDGemSplop / gvGemSplop",
+      "test": "splop_projects_a_gem_onto_a_surface_and_records_the_uv_link"
+    },
+    "OM9-L3-04-10-011": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-10-011-03"
+      ],
+      "fixture_manifest_sha256": "1f85be1ee35baa31fa095cb1eecf70280b5791c87deb3a5bf4110ed0701f7135",
+      "command": "GemPlacementLinks / gvGemPlacementLinks",
+      "test": "the_links_report_and_the_typed_command_reach_the_same_service"
+    }
+  },
+  "tests": {
+    "core_gem_placement": "22 passed (stations, taper, count, list, multi, surface, follow, flow, splop, link round-trip, purity)",
+    "app_gem_placement": "16 passed (preview, apply, Undo/Redo, cancel, conflicts, flow to curve/surface, splop, profile/guides, report, typed command, exact Count=, refused unused options)",
+    "clippy": "cargo clippy -p om9-core -p om9-app --all-targets exit 0; diagnostics are scoped to this task's files and foreign warnings are listed below",
+    "clippy_foreign_warnings": [
+      "crates/om9-app/tests/head_commands.rs",
+      "crates/om9-core/src/settings/bezel.rs"
+    ]
+  },
+  "uncertainties": [
+    "All eleven L3 keep the M05-UI manual gate open: no human has reviewed the placement commands on screen and no reviewer signature is claimed.",
+    "Only Windows x64 was exercised in this run.",
+    "The app test binaries link OCCT, so the run needs the OCCT bin and VC runtime directories on PATH; that environment requirement is recorded, not hidden.",
+    "CARGO_TARGET_DIR is H:/OpenMatrix9/cargo-target because this sandbox denies writes to the L:/om9-target directory named in AGENTS.md.",
+    "The clippy gate is scoped to the files this task owns: the shared checkout also contains concurrent in-flight work (for example the settings module and the head_commands tests), so its warnings are listed in clippy_foreign_warnings and left to that owner instead of failing this batch.",
+    "The crate-wide `cargo test -p om9-app --lib` reports 188 passed and 4 `ui::layer_dialog_audit` failures in this non-interactive session: those tests create fixtures under build/standalone-validation with a restricted token and fail with `os error 5` before reaching any placement code. The failures are environmental and recorded in app-lib-os-restriction.log, not hidden.",
+    "The placement preview is session data; painting it as a shaded viewport proxy remains a separate UI task."
+  ]
+}

@@ -24,6 +24,426 @@ macro_rules! icon {
 }
 const PALETTE: &[Icon] = &[
     icon!(
+        "Display Rendered Viewport",
+        "ToolbarDisplayRendered",
+        "",
+        "toolbar-display/ToolbarDisplayRendered.svg"
+    ),
+    icon!(
+        "Display X-Ray Viewport",
+        "ToolbarDisplayXRay",
+        "",
+        "toolbar-display/ToolbarDisplayXRay.svg"
+    ),
+    icon!(
+        "Display Pen Viewport",
+        "ToolbarDisplayPen",
+        "",
+        "toolbar-display/ToolbarDisplayPen.svg"
+    ),
+    icon!(
+        "Display Artistic Viewport",
+        "ToolbarDisplayArtistic",
+        "",
+        "toolbar-display/ToolbarDisplayArtistic.svg"
+    ),
+    icon!(
+        "Display Render Mesh Settings",
+        "ToolbarDisplayMeshSettings",
+        "",
+        "toolbar-display/ToolbarDisplayMeshSettings.svg"
+    ),
+    icon!(
+        "Display Flat Shade",
+        "ToolbarDisplayFlatShade",
+        "",
+        "toolbar-display/ToolbarDisplayFlatShade.svg"
+    ),
+    icon!(
+        "Display Object Shading",
+        "ToolbarDisplayObjectShading",
+        "",
+        "toolbar-display/ToolbarDisplayObjectShading.svg"
+    ),
+    icon!(
+        "Display Panel",
+        "ToolbarDisplayDisplayPanel",
+        "",
+        "toolbar-display/ToolbarDisplayDisplayPanel.svg"
+    ),
+    icon!(
+        "Visibility Hide Objects",
+        "ToolbarVisibilityHide",
+        "",
+        "toolbar-visibility/ToolbarVisibilityHide.svg"
+    ),
+    icon!(
+        "Visibility Show Objects",
+        "ToolbarVisibilityShow",
+        "",
+        "toolbar-visibility/ToolbarVisibilityShow.svg"
+    ),
+    icon!(
+        "Visibility Show Selected Objects",
+        "ToolbarVisibilityShowSelected",
+        "",
+        "toolbar-visibility/ToolbarVisibilityShowSelected.svg"
+    ),
+    icon!(
+        "Visibility Invert Selection and Hide",
+        "ToolbarVisibilityInvertHide",
+        "",
+        "toolbar-visibility/ToolbarVisibilityInvertHide.svg"
+    ),
+    icon!(
+        "Visibility Swap Hidden Objects",
+        "ToolbarVisibilityHideSwap",
+        "",
+        "toolbar-visibility/ToolbarVisibilityHideSwap.svg"
+    ),
+    icon!(
+        "Visibility Lock Objects",
+        "ToolbarVisibilityLock",
+        "",
+        "toolbar-visibility/ToolbarVisibilityLock.svg"
+    ),
+    icon!(
+        "Visibility Unlock Objects",
+        "ToolbarVisibilityUnlock",
+        "",
+        "toolbar-visibility/ToolbarVisibilityUnlock.svg"
+    ),
+    icon!(
+        "Visibility Unlock Selected Objects",
+        "ToolbarVisibilityUnlockSelected",
+        "",
+        "toolbar-visibility/ToolbarVisibilityUnlockSelected.svg"
+    ),
+    icon!(
+        "Visibility Invert Selection and Lock",
+        "ToolbarVisibilityInvertLock",
+        "",
+        "toolbar-visibility/ToolbarVisibilityInvertLock.svg"
+    ),
+    icon!(
+        "Visibility Swap Locked Objects",
+        "ToolbarVisibilityLockSwap",
+        "",
+        "toolbar-visibility/ToolbarVisibilityLockSwap.svg"
+    ),
+    icon!(
+        "Visibility Invert and Hide Control Points",
+        "ToolbarVisibilityInvertHidePoints",
+        "",
+        "toolbar-visibility/ToolbarVisibilityInvertHidePoints.svg"
+    ),
+    icon!(
+        "Visibility Hide Control Points",
+        "ToolbarVisibilityHidePoints",
+        "",
+        "toolbar-visibility/ToolbarVisibilityHidePoints.svg"
+    ),
+    icon!(
+        "Visibility Add Clipping Plane",
+        "ToolbarVisibilityClippingPlane",
+        "",
+        "toolbar-visibility/ToolbarVisibilityClippingPlane.svg"
+    ),
+    icon!(
+        "Visibility Disable Clipping Plane",
+        "ToolbarVisibilityDisableClipping",
+        "",
+        "toolbar-visibility/ToolbarVisibilityDisableClipping.svg"
+    ),
+    icon!(
+        "Visibility Hide A",
+        "ToolbarVisibilityHideA",
+        "",
+        "toolbar-visibility/ToolbarVisibilityHideA.svg"
+    ),
+    icon!(
+        "Visibility Hide B",
+        "ToolbarVisibilityHideB",
+        "",
+        "toolbar-visibility/ToolbarVisibilityHideB.svg"
+    ),
+    icon!(
+        "Visibility Hide C",
+        "ToolbarVisibilityHideC",
+        "",
+        "toolbar-visibility/ToolbarVisibilityHideC.svg"
+    ),
+    icon!(
+        "Visibility Hide Custom",
+        "ToolbarVisibilityHideCustom",
+        "",
+        "toolbar-visibility/ToolbarVisibilityHideCustom.svg"
+    ),
+    icon!(
+        "Standard Document Properties",
+        "DocumentProperties",
+        "",
+        "toolbar-standard/ToolbarStandardDocumentProperties.svg"
+    ),
+    icon!(
+        "Standard Right View",
+        "WorldRightView",
+        "",
+        "toolbar-standard/ToolbarStandardRightView.svg"
+    ),
+    icon!(
+        "Standard Object Snaps",
+        "ShowOsnap",
+        "",
+        "toolbar-standard/ToolbarStandardObjectSnaps.svg"
+    ),
+    icon!(
+        "Standard Select All",
+        "SelAll",
+        "",
+        "toolbar-standard/ToolbarStandardSelectAll.svg"
+    ),
+    icon!(
+        "Standard Hide Objects",
+        "HideObjects",
+        "",
+        "toolbar-standard/ToolbarStandardHide.svg"
+    ),
+    icon!(
+        "Standard Lock Objects",
+        "LockObjects",
+        "",
+        "toolbar-standard/ToolbarStandardLock.svg"
+    ),
+    icon!(
+        "Standard Shade",
+        "Shade",
+        "",
+        "toolbar-standard/ToolbarStandardShade.svg"
+    ),
+    icon!(
+        "Standard Render",
+        "RenderView",
+        "",
+        "toolbar-standard/ToolbarStandardRender.svg"
+    ),
+    icon!(
+        "Standard Spotlight",
+        "Spotlight",
+        "",
+        "toolbar-standard/ToolbarStandardSpotlight.svg"
+    ),
+    icon!(
+        "Standard Linear Dimension",
+        "Dim",
+        "",
+        "toolbar-standard/ToolbarStandardLinearDimension.svg"
+    ),
+    icon!(
+        "Standard Undo View",
+        "UndoView",
+        "",
+        "toolbar-standard/ToolbarStandardUndoView.svg"
+    ),
+    icon!(
+        "Standard Four Views",
+        "FourViews",
+        "",
+        "toolbar-standard/ToolbarStandardFourViews.svg"
+    ),
+    icon!(
+        "Standard CPlane Origin",
+        "CPlaneOrigin",
+        "",
+        "toolbar-standard/ToolbarStandardCPlaneOrigin.svg"
+    ),
+    icon!(
+        "Standard Help",
+        "Help",
+        "",
+        "toolbar-standard/ToolbarStandardHelp.svg"
+    ),
+    icon!(
+        "Standard Cut",
+        "Cut",
+        "",
+        "toolbar-standard/ToolbarStandardCut.svg"
+    ),
+    icon!(
+        "Standard Copy",
+        "CopyToClipboard",
+        "",
+        "toolbar-standard/ToolbarStandardCopy.svg"
+    ),
+    icon!(
+        "Standard Paste",
+        "Paste",
+        "",
+        "toolbar-standard/ToolbarStandardPaste.svg"
+    ),
+    icon!(
+        "Standard Pan",
+        "Pan",
+        "",
+        "toolbar-standard/ToolbarStandardPan.svg"
+    ),
+    icon!(
+        "Standard Rotate View",
+        "RotateView",
+        "",
+        "toolbar-standard/ToolbarStandardRotateView.svg"
+    ),
+    icon!(
+        "SubD Edit Mode",
+        "ClayEdit",
+        "",
+        "toolbar-subd/ToolbarSubDEditMode.svg"
+    ),
+    icon!(
+        "SubD Primitives",
+        "ClayooPrimitives",
+        "",
+        "toolbar-subd/ToolbarSubDPrimitives.svg"
+    ),
+    icon!(
+        "SubD Creation",
+        "ClayooCreation",
+        "",
+        "toolbar-subd/ToolbarSubDCreation.svg"
+    ),
+    icon!(
+        "SubD Edition",
+        "ClayooEdition",
+        "",
+        "toolbar-subd/ToolbarSubDEdition.svg"
+    ),
+    icon!(
+        "SubD Selection",
+        "ClayooSelection",
+        "",
+        "toolbar-subd/ToolbarSubDSelection.svg"
+    ),
+    icon!(
+        "SubD Hotkeys Settings",
+        "ClayooHotkeys",
+        "",
+        "toolbar-subd/ToolbarSubDHotkeys.svg"
+    ),
+    icon!(
+        "SubD Settings",
+        "ClayooSettings",
+        "",
+        "toolbar-subd/ToolbarSubDSettings.svg"
+    ),
+    icon!(
+        "SubD Help",
+        "ClayHelp",
+        "",
+        "toolbar-subd/ToolbarSubDHelp.svg"
+    ),
+    icon!(
+        "SubD Report Feedback",
+        "ClayReportFeedback",
+        "",
+        "toolbar-subd/ToolbarSubDFeedback.svg"
+    ),
+    icon!(
+        "SubD Elements",
+        "ClayElements",
+        "",
+        "toolbar-subd/ToolbarSubDElements.svg"
+    ),
+    icon!(
+        "Clay Emboss",
+        "ClayEmboss",
+        "",
+        "toolbar-emboss/ToolbarEmbossEmboss.svg"
+    ),
+    icon!(
+        "Emboss Resources",
+        "ClayEmbossResources",
+        "OM9-EMBOSS-014",
+        "toolbar-emboss/ToolbarEmbossResources.svg"
+    ),
+    icon!(
+        "Emboss Texture Creator",
+        "ClayEmbossTextureCreator",
+        "",
+        "toolbar-emboss/ToolbarEmbossTextureCreator.svg"
+    ),
+    icon!(
+        "Emboss Raster to Vector",
+        "ClayEmbossRastertoVector",
+        "",
+        "toolbar-emboss/ToolbarEmbossRasterToVector.svg"
+    ),
+    icon!(
+        "Emboss Text on Curve",
+        "ClayEmbossTextOnCurve",
+        "",
+        "toolbar-emboss/ToolbarEmbossTextOnCurve.svg"
+    ),
+    icon!(
+        "Emboss Decimator",
+        "ClayEmbossDecimator",
+        "OM9-EMBOSS-015",
+        "toolbar-emboss/ToolbarEmbossDecimator.svg"
+    ),
+    icon!(
+        "Sculpt",
+        "ClaySculpt",
+        "",
+        "toolbar-sculpt/ToolbarSculptSculpt.svg"
+    ),
+    icon!(
+        "Sculpt Brush",
+        "ClaySculptBrush",
+        "",
+        "toolbar-sculpt/ToolbarSculptBrush.svg"
+    ),
+    icon!(
+        "Sculpt Crease",
+        "ClaySculptCrease",
+        "",
+        "toolbar-sculpt/ToolbarSculptCrease.svg"
+    ),
+    icon!(
+        "Sculpt Flatten",
+        "ClaySculptFlatten",
+        "",
+        "toolbar-sculpt/ToolbarSculptFlatten.svg"
+    ),
+    icon!(
+        "Sculpt Inflate",
+        "ClaySculptInflate",
+        "",
+        "toolbar-sculpt/ToolbarSculptInflate.svg"
+    ),
+    icon!(
+        "Sculpt Pinch",
+        "ClaySculptPinch",
+        "",
+        "toolbar-sculpt/ToolbarSculptPinch.svg"
+    ),
+    icon!(
+        "Sculpt Smooth",
+        "ClaySculptSmooth",
+        "",
+        "toolbar-sculpt/ToolbarSculptSmooth.svg"
+    ),
+    icon!(
+        "Sculpt Twist",
+        "ClaySculptTwist",
+        "",
+        "toolbar-sculpt/ToolbarSculptTwist.svg"
+    ),
+    icon!(
+        "Sculpt Drag",
+        "ClaySculptDrag",
+        "",
+        "toolbar-sculpt/ToolbarSculptDrag.svg"
+    ),
+    icon!(
         "Line",
         "CurveLineSingleLine",
         "OM9-CURVE-002",
@@ -56,25 +476,25 @@ const PALETTE: &[Icon] = &[
     icon!(
         "Interpolate",
         "CurveFreeFormInterpolatePoints",
-        "",
+        "OM9-CURVE-003",
         "curve-minimal/CurveFreeFormInterpolatePoints.svg"
     ),
     icon!(
         "Ellipse",
         "CurveEllipseFromCenter",
-        "",
+        "OM9-CURVE-006",
         "curve-minimal/CurveEllipseFromCenter.svg"
     ),
     icon!(
         "Offset",
         "CurveOffsetCurve",
-        "",
+        "OM9-CURVE-018",
         "curve-minimal/CurveOffsetCurve.svg"
     ),
     icon!(
         "ProjectCurve",
         "CurveCurveFromObjectsProject",
-        "",
+        "OM9-CURVE-016",
         "curve-minimal/CurveCurveFromObjectsProject.svg"
     ),
     icon!(
@@ -83,12 +503,22 @@ const PALETTE: &[Icon] = &[
         "OM9-SOLID-012",
         "solid-minimal/SolidBoxCornertoCornerHeight.svg"
     ),
+    icon!("SolidBoxDiagonal", "SolidBoxDiagonal", "SolidBoxDiagonal", "solid-minimal/SolidBoxDiagonal.svg"),
+    icon!("SolidBox3PointsHeight", "SolidBox3PointsHeight", "SolidBox3PointsHeight", "solid-minimal/SolidBox3PointsHeight.svg"),
+    icon!("SolidBoxVerticalBase", "SolidBoxVerticalBase", "SolidBoxVerticalBase", "solid-minimal/SolidBoxVerticalBase.svg"),
+    icon!("SolidBoxCenterofBaseCornerHeight", "SolidBoxCenterofBaseCornerHeight", "SolidBoxCenterofBaseCornerHeight", "solid-minimal/SolidBoxCenterofBaseCornerHeight.svg"),
     icon!(
         "Sphere",
         "SolidSphereCenterRadius",
         "OM9-SOLID-014",
         "solid-minimal/SolidSphereCenterRadius.svg"
     ),
+    icon!("SolidSphere2Points","SolidSphere2Points","SolidSphere2Points","solid-minimal/SolidSphere2Points.svg"),
+    icon!("SolidSphere3Points","SolidSphere3Points","SolidSphere3Points","solid-minimal/SolidSphere3Points.svg"),
+    icon!("SolidSphere4Points","SolidSphere4Points","SolidSphere4Points","solid-minimal/SolidSphere4Points.svg"),
+    icon!("SolidSphereAroundCurve","SolidSphereAroundCurve","SolidSphereAroundCurve","solid-minimal/SolidSphereAroundCurve.svg"),
+    icon!("SolidSphereTangenttoCurves","SolidSphereTangenttoCurves","SolidSphereTangenttoCurves","solid-minimal/SolidSphereTangenttoCurves.svg"),
+    icon!("SolidSphereFitSpheretoPoints","SolidSphereFitSpheretoPoints","SolidSphereFitSpheretoPoints","solid-minimal/SolidSphereFitSpheretoPoints.svg"),
     icon!("Union", "SolidUnion", "", "solid-minimal/SolidUnion.svg"),
     icon!(
         "Difference",
@@ -112,7 +542,7 @@ const PALETTE: &[Icon] = &[
     icon!(
         "Revolve",
         "SurfaceRevolve",
-        "",
+        "OM9-SURFACE-018",
         "surface-minimal/SurfaceRevolve.svg"
     ),
     icon!(
@@ -635,13 +1065,13 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "OthersMeasureDimHorizontal",
         "OthersMeasureDimHorizontal",
-        "",
+        "OM9-MEASURE-004",
         "core-minimal/OthersMeasureDimHorizontal.svg"
     ),
     icon!(
         "OthersMeasureDimVertical",
         "OthersMeasureDimVertical",
-        "",
+        "OM9-MEASURE-006",
         "core-minimal/OthersMeasureDimVertical.svg"
     ),
     icon!(
@@ -695,7 +1125,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "OthersMeasureEditDim",
         "OthersMeasureEditDim",
-        "",
+        "OM9-MEASURE-014",
         "core-minimal/OthersMeasureEditDim.svg"
     ),
     icon!(
@@ -707,7 +1137,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "OthersMeasureDimOptions",
         "OthersMeasureDimOptions",
-        "",
+        "OM9-MEASURE-016",
         "core-minimal/OthersMeasureDimOptions.svg"
     ),
     icon!(
@@ -719,7 +1149,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "CurveArcStartEndDirection",
         "CurveArcStartEndDirection",
-        "OM9-CURVE-007",
+        "OM9-CURVE-008",
         "curve-minimal/CurveArcStartEndDirection.svg"
     ),
     icon!(
@@ -755,7 +1185,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "BuilderCrv2ViewHistory",
         "BuilderCrv2ViewHistory",
-        "OM9-CURVE-013",
+        "OM9-CURVE-014",
         "curve-minimal/BuilderCrv2ViewHistory.svg"
     ),
     icon!(
@@ -863,7 +1293,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "CurveFreeFormContinueInterpCurve",
         "CurveFreeFormContinueInterpCurve",
-        "OM9-CURVE-003",
+        "OM9-CURVE-035",
         "curve-minimal/CurveFreeFormContinueInterpCurve.svg"
     ),
     icon!(
@@ -899,7 +1329,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "CurveFreeFormControlPoints",
         "CurveFreeFormControlPoints",
-        "OM9-CURVE-034",
+        "OM9-CURVE-042",
         "curve-minimal/CurveFreeFormControlPoints.svg"
     ),
     icon!(
@@ -935,7 +1365,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "CurveFreeFormSketchonPolygonMesh",
         "CurveFreeFormSketchonPolygonMesh",
-        "OM9-CURVE-028",
+        "OM9-CURVE-049",
         "curve-minimal/CurveFreeFormSketchonPolygonMesh.svg"
     ),
     icon!(
@@ -947,7 +1377,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "CurveFreeFormInterpolateonSurface",
         "CurveFreeFormInterpolateonSurface",
-        "",
+        "OM9-CURVE-047",
         "curve-minimal/CurveFreeFormInterpolateonSurface.svg"
     ),
     icon!(
@@ -989,7 +1419,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "CurveOffsetOffsetCrvNormalToSurface",
         "CurveOffsetOffsetCrvNormalToSurface",
-        "OM9-CURVE-018",
+        "OM9-CURVE-057",
         "curve-minimal/CurveOffsetOffsetCrvNormalToSurface.svg"
     ),
     icon!(
@@ -1193,7 +1623,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "SurfaceSmash",
         "SurfaceSmash",
-        "",
+        "OM9-SURFACE-141",
         "surface-minimal/SurfaceSmash.svg"
     ),
     icon!(
@@ -1223,8 +1653,20 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "SurfaceSurfaceEditToolsRefittoTolerance",
         "SurfaceSurfaceEditToolsRefittoTolerance",
-        "",
+        "OM9-SURFACE-142",
         "surface-minimal/SurfaceSurfaceEditToolsRefittoTolerance.svg"
+    ),
+    icon!(
+        "SolidBooleanSplit",
+        "SolidBooleanSplit",
+        "SolidBooleanSplit",
+        "solid-minimal/SolidBooleanSplit.svg"
+    ),
+    icon!(
+        "SolidCreateSolid",
+        "SolidCreateSolid",
+        "SolidCreateSolid",
+        "solid-minimal/SolidCreateSolid.svg"
     ),
     icon!(
         "SolidBooleanTwoObjects",
@@ -1273,6 +1715,12 @@ const MENU_PALETTE: &[Icon] = &[
         "SolidPipe",
         "OM9-SOLID-011",
         "solid-minimal/SolidPipe.svg"
+    ),
+    icon!(
+        "SolidGVDMultiPipe",
+        "SolidGVDMultiPipe",
+        "SolidGVDMultiPipe",
+        "solid-minimal/SolidGVDMultiPipe.svg"
     ),
     icon!(
         "SolidEllipsoidFromCenter",
@@ -1506,7 +1954,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "TransformArrayAlongCurveonSurface",
         "TransformArrayAlongCurveonSurface",
-        "OM9-TRANSFORM-021",
+        "OM9-TRANSFORM-026",
         "transform-minimal/TransformArrayAlongCurveonSurface.svg"
     ),
     icon!(
@@ -2316,7 +2764,7 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "BuilderCustomGem",
         "BuilderCustomGem",
-        "",
+        "BuilderCustomGem",
         "gems-minimal/BuilderCustomGem.svg"
     ),
     icon!(

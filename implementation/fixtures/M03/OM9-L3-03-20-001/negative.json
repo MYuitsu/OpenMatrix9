@@ -1,0 +1,5 @@
+{
+  "l3_id": "OM9-L3-03-20-001",
+  "case": "Length with an empty or non-curve selection",
+  "expected": "Error::Missing/Error::Invalid, no label published, document unchanged"
+}

@@ -1,0 +1,34 @@
+{
+  "schema": "om9.evidence.adversarial.v1",
+  "l4": "OM9-L4-04-16-005-04",
+  "l3": "OM9-L3-04-16-005",
+  "recorded_at": "2026-10-28",
+  "status": "ADVERSARIAL_CHECKS_RECORDED",
+  "cases": [
+    {
+      "case": "negative or zero clearance",
+      "input": "Clearance=0",
+      "expect": "Invalid(\"cutter clearance\") (never silently clamped)"
+    },
+    {
+      "case": "seat below the cutter bottom",
+      "input": "LowerSeatDepth > LowerDepth",
+      "expect": "Invalid(\"cutter lower seat depth\")"
+    },
+    {
+      "case": "a ring stack that is not monotonic",
+      "input": "a hand-built ring list out of order",
+      "expect": "Invalid(\"cutter ring order\")"
+    },
+    {
+      "case": "the cutter is inside the stone",
+      "input": "GirdleScale below the stone profile",
+      "expect": "Invalid(\"cutter pavilion clearance\")"
+    }
+  ],
+  "notes": [
+    "Every refusal is a typed om9_core::Error naming the offending control; nothing is silently clamped.",
+    "A refused option restores the previous preview, so the staged builder keeps running.",
+    "Cancel and Esc drop the preview without touching the document; Undo restores a committed command in one step."
+  ]
+}

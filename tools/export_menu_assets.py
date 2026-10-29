@@ -11,6 +11,7 @@ import struct
 import xml.etree.ElementTree as ET
 import zlib
 from modern_icons import symbol_for_key, svg
+from solid_icons import SOLID_ICONS, describe_style as describe_solid_style, write_asset as write_solid_asset
 
 SCRIPT_BINDINGS = {
     'FileNew': '! _New', 'FileOpen': '! _Open', 'FileSave': '! _Save',
@@ -233,6 +234,12 @@ def export_assets(ref_root,output_root,named_root=None,named_bindings=None,butto
     auxiliary=[name for name in dict.fromkeys(list(BUTTON_ALIASES)+SIDEBAR_BUTTONS+DISPLAY_BUTTONS+list(named)) if name not in names]
     for name in names+auxiliary:
         resolution_key='resolved' if name in names else 'auxiliary_resolved'
+        if name in SOLID_ICONS:
+            metadata, record = write_solid_asset(output_root, name)
+            dest[name] = metadata
+            result['authored_symbols'][name] = record
+            result[resolution_key].append(name)
+            continue
         shifted_alias=SHIFTED_ALIASES.get(name,BUTTON_ALIASES.get(name,name))
         shifted_record=shifted_alias+'_1';shifted_archive='ButtonIcons.bin'
         shifted_item=shifted.get((shifted_archive,shifted_record))
@@ -284,6 +291,27 @@ def export_assets(ref_root,output_root,named_root=None,named_bindings=None,butto
             result['authored_symbols'][name]={'symbol':symbol,'mapping':mapping,'sha256':hashlib.sha256(target.read_bytes()).hexdigest()}
             if exact:result[resolution_key].append(name)
             else:result['missing' if name in names else 'auxiliary_missing'][name]='No matching modern crop; authored category symbol supplied'
+    solid_count = sum(name in SOLID_ICONS for name in result['authored_symbols'])
+    if solid_count:
+        describe_solid_style(result, solid_count)
+    # Standalone toolbar artwork has its own generators and must survive a
+    # main-menu export even though it is not listed in MainMenu.ini.
+    for section in previous.sections():
+        if section.startswith(('ToolbarSculpt', 'ToolbarEmboss', 'ToolbarSubD', 'ToolbarStandard', 'ToolbarVisibility', 'ToolbarDisplay')):
+            entry = previous[section]
+            relative = entry.get('image', '')
+            directory = ('toolbar-sculpt' if section.startswith('ToolbarSculpt') else
+                         'toolbar-emboss' if section.startswith('ToolbarEmboss') else
+                         'toolbar-subd' if section.startswith('ToolbarSubD') else
+                         'toolbar-standard' if section.startswith('ToolbarStandard') else
+                         'toolbar-visibility' if section.startswith('ToolbarVisibility') else 'toolbar-display')
+            if entry.get('source') != 'OpenMatrix9-authored-svg' or not relative.startswith(f'icons/{directory}/'):
+                raise ValueError(f'Invalid authored toolbar binding: {section}')
+            target = (output_root / relative).resolve()
+            if not target.is_relative_to((output_root / 'icons' / directory).resolve()) or not target.is_file():
+                raise ValueError(f'Missing authored toolbar icon: {section}')
+            dest[section] = dict(entry)
+            result['authored_symbols'][section] = {'symbol': section, 'mapping': 'authored-command-symbol', 'sha256': hashlib.sha256(target.read_bytes()).hexdigest()}
     if not allow_original:
         current_paths={s.get('image',s.get('atlas','')) for s in dest.values()}
         for relative in legacy_paths-current_paths:

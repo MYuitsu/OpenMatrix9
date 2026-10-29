@@ -149,7 +149,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Degree=") {
-            let Some(degree) = value.parse::<usize>().ok().filter(|value| (1..=11).contains(value)) else {
+            let Some(degree) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (1..=11).contains(value))
+            else {
                 self.ellipse_pending = Some(pending);
                 return Some(Err(Error::Invalid("degree must be 1..11")));
             };
@@ -158,7 +162,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("PointCount=") {
-            let Some(points) = value.parse::<usize>().ok().filter(|value| (4..=256).contains(value)) else {
+            let Some(points) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (4..=256).contains(value))
+            else {
                 self.ellipse_pending = Some(pending);
                 return Some(Err(Error::Invalid("point count must be 4..256")));
             };
@@ -182,7 +190,11 @@ impl Controller {
                 self.ellipse_pending = Some(pending);
                 return Some(Err(Error::Invalid("AroundCurve needs OnCurve=fraction")));
             };
-            let Some(fraction) = value.parse::<f64>().ok().filter(|value| (0.0..=1.0).contains(value)) else {
+            let Some(fraction) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| (0.0..=1.0).contains(value))
+            else {
                 self.ellipse_pending = Some(pending);
                 return Some(Err(Error::Invalid("OnCurve fraction must be 0..1")));
             };
@@ -190,14 +202,16 @@ impl Controller {
                 self.ellipse_pending = Some(pending);
                 return Some(Err(Error::Invalid("select a curve before AroundCurve")));
             };
-            let center = match om9_core::curve_ops::point_at(&path, fraction, self.coordinator.limits()) {
-                Ok(point) => point,
-                Err(error) => return Some(Err(error)),
-            };
-            let tangent = match om9_core::curve_ops::tangent_at(&path, fraction, self.coordinator.limits()) {
-                Ok(tangent) => tangent,
-                Err(error) => return Some(Err(error)),
-            };
+            let center =
+                match om9_core::curve_ops::point_at(&path, fraction, self.coordinator.limits()) {
+                    Ok(point) => point,
+                    Err(error) => return Some(Err(error)),
+                };
+            let tangent =
+                match om9_core::curve_ops::tangent_at(&path, fraction, self.coordinator.limits()) {
+                    Ok(tangent) => tangent,
+                    Err(error) => return Some(Err(error)),
+                };
             let norm = (tangent[0].powi(2) + tangent[1].powi(2) + tangent[2].powi(2)).sqrt();
             if norm <= 1e-12 {
                 self.ellipse_pending = Some(pending);
@@ -254,7 +268,9 @@ impl Controller {
             return Some(self.commit_ellipse());
         }
         self.ellipse_pending = Some(pending);
-        Some(Err(Error::Invalid("ellipse needs points or RadiusX=/RadiusY=")))
+        Some(Err(Error::Invalid(
+            "ellipse needs points or RadiusX=/RadiusY=",
+        )))
     }
 
     pub fn accept_ellipse_point(&mut self, point: Point3) -> Result<(), Error> {
@@ -266,7 +282,11 @@ impl Controller {
             if pending.points.len() == 2 {
                 let a = pending.points[0];
                 let b = pending.points[1];
-                let center = [(a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5];
+                let center = [
+                    (a[0] + b[0]) * 0.5,
+                    (a[1] + b[1]) * 0.5,
+                    (a[2] + b[2]) * 0.5,
+                ];
                 let delta = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
                 let radius = (delta[0].powi(2) + delta[1].powi(2) + delta[2].powi(2)).sqrt() * 0.5;
                 if radius <= 1e-9 {
@@ -275,7 +295,11 @@ impl Controller {
                 }
                 pending.center = Some(center);
                 pending.radius_x = Some(radius);
-                pending.x_axis = [delta[0] / (radius * 2.0), delta[1] / (radius * 2.0), delta[2] / (radius * 2.0)];
+                pending.x_axis = [
+                    delta[0] / (radius * 2.0),
+                    delta[1] / (radius * 2.0),
+                    delta[2] / (radius * 2.0),
+                ];
                 self.ellipse_pending = Some(pending);
                 return Ok(());
             }
@@ -358,11 +382,7 @@ impl Controller {
             let result = self.commit_ellipse();
             if result.is_ok() && mark {
                 for focus in [first, second] {
-                    self.commit_geometry(
-                        ELLIPSE,
-                        "EllipseFoci",
-                        Geometry::Point(focus),
-                    )?;
+                    self.commit_geometry(ELLIPSE, "EllipseFoci", Geometry::Point(focus))?;
                 }
             }
             return result;
@@ -379,7 +399,11 @@ impl Controller {
             };
             let second = point;
             let plane = self.input_plane();
-            let delta = [second[0] - first[0], second[1] - first[1], second[2] - first[2]];
+            let delta = [
+                second[0] - first[0],
+                second[1] - first[1],
+                second[2] - first[2],
+            ];
             let along_x = delta[0] * plane.x[0] + delta[1] * plane.x[1] + delta[2] * plane.x[2];
             let along_y = delta[0] * plane.y[0] + delta[1] * plane.y[1] + delta[2] * plane.y[2];
             let radius_x = along_x.abs() * 0.5;
@@ -410,7 +434,11 @@ impl Controller {
             return Err(Error::Invalid("ellipse center"));
         };
         if pending.radius_x.is_none() {
-            let delta = [point[0] - center[0], point[1] - center[1], point[2] - center[2]];
+            let delta = [
+                point[0] - center[0],
+                point[1] - center[1],
+                point[2] - center[2],
+            ];
             let radius = (delta[0].powi(2) + delta[1].powi(2) + delta[2].powi(2)).sqrt();
             if radius <= 1e-9 {
                 self.ellipse_pending = Some(pending);
@@ -553,14 +581,26 @@ impl Controller {
             return Vec::new();
         };
         let (radius_x, radius_y, x_axis) = if let Some(radius_x) = pending.radius_x {
-            (radius_x, pending.radius_y.unwrap_or(distance(center, point)), pending.x_axis)
+            (
+                radius_x,
+                pending.radius_y.unwrap_or(distance(center, point)),
+                pending.x_axis,
+            )
         } else {
-            let delta = [point[0] - center[0], point[1] - center[1], point[2] - center[2]];
+            let delta = [
+                point[0] - center[0],
+                point[1] - center[1],
+                point[2] - center[2],
+            ];
             let radius = (delta[0].powi(2) + delta[1].powi(2) + delta[2].powi(2)).sqrt();
             if radius <= 1e-9 {
                 return Vec::new();
             }
-            (radius, radius, [delta[0] / radius, delta[1] / radius, delta[2] / radius])
+            (
+                radius,
+                radius,
+                [delta[0] / radius, delta[1] / radius, delta[2] / radius],
+            )
         };
         if radius_x <= 1e-9 || radius_y <= 1e-9 {
             return Vec::new();

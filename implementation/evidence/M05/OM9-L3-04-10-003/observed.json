@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-003",
+  "title": "Gem Count On Curve",
+  "command": "BuilderGemCountOnCrv / gvGemCountOnCrv",
+  "scope": "`gem_placement::count_on_curve`; `CurveFit`; `GemPlacementTool::CountOnCurve`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "fit count derives from arc length, stone diameter and the requested gap",
+  "negative": "a non-fitting row is refused instead of placing a partial row",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-003-03"
+    ],
+    "fixture_manifest_sha256": "5e534ef47a4c18dad83da4d10733c5e6ee16e84a01639109522140d5369bc1d5"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "the_count_tool_fits_the_row_between_the_curve_ends"
+}

@@ -208,30 +208,30 @@ fn polyline_display_admission_charges_its_exact_vertex_count() {
 }
 
 #[test]
+fn reversed_polycurve_is_published_with_reversed_display_order() {
+    let mut curve = polyline(&[[0.0,0.0,0.0],[1.0,0.0,0.0],[1.0,2.0,0.0]]).unwrap();
+    if let Curve::Polycurve { reversed, .. } = &mut curve { *reversed = true; }
+    let (document, id) = document_with_curve(curve, Transform::identity());
+    let scene = Scene::capture(Arc::new(document), 1, &Limits::default()).unwrap();
+    assert!(scene.diagnostics.is_empty()); assert_eq!(scene.objects[0].root, id);
+    let RenderBuffers::Curve { points, .. } = scene.objects[0].buffers.as_ref() else { panic!() };
+    assert_eq!(points.as_slice(), &[[1.0,2.0,0.0],[1.0,0.0,0.0],[0.0,0.0,0.0]]);
+    assert!(scene.objects[0].has_pick_geometry());
+}
+
+#[test]
+fn disconnected_line_strokes_remain_disconnected() {
+    let line = |start, end| Curve::Line { start, end, domain: [0.0,1.0] };
+    let curve = Curve::Polycurve { segments: vec![line([0.0,0.0,0.0],[1.0,0.0,0.0]), line([2.0,0.0,0.0],[3.0,0.0,0.0])], reversed: false };
+    let (document, _) = document_with_curve(curve, Transform::identity());
+    let scene = Scene::capture(Arc::new(document), 1, &Limits::default()).unwrap();
+    let RenderBuffers::Mesh { vertices, edges, .. } = scene.objects[0].buffers.as_ref() else { panic!() };
+    assert_eq!(vertices.len(), 4); assert_eq!(edges.as_slice(), &[[0,1],[2,3]]);
+}
+
+#[test]
 fn unsupported_polycurves_report_precise_diagnostics() {
-    let line = |start, end| Curve::Line {
-        start,
-        end,
-        domain: [0., 1.],
-    };
     let cases = [
-        (
-            Curve::Polycurve {
-                segments: vec![line([0.; 3], [1., 0., 0.])],
-                reversed: true,
-            },
-            "unreversed",
-        ),
-        (
-            Curve::Polycurve {
-                segments: vec![
-                    line([0.; 3], [1., 0., 0.]),
-                    line([2., 0., 0.], [3., 0., 0.]),
-                ],
-                reversed: false,
-            },
-            "connected",
-        ),
         (
             Curve::Polycurve {
                 segments: vec![Curve::Circle {

@@ -11,6 +11,23 @@
   "mini_gate_id": "G03-C",
   "risk": "CRITICAL",
   "purpose": "Implement only the owned Rust/OCCT behavior",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M03 - Geometry 3DM/L2-01-09 - 01-be-occt-geometry/L3-006 - Loft Through Crosssections/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 1,
+    "implementation_l4": null
+  },
   "parent_l3_file": "M03 - Geometry 3DM/L2-01-09 - 01-be-occt-geometry/L3-006 - Loft Through Crosssections/l3.json",
   "preconditions": {
     "milestone": "M00,M01,M02 approved and passing actual tests; previous M03 mini-gates approved",
@@ -576,4 +593,5 @@
     "reference_note": "adapt the pinned algorithm, do not copy it; licence scope comes from M00",
     "sketch": "// Implement — Loft Through Crosssections\n// ROLE: IMPLEMENT - skeleton only; body is deliberately unimplemented.\n\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n///\n/// Owner: OM9-L2-01-09\n/// Positive fixture: valid input from the fixture\n/// Negative fixture: invalid, empty or degenerate input\n///\n/// Algorithm notes carried from the planning record:\n//   1. None\npub fn om9_l4_01_09_006_03(/* typed inputs from the contract */) -> Result</* Output */, Error> {\n    // TODO(OM9-L4-01-09-006-03): implement exactly one owner's behaviour here.\n    //   1. validate typed inputs; reject empty/degenerate input with a typed error.\n    //   2. do the work through the owning kernel/domain service, never a second engine.\n    //   3. return a typed result; never report success on a partial write.\n    unimplemented!(\"OM9-L4-01-09-006-03 not implemented\")\n}\n\n#[cfg(test)]\nmod tests {\n    // Positive: valid input from the fixture\n    #[test]\n    fn positive_om9_l4_01_09_006_03() {\n        // RED until implemented: assert the measured oracle, not a smoke check.\n        // Oracle: measured positive oracle\n        unimplemented!()\n    }\n\n    // Negative: invalid, empty or degenerate input\n    #[test]\n    fn negative_om9_l4_01_09_006_03() {\n        // Oracle: typed error with unchanged state\n        // Assert a typed error and unchanged state (no partial document mutation).\n        unimplemented!()\n    }\n}"
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

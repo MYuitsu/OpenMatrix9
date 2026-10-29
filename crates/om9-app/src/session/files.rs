@@ -146,6 +146,11 @@ impl Controller {
         if self.layer_dialog.is_some() || self.file.operation.is_some() {
             return Err(Error::Busy);
         }
+        // A rebuild that owns the document, or a recipe still waiting for its output
+        // insert, must finish before the document can be replaced or closed (`-006`).
+        if self.history_rebuilding || self.history_has_pending() {
+            return Err(Error::Busy);
+        }
         if self.is_running() {
             self.validate_session()?;
         }
@@ -525,6 +530,7 @@ impl Controller {
         )?;
         self.refresh_scene()?;
         self.selection.clear();
+        self.selection_order.clear();
         self.selection_revision = self
             .selection_revision
             .checked_add(1)

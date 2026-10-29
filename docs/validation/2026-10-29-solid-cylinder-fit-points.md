@@ -1,0 +1,7 @@
+# Cylinder FitPoints — 2026-10-29
+
+The normalized Cylinder reference describes fitting the base circle from at least three selected points or control points; surrounding Torus and Tube text is interleaved. OM9 now supports `Cylinder FitPoints` and its command option through the existing bounded circle-fit session. It accepts direct point input or preselected point, curve-control, surface-control and mesh data supported by that shared collector, then accepts a signed height and `Solid=Yes/No`. The fitting method is the existing OM9 algebraic fit and is not confirmed as Matrix's original solver.
+
+Inputs remain unchanged; invalid/collinear points and point-budget failures do not commit. A successful fit and cylinder creation produce one transaction. The selection collector snapshots geometry rather than maintaining associative history; selecting individual control points during the pending command and other unsupported source families are not established by this slice.
+
+Windows `CARGO_TARGET_DIR=L:/om9-target`, `-j 2`: seven Cylinder controller tests passed, including new direct points, translated preselected point objects, collinear retry, open face, point budget and Undo. One egui viewport test exercised direct point picks, and one shared option test covered keyboard, pointer and typed activation. Six Truncated Cone FitPoints regression workflows passed. General fit accuracy, all source families, actual desktop and original Matrix behavior remain unverified.

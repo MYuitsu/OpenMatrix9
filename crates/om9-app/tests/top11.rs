@@ -30,7 +30,228 @@ fn select(c: &mut Controller, ids: &[om9_core::identity::ObjectId]) {
 }
 
 #[test]
-fn m03_03_08_006_toolbar_has_eleven_actions_and_ring_rail_stays_disabled() {
+fn top11_move_can_start_before_selection_and_undo() {
+    let mut c = controller();
+    let id = draw_line(&mut c, [0.0; 3], [10.0, 0.0, 0.0]);
+    c.select_objects(&[]).unwrap();
+    c.top11_invoke(Top11Action::Move).unwrap();
+    assert!(c.top11_needs_object());
+    assert!(c.submit("").is_err());
+    c.top11_accept_object(id).unwrap();
+    c.submit("").unwrap();
+    assert!(!c.top11_needs_object());
+    c.accept_world_point([0.0; 3]).unwrap();
+    c.accept_world_point([2.0, 3.0, 0.0]).unwrap();
+    assert_eq!(
+        c.document().entities[&id]
+            .placement
+            .point([0.0; 3])
+            .unwrap(),
+        [2.0, 3.0, 0.0]
+    );
+    c.undo().unwrap();
+    assert_eq!(
+        c.document().entities[&id]
+            .placement
+            .point([0.0; 3])
+            .unwrap(),
+        [0.0; 3]
+    );
+}
+
+#[test]
+fn mirror_can_start_before_selection_and_cancel() {
+    let mut c = controller();
+    let id = draw_line(&mut c, [0.0; 3], [10.0, 0.0, 0.0]);
+    c.select_objects(&[]).unwrap();
+    c.submit("Mirror").unwrap();
+    c.top11_accept_object(id).unwrap();
+    c.cancel();
+    assert!(!c.is_running());
+    assert_eq!(c.document().entities.len(), 1);
+}
+
+#[test]
+fn every_top11_action_can_open_object_selection_and_cancel() {
+    for action in Top11Action::ALL {
+        if action == Top11Action::RingRail {
+            continue;
+        }
+        let mut c = controller();
+        let id = draw_line(&mut c, [0.0; 3], [10.0, 0.0, 0.0]);
+        c.select_objects(&[]).unwrap();
+        let before = c.document().clone();
+        assert!(
+            c.top11_availability()
+                .iter()
+                .any(|state| state.action == action && state.enabled)
+        );
+        c.top11_invoke(action).unwrap();
+        assert!(c.top11_needs_object(), "{action:?}");
+        c.top11_accept_object(id).unwrap();
+        c.cancel();
+        assert_eq!(c.document(), &before, "{action:?}");
+    }
+}
+
+#[test]
+fn top11_can_remove_picked_selection_and_cutters_before_commit() {
+    let mut c = controller();
+    let target = draw_line(&mut c, [-10.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let cutter = draw_line(&mut c, [0.0, -10.0, 0.0], [0.0, 10.0, 0.0]);
+    c.select_objects(&[]).unwrap();
+    c.top11_invoke(Top11Action::Split).unwrap();
+    c.top11_accept_object(target).unwrap();
+    c.top11_remove_object(target).unwrap();
+    assert!(c.submit("").is_err());
+    c.top11_accept_object(target).unwrap();
+    c.submit("").unwrap();
+    c.top11_accept_object(cutter).unwrap();
+    c.top11_remove_object(cutter).unwrap();
+    assert!(c.submit("").is_err());
+    c.top11_accept_object(cutter).unwrap();
+    c.submit("").unwrap();
+    assert_eq!(c.document().entities.len(), 3);
+    c.undo().unwrap();
+    assert_eq!(c.document().entities.len(), 2);
+    assert!(c.document().entities.contains_key(&target));
+    assert!(c.document().entities.contains_key(&cutter));
+}
+
+#[test]
+fn split_multiple_curves_is_one_undo_and_preserves_unhit_target() {
+    let mut c = controller();
+    let first = draw_line(&mut c, [-10., 0., 0.], [10., 0., 0.]);
+    let second = draw_line(&mut c, [-10., 4., 0.], [10., 4., 0.]);
+    let untouched = draw_line(&mut c, [30., 0., 0.], [40., 0., 0.]);
+    let cutter = draw_line(&mut c, [0., -5., 0.], [0., 10., 0.]);
+    c.select_objects(&[first, second, untouched]).unwrap();
+    let undo_before = c.coordinator().undo_len();
+    c.top11_invoke(Top11Action::Split).unwrap();
+    c.top11_accept_object(cutter).unwrap();
+    c.submit("").unwrap();
+    assert_eq!(c.document().entities.len(), 6);
+    assert!(c.document().entities.contains_key(&untouched));
+    assert!(c.document().entities.contains_key(&cutter));
+    assert!(!c.document().entities.contains_key(&first));
+    assert!(!c.document().entities.contains_key(&second));
+    assert_eq!(c.coordinator().undo_len(), undo_before + 1);
+    c.undo().unwrap();
+    assert_eq!(c.document().entities.len(), 4);
+    assert!(c.document().entities.contains_key(&first));
+    assert!(c.document().entities.contains_key(&second));
+    c.redo().unwrap();
+    assert_eq!(c.document().entities.len(), 6);
+}
+
+#[test]
+fn split_multiple_curves_accepts_cutters_that_hit_different_targets() {
+    let mut c = controller();
+    let first = draw_line(&mut c, [-10., 0., 0.], [10., 0., 0.]);
+    let second = draw_line(&mut c, [-10., 4., 0.], [10., 4., 0.]);
+    let cutter_a = draw_line(&mut c, [0., -2., 0.], [0., 2., 0.]);
+    let cutter_b = draw_line(&mut c, [2., 2., 0.], [2., 6., 0.]);
+    c.select_objects(&[first, second]).unwrap();
+    let undo_before = c.coordinator().undo_len();
+    c.top11_invoke(Top11Action::Split).unwrap();
+    c.top11_accept_object(cutter_a).unwrap();
+    c.top11_accept_object(cutter_b).unwrap();
+    c.submit("").unwrap();
+    assert_eq!(c.document().entities.len(), 6);
+    assert_eq!(c.coordinator().undo_len(), undo_before + 1);
+    c.undo().unwrap();
+    assert_eq!(c.document().entities.len(), 4);
+    assert!(c.document().entities.contains_key(&first));
+    assert!(c.document().entities.contains_key(&second));
+}
+
+#[test]
+fn split_point_line_accepts_world_coordinates_and_undo_redo() {
+    let mut doc = Document::with_template_tolerance("split point");
+    let mut entity = Entity::new(
+        "line",
+        Geometry::Curve(om9_core::geometry::Curve::Line {
+            start: [0., 0., 0.],
+            end: [10., 0., 0.],
+            domain: [0., 1.],
+        }),
+        None,
+    );
+    entity.placement = om9_core::geometry::Transform::translation([5., 2., 0.]);
+    let id = entity.id;
+    doc.entities.insert(id, entity);
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.select_objects(&[id]).unwrap();
+    c.submit("Split").unwrap();
+    c.submit("Point").unwrap();
+    assert!(c.submit("W9,3,0").is_err());
+    assert!(c.is_running());
+    c.submit("W9,2,0").unwrap();
+    assert_eq!(c.document().entities.len(), 2);
+    let mut lengths: Vec<f64> = c
+        .document()
+        .entities
+        .values()
+        .map(|e| {
+            let Geometry::Curve(curve) = &e.geometry else {
+                panic!("curve")
+            };
+            om9_core::curve_ops::arc_length(curve, c.coordinator().limits()).unwrap()
+        })
+        .collect();
+    lengths.sort_by(f64::total_cmp);
+    assert!(
+        (lengths[0] - 4.).abs() < 1e-8 && (lengths[1] - 6.).abs() < 1e-8,
+        "{lengths:?}"
+    );
+    assert_eq!(c.coordinator().undo_len(), 1);
+    c.undo().unwrap();
+    assert!(c.document().entities.contains_key(&id));
+    c.redo().unwrap();
+    assert_eq!(c.document().entities.len(), 2);
+}
+
+#[test]
+fn split_point_command_alias_and_cancel_leave_line_intact() {
+    let mut c = controller();
+    let id = draw_line(&mut c, [0.; 3], [10., 0., 0.]);
+    select(&mut c, &[id]);
+    c.submit("Split Point").unwrap();
+    assert_eq!(c.top11_prompt(), Some("pick a point on the line"));
+    c.cancel();
+    assert!(c.document().entities.contains_key(&id));
+    assert_eq!(c.document().entities.len(), 1);
+}
+
+#[test]
+fn split_point_rejects_non_line_without_document_changes() {
+    let mut doc = Document::with_template_tolerance("split circle");
+    let entity = Entity::new(
+        "circle",
+        Geometry::Curve(om9_core::geometry::Curve::Circle {
+            center: [0.; 3],
+            x: [1., 0., 0.],
+            y: [0., 1., 0.],
+            radius: 5.,
+            domain: [0., std::f64::consts::TAU],
+            angle_domain: None,
+        }),
+        None,
+    );
+    let id = entity.id;
+    doc.entities.insert(id, entity);
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.select_objects(&[id]).unwrap();
+    let before = c.document().clone();
+    c.submit("Split").unwrap();
+    assert!(c.submit("Point").is_err());
+    assert_eq!(c.document(), &before);
+    assert_eq!(c.coordinator().undo_len(), 0);
+    assert!(c.is_running());
+}
+
+#[test]
+fn m03_03_08_006_toolbar_has_eleven_actions_and_ring_rail_opens_the_builder() {
     let mut c = controller();
     let states = c.top11_availability();
     assert_eq!(states.len(), 11);
@@ -38,10 +259,21 @@ fn m03_03_08_006_toolbar_has_eleven_actions_and_ring_rail_stays_disabled() {
         .iter()
         .find(|state| state.action == Top11Action::RingRail)
         .unwrap();
-    assert!(!ring.enabled);
-    assert!(ring.reason.contains("M04"));
-    assert!(c.top11_invoke(Top11Action::Duplicate).is_err());
+    // M04 owns the builder now; with no command running the row is available.
+    assert!(ring.enabled);
+    assert!(c.top11_invoke(Top11Action::Duplicate).is_ok());
+    assert!(c.top11_needs_object());
+    c.cancel();
+    let result = c.top11_invoke(Top11Action::RingRail).unwrap();
+    assert!(result.message().contains("Ring Rail"));
+    assert!(c.builder().is_some());
+    let running = c.top11_availability();
+    for state in &running {
+        assert!(!state.enabled, "an open builder must disable the toolbar");
+    }
     assert!(c.top11_invoke(Top11Action::RingRail).is_err());
+    c.builder_cancel();
+    // The line command path still works after the builder closes.
     let id = draw_line(&mut c, [0.0; 3], [10.0, 0.0, 0.0]);
     select(&mut c, &[id]);
     c.submit(LINE).unwrap();

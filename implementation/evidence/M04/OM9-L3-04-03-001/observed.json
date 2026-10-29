@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m04.l3_ring_family_evidence.v1",
+  "l3_id": "OM9-L3-04-03-001",
+  "title": "Eternity Band Builder",
+  "scope": "`ring_builder::build(Eternity)` `ring_builder::stone_frames` `BuilderKind::EternityBand` `RingParams::validate` Handles `diameter`/`width`/`wall`/`stone`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "closed band B-Rep (sewn from the same sections as the mesh) with 12 stone frames and no fabricated gem body",
+  "negative": "zero stones and an impossible stone spacing are typed errors",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the ring builder panel and gestures; no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-04-03-001-03",
+      "OM9-L4-04-03-001-04",
+      "OM9-L4-04-03-001-05",
+      "OM9-L4-04-03-001-07",
+      "OM9-L4-04-03-001-06"
+    ],
+    "fixture_manifest_sha256": "68fe9869a5b742917185218c90bff5d7a255c2f23d84bb32046e9f2bbcf8ebbc"
+  }
+}

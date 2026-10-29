@@ -289,6 +289,81 @@ fn m03_01_09_003() {
 /* ------------------------- 004 pipe ------------------------- */
 
 #[test]
+fn oriented_hemisphere_has_measured_volume_and_bounds() {
+    for forward in [false,true] {
+        let body=creation::hemisphere([3.,4.,5.],[1.,0.,0.],2.,forward,deflection(),&limits()).unwrap();
+        let m=creation::measure(&body,&limits()).unwrap(); assert!(m.closed && m.solids==1);
+        assert!((m.volume_mm3-16.*PI/3.).abs()<1e-6,"{m:?}");
+        let expected=if forward {[3.,5.]} else {[1.,3.]};
+        assert!((m.bounds_mm[0]-expected[0]).abs()<1e-5 && (m.bounds_mm[3]-expected[1]).abs()<1e-5,"{m:?}");
+    }
+    assert!(creation::hemisphere([0.;3],[0.;3],1.,true,deflection(),&limits()).is_err());
+}
+
+#[test]
+fn pipe_miter_polyline_builds_exact_right_angle_tube() {
+    let limits = limits();
+    let path = [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0], [10.0, 10.0, 0.0]];
+    let body = creation::pipe_miter_polyline(&path, 1.0, true, deflection(), &limits).unwrap();
+    assert_volume(&body, 20.0 * PI, 1e-5);
+    let m = creation::measure(&body, &limits).unwrap();
+    assert!(m.closed && m.solids == 1);
+    let shell = creation::pipe_miter_polyline(&path, 1.0, false, deflection(), &limits).unwrap();
+    assert!(!creation::measure(&shell, &limits).unwrap().closed);
+    let reversed = [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
+    assert!(creation::pipe_miter_polyline(&reversed, 1.0, true, deflection(), &limits).is_err());
+}
+
+#[test]
+fn pipe_stations_straight_builds_piecewise_linear_cones() {
+    let limits = limits();
+    let path = [[0.0, 0.0, 0.0], [0.0, 0.0, 10.0]];
+    let stations = [(0.0, 1.0), (0.5, 2.0), (1.0, 3.0)];
+    let brep = creation::pipe_stations_straight(path, &stations, true, deflection(), &limits).unwrap();
+    assert_volume(&brep, PI * 130.0 / 3.0, 1e-5);
+    assert!(creation::measure(&brep, &limits).unwrap().closed);
+    let shell = creation::pipe_stations_straight(path, &stations, false, deflection(), &limits).unwrap();
+    assert!(!creation::measure(&shell, &limits).unwrap().closed);
+    for invalid in [vec![(0.0, 1.0), (0.5, 2.0), (0.5, 3.0), (1.0, 1.0)],
+        vec![(0.1, 1.0), (1.0, 1.0)], vec![(0.0, 1.0), (1.0, 0.0)]] {
+        assert!(creation::pipe_stations_straight(path, &invalid, true, deflection(), &limits).is_err());
+    }
+}
+
+#[test]
+fn round_pipe_straight_conical_body_and_hemispheres_are_exact() {
+    let limits = limits();
+    let path = [[3.0, -2.0, 5.0], [3.0, -2.0, 15.0]];
+    for (r0, r1) in [(1.0, 2.0), (2.0, 1.0), (1.0, 1.0)] {
+        let brep = creation::pipe_round_straight(path, r0, r1, deflection(), &limits).unwrap();
+        let expected = PI * 10.0 * (r0 * r0 + r0 * r1 + r1 * r1) / 3.0
+            + 2.0 * PI * (r0.powi(3) + r1.powi(3)) / 3.0;
+        assert_volume(&brep, expected, 1e-5);
+        let m = creation::measure(&brep, &limits).unwrap();
+        assert!(m.closed && m.solids == 1);
+        assert!(close(m.bounds_mm[2], 5.0 - r0, 1e-5));
+        assert!(close(m.bounds_mm[5], 15.0 + r1, 1e-5));
+    }
+}
+
+#[test]
+fn pipe_linear_straight_frustum_has_exact_volume_and_open_variant() {
+    let limits = limits();
+    let path = [[3.0, -2.0, 5.0], [3.0, -2.0, 15.0]];
+    for (start, end) in [(1.0, 2.0), (2.0, 1.0), (1.0, 1.0)] {
+        let body = creation::pipe_linear(&path, start, end, true, deflection(), &limits).unwrap();
+        assert_volume(&body, PI * 10.0 * (start * start + start * end + end * end) / 3.0, 1e-6);
+        assert!(creation::measure(&body, &limits).unwrap().closed);
+    }
+    let shell = creation::pipe_linear(&path, 1.0, 2.0, false, deflection(), &limits).unwrap();
+    assert!(!creation::measure(&shell, &limits).unwrap().closed);
+    for (start, end) in [(0.0, 1.0), (1.0, -1.0), (f64::NAN, 1.0)] {
+        assert!(creation::pipe_linear(&path, start, end, true, deflection(), &limits).is_err());
+    }
+    assert!(creation::pipe_linear(&[path[0], path[0]], 1.0, 2.0, true, deflection(), &limits).is_err());
+}
+
+#[test]
 fn m03_01_09_004() {
     let limits = limits();
     let pipe = creation::pipe(

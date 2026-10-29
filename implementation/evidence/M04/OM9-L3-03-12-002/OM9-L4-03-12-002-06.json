@@ -1,0 +1,76 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-12-002",
+  "title": "Builder Style Browser And Thumbnail",
+  "generated_at_utc": "2026-10-27T02:48:32Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the Builder Styles window at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "ec0d792345f8e3586284215d9f038505cff4a44be6a95a1080b01b481eef51d7",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "the ring mode lists its three styles with authored thumbnails",
+    "negative": "a corrupt thumbnail falls back to the placeholder and the row stays"
+  },
+  "l4_id": "OM9-L4-03-12-002-06",
+  "role": "ACCEPTANCE",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/builder_style.rs",
+    "crates/om9-app/tests/builder_styles.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2",
+        "the_browser_lists_every_style_for_the_mode_and_disables_the_incompatible"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2d9b1f36a27eabcaddbe30ceb70968a501480f6ff5d3da167f85a66a1ec532b0",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s"
+      ],
+      "test": "the_browser_lists_every_style_for_the_mode_and_disables_the_incompatible",
+      "package": "om9-core",
+      "binary": "builder_style"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2",
+        "the_browser_lists_the_styles_of_the_open_mode"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "aabfb1b81106123a818927e4fa9308d8dd24be68f0d5d3605a4d904aeae0d8c7",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s"
+      ],
+      "test": "the_browser_lists_the_styles_of_the_open_mode",
+      "package": "om9-app",
+      "binary": "builder_styles"
+    }
+  ],
+  "manual_gate_note": "Acceptance And Evidence: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

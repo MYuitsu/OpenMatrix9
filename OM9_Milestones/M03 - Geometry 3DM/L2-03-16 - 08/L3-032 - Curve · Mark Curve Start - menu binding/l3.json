@@ -4,6 +4,247 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-16",
   "title": "Curve · Mark Curve Start — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Single Point",
+        "Multiple Points",
+        "Closest Point",
+        "Drape Points",
+        "Mark Curve Start",
+        "Mark Curve End"
+      ],
+      "option_count": 6
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Curve",
+      "command": "Point Object",
+      "option": "Mark Curve Start",
+      "root_group": false,
+      "path": [
+        "Curve",
+        "Point Object"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "one oriented line from (0,0,0) to (3,4,0), identify start/end by parameter domain",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-16 - 08/L3-032 - Curve · Mark Curve Start - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Single Point",
+        "command_id": "CurvePointObjectSinglePoint",
+        "script": "! _Point",
+        "alt_script": "! _Points",
+        "alt_label": "Multiple Points",
+        "covered_by_l3": "OM9-L3-03-16-031",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Single Point",
+          "typed_forms": [
+            "Single Point"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Multiple Points",
+        "command_id": "CurvePointObjectMultiplePoints",
+        "script": "! _Points",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Multiple Points",
+          "typed_forms": [
+            "Multiple Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Closest Point",
+        "command_id": "CurvePointObjectClosestPoint",
+        "script": "! _ClosestPt",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Closest Point",
+          "typed_forms": [
+            "Closest Point"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Drape Points",
+        "command_id": "CurvePointObjectDrapePoints",
+        "script": "! _DrapePt",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Drape Points",
+          "typed_forms": [
+            "Drape Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Mark Curve Start",
+        "command_id": "CurvePointObjectMarkCurveStart",
+        "script": "! _CrvStart",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-032",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Mark Curve Start",
+          "typed_forms": [
+            "Mark Curve Start"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Mark Curve End",
+        "command_id": "CurvePointObjectMarkCurveEnd",
+        "script": "! _CrvEnd",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-033",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Mark Curve End",
+          "typed_forms": [
+            "Mark Curve End"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Multiple Points",
+      "Closest Point",
+      "Drape Points"
+    ],
+    "missing": [
+      "option:Multiple Points: type/default/range/unit/prompt",
+      "option:Closest Point: type/default/range/unit/prompt",
+      "option:Drape Points: type/default/range/unit/prompt",
+      "input:one oriented line from (0,0,0) to (3,4,0), identify start/end by parameter domain: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-16-032-04"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E05",
@@ -120,13 +361,25 @@
       "depends_on_task_ids": [
         "OM9-L4-03-16-032-02"
       ]
+    },
+    {
+      "id": "OM9-L4-03-16-032-04",
+      "title": "Parameter Implementation — Curve · Mark Curve Start — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-032 - Curve · Mark Curve Start - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-16-032-01",
+        "OM9-L4-03-16-032-02",
+        "OM9-L4-03-16-032-03"
+      ]
     }
   ],
   "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-03-16-032-01",
     "OM9-L4-03-16-032-02",
-    "OM9-L4-03-16-032-03"
+    "OM9-L4-03-16-032-03",
+    "OM9-L4-03-16-032-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -274,10 +527,10 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
-    "date": "2026-10-23",
+    "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
-    "scope": "cataloged command id with verified visible disabled reason; no interactive session yet",
+    "scope": "one cataloged command id shared by the Matrix Curve menu row and the command line, with an interactive Rust session and verified geometry",
     "owner": {
       "crate": "om9-app",
       "files": [
@@ -295,12 +548,12 @@
       "implementation/fixtures/M03/OM9-L3-03-16-032/positive.json",
       "implementation/fixtures/M03/OM9-L3-03-16-032/negative.json",
       "implementation/evidence/M03/OM9-L3-03-16-032/",
-      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json"
+      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json",
+      "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/receipt.json"
     ],
     "tests": [
-      "cargo test -p om9-app --test curve_menu: 4 passed",
-      "Line/Point geometry smoke: passed",
-      "disabled reason catalog: 56 rows verified"
+      "cargo test -p om9-app --test curve_menu: 5 passed (58-row id/icon/label/script/menu-dispatch parity)",
+      "cargo test -p om9-app (curve command regressions): 320 passed, 0 failed"
     ],
     "l4_evidence": {
       "OM9-L4-03-16-032-01": "1/1",
@@ -310,8 +563,16 @@
     "human_approval": null,
     "manual_gate": "M03-UI",
     "remaining": [
-      "No interactive command session yet; the menu is disabled with a visible reason.",
-      "Human M03-UI review is unsigned."
-    ]
+      "Human M03-UI click/preview review is unsigned."
+    ],
+    "menu_binding": {
+      "date": "2026-10-26",
+      "feature": "OM9-CURVE-033",
+      "menu_label": "Mark Curve Start",
+      "menu_icon": "CurvePointObjectMarkCurveStart",
+      "documented_script": "CrvStart",
+      "binding_state": "Implemented",
+      "same_id_menu_and_commandline": true
+    }
   }
 }

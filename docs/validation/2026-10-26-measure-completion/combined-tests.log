@@ -1,0 +1,123 @@
+[rtk] /!\ No hook installed — run `rtk init -g` for automatic token savings
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+   Compiling om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+   Compiling om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+   Compiling om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 00s
+     Running tests\annotation.rs (L:/om9-target\debug\deps\annotation-7e0ce975861f36e5.exe)
+
+running 8 tests
+test all_thirteen_catalog_ids_have_distinct_icons_and_one_dispatcher ... ok
+test session_style_defaults_and_transformed_values_are_observable ... ok
+test scene_displays_independent_dimension_strokes_without_connecting_gaps ... ok
+test diameter_and_radius_use_the_placed_circle_and_keep_source ... ok
+test text_and_leader_edit_text_without_flattening_semantics ... ok
+test edits_options_and_recenter_preserve_identity_and_are_atomic ... ok
+test preview_cancel_invalid_witness_and_native_archive_roundtrip ... ok
+test five_dimension_families_have_independent_value_oracles_and_one_undo ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\command_options_interface.rs (L:/om9-target\debug\deps\command_options_interface-002cd866143f863f.exe)
+
+running 9 tests
+test stale_options_are_refused_and_value_activation_does_not_mutate_owner ... ok
+test line_length_snapshot_uses_the_input_unit_without_rescaling_geometry ... ok
+test line_prompt_carries_its_options_inline ... ok
+test collisions_are_unique_numeric_input_and_paste_are_preserved ... ok
+test accelerators_do_not_repeat_or_interrupt_ime_drafts_and_other_editors ... ok
+test line_repeat_slot_never_leaks_options_into_polyline ... ok
+test fixed_choices_refresh_the_selected_value_on_every_input_route ... ok
+test numeric_options_keep_invalid_draft_and_commit_actual_geometry_once ... ok
+test commands_share_keyboard_pointer_and_typed_activation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.01s
+
+     Running tests\measure.rs (L:/om9-target\debug\deps\measure-e250e9722f9ed10e.exe)
+
+running 5 tests
+test m03_03_20_003_bounding_box_reports_size_and_center ... ok
+test m03_03_20_005_the_label_is_transient_and_never_stale ... ok
+test m03_03_20_001_distance_and_length_report_millimetres ... ok
+test m03_03_20_004_object_summary_counts_types_without_duplicating_definitions ... ok
+test m03_03_20_002_angle_and_radius_report_degrees_and_millimetres ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\measure_extended.rs (L:/om9-target\debug\deps\measure_extended-95f953457a857744.exe)
+
+running 7 tests
+test placed_arc_keeps_its_trim_under_nonuniform_scale ... ok
+test summary_groups_instances_and_counts_only_placed_explicit_carats ... ok
+test dynamic_ortho_and_continuous_distance_are_read_only ... ok
+test radius_on_an_ellipse_is_pointwise_and_a_line_has_no_finite_curvature ... ok
+test isocurve_and_surface_area_use_world_placement ... ok
+test object_distance_uses_trimmed_curves_and_finite_surface_domains ... ok
+test canonical_brep_edges_area_volume_and_object_distance_have_numeric_oracles ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\measure_ui.rs (L:/om9-target\debug\deps\measure_ui-0c8e5c58d16a4407.exe)
+
+running 3 tests
+test the_length_read_out_reaches_the_command_line_without_mutating_the_document ... ok
+test the_measure_palette_icon_dispatches_the_length_read_out ... ok
+test the_distance_prompts_and_final_label_are_the_command_line_state ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
+
+     Running tests\rectangle_regressions.rs (L:/om9-target\debug\deps\rectangle_regressions-b4f591b69c8d8953.exe)
+
+running 5 tests
+test typed_first_and_relative_second_corner_share_the_coordinate_parser ... ok
+test typed_world_corners_ignore_cplane_origin_and_project_off_plane_height ... ok
+test bad_input_and_degenerate_pick_can_retry_then_undo_redo_and_cancel ... ok
+test square_and_fixed_length_keep_the_cursor_side ... ok
+test corners_keep_all_four_drag_directions_in_shifted_and_rotated_cplanes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\transform_corrections.rs (L:/om9-target\debug\deps\transform_corrections-cda138d9bdb2c8dc.exe)
+
+running 6 tests
+test inverse_surface_routines_exist_and_return_measured_projection ... ok
+test blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing ... ok
+test roadlike_follows_the_tangent_and_preserves_cplane_up ... ok
+test setpt_cplane_axes_and_cancel_are_read_only_until_commit ... ok
+test setpt_edits_only_the_requested_control_coordinates_and_keeps_placement ... ok
+test spacing_is_in_mm_and_preserves_the_original_in_one_undo ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\transform_menu.rs (L:/om9-target\debug\deps\transform_menu-d9dceb804f2cfd4f.exe)
+
+running 22 tests
+test m03_04_01_042_every_catalogued_row_is_enabled_or_refused_with_a_reason ... ok
+test m03_04_01_042_catalog_matches_the_authored_menu_features_and_icons ... ok
+test m03_04_01_010_project_to_cplane_lands_objects_from_different_heights ... ok
+test m03_04_01_curve_rows_refuse_a_selection_without_exactly_one_path ... ok
+test m03_04_01_negatives_refuse_without_changing_the_document ... ok
+test m03_04_01_016_orient_perpendicular_to_curve_stands_the_object_on_the_path ... ok
+test m03_04_01_031_scale_by_plane_scales_along_the_plane_normal ... ok
+test m03_04_01_006_orient_three_points_turns_the_selection ... ok
+test m03_04_01_030_set_points_edits_the_selected_point_coordinates ... ok
+test m03_04_01_001_scale_3d_scales_the_box_about_the_base_point ... ok
+test m03_04_01_004_scale_non_uniform_applies_three_factors ... ok
+test m03_04_01_005_orient_two_points_translates_the_selection ... ok
+test m03_04_01_002_scale2d_leaves_the_normal_axis_alone ... ok
+test m03_04_01_007_rotate_3d_turns_ninety_degrees_about_the_cplane_normal ... ok
+test m03_04_01_003_scale1d_grows_only_along_the_cplane_x ... ok
+test m03_04_01_038_remap_maps_the_source_plane_onto_the_cplane ... ok
+test m03_04_01_023_array_linear_spaces_the_copies_along_the_plane_x ... ok
+test m03_04_01_010_project_to_cplane_drops_each_object_onto_the_plane ... ok
+test m03_04_01_022_array_along_curve_spaces_copies_by_arc_length ... ok
+test m03_04_01_009_array_polar_creates_the_requested_count ... ok
+test m03_04_01_menu_click_and_typed_command_run_the_same_body ... ok
+test m03_04_01_026_array_creates_the_requested_grid ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

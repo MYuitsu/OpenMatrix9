@@ -48,7 +48,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Distance=") {
-            let Some(distance) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value != 0.0) else {
+            let Some(distance) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value != 0.0)
+            else {
                 self.offset_curve_pending = Some(pending);
                 return Some(Err(Error::Invalid("offset distance must be non-zero")));
             };
@@ -81,7 +85,11 @@ impl Controller {
         for index in 0..samples.len() {
             let previous = samples[index.saturating_sub(1)];
             let next = samples[(index + 1).min(samples.len() - 1)];
-            let tangent = [next[0] - previous[0], next[1] - previous[1], next[2] - previous[2]];
+            let tangent = [
+                next[0] - previous[0],
+                next[1] - previous[1],
+                next[2] - previous[2],
+            ];
             let mut normal = [
                 tangent[1] * plane_normal[2] - tangent[2] * plane_normal[1],
                 tangent[2] * plane_normal[0] - tangent[0] * plane_normal[2],

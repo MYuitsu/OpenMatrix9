@@ -1,0 +1,109 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+error[E0425]: cannot find function `tangent_sphere_two_curves_point` in this scope
+    --> crates\om9-app\src\session\solid.rs:1686:40
+     |
+1686 |                     let center = match tangent_sphere_two_curves_point(
+     |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `tangent_sphere_three_curves` in this scope
+    --> crates\om9-app\src\session\solid.rs:1716:40
+     |
+1716 |                     let center = match tangent_sphere_three_curves(
+     |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `tangent_sphere_two_curves` in this scope
+    --> crates\om9-app\src\session\solid.rs:1743:40
+     |
+1743 |                     let center = match tangent_sphere_two_curves(
+     |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `tangent_sphere_curve_two_points` in this scope
+    --> crates\om9-app\src\session\solid.rs:1765:44
+     |
+1765 |                         let center = match tangent_sphere_curve_two_points(
+     |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `tangent_sphere_curve_point` in this scope
+    --> crates\om9-app\src\session\solid.rs:1798:40
+     |
+1798 |                     let center = match tangent_sphere_curve_point(
+     |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0599]: no method named `fit_sphere_points` found for mutable reference `&mut session::Controller` in the current scope
+    --> crates\om9-app\src\session\solid.rs:1954:38
+     |
+1954 |                     return Some(self.fit_sphere_points(&points));
+     |                                      ^^^^^^^^^^^^^^^^^
+     |
+help: there is a method `solid_sphere_points` with a similar name, but with different arguments
+    --> crates\om9-app\src\session\solid.rs:2460:5
+     |
+2460 | /     fn solid_sphere_points(
+2461 | |         &mut self,
+2462 | |         _center: om9_core::geometry::Point3,
+2463 | |         _radius: f64,
+2464 | |     ) -> Result<()> {
+     | |___________________^
+
+error[E0599]: no method named `solid_box_dimensions` found for mutable reference `&mut session::Controller` in the current scope
+    --> crates\om9-app\src\session\solid.rs:2082:38
+     |
+2082 |                     return Some(self.solid_box_dimensions(center, length, width, height));
+     |                                      ^^^^^^^^^^^^^^^^^^^^
+     |
+help: there is a method `solid_box_points` with a similar name, but with different arguments
+    --> crates\om9-app\src\session\solid.rs:2470:5
+     |
+2470 | /     pub fn solid_box_points(
+2471 | |         &mut self,
+2472 | |         _first: om9_core::geometry::Point3,
+2473 | |         _second: om9_core::geometry::Point3,
+...    |
+2476 | |         _width: Option<f64>,
+2477 | |     ) -> Result<()> {
+     | |___________________^
+
+error[E0599]: no method named `accept_sphere_point` found for mutable reference `&mut session::Controller` in the current scope
+    --> crates\om9-app\src\session.rs:4030:25
+     |
+4030 |             return self.accept_sphere_point(point);
+     |                         ^^^^^^^^^^^^^^^^^^^
+     |
+help: there is a method `accept_interp_point` with a similar name
+     |
+4030 -             return self.accept_sphere_point(point);
+4030 +             return self.accept_interp_point(point);
+     |
+
+error[E0599]: no method named `solid_box_dimensions` found for mutable reference `&mut session::Controller` in the current scope
+    --> crates\om9-app\src\session.rs:4046:25
+     |
+4046 |             return self.solid_box_dimensions(
+     |                    -----^^^^^^^^^^^^^^^^^^^^
+     |
+help: there is a method `solid_box_points` with a similar name, but with different arguments
+    --> crates\om9-app\src\session\solid.rs:2470:5
+     |
+2470 | /     pub fn solid_box_points(
+2471 | |         &mut self,
+2472 | |         _first: om9_core::geometry::Point3,
+2473 | |         _second: om9_core::geometry::Point3,
+...    |
+2476 | |         _width: Option<f64>,
+2477 | |     ) -> Result<()> {
+     | |___________________^
+
+error[E0599]: no method named `box_height_ray_point` found for struct `session::Controller` in the current scope
+    --> crates\om9-app\src\ui.rs:3288:58
+     |
+3288 |                     if let Some(point) = self.controller.box_height_ray_point(&ray) {
+     |                                                          ^^^^^^^^^^^^^^^^^^^^ method not found in `session::Controller`
+     |
+    ::: crates\om9-app\src\session.rs:362:1
+     |
+ 362 | pub struct Controller {
+     | --------------------- method `box_height_ray_point` not found for this struct
+
+Some errors have detailed explanations: E0425, E0599.
+For more information about an error, try `rustc --explain E0425`.
+error: could not compile `om9-app` (lib) due to 10 previous errors

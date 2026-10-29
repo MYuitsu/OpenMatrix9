@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --test builder_style -j 2 matching_attributes_copies_only_the_declared_attributes_and_keeps_the_identity
+# exit code: 0
+# captured: 2026-10-27T02:48:45Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test matching_attributes_copies_only_the_declared_attributes_and_keeps_the_identity ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)
+
+$ cargo test -p om9-app --test builder_styles -j 2 matching_attributes_copies_from_the_selection_and_keeps_the_ids
+# exit code: 0
+# captured: 2026-10-27T02:48:46Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test matching_attributes_copies_from_the_selection_and_keeps_the_ids ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests\builder_styles.rs (L:\om9-target\debug\deps\builder_styles-c54c9038cd98df6e.exe)

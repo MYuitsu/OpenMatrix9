@@ -640,7 +640,7 @@ fn is_rigid(placement: Transform) -> bool {
 }
 
 /// Inverse of a rigid placement (orthonormal rotation/reflection plus translation).
-fn inverse_affine(placement: Transform) -> Result<Transform> {
+pub fn inverse_affine(placement: Transform) -> Result<Transform> {
     placement.validate()?;
     let m = placement.0;
     let determinant = m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
@@ -676,36 +676,36 @@ fn affine_circle(
     x: Point3,
     y: Point3,
     radius: f64,
+    angles: [f64; 2],
     placement: Transform,
 ) -> Result<Curve> {
-    let half = std::f64::consts::FRAC_1_SQRT_2;
-    let unit = [
-        [1.0, 0.0],
-        [1.0, 1.0],
-        [0.0, 1.0],
-        [-1.0, 1.0],
-        [-1.0, 0.0],
-        [-1.0, -1.0],
-        [0.0, -1.0],
-        [1.0, -1.0],
-        [1.0, 0.0],
-    ];
-    let mut poles = Vec::with_capacity(unit.len());
-    for [cos, sin] in unit {
-        let point = [
-            center[0] + radius * (cos * x[0] + sin * y[0]),
-            center[1] + radius * (cos * x[1] + sin * y[1]),
-            center[2] + radius * (cos * x[2] + sin * y[2]),
-        ];
-        poles.push(placement.point(point)?);
+    let span = angles[1] - angles[0];
+    if !span.is_finite() || span <= 0. || span > std::f64::consts::TAU + 1e-10 {
+        return Err(Error::Invalid("affine arc angular domain"));
     }
+    let segments = (span / std::f64::consts::FRAC_PI_2).ceil() as usize;
+    let mut poles = Vec::with_capacity(segments * 2 + 1);
+    let mut weights = Vec::with_capacity(segments * 2 + 1);
+    let mut knots = vec![0., 0., 0.];
+    for i in 0..segments {
+        let a = angles[0] + span * i as f64 / segments as f64;
+        let b = angles[0] + span * (i + 1) as f64 / segments as f64;
+        let weight = ((b - a) * 0.5).cos();
+        for (angle, w) in [(a, 1.), ((a + b) * 0.5, weight), (b, 1.)].into_iter().skip(usize::from(i > 0)) {
+            let point = std::array::from_fn(|axis| center[axis] + radius * (angle.cos() * x[axis] + angle.sin() * y[axis]) / w);
+            poles.push(placement.point(point)?);
+            weights.push(w);
+        }
+        if i + 1 < segments {
+            knots.extend([ (i + 1) as f64 / segments as f64; 2]);
+        }
+    }
+    knots.extend([1., 1., 1.]);
     let curve = NurbsCurve {
         degree: 2,
         poles,
-        weights: vec![1.0, half, 1.0, half, 1.0, half, 1.0, half, 1.0],
-        knots: vec![
-            0.0, 0.0, 0.0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1.0, 1.0, 1.0,
-        ],
+        weights,
+        knots,
         domain: [0.0, 1.0],
         periodic: false,
         reversed: false,
@@ -736,7 +736,7 @@ fn transform_normal(placement: Transform, normal: Point3) -> Result<Point3> {
     unit(out)
 }
 
-fn bake_curve(curve: &Curve, placement: Transform) -> Result<Curve> {
+pub fn bake_curve(curve: &Curve, placement: Transform) -> Result<Curve> {
     let vector = |v: Point3| -> Result<Point3> {
         let mut out = [0.0; 3];
         for (row, value) in out.iter_mut().enumerate() {
@@ -779,7 +779,7 @@ fn bake_curve(curve: &Curve, placement: Transform) -> Result<Curve> {
                     angle_domain: *angle_domain,
                 }
             } else {
-                affine_circle(*center, *x, *y, *radius, placement)?
+                affine_circle(*center, *x, *y, *radius, angle_domain.unwrap_or(*domain), placement)?
             }
         }
         Curve::Nurbs(nurbs) => {
@@ -805,7 +805,13 @@ fn bake_curve(curve: &Curve, placement: Transform) -> Result<Curve> {
     })
 }
 
-fn bake_geometry(geometry: &Geometry, placement: Transform, limits: &Limits) -> Result<Geometry> {
+/// The geometry with the placement applied, so callers that work in world space (mirror,
+/// deformers) can write one Geometry mutation back into the object's own frame.
+pub fn bake_geometry(
+    geometry: &Geometry,
+    placement: Transform,
+    limits: &Limits,
+) -> Result<Geometry> {
     geometry.validate(limits)?;
     Ok(match geometry {
         Geometry::Point(point) => Geometry::Point(placement.point(*point)?),

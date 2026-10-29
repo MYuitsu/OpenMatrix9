@@ -1,0 +1,28 @@
+$ cargo test -p om9-app --test gem_placement -j 2
+# exit code: 0
+# captured: 2026-10-27T13:44:53Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 16 tests
+test a_wrong_selection_is_a_typed_refusal_and_opens_nothing ... ok
+test an_option_the_tool_does_not_use_is_a_typed_refusal ... ok
+test cancel_drops_the_session_and_leaves_no_phantom ... ok
+test the_links_report_and_the_typed_command_reach_the_same_service ... ok
+test the_list_tool_places_heterogeneous_stones_in_order ... ok
+test the_surface_tool_stands_the_gem_on_the_surface_normal ... ok
+test count_places_an_exact_number_of_stones_between_the_range_ends ... ok
+test splop_projects_a_gem_onto_a_surface_and_records_the_uv_link ... ok
+test the_multi_tool_places_one_run_per_curve_in_one_transaction ... ok
+test the_advanced_tool_tapers_the_row_from_the_start_size_to_the_end_size ... ok
+test flow_carries_surface_stones_onto_another_surface ... ok
+test flow_carries_the_same_stones_onto_a_target_curve ... ok
+test the_count_tool_fits_the_row_between_the_curve_ends ... ok
+test follow_marks_gems_whose_source_is_gone_as_conflicts_instead_of_moving_them ... ok
+test the_row_previews_without_an_object_and_applies_in_one_transaction ... ok
+test profile_and_guides_insert_construction_curves ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running tests\gem_placement.rs (cargo-target\debug\deps\gem_placement-6deb83edeedfcaef.exe)

@@ -1,0 +1,44 @@
+$ cargo test -p om9-app --test settings_commands -j 2
+
+--- stdout ---
+
+running 24 tests
+test every_icon_alias_resolves_to_its_own_feature ... ok
+test a_command_without_a_gem_selection_is_refused ... ok
+test pull_to_rail_needs_a_selected_circle_rail ... ok
+test the_editor_refuses_a_non_prong_selection ... ok
+test metal_piece_border_without_a_border_is_refused ... ok
+test metal_piece_curve_mode_without_a_border_is_refused ... ok
+test the_prong_builder_stages_the_documented_option_row ... ok
+test metal_piece_top_mode_stages_a_cutter_and_commits_bodies ... ok
+test prong_on_surface_stages_from_a_surface_and_commits_one_prong ... ok
+test the_channel_border_commits_two_guide_curves ... ok
+test metal_piece_curve_mode_uses_the_picked_curve ... ok
+test pull_to_rail_moves_a_selected_mesh_onto_the_rail ... ok
+test a_refused_bead_count_keeps_the_staged_command ... ok
+test cutter_features_stay_out_of_the_mass ... ok
+test bead_on_surface_places_one_bead_on_the_picked_uv ... ok
+test settings_mass_reports_grams_from_the_committed_features ... ok
+test a_refused_option_keeps_the_command_and_its_last_preview ... ok
+test the_icon_stages_a_prong_set_and_enter_commits_one_body_per_prong ... ok
+test an_option_changes_the_preview_before_the_commit ... ok
+test metal_piece_can_follow_a_committed_channel_border ... ok
+test metal_piece_curve_mode_uses_the_committed_border ... ok
+test the_editor_edits_a_committed_prong_in_place ... ok
+test bead_on_curve_commits_the_run_along_the_selected_curve ... ok
+test bead_count_drives_the_run_and_spacing_returns_to_auto ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+
+--- stderr ---
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+   Compiling om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+   Compiling om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+   Compiling om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+   Compiling om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 39.80s
+     Running tests\settings_commands.rs (cargo-target\debug\deps\settings_commands-dc6dacb0cec76730.exe)

@@ -1,0 +1,61 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-04-19-002",
+  "reviewer": {
+    "name": "OM9 automated evidence gate",
+    "role": "automated acceptance; no human signature",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "ACCEPTED_BY_AUTOMATED_EVIDENCE",
+  "approved_at_utc": "2026-10-27T07:12:44Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "synthetic_material (10.0 g/cm^3, test-only) resolves with provenance and the 1/1000 mm^3-to-cm^3 factor; built-in 18k yellow gold carries a nominal density and a 1% uncertainty Negative: a missing id, blank id, negative density, a kg/m^3 value entered as g/cm^3 (15500) and a blank provenance are refused",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/api.md",
+      "sha256": "d66db331f964c3c7c786f625864aea83b31e58e22c2c06c21b653eb7b60c547e",
+      "bytes": 812
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/negative.json",
+      "sha256": "9efad28e61128b7137afcbd2f6931f62855bfaa75939a732e1079ff7b5d3ec40",
+      "bytes": 464
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/OM9-L4-04-19-002-03.json",
+      "sha256": "1599415b105a9f4360ca1fb40c5f35368a59935ecc7ef61bab328573bee449d1",
+      "bytes": 3420
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/OM9-L4-04-19-002-04.json",
+      "sha256": "f1f849a762833e48ae0a36c281656b8457599dc8f7130ec254ff7a47e0b6308f",
+      "bytes": 3417
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/OM9-L4-04-19-002-05.json",
+      "sha256": "7f81edcf63c21d00f77202f95db135444fb33495c6839c6c52fbdc29fa18a426",
+      "bytes": 3417
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/OM9-L4-04-19-002-06.json",
+      "sha256": "0a42b7408a735cc47d3216103cd05cfae6cdcfe7ae6724b19a86af9fe83195ed",
+      "bytes": 3413
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/positive.json",
+      "sha256": "fadf3c1fdadac94219b1b22245922758e155b4d467d0c4db0eaff1d6f2d85697",
+      "bytes": 873
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/README.md",
+      "sha256": "c69061266994a36f933db1345ab6c309fc3b1978600be46b9b763018b20d8509",
+      "bytes": 1409
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-002/source_crosswalk.json",
+      "sha256": "10cce2ee16b73f37a6abe0a7f3febf8f09f4c17e7dcc6b5d051caa9d4323e361",
+      "bytes": 1159
+    }
+  ],
+  "note": "Generated from the passing receipts. The L3 plan sets manual_test_gate AUTO_ONLY; this record is not a human signature and does not approve a manual builder-panel review."
+}

@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-009",
+  "title": "Rail And Profile Viewport Handles",
+  "generated_at_utc": "2026-10-27T04:25:55Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "42f2bd2dddc6f8962fbec53d5fe38c6d30f223ca903a07f5b5385bc26e6690e2",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "the RailProfile builder exposes width, height and position handles; adjusting width by +1 mm reports 3.00 x 1.50 in the panel and one Apply inserts one entity and one recipe",
+    "negative": "Cancel after a drag inserts nothing; an invalid or locked drag is refused before the model changes"
+  },
+  "l4_id": "OM9-L4-04-02-009-04",
+  "role": "INTEGRATE",
+  "kind": "integration",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-core/tests/builder_session.rs",
+    "crates/om9-app/tests/ring_tools.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_rail_profile_handles_edit_width_and_commit_exactly_once"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "f39a0ff57cb809f54490af06ad483049ff2ea94f72976cca7519e28c890a41fa",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_rail_profile_handles_edit_width_and_commit_exactly_once",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2",
+        "a_rail_profile_builder_reads_the_selected_rail_and_exposes_two_handles"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "7ef570202fa73354aeb5ff546630b0d1e49edd9f2cb9fbcb199109afd9606056",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "a_rail_profile_builder_reads_the_selected_rail_and_exposes_two_handles",
+      "package": "om9-core",
+      "binary": "builder_session"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

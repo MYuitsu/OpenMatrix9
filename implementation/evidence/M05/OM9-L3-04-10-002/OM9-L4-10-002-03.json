@@ -1,0 +1,60 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-10-002",
+  "l4_id": "OM9-L4-10-002-03",
+  "title": "Gem On Curve Advanced",
+  "generated_at_utc": "2026-10-27T13:45:01Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "M05-UI",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the placement command at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "9f6e9f49324d6b512ea125c39d06d0b9f18b09c4381d70326ad8539aaf2df159",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "monotonic variable-diameter row between the two requested sizes",
+    "negative": "bad sizes and mismatched spec lists are typed refusals"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_placement.rs",
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/src/session/gem_placement.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/tests/gem_placement.rs",
+    "tools/record_m05_l2_04_10_gem_placement.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_placement",
+        "-j",
+        "2",
+        "the_advanced_tool_tapers_the_row_from_the_start_size_to_the_end_size"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "61e42d52fe9c27fc0caf243418d7e68d6227cbb2784e0a239ef9d8400b94ed83",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.04s"
+      ],
+      "test": "the_advanced_tool_tapers_the_row_from_the_start_size_to_the_end_size",
+      "package": "om9-app",
+      "binary": "gem_placement"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-13-003",
+  "title": "Matrix History Broken Link Report",
+  "owner": "om9-app Controller history API over om9-core HistoryGraph",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/history_ops.rs",
+      "symbols": [
+        "BrokenLink",
+        "broken_links"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/history.rs",
+      "symbols": [
+        "Controller::history_entries",
+        "Controller::history_broken_links"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "symbols": [
+        "MatrixApp::history_window_ui"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "broken_links reports the recipe id, command, state, missing input roles, changed input roles and the matching source object ids; a Clean recipe with intact bindings never appears.",
+    "The History window shows the recipe id, the detail (`missing input <role> (source <id>)` or `stale: <reason>`) and the Edit/Clear remediation; nothing is repaired silently.",
+    "Dirty/Unresolved/Failed rows are warnings too, so a parameter edit with update off (or a source revision change) is visible without being called missing.",
+    "The row is derived from the graph, not cached UI state, so a reopen re-reports the phantom reference."
+  ]
+}

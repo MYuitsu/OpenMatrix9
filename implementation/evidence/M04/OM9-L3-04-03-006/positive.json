@@ -1,0 +1,12 @@
+{
+  "expect": {
+    "same_object": true,
+    "undo": "18 mm volume",
+    "volume": "grows"
+  },
+  "steps": [
+    "signet 18 mm applied",
+    "reopen and set diameter 19 mm",
+    "apply update"
+  ]
+}

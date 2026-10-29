@@ -1,0 +1,1706 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-26",
+  "scope": "Read-only source inventory for a documentation-only handoff. Token declarations and pending fields do not prove runtime completion.",
+  "existing_option_group_count": 39,
+  "registered_provider_count": 37,
+  "controller_pending_field_count": 57,
+  "additional_pending_owner_count": 19,
+  "groups": [
+    {
+      "owner": "solid",
+      "source": "crates/om9-app/src/session/solid.rs",
+      "provider": "solid_option_tokens",
+      "line": 1158,
+      "pending_field": "solid_pending",
+      "feature_constants": [],
+      "tokens": [
+        {
+          "label": "Point",
+          "payload": "Point",
+          "value_entry": false
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        },
+        {
+          "label": "Center",
+          "payload": "Mode=Center",
+          "value_entry": false
+        },
+        {
+          "label": "2Point",
+          "payload": "Mode=2Point",
+          "value_entry": false
+        },
+        {
+          "label": "3Point",
+          "payload": "Mode=3Point",
+          "value_entry": false
+        },
+        {
+          "label": "4Point",
+          "payload": "Mode=4Point",
+          "value_entry": false
+        },
+        {
+          "label": "Vertical",
+          "payload": "Mode=Vertical",
+          "value_entry": false
+        },
+        {
+          "label": "AroundCurve",
+          "payload": "Mode=AroundCurve",
+          "value_entry": false
+        },
+        {
+          "label": "FitPoints",
+          "payload": "Mode=FitPoints",
+          "value_entry": false
+        },
+        {
+          "label": "Tangent",
+          "payload": "Mode=Tangent",
+          "value_entry": false
+        },
+        {
+          "label": "Solution=1",
+          "payload": "Solution=1",
+          "value_entry": false
+        },
+        {
+          "label": "Solution=2",
+          "payload": "Solution=2",
+          "value_entry": false
+        },
+        {
+          "label": "Radius=",
+          "payload": "Radius=",
+          "value_entry": true
+        },
+        {
+          "label": "Diameter=",
+          "payload": "Diameter=",
+          "value_entry": true
+        },
+        {
+          "label": "Diagonal",
+          "payload": "Mode=Diagonal",
+          "value_entry": false
+        },
+        {
+          "label": "Cube",
+          "payload": "Mode=Cube",
+          "value_entry": false
+        },
+        {
+          "label": "Length=",
+          "payload": "Length=",
+          "value_entry": true
+        },
+        {
+          "label": "Width=",
+          "payload": "Width=",
+          "value_entry": true
+        },
+        {
+          "label": "Height=",
+          "payload": "Height=",
+          "value_entry": true
+        }
+      ],
+      "availability_source": "fn solid_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.solid_pending.as_ref() else {\n            return Vec::new();\n        };\n        if pending.sphere_mode {\n            if pending.sphere_kind == \"Tangent\"\n                && pending.sphere_curve.is_empty()\n                && pending.points.is_empty()\n                && pending.sphere_center.is_none()\n            {\n                return vec![\n                    (\"Point\", \"Point\"),\n                    (\"Undo\", \"Undo\"),\n                    (\"Cancel\", \"Cancel\"),\n                ];\n            }\n            if matches!(\n                pending.sphere_kind,\n                \"AroundCurve\" | \"Tangent\" | \"Tangent2\" | \"Tangent3\"\n            ) && !pending.sphere_curve.is_empty()\n                && pending.points.is_empty()\n                && pending.sphere_center.is_none()\n            {\n                if matches!(pending.sphere_kind, \"Tangent\" | \"Tangent2\") {\n                    return vec![\n                        (\"Point\", \"Point\"),\n                        (\"Undo\", \"Undo\"),\n                        (\"Cancel\", \"Cancel\"),\n                    ];\n                }\n                return vec![(\"Undo\", \"Undo\"), (\"Cancel\", \"Cancel\")];\n            }\n            if pending.points.is_empty() && pending.sphere_center.is_none() {\n                return vec![\n                    (\"Center\", \"Mode=Center\"),\n                    (\"2Point\", \"Mode=2Point\"),\n                    (\"3Point\", \"Mode=3Point\"),\n                    (\"4Point\", \"Mode=4Point\"),\n                    (\"Vertical\", \"Mode=Vertical\"),\n                    (\"AroundCurve\", \"Mode=AroundCurve\"),\n                    (\"FitPoints\", \"Mode=FitPoints\"),\n                    (\"Tangent\", \"Mode=Tangent\"),\n                    (\"Cancel\", \"Cancel\"),\n                ];\n            }\n            let mut tokens = Vec::new();\n            if (pending.sphere_kind == \"TangentPoint\" && pending.points.len() >= 2)\n                || (pending.sphere_kind == \"Tangent\" && pending.sphere_center.is_some())\n            {\n                tokens.push((\"Solution=1\", \"Solution=1\"));\n                tokens.push((\"Solution=2\", \"Solution=2\"));\n            }\n            tokens.push((\"Radius=\", \"Radius=\"));\n            tokens.push((\"Diameter=\", \"Diameter=\"));\n            tokens.push((\"Undo\", \"Undo\"));\n            tokens.push((\"Cancel\", \"Cancel\"));\n            return tokens;\n        }\n        if !pending.box_mode {\n            return Vec::new();\n        }\n        if pending.points.is_empty() {\n            return vec![\n                (\"Diagonal\", \"Mode=Diagonal\"),\n                (\"3Point\", \"Mode=3Point\"),\n                (\"Vertical\", \"Mode=Vertical\"),\n                (\"Center\", \"Mode=Center\"),\n                (\"Cube\", \"Mode=Cube\"),\n                (\"Cancel\", \"Cancel\"),\n            ];\n        }\n        let mut tokens = Vec::new();\n        if pending.points.len() == 1 && pending.box_kind == \"Diagonal\" {\n            tokens.push((\"Cube\", \"Mode=Cube\"));\n        }\n        if !pending.points.is_empty() {\n            if pending.box_kind == \"Center\" && pending.points.len() == 1 {\n                tokens.push((\"Length=\", \"Length=\"));\n            }\n            tokens.push((\"Width=\", \"Width=\"));\n            tokens.push((\"Height=\", \"Height=\"));\n        }\n        tokens.push((\"Undo\", \"Undo\"));\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "circle",
+      "source": "crates/om9-app/src/session/circle.rs",
+      "provider": "circle_option_tokens",
+      "line": 592,
+      "pending_field": "circle_pending",
+      "feature_constants": [
+        {
+          "constant": "CIRCLE",
+          "value": "OM9-CURVE-005"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Center",
+          "payload": "Center",
+          "value_entry": false
+        },
+        {
+          "label": "2Point",
+          "payload": "2Point",
+          "value_entry": false
+        },
+        {
+          "label": "3Point",
+          "payload": "3Point",
+          "value_entry": false
+        },
+        {
+          "label": "Vertical",
+          "payload": "Vertical",
+          "value_entry": false
+        },
+        {
+          "label": "FitPoints",
+          "payload": "FitPoints",
+          "value_entry": false
+        },
+        {
+          "label": "AroundCurve",
+          "payload": "AroundCurve",
+          "value_entry": false
+        },
+        {
+          "label": "Tangent",
+          "payload": "Tangent",
+          "value_entry": false
+        },
+        {
+          "label": "Deformable",
+          "payload": "Deformable",
+          "value_entry": false
+        },
+        {
+          "label": "Approx",
+          "payload": "Approx",
+          "value_entry": false
+        },
+        {
+          "label": "Degree=",
+          "payload": "Degree=",
+          "value_entry": true
+        },
+        {
+          "label": "PointCount=",
+          "payload": "PointCount=",
+          "value_entry": true
+        },
+        {
+          "label": "Radius=",
+          "payload": "Radius=",
+          "value_entry": true
+        },
+        {
+          "label": "Point=",
+          "payload": "Point=",
+          "value_entry": true
+        },
+        {
+          "label": "Solution=",
+          "payload": "Solution=",
+          "value_entry": true
+        },
+        {
+          "label": "OnCurve=",
+          "payload": "OnCurve=",
+          "value_entry": true
+        },
+        {
+          "label": "Size=Diameter",
+          "payload": "Size=Diameter",
+          "value_entry": false
+        },
+        {
+          "label": "Size=Circumference",
+          "payload": "Size=Circumference",
+          "value_entry": false
+        },
+        {
+          "label": "Size=Area",
+          "payload": "Size=Area",
+          "value_entry": false
+        },
+        {
+          "label": "Diameter=",
+          "payload": "Diameter=",
+          "value_entry": true
+        },
+        {
+          "label": "Circumference=",
+          "payload": "Circumference=",
+          "value_entry": true
+        },
+        {
+          "label": "Area=",
+          "payload": "Area=",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn circle_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.circle_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = vec![\n            (\"Center\", \"Center\"),\n            (\"2Point\", \"2Point\"),\n            (\"3Point\", \"3Point\"),\n            (\"Vertical\", \"Vertical\"),\n            (\"FitPoints\", \"FitPoints\"),\n            (\"AroundCurve\", \"AroundCurve\"),\n            (\"Tangent\", \"Tangent\"),\n        ];\n        tokens.push((\"Deformable\", \"Deformable\"));\n        tokens.push((\"Approx\", \"Approx\"));\n        if pending.deformable {\n            tokens.push((\"Degree=\", \"Degree=\"));\n            tokens.push((\"PointCount=\", \"PointCount=\"));\n        }\n        if pending.mode == \"Tangent\" {\n            tokens.push((\"Radius=\", \"Radius=\"));\n            tokens.push((\"Point=\", \"Point=\"));\n            tokens.push((\"Solution=\", \"Solution=\"));\n        }\n        if pending.points.is_empty() && pending.mode == \"AroundCurve\" {\n            tokens.push((\"OnCurve=\", \"OnCurve=\"));\n        }\n        if pending.points.len() == 1 && pending.mode == \"Center\" {\n            tokens.push((\"Size=Diameter\", \"Size=Diameter\"));\n            tokens.push((\"Size=Circumference\", \"Size=Circumference\"));\n            tokens.push((\"Size=Area\", \"Size=Area\"));\n            tokens.push((\"Radius=\", \"Radius=\"));\n            tokens.push((\"Diameter=\", \"Diameter=\"));\n            tokens.push((\"Circumference=\", \"Circumference=\"));\n            tokens.push((\"Area=\", \"Area=\"));\n        }\n        if !pending.points.is_empty() {\n            tokens.push((\"Undo\", \"Undo\"));\n        }\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "rect",
+      "source": "crates/om9-app/src/session/rect.rs",
+      "provider": "rect_option_tokens",
+      "line": 372,
+      "pending_field": "rect_pending",
+      "feature_constants": [
+        {
+          "constant": "RECTANGLE",
+          "value": "OM9-CURVE-004"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Square",
+          "payload": "Square",
+          "value_entry": false
+        },
+        {
+          "label": "Length=",
+          "payload": "Length=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        },
+        {
+          "label": "Center",
+          "payload": "Center",
+          "value_entry": false
+        },
+        {
+          "label": "3Point",
+          "payload": "3Point",
+          "value_entry": false
+        },
+        {
+          "label": "Vertical",
+          "payload": "Vertical",
+          "value_entry": false
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn rect_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.rect_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = vec![\n            (\"Square\", \"Square\"),\n            (\"Length=\", \"Length=\"),\n            (\"Cancel\", \"Cancel\"),\n        ];\n        if pending.points.is_empty() {\n            tokens.insert(0, (\"Center\", \"Center\"));\n            tokens.insert(0, (\"3Point\", \"3Point\"));\n            tokens.insert(0, (\"Vertical\", \"Vertical\"));\n        }\n        if !pending.points.is_empty() {\n            tokens.insert(0, (\"Undo\", \"Undo\"));\n        }\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "interp",
+      "source": "crates/om9-app/src/session/interp.rs",
+      "provider": "interp_option_tokens",
+      "line": 117,
+      "pending_field": "interp_pending",
+      "feature_constants": [
+        {
+          "constant": "INTERP",
+          "value": "OM9-CURVE-003"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Degree=",
+          "payload": "Degree=",
+          "value_entry": true
+        },
+        {
+          "label": "Close",
+          "payload": "Close",
+          "value_entry": false
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn interp_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.interp_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = vec![(\"Degree=\", \"Degree=\")];\n        if pending.points.len() >= 4 {\n            tokens.push((\"Close\", \"Close\"));\n        }\n        if !pending.points.is_empty() {\n            tokens.push((\"Undo\", \"Undo\"));\n        }\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "ellipse",
+      "source": "crates/om9-app/src/session/ellipse.rs",
+      "provider": "ellipse_option_tokens",
+      "line": 510,
+      "pending_field": "ellipse_pending",
+      "feature_constants": [
+        {
+          "constant": "ELLIPSE",
+          "value": "OM9-CURVE-006"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Center",
+          "payload": "Center",
+          "value_entry": false
+        },
+        {
+          "label": "Corner",
+          "payload": "Corner",
+          "value_entry": false
+        },
+        {
+          "label": "Diameter",
+          "payload": "Diameter",
+          "value_entry": false
+        },
+        {
+          "label": "Vertical",
+          "payload": "Vertical",
+          "value_entry": false
+        },
+        {
+          "label": "FromFoci",
+          "payload": "FromFoci",
+          "value_entry": false
+        },
+        {
+          "label": "AroundCurve",
+          "payload": "AroundCurve",
+          "value_entry": false
+        },
+        {
+          "label": "OnCurve=",
+          "payload": "OnCurve=",
+          "value_entry": true
+        },
+        {
+          "label": "MarkFoci",
+          "payload": "MarkFoci",
+          "value_entry": false
+        },
+        {
+          "label": "Deformable",
+          "payload": "Deformable",
+          "value_entry": false
+        },
+        {
+          "label": "Approx",
+          "payload": "Approx",
+          "value_entry": false
+        },
+        {
+          "label": "Degree=",
+          "payload": "Degree=",
+          "value_entry": true
+        },
+        {
+          "label": "PointCount=",
+          "payload": "PointCount=",
+          "value_entry": true
+        },
+        {
+          "label": "RadiusX=",
+          "payload": "RadiusX=",
+          "value_entry": true
+        },
+        {
+          "label": "RadiusY=",
+          "payload": "RadiusY=",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn ellipse_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.ellipse_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = Vec::new();\n        if pending.points.is_empty() && pending.center.is_none() {\n            tokens.extend([\n                (\"Center\", \"Center\"),\n                (\"Corner\", \"Corner\"),\n                (\"Diameter\", \"Diameter\"),\n                (\"Vertical\", \"Vertical\"),\n                (\"FromFoci\", \"FromFoci\"),\n                (\"AroundCurve\", \"AroundCurve\"),\n            ]);\n        }\n        if pending.mode == \"AroundCurve\" && pending.center.is_none() {\n            tokens.push((\"OnCurve=\", \"OnCurve=\"));\n        }\n        if pending.mode == \"FromFoci\" || pending.center.is_some() {\n            tokens.push((\"MarkFoci\", \"MarkFoci\"));\n        }\n        tokens.push((\"Deformable\", \"Deformable\"));\n        tokens.push((\"Approx\", \"Approx\"));\n        if pending.deformable {\n            tokens.push((\"Degree=\", \"Degree=\"));\n            tokens.push((\"PointCount=\", \"PointCount=\"));\n        }\n        if pending.center.is_some() {\n            tokens.push((\"RadiusX=\", \"RadiusX=\"));\n            tokens.push((\"RadiusY=\", \"RadiusY=\"));\n        }\n        if pending.center.is_some() || !pending.points.is_empty() {\n            tokens.push((\"Undo\", \"Undo\"));\n        }\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "arc",
+      "source": "crates/om9-app/src/session/arc.rs",
+      "provider": "arc_option_tokens",
+      "line": 200,
+      "pending_field": "arc_pending",
+      "feature_constants": [
+        {
+          "constant": "ARC",
+          "value": "OM9-CURVE-007"
+        },
+        {
+          "constant": "ARC_START",
+          "value": "OM9-CURVE-008"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "3Point",
+          "payload": "3Point",
+          "value_entry": false
+        },
+        {
+          "label": "Center",
+          "payload": "Center",
+          "value_entry": false
+        },
+        {
+          "label": "StartPoint",
+          "payload": "StartPoint",
+          "value_entry": false
+        },
+        {
+          "label": "Radius=",
+          "payload": "Radius=",
+          "value_entry": true
+        },
+        {
+          "label": "Diameter=",
+          "payload": "Diameter=",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn arc_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.arc_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = Vec::new();\n        if pending.points.is_empty() {\n            tokens.push((\"3Point\", \"3Point\"));\n            tokens.push((\"Center\", \"Center\"));\n            tokens.push((\"StartPoint\", \"StartPoint\"));\n        }\n        if pending.mode == \"Center\" && pending.points.is_empty() {\n            tokens.push((\"Radius=\", \"Radius=\"));\n            tokens.push((\"Diameter=\", \"Diameter=\"));\n        }\n        if !pending.points.is_empty() {\n            tokens.push((\"Undo\", \"Undo\"));\n        }\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "rebuild",
+      "source": "crates/om9-app/src/session/rebuild.rs",
+      "provider": "rebuild_option_tokens",
+      "line": 87,
+      "pending_field": "rebuild_pending",
+      "feature_constants": [
+        {
+          "constant": "REBUILD",
+          "value": "OM9-CURVE-009"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Degree=",
+          "payload": "Degree=",
+          "value_entry": true
+        },
+        {
+          "label": "Points=",
+          "payload": "Points=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn rebuild_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.rebuild_pending.is_some() {\n            vec![\n                (\"Degree=\", \"Degree=\"),\n                (\"Points=\", \"Points=\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "fit",
+      "source": "crates/om9-app/src/session/fit.rs",
+      "provider": "fit_option_tokens",
+      "line": 110,
+      "pending_field": "fit_pending",
+      "feature_constants": [
+        {
+          "constant": "FIT",
+          "value": "OM9-CURVE-010"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Tolerance=",
+          "payload": "Tolerance=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn fit_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.fit_pending.is_some() {\n            vec![(\"Tolerance=\", \"Tolerance=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "offset_curve",
+      "source": "crates/om9-app/src/session/offset.rs",
+      "provider": "offset_curve_option_tokens",
+      "line": 114,
+      "pending_field": "offset_curve_pending",
+      "feature_constants": [
+        {
+          "constant": "OFFSET",
+          "value": "OM9-CURVE-018"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Distance=",
+          "payload": "Distance=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn offset_curve_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.offset_curve_pending.is_some() {\n            vec![(\"Distance=\", \"Distance=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "project",
+      "source": "crates/om9-app/src/session/project.rs",
+      "provider": "project_option_tokens",
+      "line": 130,
+      "pending_field": "project_pending",
+      "feature_constants": [
+        {
+          "constant": "PROJECT",
+          "value": "OM9-CURVE-016"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Direction=",
+          "payload": "Direction=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn project_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.project_pending.is_some() {\n            vec![(\"Direction=\", \"Direction=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "blend",
+      "source": "crates/om9-app/src/session/blend.rs",
+      "provider": "blend_option_tokens",
+      "line": 147,
+      "pending_field": "blend_pending",
+      "feature_constants": [
+        {
+          "constant": "BLEND",
+          "value": "OM9-CURVE-011"
+        },
+        {
+          "constant": "BLEND_CRV",
+          "value": "OM9-CURVE-012"
+        },
+        {
+          "constant": "MATCH",
+          "value": "OM9-CURVE-052"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Scale1=",
+          "payload": "Scale1=",
+          "value_entry": true
+        },
+        {
+          "label": "Scale2=",
+          "payload": "Scale2=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn blend_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.blend_pending.is_some() {\n            vec![\n                (\"Scale1=\", \"Scale1=\"),\n                (\"Scale2=\", \"Scale2=\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "isocurve",
+      "source": "crates/om9-app/src/session/isocurve.rs",
+      "provider": "isocurve_option_tokens",
+      "line": 89,
+      "pending_field": "isocurve_pending",
+      "feature_constants": [
+        {
+          "constant": "ISOCURVE",
+          "value": "OM9-CURVE-019"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "U=",
+          "payload": "U=",
+          "value_entry": true
+        },
+        {
+          "label": "V=",
+          "payload": "V=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn isocurve_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.isocurve_pending.is_some() {\n            vec![(\"U=\", \"U=\"), (\"V=\", \"V=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "pull",
+      "source": "crates/om9-app/src/session/pull.rs",
+      "provider": "pull_option_tokens",
+      "line": 89,
+      "pending_field": "pull_pending",
+      "feature_constants": [
+        {
+          "constant": "PULL",
+          "value": "OM9-CURVE-015"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Tolerance=",
+          "payload": "Tolerance=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn pull_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.pull_pending.is_some() {\n            vec![(\"Tolerance=\", \"Tolerance=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "intersect",
+      "source": "crates/om9-app/src/session/intersect.rs",
+      "provider": "intersect_option_tokens",
+      "line": 102,
+      "pending_field": "intersect_pending",
+      "feature_constants": [
+        {
+          "constant": "INTERSECT",
+          "value": "OM9-CURVE-017"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Tolerance=",
+          "payload": "Tolerance=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn intersect_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.intersect_pending.is_some() {\n            vec![(\"Tolerance=\", \"Tolerance=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "crv2view",
+      "source": "crates/om9-app/src/session/crv2view.rs",
+      "provider": "crv2view_option_tokens",
+      "line": 102,
+      "pending_field": "crv2view_pending",
+      "feature_constants": [
+        {
+          "constant": "CRV2VIEW",
+          "value": "OM9-CURVE-013"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn crv2view_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.crv2view_pending.is_some() {\n            vec![(\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "through_points",
+      "source": "crates/om9-app/src/session/through_points.rs",
+      "provider": "through_points_option_tokens",
+      "line": 99,
+      "pending_field": "through_points_pending",
+      "feature_constants": [
+        {
+          "constant": "THROUGH_POINTS",
+          "value": "OM9-CURVE-026"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Degree=",
+          "payload": "Degree=",
+          "value_entry": true
+        },
+        {
+          "label": "Closed",
+          "payload": "Closed",
+          "value_entry": false
+        },
+        {
+          "label": "Open",
+          "payload": "Open",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn through_points_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.through_points_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = vec![(\"Degree=\", \"Degree=\")];\n        if pending.points.len() >= 4 {\n            tokens.push((\"Closed\", \"Closed\"));\n            tokens.push((\"Open\", \"Open\"));\n        }\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "polygon",
+      "source": "crates/om9-app/src/session/polygon.rs",
+      "provider": "polygon_option_tokens",
+      "line": 194,
+      "pending_field": "polygon_pending",
+      "feature_constants": [
+        {
+          "constant": "POLYGON",
+          "value": "OM9-CURVE-028"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Sides=",
+          "payload": "Sides=",
+          "value_entry": true
+        },
+        {
+          "label": "Circumscribed",
+          "payload": "Circumscribed",
+          "value_entry": false
+        },
+        {
+          "label": "Inscribed",
+          "payload": "Inscribed",
+          "value_entry": false
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn polygon_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.polygon_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = vec![\n            (\"Sides=\", \"Sides=\"),\n            (\"Circumscribed\", \"Circumscribed\"),\n            (\"Inscribed\", \"Inscribed\"),\n        ];\n        if pending.center.is_some() {\n            tokens.insert(0, (\"Undo\", \"Undo\"));\n        }\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "helix",
+      "source": "crates/om9-app/src/session/helix.rs",
+      "provider": "helix_option_tokens",
+      "line": 218,
+      "pending_field": "helix_pending",
+      "feature_constants": [
+        {
+          "constant": "HELIX",
+          "value": "OM9-CURVE-030"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Radius=",
+          "payload": "Radius=",
+          "value_entry": true
+        },
+        {
+          "label": "Height=",
+          "payload": "Height=",
+          "value_entry": true
+        },
+        {
+          "label": "Turns=",
+          "payload": "Turns=",
+          "value_entry": true
+        },
+        {
+          "label": "Axis=",
+          "payload": "Axis=",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn helix_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.helix_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = vec![\n            (\"Radius=\", \"Radius=\"),\n            (\"Height=\", \"Height=\"),\n            (\"Turns=\", \"Turns=\"),\n            (\"Axis=\", \"Axis=\"),\n        ];\n        if pending.center.is_some() {\n            tokens.push((\"Undo\", \"Undo\"));\n        }\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "spiral",
+      "source": "crates/om9-app/src/session/spiral.rs",
+      "provider": "spiral_option_tokens",
+      "line": 233,
+      "pending_field": "spiral_pending",
+      "feature_constants": [
+        {
+          "constant": "SPIRAL",
+          "value": "OM9-CURVE-029"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "StartRadius=",
+          "payload": "StartRadius=",
+          "value_entry": true
+        },
+        {
+          "label": "EndRadius=",
+          "payload": "EndRadius=",
+          "value_entry": true
+        },
+        {
+          "label": "Turns=",
+          "payload": "Turns=",
+          "value_entry": true
+        },
+        {
+          "label": "Height=",
+          "payload": "Height=",
+          "value_entry": true
+        },
+        {
+          "label": "Axis=",
+          "payload": "Axis=",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn spiral_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.spiral_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = vec![\n            (\"StartRadius=\", \"StartRadius=\"),\n            (\"EndRadius=\", \"EndRadius=\"),\n            (\"Turns=\", \"Turns=\"),\n            (\"Height=\", \"Height=\"),\n            (\"Axis=\", \"Axis=\"),\n        ];\n        if pending.center.is_some() {\n            tokens.push((\"Undo\", \"Undo\"));\n        }\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "fillet_corners",
+      "source": "crates/om9-app/src/session/fillet_corners.rs",
+      "provider": "fillet_corners_option_tokens",
+      "line": 145,
+      "pending_field": "fillet_corners_pending",
+      "feature_constants": [
+        {
+          "constant": "FILLET_CORNERS",
+          "value": "OM9-CURVE-023"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Radius=",
+          "payload": "Radius=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn fillet_corners_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.fillet_corners_pending.is_some() {\n            vec![(\"Radius=\", \"Radius=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "divide",
+      "source": "crates/om9-app/src/session/divide.rs",
+      "provider": "divide_option_tokens",
+      "line": 83,
+      "pending_field": "divide_pending",
+      "feature_constants": [
+        {
+          "constant": "DIVIDE",
+          "value": "OM9-CURVE-036"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Count=",
+          "payload": "Count=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn divide_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.divide_pending.is_some() {\n            vec![(\"Count=\", \"Count=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "to_lines",
+      "source": "crates/om9-app/src/session/to_lines.rs",
+      "provider": "to_lines_option_tokens",
+      "line": 78,
+      "pending_field": "to_lines_pending",
+      "feature_constants": [
+        {
+          "constant": "TO_LINES",
+          "value": "OM9-CURVE-050"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Count=",
+          "payload": "Count=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn to_lines_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.to_lines_pending.is_some() {\n            vec![(\"Count=\", \"Count=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "crv_seam",
+      "source": "crates/om9-app/src/session/crv_seam.rs",
+      "provider": "crv_seam_option_tokens",
+      "line": 75,
+      "pending_field": "crv_seam_pending",
+      "feature_constants": [
+        {
+          "constant": "CRV_SEAM",
+          "value": "OM9-CURVE-031"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Seam=",
+          "payload": "Seam=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn crv_seam_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.crv_seam_pending.is_some() {\n            vec![(\"Seam=\", \"Seam=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "control_curve",
+      "source": "crates/om9-app/src/session/control_curve.rs",
+      "provider": "control_curve_option_tokens",
+      "line": 92,
+      "pending_field": "control_curve_pending",
+      "feature_constants": [
+        {
+          "constant": "CONTROL_CURVE",
+          "value": "OM9-CURVE-042"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Degree=",
+          "payload": "Degree=",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn control_curve_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.control_curve_pending.is_some() {\n            vec![\n                (\"Degree=\", \"Degree=\"),\n                (\"Undo\", \"Undo\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "continue_curve",
+      "source": "crates/om9-app/src/session/continue_curve.rs",
+      "provider": "continue_curve_option_tokens",
+      "line": 117,
+      "pending_field": "continue_curve_pending",
+      "feature_constants": [
+        {
+          "constant": "CONTINUE_CURVE",
+          "value": "OM9-CURVE-041"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Degree=",
+          "payload": "Degree=",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn continue_curve_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.continue_curve_pending.is_some() {\n            vec![\n                (\"Degree=\", \"Degree=\"),\n                (\"Undo\", \"Undo\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "offset_on_surface",
+      "source": "crates/om9-app/src/session/offset_on_surface.rs",
+      "provider": "offset_on_surface_option_tokens",
+      "line": 149,
+      "pending_field": "offset_on_surface_pending",
+      "feature_constants": [
+        {
+          "constant": "OFFSET_ON_SURFACE",
+          "value": "OM9-CURVE-020"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Distance=",
+          "payload": "Distance=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn offset_on_surface_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.offset_on_surface_pending.is_some() {\n            vec![(\"Distance=\", \"Distance=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "offset_normal",
+      "source": "crates/om9-app/src/session/offset_normal.rs",
+      "provider": "offset_normal_option_tokens",
+      "line": 118,
+      "pending_field": "offset_normal_pending",
+      "feature_constants": [
+        {
+          "constant": "OFFSET_NORMAL",
+          "value": "OM9-CURVE-057"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Distance=",
+          "payload": "Distance=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn offset_normal_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.offset_normal_pending.is_some() {\n            vec![(\"Distance=\", \"Distance=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "corner",
+      "source": "crates/om9-app/src/session/corner_ops.rs",
+      "provider": "corner_option_tokens",
+      "line": 120,
+      "pending_field": "corner_pending",
+      "feature_constants": [
+        {
+          "constant": "FILLET",
+          "value": "OM9-CURVE-021"
+        },
+        {
+          "constant": "CHAMFER",
+          "value": "OM9-CURVE-022"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Radius=",
+          "payload": "Radius=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        },
+        {
+          "label": "Distance=",
+          "payload": "Distance=",
+          "value_entry": true
+        }
+      ],
+      "availability_source": "fn corner_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.corner_pending.as_ref() else {\n            return Vec::new();\n        };\n        if pending.feature == FILLET {\n            vec![(\"Radius=\", \"Radius=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            vec![(\"Distance=\", \"Distance=\"), (\"Cancel\", \"Cancel\")]\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "cross_section",
+      "source": "crates/om9-app/src/session/cross_section.rs",
+      "provider": "cross_section_option_tokens",
+      "line": 103,
+      "pending_field": "cross_section_pending",
+      "feature_constants": [
+        {
+          "constant": "CROSS_SECTION",
+          "value": "OM9-CURVE-043"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Count=",
+          "payload": "Count=",
+          "value_entry": true
+        },
+        {
+          "label": "Spacing=",
+          "payload": "Spacing=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn cross_section_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.cross_section_pending.is_some() {\n            vec![\n                (\"Count=\", \"Count=\"),\n                (\"Spacing=\", \"Spacing=\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "curve_soft_edit",
+      "source": "crates/om9-app/src/session/curve_soft_edit.rs",
+      "provider": "curve_soft_edit_option_tokens",
+      "line": 97,
+      "pending_field": "curve_soft_edit_pending",
+      "feature_constants": [
+        {
+          "constant": "CURVE_SOFT_EDIT",
+          "value": "OM9-CURVE-055"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Index=",
+          "payload": "Index=",
+          "value_entry": true
+        },
+        {
+          "label": "Point=",
+          "payload": "Point=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn curve_soft_edit_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.curve_soft_edit_pending.is_some() {\n            vec![\n                (\"Index=\", \"Index=\"),\n                (\"Point=\", \"Point=\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "angle_isocurve",
+      "source": "crates/om9-app/src/session/angle_isocurve.rs",
+      "provider": "angle_isocurve_option_tokens",
+      "line": 101,
+      "pending_field": "angle_isocurve_pending",
+      "feature_constants": [
+        {
+          "constant": "ANGLE_ISOCURVE",
+          "value": "OM9-CURVE-044"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Angle=",
+          "payload": "Angle=",
+          "value_entry": true
+        },
+        {
+          "label": "Direction=",
+          "payload": "Direction=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn angle_isocurve_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.angle_isocurve_pending.is_some() {\n            vec![\n                (\"Angle=\", \"Angle=\"),\n                (\"Direction=\", \"Direction=\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "extrude_surface",
+      "source": "crates/om9-app/src/session/extrude_surface.rs",
+      "provider": "extrude_surface_option_tokens",
+      "line": 82,
+      "pending_field": "extrude_surface_pending",
+      "feature_constants": [
+        {
+          "constant": "EXTRUDE",
+          "value": "OM9-SURFACE-002"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Height=",
+          "payload": "Height=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn extrude_surface_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.extrude_surface_pending.is_some() {\n            vec![(\"Height=\", \"Height=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "heightfield",
+      "source": "crates/om9-app/src/session/heightfield.rs",
+      "provider": "heightfield_option_tokens",
+      "line": 113,
+      "pending_field": "heightfield_pending",
+      "feature_constants": [
+        {
+          "constant": "HEIGHTFIELD",
+          "value": "OM9-SURFACE-031"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "File=",
+          "payload": "File=",
+          "value_entry": true
+        },
+        {
+          "label": "Height=",
+          "payload": "Height=",
+          "value_entry": true
+        },
+        {
+          "label": "Size=",
+          "payload": "Size=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn heightfield_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.heightfield_pending.is_some() {\n            vec![\n                (\"File=\", \"File=\"),\n                (\"Height=\", \"Height=\"),\n                (\"Size=\", \"Size=\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "extend_curve",
+      "source": "crates/om9-app/src/session/extend_curve.rs",
+      "provider": "extend_curve_option_tokens",
+      "line": 115,
+      "pending_field": "extend_curve_pending",
+      "feature_constants": [
+        {
+          "constant": "EXTEND",
+          "value": "OM9-CURVE-027"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Length=",
+          "payload": "Length=",
+          "value_entry": true
+        },
+        {
+          "label": "End",
+          "payload": "End",
+          "value_entry": false
+        },
+        {
+          "label": "Start",
+          "payload": "Start",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn extend_curve_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        let Some(pending) = self.extend_curve_pending.as_ref() else {\n            return Vec::new();\n        };\n        let mut tokens = vec![(\"Length=\", \"Length=\")];\n        tokens.push(if pending.at_start {\n            (\"End\", \"End\")\n        } else {\n            (\"Start\", \"Start\")\n        });\n        tokens.push((\"Cancel\", \"Cancel\"));\n        tokens\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "tween_curves",
+      "source": "crates/om9-app/src/session/tween_curves.rs",
+      "provider": "tween_curves_option_tokens",
+      "line": 115,
+      "pending_field": "tween_curves_pending",
+      "feature_constants": [
+        {
+          "constant": "TWEEN_CURVES",
+          "value": "OM9-CURVE-038"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Count=",
+          "payload": "Count=",
+          "value_entry": true
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn tween_curves_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.tween_curves_pending.is_some() {\n            vec![(\"Count=\", \"Count=\"), (\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "continue_interp",
+      "source": "crates/om9-app/src/session/continue_interp.rs",
+      "provider": "continue_interp_option_tokens",
+      "line": 105,
+      "pending_field": "continue_interp_pending",
+      "feature_constants": [
+        {
+          "constant": "CONTINUE_INTERP",
+          "value": "OM9-CURVE-035"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Degree=",
+          "payload": "Degree=",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        },
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn continue_interp_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.continue_interp_pending.is_some() {\n            vec![\n                (\"Degree=\", \"Degree=\"),\n                (\"Undo\", \"Undo\"),\n                (\"Cancel\", \"Cancel\"),\n            ]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "arc_blend",
+      "source": "crates/om9-app/src/session/arc_blend.rs",
+      "provider": "arc_blend_option_tokens",
+      "line": 151,
+      "pending_field": "arc_blend_pending",
+      "feature_constants": [
+        {
+          "constant": "ARC_BLEND",
+          "value": "OM9-CURVE-056"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "Cancel",
+          "payload": "Cancel",
+          "value_entry": false
+        }
+      ],
+      "availability_source": "fn arc_blend_option_tokens(&self) -> Vec<(&'static str, &'static str)> {\n        if self.arc_blend_pending.is_some() {\n            vec![(\"Cancel\", \"Cancel\")]\n        } else {\n            Vec::new()\n        }\n    }",
+      "coverage": "registered_legacy_token_adapter_not_full_polyline_parity"
+    },
+    {
+      "owner": "line",
+      "source": "crates/om9-app/src/session.rs",
+      "provider": "CommandSession + command_options adapter",
+      "pending_field": "session",
+      "feature_constants": [
+        {
+          "constant": "LINE",
+          "value": "OM9-CURVE-002"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "BothSides",
+          "payload": "BothSides=Yes/No",
+          "value_entry": false
+        },
+        {
+          "label": "Length",
+          "payload": "Length=",
+          "value_entry": true
+        }
+      ],
+      "coverage": "registered_special_owner"
+    },
+    {
+      "owner": "polyline",
+      "source": "crates/om9-app/src/session/polyline.rs",
+      "provider": "PolylineOptionInterface",
+      "pending_field": "polyline_pending",
+      "feature_constants": [
+        {
+          "constant": "POLYLINE",
+          "value": "OM9-CURVE-001"
+        }
+      ],
+      "tokens": [
+        {
+          "label": "PersistentClose",
+          "payload": "PersistentClose",
+          "value_entry": false
+        },
+        {
+          "label": "Mode",
+          "payload": "Mode",
+          "value_entry": false
+        },
+        {
+          "label": "Helpers",
+          "payload": "Helpers",
+          "value_entry": false
+        },
+        {
+          "label": "Length",
+          "payload": "Length",
+          "value_entry": true
+        },
+        {
+          "label": "Close",
+          "payload": "Close",
+          "value_entry": false
+        },
+        {
+          "label": "Direction",
+          "payload": "Direction",
+          "value_entry": true
+        },
+        {
+          "label": "Center",
+          "payload": "Center",
+          "value_entry": true
+        },
+        {
+          "label": "Undo",
+          "payload": "Undo",
+          "value_entry": false
+        }
+      ],
+      "coverage": "reference_behavior_with_documented_limits"
+    }
+  ],
+  "additional_pending_owners": [
+    {
+      "field": "top11_pending",
+      "rust_type": "self::top11::Top11Pending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "surface_pending",
+      "rust_type": "SurfacePending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "curve_pair_pending",
+      "rust_type": "CurvePairPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "surface_pair_pending",
+      "rust_type": "SurfacePairPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "seam_pending",
+      "rust_type": "SeamPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "soft_edit_pending",
+      "rust_type": "SoftEditPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "tween_pending",
+      "rust_type": "TweenPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "extend_pending",
+      "rust_type": "ExtendPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "split_pending",
+      "rust_type": "SplitPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "tangent_pending",
+      "rust_type": "TangentPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "extrude_all_pending",
+      "rust_type": "ExtrudeAllPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "variable_offset_pending",
+      "rust_type": "VarOffsetPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "shrink_pending",
+      "rust_type": "ShrinkPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "variable_blend_pending",
+      "rust_type": "VarBlendPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "chamfer_pending",
+      "rust_type": "ChamferPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "fillet_pending",
+      "rust_type": "FilletPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "variable_chamfer_pending",
+      "rust_type": "VarChamferPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "history_options_pending",
+      "rust_type": "HistoryOptionsPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    },
+    {
+      "field": "slash_pending",
+      "rust_type": "SlashPending",
+      "coverage": "audit_required_outside_existing_option_registry"
+    }
+  ],
+  "source_sha256": {
+    "crates/om9-app/src/session/solid.rs": "af509f5c329ea2689a20a7acd7a4009d0736f2699089ff8066cd0002e436deed",
+    "crates/om9-app/src/session/circle.rs": "1b8a3152e0d38bd9d880faeaaf9875e2dfd77a7f88c777233fbe6e542020e69a",
+    "crates/om9-app/src/session/rect.rs": "96d43943034bf0963ca00372596086862e64103bb259c7c2100c5f19ebbf4332",
+    "crates/om9-app/src/session/interp.rs": "4318debfc8566a20d32cb2bb99c279779df0b50b7cd9e84689c48cdc606cb4af",
+    "crates/om9-app/src/session/ellipse.rs": "5fa601492f8ad8895f873e1afae0683549c987136bff1007b141b5f19b3c0706",
+    "crates/om9-app/src/session/arc.rs": "c0071f2e004fe8c49d60f2e402faaac6ce1392023d087586c8f2e057fadf1cb1",
+    "crates/om9-app/src/session/rebuild.rs": "9117a4508d61ceb9ddb1319dd25f9e26a3fdc1787b77e5294a1ca494fe9dcdc8",
+    "crates/om9-app/src/session/fit.rs": "6cf21c6d2c937f42fca8e8ce29bf9bf5de2f0aa4a27dc26ce64078b72bfb4d8f",
+    "crates/om9-app/src/session/offset.rs": "f65ab0e37f2685d615d4624050e10b7d14885c55ce4dcce953527af7b789cb23",
+    "crates/om9-app/src/session/project.rs": "c970e9755609a37c1fc451fca837383e18d673b2691f14e765b2131f16207375",
+    "crates/om9-app/src/session/blend.rs": "1801f0816236dc9116a59a979b3d987aa42ca2cc05ad6b5eab63c3ad1f5a4e13",
+    "crates/om9-app/src/session/isocurve.rs": "2bc92ae09b377f05d097470f32c46b6e64e4c651e76d68a75977a2c5fffba6a7",
+    "crates/om9-app/src/session/pull.rs": "b7860001e0500fbd4e0fcc3d54e603f088cc172354413d5b5a1fbca58ad5d44e",
+    "crates/om9-app/src/session/intersect.rs": "cc99f45cac99636926903ef5bb9cc186460d032ee9b4449ca9fa6a6e3ca3dbca",
+    "crates/om9-app/src/session/crv2view.rs": "2dda5cacd6269323e970e8e99acf0b30b38e78f58ec3f0ffe71c847066e3af2b",
+    "crates/om9-app/src/session/through_points.rs": "629bb377f4a81c213c9c6d7d00c3917dbc56ae48ef1d5f380c10bd2958823485",
+    "crates/om9-app/src/session/polygon.rs": "bf530a0e02275685fb1f6e4a863ed9b28fb6e2685d13650bee2f943525717614",
+    "crates/om9-app/src/session/helix.rs": "e5863e9444461aa33cbb33b079d5e53576a9094b583c6bcf7d26e2637f222237",
+    "crates/om9-app/src/session/spiral.rs": "f537144d045eb3a52e0489d917b4fa89805d744ba90fd0881e77c70c11fe5050",
+    "crates/om9-app/src/session/fillet_corners.rs": "391f92232e97921a8bc9c99a1799ee4e703273ce85e8e79b56d258c4683a2f48",
+    "crates/om9-app/src/session/divide.rs": "ce0262d012b810b395588a4375fd642c2633c9467079efef926ac0bb142603d0",
+    "crates/om9-app/src/session/to_lines.rs": "31c280f36fe933e20f7d1413fced7e96456563fc430ac6adc957001e9cbbecf5",
+    "crates/om9-app/src/session/crv_seam.rs": "9dc9be55792a9a91a42743b2e7487868e32eeac1c0c45b94ffe83095e87bb46a",
+    "crates/om9-app/src/session/control_curve.rs": "6d3721a3e2e26010c4bd312a53be1859c92b097a1dde68cea1d5240f1131acdb",
+    "crates/om9-app/src/session/continue_curve.rs": "c5f47e2f2b5807f12e5aaaf590cd08d430d6721b64ccd5f28945c1554a11e46f",
+    "crates/om9-app/src/session/offset_on_surface.rs": "46802e5a70e3db5020d63bc0b6c1a9834aeae14ea1b222cdeb10b36f06c21255",
+    "crates/om9-app/src/session/offset_normal.rs": "5fc765d07a73e89c3e7833e1de3ab17d2f3f1c22a0325f832dca07929161ef53",
+    "crates/om9-app/src/session/corner_ops.rs": "6d2f611dd537b34ab420fd2d26a4395c148c1839d86df641b44454936974f68c",
+    "crates/om9-app/src/session/cross_section.rs": "e6cc6b891b68b887b12842b63bffa35117b00940c655d304a40800c4e065dd59",
+    "crates/om9-app/src/session/curve_soft_edit.rs": "e6596fc0517e7697d799c7daaa2287b8d0d0ac2340e504a6bdbafae1d7ead6e7",
+    "crates/om9-app/src/session/angle_isocurve.rs": "31ab065d62efbe9aa86577e5850ef025518cb2afdabcefb1a8ed89a869d9ed61",
+    "crates/om9-app/src/session/extrude_surface.rs": "d1e337533e20e290123f847591ebb0e512752c43e130ffd5446b77075bb8596c",
+    "crates/om9-app/src/session/heightfield.rs": "5f47a5c65407c095c1dacb804a29d7ddebce563ac6c4485206376b93da0a280f",
+    "crates/om9-app/src/session/extend_curve.rs": "bb0fa9ba071cd232b9a88927157295024e1a862ada000812181cd21d9f983221",
+    "crates/om9-app/src/session/tween_curves.rs": "1c9cba7ce91f0d6f03969be926d0ad8002bc6b886744c86a3145198ae3e0df9a",
+    "crates/om9-app/src/session/continue_interp.rs": "cecfdd692efff95a411a0ebd54484f6b8c579993e7566583fdd98ed2b3ede1a5",
+    "crates/om9-app/src/session/arc_blend.rs": "eb7a673d1be3ca2cefcdb738e38937e90a2158d04d40f2b4febb3811bf97312e",
+    "crates/om9-app/src/command_options.rs": "c903a1ad326fbb78be82be10e1292685053e3647ee6d6eb30a17d28f2a40fd21",
+    "crates/om9-app/src/polyline_options.rs": "3b4dbf517fe934e7a8aacc7cd2c63432979cc012102f17ecf2a35ce872617f36",
+    "crates/om9-app/src/session.rs": "f89af1a70ae7aa2ef52361cfd3f9805085a5106005f2671b4dfe425995729aad",
+    "crates/om9-app/src/ui.rs": "8731cb578fbfe87689df71f4dc7cb1a6260ffe186df3cf14173d4f13b1d3f8d1",
+    "crates/om9-app/src/ui/command.rs": "152c1018cbcde68a7874a765e9219ad03ea249de3b1b511ed2694d14d51d1c8d",
+    "crates/om9-app/src/transcript.rs": "8890516a60a5f1ea306a03dfec5bd3b8c2e7390a15a4011be45c849f2a22fc39",
+    "crates/om9-app/src/session/top11.rs": "eae74e026f28b83fe0e465b9fd0ec6728bfb3c39738a73f7bae8477da15394a4",
+    "crates/om9-app/src/session/surface_edit.rs": "5adbdc36bc53ca77df0122529061a414aab7526506e811497f0105abb3824db9",
+    "crates/om9-app/src/session/plugins.rs": "d7fffea49f0e8e89dc58534382ca4f407ff379122f627685dda13e180403bd62",
+    "crates/om9-app/Cargo.toml": "fc3e65d6d311e5e2b80535412ff6af42de576114404732b4315c4ea525c72ed2",
+    "crates/om9-app/tests/command_options_interface.rs": "5ae5f78c73ddf76c14c8da0152d03ccd3252c12677212c668b6639188553a29d",
+    "crates/om9-app/tests/polyline_options_interface.rs": "c3e34b8675d07270c6a4d418e23e97400a89df8b0be445789a4d5fadcf3d4c0c",
+    "crates/om9-app/tests/polyline_mode_regression.rs": "b0bf9af75e227e041a8496c1a850823513a33478ccc080653f960c2fc95a3e9e",
+    "crates/om9-app/tests/pinned_command.rs": "adc4847f93f6331fa8c7eeb31bfc2184ed51f24ea96ae06381eddbff2bb6ba5c"
+  }
+}

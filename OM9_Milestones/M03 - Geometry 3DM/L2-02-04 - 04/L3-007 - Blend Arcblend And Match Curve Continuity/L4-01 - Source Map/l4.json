@@ -11,6 +11,23 @@
   "mini_gate_id": "G03-B",
   "risk": "HIGH",
   "purpose": "Confirm upstream code and stable responsibility",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M03 - Geometry 3DM/L2-02-04 - 04/L3-007 - Blend Arcblend And Match Curve Continuity/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 1,
+    "implementation_l4": null
+  },
   "parent_l3_file": "M03 - Geometry 3DM/L2-02-04 - 04/L3-007 - Blend Arcblend And Match Curve Continuity/l3.json",
   "preconditions": {
     "milestone": "M00,M01,M02 approved and passing actual tests; previous M03 mini-gates approved",
@@ -535,8 +552,12 @@
       "stage": "1/2. Vành, profile bốn rail và thân",
       "why_for_this_task": "Blend của tiền lệ chỉ đạt liên tục bậc MỘT (G1): không có vector cong nào được tính, nên không được quảng cáo là G2.",
       "om9_backend": "pure Rust cho tham số hoá và trật tự; OCCT cho sweep hai rail, loft, pipe và join",
-      "steps_cited": [11],
-      "algorithm_steps": ["F11. Cỡ vành: từ đường kính rail suy cỡ theo công thức US rồi làm tròn tới phần tư."],
+      "steps_cited": [
+        11
+      ],
+      "algorithm_steps": [
+        "F11. Cỡ vành: từ đường kính rail suy cỡ theo công thức US rồi làm tròn tới phần tư."
+      ],
       "source_file": "MatrixBuilder/FourRailProfile/FourRailProfileBuilder.cs",
       "source_methods": [
         "Initialize",
@@ -560,4 +581,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `SOURCE_AUDIT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `SOURCE_AUDIT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

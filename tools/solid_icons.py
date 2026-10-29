@@ -67,6 +67,15 @@ SOLID_ICONS = {
         + path('M13 12 H18 V20 H13 Z', HIGHLIGHT)
         + arrow('M22 5 H28 V10', 'M25 7 L28 10 L31 7')
         + arrow('M10 27 H4 V22', 'M1 25 L4 22 L7 25')),
+    'SolidBooleanSplit': ('Boolean split', 'Split intersecting solid regions into separate pieces', None,
+        face('M3 5 H18 V20 H3 Z') + face('M14 12 H29 V27 H14 Z')
+        + path('M14 12 H18 V20 H14 Z', HIGHLIGHT, width=2.2)
+        + path('M10 24 H4 M24 6 H30', WHITE, width=1.8)),
+    'SolidCreateSolid': ('Create solid', 'Build closed solid regions from intersecting surfaces', None,
+        path('M3 7 H20 V20 H3 Z M12 12 H29 V27 H12 Z', PURPLE, dashed=True, width=1.6)
+        + face('M9 14 L19 10 L26 14 L16 18 Z', HIGHLIGHT, .25)
+        + face('M9 14 V23 L16 27 V18 Z', HIGHLIGHT, .2)
+        + face('M16 18 L26 14 V23 L16 27 Z', HIGHLIGHT, .2)),
     'SolidCapPlanarHoles': ('Cap planar holes', 'Close a planar opening to create a solid', 5,
         cylinder() + face('M6 9 C6 3 26 3 26 9 C26 15 6 15 6 9 Z', HIGHLIGHT, .3)
         + arrow('M16 1 V7', 'M13 4 L16 7 L19 4')),
@@ -96,10 +105,35 @@ SOLID_ICONS = {
         face('M6 24 C7 11 19 23 23 7 L29 9 C25 30 11 16 12 26 Z')
         + ellipse(9, 25, 3, 2, HIGHLIGHT)
         + path('M9 24 C11 15 22 25 26 8', HIGHLIGHT)),
+    'SolidGVDMultiPipe': ('Multiple pipes', 'Sweep round profiles along several selected curves', 11,
+        path('M4 25 C6 12 13 19 15 6 M12 26 C14 13 22 20 24 7', PURPLE, width=3)
+        + ellipse(4, 25, 2.4, 1.6, HIGHLIGHT)
+        + ellipse(12, 26, 2.4, 1.6, HIGHLIGHT)
+        + path('M23 19 H30 M26.5 15.5 V22.5', WHITE, width=1.8)),
     'SolidBoxCornertoCornerHeight': ('Box', 'Solid rectangular box', 12, cube()),
+    'SolidBoxDiagonal': ('Box diagonal', 'Box from diagonal base corners', 12,
+        cube() + path('M5 21 L26 11', HIGHLIGHT, width=2) + points((5,21),(26,11), color=HIGHLIGHT)),
+    'SolidBox3PointsHeight': ('Box three points', 'Box from an edge and width', 12,
+        cube() + path('M4 22 L13 28 L28 22', HIGHLIGHT, width=2)),
+    'SolidBoxVerticalBase': ('Box vertical base', 'Box with a vertical base plane', 12,
+        cube() + path('M4 11 V22 L13 28 V17 Z', HIGHLIGHT, width=2)),
+    'SolidBoxCenterofBaseCornerHeight': ('Box from center', 'Box around a center point', 12,
+        cube() + path('M12 22 H20 M16 18 V26', HIGHLIGHT, width=2)),
     'SolidSphereCenterRadius': ('Sphere', 'Solid sphere with circular silhouette', 14,
         ellipse(16, 16, 12, 12) + ellipse(16, 16, 12, 4, PURPLE, 1.6)
         + path('M16 4 C8 8 8 24 16 28 C24 24 24 8 16 4', PURPLE, width=1.6)),
+    'SolidSphere2Points': ('Sphere two points', 'Sphere defined by diameter endpoints', 14,
+        ellipse(16,16,12,12) + path('M4 16 H28', HIGHLIGHT) + points((4,16),(28,16),color=HIGHLIGHT)),
+    'SolidSphere3Points': ('Sphere three points', 'Sphere defined by three points', 14,
+        ellipse(16,16,12,12) + points((16,4),(5,21),(27,21),color=HIGHLIGHT)),
+    'SolidSphere4Points': ('Sphere four points', 'Sphere defined by four points', 14,
+        ellipse(16,16,12,12) + points((16,4),(4,16),(28,16),(16,28),color=HIGHLIGHT)),
+    'SolidSphereAroundCurve': ('Sphere around curve', 'Sphere centered on a selected curve', 14,
+        ellipse(16,16,11,11) + path('M2 24 Q12 4 30 8', HIGHLIGHT, width=2)),
+    'SolidSphereTangenttoCurves': ('Sphere tangent', 'Sphere tangent to curves', 14,
+        ellipse(16,16,10,10) + path('M3 26 H29', HIGHLIGHT, width=2) + points((16,26),color=WHITE)),
+    'SolidSphereFitSpheretoPoints': ('Sphere fit points', 'Fit a sphere to selected points', 14,
+        ellipse(16,16,10,10) + points((7,9),(25,10),(10,26),(25,24),color=HIGHLIGHT)),
     'SolidEllipsoidFromCenter': ('Ellipsoid', 'Solid stretched ellipsoid', 13,
         ellipse(16, 16, 14, 9) + ellipse(16, 16, 14, 3, PURPLE, 1.6)
         + path('M16 7 C10 9 10 23 16 25 C22 23 22 9 16 7', PURPLE, width=1.6)),
@@ -179,7 +213,7 @@ def write_asset(output_root, key, tooltip=None):
               'mapping': metadata['mapping'], 'sha256': hashlib.sha256(raw).hexdigest(),
               'palette': [c for c in (PURPLE, HIGHLIGHT, WHITE) if c in raw.decode()],
               'spec_id': f'OM9-SOLID-{spec:03}' if spec else None,
-              'semantic_source': 'local Solid spec' if spec else 'local Rhino foundation control-point notes; SolidPtOn editing grips'}
+              'semantic_source': 'local Solid spec' if spec else ('Rhino 5 command help' if key in ('SolidBooleanSplit', 'SolidCreateSolid') else 'local Rhino foundation control-point notes; SolidPtOn editing grips')}
     return metadata, {k:v for k,v in record.items() if k not in ('reference_image','reference_type','reference_images','palette_reference','reference_palette')}
 
 
@@ -203,7 +237,7 @@ def contact_sheet(keys):
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{columns*cell_w}" height="{height}">',
              '<rect width="100%" height="100%" fill="#333333"/>',
              '<text x="16" y="28" font-family="Arial,sans-serif" font-size="20" fill="white">OpenMatrix9 — Solid / minimal SVG</text>',
-             '<text x="16" y="48" font-family="Arial,sans-serif" font-size="12" fill="#cccccc">30 icons · purple solids · warm-yellow result / selected feature · white actions · 64px and 24px samples</text>']
+             f'<text x="16" y="48" font-family="Arial,sans-serif" font-size="12" fill="#cccccc">{len(keys)} icons · purple solids · warm-yellow result / selected feature · white actions · 64px and 24px samples</text>']
     for i,key in enumerate(keys):
         x,y = (i%columns)*cell_w,64+(i//columns)*cell_h
         label,_,_,geometry = SOLID_ICONS[key]

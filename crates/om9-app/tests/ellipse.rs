@@ -33,10 +33,11 @@ fn ellipse_center_major_and_minor_points_match() {
     c.submit("Ellipse").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     for expected in ["RadiusX=", "RadiusY=", "MarkFoci"] {
-        assert!(c
-            .ellipse_option_tokens()
-            .iter()
-            .any(|(_, command)| *command == expected));
+        assert!(
+            c.ellipse_option_tokens()
+                .iter()
+                .any(|(_, command)| *command == expected)
+        );
     }
     c.accept_world_point([10.0, 0.0, 0.0]).unwrap();
     c.accept_world_point([0.0, 5.0, 0.0]).unwrap();
@@ -67,7 +68,6 @@ fn ellipse_preview_is_a_closed_ring() {
     assert_eq!(c.ellipse_preview([10.0, 0.0, 0.0]).len(), 64);
 }
 
-
 #[test]
 fn ellipse_corner_mode_uses_the_bounding_box() {
     let mut c = controller();
@@ -81,7 +81,6 @@ fn ellipse_corner_mode_uses_the_bounding_box() {
     assert!((max[1] - 5.0).abs() < 1e-9);
     assert!((min[1] + 5.0).abs() < 1e-9);
 }
-
 
 #[test]
 fn ellipse_diameter_mode_uses_major_diameter() {
@@ -123,7 +122,6 @@ fn ellipse_from_foci_uses_the_focal_sum() {
     assert!((max[1] - 4.0).abs() < 1e-9);
 }
 
-
 #[test]
 fn ellipse_center_follows_the_active_cplane() {
     let mut c = controller();
@@ -138,7 +136,6 @@ fn ellipse_center_follows_the_active_cplane() {
     assert!((max[2] - 5.0).abs() < 1e-9);
     assert!(min[1].abs() < 1e-9 && max[1].abs() < 1e-9);
 }
-
 
 #[test]
 fn ellipse_mark_foci_creates_two_points() {
@@ -158,17 +155,17 @@ fn ellipse_mark_foci_creates_two_points() {
     assert_eq!(points, 2);
 }
 
-
 #[test]
 fn ellipse_deformable_rebuilds_to_the_requested_point_count() {
     let mut c = controller();
     c.submit("Ellipse").unwrap();
     c.submit("Deformable=on").unwrap();
     for expected in ["Degree=", "PointCount="] {
-        assert!(c
-            .ellipse_option_tokens()
-            .iter()
-            .any(|(_, command)| *command == expected));
+        assert!(
+            c.ellipse_option_tokens()
+                .iter()
+                .any(|(_, command)| *command == expected)
+        );
     }
     c.submit("Degree=3").unwrap();
     c.submit("PointCount=32").unwrap();
@@ -185,7 +182,6 @@ fn ellipse_deformable_rebuilds_to_the_requested_point_count() {
     assert_eq!(curve.poles.len(), 32);
 }
 
-
 #[test]
 fn ellipse_exposes_mode_tokens() {
     let mut c = controller();
@@ -195,7 +191,6 @@ fn ellipse_exposes_mode_tokens() {
         assert!(tokens.iter().any(|(_, command)| *command == expected));
     }
 }
-
 
 #[test]
 fn ellipse_corner_follows_the_active_cplane() {
@@ -211,7 +206,6 @@ fn ellipse_corner_follows_the_active_cplane() {
     assert!((max[2] - 20.0).abs() < 1e-9, "{max:?}");
     assert!(min[1].abs() < 1e-9 && max[1].abs() < 1e-9);
 }
-
 
 #[test]
 fn ellipse_vertical_follows_the_active_cplane() {
@@ -229,7 +223,6 @@ fn ellipse_vertical_follows_the_active_cplane() {
     assert!(min[1].abs() < 1e-9 && max[1].abs() < 1e-9);
 }
 
-
 #[test]
 fn ellipse_around_curve_uses_the_path() {
     let mut doc = Document::new("ellipse around");
@@ -245,10 +238,11 @@ fn ellipse_around_curve_uses_the_path() {
     c.select_objects(&[id]).unwrap();
     c.submit("Ellipse").unwrap();
     c.submit("AroundCurve").unwrap();
-    assert!(c
-        .ellipse_option_tokens()
-        .iter()
-        .any(|(_, command)| *command == "OnCurve="));
+    assert!(
+        c.ellipse_option_tokens()
+            .iter()
+            .any(|(_, command)| *command == "OnCurve=")
+    );
     c.submit("OnCurve=0.5").unwrap();
     c.submit("RadiusX=5").unwrap();
     c.submit("RadiusY=3").unwrap();
@@ -268,7 +262,6 @@ fn ellipse_around_curve_uses_the_path() {
     let count = curve.poles.len() as f64;
     assert!((center[0] / count - 5.0).abs() < 0.1);
 }
-
 
 #[test]
 fn ellipse_around_curve_preview_uses_the_path_normal() {
@@ -294,7 +287,6 @@ fn ellipse_around_curve_preview_uses_the_path_normal() {
         assert!((radius - 5.0).abs() < 1e-9);
     }
 }
-
 
 #[test]
 fn ellipse_around_curve_accepts_a_path_pick() {
@@ -324,11 +316,21 @@ fn ellipse_around_curve_accepts_a_path_pick() {
     let Geometry::Curve(om9_core::geometry::Curve::Nurbs(curve)) = &entity.geometry else {
         panic!("nurbs");
     };
-    let min_x = curve.poles.iter().map(|point| point[0]).fold(f64::MAX, f64::min);
-    let max_x = curve.poles.iter().map(|point| point[0]).fold(f64::MIN, f64::max);
-    assert!(((min_x + max_x) * 0.5 - 5.0).abs() < 1e-6, "{min_x} {max_x}");
+    let min_x = curve
+        .poles
+        .iter()
+        .map(|point| point[0])
+        .fold(f64::MAX, f64::min);
+    let max_x = curve
+        .poles
+        .iter()
+        .map(|point| point[0])
+        .fold(f64::MIN, f64::max);
+    assert!(
+        ((min_x + max_x) * 0.5 - 5.0).abs() < 1e-6,
+        "{min_x} {max_x}"
+    );
 }
-
 
 #[test]
 fn ellipse_from_foci_exposes_undo_token() {
@@ -336,12 +338,12 @@ fn ellipse_from_foci_exposes_undo_token() {
     c.submit("Ellipse").unwrap();
     c.submit("FromFoci").unwrap();
     c.accept_world_point([-3.0, 0.0, 0.0]).unwrap();
-    assert!(c
-        .ellipse_option_tokens()
-        .iter()
-        .any(|(_, command)| *command == "Undo"));
+    assert!(
+        c.ellipse_option_tokens()
+            .iter()
+            .any(|(_, command)| *command == "Undo")
+    );
 }
-
 
 #[test]
 fn ellipse_center_mode_can_mark_foci() {
@@ -364,15 +366,15 @@ fn ellipse_center_mode_can_mark_foci() {
     assert!((point[0].abs() - 75.0f64.sqrt()).abs() < 1e-6);
 }
 
-
 #[test]
 fn ellipse_accepts_approx_alias() {
     let mut c = controller();
     c.submit("Ellipse").unwrap();
-    assert!(c
-        .ellipse_option_tokens()
-        .iter()
-        .any(|(_, command)| *command == "Approx"));
+    assert!(
+        c.ellipse_option_tokens()
+            .iter()
+            .any(|(_, command)| *command == "Approx")
+    );
     c.submit("Approx=on").unwrap();
     c.submit("PointCount=12").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
@@ -389,7 +391,6 @@ fn ellipse_accepts_approx_alias() {
     };
     assert_eq!(curve.poles.len(), 12);
 }
-
 
 #[test]
 fn ellipse_accepts_bare_deformable_option() {
@@ -412,7 +413,6 @@ fn ellipse_accepts_bare_deformable_option() {
     assert_eq!(curve.poles.len(), 12);
 }
 
-
 #[test]
 fn ellipse_deformable_token_toggles_off() {
     let mut c = controller();
@@ -433,4 +433,31 @@ fn ellipse_deformable_token_toggles_off() {
         panic!("nurbs");
     };
     assert_eq!(curve.poles.len(), 9);
+}
+
+#[test]
+fn ellipse_radii_use_the_shared_option_entries() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    let mut c = controller();
+    c.submit("Ellipse").unwrap();
+    c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    for (name, draft, value) in [
+        ("RadiusX", "RadiusX=", "RadiusX=10"),
+        ("RadiusY", "RadiusY=", "RadiusY=5"),
+    ] {
+        let option = c
+            .command_options()
+            .into_iter()
+            .find(|option| option.id.name() == name)
+            .unwrap_or_else(|| panic!("{name} option"));
+        assert_eq!(
+            c.activate_command_option(option.id).unwrap(),
+            CommandOptionEffect::Draft(draft.into())
+        );
+        c.submit(value).unwrap();
+    }
+    c.submit("").unwrap();
+    let (_min, max) = bounds(&c);
+    assert!((max[0] - 10.0).abs() < 1e-9);
+    assert!((max[1] - 5.0).abs() < 1e-9);
 }

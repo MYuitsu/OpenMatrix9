@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-12-006",
+  "title": "Gem Springs And Relaxation",
+  "cases": [
+    "overlapping stones are pushed apart while staying on the surface",
+    "move/resize use the typed Spacing, Minimum Spacing, Iterations and Strength",
+    "Add/Remove/Lock are represented by the selected gem set and the plan",
+    "Undo restores the previous placements and geometry"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

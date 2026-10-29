@@ -1,0 +1,415 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3m 01s
+     Running tests\continue_curve.rs (L:\om9-target\debug\deps\continue_curve-553c4c96be4bc091.exe)
+
+running 2 tests
+test continue_curve_accepts_degree_option ... ok
+test continue_curve_starts_at_the_last_control_point ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\continue_interp.rs (L:\om9-target\debug\deps\continue_interp-60b85137e3176135.exe)
+
+running 2 tests
+test continue_interp_curve_starts_from_the_selected_end ... ok
+test continue_interp_accepts_degree_option ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\control_curve.rs (L:\om9-target\debug\deps\control_curve-132b3aafca660b6e.exe)
+
+running 2 tests
+test control_curve_accepts_degree_option ... ok
+test control_curve_uses_the_clicked_poles ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\corner_ops.rs (L:\om9-target\debug\deps\corner_ops-1715c22e812ba917.exe)
+
+running 3 tests
+test corner_ops_expose_the_matching_option ... ok
+test chamfer_creates_a_corner_line ... ok
+test fillet_creates_a_tangent_arc ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\cross_section.rs (L:\om9-target\debug\deps\cross_section-7b923351779a33ce.exe)
+
+running 3 tests
+test cross_section_exposes_count_and_spacing_tokens ... ok
+test cross_section_profiles_generate_multiple_sections ... ok
+test cross_section_options_use_the_shared_snapshot ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\crv_seam.rs (L:\om9-target\debug\deps\crv_seam-4f3c1d1e34098321.exe)
+
+running 2 tests
+test crv_seam_exposes_seam_token ... ok
+test crv_seam_moves_the_circle_start_angle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\curve_boolean.rs (L:\om9-target\debug\deps\curve_boolean-effdb323b04fc259.exe)
+
+running 4 tests
+test curve_boolean_joins_connected_boundary_curves ... ok
+test curve_boolean_nested_circle_keeps_the_outer_boundary ... ok
+test curve_boolean_keeps_two_disjoint_circles ... ok
+test curve_boolean_unions_two_overlapping_circles ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\curve_soft_edit.rs (L:\om9-target\debug\deps\curve_soft_edit-b19301e6188ce47b.exe)
+
+running 1 test
+test curve_soft_edit_moves_a_single_edit_point ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\divide.rs (L:\om9-target\debug\deps\divide-da69d22fb63d7e8b.exe)
+
+running 3 tests
+test divide_exposes_count_token ... ok
+test divide_places_intermediate_points ... ok
+test divide_uses_equal_arc_length_stations ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\dup_border.rs (L:\om9-target\debug\deps\dup_border-65abe06720a0de39.exe)
+
+running 1 test
+test dup_border_creates_four_boundary_curves ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\ellipse.rs (L:\om9-target\debug\deps\ellipse-f6583d1287fbe209.exe)
+
+running 22 tests
+test ellipse_exposes_mode_tokens ... ok
+test ellipse_from_foci_exposes_undo_token ... ok
+test ellipse_preview_is_a_closed_ring ... ok
+test ellipse_around_curve_preview_uses_the_path_normal ... ok
+test ellipse_corner_mode_uses_the_bounding_box ... ok
+test ellipse_corner_follows_the_active_cplane ... ok
+test ellipse_radii_use_the_shared_option_entries ... ok
+test ellipse_deformable_token_toggles_off ... ok
+test ellipse_from_foci_uses_the_focal_sum ... ok
+test ellipse_center_major_and_minor_points_match ... ok
+test ellipse_vertical_mode_swaps_the_radii ... ok
+test ellipse_center_follows_the_active_cplane ... ok
+test ellipse_vertical_follows_the_active_cplane ... ok
+test ellipse_diameter_mode_uses_major_diameter ... ok
+test ellipse_radius_options_commit_on_enter ... ok
+test ellipse_deformable_rebuilds_to_the_requested_point_count ... ok
+test ellipse_around_curve_uses_the_path ... ok
+test ellipse_accepts_approx_alias ... ok
+test ellipse_around_curve_accepts_a_path_pick ... ok
+test ellipse_accepts_bare_deformable_option ... ok
+test ellipse_mark_foci_creates_two_points ... ok
+test ellipse_center_mode_can_mark_foci ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\extend_curve.rs (L:\om9-target\debug\deps\extend_curve-5f0fb449ac213138.exe)
+
+running 2 tests
+test extend_curve_adds_a_tangent_line ... ok
+test extend_can_use_the_start_end ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\fillet_corners.rs (L:\om9-target\debug\deps\fillet_corners-b625d42b7f18a40d.exe)
+
+running 2 tests
+test fillet_corners_exposes_radius_token ... ok
+test fillet_corners_creates_an_arc_at_each_corner ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\fit.rs (L:\om9-target\debug\deps\fit-b942a4104ff649a1.exe)
+
+running 2 tests
+test fit_exposes_tolerance_token ... ok
+test fit_curve_refits_a_circle_within_tolerance ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\helix.rs (L:\om9-target\debug\deps\helix-3859fd4162ccb05c.exe)
+
+running 6 tests
+test helix_preview_is_a_wire ... ok
+test helix_exposes_options_and_undo ... ok
+test helix_follows_the_active_cplane_axis ... ok
+test helix_uses_height_and_turns ... ok
+test helix_accepts_radius_option ... ok
+test helix_accepts_a_custom_axis ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests\interp.rs (L:\om9-target\debug\deps\interp-3026dc650a3cff21.exe)
+
+running 4 tests
+test interp_curve_preview_follows_the_cursor ... ok
+test interp_preview_uses_the_interpolated_curve ... ok
+test interp_curve_fits_four_points ... ok
+test interp_curve_accepts_degree_option ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\interp_on_surface.rs (L:\om9-target\debug\deps\interp_on_surface-64a9ac88a040ba27.exe)
+
+running 1 test
+test interp_curve_on_surface_projects_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\intersect.rs (L:\om9-target\debug\deps\intersect-8197c828b2cac3a7.exe)
+
+running 3 tests
+test intersect_exposes_tolerance_token ... ok
+test intersect_handles_two_circles_with_the_core_solver ... ok
+test intersect_creates_a_point_at_the_crossing ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests\intersect_two_sets.rs (L:\om9-target\debug\deps\intersect_two_sets-0064db6d92a16847.exe)
+
+running 1 test
+test intersect_two_sets_creates_all_crossing_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.66s
+
+     Running tests\isocurve.rs (L:\om9-target\debug\deps\isocurve-29db5701650c57e1.exe)
+
+running 2 tests
+test isocurve_exposes_u_v_tokens ... ok
+test extract_isocurve_creates_a_curve_from_a_surface ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\mesh_curve.rs (L:\om9-target\debug\deps\mesh_curve-26d804cd0deca8a9.exe)
+
+running 1 test
+test mesh_curve_projects_points_onto_the_mesh ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\offset.rs (L:\om9-target\debug\deps\offset-f8cddf4a70bd6fa3.exe)
+
+running 4 tests
+test offset_exposes_distance_token ... ok
+test offset_curve_moves_a_circle_outward ... ok
+test offset_distance_uses_the_shared_option_entry ... ok
+test offset_curve_follows_the_active_cplane ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\offset_normal.rs (L:\om9-target\debug\deps\offset_normal-9f5c5f620b27c000.exe)
+
+running 1 test
+test offset_normal_moves_along_the_surface_normal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\offset_on_surface.rs (L:\om9-target\debug\deps\offset_on_surface-9a490c6e068152ce.exe)
+
+running 1 test
+test offset_curve_on_surface_shifts_across_the_surface ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests\polygon.rs (L:\om9-target\debug\deps\polygon-1f337fd8cdcfa5d1.exe)
+
+running 7 tests
+test polygon_exposes_options_and_undo ... ok
+test polygon_preview_uses_the_cursor_radius ... ok
+test polygon_defaults_to_a_square ... ok
+test polygon_starts_at_the_radius_point ... ok
+test polygon_follows_the_active_cplane ... ok
+test polygon_circumscribed_uses_the_apothem ... ok
+test polygon_accepts_a_side_count ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\polyline.rs (L:\om9-target\debug\deps\polyline-fadd109f467f2674.exe)
+
+running 3 tests
+test polyline_preview_follows_the_cursor ... ok
+test polyline_close_adds_the_closing_segment ... ok
+test polyline_enter_commits_open_segments ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\polyline_command.rs (L:\om9-target\debug\deps\polyline_command-1839892d03ee8873.exe)
+
+running 2 tests
+test polyline_options_persistent_close_length_and_helpers ... ok
+test empty_enter_finishes_polyline_and_delete_removes_it ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\polyline_mode_regression.rs (L:\om9-target\debug\deps\polyline_mode_regression-013d8b1a62203727.exe)
+
+running 9 tests
+test invalid_arc_retains_points_and_cancel_keeps_the_document_empty ... ok
+test typed_options_and_coordinates_construct_arc_direction_and_center ... ok
+test menu_and_cmd_build_the_same_line_arc_line_with_one_undo ... ok
+test viewport_typing_m_uses_mode_instead_of_mid_snap ... ok
+test holding_m_toggles_once_and_keeps_the_draft_empty ... ok
+test shortcuts_preserve_nonempty_drafts_paste_and_ime ... ok
+test m_toggles_twice_and_updates_live_prompt_without_a_draft ... ok
+test switching_back_after_an_arc_keeps_close_distinct_from_persistent_close ... ok
+test clicking_mode_and_flags_uses_the_same_toggle_as_the_keyboard ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.61s
+
+     Running tests\polyline_on_surface.rs (L:\om9-target\debug\deps\polyline_on_surface-72351e8251fe714d.exe)
+
+running 1 test
+test polyline_on_surface_projects_and_connects_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\polyline_options_interface.rs (L:\om9-target\debug\deps\polyline_options_interface-10d3c0a086430b9d.exe)
+
+running 3 tests
+test descriptors_expose_current_values_and_unambiguous_stage_shortcuts ... ok
+test invalid_value_retains_the_parameter_stage_and_has_no_document_effect ... ok
+test every_polyline_parameter_has_the_same_keyboard_pointer_and_typed_behavior ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.83s
+
+     Running tests\polyline_shortcuts.rs (L:\om9-target\debug\deps\polyline_shortcuts-d05bee2cca931d56.exe)
+
+running 1 test
+test underlined_polyline_shortcut_toggles_without_writing_to_draft ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
+
+     Running tests\project.rs (L:\om9-target\debug\deps\project-e8e406ac01b1e438.exe)
+
+running 4 tests
+test project_exposes_direction_token ... ok
+test project_curve_drops_to_the_construction_plane ... ok
+test project_direction_vector_controls_the_ray ... ok
+test project_uses_the_active_cplane ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\pull.rs (L:\om9-target\debug\deps\pull-f8d9299de54583ba.exe)
+
+running 2 tests
+test pull_exposes_tolerance_token ... ok
+test pull_curve_lands_on_the_surface ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\rebuild.rs (L:\om9-target\debug\deps\rebuild-2397775d07b064a2.exe)
+
+running 3 tests
+test rebuild_exposes_degree_and_points_tokens ... ok
+test rebuild_curve_uses_the_requested_point_count ... ok
+test rebuild_curve_accepts_a_degree_option ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\rect.rs (L:\om9-target\debug\deps\rect-642ca4d04402cd07.exe)
+
+running 16 tests
+test rectangle_vertical_preview_uses_the_vertical_edge ... ok
+test rectangle_center_preview_is_centered ... ok
+test rectangle_three_point_preview_uses_the_edge_frame ... ok
+test rectangle_preview_has_four_edges ... ok
+test rectangle_preview_follows_the_active_cplane ... ok
+test rectangle_square_option_uses_the_longer_side ... ok
+test rectangle_center_mode_uses_the_center_and_doubles_the_extent ... ok
+test rectangle_three_point_accepts_numeric_width ... ok
+test rectangle_width_and_height_commit_after_enter ... ok
+test rectangle_three_point_mode_uses_edge_then_width ... ok
+test rectangle_three_point_accepts_numeric_height ... ok
+test rectangle_square_uses_the_shared_option_snapshot ... ok
+test rectangle_two_corners_match ... ok
+test rectangle_vertical_mode_uses_a_vertical_edge ... ok
+test rectangle_follows_the_active_cplane ... ok
+test rectangle_accepts_length_option ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\section.rs (L:\om9-target\debug\deps\section-656b573a994a26e6.exe)
+
+running 1 test
+test section_intersects_a_cylinder_with_the_cplane ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\silhouette.rs (L:\om9-target\debug\deps\silhouette-f95f10d8a1de6469.exe)
+
+running 1 test
+test silhouette_finds_the_view_contour_of_a_cylinder ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\sketch.rs (L:\om9-target\debug\deps\sketch-ab63f0466568c742.exe)
+
+running 1 test
+test sketch_connects_selected_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\sketch_on_surface.rs (L:\om9-target\debug\deps\sketch_on_surface-e53a956c2da7bc6c.exe)
+
+running 1 test
+test sketch_on_surface_projects_points_into_a_polyline ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\spiral.rs (L:\om9-target\debug\deps\spiral-738a13d5b0e1c8f1.exe)
+
+running 5 tests
+test spiral_exposes_options ... ok
+test spiral_preview_grows_with_the_radius ... ok
+test spiral_grows_from_start_to_end_radius ... ok
+test spiral_accepts_a_custom_axis ... ok
+test spiral_accepts_start_radius_option ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests\through_points.rs (L:\om9-target\debug\deps\through_points-8d0d2269f7492720.exe)
+
+running 2 tests
+test curve_through_points_interpolates_selected_points ... ok
+test through_points_accepts_degree_option ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\to_lines.rs (L:\om9-target\debug\deps\to_lines-37a83be65d7bb377.exe)
+
+running 2 tests
+test to_lines_exposes_count_token ... ok
+test convert_curve_to_lines_uses_the_requested_segments ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\tween_curves.rs (L:\om9-target\debug\deps\tween_curves-2041f2ae1bec4167.exe)
+
+running 2 tests
+test tween_curves_builds_the_midpoint_curve ... ok
+test tween_curves_count_creates_multiple_curves ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\uv_curves.rs (L:\om9-target\debug\deps\uv_curves-73c9dcfdaf5ff1e4.exe)
+
+running 1 test
+test create_uv_curves_writes_the_uv_rectangle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\wireframe.rs (L:\om9-target\debug\deps\wireframe-be40f8d509b59ae8.exe)
+
+running 1 test
+test dup_edge_extracts_the_brep_display_edges ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+

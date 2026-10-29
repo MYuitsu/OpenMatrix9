@@ -1,0 +1,57 @@
+{
+  "schema": "om9.m05.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-13-002",
+  "title": "Gem Control And Size Edits",
+  "owner": "om9-core gem_edits owner + om9-app gem edit/report session",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/gem_edits.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-core/src/gem.rs",
+      "state": "REUSED_GEM_OWNER"
+    },
+    {
+      "path": "crates/om9-core/src/builder_style.rs",
+      "state": "REUSED_NAME_RULES"
+    },
+    {
+      "path": "crates/om9-core/tests/gem_edits.rs",
+      "state": "REGISTERED_TESTS"
+    },
+    {
+      "path": "crates/om9-app/src/session/gem_edits.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-app/src/session/gem.rs",
+      "state": "REUSED_GEM_SESSION"
+    },
+    {
+      "path": "crates/om9-app/src/session.rs",
+      "state": "COMMAND_WIRING"
+    },
+    {
+      "path": "crates/om9-app/tests/gem_edits.rs",
+      "state": "REGISTERED_TESTS"
+    }
+  ],
+  "source_audit": {
+    "matrix_assets": "NOT_COPIED",
+    "result": "PROCEDURAL_DATA_ONLY",
+    "detail": "No Matrix asset, catalogue bitmap or decompiled resource is read or shipped. Edits operate on the typed GemSpec/GemRecord owner and every weight comes from the closed procedural mesh in crates/om9-core/src/gem.rs."
+  },
+  "planning_inputs": [
+    "OM9_Milestones/M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-002 - Gem Control And Size Edits/l3.json",
+    "OM9_Milestones/M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L2.json"
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The gem body stays the mesh/record owner of OM9-L2-04-09; this module edits the record and regenerates the body through the same build_mesh.",
+    "The Matrix command names of the family are preserved and dispatch to one session.",
+    "An edit is pure data: no core function mutates the document, the session commits one transaction."
+  ]
+}

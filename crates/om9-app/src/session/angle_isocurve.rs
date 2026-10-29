@@ -72,7 +72,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.angle_isocurve_pending = Some(pending);
-            return Some(Err(Error::Invalid("AngleIsocurve accepts Angle=, Direction= or Enter")));
+            return Some(Err(Error::Invalid(
+                "AngleIsocurve accepts Angle=, Direction= or Enter",
+            )));
         }
         let turns = (pending.angle / 360.0).rem_euclid(1.0);
         let iso = if pending.axis == 0 {

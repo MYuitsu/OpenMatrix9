@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-20-005",
+  "case": "Length on a 5 mm line, menu icon and Command Line",
+  "input": "Length on a 5 mm line, menu icon and Command Line",
+  "expected": "status `Info: Length = 5 mm`, one history line, Undo journal and document unchanged"
+}

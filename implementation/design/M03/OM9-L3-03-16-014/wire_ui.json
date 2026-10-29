@@ -2,14 +2,16 @@
   "schema": "om9.m03.l2-03-16.wire_ui.v1",
   "l3_id": "OM9-L3-03-16-014",
   "menu_icon": "BuilderCrv2ViewHistory",
-  "command_id": "OM9-CURVE-114",
+  "command_id": "OM9-CURVE-014",
   "menu_and_commandline_same_id": true,
-  "enabled": false,
-  "disabled_reason": "no verified backend owner for Curve 2 Views with History; menu stays disabled",
-  "visible_disabled_reason": true,
-  "ui_state": "DISABLED_VISIBLE_REASON",
+  "enabled": true,
+  "disabled_reason": "",
+  "visible_disabled_reason": false,
+  "ui_state": "ENABLED",
   "owner_service_reused": null,
   "transaction": "one session; one Undo entry",
   "smoke_receipt": "implementation/evidence/M03/OM9-L3-03-16-014/OM9-L4-03-16-014-02.wire.json",
-  "status": "VERIFIED_DISABLED_PLACEHOLDER"
+  "status": "VERIFIED_ENABLED_SESSION",
+  "menu_label": "Curve 2 Views with History",
+  "documented_script": "Crv2View"
 }

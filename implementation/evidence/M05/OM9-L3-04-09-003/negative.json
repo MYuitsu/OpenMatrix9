@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-09-003",
+  "title": "Gem Loader Shape Cut Size Picker",
+  "cases": [
+    "Size=999, Depth=0, Shape=Blob, Unknown=1 -> typed error, loader stays open",
+    "Cancel drops the preview and leaves the document unchanged",
+    "a locked Gem layer refuses the insert and leaves the document empty"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

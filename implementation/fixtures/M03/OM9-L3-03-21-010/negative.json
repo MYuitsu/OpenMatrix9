@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-010",
+  "case": "no selection, or more than one",
+  "expected": "no selection, or more than one -> Error::Invalid(\"select one annotation\"); a locked object -> Error::Permission(\"annotation edit\"); a Text Block or Leader -> Error::Invalid(\"select a dimension\")",
+  "test": "crates/om9-app/tests/annotation.rs::preview_cancel_invalid_witness_and_native_archive_roundtrip"
+}

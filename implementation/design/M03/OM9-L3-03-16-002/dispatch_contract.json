@@ -11,7 +11,7 @@
   "undo_transaction_policy": "one command session = one transaction; cancel/refusal writes nothing",
   "dialog_result_mapping": "menu and command line resolve to the same command_id; a disabled row reports the reason and does not mutate",
   "disabled_reason": "",
-  "status": "DISPATCH_IMPLEMENTED",
+  "status": "IMPLEMENTED_AWAITING_UI_REVIEW",
   "backend_owner": "OM9-L3-02-04-001",
   "reviewed_sources": [
     "crates/om9-app/src/curve_menu.rs",

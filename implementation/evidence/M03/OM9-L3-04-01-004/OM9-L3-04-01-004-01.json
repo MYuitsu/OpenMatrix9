@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-004-01",
+  "l3_id": "OM9-L3-04-01-004",
+  "kind": "Automated Runtime",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Scale Non-Uniform: golden case 'box 10x10x10 at the world origin, base point 0,0,0, factors 2 / 3 / 4' -> the far corner moves from (10,10,10) to (20,30,40)",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_004_scale_non_uniform_applies_three_factors"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

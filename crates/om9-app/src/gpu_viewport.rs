@@ -12,6 +12,16 @@ use eframe::egui_wgpu::RenderState;
 use eframe::wgpu;
 use om9_render::{Camera, MeshData};
 
+type HiddenSources = Option<[om9_core::identity::ObjectId; 2]>;
+
+fn presentation_snapshot(scene: &om9_scene::scene::Scene, hidden: HiddenSources) -> om9_scene::scene::Scene {
+    let mut snapshot = scene.render_snapshot();
+    if let Some(hidden) = hidden {
+        snapshot.objects.retain(|object| !hidden.contains(&object.root));
+    }
+    snapshot
+}
+
 /// One viewport's GPU target and its registration in egui.
 pub struct GpuViewport {
     size: (u32, u32),
@@ -37,6 +47,7 @@ pub struct GpuViewport {
     last_selection: Option<u64>,
     /// Revision of the transient gumball preview: a drag must repaint every viewport.
     last_preview: Option<u64>,
+    last_hidden_sources: Option<HiddenSources>,
     /// Stress scene (`OM9_GPU_STRESS=N`): a batch of N boxes sharing one arena, instead of the sphere.
     batch: Option<om9_render::scene::SceneBatch>,
     /// The same stress scene through the GPU cluster culler, when `OM9_GPU_CLUSTER` is set.
@@ -89,6 +100,7 @@ pub struct RefinementKey {
     selection: u64,
     cplane: u64,
     preview: u64,
+    hidden_sources: HiddenSources,
     size: (u32, u32),
     generation: u64,
 }
@@ -100,7 +112,7 @@ pub type SharedResourcePool = std::sync::Arc<std::sync::Mutex<ResourcePool>>;
 pub struct ResourcePool {
     encoder: Option<wgpu::CommandEncoder>,
     budget: Option<UploadBudget>,
-    signature: Option<(om9_core::identity::DocumentId, u64, u64)>,
+    signature: Option<(om9_core::identity::DocumentId, u64, u64, HiddenSources)>,
     entries: std::collections::BTreeMap<u32, ResourceEntry>,
 }
 pub fn submit_window(pool: &SharedResourcePool, state: &RenderState) -> bool {
@@ -145,7 +157,7 @@ impl Default for ViewportRenderRequest {
         }
     }
 }
-type OverlayKey = (om9_core::identity::DocumentId, u64, u64, u64, u32, u64);
+type OverlayKey = (om9_core::identity::DocumentId, u64, u64, u64, u32, u64, HiddenSources);
 struct ViewOverlays {
     key: OverlayKey,
     fixed: om9_render::overlay::OverlayBatch,
@@ -347,6 +359,7 @@ impl GpuViewport {
             last_cplane: None,
             last_selection: None,
             last_preview: None,
+            last_hidden_sources: None,
             batch,
             cluster,
             shared_scene,
@@ -497,6 +510,7 @@ impl GpuViewport {
         self.last_cplane = None;
         self.last_selection = None;
         self.last_preview = None;
+        self.last_hidden_sources = None;
     }
 
     /// The cluster renderer, when this viewport draws through the cluster path.
@@ -926,12 +940,13 @@ impl GpuViewport {
         viewport: om9_scene::camera::Viewport,
         selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
         selection: u64,
+        hidden_sources: HiddenSources,
         samples: u32,
     ) -> bool {
         let Some(scene) = scene else {
             return false;
         };
-        let signature = (scene.document.id, scene.epoch, selection);
+        let signature = (scene.document.id, scene.epoch, selection, hidden_sources);
         let mut pool = self.pool.lock().unwrap_or_else(|e| e.into_inner());
         if pool.signature != Some(signature) {
             pool.signature = Some(signature);
@@ -976,7 +991,7 @@ impl GpuViewport {
             && entry.job.is_none()
             && !entry.failed
         {
-            let snapshot = scene.render_snapshot();
+            let snapshot = presentation_snapshot(scene, hidden_sources);
             let state = state.clone();
             let camera = camera.clone();
             let selected = selected.clone();
@@ -1033,6 +1048,7 @@ impl GpuViewport {
             cplane.revision,
             samples,
             point_size.to_bits(),
+            hidden_sources,
         );
         // Orbit/pan preserve point size; moving zoom reuses its last point markers until settling.
         let overlay_valid = self.overlays.as_ref().is_some_and(|o| {
@@ -1043,6 +1059,7 @@ impl GpuViewport {
                     && o.key.2 == key.2
                     && o.key.3 == key.3
                     && o.key.4 == key.4)
+                    && o.key.6 == key.6
         });
         if !overlay_valid {
             if self.overlay_job.as_ref().is_some_and(|(k, _)| {
@@ -1052,7 +1069,8 @@ impl GpuViewport {
                         && k.1 == key.1
                         && k.2 == key.2
                         && k.3 == key.3
-                        && k.4 == key.4)
+                        && k.4 == key.4
+                        && k.6 == key.6)
             }) {
                 self.overlay_job = None;
             }
@@ -1063,6 +1081,7 @@ impl GpuViewport {
                         && o.key.2 == key.2
                         && o.key.3 == key.3
                         && o.key.5 == key.5
+                        && o.key.6 == key.6
                         && o.fixed.pending_upload_bytes() == 0
                         && o.moving.pending_upload_bytes() == 0
                         && o.ghost.pending_upload_bytes() == 0
@@ -1079,7 +1098,7 @@ impl GpuViewport {
                     })
                     .map(|rx| (key, rx));
                 } else {
-                    let snapshot = scene.render_snapshot();
+                    let snapshot = presentation_snapshot(scene, hidden_sources);
                     let state = state.clone();
                     let selected = selected.clone();
                     self.overlay_job = prepare_task(move || {
@@ -1111,7 +1130,8 @@ impl GpuViewport {
                             && job_key.1 == key.1
                             && job_key.2 == key.2
                             && job_key.3 == key.3
-                            && job_key.4 == key.4)
+                            && job_key.4 == key.4
+                            && job_key.6 == key.6)
                     {
                         self.overlays = Some(overlays);
                     }
@@ -1191,6 +1211,7 @@ impl GpuViewport {
         selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
         selection_revision: u64,
         preview_revision: u64,
+        hidden_sources: HiddenSources,
         _close: bool,
     ) -> bool {
         let pixels_per_point = ui.ctx().pixels_per_point();
@@ -1258,7 +1279,8 @@ impl GpuViewport {
             && self.last_epoch == Some(epoch)
             && self.last_cplane == Some(cplane.revision)
             && self.last_selection == Some(selection_revision)
-            && self.last_preview == Some(preview_revision);
+            && self.last_preview == Some(preview_revision)
+            && self.last_hidden_sources == Some(hidden_sources);
         let document = self.batch.is_none() && self.cluster.is_none();
         if document {
             self.preparing = false;
@@ -1272,6 +1294,7 @@ impl GpuViewport {
                 selection: selection_revision,
                 cplane: cplane.revision,
                 preview: preview_revision,
+                hidden_sources,
                 size: (width, height),
                 generation: self.request.generation,
             });
@@ -1325,6 +1348,7 @@ impl GpuViewport {
                 viewport,
                 selected,
                 selection_revision,
+                hidden_sources,
                 samples,
             ) {
                 self.preparing = true;
@@ -1493,6 +1517,7 @@ impl GpuViewport {
                 self.last_cplane = Some(cplane.revision);
                 self.last_selection = Some(selection_revision);
                 self.last_preview = Some(preview_revision);
+                self.last_hidden_sources = Some(hidden_sources);
                 drop(slot);
                 if self.request.moving {
                     if let Some(old) = self.published_id.replace(texture_id)
@@ -1545,6 +1570,7 @@ impl GpuViewport {
         self.last_cplane = Some(cplane.revision);
         self.last_selection = Some(selection_revision);
         self.last_preview = Some(preview_revision);
+        self.last_hidden_sources = Some(hidden_sources);
         let uv = egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0));
         ui.painter()
             .image(texture_id, rect, uv, egui::Color32::WHITE);

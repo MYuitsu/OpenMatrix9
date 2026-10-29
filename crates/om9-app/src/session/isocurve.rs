@@ -72,7 +72,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.isocurve_pending = Some(pending);
-            return Some(Err(Error::Invalid("ExtractIsocurve accepts U=, V= or Enter")));
+            return Some(Err(Error::Invalid(
+                "ExtractIsocurve accepts U=, V= or Enter",
+            )));
         }
         let curve = match om9_core::surface_kernel::isocurve(
             &pending.surface,
@@ -83,7 +85,11 @@ impl Controller {
             Ok(curve) => curve,
             Err(error) => return Some(Err(error)),
         };
-        Some(self.commit_geometry(ISOCURVE, "ExtractIsocurve", Geometry::Curve(Curve::Nurbs(curve))))
+        Some(self.commit_geometry(
+            ISOCURVE,
+            "ExtractIsocurve",
+            Geometry::Curve(Curve::Nurbs(curve)),
+        ))
     }
 
     pub fn isocurve_option_tokens(&self) -> Vec<(&'static str, &'static str)> {

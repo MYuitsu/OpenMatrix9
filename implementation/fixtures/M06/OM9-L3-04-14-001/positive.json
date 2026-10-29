@@ -1,0 +1,26 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-14-001",
+  "cases": [
+    {
+      "input": "round 6 mm gem, Prongs=4, Rails=2, default Height/Drop",
+      "expect": "4 prongs and 2 rails, every body closed with positive volume, prong ids gem:<id>:prong:NN",
+      "oracle": "om9-core src/settings/head.rs::a_basket_head_builds_closed_prongs_and_rails"
+    },
+    {
+      "input": "oval 8x6 gem, Prongs=8",
+      "expect": "8 prongs standing on the oval outline (nudge offset), long and short axes both represented, all bodies closed",
+      "oracle": "om9-core src/settings/head.rs::non_round_girdles_build_and_keep_prong_symmetry"
+    },
+    {
+      "input": "BuilderHead icon with a selected gem",
+      "expect": "preview message reports prong/rail counts and volume; Enter commits one body per prong and rail with the om9.settings.head payload; Undo restores the document",
+      "oracle": "om9-app tests/head_commands.rs::the_head_icon_stages_a_basket_and_enter_commits_prongs_and_rails"
+    }
+  ],
+  "automated_tests": [
+    "the_head_icon_stages_a_basket_and_enter_commits_prongs_and_rails",
+    "a_basket_head_builds_closed_prongs_and_rails",
+    "non_round_girdles_build_and_keep_prong_symmetry"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-13-006",
+  "title": "History Commandline And Preview Status",
+  "generated_at_utc": "2026-10-27T03:41:04Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/icon/window review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "713c395a1c2c9093cbffbf811509f56264508f85066e53fdf056867082ad3808",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "HistoryRecord/HistoryUpdate/HistoryReport/ClearHistory/EditHistory drive the same controller switches; recompute reports complete with the rebuilt feature count or failed with the node id and reason",
+    "negative": "ClearHistory with no selection -> Missing(history object); closing the window while a recipe is Pending -> Busy, document untouched"
+  },
+  "l4_id": "OM9-L4-03-13-006-06",
+  "role": "ACCEPT",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-app/src/session/history.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/session/files.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/history_updates.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "history_updates",
+        "-j",
+        "2",
+        "the_command_line_drives_the_switches_report_and_clear"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "db54f82aaf4faebad09f6cd5dd2bbf5eafdfa70f55f27cfc0d17c6c0ea17e408",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "the_command_line_drives_the_switches_report_and_clear",
+      "package": "om9-app",
+      "binary": "history_updates"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "history_updates",
+        "-j",
+        "2",
+        "closing_the_window_is_refused_while_a_recipe_is_pending"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "5532da5dc626a170e5a35f54fb43558d2f567b8e614555bdc01e362e3f540bbd",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "closing_the_window_is_refused_while_a_recipe_is_pending",
+      "package": "om9-app",
+      "binary": "history_updates"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

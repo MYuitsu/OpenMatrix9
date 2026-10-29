@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-13-004",
+  "title": "Matrix Clear Single Object History",
+  "generated_at_utc": "2026-10-27T03:41:04Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/icon/window review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "39592b0f9c6424d3e0747208e65f47daa4b0acaab7b4f981dd59b2d4d9007bb0",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "clearing the profile detaches only its recipe; the profile geometry stays, the rail recipe stays Clean and the report lists the remaining feature",
+    "negative": "locked recipe -> Invalid(history recipe locked); no owner -> Missing(history recipe)"
+  },
+  "l4_id": "OM9-L4-03-13-004-07",
+  "role": "ADVERSARIAL",
+  "kind": "adversarial",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/history_ops.rs",
+    "crates/om9-app/src/session/history.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/history_links.rs",
+    "crates/om9-app/tests/history_updates.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "history_updates",
+        "-j",
+        "2",
+        "clear_history_detaches_only_the_selected_object_and_refuses_a_lock"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "335fa2014bb00e00cb819f9d62fc22d2d01792033855d2ef3b4421ee8f6515a6",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.01s"
+      ],
+      "test": "clear_history_detaches_only_the_selected_object_and_refuses_a_lock",
+      "package": "om9-app",
+      "binary": "history_updates"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

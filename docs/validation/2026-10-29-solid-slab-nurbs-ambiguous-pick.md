@@ -1,0 +1,7 @@
+# Slab NURBS ambiguous side pick — 2026-10-29
+
+The hidden Slab session compares refined candidates at approximately equal nearest distances. When geometrically distinct candidates imply conflicting signed offsets, it rejects the pick and yields no preview instead of choosing one arbitrarily. Equal-distance candidates with matching signed offsets remain accepted. This uses numerical tolerances and the existing bounded per-knot-span search, not a proof that every global minimum has been found.
+
+Controller fixtures exercise two parallel, equally distant spans with opposite signed offsets, in forward and reversed directions. The pick is rejected without a document change or Undo transaction, and a nearby unambiguous pick produces a preview. A separate symmetric U fixture confirms equal-distance candidates with matching signed offsets remain accepted. These fixtures test preview and selection, not successful publication of the cornered sources.
+
+With `CARGO_TARGET_DIR=L:\om9-target` and `-j 2`: `cargo test -j 2 -p om9-app --test solid solid_slab_` passed 19 tests; `cargo test -j 2 -p om9-app --test solid_difference_ui viewport_slab_development_` passed 10 tests. Higher-degree multimodal spans, coincident corner tangents, numerical tolerance extremes, global offset topology and the public Slab command remain open. This is an OM9 development rule; original Matrix behavior is not established.

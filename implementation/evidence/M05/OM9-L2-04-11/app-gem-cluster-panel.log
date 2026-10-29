@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests\gem_cluster_panel.rs (L:\om9-target\debug\deps\gem_cluster_panel-cd73a4dd2d43e774.exe)
+
+running 11 tests
+test a_bad_selection_is_refused_explicitly ... ok
+test cancel_leaves_the_document_untouched ... ok
+test orient_to_gem_aligns_the_object_and_undo_restores_it ... ok
+test typed_command_names_open_the_same_builders ... ok
+test the_tapered_baguette_between_two_curves_is_one_stone ... ok
+test the_baguette_channel_commits_between_two_curves ... ok
+test gems_between_curves_uses_the_round_section_and_touches_both_walls ... ok
+test the_cluster_builder_places_a_ring_with_offsets ... ok
+test the_halo_builder_previews_and_commits_one_transaction ... ok
+test undoing_a_halo_removes_the_accents_and_the_feature ... ok
+test editing_a_halo_reuses_the_existing_child_ids ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.34s
+

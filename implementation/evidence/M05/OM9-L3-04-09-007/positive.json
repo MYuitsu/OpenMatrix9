@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-09-007",
+  "title": "Gem Asset Properties And Layer Defaults",
+  "cases": [
+    "label/material/colour/girdle edits are one journal entry; Undo restores all",
+    "the gem routes to the Gem 01 layer even when another layer is current",
+    "a colour edit changes only the selected gem, never the scene",
+    "F6 Gem Properties is enabled while the unimplemented GemReport stays disabled"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

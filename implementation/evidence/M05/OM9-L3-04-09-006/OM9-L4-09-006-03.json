@@ -1,0 +1,89 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-09-006",
+  "l4_id": "OM9-L4-09-006-03",
+  "title": "Gem Instance Create Rotate And Position",
+  "generated_at_utc": "2026-10-27T09:23:48Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the gem window at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "223a7a95902092d7fcc4e043b4aabb93b5e21250e77d0a664643d8690eeaaf31",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "move/rotate keeps identity; a duplicate shares one definition and undoes as one step",
+    "negative": "a non-gem and a definition-owned instance cannot be edited in place"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/transaction.rs",
+    "crates/om9-core/tests/gem_assets.rs",
+    "crates/om9-kernel/src/brep.rs",
+    "crates/om9-kernel/src/gem.rs",
+    "crates/om9-kernel/src/lib.rs",
+    "crates/om9-kernel/src/brep_bridge.cpp",
+    "crates/om9-kernel/Cargo.toml",
+    "crates/om9-kernel/tests/gem_brep.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/f6.rs",
+    "crates/om9-app/src/icons.rs",
+    "crates/om9-app/tests/gem_panel.rs",
+    "tools/record_m05_l2_04_09_gem_assets.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_positioner_moves_and_rotates_the_instance_in_place"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "927dc59c292c3972cd65f36b5daef445af4648894ff900224a6ea746af18bb9d",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.59s"
+      ],
+      "test": "the_positioner_moves_and_rotates_the_instance_in_place",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_positioner_duplicates_with_one_shared_definition"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "5ebc793d7e23e9460030c54201bf477b4792795477351adda515f62ef775805c",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.63s"
+      ],
+      "test": "the_positioner_duplicates_with_one_shared_definition",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

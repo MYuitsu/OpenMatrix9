@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-041-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-041",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
-  "command_id": "OM9-CURVE-141",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
+  "command_id": "OM9-CURVE-042",
   "source_command": "Curve",
   "menu_icon": "CurveFreeFormControlPoints",
   "owner_candidate": "",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "no verified backend owner for Curve; menu stays disabled",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-041/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-041/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-041/dispatch_contract.json": "d1ae5ec0536e46f794be1805607748ad97c4740d24b0cee5b25b4383b43643f8",
-    "implementation/design/M03/OM9-L3-03-16-041/dispatch_contract.md": "76d37b897f7603f475c2a7a94f68c751c7e2d961a30046b03828a60e83a77439"
+    "implementation/design/M03/OM9-L3-03-16-041/dispatch_contract.json": "fe2703024a44c85965ab3dbc016fee4ecb07d0c572af7e79899842f4d27331cc",
+    "implementation/design/M03/OM9-L3-03-16-041/dispatch_contract.md": "f75ec6624bca3a7620a45281f6689ad72be6712a678605092e5ad6a52c8fd626"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Curve"
 }

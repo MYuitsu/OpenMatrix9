@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m04.l3_builder_style_evidence.v1",
+  "l3_id": "OM9-L3-03-12-006",
+  "title": "Builder Style Match Attributes",
+  "scope": "BuilderStyle::match_attributes over declared extension slots om9.rail/om9.head STYLE_ATTRIBUTES (width_mm/height_mm/material) with types kept Controller::builder_match_attributes + StyleMatch command line",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "matching_attributes_copies_only_the_declared_attributes_and_keeps_the_identity",
+    "a_source_without_a_declared_slot_or_with_a_wrong_type_is_refused",
+    "matching_attributes_copies_from_the_selection_and_keeps_the_ids"
+  ],
+  "fixture": "source ring has width=3, material=synthetic, height=2",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the Builder Styles browser and its gestures; no reviewer signature is claimed.",
+  "logs": [
+    "core-builder-style.log",
+    "app-builder-styles.log",
+    "workspace-check.log"
+  ],
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-03-12-006-03",
+      "OM9-L4-03-12-006-04",
+      "OM9-L4-03-12-006-05",
+      "OM9-L4-03-12-006-06"
+    ],
+    "fixture_manifest_sha256": "8c2a025c59b99035d5d2c825deea3eb3d91a68cdbff593464d9d4c20ab14a43b"
+  }
+}

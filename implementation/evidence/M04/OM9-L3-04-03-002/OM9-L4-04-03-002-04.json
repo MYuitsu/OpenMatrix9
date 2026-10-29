@@ -1,0 +1,104 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-03-002",
+  "title": "Signet Ring Builder",
+  "generated_at_utc": "2026-10-27T09:35:13Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the ring builder panel at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "3335a39ef7c1cd61dc7ca2da8a8f4209cfe39b82bd7d1d51c4ee780bd08c7076",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "closed signet body with a visible top and two shoulders",
+    "negative": "negative wall, folded top contour and zero shoulder are refused"
+  },
+  "l4_id": "OM9-L4-04-03-002-04",
+  "role": "INTEGRATION",
+  "kind": "integration",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/ring_builder.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/ring_family.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/tests/ring_family_panel.rs",
+    "crates/om9-kernel/src/associative.rs",
+    "crates/om9-kernel/src/creation.rs",
+    "crates/om9-kernel/src/creation_bridge.cpp",
+    "crates/om9-kernel/tests/ring_family_brep.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_family_panel",
+        "-j",
+        "2",
+        "the_ring_family_opens_from_the_command_line_and_lists_its_parameters"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "ff92a6ac513bd244d3eb2cc163a68713ca2d555342bd48aab2d75073142dba8f",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.58s"
+      ],
+      "test": "the_ring_family_opens_from_the_command_line_and_lists_its_parameters",
+      "package": "om9-app",
+      "binary": "ring_family_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_family_panel",
+        "-j",
+        "2",
+        "an_invalid_ring_parameter_is_refused_and_the_document_stays_empty"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "0933d69280527c8f75e46418a40c3e9525c44fab64c03a348f1ab1aaa5b2755a",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 3.02s"
+      ],
+      "test": "an_invalid_ring_parameter_is_refused_and_the_document_stays_empty",
+      "package": "om9-app",
+      "binary": "ring_family_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_family_panel",
+        "-j",
+        "2",
+        "the_ring_handles_move_the_same_fields_the_panel_edits"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "d993a810b43e19b11e1a604a221826c918fd39a76d4819c95d1e36bf11f1b271",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.21s"
+      ],
+      "test": "the_ring_handles_move_the_same_fields_the_panel_edits",
+      "package": "om9-app",
+      "binary": "ring_family_panel"
+    }
+  ],
+  "manual_gate_note": "Integration: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

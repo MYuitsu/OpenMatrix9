@@ -1,0 +1,23 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-15-010",
+  "cases": [
+    {
+      "input": "SettingsMass before any feature",
+      "error": "missing settings mass features"
+    },
+    {
+      "input": "only a cutter committed, SettingsMass",
+      "error": "missing settings mass features (a cutter never adds mass)"
+    },
+    {
+      "input": "SettingsMass material=unobtainium",
+      "error": "missing metal material"
+    },
+    {
+      "input": "SettingsMass extra=1",
+      "error": "invalid settings mass option"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

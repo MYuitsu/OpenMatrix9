@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-11-005",
+  "title": "Gems Between Two Curves",
+  "cases": [
+    "round section stones take the wall gap as diameter and touch both walls",
+    "the same channel fit/auto-spacing engine is reused (no second placement primitive)",
+    "Apply is one transaction and Undo restores the walls-only document"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

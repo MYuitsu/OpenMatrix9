@@ -34,6 +34,65 @@ def button_archive(entries, indexed=False):
     return output+b'\0'*4
 
 class AssetsTests(unittest.TestCase):
+    def test_export_preserves_separately_authored_toolbar_icons(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t) / 'ref'; root.mkdir()
+            (root / 'MainMenu.ini').write_text('[Menu1]\nIcon1=FileNew\n')
+            (root / 'Matrix.rui').write_text(rui())
+            out = Path(t) / 'Resources'
+            (out / 'menu').mkdir(parents=True)
+            icon = out / 'icons/toolbar-sculpt/ToolbarSculptBrush.svg'
+            icon.parent.mkdir(parents=True)
+            icon.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"/>')
+            emboss = out / 'icons/toolbar-emboss/ToolbarEmbossTextOnCurve.svg'
+            emboss.parent.mkdir(parents=True)
+            emboss.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"/>')
+            subd = out / 'icons/toolbar-subd/ToolbarSubDHelp.svg'
+            subd.parent.mkdir(parents=True)
+            subd.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"/>')
+            standard = out / 'icons/toolbar-standard/ToolbarStandardCut.svg'
+            standard.parent.mkdir(parents=True)
+            standard.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"/>')
+            visibility = out / 'icons/toolbar-visibility/ToolbarVisibilityShow.svg'
+            visibility.parent.mkdir(parents=True)
+            visibility.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"/>')
+            display = out / 'icons/toolbar-display/ToolbarDisplayXRay.svg'
+            display.parent.mkdir(parents=True)
+            display.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"/>')
+            (out / 'menu/icons.ini').write_text(
+                '[ToolbarSculptBrush]\nimage=icons/toolbar-sculpt/ToolbarSculptBrush.svg\n'
+                'source=OpenMatrix9-authored-svg\nstatus=resolved\n'
+                '[ToolbarEmbossTextOnCurve]\nimage=icons/toolbar-emboss/ToolbarEmbossTextOnCurve.svg\n'
+                'source=OpenMatrix9-authored-svg\nstatus=resolved\n'
+                '[ToolbarSubDHelp]\nimage=icons/toolbar-subd/ToolbarSubDHelp.svg\n'
+                'source=OpenMatrix9-authored-svg\nstatus=resolved\n'
+                '[ToolbarStandardCut]\nimage=icons/toolbar-standard/ToolbarStandardCut.svg\n'
+                'source=OpenMatrix9-authored-svg\nstatus=resolved\n'
+                '[ToolbarVisibilityShow]\nimage=icons/toolbar-visibility/ToolbarVisibilityShow.svg\n'
+                'source=OpenMatrix9-authored-svg\nstatus=resolved\n'
+                '[ToolbarDisplayXRay]\nimage=icons/toolbar-display/ToolbarDisplayXRay.svg\n'
+                'source=OpenMatrix9-authored-svg\nstatus=resolved\n')
+            report = export_assets(root, out)
+            self.assertTrue(icon.is_file())
+            ini = configparser.ConfigParser(); ini.read(out / 'menu/icons.ini')
+            self.assertEqual(ini['ToolbarSculptBrush']['image'], 'icons/toolbar-sculpt/ToolbarSculptBrush.svg')
+            self.assertEqual(report['authored_symbols']['ToolbarSculptBrush']['sha256'], hashlib.sha256(icon.read_bytes()).hexdigest())
+            self.assertTrue(emboss.is_file())
+            self.assertEqual(ini['ToolbarEmbossTextOnCurve']['image'], 'icons/toolbar-emboss/ToolbarEmbossTextOnCurve.svg')
+            self.assertEqual(report['authored_symbols']['ToolbarEmbossTextOnCurve']['sha256'], hashlib.sha256(emboss.read_bytes()).hexdigest())
+            self.assertTrue(subd.is_file())
+            self.assertEqual(ini['ToolbarSubDHelp']['image'], 'icons/toolbar-subd/ToolbarSubDHelp.svg')
+            self.assertEqual(report['authored_symbols']['ToolbarSubDHelp']['sha256'], hashlib.sha256(subd.read_bytes()).hexdigest())
+            self.assertTrue(standard.is_file())
+            self.assertEqual(ini['ToolbarStandardCut']['image'], 'icons/toolbar-standard/ToolbarStandardCut.svg')
+            self.assertEqual(report['authored_symbols']['ToolbarStandardCut']['sha256'], hashlib.sha256(standard.read_bytes()).hexdigest())
+            self.assertTrue(visibility.is_file())
+            self.assertEqual(ini['ToolbarVisibilityShow']['image'], 'icons/toolbar-visibility/ToolbarVisibilityShow.svg')
+            self.assertEqual(report['authored_symbols']['ToolbarVisibilityShow']['sha256'], hashlib.sha256(visibility.read_bytes()).hexdigest())
+            self.assertTrue(display.is_file())
+            self.assertEqual(ini['ToolbarDisplayXRay']['image'], 'icons/toolbar-display/ToolbarDisplayXRay.svg')
+            self.assertEqual(report['authored_symbols']['ToolbarDisplayXRay']['sha256'], hashlib.sha256(display.read_bytes()).hexdigest())
+
     def test_shifted_png_precedes_named_and_original(self):
         with tempfile.TemporaryDirectory() as t:
             root=Path(t)/'ref';root.mkdir()

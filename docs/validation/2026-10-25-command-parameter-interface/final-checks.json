@@ -1,0 +1,19 @@
+{
+  "public_source_audit": {
+    "exit_code": 0,
+    "source_files": 12440,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "scoped_rustfmt_check": { "exit_code": 0 },
+  "git_diff_check": { "exit_code": 0 },
+  "prune_build_artifacts_apply": {
+    "exit_code": 0,
+    "removed_runs": 0,
+    "kept_newest_per_root": 10,
+    "older_cited_runs_retained": 113
+  },
+  "release_window": "Preserved; new verification uses the separately built debug executable.",
+  "business_skill_update": "PROPOSED_NOT_RECORDED_PENDING_USER_CONSENT"
+}

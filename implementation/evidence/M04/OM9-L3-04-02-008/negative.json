@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-008",
+  "kind": "negative",
+  "expected": "an invalid profile width makes the downstream rebuild fail explicitly and leaves the committed sweep geometry revision unchanged",
+  "verified_by": [
+    "a_ring_size_edit_rebuilds_the_profile_and_one_dirty_sweep",
+    "a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one"
+  ]
+}

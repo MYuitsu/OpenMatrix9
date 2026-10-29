@@ -4,6 +4,42 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-08",
   "title": "Top11 Explode Join Split Trim Actions",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "Controlled test project containing the object selection required for Top11 Explode Join Split Trim Actions",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-08 - 07-febe-matrix-top11/L3-004 - Top11 Explode Join Split Trim Actions/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:Controlled test project containing the object selection required for Top11 Explode Join Split Trim Actions: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
@@ -290,6 +326,30 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "multi_curve_split_2026_10_28": {
+      "scope": "Split multiple curve targets with one or more cutting curves in one transaction, preserving unhit targets; focused geometry and controller Undo/Redo tests.",
+      "evidence": "docs/validation/2026-10-28-top11-split-multiple.md",
+      "status": "AUTOMATED_PARTIAL_MANUAL_UI_PENDING",
+      "limitations": "Actual UI Undo/Redo replay, different placements, multi-target Trim, surfaces and BReps remain open."
+    },
+    "split_point_join_many_2026_10_28": {
+      "scope": "Split Point for a preselected line; Join three or more connected BReps; focused geometry, failure and Undo/Redo tests.",
+      "evidence": "docs/validation/2026-10-28-top11-split-join-followup.md",
+      "status": "AUTOMATED_PARTIAL_MANUAL_UI_PENDING",
+      "limitations": "General or closed curves, complex topology, mixed inputs and multi-target Split/Trim remain open."
+    },
+    "join_brep_2026_10_28": {
+      "scope": "Two BRep sewing with explicit document tolerance in world coordinates, one transaction; adjacent and disconnected box-face fixtures and Undo/Redo.",
+      "evidence": "docs/validation/2026-10-28-top11-selection-transforms-join.md",
+      "status": "AUTOMATED_PARTIAL_MANUAL_UI_PENDING",
+      "limitations": "More than two BReps, raw surfaces, mixed inputs and broader topology remain unverified or unsupported."
+    },
+    "explode_brep_2026_10_28": {
+      "scope": "OCCT BRep polysurfaces are split into exact face BReps with preserved placement in one transaction; single faces are refused.",
+      "evidence": "docs/validation/2026-10-28-top11-explode-brep.md",
+      "status": "AUTOMATED_PARTIAL_MANUAL_UI_PENDING",
+      "limitations": "Box fixture only; other documented Explode types and wider Join/Split/Trim gaps remain open."
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",

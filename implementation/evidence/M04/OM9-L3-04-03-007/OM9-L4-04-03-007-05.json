@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-03-007",
+  "title": "Ring Builder Final B-Rep Validation",
+  "generated_at_utc": "2026-10-27T09:36:05Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the ring builder panel at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "360f74e9afa8078e8d61ed3fbc83344ba5bd1e9124a8ddce149d3d2b3aa16b48",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "closed ring accepted with positive volume in both representations (mesh and sewn B-Rep)",
+    "negative": "an open mesh and a too-thin section are rejected by the same gate"
+  },
+  "l4_id": "OM9-L4-04-03-007-05",
+  "role": "REGRESSION",
+  "kind": "regression",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/ring_builder.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/ring_family.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/tests/ring_family_panel.rs",
+    "crates/om9-kernel/src/associative.rs",
+    "crates/om9-kernel/src/creation.rs",
+    "crates/om9-kernel/src/creation_bridge.cpp",
+    "crates/om9-kernel/tests/ring_family_brep.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "6e674dabf6490c0b92a93e1afd2e53333f7144ed6ea5d6a4bca165542c65963e",
+      "summary": [
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ],
+      "test": null,
+      "package": "om9-core",
+      "binary": "builder_session"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "eec54957a74cee7a72824b435cdedd8b5bea355e7b364efd3f4611277f504f47",
+      "summary": [
+        "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ],
+      "test": null,
+      "package": "om9-core",
+      "binary": "builder_style"
+    }
+  ],
+  "manual_gate_note": "Regression Tests: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

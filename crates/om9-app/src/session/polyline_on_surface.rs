@@ -41,10 +41,6 @@ impl Controller {
             );
         }
         let curve = om9_core::curve_build::polyline(&projected)?;
-        self.commit_geometry(
-            POLYLINE_ON_SURFACE,
-            "PolylineOnSrf",
-            Geometry::Curve(curve),
-        )
+        self.commit_geometry(POLYLINE_ON_SURFACE, "PolylineOnSrf", Geometry::Curve(curve))
     }
 }

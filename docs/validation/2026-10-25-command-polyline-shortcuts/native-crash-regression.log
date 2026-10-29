@@ -1,0 +1,45 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 21.79s
+     Running tests\command_tokens.rs (L:/om9-target\debug\deps\command_tokens-af9e3befc9344a2c.exe)
+
+running 1 test
+test clicking_the_both_sides_token_toggles_through_the_typed_option_path ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.51s
+
+     Running tests\pinned_command.rs (L:/om9-target\debug\deps\pinned_command-1feeae4113cdbad3.exe)
+
+running 7 tests
+test pinned_row_pointer_edits_unicode_suffix_and_preserves_prompt ... ok
+test dragging_from_pinned_suffix_to_history_selects_and_copies_the_same_document ... ok
+test viewport_title_click_preserves_numeric_draft_and_enter_accepts_it ... ok
+test paste_that_retires_unicode_history_recomputes_layout_boundary_without_panicking ... ok
+test ime_confirmation_enter_cannot_execute_provisional_command_or_coordinate ... ok
+test live_command_is_pinned_and_unwrapped_while_history_scrolls_and_copies_as_one_document ... ok
+test dragging_scrolled_history_into_pinned_row_keeps_shared_selection ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.79s
+
+     Running tests\polyline_mode_regression.rs (L:/om9-target\debug\deps\polyline_mode_regression-013d8b1a62203727.exe)
+
+running 9 tests
+test invalid_arc_retains_points_and_cancel_keeps_the_document_empty ... ok
+test typed_options_and_coordinates_construct_arc_direction_and_center ... ok
+test menu_and_cmd_build_the_same_line_arc_line_with_one_undo ... ok
+test viewport_typing_m_uses_mode_instead_of_mid_snap ... ok
+test holding_m_toggles_once_and_keeps_the_draft_empty ... ok
+test shortcuts_preserve_nonempty_drafts_paste_and_ime ... ok
+test switching_back_after_an_arc_keeps_close_distinct_from_persistent_close ... ok
+test m_toggles_twice_and_updates_live_prompt_without_a_draft ... ok
+test clicking_mode_and_flags_uses_the_same_toggle_as_the_keyboard ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s
+
+     Running tests\polyline_shortcuts.rs (L:/om9-target\debug\deps\polyline_shortcuts-d05bee2cca931d56.exe)
+
+running 2 tests
+test raw_hook_shortcuts_change_prompt_after_a_point ... ok
+test underlined_polyline_shortcut_toggles_without_writing_to_draft ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s
+

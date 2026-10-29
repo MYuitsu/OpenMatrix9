@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --test builder_style -j 2 the_browser_lists_every_style_for_the_mode_and_disables_the_incompatible
+# exit code: 0
+# captured: 2026-10-27T02:48:29Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_browser_lists_every_style_for_the_mode_and_disables_the_incompatible ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)
+
+$ cargo test -p om9-core --test builder_style -j 2 a_missing_or_corrupt_thumbnail_falls_back_without_dropping_the_style
+# exit code: 0
+# captured: 2026-10-27T02:48:29Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_missing_or_corrupt_thumbnail_falls_back_without_dropping_the_style ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)

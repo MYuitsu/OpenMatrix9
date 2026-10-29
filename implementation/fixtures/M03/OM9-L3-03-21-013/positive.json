@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-013",
+  "case": "a dimension whose text point was dragged away",
+  "expected": "a dimension whose text point was dragged away -> the text point returns to the layout centre, the object id is unchanged and the commit is one Undo entry",
+  "test": "crates/om9-app/tests/annotation.rs::edits_options_and_recenter_preserve_identity_and_are_atomic"
+}

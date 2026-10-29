@@ -236,6 +236,7 @@ impl Controller {
             for id in ids {
                 self.selection.remove(id);
             }
+            self.selection_order.retain(|id| self.selection.contains(id));
             self.prune_subselection();
             self.refresh_scene()?;
             self.sync_published(om9_core::changes::ChangeCause::Edit);

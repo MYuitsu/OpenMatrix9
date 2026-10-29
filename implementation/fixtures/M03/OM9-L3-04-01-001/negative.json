@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-001",
+  "case": "factor 0",
+  "expected": "`Error::Invalid(\"scale factor\")`; the run stays open on \"Scale factor: \" and the document is untouched",
+  "test": "m03_04_01_001_scale_3d_scales_the_box_about_the_base_point"
+}

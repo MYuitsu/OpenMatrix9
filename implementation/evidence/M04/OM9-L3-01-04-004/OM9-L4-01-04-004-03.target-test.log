@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --test associative_rebuild -- --exact a_semantic_reference_survives_an_allowed_edit_and_refuses_ambiguity
+# exit code: 0
+# captured: 2026-10-26T16:03:36Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_semantic_reference_survives_an_allowed_edit_and_refuses_ambiguity ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)
+
+$ cargo test -p om9-core --test associative_rebuild -- --exact a_detached_feature_cannot_keep_a_semantic_reference
+# exit code: 0
+# captured: 2026-10-26T16:03:36Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_detached_feature_cannot_keep_a_semantic_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)

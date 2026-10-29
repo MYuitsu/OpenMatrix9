@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-20-002",
+  "case": "Angle -> 0,0,0 -> 1,0,0 -> 0,0,0 -> 0,1,0; Circle { center: [0,0,0], radius: 5 }",
+  "input": "Angle -> 0,0,0 -> 1,0,0 -> 0,0,0 -> 0,1,0; Circle { center: [0,0,0], radius: 5 }",
+  "expected": "labels `Angle = 90 deg` and `Radius = 5 mm`; document unchanged"
+}

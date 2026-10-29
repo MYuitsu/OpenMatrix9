@@ -1,0 +1,51 @@
+{
+  "schema": "om9.m05.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-11-001",
+  "title": "Halo Builder",
+  "owner": "om9-core gem_cluster owner + om9-app gem cluster session/window",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/gem_cluster.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-core/src/gem.rs",
+      "state": "REUSED_GEM_OWNER"
+    },
+    {
+      "path": "crates/om9-core/src/curve_ops.rs",
+      "state": "REUSED_CURVE_MEASUREMENT"
+    },
+    {
+      "path": "crates/om9-core/tests/gem_cluster.rs",
+      "state": "REGISTERED_TESTS"
+    },
+    {
+      "path": "crates/om9-app/src/session/gem_cluster.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-app/src/ui/gem_cluster.rs",
+      "state": "IMPLEMENTED_WINDOW"
+    },
+    {
+      "path": "crates/om9-app/tests/gem_cluster_panel.rs",
+      "state": "REGISTERED_TESTS"
+    }
+  ],
+  "source_audit": {
+    "matrix_assets": "NOT_COPIED",
+    "result": "PROCEDURAL_ASSETS_ONLY",
+    "detail": "Accent stones are the existing procedural GemSpec/mesh owner; no Matrix gem or metal binary is read."
+  },
+  "planning_inputs": [
+    "OM9_Milestones/M05 - Gems and Layout/L2-04-11 - 03-febe-gem-halo-cluster/L3-001 - Halo Builder/l3.json"
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "Metal channel/prong geometry is owned downstream by M06/M07; this module records the manual parameters.",
+    "The Matrix command names are kept."
+  ]
+}

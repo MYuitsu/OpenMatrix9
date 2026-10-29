@@ -1,0 +1,9 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-004",
+  "kind": "negative",
+  "expected": "locked recipe -> Invalid(history recipe locked); no owner -> Missing(history recipe)",
+  "verified_by": [
+    "clear_history_detaches_only_the_selected_object_and_refuses_a_lock"
+  ]
+}

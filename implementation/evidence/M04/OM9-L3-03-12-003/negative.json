@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "expect": "Missing(\"style profile\")",
+      "style": "without profile_ref on RailProfile"
+    },
+    {
+      "expect": "Missing(\"builder style\")",
+      "style": "name not in the library"
+    }
+  ]
+}

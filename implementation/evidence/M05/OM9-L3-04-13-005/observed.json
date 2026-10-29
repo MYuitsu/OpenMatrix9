@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_edits_evidence.v1",
+  "l3_id": "OM9-L3-04-13-005",
+  "title": "Gem Style Load",
+  "command": "OthersLoadStyle / gvLoadStyle",
+  "scope": "`GemStyle::apply(record)`; `GemStyleStore::get(name)`; `OthersLoadStyle` session",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "named style applied to every selected stone with identity kept",
+  "negative": "an absent name or a malformed store is a typed refusal",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-13-005-03"
+    ],
+    "fixture_manifest_sha256": "af40e53413e06a044ddc0e349805d4a8400b626ef6aba39e3ba25d5af96877c8"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/tests/gem_edits.rs"
+  ],
+  "test": "save_and_load_style_roundtrip_through_the_style_file"
+}

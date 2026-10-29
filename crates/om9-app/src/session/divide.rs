@@ -48,7 +48,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Count=") {
-            let Some(count) = value.parse::<usize>().ok().filter(|count| *count >= 2 && *count <= 100_000) else {
+            let Some(count) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|count| *count >= 2 && *count <= 100_000)
+            else {
                 self.divide_pending = Some(pending);
                 return Some(Err(Error::Invalid("count must be 2..100000")));
             };
@@ -69,11 +73,7 @@ impl Controller {
             Err(error) => return Some(Err(error)),
         };
         for (point, _) in stations.iter().skip(1).take(pending.count - 1) {
-            if let Err(error) = self.commit_geometry(
-                DIVIDE,
-                "Divide",
-                Geometry::Point(*point),
-            ) {
+            if let Err(error) = self.commit_geometry(DIVIDE, "Divide", Geometry::Point(*point)) {
                 return Some(Err(error));
             }
         }

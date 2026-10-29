@@ -35,7 +35,11 @@ impl Controller {
         if groups.is_empty() {
             return Err(Error::Invalid("brep has no display edges"));
         }
-        let label = if feature == DUP_EDGE { "DupEdge" } else { "ExtractWire" };
+        let label = if feature == DUP_EDGE {
+            "DupEdge"
+        } else {
+            "ExtractWire"
+        };
         let mut committed = false;
         for segments in groups.values() {
             let mut lines = Vec::with_capacity(segments.len());

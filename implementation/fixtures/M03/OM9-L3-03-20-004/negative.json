@@ -1,0 +1,5 @@
+{
+  "l3_id": "OM9-L3-03-20-004",
+  "case": "unknown extension slot and a block definition holding copies of the entities",
+  "expected": "unknown counted as unknown (never a gem); the definition members do not change `total`"
+}

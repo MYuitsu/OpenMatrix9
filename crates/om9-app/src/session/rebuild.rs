@@ -50,7 +50,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Degree=") {
-            let Some(degree) = value.parse::<usize>().ok().filter(|value| *value >= 1 && *value <= 11) else {
+            let Some(degree) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| *value >= 1 && *value <= 11)
+            else {
                 self.rebuild_pending = Some(pending);
                 return Some(Err(Error::Invalid("degree must be 1..11")));
             };
@@ -69,7 +73,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.rebuild_pending = Some(pending);
-            return Some(Err(Error::Invalid("Rebuild accepts Degree=, Points= or Enter")));
+            return Some(Err(Error::Invalid(
+                "Rebuild accepts Degree=, Points= or Enter",
+            )));
         }
         let curve = match om9_core::curve_build::rebuild(
             &pending.source,

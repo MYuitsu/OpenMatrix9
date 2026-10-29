@@ -1,0 +1,26 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-14-003",
+  "cases": [
+    {
+      "input": "Level=4, Prong=2, Size=1.3",
+      "expect": "only prong 1 is rebuilt; prong 0 and rail 0 keep their exact vertices",
+      "oracle": "om9-core src/settings/head.rs::a_level_four_edit_touches_only_the_selected_prong"
+    },
+    {
+      "input": "Level=1, Height=2.2",
+      "expect": "every prong takes the new height",
+      "oracle": "om9-core src/settings/head.rs::an_overall_edit_rebuilds_every_prong"
+    },
+    {
+      "input": "Level=4 Prong=2 Size=1.3 in the app preview",
+      "expect": "the staged preview shows prong 1 at 1.3 mm and prong 0 at 0.9 mm; commit keeps four prongs",
+      "oracle": "om9-app tests/head_commands.rs::a_level_four_edit_changes_only_its_prong_in_the_preview"
+    }
+  ],
+  "automated_tests": [
+    "a_level_four_edit_changes_only_its_prong_in_the_preview",
+    "a_level_four_edit_touches_only_the_selected_prong",
+    "an_overall_edit_rebuilds_every_prong"
+  ]
+}

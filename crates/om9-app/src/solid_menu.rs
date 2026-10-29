@@ -296,4 +296,11 @@ mod tests {
         assert!(by_feature("OM9-SOLID-008").unwrap().enabled());
         assert!(by_feature("OM9-SOLID-029").unwrap().enabled());
     }
+
+    #[test]
+    fn recovered_unimplemented_commands_remain_in_solid_menu() {
+        let menu = crate::menu_catalog::SOLID;
+        let start = menu.iter().position(|key| *key == "SolidBooleanTwoObjects").unwrap();
+        assert_eq!(&menu[start + 1..start + 3], &["SolidBooleanSplit", "SolidCreateSolid"]);
+    }
 }

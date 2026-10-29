@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-026",
+  "case": "columns 1 with rows 1",
+  "expected": "`Error::Invalid(\"array count\")`; a one-cell grid is not an array",
+  "test": "m03_04_01_026_array_creates_the_requested_grid"
+}

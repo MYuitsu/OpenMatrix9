@@ -1,0 +1,27 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-17-006",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "Boolean without a metal body",
+      "input": "Boolean=On with gems only",
+      "expect": "Missing(\"cutter boolean surface\")"
+    },
+    {
+      "case": "Preserve=Remove with the Boolean off",
+      "input": "Preserve=Remove",
+      "expect": "Invalid(\"cutter preserve needs a boolean\")"
+    },
+    {
+      "case": "an unknown boolean mode",
+      "input": "Boolean=sometimes",
+      "expect": "Invalid(\"cutter boolean\")"
+    },
+    {
+      "case": "a cutter that misses the target",
+      "input": "a block far from the metal",
+      "expect": "Invalid(\"cutter boolean removed nothing\")"
+    }
+  ]
+}

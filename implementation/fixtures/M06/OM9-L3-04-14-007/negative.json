@@ -1,0 +1,19 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-14-007",
+  "cases": [
+    {
+      "input": "Profile=Unobtainium on the head",
+      "error": "invalid prong profile"
+    },
+    {
+      "input": "Profile=Nonexistent on the bezel",
+      "error": "invalid edge profile"
+    },
+    {
+      "input": "Bezier with 2 control points",
+      "error": "invalid profile bezier control"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

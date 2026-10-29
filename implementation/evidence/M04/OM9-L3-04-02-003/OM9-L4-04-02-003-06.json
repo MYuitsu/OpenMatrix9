@@ -1,0 +1,103 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-003",
+  "title": "Profile Placer On Rail",
+  "generated_at_utc": "2026-10-27T04:25:55Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "81ddb85c8ce5d3553c4d25946ce75b83f73b7dd103ac2f41c81697de68d16dfa",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "rail radius 9 with a closed 2 x 1 profile: position 0.00 sits at the rail start, 0.25 moves to the quarter station, and a 90 degree roll moves the section corner while the profile centre stays on the rail",
+    "negative": "a missing rail input is refused; a zero-length or degenerate tangent is refused before a preview is built"
+  },
+  "l4_id": "OM9-L4-04-02-003-06",
+  "role": "ACCEPT",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/curve_ops.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/ring_tools.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/ring_tools.rs",
+    "crates/om9-app/tests/ring_tools.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "a_profile_placer_moves_the_section_along_the_rail_and_rolls_it_without_flipping"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "555c21653a82c15e8e52064816138011dc997c6b1c627a8e7b4780c21c080467",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s"
+      ],
+      "test": "a_profile_placer_moves_the_section_along_the_rail_and_rolls_it_without_flipping",
+      "package": "om9-core",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "a_profile_placer_refuses_a_missing_rail_selection"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2f0653b406133daaac02a29322135d8457d000077f4d00786984aa6f77f83419",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s"
+      ],
+      "test": "a_profile_placer_refuses_a_missing_rail_selection",
+      "package": "om9-core",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_profile_placer_and_outside_rail_icons_open_the_existing_builder_modes"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "ce40b1ad1c6d5492db914cef58387f5eb74cfe06900d15865bdffbf6c7b28443",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_profile_placer_and_outside_rail_icons_open_the_existing_builder_modes",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

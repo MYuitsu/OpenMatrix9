@@ -11,6 +11,26 @@
   "mini_gate_id": "G03-D",
   "risk": "NORMAL",
   "purpose": "Establish command ID and backend capability mapping",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 5,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-003 - Transform · Scale1D - menu binding/l3.json#/parameter_contract",
+    "catalog_command": {
+      "menu": "Transform",
+      "command": "Scale"
+    },
+    "option_count": 5,
+    "missing_option_count": 0,
+    "domain_input_count": 1,
+    "implementation_l4": "OM9-L4-04-01-003-04"
+  },
   "parent_l3_file": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-003 - Transform · Scale1D - menu binding/l3.json",
   "preconditions": {
     "milestone": "M00,M01,M02 approved and passing actual tests; previous M03 mini-gates approved",
@@ -449,4 +469,5 @@
     "reference_note": "the fixture is authored data; upstream code is read, never executed as proof",
     "sketch": "// Dispatch Contract — Transform · Scale1D — menu binding\n// ROLE: CONTRACT_TEST - freeze the contract, then write a test that fails first.\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n// Owner: OM9-L2-04-01\n//\n// 1. Freeze the typed signature and the error enum in the owner crate.\n// 2. Write the fixture harness for the L3 fixture:\n//      input:  valid input from the fixture\n//      expect: measured positive oracle\n//      negative input: invalid, empty or degenerate input\n//      negative expect: typed error with unchanged state\n// 3. Run it: it must fail for the right reason (missing behaviour), not a compile accident.\n// 4. Only then hand the frozen type to the IMPLEMENT task of the same L3.\n\n#[test]\nfn om9_l4_04_01_003_01_contract_is_red_first() {\n    // Arrange: build the fixture input from authored data, not from the implementation.\n    // Act: call the frozen entry point.\n    // Assert: expected == actual for the positive fixture, and a typed error for the negative one.\n    // Record the failing output as the RED receipt for this task.\n    unimplemented!()\n}"
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

@@ -1,0 +1,10 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.27s
+     Running unittests src\lib.rs (L:/om9-target\debug\deps\om9_app-394fd906d65bc36f.exe)
+
+running 2 tests
+test session::command_options_tests::sphere_solution_choices_reflect_the_owner_branch ... ok
+test session::command_options_tests::every_declared_owner_has_unique_options_and_safe_value_entry ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 177 filtered out; finished in 0.01s
+

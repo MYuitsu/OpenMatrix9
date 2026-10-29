@@ -1,0 +1,2997 @@
+=== cargo test -p om9-app -j 2 --no-fail-fast ===
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18m 22s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_app-394fd906d65bc36f.exe)
+
+running 209 tests
+test camera_rig::tests::slerp_takes_the_short_arc_and_normalizes ... ok
+test display::tests::a_mirrored_face_flips_its_side_and_never_touches_an_id ... ok
+test dock_layout::tests::rail_icon_edge_hits_its_anchors_and_stays_monotone_and_clamped ... ok
+test command_events::tests::the_log_is_bounded_and_the_sequence_still_rises ... ok
+test dock_layout::tests::builder_area_defaults_to_the_space_below_projects ... ok
+test dock_layout::tests::default_left_column_matches_the_documented_matrix_order ... ok
+test dock_layout::tests::reorder_moves_only_the_requested_menu_and_keeps_other_state ... ok
+test command_events::tests::a_run_reports_started_progress_warn_and_finished_in_order ... ok
+test dock_layout::tests::resolve_is_total_for_degenerate_and_nonfinite_windows ... ok
+test dock_layout::tests::right_dock_threshold_boundary_is_1200_logical_points ... ok
+test dock_layout::tests::widest_rail_and_widest_right_dock_still_leave_the_canvas_minimum ... ok
+test dock_layout::tests::narrow_window_yields_the_right_column_and_keeps_command_line ... ok
+test f6::tests::a_floating_window_is_clamped_inside_the_screen ... ok
+test camera_rig::tests::zoom_is_multiplicative_and_clamped ... ok
+test camera_rig::tests::orbit_keeps_the_distance ... ok
+test camera_rig::tests::rig_roundtrip_preserves_eye_target_and_up ... ok
+test camera_rig::tests::zoom_toward_moves_the_pivot_toward_the_cursor ... ok
+test camera_rig::tests::zoom_toward_keeps_the_cursor_point_on_screen ... ok
+test frame_scheduler::tests::invalid_hz_never_panics ... ok
+test frame_scheduler::tests::deadlines_do_not_sleep_or_inherit_idle ... ok
+test f6::tests::general_actions_use_the_registry_and_are_not_duplicated ... ok
+test dock_layout::tests::clamp_floats_recovers_menus_dragged_outside_the_window ... ok
+test gpu_viewport::selected_lod_tests::a_selected_object_never_receives_a_lod_target ... ok
+test gpu_viewport::selection_colour_tests::the_selection_colour_is_pink_not_yellow ... ok
+test display::tests::a_display_preset_round_trips_and_a_bad_schema_falls_back_with_a_warning ... ok
+test frame_scheduler::tests::profiles_degrade_and_recover_with_hysteresis ... ok
+test gpu_viewport::tests::the_preview_matrix_keeps_the_row_major_origin ... ok
+test frame_scheduler::tests::auto_fallback_and_recovery_require_sustained_windows ... ok
+test interaction_log::tests::a_frame_time_is_finite_and_positive ... ok
+test f6::tests::builder_prefill_is_typed_and_requires_its_provider ... ok
+test dock_layout::tests::dock_right_mirrors_the_left_column_and_float_needs_a_rectangle ... ok
+test dock_layout::tests::unknown_panel_and_section_keys_are_reported_and_repaired ... ok
+test display::tests::a_gem_without_m05_material_is_neutral_and_explicitly_deferred ... ok
+test display::tests::a_disabled_cutter_category_never_hides_model_geometry ... ok
+test f6::tests::mixed_or_unknown_semantics_fall_back_to_general ... ok
+test f6::tests::empty_and_curve_and_solid_selections_get_distinct_contexts ... ok
+test f6::tests::gem_context_registers_but_disables_without_m05 ... ok
+test display::tests::a_gem_colour_token_is_used_when_the_semantic_provider_has_it ... ok
+test display::tests::typed_m05_and_m07_records_are_read_without_inventing_assets ... ok
+test f6::tests::a_custom_menu_keeps_order_and_disables_a_deleted_command ... ok
+test dock_layout::tests::schema_one_and_unknown_versions_reset_to_the_documented_default ... ok
+test navigation::tests::fractional_wheel_partition_and_finite_speed_are_stable ... ok
+test dock_layout::tests::removed_section_is_restored_and_orders_stay_dense ... ok
+test navigation::tests::held_still_refines_but_preserves_capture_and_resume_is_direct ... ok
+test navigation::tests::reversal_moves_towards_new_target_without_overshoot ... ok
+test navigation::tests::wheel_conserves_burst_and_finishes_exactly ... ok
+test navigation::tests::settle_a_and_drag_b_have_independent_owners_and_external_camera_cancels_zoom ... ok
+test dock_layout::tests::round_trip_persists_menu_identity_visibility_and_order ... ok
+test navigation::tests::every_zoom_sample_preserves_anchor ... ok
+test option_parser::tests::a_point_is_not_an_option ... ok
+test navigation::tests::orthographic_clamp_and_deep_zoom_preserve_anchor ... ok
+test panel_ops::tests::work_area_matches_the_documented_numbers ... ok
+test panel_ops::tests::float_drop_rect_is_the_pointer_minus_the_grab_offset ... ok
+test panel_ops::tests::work_area_refuses_unusable_windows ... ok
+test dock_layout::tests::load_reports_missing_corrupt_and_oversized_files_as_default ... ok
+test project_manager::tests::empty_capture_is_explicit_and_does_not_create_a_slot ... ok
+test project_manager::tests::invalid_slot_index_is_rejected ... ok
+test option_parser::tests::the_name_is_read_without_case_or_padding ... ok
+test dock_layout::tests::save_reload_and_reset_menus_keep_document_scope_out ... ok
+test project_manager::tests::master_snapshot_is_a_deep_whole_document_copy ... ok
+test option_parser::tests::flags_and_numbers_are_read_with_their_units ... ok
+test project_manager::tests::projects_have_stable_ids_and_duplicate_labels_are_allowed ... ok
+test option_parser::tests::everything_else_is_refused_with_a_reason ... ok
+test project_manager::tests::notes_and_customer_preserve_unicode_and_reject_file_paths ... ok
+test session::channel_cutters::tests::the_four_row_commands_resolve_and_keep_their_kinds ... ok
+test session::gem_cutters::tests::rotation_and_y_scale_controls_are_parsed ... ok
+test session::gem_cutters::tests::the_two_cutter_commands_resolve_and_share_one_handler ... ok
+test project_manager::tests::restore_uses_new_ids_and_repeated_restore_does_not_collide ... ok
+test session::gumball_numeric::tests::the_parser_reads_each_form ... ok
+test session::measure::tests::a_degenerate_direction_and_a_spline_radius_are_refused ... ok
+test session::measure::tests::labels_trim_trailing_zeros_and_keep_millimetres ... ok
+test project_manager::tests::capture_two_objects_does_not_mutate_geometry_and_keeps_revision_thumbnail ... ok
+test report::tests::report_admission_failure_writes_no_partial_success ... ok
+test project_manager::tests::deleting_a_captured_object_makes_the_slot_unavailable ... ok
+test gpu_viewport::ghost_tests::the_ghost_uses_the_placement_and_the_live_mesh_uses_the_preview ... ok
+test session::transform::tests::a_count_is_a_whole_number_of_at_least_two ... ok
+test session::transform::tests::a_factor_must_be_positive_and_finite ... ok
+test session::transform::tests::a_number_accepts_the_documented_units_and_refuses_junk ... ok
+test command_events::tests::a_panicking_observer_is_contained_and_the_others_still_hear_it ... ok
+test session::transform::tests::a_station_snaps_to_the_nearest_point_on_the_path ... ok
+test session::transform::tests::every_command_asks_for_its_documented_inputs ... ok
+test session::transform::tests::scale_about_composes_the_kernel_axes ... ok
+test session::transform::tests::a_station_is_measured_along_the_curve_length_not_along_the_axis ... ok
+test session::transform::tests::the_cplane_frame_is_right_handed ... ok
+test session::transform::tests::the_prompt_advances_through_the_fields ... ok
+test startup::tests::app_config_refuses_an_unusable_start_before_any_window_exists ... ok
+test menu_catalog::tests::every_menu_has_the_full_reference_icon_list ... ok
+test startup::tests::dialog_is_opt_out_for_automation_only ... ok
+test startup::tests::detail_is_bounded_on_char_boundaries_and_newlines_are_folded ... ok
+test menu_catalog::tests::most_reference_icons_map_to_a_feature ... ok
+test startup::tests::effective_min_size_falls_back_safely_for_degenerate_input ... ok
+test startup::tests::effective_min_size_fits_a_1366x768_screen_at_100_percent ... ok
+test session::plugins::tests::plugin_budget_refusal_preserves_scene_and_document ... ok
+test startup::tests::effective_min_size_is_capped_to_the_work_area_at_125_and_150_percent ... ok
+test startup::tests::effective_min_size_keeps_1280x720_on_large_screens ... ok
+test startup::tests::failure_line_names_the_stage_and_keeps_the_detail ... ok
+test startup::tests::hardware_gpu_is_required_without_a_software_fallback ... ok
+test session::plugins::tests::cmd_plugin_errors_preserve_document_and_existing_command ... ok
+test startup::tests::nominal_minimum_is_1280x720_and_the_builder_gets_the_planner_floor ... ok
+test solid_menu::tests::every_solid_command_has_one_binding_and_a_visible_reason ... ok
+test status_surface::tests::failure_survives_a_later_success_and_clears_only_on_acknowledge ... ok
+test status_surface::tests::messages_are_bounded_on_char_boundaries_and_newlines_are_folded ... ok
+test status_surface::tests::revision_changes_only_when_the_visible_state_changes ... ok
+test status_surface::tests::tail_is_bounded_and_ordered_oldest_first ... ok
+test session::command_options_tests::sphere_solution_choices_reflect_the_owner_branch ... ok
+test transcript::redaction_tests::a_unc_path_keeps_only_the_file_name ... ok
+test transcript::redaction_tests::a_windows_path_keeps_only_the_file_name ... ok
+test three_dm_host::tests::absolute_path_and_trusted_digest_are_required ... ok
+test startup::tests::effective_min_size_is_always_finite_and_between_the_floor_and_the_minimum ... ok
+test transcript::redaction_tests::ordinary_words_are_untouched ... ok
+test three_dm_host::tests::fingerprint_requires_exactly_64_hex_digits ... ok
+test session::plugins::tests::plugin_selection_is_validated_before_publication_and_applied_after ... ok
+test session::plugins::tests::refused_plugin_batch_keeps_scene_document_and_redo ... ok
+test session::plugins::tests::staged_plugin_batch_publishes_scene_in_one_undo_unit ... ok
+test pictureframe::tests::move_and_scale_keep_the_aspect_ratio_and_refuse_bad_sizes ... ok
+test pictureframe::tests::opacity_lock_and_visibility_preserve_the_asset ... ok
+test pictureframe::tests::known_distance_calibration_maps_100_pixels_to_25_mm ... ok
+test pictureframe::tests::a_png_gives_a_twenty_millimetre_quad_and_rejects_bad_bytes ... ok
+test pictureframe::tests::an_embedded_store_round_trips_and_a_missing_or_mismatched_asset_is_explicit ... ok
+test pictureframe::tests::a_jpeg_gives_a_twenty_millimetre_quad_and_is_persisted ... ok
+test ui::chrome::chrome_tests::top11_tab_lists_the_eleven_action_icons ... ok
+test three_dm_host::tests::packaged_layout_reads_the_sibling_digest_before_admission ... ok
+test session::surface_command_tests::rebuild_and_unroll_commit_one_surface_and_one_undo_entry ... ok
+test startup::tests::receipt_is_bounded_json_that_replaces_the_previous_failure ... ok
+test navigation_audit::tests::native_replay_preserves_cadence_on_fractionally_early_callbacks ... ok
+test session::command_options_tests::every_declared_owner_has_unique_options_and_safe_value_entry ... ok
+test gpu_viewport::display_lod_tests::a_display_lod_reduces_the_triangles_and_keeps_the_full_mesh_without_a_target ... ok
+test ui::file_success_audit::tests::restore_comparison_requires_renewal_and_rejects_other_content_changes ... ok
+test ui::file_success_audit::tests::missing_owned_overwrite_never_injects_an_accept_click ... ok
+test ui::chrome::chrome_tests::view_selection_requests_cmd_focus_without_erasing_numeric_input ... ok
+test icons::tests::feature_and_menu_aliases_share_cached_rasters_and_unknowns_are_neutral ... ok
+test ui::files::tests::minimized_logic_vetoes_dirty_close_and_retains_one_prompt_owner ... ok
+test ui::gem_edits::tests::a_round_stone_with_a_custom_profile_still_maps_its_girdle ... ok
+test ui::gem_edits::tests::a_stone_outside_the_view_is_skipped_instead_of_pinned_to_the_edge ... ok
+test ui::gem_edits::tests::every_visible_stone_gets_a_numbered_caption_inside_the_viewport ... ok
+test ui::files::tests::minimized_logic_vetoes_stale_close_approval ... ok
+test ui::gumball_colour_tests::a_plane_icon_shows_its_two_axes ... ok
+test ui::gem::preview_tests::the_preview_wireframe_covers_the_gem_and_stays_on_screen ... ok
+test ui::gumball_colour_tests::every_scale_box_carries_its_own_axis_colour ... ok
+test ui::gumball_colour_tests::the_three_axes_have_three_different_colours ... ok
+test ui::gem::preview_tests::the_preview_follows_its_placement ... ok
+test ui::icon_tests::window_icon_is_decoded_from_the_authored_launcher_asset ... ok
+test ui::chrome::chrome_tests::top11_tab_renders_without_mutating_the_document ... ok
+test ui::chrome::chrome_tests::sidebar_wrapping_and_toolbar_scrolling_keep_a_240px_allocation ... ok
+test ui::rotation_feedback::tests::edge_on_rotation_feedback_does_not_leave_a_bright_line ... ok
+test ui::rotation_feedback::tests::visible_sector_keeps_its_fill_without_internal_antialias_spokes ... ok
+test ui::sidebar_palettes::tests::every_reference_slot_has_an_authored_icon_and_correct_right_hand_groups ... ok
+test ui::sidebar_palettes::tests::project_ortho_planar_and_smarttrack_palette_slots_toggle_their_state ... ok
+test ui::chrome::chrome_tests::sculpt_toolbar_retains_reference_separator ... ok
+test ui::chrome::chrome_tests::added_toolbar_groups_use_real_authored_icon_bindings ... ok
+test gpu_viewport::selection_colour_tests::the_renderer_paints_the_selection_pink ... ok
+test ui::chrome::chrome_tests::set_view_partial_toolbar_renders_and_unavailable_buttons_do_not_dispatch ... ok
+test ui::tests::audit_layout_mode_parses_only_the_two_known_modes ... ok
+test ui::tests::audit_min_window_follows_the_simulated_monitor_and_zoom ... ok
+test ui::tests::audit_rail_width_is_finite_and_inside_the_rail_bounds ... ok
+test ui::chrome::chrome_tests::top11_sidebar_is_one_ordered_row_above_display ... ok
+test ui::tests::audit_window_size_parses_only_positive_finite_pairs ... ok
+test ui::sidebar_palettes::tests::reference_slots_keep_counts_rows_and_group_gaps_at_every_dock_width ... ok
+test ui::tests::audit_zoom_parses_only_finite_values_in_range ... ok
+test ui::top11::tests::every_top11_icon_is_addressable_from_the_toolbar_name ... ok
+test ui::top11::tests::a_control_grip_is_hit_at_its_projected_screen_point ... ok
+test window_identity_guard::every_window_of_the_application_carries_an_identity ... ok
+test window_identity_guard::the_signal_catches_a_window_named_only_by_its_title ... ok
+test workbench_regions::tests::dead_notes_stay_unreachable ... ok
+test workbench_regions::tests::compute_regions_changes_nothing_but_its_return_value ... ok
+test workbench_regions::tests::errors_are_visible_text_and_convert_to_the_core_error ... ok
+test workbench_regions::tests::floor_800x400_keeps_every_minimum ... ok
+test workbench_regions::tests::hidden_command_line_is_kept_with_note ... ok
+test workbench_regions::tests::hidden_left_rail_does_not_change_the_floor ... ok
+test workbench_regions::tests::hidden_right_dock_is_a_defined_state ... ok
+test ui::layer_dialog_audit::tests::startup_focus_wait_is_bounded_and_never_fabricates_os_focus ... ok
+test workbench_regions::tests::hosts_are_asked_only_what_the_contract_documents ... ok
+test workbench_regions::tests::narrow_window_yields_right_dock_with_note ... ok
+test workbench_regions::tests::nonfinite_stored_size_is_an_explicit_error ... ok
+test workbench_regions::tests::one_maximized_view_fills_the_center ... ok
+test workbench_regions::tests::plan_is_serde_ready ... ok
+test workbench_regions::tests::real_workspace_feeds_the_scene_seam ... ok
+test workbench_regions::tests::plans_for_normal_sizes_never_overlap_and_tile_the_center ... ok
+test workbench_regions::tests::right_dock_threshold_boundary ... ok
+test workbench_regions::tests::supported_minimum_and_floor_are_the_documented_numbers ... ok
+test workbench_regions::tests::tile_views_rejects_a_degenerate_center ... ok
+test workbench_regions::tests::validate_detects_overlap_and_a_short_command_input ... ok
+test workbench_regions::tests::valid_layout_exposes_left_center_four_views_and_optional_right_dock ... ok
+test workbench_regions::tests::view_set_must_be_one_to_four_distinct_views ... ok
+test workbench_regions::tests::without_a_docked_menu_the_right_dock_is_absent ... ok
+test workbench_regions::tests::window_below_the_minimum_returns_window_too_small ... ok
+test workbench_regions::tests::zero_negative_nonfinite_and_huge_windows_are_invalid ... ok
+test workbench_regions::tests::narrow_window_never_overlaps_or_hides_command_input ... ok
+test icons::tests::every_embedded_authored_svg_renders_visible_pixels ... ok
+test ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots ... FAILED
+test ui::chrome::chrome_tests::display_toolbar_switches_only_active_view_with_existing_view_owner ... ok
+test ui::layer_dialog_audit::tests::absent_rename_modal_never_receives_synthetic_text_in_cmd ... ok
+test ui::chrome::chrome_tests::a_window_under_1200_points_offers_no_dock_strip_and_floats_instead ... ok
+test ui::chrome::chrome_tests::emboss_toolbar_unsupported_buttons_do_not_dispatch ... ok
+test ui::chrome::chrome_tests::command_toolbar_slots_are_75_percent_of_previous_responsive_size ... ok
+test ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales ... FAILED
+test ui::chrome::chrome_tests::subd_flyouts_preserve_catalog_and_open_from_toolbar ... ok
+test ui::sidebar_scroll_audit::slim_sidebar_scrollbar_stays_visible_when_all_content_fits ... ok
+test ui::chrome::chrome_tests::dragging_a_menu_to_the_right_edge_docks_it_and_shows_the_hidden_dock ... ok
+test ui::tests::dock_receipt_contains_the_left_stack_evidence ... ok
+test interaction_log::tests::records_are_json_lines_with_a_timestamp ... ok
+test ui::files::tests::real_adapter_error_keeps_file_owner_and_draft_and_requires_explicit_retry ... ok
+test ui::layer_dialog_audit::tests::ordinary_advanced_click_records_acceptance_without_reentrant_context_lock ... ok
+test ui::sidebar_scroll_audit::sidebar_wheel_scroll_is_retained_on_following_frames ... ok
+test ui::chrome::chrome_tests::top11_multi_split_cmd_undo_redo_from_clean_document ... ok
+test ui::layer_dialog_audit::tests::long_advanced_gesture_is_reported_before_replay_can_edit_cmd ... ok
+test ui::chrome::chrome_tests::visibility_toolbar_keeps_reference_order_and_unavailable_commands_inert ... ok
+test ui::chrome::chrome_tests::standard_toolbar_new_unavailable_icons_render_without_dispatch ... ok
+test ui::sidebar_scroll_audit::slim_sidebar_scrollbar_never_overlays_buttons_at_supported_widths_and_dpi ... ok
+
+failures:
+
+---- ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots stdout ----
+
+thread 'ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots' (25176) panicked at crates\om9-app\src\ui\icon_size_audit.rs:71:17:
+assertion `left == right` failed
+  left: 31
+ right: 20
+
+---- ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales stdout ----
+OM9_ICON_SIZE {"client_points":[1280.0,720.0],"dock_art_pt":21.0,"dock_slot_device_px":24.0,"dock_slot_pt":24.0,"fixed_art_pt":17.21875,"fixed_slot_device_px":20.21875,"fixed_slot_pt":20.21875,"history_slot_pt":24.0,"main_art_pt":20.0,"main_slot_device_px":23.0,"main_slot_pt":23.0,"resolution":[1280.0,720.0],"scale":1.0,"toolbar_art_pt":15.0,"toolbar_slot_device_px":17.25,"toolbar_slot_pt":17.25}
+
+thread 'ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales' (31012) panicked at crates\om9-app\src\ui\icon_size_audit.rs:236:21:
+assertion `left == right` failed: 1280x720@1/Curve/page0
+  left: 31
+ right: 20
+
+
+failures:
+    ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales
+    ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots
+
+test result: FAILED. 207 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.73s
+
+error: test failed, to rerun pass `-p om9-app --lib`
+     Running unittests src\main.rs (L:\om9-target\debug\deps\om9-18eeeeada12ad0f6.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\acceptance_selection_set.rs (L:\om9-target\debug\deps\acceptance_selection_set-f9ef1edc063f4590.exe)
+
+running 6 tests
+test a_batch_with_one_bad_id_is_refused_whole ... ok
+test a_locked_or_hidden_object_is_refused_and_not_stored ... ok
+test an_identifier_that_no_longer_exists_is_refused ... ok
+test selecting_never_writes_document_history ... ok
+test click_a_then_ctrl_click_b_gives_both_and_toggling_a_leaves_b ... ok
+test twenty_selection_round_trips_are_identical ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\acceptance_viewport_selection.rs (L:\om9-target\debug\deps\acceptance_viewport_selection-134723ea6c3d0af7.exe)
+
+running 8 tests
+test escape_without_a_drag_clears_the_selection ... ok
+test ctrl_shift_click_picks_the_face_under_the_pointer ... ok
+test a_picked_subobject_is_drawn_in_the_viewport ... ok
+test a_drag_that_starts_on_the_dock_draws_no_selection_marquee ... ok
+test pick_tolerance_stays_in_logical_points_at_high_dpi ... ok
+test shift_adds_with_a_band_and_ctrl_removes ... ok
+test shift_click_adds_and_keeps_an_already_selected_object ... ok
+test twenty_band_passes_leave_the_same_selection ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 29.69s
+
+     Running tests\accuracy_fixture.rs (L:\om9-target\debug\deps\accuracy_fixture-2ad36e966b2eadd8.exe)
+
+running 2 tests
+test jewellery_lod_keeps_surface_area ... ignored, needs an imported jewellery fixture selected by OM9_ACCURACY_FIXTURE
+test jewellery_lod_matches_the_full_detail_image ... ignored, needs an imported jewellery fixture and a GPU adapter
+
+test result: ok. 0 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\angle_isocurve.rs (L:\om9-target\debug\deps\angle_isocurve-e0366bdf1f3f4108.exe)
+
+running 2 tests
+test angle_isocurve_extracts_at_the_requested_angle ... ok
+test angle_isocurve_options_use_the_shared_snapshot ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\annotation.rs (L:\om9-target\debug\deps\annotation-7e0ce975861f36e5.exe)
+
+running 8 tests
+test all_thirteen_catalog_ids_have_distinct_icons_and_one_dispatcher ... ok
+test session_style_defaults_and_transformed_values_are_observable ... ok
+test scene_displays_independent_dimension_strokes_without_connecting_gaps ... ok
+test diameter_and_radius_use_the_placed_circle_and_keep_source ... ok
+test text_and_leader_edit_text_without_flattening_semantics ... ok
+test edits_options_and_recenter_preserve_identity_and_are_atomic ... ok
+test preview_cancel_invalid_witness_and_native_archive_roundtrip ... ok
+test five_dimension_families_have_independent_value_oracles_and_one_undo ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\annotation_ui.rs (L:\om9-target\debug\deps\annotation_ui-5540a0fb407ff88e.exe)
+
+running 3 tests
+test object_summary_is_reached_by_the_analyze_menu ... ok
+test hovering_distance_draws_a_value_before_commit_and_keeps_the_document_unchanged ... ok
+test the_measure_palette_horizontal_icon_creates_a_visible_dimension_label ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.31s
+
+     Running tests\apply_crv.rs (L:\om9-target\debug\deps\apply_crv-e9596e98bade272c.exe)
+
+running 1 test
+test apply_crv_maps_a_curve_onto_the_surface ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\arc.rs (L:\om9-target\debug\deps\arc-d29a8f67515c6e62.exe)
+
+running 13 tests
+test arc_mode_tokens_and_mode_lock ... ok
+test arc_start_point_preview_follows_the_active_cplane ... ok
+test arc_center_preview_follows_the_active_cplane ... ok
+test arc_preview_has_thirty_two_segments ... ok
+test arc_radius_preview_uses_the_preset ... ok
+test arc_accepts_diameter_option ... ok
+test arc_center_mode_uses_start_and_end_angles ... ok
+test arc_radius_option_sets_the_radius ... ok
+test arc_center_follows_the_active_cplane ... ok
+test arc_center_uses_the_shared_choice_option ... ok
+test arc_three_points_match_the_circumcircle ... ok
+test arc_mode_change_clears_the_radius_option ... ok
+test arc_start_direction_uses_the_start_tangent ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\arc_blend.rs (L:\om9-target\debug\deps\arc_blend-0efecb8592bda7db.exe)
+
+running 2 tests
+test arc_blend_follows_the_active_cplane ... ok
+test arc_blend_connects_two_curve_ends ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\blend.rs (L:\om9-target\debug\deps\blend-bf2dd82b06e343f2.exe)
+
+running 5 tests
+test blend_exposes_scale_tokens ... ok
+test blend_accepts_tangent_scale_options ... ok
+test adjustable_blend_crv_dispatches_to_the_same_builder ... ok
+test match_uses_the_blend_builder_with_the_match_label ... ok
+test blend_curve_bridges_two_curve_ends ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\brep_selection.rs (L:\om9-target\debug\deps\brep_selection-30d2afdef3d8fb96.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\builder_controls.rs (L:\om9-target\debug\deps\builder_controls-633cee14c06e5cc4.exe)
+
+running 8 tests
+test a_locked_input_makes_the_builder_read_only_and_hides_its_handles ... ok
+test a_tab_with_an_invalid_preview_is_never_silently_applied_or_silently_dropped ... ok
+test a_slider_edit_from_the_panel_quantises_and_previews_the_same_value ... ok
+test a_stale_panel_event_cannot_overwrite_a_newer_handle_drag ... ok
+test escape_after_preview_edits_leaves_the_document_bytewise_unchanged ... ok
+test a_mode_tab_switch_keeps_each_modes_own_parameters ... ok
+test the_f6_prefill_and_the_command_line_reach_the_same_builder_service ... ok
+test double_enter_applies_once_and_reset_creates_no_journal_entry ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\builder_panel.rs (L:\om9-target\debug\deps\builder_panel-59c8ebc246fb5c22.exe)
+
+running 10 tests
+test cancel_and_reset_leave_the_document_untouched ... ok
+test a_failed_tab_switch_restores_the_previous_tab ... ok
+test tabs_keep_each_mode_parameters_and_switch_safely ... ok
+test the_profile_library_changes_the_preview_and_the_applied_shape ... ok
+test a_handle_drag_and_a_typed_value_share_the_one_field ... ok
+test the_preset_can_be_chosen_from_the_command_line ... ok
+test the_ring_rail_command_line_opens_edits_and_applies_one_undoable_feature ... ok
+test outside_rail_and_resizer_apply_independent_outputs ... ok
+test a_parameter_edit_and_its_recompute_are_two_undoable_steps ... ok
+test profile_and_sweep_modes_read_the_selection_and_commit_their_own_command ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.54s
+
+     Running tests\builder_slot.rs (L:\om9-target\debug\deps\builder_slot-9ec03b25ef03a0e6.exe)
+
+running 9 tests
+test fixture_design_pair_is_present ... ok
+test b1_the_slot_is_reserved_directly_below_projects ... ok
+test b6_to_y4_a_layout_file_cannot_break_the_reservation ... ok
+test b5_the_placeholder_became_the_live_builder_panel_in_m04 ... ok
+test b2_every_placement_is_refused_and_changes_nothing ... ok
+test y2_y3_y5_the_slot_is_a_placeholder_and_never_a_menu ... ok
+test b3_the_slot_owns_no_model ... ok
+test y1_a_click_on_the_bar_is_refused ... ok
+test b4_the_bar_carries_no_close_box_and_starts_no_drag ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.14s
+
+     Running tests\builder_styles.rs (L:\om9-target\debug\deps\builder_styles-c54c9038cd98df6e.exe)
+
+running 9 tests
+test a_style_for_another_mode_is_listed_disabled_and_refused ... ok
+test the_browser_lists_the_styles_of_the_open_mode ... ok
+test a_locked_input_keeps_the_browser_read_only ... ok
+test applying_a_style_changes_the_preview_only ... ok
+test the_command_line_routes_style_apply_and_save_to_the_same_service ... ok
+test saving_a_style_adds_a_user_row_without_rewriting_the_defaults ... ok
+test matching_attributes_copies_from_the_selection_and_keeps_the_ids ... ok
+test cancel_and_apply_clear_the_applied_style_marker ... ok
+test user_styles_roundtrip_through_the_configured_file ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\channel_cutters.rs (L:\om9-target\debug\deps\channel_cutters-9e609822b3504de1.exe)
+
+running 7 tests
+test the_channel_options_reach_the_cutter_and_a_bad_width_is_refused ... ok
+test a_boolean_without_a_metal_body_is_refused_and_keeps_the_preview ... ok
+test every_row_command_resolves_from_the_typed_line_and_needs_a_gem ... ok
+test micro_prong_builds_one_scallop_per_gap_and_records_the_count ... ok
+test the_channel_icon_stages_a_preview_and_enter_commits_one_transaction ... ok
+test the_bright_cutter_rings_one_stone_and_the_channel_mirrors_the_row ... ok
+test the_interactive_boolean_cuts_every_selected_metal_body ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests\chrome_actions.rs (L:\om9-target\debug\deps\chrome_actions-d2a72f8b3f88912e.exe)
+
+running 13 tests
+test every_reference_menu_has_its_full_icon_list ... ok
+test main_menu_categories_wrap_at_the_rail_edge ... ok
+test icons_scale_with_the_screen_size ... ok
+test unregistered_right_click_slot_never_executes_a_previous_action ... ok
+test f4_toggles_world_datum_without_mutating_document ... ok
+test main_menu_category_tabs_switch_palette_without_document_mutation ... ok
+test help_popup_contains_help_and_about_without_feature_catalog_actions ... ok
+test view_tab_switches_active_and_maximized_view ... ok
+test top_menu_labels_are_interactive_and_return_to_categories ... ok
+test view_tab_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test view_menu_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test display_toolbar_tab_does_not_reuse_enabled_geometry_palette ... ok
+test snaps_are_noninvoking_even_where_the_old_sidebar_displayed_point_and_line ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.64s
+
+     Running tests\circle.rs (L:\om9-target\debug\deps\circle-ddb82b5a84b7520a.exe)
+
+running 29 tests
+test circle_preview_and_tokens_follow_the_pending_points ... ok
+test circle_center_preview_follows_the_active_cplane ... ok
+test circle_fit_points_preview_is_a_ring ... ok
+test circle_tangent_preview_is_a_ring ... ok
+test circle_deformable_preview_uses_the_rebuilt_curve ... ok
+test circle_deformable_rejects_point_count_not_above_degree ... ok
+test circle_around_curve_preview_uses_the_path_normal ... ok
+test circle_tangent_point_preview_is_a_ring ... ok
+test circle_three_point_uses_the_circumcircle ... ok
+test circle_center_and_radius_match ... ok
+test circle_center_follows_the_active_cplane ... ok
+test circle_deformable_token_toggles_off ... ok
+test circle_fit_points_fits_a_circle ... ok
+test circle_tangent_accepts_a_bare_radius ... ok
+test circle_accepts_circumference_size_and_exposes_size_tokens ... ok
+test circle_area_size_uses_the_shared_choice_option ... ok
+test circle_tangent_to_two_lines ... ok
+test circle_around_curve_uses_the_path ... ok
+test circle_tangent_to_a_line_and_point ... ok
+test circle_two_point_preview_follows_the_active_cplane ... ok
+test circle_vertical_preview_is_a_closed_ring ... ok
+test circle_two_point_uses_the_diameter ... ok
+test circle_vertical_mode_pick_sets_the_plane_from_the_point ... ok
+test circle_accepts_bare_deformable_option ... ok
+test circle_accepts_approx_alias ... ok
+test circle_accepts_diameter_and_area_sizes ... ok
+test circle_deformable_rebuilds_to_point_count ... ok
+test circle_vertical_mode_uses_a_vertical_plane ... ok
+test circle_accepts_diameter_and_area_prefixes ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\clip_behaviours.rs (L:\om9-target\debug\deps\clip_behaviours-508001c52eeb46c1.exe)
+
+running 3 tests
+test clicking_selects_and_empty_space_deselects_with_the_gumball_following ... ok
+test a_window_band_selects_the_set_and_escape_clears_it ... ok
+test orbiting_and_zooming_leave_the_gumball_attached_and_the_same_screen_size ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.03s
+
+     Running tests\cold_layers.rs (L:\om9-target\debug\deps\cold_layers-6a0dd0cae64fee14.exe)
+
+running 4 tests
+test independent_process_restores_unicode_preset_and_independent_hidden_flags ... ok
+test independent_owned_process_restores_layer_current_and_explicit_object_preferences ... ok
+test fresh_owned_process_restores_actual_dialog_commits_and_rejects_the_old_handle ... ok
+test actual_cli_explicitly_migrates_v3_then_fresh_process_reopens_v4_without_inferred_slot ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.45s
+
+     Running tests\cold_reopen.rs (L:\om9-target\debug\deps\cold_reopen-f0e0e7590f2530d3.exe)
+
+running 9 tests
+test corrupt_archive_causes_real_process_failure_without_success_json ... ok
+test schema4_cold_process_preserves_namespaces_current_edits_tombstones_and_original_unit_context ... ok
+test fresh_process_hydrates_embedded_resource_after_original_file_is_removed ... ok
+test runtime_migration_overflow_rejects_before_replacing_original_schema1_file ... ok
+test audit_process_reports_loaded_document_and_waits_for_its_owner_to_release ... ok
+test persistent_report_hash_keeps_recipe_parameters_named_like_session_fields ... ok
+test actual_standalone_process_creates_and_cold_reopens_owned_om9_document ... ok
+test actual_process_requires_explicit_v1_upgrade_and_preserves_durable_identity ... ok
+test actual_schema2_upgrade_preserves_embedded_bytes_and_does_not_invent_native_sources ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.76s
+
+     Running tests\command_context.rs (L:\om9-target\debug\deps\command_context-cadbd7465bf6ca22.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... ok
+test c1_the_context_snapshot_names_document_view_selection_and_revisions ... ok
+test c2_a_view_tab_switch_keeps_the_command_and_its_context ... ok
+test c4_a_command_keeps_the_context_it_started_against ... ok
+test c3_a_context_whose_view_or_document_is_gone_is_stale ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\command_events_surface.rs (L:\om9-target\debug\deps\command_events_surface-fb87a7a508dddf1b.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... ok
+test z2_a_cancelled_run_finishes_with_the_cancel_outcome ... ok
+test z3_and_z4_the_order_is_total_and_the_log_is_bounded ... ok
+test z1_a_run_reports_its_steps_in_order ... ok
+test aa1_to_aa4_a_broken_observer_cannot_touch_the_run ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\command_feedback_adapter.rs (L:\om9-target\debug\deps\command_feedback_adapter-439853fcd851f7f4.exe)
+
+running 5 tests
+test the_underlined_option_letter_toggles_the_flag ... ok
+test a_locale_comma_and_nan_are_refused_without_mutating_the_command ... ok
+test the_running_command_exposes_its_canonical_feature_and_prompt ... ok
+test a_document_change_during_a_prompt_cancels_it_safely ... ok
+test registry_aliases_reach_the_same_canonical_command ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\command_inline_options.rs (L:\om9-target\debug\deps\command_inline_options-60a27bfd3dca4c68.exe)
+
+running 4 tests
+test idle_prompt_never_gains_an_option_signature ... ok
+test polyline_keeps_its_own_signature_without_duplication ... ok
+test prompt_with_options_names_every_option_inline_for_each_starter ... ok
+test the_command_bar_underlines_interp_options_inside_the_prompt ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.23s
+
+     Running tests\command_options_and_repeat.rs (L:\om9-target\debug\deps\command_options_and_repeat-9994e2c968ed23bd.exe)
+
+running 6 tests
+test a_bare_option_number_follows_the_document_unit ... ok
+test fixture_design_pairs_are_present ... ok
+test p1_to_p10_every_bad_option_is_refused_with_a_reason ... ok
+test s1_to_s3_a_destructive_command_is_never_repeated ... ok
+test o1_to_o4_the_parser_reads_the_declared_options ... ok
+test q1_to_q3_and_r1_to_r4_repeat_runs_the_last_repeatable_command ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\command_options_interface.rs (L:\om9-target\debug\deps\command_options_interface-002cd866143f863f.exe)
+
+running 9 tests
+test stale_options_are_refused_and_value_activation_does_not_mutate_owner ... ok
+test line_length_snapshot_uses_the_input_unit_without_rescaling_geometry ... ok
+test line_prompt_carries_its_options_inline ... ok
+test collisions_are_unique_numeric_input_and_paste_are_preserved ... ok
+test accelerators_do_not_repeat_or_interrupt_ime_drafts_and_other_editors ... ok
+test line_repeat_slot_never_leaks_options_into_polyline ... ok
+test fixed_choices_refresh_the_selected_value_on_every_input_route ... ok
+test numeric_options_keep_invalid_draft_and_commit_actual_geometry_once ... ok
+test commands_share_keyboard_pointer_and_typed_activation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 56.54s
+
+     Running tests\command_sessions.rs (L:\om9-target\debug\deps\command_sessions-42703811ec818c73.exe)
+
+running 6 tests
+test unavailable_command_and_unknown_options_cannot_publish_or_replace_active_session ... ok
+test cancel_and_invalid_second_point_preserve_world_and_executable_redo ... ok
+test numeric_cmd_points_use_page_units_and_captured_cplane_exactly_once ... ok
+test both_sides_uses_start_as_midpoint_and_empty_enter_never_repeats_active_session ... ok
+test menu_cmd_and_f6_dispatch_the_same_line_phases_and_atomic_commit ... ok
+test scene_is_derived_from_published_document_and_recent_icons_hold_nine_completed_commands ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\command_shortcuts.rs (L:\om9-target\debug\deps\command_shortcuts-4f0d0c635134895d.exe)
+
+running 3 tests
+test space_while_editing_the_command_line_does_not_repeat ... ok
+test escape_aborts_the_running_command_and_keeps_the_document ... ok
+test space_repeats_the_allowlisted_command_when_the_editor_is_idle ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.49s
+
+     Running tests\command_snapshot.rs (L:\om9-target\debug\deps\command_snapshot-ea4876662de71419.exe)
+
+running 3 tests
+test polyline_snapshot_owner_and_stage_options_match_the_owner ... ok
+test positional_top11_owner_is_visible_without_a_fake_option_row ... FAILED
+test active_input_snapshot_is_owner_run_and_phase_aware ... ok
+
+failures:
+
+---- positional_top11_owner_is_visible_without_a_fake_option_row stdout ----
+
+thread 'positional_top11_owner_is_visible_without_a_fake_option_row' (41044) panicked at crates\om9-app\tests\command_snapshot.rs:52:5:
+assertion failed: snapshot.options.is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    positional_top11_owner_is_visible_without_a_fake_option_row
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p om9-app --test command_snapshot`
+     Running tests\command_state_machine.rs (L:\om9-target\debug\deps\command_state_machine-00a47ff528be933e.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... ok
+test n1_to_n6_out_of_order_input_cannot_commit_partial_geometry ... ok
+test m1_to_m4_the_command_walks_its_phases ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\command_tokens.rs (L:\om9-target\debug\deps\command_tokens-af9e3befc9344a2c.exe)
+
+running 1 test
+test clicking_the_both_sides_token_toggles_through_the_typed_option_path ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.38s
+
+     Running tests\command_transactions.rs (L:\om9-target\debug\deps\command_transactions-f0064ba042adbc0b.exe)
+
+running 5 tests
+test fixture_design_pairs_are_present ... ok
+test x1_to_x3_and_y1_to_y4_a_cancel_leaves_no_orphan ... ok
+test u1_to_u4_a_failure_writes_nothing ... ok
+test t1_to_t3_one_action_is_one_journal_entry ... ok
+test v1_to_v2_and_w1_to_w4_the_journal_walks_back_and_forward ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\command_transcript.rs (L:\om9-target\debug\deps\command_transcript-40e166007ef7d7c3.exe)
+
+running 3 tests
+test one_surface_keeps_history_and_prompt_protected_with_unicode_char_indices ... ok
+test paste_only_changes_draft_and_submit_is_an_explicit_separate_action ... ok
+test recall_down_restores_pending_draft_and_history_is_bounded_without_utf8_damage ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_values.rs (L:\om9-target\debug\deps\command_values-682dbf160fbc3510.exe)
+
+running 7 tests
+test interp_snapshot_carries_degree_and_close ... ok
+test top11_duplicate_flags_are_typed_values ... ok
+test rebuild_and_polygon_snapshots_carry_typed_values ... ok
+test snapshots_expose_typed_values_not_only_labels ... ok
+test helix_and_spiral_snapshots_carry_typed_owner_values ... ok
+test primitive_snapshots_carry_typed_owner_values ... ok
+test angle_and_divide_snapshots_carry_typed_values ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\continue_curve.rs (L:\om9-target\debug\deps\continue_curve-553c4c96be4bc091.exe)
+
+running 2 tests
+test continue_curve_starts_at_the_last_control_point ... ok
+test continue_curve_accepts_degree_option ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\continue_interp.rs (L:\om9-target\debug\deps\continue_interp-60b85137e3176135.exe)
+
+running 2 tests
+test continue_interp_curve_starts_from_the_selected_end ... ok
+test continue_interp_accepts_degree_option ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\control_curve.rs (L:\om9-target\debug\deps\control_curve-132b3aafca660b6e.exe)
+
+running 2 tests
+test control_curve_accepts_degree_option ... ok
+test control_curve_uses_the_clicked_poles ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\corner_ops.rs (L:\om9-target\debug\deps\corner_ops-1715c22e812ba917.exe)
+
+running 3 tests
+test corner_ops_expose_the_matching_option ... ok
+test fillet_creates_a_tangent_arc ... ok
+test chamfer_creates_a_corner_line ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\cplane_coordinate_input.rs (L:\om9-target\debug\deps\cplane_coordinate_input-46398c1006ae7ca2.exe)
+
+running 10 tests
+test ortho_snaps_to_the_dominant_cplane_axis_from_the_previous_point ... ok
+test relative_entry_without_a_base_is_refused_without_a_document_write ... ok
+test malformed_point_text_keeps_the_prompt_and_the_document_unchanged ... ok
+test planar_projects_onto_the_active_plane_and_both_modes_stay_on_it ... ok
+test local_entry_uses_the_active_view_cplane ... ok
+test front_view_local_input_uses_the_front_cplane_not_top ... ok
+test switching_views_reads_the_other_views_plane_without_moving_the_world_point ... ok
+test cplane_origin_rotation_keeps_world_geometry_and_rejects_collinear_input ... ok
+test f4_inserts_the_world_origin_through_the_point_prompt ... ok
+test world_entry_ignores_the_cplane_and_relative_uses_the_previous_point ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\cplane_f4_ui.rs (L:\om9-target\debug\deps\cplane_f4_ui-ba88d75454be6051.exe)
+
+running 1 test
+test f4_inserts_world_origin_in_a_point_prompt_and_only_toggles_the_datum_when_idle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.99s
+
+     Running tests\cplane_menu.rs (L:\om9-target\debug\deps\cplane_menu-28cf8d77ec01179e.exe)
+
+running 1 test
+test viewport_menu_applies_a_preset_to_the_captured_view_only ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\cross_section.rs (L:\om9-target\debug\deps\cross_section-7b923351779a33ce.exe)
+
+running 3 tests
+test cross_section_exposes_count_and_spacing_tokens ... ok
+test cross_section_profiles_generate_multiple_sections ... ok
+test cross_section_options_use_the_shared_snapshot ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\crv2view.rs (L:\om9-target\debug\deps\crv2view-d73246d95a11ccf9.exe)
+
+running 2 tests
+test crv2view_combines_two_projection_curves ... ok
+test crv2view_history_records_one_replayable_recipe ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\crv_ends.rs (L:\om9-target\debug\deps\crv_ends-42f961ff043c3bba.exe)
+
+running 1 test
+test crv_start_and_end_create_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\crv_seam.rs (L:\om9-target\debug\deps\crv_seam-4f3c1d1e34098321.exe)
+
+running 2 tests
+test crv_seam_exposes_seam_token ... ok
+test crv_seam_moves_the_circle_start_angle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\curve_boolean.rs (L:\om9-target\debug\deps\curve_boolean-effdb323b04fc259.exe)
+
+running 4 tests
+test curve_boolean_nested_circle_keeps_the_outer_boundary ... ok
+test curve_boolean_joins_connected_boundary_curves ... ok
+test curve_boolean_keeps_two_disjoint_circles ... ok
+test curve_boolean_unions_two_overlapping_circles ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\curve_menu.rs (L:\om9-target\debug\deps\curve_menu-771ed5d423c291b2.exe)
+
+running 6 tests
+test every_row_dispatches_to_its_session ... ok
+test every_documented_curve_menu_row_has_one_stable_id_and_icon ... ok
+test line_and_point_commands_still_create_geometry_through_the_same_ids ... ok
+test every_row_reaches_the_dispatch_entry_from_the_menu ... ok
+test menu_label_and_documented_script_resolve_to_the_same_command ... ok
+test running_curve_menu_commands_retain_their_actual_feature ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.01s
+
+     Running tests\curve_soft_edit.rs (L:\om9-target\debug\deps\curve_soft_edit-b19301e6188ce47b.exe)
+
+running 1 test
+test curve_soft_edit_moves_a_single_edit_point ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\display_modes.rs (L:\om9-target\debug\deps\display_modes-9006bb51965bd240.exe)
+
+running 3 tests
+test a_display_preset_restores_wireframe_and_edge_preferences ... ok
+test wireframe_and_shaded_show_the_same_box_and_do_not_write_the_model ... ok
+test a_mode_switch_keeps_selected_ids_and_visibility_flags ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\display_persistence.rs (L:\om9-target\debug\deps\display_persistence-8732f58155a4a126.exe)
+
+running 2 tests
+test a_display_preset_is_embedded_and_restored_with_the_project ... ok
+test a_corrupt_display_preset_falls_back_without_losing_the_project ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests\divide.rs (L:\om9-target\debug\deps\divide-da69d22fb63d7e8b.exe)
+
+running 3 tests
+test divide_exposes_count_token ... ok
+test divide_places_intermediate_points ... ok
+test divide_uses_equal_arc_length_stations ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\dock_layout_default.rs (L:\om9-target\debug\deps\dock_layout_default-d1cf5b1c1a84089d.exe)
+
+running 7 tests
+test fixture_bytes_are_the_specification ... ok
+test d3_reset_returns_the_baseline_and_the_caller_decides_what_to_publish ... ok
+test d2_reset_is_idempotent ... ok
+test d1_reset_after_every_placement_kind_recreates_the_baseline ... ok
+test n9_an_impossible_stored_home_is_repaired_with_a_diagnostic ... ok
+test d4_reload_without_a_store_is_the_factory_default ... ok
+test n1_to_n8_a_layout_that_cannot_be_honoured_resets_to_the_baseline ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\dock_layout_persistence.rs (L:\om9-target\debug\deps\dock_layout_persistence-7fe784c28224ebf4.exe)
+
+running 6 tests
+test fixture_design_pair_is_present ... ok
+test s4_a_session_without_a_kept_file_is_the_baseline ... ok
+test m1_to_m13_a_file_that_cannot_be_honoured_is_repaired_with_a_warning ... ok
+test s3_a_kept_file_reopens_the_same_named_ids ... ok
+test s1_a_session_keeps_what_the_user_arranged ... ok
+test s2_a_written_file_is_a_fixed_point ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\document_contract.rs (L:\om9-target\debug\deps\document_contract-426ed3f36df8dd02.exe)
+
+running 11 tests
+test l3_011_one_edit_publishes_one_ordered_batch_with_a_new_revision ... ok
+test l3_011_an_observer_cannot_change_the_document_it_is_told_about ... ok
+test l3_011_a_panicking_observer_is_recorded_and_the_others_still_run ... ok
+test l3_010_a_selection_from_another_document_generation_is_stale ... ok
+test l3_011_undo_and_redo_are_published_with_their_own_cause ... ok
+test l3_010_selection_is_pruned_after_undo_and_redo_restores_the_object ... ok
+test l3_011_recording_starts_with_the_first_observer_and_holds_nothing_before ... ok
+test l3_012_another_documents_snapshot_is_refused_without_changing_the_controller ... ok
+test l3_010_a_stale_list_index_is_detected_instead_of_mapped_to_a_neighbour ... ok
+test l3_012_a_restore_inside_a_running_command_is_busy ... ok
+test l3_012_snapshot_restore_rebuilds_the_document_and_resets_undo ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\document_window_state.rs (L:\om9-target\debug\deps\document_window_state-940b6c5bd0f52161.exe)
+
+running 9 tests
+test fixture_design_pair_is_present ... ok
+test w1_a_new_session_is_named_and_clean ... ok
+test w7_a_long_name_is_cut_on_a_character_boundary ... ok
+test w6_only_menus_moved_leaves_the_document_clean ... ok
+test w3_saving_removes_the_marker_and_names_the_file ... ok
+test w2_a_changed_document_is_marked ... ok
+test w4_a_change_after_saving_marks_it_again ... ok
+test w5_switching_documents_changes_the_name_and_clears_the_state ... ok
+test c1_to_c9_unsaved_work_requires_an_explicit_decision ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.09s
+
+     Running tests\dup_border.rs (L:\om9-target\debug\deps\dup_border-65abe06720a0de39.exe)
+
+running 1 test
+test dup_border_creates_four_boundary_curves ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\edge_srf.rs (L:\om9-target\debug\deps\edge_srf-2fd497e213010163.exe)
+
+running 1 test
+test edgesrf_builds_a_surface_from_two_boundary_lines ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\ellipse.rs (L:\om9-target\debug\deps\ellipse-f6583d1287fbe209.exe)
+
+running 22 tests
+test ellipse_preview_is_a_closed_ring ... ok
+test ellipse_exposes_mode_tokens ... ok
+test ellipse_from_foci_exposes_undo_token ... ok
+test ellipse_around_curve_preview_uses_the_path_normal ... ok
+test ellipse_from_foci_uses_the_focal_sum ... ok
+test ellipse_vertical_follows_the_active_cplane ... ok
+test ellipse_vertical_mode_swaps_the_radii ... ok
+test ellipse_deformable_token_toggles_off ... ok
+test ellipse_corner_mode_uses_the_bounding_box ... ok
+test ellipse_center_major_and_minor_points_match ... ok
+test ellipse_center_follows_the_active_cplane ... ok
+test ellipse_radii_use_the_shared_option_entries ... ok
+test ellipse_corner_follows_the_active_cplane ... ok
+test ellipse_radius_options_commit_on_enter ... ok
+test ellipse_around_curve_accepts_a_path_pick ... ok
+test ellipse_around_curve_uses_the_path ... ok
+test ellipse_diameter_mode_uses_major_diameter ... ok
+test ellipse_accepts_bare_deformable_option ... ok
+test ellipse_accepts_approx_alias ... ok
+test ellipse_deformable_rebuilds_to_the_requested_point_count ... ok
+test ellipse_center_mode_can_mark_foci ... ok
+test ellipse_mark_foci_creates_two_points ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\extend_curve.rs (L:\om9-target\debug\deps\extend_curve-5f0fb449ac213138.exe)
+
+running 2 tests
+test extend_curve_adds_a_tangent_line ... ok
+test extend_can_use_the_start_end ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\extend_shrink.rs (L:\om9-target\debug\deps\extend_shrink-e8a982d845949e3c.exe)
+
+running 4 tests
+test shrinksrf_shrinks_a_plane ... ok
+test shrinksrf_options_stage_four_uv_values ... ok
+test extendsrf_extends_a_plane_edge ... ok
+test extendsrf_options_stage_edge_then_distance ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\extrude_surface.rs (L:\om9-target\debug\deps\extrude_surface-b0cfa3fbef13b4bb.exe)
+
+running 2 tests
+test extrude_height_uses_the_shared_option_entry ... ok
+test extrude_builds_a_surface_from_a_curve ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\f6_context.rs (L:\om9-target\debug\deps\f6_context-261513675ea976b2.exe)
+
+running 2 tests
+test a_custom_menu_persists_in_the_project_with_stable_order_and_stale_disable ... ok
+test f6_uses_the_selected_class_and_empty_general_context ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests\file_lifecycle.rs (L:\om9-target\debug\deps\file_lifecycle-a656bd359a95f6e5.exe)
+
+running 20 tests
+test file_and_layer_dialogs_cannot_overlap_owners ... ok
+test file_tokens_are_foreign_consumed_and_stale_after_undo_roundtrip ... ok
+test rejected_picker_reply_is_consumed_even_if_the_path_later_becomes_valid ... ok
+test missing_replay_module_is_diagnostic_and_not_a_clean_restore ... ok
+test old_overwrite_confirmation_cannot_authorize_reselected_destination ... ok
+test dirty_new_cancel_preserves_pending_line_and_discard_replaces_only_after_acceptance ... ok
+test close_cancel_save_failure_and_stale_consent_cannot_approve_shutdown ... ok
+test close_clean_or_discard_keeps_document_and_history_until_native_shutdown ... ok
+test open_invalid_or_missing_candidate_keeps_document_scene_command_and_redo ... ok
+test save_clean_marker_tracks_undo_redo_and_different_same_revision_branch ... ok
+test save_as_existing_destination_requires_explicit_overwrite_and_cancel_preserves_bytes ... ok
+test consumed_save_picker_reply_cannot_become_a_later_open_selection ... ok
+test new_save_failure_or_path_cancel_does_not_discard_old_document ... ok
+test same_file_open_renews_runtime_authority_and_invalidates_old_modal_tokens ... ok
+test failing_save_to_active_path_does_not_turn_into_a_save_as_picker ... ok
+test save_as_cancel_failure_and_unsupported_format_preserve_identity_and_target ... ok
+test first_save_and_subsequent_save_preserve_model_undo_and_redo ... ok
+test close_save_first_path_and_known_path_preserve_geometry_undo ... ok
+test save_keeps_hidden_locked_off_layers_and_explicit_preferences_in_complete_document ... ok
+test open_candidate_must_fit_alongside_old_world_scene_and_undo ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.83s
+
+     Running tests\file_lifecycle_cold.rs (L:\om9-target\debug\deps\file_lifecycle_cold-1ea657f134193f6a.exe)
+
+running 1 test
+test controller_saved_documents_survive_new_open_and_independent_cold_inspection ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.76s
+
+     Running tests\file_widgets.rs (L:\om9-target\debug\deps\file_widgets-f05e1dd912696b54.exe)
+
+running 21 tests
+test ui_startup_from_file_keeps_active_path_and_missing_module_diagnostics ... ok
+test close_save_failure_at_active_path_keeps_prompt_draft_and_path ... FAILED
+test file_menu_and_cmd_dispatch_owned_intents_through_same_controller ... ok
+test clean_close_accepts_and_other_file_owner_defers_close ... ok
+test shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save ... FAILED
+test held_opening_enter_cannot_accept_save_on_the_new_prompt ... FAILED
+test overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace ... FAILED
+test owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner ... FAILED
+test toolbar_new_opens_unsaved_prompt_and_escape_keeps_line_draft_and_redo ... ok
+test window_close_discard_requests_shutdown_without_replacing_old_document ... ok
+test cmd_enter_opens_prompt_without_saving_and_ime_enter_cannot_affirm_it ... ok
+test window_close_cancel_and_repeated_requests_keep_line_draft_and_same_prompt ... ok
+test window_close_first_save_picker_cancel_preserves_document_and_draft ... ok
+test cmd_composition_transfers_to_file_prompt_until_commit ... ok
+test ime_commit_enter_and_escape_wait_for_a_fresh_key_after_composition ... ok
+test actual_save_control_routes_pending_new_without_a_second_geometry_undo ... ok
+test discard_new_resets_runtime_only_after_actual_button_and_blocks_canvas_input ... ok
+test failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo ... FAILED
+test real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once ... FAILED
+test old_discard_or_cancel_pointer_release_cannot_answer_a_new_prompt_owner ... ok
+test thirty_closed_file_prompts_reuse_area_state_and_keep_cmd_editor ... ok
+
+failures:
+
+---- close_save_failure_at_active_path_keeps_prompt_draft_and_path stdout ----
+
+thread 'close_save_failure_at_active_path_keeps_prompt_draft_and_path' (36256) panicked at crates\om9-app\tests\file_widgets.rs:244:10:
+called `Result::unwrap()` on an `Err` value: Stale("file operation document/context")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save stdout ----
+
+thread 'shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save' (47664) panicked at crates\om9-app\tests\file_widgets.rs:484:10:
+called `Result::unwrap()` on an `Err` value: Stale("file operation document/context")
+
+---- held_opening_enter_cannot_accept_save_on_the_new_prompt stdout ----
+
+thread 'held_opening_enter_cannot_accept_save_on_the_new_prompt' (32356) panicked at crates\om9-app\tests\file_widgets.rs:705:10:
+called `Result::unwrap()` on an `Err` value: Stale("file operation document/context")
+
+---- overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace stdout ----
+
+thread 'overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace' (7296) panicked at crates\om9-app\tests\file_widgets.rs:554:10:
+called `Result::unwrap()` on an `Err` value: Stale("file operation document/context")
+
+---- owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner stdout ----
+
+thread 'owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner' (40804) panicked at crates\om9-app\tests\file_widgets.rs:390:10:
+called `Result::unwrap()` on an `Err` value: Stale("file operation document/context")
+
+---- failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo stdout ----
+
+thread 'failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo' (31396) panicked at crates\om9-app\tests\file_widgets.rs:531:58:
+called `Option::unwrap()` on a `None` value
+
+---- real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once stdout ----
+
+thread 'real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once' (31052) panicked at crates\om9-app\tests\file_widgets.rs:352:5:
+assertion `left == right` failed
+  left: CoordinatorSnapshot { world: World { documents: {DocumentId(795e7005-f9b6-46ac-9d90-e6af247608e4): Document { id: DocumentId(795e7005-f9b6-46ac-9d90-e6af247608e4), name: "Untitled", epoch: 1, session_generation: 1, owner_session: SessionId(774858e8-c1a6-488d-b944-9966df3c5674), revision: 5, context_revision: 1, page_unit: Millimeter, tolerance: None, current_layer: None, layer_order: [], layers: {}, entities: {ObjectId(9259f61b-d97b-46ee-b50f-3a02aab98247): Entity { id: ObjectId(9259f61b-d97b-46ee-b50f-3a02aab98247), label: "Point", generation: 1, geometry_revision: 1, attributes_revision: 1, geometry: Point([1.0, 2.0, 3.0]), placement: Transform([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]), attributes: Attributes { layer: None, visible: true, hidden: false, selectable: true, locked: false, color: None, line_pattern: None, line_pattern_source: 0, material: None, material_source: 0, plot_color: None, plot_weight_mm: None, plot_color_source: None, plot_weight_source: None, display_order: 0, space: 1, viewport_id: None }, extensions: {} }}, definitions: {}, history: HistoryGraph { recipes: {}, references: {} }, results: {}, resources: {ResourceId(124aaf44-8b2a-4487-84e3-ea0e52dd69bc): Resource { id: ResourceId(124aaf44-8b2a-4487-84e3-ea0e52dd69bc), name: "om9.display.v1", kind: OpaqueBinary, byte_length: 134, sha256: [223, 23, 105, 39, 2, 67, 11, 237, 110, 220, 147, 157, 213, 159, 235, 169, 115, 53, 91, 35, 152, 36, 8, 215, 38, 223, 151, 245, 38, 150, 179, 107], payload: Some([123, 34, 118, 101, 114, 115, 105, 111, 110, 34, 58, 49, 44, 34, 119, 105, 114, 101, 102, 114, 97, 109, 101, 34, 58, 116, 114, 117, 101, 44, 34, 115, 104, 111, 119, 95, 101, 100, 103, 101, 115, 34, 58, 116, 114, 117, 101, 44, 34, 98, 97, 99, 107, 102, 97, 99, 101, 95, 99, 117, 101, 115, 34, 58, 116, 114, 117, 101, 44, 34, 104, 105, 100, 101, 95, 119, 111, 114, 107, 105, 110, 103, 95, 99, 117, 114, 118, 101, 115, 34, 58, 102, 97, 108, 115, 101, 44, 34, 104, 105, 100, 101, 95, 99, 117, 116, 116, 101, 114, 115, 34, 58, 102, 97, 108, 115, 101, 44, 34, 103, 101, 109, 95, 99, 117, 101, 115, 34, 58, 116, 114, 117, 101, 125]) }, ResourceId(1a2a4b3d-8440-4fd8-87ac-885ac37b0b2d): Resource { id: ResourceId(1a2a4b3d-8440-4fd8-87ac-885ac37b0b2d), name: "om9.f6.v1", kind: OpaqueBinary, byte_length: 30, sha256: [26, 9, 63, 136, 160, 44, 222, 46, 41, 54, 81, 164, 184, 75, 166, 157, 131, 96, 133, 69, 251, 0, 206, 16, 170, 71, 4, 186, 33, 37, 237, 219], payload: Some([123, 34, 118, 101, 114, 115, 105, 111, 110, 34, 58, 49, 44, 34, 99, 111, 109, 109, 97, 110, 100, 95, 105, 100, 115, 34, 58, 91, 93, 125]) }, ResourceId(8760121d-7294-40ec-ac3a-db15faeab217): Resource { id: ResourceId(8760121d-7294-40ec-ac3a-db15faeab217), name: "om9.pictureframe.v1", kind: OpaqueBinary, byte_length: 25, sha256: [2, 115, 79, 221, 110, 33, 42, 202, 254, 214, 65, 78, 1, 110, 178, 138, 101, 68, 216, 134, 204, 9, 208, 184, 217, 134, 111, 217, 218, 227, 126, 136], payload: Some([123, 34, 118, 101, 114, 115, 105, 111, 110, 34, 58, 49, 44, 34, 102, 114, 97, 109, 101, 115, 34, 58, 91, 93, 125]) }}, retained_sources: {}, import_namespaces: {}, groups: {}, features: {}, exchange: ExchangeMetadata { line_patterns: {}, text_styles: {}, materials: {}, dim_styles: {}, hatch_patterns: {}, lights: {} } }} }, authority: SessionId(b89e450b-dcd4-4a2d-b73a-c6c63a3f9328), epoch: 5, scope_generation: 0, undo: [], redo: [], scope: None, identities: IdentityLedger([Object(ObjectId(9259f61b-d97b-46ee-b50f-3a02aab98247)), Resource(ResourceId(124aaf44-8b2a-4487-84e3-ea0e52dd69bc)), Resource(ResourceId(1a2a4b3d-8440-4fd8-87ac-885ac37b0b2d)), Resource(ResourceId(8760121d-7294-40ec-ac3a-db15faeab217))]) }
+ right: CoordinatorSnapshot { world: World { documents: {DocumentId(795e7005-f9b6-46ac-9d90-e6af247608e4): Document { id: DocumentId(795e7005-f9b6-46ac-9d90-e6af247608e4), name: "Untitled", epoch: 1, session_generation: 1, owner_session: SessionId(774858e8-c1a6-488d-b944-9966df3c5674), revision: 2, context_revision: 1, page_unit: Millimeter, tolerance: None, current_layer: None, layer_order: [], layers: {}, entities: {ObjectId(9259f61b-d97b-46ee-b50f-3a02aab98247): Entity { id: ObjectId(9259f61b-d97b-46ee-b50f-3a02aab98247), label: "Point", generation: 1, geometry_revision: 1, attributes_revision: 1, geometry: Point([1.0, 2.0, 3.0]), placement: Transform([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]), attributes: Attributes { layer: None, visible: true, hidden: false, selectable: true, locked: false, color: None, line_pattern: None, line_pattern_source: 0, material: None, material_source: 0, plot_color: None, plot_weight_mm: None, plot_color_source: None, plot_weight_source: None, display_order: 0, space: 1, viewport_id: None }, extensions: {} }}, definitions: {}, history: HistoryGraph { recipes: {}, references: {} }, results: {}, resources: {}, retained_sources: {}, import_namespaces: {}, groups: {}, features: {}, exchange: ExchangeMetadata { line_patterns: {}, text_styles: {}, materials: {}, dim_styles: {}, hatch_patterns: {}, lights: {} } }} }, authority: SessionId(b89e450b-dcd4-4a2d-b73a-c6c63a3f9328), epoch: 2, scope_generation: 0, undo: [UndoEntry { id: TransactionId(57598127-d2bf-490d-9b55-0391feb1d36c), label: "Point", before: {DocumentId(795e7005-f9b6-46ac-9d90-e6af247608e4): Document { id: DocumentId(795e7005-f9b6-46ac-9d90-e6af247608e4), name: "Untitled", epoch: 1, session_generation: 1, owner_session: SessionId(774858e8-c1a6-488d-b944-9966df3c5674), revision: 1, context_revision: 1, page_unit: Millimeter, tolerance: None, current_layer: None, layer_order: [], layers: {}, entities: {}, definitions: {}, history: HistoryGraph { recipes: {}, references: {} }, results: {}, resources: {}, retained_sources: {}, import_namespaces: {}, groups: {}, features: {}, exchange: ExchangeMetadata { line_patterns: {}, text_styles: {}, materials: {}, dim_styles: {}, hatch_patterns: {}, lights: {} } }}, after: {DocumentId(795e7005-f9b6-46ac-9d90-e6af247608e4): Document { id: DocumentId(795e7005-f9b6-46ac-9d90-e6af247608e4), name: "Untitled", epoch: 1, session_generation: 1, owner_session: SessionId(774858e8-c1a6-488d-b944-9966df3c5674), revision: 2, context_revision: 1, page_unit: Millimeter, tolerance: None, current_layer: None, layer_order: [], layers: {}, entities: {ObjectId(9259f61b-d97b-46ee-b50f-3a02aab98247): Entity { id: ObjectId(9259f61b-d97b-46ee-b50f-3a02aab98247), label: "Point", generation: 1, geometry_revision: 1, attributes_revision: 1, geometry: Point([1.0, 2.0, 3.0]), placement: Transform([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]), attributes: Attributes { layer: None, visible: true, hidden: false, selectable: true, locked: false, color: None, line_pattern: None, line_pattern_source: 0, material: None, material_source: 0, plot_color: None, plot_weight_mm: None, plot_color_source: None, plot_weight_source: None, display_order: 0, space: 1, viewport_id: None }, extensions: {} }}, definitions: {}, history: HistoryGraph { recipes: {}, references: {} }, results: {}, resources: {}, retained_sources: {}, import_namespaces: {}, groups: {}, features: {}, exchange: ExchangeMetadata { line_patterns: {}, text_styles: {}, materials: {}, dim_styles: {}, hatch_patterns: {}, lights: {} } }} }], redo: [], scope: None, identities: IdentityLedger([Object(ObjectId(9259f61b-d97b-46ee-b50f-3a02aab98247))]) }
+
+
+failures:
+    close_save_failure_at_active_path_keeps_prompt_draft_and_path
+    failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo
+    held_opening_enter_cannot_accept_save_on_the_new_prompt
+    overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace
+    owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner
+    real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once
+    shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save
+
+test result: FAILED. 14 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 41.56s
+
+error: test failed, to rerun pass `-p om9-app --test file_widgets`
+     Running tests\fillet_corners.rs (L:\om9-target\debug\deps\fillet_corners-b625d42b7f18a40d.exe)
+
+running 2 tests
+test fillet_corners_exposes_radius_token ... ok
+test fillet_corners_creates_an_arc_at_each_corner ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\fit.rs (L:\om9-target\debug\deps\fit-b942a4104ff649a1.exe)
+
+running 2 tests
+test fit_exposes_tolerance_token ... ok
+test fit_curve_refits_a_circle_within_tolerance ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\gem_cluster_panel.rs (L:\om9-target\debug\deps\gem_cluster_panel-cd73a4dd2d43e774.exe)
+
+running 11 tests
+test a_bad_selection_is_refused_explicitly ... ok
+test cancel_leaves_the_document_untouched ... ok
+test orient_to_gem_aligns_the_object_and_undo_restores_it ... ok
+test typed_command_names_open_the_same_builders ... ok
+test the_tapered_baguette_between_two_curves_is_one_stone ... ok
+test the_baguette_channel_commits_between_two_curves ... ok
+test gems_between_curves_uses_the_round_section_and_touches_both_walls ... ok
+test the_cluster_builder_places_a_ring_with_offsets ... ok
+test the_halo_builder_previews_and_commits_one_transaction ... ok
+test undoing_a_halo_removes_the_accents_and_the_feature ... ok
+test editing_a_halo_reuses_the_existing_child_ids ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.48s
+
+     Running tests\gem_cutters.rs (L:\om9-target\debug\deps\gem_cutters-5c43d286cdb74d6e.exe)
+
+running 7 tests
+test the_builder_needs_a_selected_gem ... ok
+test a_typed_cutter_command_reaches_the_same_handler ... ok
+test a_removed_body_without_a_boolean_is_refused_and_the_preview_survives ... ok
+test the_library_command_builds_each_preset_and_records_the_seat ... ok
+test the_dimensional_bezel_cutter_options_reach_the_shared_scallop_command ... ok
+test the_gem_cutter_icon_stages_a_preview_and_enter_commits_cutter_bodies ... ok
+test the_interactive_boolean_cuts_the_metal_and_the_preserve_answer_removes_the_bodies ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.90s
+
+     Running tests\gem_edits.rs (L:\om9-target\debug\deps\gem_edits-bb31322b60f9f8c2.exe)
+
+running 11 tests
+test control_refuses_a_non_gem_selection_and_an_unknown_option ... ok
+test the_map_numbers_the_selected_stones_without_touching_the_document ... ok
+test save_style_refuses_a_name_the_shared_store_would_reject ... ok
+test the_reporter_uses_the_material_density_instead_of_one_diamond_basis ... ok
+test the_reporter_aggregates_count_and_calculated_mass ... ok
+test the_palette_icon_and_the_typed_command_reach_the_same_service ... ok
+test update_rebuilds_the_geometry_from_the_stored_record ... ok
+test control_edits_every_selected_stone_in_one_transaction_and_undo_restores_it ... ok
+test match_attributes_copies_geometry_from_the_first_selected_stone ... ok
+test save_and_load_style_roundtrip_through_the_style_file ... ok
+test an_edit_keeps_the_placement_link_and_the_attribute_history_shows_it ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)
+
+running 25 tests
+test a_locked_gem_layer_refuses_creation_and_property_edit ... ok
+test a_bad_loader_option_is_refused_and_the_session_stays_open ... ok
+test the_loader_previews_without_creating_an_object_and_cancel_leaves_no_phantom ... ok
+test the_custom_builder_refuses_an_open_or_non_planar_curve ... ok
+test the_typed_command_names_start_the_same_services ... ok
+test the_positioner_refuses_a_non_gem ... ok
+test the_brep_option_keeps_the_portable_mesh_body ... ok
+test the_baguette_builder_refuses_a_degenerate_girdle_and_an_oversized_corner ... ok
+test the_emerald_builder_commits_the_requested_dimensions ... ok
+test the_loader_preview_is_world_space_and_never_committed ... ok
+test the_f6_gem_context_enables_properties_but_not_the_unimplemented_report ... ok
+test gems_route_to_the_gem_layer_default_even_from_another_current_layer ... ok
+test applying_the_loader_inserts_one_gem_in_one_transaction_and_undo_restores ... ok
+test a_gem_mutation_is_the_only_way_the_tools_touch_the_document ... ok
+test keep_original_size_keeps_the_replaced_gems_dimensions ... ok
+test replacing_a_selected_gem_keeps_the_object_and_gem_identity ... ok
+test the_positioner_preview_mirrors_move_rotate_and_scale ... ok
+test the_property_editor_refuses_a_shared_instance ... ok
+test the_loader_commits_an_editable_brep_with_the_mesh_volume ... ok
+test the_positioner_moves_and_rotates_the_instance_in_place ... ok
+test the_positioner_duplicates_with_one_shared_definition ... ok
+test the_property_editor_is_one_transaction_and_undo_restores_every_field ... ok
+test loader_options_change_the_cut_shape_size_and_depth ... ok
+test the_custom_builder_uses_a_closed_planar_profile ... ok
+test a_property_edit_never_recolours_the_rest_of_the_scene ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.35s
+
+     Running tests\gem_pave_panel.rs (L:\om9-target\debug\deps\gem_pave_panel-7cb7ed0d9f1ca140.exe)
+
+running 14 tests
+test cancel_and_bad_selection_leave_the_document_untouched ... ok
+test sphere_handles_drag_radius_and_count_through_the_shared_builder_route ... ok
+test pave_style_save_and_apply_restore_the_stone_parameters ... ok
+test typed_commands_and_reset_share_the_same_handler ... ok
+test azure_builder_commits_four_profiles_per_stone ... ok
+test prong_builder_commits_markers_and_refuses_no_gem ... ok
+test gem_springs_move_stones_and_undo_restores_them ... ok
+test manual_pave_honours_the_exact_quantity ... ok
+test sphere_builder_previews_and_commits_without_a_surface ... ok
+test selected_curves_supply_the_attractor_and_closed_edges ... ok
+test auto_pave_previews_and_commits_one_feature ... ok
+test editing_the_builder_reuses_existing_child_ids ... ok
+test undo_redo_restore_the_whole_pave_layout ... ok
+test refreshing_a_feature_preserves_the_child_ids ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 41.61s
+
+     Running tests\gem_placement.rs (L:\om9-target\debug\deps\gem_placement-6deb83edeedfcaef.exe)
+
+running 16 tests
+test a_wrong_selection_is_a_typed_refusal_and_opens_nothing ... ok
+test cancel_drops_the_session_and_leaves_no_phantom ... ok
+test an_option_the_tool_does_not_use_is_a_typed_refusal ... ok
+test the_list_tool_places_heterogeneous_stones_in_order ... ok
+test the_surface_tool_stands_the_gem_on_the_surface_normal ... ok
+test the_links_report_and_the_typed_command_reach_the_same_service ... ok
+test count_places_an_exact_number_of_stones_between_the_range_ends ... ok
+test the_advanced_tool_tapers_the_row_from_the_start_size_to_the_end_size ... ok
+test the_multi_tool_places_one_run_per_curve_in_one_transaction ... ok
+test flow_carries_surface_stones_onto_another_surface ... ok
+test splop_projects_a_gem_onto_a_surface_and_records_the_uv_link ... ok
+test flow_carries_the_same_stones_onto_a_target_curve ... ok
+test the_row_previews_without_an_object_and_applies_in_one_transaction ... ok
+test the_count_tool_fits_the_row_between_the_curve_ends ... ok
+test profile_and_guides_insert_construction_curves ... ok
+test follow_marks_gems_whose_source_is_gone_as_conflicts_instead_of_moving_them ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests\gesture_regressions.rs (L:\om9-target\debug\deps\gesture_regressions-848728d8a1e2e9cd.exe)
+
+running 6 tests
+test pressing_elsewhere_then_crossing_a_handle_does_not_start_a_transform ... ok
+test losing_window_focus_discards_the_gesture_without_publication ... ok
+test losing_selection_cancels_the_preview_and_preserves_old_redo ... ok
+test tapping_alt_during_a_drag_copies_and_tapping_twice_restores_move ... ok
+test a_fast_first_sample_and_the_release_position_are_kept_in_every_view ... ok
+test scaling_is_independent_of_the_number_of_pointer_samples ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.97s
+
+     Running tests\global_status_surface.rs (L:\om9-target\debug\deps\global_status_surface-49bb53770c8ff826.exe)
+
+running 10 tests
+test x7_the_surface_is_pure ... ok
+test fixture_design_pair_is_present ... ok
+test g5_to_g10_the_surface_reports_what_the_fixture_states ... ok
+test x3_the_surface_never_answers_for_another_owner ... ok
+test g4_a_panel_message_never_hides_a_failure ... ok
+test g1_an_invalid_command_is_visible_and_retrievable ... ok
+test x1_escape_still_cancels_a_running_command_under_a_failure ... FAILED
+test g3_only_dismiss_clears_a_failure ... ok
+test x2_to_x6_the_surface_never_swallows_state ... ok
+test g2_a_failure_survives_a_later_success ... ok
+
+failures:
+
+---- x1_escape_still_cancels_a_running_command_under_a_failure stdout ----
+
+thread 'x1_escape_still_cancels_a_running_command_under_a_failure' (17156) panicked at crates\om9-app\tests\global_status_surface.rs:358:5:
+assertion `left == right` failed: and the failure stays on the line
+  left: Info
+ right: Error
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    x1_escape_still_cancels_a_running_command_under_a_failure
+
+test result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.63s
+
+error: test failed, to rerun pass `-p om9-app --test global_status_surface`
+     Running tests\gpu_navigation_publication.rs (L:\om9-target\debug\deps\gpu_navigation_publication-f174ba52891944df.exe)
+
+running 2 tests
+test publication_rejects_old_generation_and_same_revision_pose_and_recovers_from_oversize ... ok
+test document_identity_invalidates_equal_epoch_camera_selection_and_size ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.87s
+
+     Running tests\gumball_cold.rs (L:\om9-target\debug\deps\gumball_cold-dadff6986460b436.exe)
+
+running 1 test
+test a_gumball_commit_reopens_in_a_fresh_process_with_the_same_id_and_placement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.97s
+
+     Running tests\gumball_interaction.rs (L:\om9-target\debug\deps\gumball_interaction-e93a886a2f051fbf.exe)
+
+running 6 tests
+test a_gesture_without_motion_writes_nothing ... ok
+test the_pivot_is_none_without_a_selection ... ok
+test scaling_doubles_the_distance_from_the_pivot ... ok
+test rotating_turns_the_selection_about_its_centre ... ok
+test moving_two_selected_objects_is_one_journal_entry ... ok
+test an_x_axis_drag_adds_exactly_five_millimetres_with_one_undo_redo ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\gumball_numeric.rs (L:\om9-target\debug\deps\gumball_numeric-f093aafbd96e5cb2.exe)
+
+running 6 tests
+test numeric_commands_without_a_selection_are_refused ... ok
+test a_malformed_numeric_command_changes_nothing ... ok
+test a_twelve_point_five_millimetre_handle_input_is_exact_and_one_entry ... ok
+test nan_and_empty_numeric_inputs_commit_nothing_and_keep_the_gumball ... ok
+test a_numeric_move_is_one_transaction ... ok
+test a_numeric_rotation_and_scale_turn_about_the_pivot ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_placement.rs (L:\om9-target\debug\deps\gumball_placement-ddacdc51fb7bc185.exe)
+
+running 4 tests
+test object_alignment_follows_the_selected_objects_axes ... ok
+test cplane_alignment_follows_the_active_construction_plane_without_moving_the_object ... ok
+test a_relocated_gumball_turns_about_the_new_origin ... ok
+test resetting_the_gumball_puts_the_pivot_back_at_the_selection_centre ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\gumball_viewport.rs (L:\om9-target\debug\deps\gumball_viewport-cfa596e8f41ff854.exe)
+
+running 3 tests
+test shift_dragging_a_ring_rotates_the_selection ... ok
+test dragging_the_scale_square_scales_the_selection ... ok
+test a_click_selects_and_a_gumball_drag_moves_the_line ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.77s
+
+     Running tests\head_commands.rs (L:\om9-target\debug\deps\head_commands-1af9cd0a72e9a43c.exe)
+
+running 9 tests
+test a_selection_without_a_gem_is_refused_by_name ... ok
+test cancel_discards_the_preview_without_touching_the_document ... ok
+test the_three_bezel_modes_build_and_the_boolean_cuts_a_finger_rail ... ok
+test the_half_bezel_toggle_replaces_the_prongs_and_keeps_rails ... ok
+test the_head_icon_stages_a_basket_and_enter_commits_prongs_and_rails ... ok
+test the_seat_cut_opens_the_stone_and_undo_restores_it ... ok
+test a_level_four_edit_changes_only_its_prong_in_the_preview ... ok
+test scallop_cutters_commit_and_stay_out_of_the_settings_mass ... ok
+test the_bezier_profile_is_saved_and_resolved_by_name ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.56s
+
+     Running tests\heightfield.rs (L:\om9-target\debug\deps\heightfield-195eba6aedae658e.exe)
+
+running 1 test
+test heightfield_builds_a_surface_from_an_image ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\helix.rs (L:\om9-target\debug\deps\helix-3859fd4162ccb05c.exe)
+
+running 6 tests
+test helix_exposes_options_and_undo ... ok
+test helix_preview_is_a_wire ... ok
+test helix_follows_the_active_cplane_axis ... ok
+test helix_uses_height_and_turns ... ok
+test helix_accepts_a_custom_axis ... ok
+test helix_accepts_radius_option ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests\history_updates.rs (L:\om9-target\debug\deps\history_updates-20132f3e07766888.exe)
+
+running 8 tests
+test closing_the_window_is_refused_while_a_recipe_is_pending ... ok
+test reenabling_update_refuses_a_broken_dependency ... ok
+test the_command_line_drives_the_switches_report_and_clear ... ok
+test record_off_commits_geometry_without_a_recipe_and_toggles_stamp_new_records ... ok
+test edit_from_history_reopens_the_builder_at_the_recorded_parameters ... ok
+test the_report_names_a_missing_input_and_survives_a_reopen ... ok
+test clear_history_detaches_only_the_selected_object_and_refuses_a_lock ... ok
+test update_off_marks_dirty_and_rebuilds_only_after_update_is_reenabled ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests\interaction_log.rs (L:\om9-target\debug\deps\interaction_log-f13e16f6e73cf82f.exe)
+
+running 1 test
+test a_right_drag_writes_an_orbit_record ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.74s
+
+     Running tests\interp.rs (L:\om9-target\debug\deps\interp-3026dc650a3cff21.exe)
+
+running 4 tests
+test interp_curve_preview_follows_the_cursor ... ok
+test interp_preview_uses_the_interpolated_curve ... ok
+test interp_curve_fits_four_points ... ok
+test interp_curve_accepts_degree_option ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\interp_on_surface.rs (L:\om9-target\debug\deps\interp_on_surface-64a9ac88a040ba27.exe)
+
+running 1 test
+test interp_curve_on_surface_projects_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests\intersect.rs (L:\om9-target\debug\deps\intersect-8197c828b2cac3a7.exe)
+
+running 3 tests
+test intersect_exposes_tolerance_token ... ok
+test intersect_handles_two_circles_with_the_core_solver ... ok
+test intersect_creates_a_point_at_the_crossing ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests\intersect_two_sets.rs (L:\om9-target\debug\deps\intersect_two_sets-0064db6d92a16847.exe)
+
+running 1 test
+test intersect_two_sets_creates_all_crossing_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.65s
+
+     Running tests\isocurve.rs (L:\om9-target\debug\deps\isocurve-29db5701650c57e1.exe)
+
+running 2 tests
+test isocurve_exposes_u_v_tokens ... ok
+test extract_isocurve_creates_a_curve_from_a_surface ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\l2_01_13.rs (L:\om9-target\debug\deps\l2_01_13-76a5fdb87b871b8c.exe)
+
+running 15 tests
+test m03_01_13_001 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_002 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_003 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_004 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_005 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_006 ... ignored, requires an admitted native reader, OCCT runtime and the source fixture builder
+test m03_01_13_007 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_008 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_008_r5a_proxy_display_without_conversion ... ignored, requires the authored binary fixture builder
+test m03_01_13_009 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_010 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_011 ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_012 ... ignored, requires an admitted native reader, OCCT runtime and the source fixture builder
+test m03_01_13_receipt ... ignored, requires an admitted native reader and the authored source fixture builder
+test m03_01_13_stress ... ignored, requires an admitted native reader and the authored source fixture builder
+
+test result: ok. 0 passed; 0 failed; 15 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_category_palette.rs (L:\om9-target\debug\deps\layer_category_palette-47f246c163072624.exe)
+
+running 6 tests
+test p4_a_category_lists_the_slots_it_shows ... ok
+test p1_and_p2_the_palette_has_the_seven_categories_and_the_four_groups ... ok
+test p3_every_slot_maps_to_its_documented_category ... ok
+test fixture_design_pair_is_present ... ok
+test n1_to_n6_a_display_label_is_not_an_identity ... ok
+test p5_the_palette_model_reaches_the_application ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_controller.rs (L:\om9-target\debug\deps\layer_controller-40c4d5d980663d55.exe)
+
+running 9 tests
+test parser_uses_slot_identity_custom_label_none_and_closed_bounded_input ... ok
+test selection_filters_hidden_definition_members_and_counts_before_source_allocation ... ok
+test lazy_assign_keeps_current_and_is_one_undo_without_partial_creation_on_failure ... ok
+test pending_line_preserves_start_both_sides_and_binds_current_at_acceptance ... ok
+test group_mixed_toggle_keeps_hidden_and_explicit_selectable_preferences ... ok
+test quoted_numeric_none_and_zero_labels_resolve_owned_identity ... ok
+test layer_cmd_creates_only_its_group_and_does_not_assign_existing_objects ... ok
+test off_current_accepts_invisible_output_locked_current_refuses_without_losing_draft ... ok
+test nested_scene_metadata_and_new_point_refuse_aggregate_budget_without_mutation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests\layer_current_and_assign.rs (L:\om9-target\debug\deps\layer_current_and_assign-027a67f08d586ae4.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... ok
+test l1_to_l4_a_locked_layer_refuses_assignment_and_still_accepts_being_current ... ok
+test c1_to_c4_the_panel_and_the_model_agree_on_the_current_layer ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\layer_dialogs.rs (L:\om9-target\debug\deps\layer_dialogs-b45d71a87743e2fd.exe)
+
+running 11 tests
+test basic_lights_and_conflicting_dialog_requests_refuse_before_mutation ... ok
+test hidden_snapshot_count_is_admitted_before_allocation ... ok
+test empty_show_confirmation_needs_no_mutation_buffers_in_a_tight_budget ... ok
+test open_cancel_does_not_materialize_lazy_layers_or_consume_redo ... ok
+test old_and_foreign_tokens_cannot_mutate_a_new_dialog_or_a_reopened_document ... ok
+test selective_show_changes_only_chosen_hidden_flag_and_keeps_canvas_selection_and_masks ... ok
+test rename_confirmation_materializes_one_group_without_changing_current_or_objects ... ok
+test invalid_names_leave_dialog_editable_and_document_unchanged ... ok
+test undo_roundtrip_does_not_revive_a_dialog_snapshot ... ok
+test color_confirmation_refreshes_by_layer_scene_and_preserves_alpha_identity_and_geometry ... ok
+test empty_confirmation_and_existing_customization_noop_preserve_redo ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\layer_select_by_layer.rs (L:\om9-target\debug\deps\layer_select_by_layer-feec4a64c3666efd.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... ok
+test a1_to_a4_selecting_the_layer_selects_exactly_its_editable_objects ... ok
+test b1_to_b5_hidden_and_locked_objects_respect_the_selectable_policy ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\layer_state_persistence.rs (L:\om9-target\debug\deps\layer_state_persistence-07f7a7ed312b7875.exe)
+
+running 2 tests
+test k1_to_k3_the_two_layers_come_back_with_their_flags_and_ids ... ok
+test l1_to_l3_the_palette_never_shows_cached_state ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\layer_visible_locked.rs (L:\om9-target\debug\deps\layer_visible_locked-917314b4334b64b2.exe)
+
+running 3 tests
+test fixture_design_pair_is_present ... ok
+test t1_to_t4_a_locked_edit_is_refused_without_mutation ... ok
+test s1_to_s5_visible_and_locked_change_the_model_the_viewport_and_picking ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\layer_widgets.rs (L:\om9-target\debug\deps\layer_widgets-11d067f7039f23cf.exe)
+
+running 19 tests
+test default_rows_are_lazy_advanced_collapsed_and_fit_sidebar ... ok
+test current_widget_rebinds_pending_line_without_erasing_numeric_draft ... ok
+test command_acceptance_keeps_layer_hit_regions_at_the_rendered_locations ... ok
+test hidden_modal_virtualizes_large_snapshot_and_keeps_every_owned_choice ... ok
+test shift_right_advanced_name_opens_rename_modal_without_materializing_layers ... ok
+test real_name_swatch_and_arrow_keep_current_separate_from_assignment_and_filter_selection ... ok
+test release_of_old_dialog_ok_cannot_confirm_a_new_token ... ok
+test rename_modal_escape_preserves_pending_line_and_numeric_draft ... ok
+test stale_modal_dismissal_and_old_ok_click_cannot_publish_pending_line ... ok
+test modal_ime_commit_enter_does_not_publish_or_cancel_pending_command ... ok
+test advanced_expand_collapse_and_group_bar_use_stable_nonsequential_label_order ... ok
+test closing_rename_removes_its_editor_state_without_removing_cmd_state ... ok
+test rename_modal_text_and_ok_publish_only_label_and_rebind_pending_line ... ok
+test actual_hide_show_and_lock_visibility_preserve_explicit_preferences ... ok
+test invalid_rgb_text_cannot_silently_confirm_an_unchanged_color ... ok
+test color_modal_keyboard_edit_ok_and_cancel_do_not_change_current_or_membership ... ok
+test selective_show_checkbox_ids_distinguish_duplicate_labels_and_cancel_keeps_hidden ... ok
+test hidden_choice_long_and_multiline_labels_keep_fixed_clickable_rows ... ok
+test repeated_closed_dialogs_keep_modal_area_and_scroll_state_bounded ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 23.10s
+
+     Running tests\left_stack_layers.rs (L:\om9-target\debug\deps\left_stack_layers-37bfa4880ea997dc.exe)
+
+running 8 tests
+test rail_outer_width_is_300_and_inner_is_chrome_less ... ok
+test layers_title_bar_is_visible_without_scrolling_at_1280x720 ... ok
+test max_rail_keeps_the_canvas_minimum ... ok
+test icon_edge_follows_the_rail_width ... ok
+test layers_stays_in_the_left_column_after_a_save_and_reload_round_trip ... ok
+test layers_sits_between_info_and_projects_at_supported_frames ... ok
+test default_frame_has_no_right_dock ... ok
+test layers_stays_in_the_left_column_after_reset_menus_from_a_perturbed_layout ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.21s
+
+     Running tests\loft_cmd.rs (L:\om9-target\debug\deps\loft_cmd-c1ff9329a4296b07.exe)
+
+running 1 test
+test loft_command_builds_a_surface_between_two_lines ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\match_srf.rs (L:\om9-target\debug\deps\match_srf-1f7f6de50140f6be.exe)
+
+running 2 tests
+test matchsrf_matches_two_surface_edges ... ok
+test matchsrf_options_stage_source_then_target ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\matrix_selection_sequence.rs (L:\om9-target\debug\deps\matrix_selection_sequence-8cb76ba476e79b57.exe)
+
+running 2 tests
+test the_overlap_popup_names_the_type_and_layer_swatch ... ok
+test plain_click_replaces_shift_adds_and_ctrl_toggles ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.92s
+
+     Running tests\measure.rs (L:\om9-target\debug\deps\measure-e250e9722f9ed10e.exe)
+
+running 5 tests
+test m03_03_20_003_bounding_box_reports_size_and_center ... ok
+test m03_03_20_001_distance_and_length_report_millimetres ... ok
+test m03_03_20_005_the_label_is_transient_and_never_stale ... ok
+test m03_03_20_002_angle_and_radius_report_degrees_and_millimetres ... ok
+test m03_03_20_004_object_summary_counts_types_without_duplicating_definitions ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests\measure_extended.rs (L:\om9-target\debug\deps\measure_extended-95f953457a857744.exe)
+
+running 7 tests
+test object_distance_uses_trimmed_curves_and_finite_surface_domains ... ok
+test placed_arc_keeps_its_trim_under_nonuniform_scale ... ok
+test summary_groups_instances_and_counts_only_placed_explicit_carats ... ok
+test radius_on_an_ellipse_is_pointwise_and_a_line_has_no_finite_curvature ... ok
+test isocurve_and_surface_area_use_world_placement ... ok
+test dynamic_ortho_and_continuous_distance_are_read_only ... ok
+test canonical_brep_edges_area_volume_and_object_distance_have_numeric_oracles ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests\measure_ui.rs (L:\om9-target\debug\deps\measure_ui-0c8e5c58d16a4407.exe)
+
+running 3 tests
+test the_length_read_out_reaches_the_command_line_without_mutating_the_document ... ok
+test the_measure_palette_icon_dispatches_the_length_read_out ... ok
+test the_distance_prompts_and_final_label_are_the_command_line_state ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.52s
+
+     Running tests\merge_srf.rs (L:\om9-target\debug\deps\merge_srf-d44492fb89702e9f.exe)
+
+running 1 test
+test mergesrf_merges_two_coplanar_planes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\mesh_curve.rs (L:\om9-target\debug\deps\mesh_curve-26d804cd0deca8a9.exe)
+
+running 1 test
+test mesh_curve_projects_points_onto_the_mesh ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\mesh_fill.rs (L:\om9-target\debug\deps\mesh_fill-2fa541215edbf40f.exe)
+
+running 2 tests
+test a_document_without_meshes_draws_no_extra_fills ... ok
+test a_mesh_object_fills_its_faces_after_the_grid ... FAILED
+
+failures:
+
+---- a_mesh_object_fills_its_faces_after_the_grid stdout ----
+
+thread 'a_mesh_object_fills_its_faces_after_the_grid' (49376) panicked at crates\om9-app\tests\mesh_fill.rs:104:5:
+each of the twelve cube triangles needs a fill: 24 vs 24 in an empty document
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_mesh_object_fills_its_faces_after_the_grid
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.88s
+
+error: test failed, to rerun pass `-p om9-app --test mesh_fill`
+     Running tests\mesh_stress_command.rs (L:\om9-target\debug\deps\mesh_stress_command-54398e527ff3f2df.exe)
+
+running 4 tests
+test a_bad_count_is_refused_without_touching_the_document ... ok
+test the_command_creates_the_requested_meshes_in_one_entry ... ok
+test a_bare_command_uses_the_default_count ... ok
+test the_menu_dispatch_path_also_creates_the_default_scene ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests\metal_weights.rs (L:\om9-target\debug\deps\metal_weights-2e66a59fd3aebe40.exe)
+
+running 6 tests
+test the_icon_reports_a_closed_box_in_grams_and_pennyweights_without_editing ... ok
+test a_missing_density_is_a_typed_refusal_not_a_zero_mass ... ok
+test the_command_line_matches_the_icon_and_accepts_a_material ... ok
+test an_assignment_that_omits_a_selected_body_is_refused ... ok
+test an_open_shell_is_refused_and_the_previous_report_is_preserved ... ok
+test a_multi_material_selection_reports_each_body_and_the_total ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\navigation_commands.rs (L:\om9-target\debug\deps\navigation_commands-d51b5a9cd1ad6655.exe)
+
+running 6 tests
+test home_restores_the_camera_preset_without_touching_cplane_layers_or_document ... ok
+test zoom_selected_ignores_far_unselected_geometry ... ok
+test center_moves_the_target_to_the_world_origin_and_preserves_rotation ... ok
+test zoom_extents_fits_the_whole_scene_and_keeps_the_view_direction ... ok
+test empty_scene_is_a_typed_fit_failure_and_a_point_keeps_a_finite_span ... ok
+test view_commands_are_available_and_dispatch_through_the_session ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\navigation_deadlines.rs (L:\om9-target\debug\deps\navigation_deadlines-949d524a66058997.exe)
+
+running 1 test
+test fractionally_early_vsync_does_not_double_the_camera_interval ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\navigation_drag.rs (L:\om9-target\debug\deps\navigation_drag-8fc492f674181f33.exe)
+
+running 6 tests
+test perspective_right_drag_orbits_without_moving_target_or_model ... ok
+test shift_right_drag_pans_perspective_without_rotating_it ... ok
+test orthographic_right_drag_pans_without_changing_zoom_or_model ... ok
+test typed_curve_right_click_rejects_insufficient_points_then_commits ... ok
+test right_click_finishes_polyline_but_right_drag_does_not ... ok
+test curve_menu_pending_commands_route_right_click_like_empty_enter has been running for over 60 seconds
+test curve_menu_pending_commands_route_right_click_like_empty_enter ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 75.90s
+
+     Running tests\navigation_input.rs (L:\om9-target\debug\deps\navigation_input-08b32113204bde14.exe)
+
+running 1 test
+test a_wheel_burst_animates_and_zooms_toward_the_cursor ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.23s
+
+     Running tests\navigation_lifecycle.rs (L:\om9-target\debug\deps\navigation_lifecycle-947af4ffff276a8d.exe)
+
+running 8 tests
+test high_dpi_panes_remain_inside_the_actual_canvas ... ok
+test escape_stops_capture_and_later_pointer_motion_cannot_resume_it ... ok
+test focus_loss_releases_owner_and_does_not_move_on_return ... ok
+test disappearing_owner_and_dpi_layout_change_do_not_leave_capture_stuck ... ok
+test repeated_egui_layout_pass_does_not_apply_drag_twice ... ok
+test zoom_settles_with_no_input_and_preserves_screen_anchor ... ok
+test capture_crosses_other_panes_and_release_has_no_inertia ... ok
+test drag_interrupts_zoom_at_the_displayed_pose_and_cancels_unseen_tail ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.71s
+
+     Running tests\navigation_maximize.rs (L:\om9-target\debug\deps\navigation_maximize-6565010a87790de6.exe)
+
+running 2 tests
+test double_clicking_the_canvas_does_not_toggle_the_layout ... ok
+test double_clicking_a_title_maximizes_and_keeps_every_camera ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.46s
+
+     Running tests\navigation_precision.rs (L:\om9-target\debug\deps\navigation_precision-576796003c1bcfe7.exe)
+
+running 3 tests
+test pole_crossing_input_cannot_flip_or_invalidate_the_camera ... ok
+test restoring_a_different_pose_with_the_same_revision_cancels_the_old_zoom ... ok
+test deep_zoom_anchor_stays_within_a_tenth_physical_pixel_at_large_coordinates ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\object_info_overlay.rs (L:\om9-target\debug\deps\object_info_overlay-6faf24bc16965724.exe)
+
+running 4 tests
+test j1_to_j4_an_unavailable_measurement_is_never_a_zero ... ok
+test i1_to_i5_the_info_is_sourced_from_the_model ... ok
+test generic_polycurve_reports_bounds_and_length ... ok
+test the_receipt_carries_the_same_line_the_overlay_paints ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests\offset.rs (L:\om9-target\debug\deps\offset-f8cddf4a70bd6fa3.exe)
+
+running 4 tests
+test offset_exposes_distance_token ... ok
+test offset_curve_follows_the_active_cplane ... ok
+test offset_curve_moves_a_circle_outward ... ok
+test offset_distance_uses_the_shared_option_entry ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests\offset_normal.rs (L:\om9-target\debug\deps\offset_normal-9f5c5f620b27c000.exe)
+
+running 1 test
+test offset_normal_moves_along_the_surface_normal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\offset_on_surface.rs (L:\om9-target\debug\deps\offset_on_surface-9a490c6e068152ce.exe)
+
+running 1 test
+test offset_curve_on_surface_shifts_across_the_surface ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests\offset_srf.rs (L:\om9-target\debug\deps\offset_srf-d64cc135cbd0c0cb.exe)
+
+running 1 test
+test offsetsrf_offsets_a_plane ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\osnap_brep.rs (L:\om9-target\debug\deps\osnap_brep-095dba6ce3c4d086.exe)
+
+running 1 test
+test a_ray_through_a_brep_face_returns_a_surface_snap_on_the_trimmed_face ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\osnap_ui.rs (L:\om9-target\debug\deps\osnap_ui-d0f5c8487ecb55ca.exe)
+
+running 3 tests
+test disabling_end_removes_the_marker_from_the_next_frame ... ok
+test escape_clears_the_smarttrack_guides_and_pending_snap ... ok
+test an_end_marker_is_consumed_by_the_point_prompt_and_smarttrack_keeps_two_anchors ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.35s
+
+     Running tests\panel_door.rs (L:\om9-target\debug\deps\panel_door-49afb6521e56c2c2.exe)
+
+running 12 tests
+test n17_floating_before_the_first_frame_reports_no_work_area ... ok
+test p13_panel_operations_touch_ui_state_only ... ok
+test the_door_is_the_only_way_the_tests_and_the_ui_place_menus ... ok
+test p9_the_mouse_path_and_the_api_path_produce_the_same_layout ... ok
+test p3_a_drag_onto_the_upper_half_of_the_display_bar_lands_at_position_2 ... ok
+test n30_an_unacknowledged_failure_is_not_hidden_by_panel_messages ... ok
+test n21_a_click_on_the_builders_bar_is_refused_and_starts_no_drag ... ok
+test p4_a_drag_onto_the_lower_half_of_the_snaps_bar_lands_at_position_3 ... ok
+test panel_history_never_drops_a_keystroke_from_the_command_draft ... ok
+test n19_escape_cancels_a_drag_and_keeps_the_command_draft ... ok
+test p2_a_rolled_up_snaps_and_layers_report_their_closed_bar_controls ... ok
+test n29_reset_reload_and_hiding_cancel_a_drag_in_progress ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.40s
+
+     Running tests\panel_ops.rs (L:\om9-target\debug\deps\panel_ops-f6c6dce9767afd71.exe)
+
+running 33 tests
+test fixture_directory_is_the_expected_one ... ok
+test n16_an_invalid_window_has_no_work_area ... ok
+test n26_only_a_column_side_is_a_dock_target ... ok
+test n27_an_unknown_section_key_reports_the_key_back ... ok
+test n15_a_window_below_the_floor_is_refused_without_rewriting_the_layout ... ok
+test p10_layers_defaults_to_left_directly_below_info_and_settings ... ok
+test n24_floating_an_already_floating_menu_is_refused ... ok
+test n31_docking_another_menu_right_never_moves_layers ... ok
+test n18_a_drop_over_the_toolbar_cancels ... ok
+test p1_collapse_then_expand_restores_the_exact_state ... ok
+test n1_a_drop_beyond_the_right_edge_floats_inside_the_window ... ok
+test n14_a_window_shrink_recovers_the_floating_menu ... ok
+test n32_a_narrow_window_yields_the_right_dock_without_moving_layers ... ok
+test n5_a_drop_in_a_view_inside_the_window_floats_without_the_outside_note ... ok
+test p12_docking_back_without_home_lands_below_info_and_settings ... ok
+test p2_collapsing_snaps_and_layers_keeps_the_documented_order ... ok
+test n2_n3_n4_a_drop_outside_any_edge_is_pulled_back_inside ... ok
+test n23_a_floating_menu_is_not_reordered ... ok
+test n12_n13_a_non_finite_readback_is_refused_and_changes_nothing ... ok
+test n20_a_lost_pointer_cancels_the_drop ... ok
+test n28_a_hidden_section_cannot_be_moved_or_floated ... ok
+test every_error_leaves_the_serialized_layout_identical ... ok
+test p8_a_user_moved_floating_window_is_readback_not_recovery ... ok
+test p6_dock_right_then_left_restores_home_and_roll_up ... ok
+test n25_a_no_op_is_reported_and_never_silent ... ok
+test p7_float_records_home_and_close_returns_to_it ... ok
+test the_drop_index_is_the_first_bar_centre_at_or_below_the_pointer ... ok
+test p5_move_is_one_operation_for_the_api_and_the_button ... ok
+test n21_n22_the_reserved_builders_area_refuses_every_operation ... ok
+test p11_layers_placement_holds_at_every_supported_size ... ok
+test n6_to_n12_a_float_rectangle_is_normalised_or_refused ... ok
+test n34_menu_placement_has_exactly_one_door_in_the_ui ... ok
+test n33_randomized_operation_sweep_holds_every_invariant ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s
+
+     Running tests\patch_cmd.rs (L:\om9-target\debug\deps\patch_cmd-d57098ba553e7c0e.exe)
+
+running 1 test
+test patch_builds_a_surface_from_four_boundary_curves ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\pick_27k.rs (L:\om9-target\debug\deps\pick_27k-23e0a7e1fd8a530d.exe)
+
+running 1 test
+test picking_27k_uses_the_bvh_and_stays_under_a_frame ... ignored, needs OM9_PICK_FIXTURE (a 27k .om9 project)
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\pick_disambiguation.rs (L:\om9-target\debug\deps\pick_disambiguation-8fbd6c27309a02b1.exe)
+
+running 5 tests
+test a_choice_is_refused_if_the_document_changed_while_the_popup_was_open ... ok
+test a_click_on_one_object_selects_it_without_a_popup ... ok
+test a_click_on_two_objects_offers_a_choice_and_the_choice_selects ... ok
+test escaping_the_choice_keeps_the_previous_selection ... ok
+test the_popup_rows_name_the_type_and_escape_closes_without_selecting ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.35s
+
+     Running tests\pictureframe_persistence.rs (L:\om9-target\debug\deps\pictureframe_persistence-2640ae40a4db50ac.exe)
+
+running 3 tests
+test a_bad_image_creates_no_quad ... ok
+test a_reference_image_round_trips_with_transform_opacity_and_calibration ... ok
+test a_picture_frame_binds_a_texture_and_paints_opacity ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+     Running tests\pinned_command.rs (L:\om9-target\debug\deps\pinned_command-1feeae4113cdbad3.exe)
+
+running 7 tests
+test paste_that_retires_unicode_history_recomputes_layout_boundary_without_panicking ... ok
+test pinned_row_pointer_edits_unicode_suffix_and_preserves_prompt ... ok
+test dragging_from_pinned_suffix_to_history_selects_and_copies_the_same_document ... ok
+test live_command_is_pinned_and_unwrapped_while_history_scrolls_and_copies_as_one_document ... ok
+test viewport_title_click_preserves_numeric_draft_and_enter_accepts_it ... ok
+test ime_confirmation_enter_cannot_execute_provisional_command_or_coordinate ... ok
+test dragging_scrolled_history_into_pinned_row_keeps_shared_selection ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.07s
+
+     Running tests\planar_srf.rs (L:\om9-target\debug\deps\planar_srf-87cfe2ddebb377f8.exe)
+
+running 1 test
+test planarsrf_builds_a_surface_from_a_closed_curve ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\plugin_native.rs (L:\om9-target\debug\deps\plugin_native-e238967ae5455e2a.exe)
+
+running 38 tests
+test native_plugin_builds_arc_and_spline_curves_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_builds_ellipse_and_rectangle_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_cancel_and_unknown_command_preserve_scene_and_existing_redo ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_clears_the_current_layer ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_cmd_geometry_undo_redo_and_archive_roundtrip ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_counts_objects_by_geometry_kind ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_creates_a_group ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_creates_a_layer_and_assigns_an_object_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_creates_a_mesh_object ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_deletes_a_group ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_edits_object_attributes_and_queries_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_lists_block_definitions ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_lists_document_groups ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_measures_a_circle_radius ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_measures_a_curve_length ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_measures_a_mesh_area ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_measures_distance_and_angle_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_measures_object_bounds ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_a_host_undo_in_the_change_feed ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_an_object_placement ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_curve_information_and_samples_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_layer_order ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_one_layer_record ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_one_object_record ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_project_state_and_requests_an_atomic_save ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_the_recorded_change_batch ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reads_units_tolerance_and_typed_numbers_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reports_a_measurement_label ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reports_no_provenance_for_a_native_object ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reports_pickability ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_reports_progress_and_warnings_into_the_command_event_log ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_requests_save_as_and_the_host_dialog_saves_atomically ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_selected_geometry_move_delete_and_undo_redo ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_sets_an_object_placement_matrix ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_sets_the_document_tolerance ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_tags_an_object_with_an_extension_slot ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_validates_typed_parameters_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+test native_plugin_writes_the_selection_through_the_sdk ... ignored, requires built native hello-plugin .om9p and OM9_TEST_PLUGIN_PACKAGE
+
+test result: ok. 0 passed; 0 failed; 38 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\polygon.rs (L:\om9-target\debug\deps\polygon-1f337fd8cdcfa5d1.exe)
+
+running 7 tests
+test polygon_exposes_options_and_undo ... ok
+test polygon_preview_uses_the_cursor_radius ... ok
+test polygon_accepts_a_side_count ... ok
+test polygon_defaults_to_a_square ... ok
+test polygon_follows_the_active_cplane ... ok
+test polygon_circumscribed_uses_the_apothem ... ok
+test polygon_starts_at_the_radius_point ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\polyline.rs (L:\om9-target\debug\deps\polyline-fadd109f467f2674.exe)
+
+running 3 tests
+test polyline_preview_follows_the_cursor ... ok
+test polyline_enter_commits_open_segments ... ok
+test polyline_close_adds_the_closing_segment ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\polyline_command.rs (L:\om9-target\debug\deps\polyline_command-1839892d03ee8873.exe)
+
+running 2 tests
+test polyline_options_persistent_close_length_and_helpers ... ok
+test empty_enter_finishes_polyline_and_delete_removes_it ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\polyline_mode_regression.rs (L:\om9-target\debug\deps\polyline_mode_regression-013d8b1a62203727.exe)
+
+running 9 tests
+test invalid_arc_retains_points_and_cancel_keeps_the_document_empty ... ok
+test typed_options_and_coordinates_construct_arc_direction_and_center ... ok
+test menu_and_cmd_build_the_same_line_arc_line_with_one_undo ... ok
+test viewport_typing_m_uses_mode_instead_of_mid_snap ... ok
+test holding_m_toggles_once_and_keeps_the_draft_empty ... ok
+test shortcuts_preserve_nonempty_drafts_paste_and_ime ... ok
+test m_toggles_twice_and_updates_live_prompt_without_a_draft ... ok
+test switching_back_after_an_arc_keeps_close_distinct_from_persistent_close ... ok
+test clicking_mode_and_flags_uses_the_same_toggle_as_the_keyboard ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.36s
+
+     Running tests\polyline_on_surface.rs (L:\om9-target\debug\deps\polyline_on_surface-72351e8251fe714d.exe)
+
+running 1 test
+test polyline_on_surface_projects_and_connects_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\polyline_options_interface.rs (L:\om9-target\debug\deps\polyline_options_interface-10d3c0a086430b9d.exe)
+
+running 3 tests
+test descriptors_expose_current_values_and_unambiguous_stage_shortcuts ... ok
+test invalid_value_retains_the_parameter_stage_and_has_no_document_effect ... ok
+test every_polyline_parameter_has_the_same_keyboard_pointer_and_typed_behavior ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 33.79s
+
+     Running tests\polyline_shortcuts.rs (L:\om9-target\debug\deps\polyline_shortcuts-d05bee2cca931d56.exe)
+
+running 1 test
+test underlined_polyline_shortcut_toggles_without_writing_to_draft ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
+
+     Running tests\preview_drag.rs (L:\om9-target\debug\deps\preview_drag-d680b174ea8182af.exe)
+
+running 3 tests
+test the_drag_leaves_the_placement_untouched_so_the_ghost_can_stay_at_the_old_spot ... ok
+test the_preview_moves_the_selected_objects_without_touching_the_document ... ok
+test dragging_a_handle_updates_the_preview_then_commits_on_release ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.00s
+
+     Running tests\project.rs (L:\om9-target\debug\deps\project-e8e406ac01b1e438.exe)
+
+running 4 tests
+test project_exposes_direction_token ... ok
+test project_direction_vector_controls_the_ray ... ok
+test project_uses_the_active_cplane ... ok
+test project_curve_drops_to_the_construction_plane ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\project_manager_persistence.rs (L:\om9-target\debug\deps\project_manager_persistence-79fd121ed2b28bd3.exe)
+
+running 2 tests
+test restore_master_live_replaces_the_document_atomically ... ok
+test jobbag_state_survives_save_and_reopen_inside_the_om9_file ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s
+
+     Running tests\project_manager_ui.rs (L:\om9-target\debug\deps\project_manager_ui-2eea1e27cd535540.exe)
+
+running 3 tests
+test projects_and_three_jobbag_slots_are_visible ... ok
+test new_project_row_and_notes_keep_selection ... ok
+test capture_selection_then_restore_inserts_fresh_ids ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.83s
+
+     Running tests\property_editor_adapter.rs (L:\om9-target\debug\deps\property_editor_adapter-424a9faa8efe6e25.exe)
+
+running 4 tests
+test e5_renaming_is_one_command_and_undo_restores_the_name ... ok
+test e1_to_e4_an_edit_is_one_command_and_undo_restores_it ... ok
+test f1_to_f4_read_only_fields_are_disabled_and_a_locked_layer_refuses_the_edit ... ok
+test the_app_adapter_edits_the_single_selection ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+     Running tests\property_menu_ui.rs (L:\om9-target\debug\deps\property_menu_ui-a2710c4cdb0de8c1.exe)
+
+running 1 test
+test locking_from_the_edit_menu_is_one_undo_step ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.68s
+
+     Running tests\pull.rs (L:\om9-target\debug\deps\pull-f8d9299de54583ba.exe)
+
+running 2 tests
+test pull_exposes_tolerance_token ... ok
+test pull_curve_lands_on_the_surface ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\r5a_display.rs (L:\om9-target\debug\deps\r5a_display-443f73e079c03b28.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\rail_revolve.rs (L:\om9-target\debug\deps\rail_revolve-a440ff96c5fe794b.exe)
+
+running 2 tests
+test rail_revolve_axis_option_uses_the_shared_entry ... ok
+test rail_revolve_uses_the_axis_input ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\rebuild.rs (L:\om9-target\debug\deps\rebuild-2397775d07b064a2.exe)
+
+running 3 tests
+test rebuild_exposes_degree_and_points_tokens ... ok
+test rebuild_curve_uses_the_requested_point_count ... ok
+test rebuild_curve_accepts_a_degree_option ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\rect.rs (L:\om9-target\debug\deps\rect-642ca4d04402cd07.exe)
+
+running 16 tests
+test rectangle_preview_follows_the_active_cplane ... ok
+test rectangle_center_preview_is_centered ... ok
+test rectangle_three_point_preview_uses_the_edge_frame ... ok
+test rectangle_preview_has_four_edges ... ok
+test rectangle_vertical_preview_uses_the_vertical_edge ... ok
+test rectangle_accepts_length_option ... ok
+test rectangle_three_point_mode_uses_edge_then_width ... ok
+test rectangle_vertical_mode_uses_a_vertical_edge ... ok
+test rectangle_three_point_accepts_numeric_height ... ok
+test rectangle_three_point_accepts_numeric_width ... ok
+test rectangle_two_corners_match ... ok
+test rectangle_width_and_height_commit_after_enter ... ok
+test rectangle_square_option_uses_the_longer_side ... ok
+test rectangle_follows_the_active_cplane ... ok
+test rectangle_square_uses_the_shared_option_snapshot ... ok
+test rectangle_center_mode_uses_the_center_and_doubles_the_extent ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\rectangle_regressions.rs (L:\om9-target\debug\deps\rectangle_regressions-b4f591b69c8d8953.exe)
+
+running 5 tests
+test typed_world_corners_ignore_cplane_origin_and_project_off_plane_height ... ok
+test typed_first_and_relative_second_corner_share_the_coordinate_parser ... ok
+test bad_input_and_degenerate_pick_can_retry_then_undo_redo_and_cancel ... ok
+test square_and_fixed_length_keep_the_cursor_side ... ok
+test corners_keep_all_four_drag_directions_in_shifted_and_rotated_cplanes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\refit_srf.rs (L:\om9-target\debug\deps\refit_srf-5bbdecd169535478.exe)
+
+running 4 tests
+test refit_srf_without_a_surface_selection_is_refused_without_a_transaction ... ok
+test refit_srf_refuses_a_non_positive_tolerance_and_keeps_the_prompt ... ok
+test refit_srf_waits_for_a_tolerance_and_commits_one_surface ... ok
+test the_typed_refitsrf_name_dispatches_the_same_command ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests\revolve.rs (L:\om9-target\debug\deps\revolve-0ed277e0d7bde2b9.exe)
+
+running 1 test
+test revolve_builds_a_surface_around_the_cplane_normal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests\ring_family_panel.rs (L:\om9-target\debug\deps\ring_family_panel-7d33ae66eb23707a.exe)
+
+running 5 tests
+test the_ring_handles_move_the_same_fields_the_panel_edits ... ok
+test the_ring_family_opens_from_the_command_line_and_lists_its_parameters ... ok
+test a_signet_style_preset_applies_to_the_signet_builder ... ok
+test an_eternity_band_applies_a_closed_solid_in_one_undoable_step ... ok
+test an_invalid_ring_parameter_is_refused_and_the_document_stays_empty ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.90s
+
+     Running tests\ring_tools.rs (L:\om9-target\debug\deps\ring_tools-778347aecb2426da.exe)
+
+running 10 tests
+test the_profile_placer_and_outside_rail_icons_open_the_existing_builder_modes ... ok
+test the_profile_end_cap_refuses_an_open_curve_without_changing_the_document ... ok
+test the_four_profile_icon_refuses_an_inconsistent_selection ... ok
+test the_ring_size_command_switches_the_builder_to_the_us_table ... ok
+test the_custom_rail_icon_records_a_validated_closed_rail_and_refuses_an_open_one ... ok
+test the_profile_merge_icon_joins_compatible_sections_and_refuses_one_section ... ok
+test the_profile_end_cap_icon_builds_a_planar_cap_from_closed_sections ... ok
+test the_rail_profile_handles_edit_width_and_commit_exactly_once ... ok
+test the_four_profile_icon_reaches_the_existing_four_rail_metadata_command ... ok
+test a_ring_size_edit_rebuilds_the_profile_and_one_dirty_sweep ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 59.77s
+
+     Running tests\rubber_band.rs (L:\om9-target\debug\deps\rubber_band-26d2752b8ebc4900.exe)
+
+running 2 tests
+test a_band_around_one_point_selects_only_that_one ... ok
+test a_band_over_two_points_selects_both ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.07s
+
+     Running tests\scene_allocation_peak.rs (L:\om9-target\debug\deps\scene_allocation_peak-a29856f8f2db7b30.exe)
+
+running 1 test
+test moving_reallocation_cannot_exceed_admitted_nested_scene_or_cloud_peak ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.40s
+
+     Running tests\seam_srf.rs (L:\om9-target\debug\deps\seam_srf-7767329b1bde7732.exe)
+
+running 2 tests
+test seam_options_stage_axis_then_tolerance ... ok
+test seamsrf_moves_a_closed_surface_seam ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\section.rs (L:\om9-target\debug\deps\section-656b573a994a26e6.exe)
+
+running 1 test
+test section_intersects_a_cylinder_with_the_cplane ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\selection_overlay.rs (L:\om9-target\debug\deps\selection_overlay-cff9c72853e95373.exe)
+
+running 8 tests
+test ctrl_click_toggles_one_object_in_and_out_of_the_selection ... ok
+test any_selection_shows_the_gumball ... ok
+test clearing_the_selection_removes_the_frame_and_the_gumball ... ok
+test a_multi_selection_draws_a_frame_around_itself ... ok
+test a_single_selection_has_no_frame_but_two_do ... ok
+test hovering_an_object_shows_a_frame_that_follows_the_pointer ... ok
+test escape_cancels_a_gumball_drag_without_committing ... ok
+test the_band_is_a_window_left_to_right_and_crossing_right_to_left ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.03s
+
+     Running tests\settings_commands.rs (L:\om9-target\debug\deps\settings_commands-dc6dacb0cec76730.exe)
+
+running 24 tests
+test every_icon_alias_resolves_to_its_own_feature ... ok
+test pull_to_rail_needs_a_selected_circle_rail ... ok
+test the_editor_refuses_a_non_prong_selection ... ok
+test a_command_without_a_gem_selection_is_refused ... ok
+test the_prong_builder_stages_the_documented_option_row ... ok
+test metal_piece_border_without_a_border_is_refused ... ok
+test metal_piece_curve_mode_without_a_border_is_refused ... ok
+test metal_piece_top_mode_stages_a_cutter_and_commits_bodies ... ok
+test prong_on_surface_stages_from_a_surface_and_commits_one_prong ... ok
+test the_channel_border_commits_two_guide_curves ... ok
+test metal_piece_curve_mode_uses_the_picked_curve ... ok
+test cutter_features_stay_out_of_the_mass ... ok
+test bead_on_surface_places_one_bead_on_the_picked_uv ... ok
+test pull_to_rail_moves_a_selected_mesh_onto_the_rail ... ok
+test a_refused_bead_count_keeps_the_staged_command ... ok
+test metal_piece_curve_mode_uses_the_committed_border ... ok
+test settings_mass_reports_grams_from_the_committed_features ... ok
+test a_refused_option_keeps_the_command_and_its_last_preview ... ok
+test metal_piece_can_follow_a_committed_channel_border ... ok
+test an_option_changes_the_preview_before_the_commit ... ok
+test the_icon_stages_a_prong_set_and_enter_commits_one_body_per_prong ... ok
+test the_editor_edits_a_committed_prong_in_place ... ok
+test bead_on_curve_commits_the_run_along_the_selected_curve ... ok
+test bead_count_drives_the_run_and_spacing_returns_to_auto ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests\shell_docking.rs (L:\om9-target\debug\deps\shell_docking-117ff35e765dcb02.exe)
+
+running 10 tests
+test a_schema_one_layout_file_resets_with_a_diagnostic_instead_of_crashing ... ok
+test left_column_renders_the_documented_sections_with_builders_below_projects ... FAILED
+test builder_area_stays_reserved_and_non_interactive ... FAILED
+test narrow_window_yields_the_right_column_and_keeps_command_line_and_canvas ... ok
+test menus_dock_to_the_right_mirror_column_and_back ... ok
+test the_left_rail_and_command_line_keep_their_documented_bounds ... ok
+test a_floated_menu_keeps_its_rectangle_and_docks_back ... ok
+test reset_and_reload_menus_follow_the_documented_commands ... ok
+test rolling_up_a_title_bar_keeps_its_state_and_persists ... ok
+test invalid_command_stays_visible_in_the_status_surface_and_the_transcript ... FAILED
+
+failures:
+
+---- left_column_renders_the_documented_sections_with_builders_below_projects stdout ----
+
+thread 'left_column_renders_the_documented_sections_with_builders_below_projects' (36340) panicked at crates\om9-app\tests\shell_docking.rs:147:5:
+builders open in the space below the Project Manager
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- builder_area_stays_reserved_and_non_interactive stdout ----
+
+thread 'builder_area_stays_reserved_and_non_interactive' (31748) panicked at crates\om9-app\tests\shell_docking.rs:317:5:
+assertion `left == right` failed
+  left: 1
+ right: 0
+
+---- invalid_command_stays_visible_in_the_status_surface_and_the_transcript stdout ----
+
+thread 'invalid_command_stays_visible_in_the_status_surface_and_the_transcript' (46756) panicked at crates\om9-app\tests\shell_docking.rs:340:5:
+assertion `left == right` failed: unknown command: NotACommand
+  left: Ready
+ right: Error
+
+
+failures:
+    builder_area_stays_reserved_and_non_interactive
+    invalid_command_stays_visible_in_the_status_surface_and_the_transcript
+    left_column_renders_the_documented_sections_with_builders_below_projects
+
+test result: FAILED. 7 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.11s
+
+error: test failed, to rerun pass `-p om9-app --test shell_docking`
+     Running tests\silhouette.rs (L:\om9-target\debug\deps\silhouette-f95f10d8a1de6469.exe)
+
+running 1 test
+test silhouette_finds_the_view_contour_of_a_cylinder ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\sketch.rs (L:\om9-target\debug\deps\sketch-ab63f0466568c742.exe)
+
+running 1 test
+test sketch_connects_selected_points ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\sketch_on_surface.rs (L:\om9-target\debug\deps\sketch_on_surface-e53a956c2da7bc6c.exe)
+
+running 1 test
+test sketch_on_surface_projects_points_into_a_polyline ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\smash.rs (L:\om9-target\debug\deps\smash-7687629bfc70a015.exe)
+
+running 4 tests
+test smash_without_a_surface_selection_is_refused_without_a_transaction ... ok
+test the_typed_smash_name_dispatches_the_same_command ... ok
+test smash_of_a_developable_cylinder_reports_no_stretch ... ok
+test smash_flattens_a_non_developable_surface_and_reports_the_stretch ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\snap_panel_modes.rs (L:\om9-target\debug\deps\snap_panel_modes-8695da7281f99a5f.exe)
+
+running 4 tests
+test project_projects_to_the_active_cplane_without_changing_it ... ok
+test panel_updates_enabled_state_and_override_in_the_same_frame ... ok
+test a_focused_command_editor_does_not_consume_the_snap_shortcut ... ok
+test e_and_m_select_end_and_mid_while_a_command_is_running ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.73s
+
+     Running tests\solid.rs (L:\om9-target\debug\deps\solid-f32a980bab19fb30.exe)
+
+running 71 tests
+test solid_box_rejects_mode_changes_after_the_first_point ... ok
+test solid_box_exposes_preview_markers_for_picked_points ... ok
+test solid_box_center_exposes_length_token ... ok
+test solid_box_accepts_undo_alias ... ok
+test solid_box_exposes_a_twelve_edge_wire_preview ... ok
+test solid_box_exposes_width_and_height_tokens ... ok
+test solid_box_exposes_clickable_mode_tokens ... ok
+test solid_box_center_dimensions_preview_uses_length_and_width ... ok
+test solid_box_center_undo_steps_back_through_length_and_width ... ok
+test box_center_mode_uses_the_shared_choice_option ... ok
+test solid_ellipsoid_native_ui_saved_fixture ... ignored, requires an ellipsoid .om9 saved by the native UI; set OM9_ELLIPSOID_UI_FIXTURE
+test solid_right_click_defaults_start_box_3point_and_sphere_2point ... ok
+test solid_box_accepts_width_and_height_options ... ok
+test solid_box_enter_height_uses_the_base_width ... ok
+test solid_box_height_can_be_picked_in_the_viewport ... ok
+test solid_box_negative_height_shifts_the_base_down ... ok
+test solid_box_accepts_mode_prefix_and_rejects_corners ... ok
+test solid_box_uses_the_freecad_point_prompts ... ok
+test solid_sphere_exposes_a_three_circle_wire_preview ... ok
+test solid_box_three_point_mode_uses_edge_then_width_then_height ... ok
+test solid_sphere_exposes_clickable_mode_tokens ... ok
+test solid_sphere_exposes_radius_and_diameter_tokens ... ok
+test solid_box_center_accepts_length_width_height_sequence ... ok
+test solid_box_cube_is_available_after_the_diagonal_first_point ... ok
+test solid_box_center_mode_uses_the_center_and_doubles_the_base ... ok
+test solid_box_vertical_mode_uses_a_vertical_edge ... ok
+test solid_box_height_can_be_picked_from_a_vertical_plane ... ok
+test solid_box_cube_mode_uses_the_diagonal_as_a_cube ... ok
+test solid_sphere_four_point_undo_returns_to_third_point ... ok
+test solid_box_center_length_width_then_height_click ... ok
+test solid_sphere_tangent_curve_exposes_solution_tokens ... ok
+test solid_sphere_tangent_curve_tokens_replace_the_mode_list ... ok
+test solid_sphere_tangent_offers_the_point_constraint_token ... ok
+test solid_menu_usage_and_invalid_input_are_visible_errors ... ok
+test solid_shell_removes_one_face_and_stays_closed ... ok
+test solid_sphere_fit_points_accepts_a_selection_batch ... ok
+test solid_sphere_tangent_two_curves_exposes_undo_tokens ... ok
+test solid_sphere_four_point_mode_uses_the_fourth_point ... ok
+test solid_sphere_fit_points_fits_the_collected_points ... ok
+test solid_sphere_tangent_three_points_use_the_circumcircle ... ok
+test solid_sphere_three_point_mode_uses_the_circumcircle ... ok
+test solid_sphere_three_point_previews_the_circumcircle_sphere ... ok
+test solid_sphere_center_then_radius_point_matches_freecad ... ok
+test solid_sphere_tangent_point_solution_two_uses_the_other_branch ... ok
+test solid_sphere_two_point_previews_the_diameter_sphere ... ok
+test solid_sphere_tangent_point_constraints_use_two_points ... ok
+test solid_sphere_tangent_curve_and_point_finds_a_circle ... ok
+test solid_text_builds_exact_outline_solids ... ok
+test solid_sphere_three_point_accepts_radius_for_the_chord ... ok
+test solid_sphere_around_curve_accepts_path_by_label ... ok
+test solid_sphere_around_curve_accepts_oncurve_fraction ... ok
+test solid_sphere_tangent_handles_an_out_of_plane_curve ... ok
+test solid_sphere_curve_alias_accepts_a_world_pick ... ok
+test solid_sphere_tangent_curve_solution_two_flips_the_normal_side ... ok
+test solid_options_accept_short_key_aliases ... ok
+test solid_boolean_menu_commands_commit_one_transaction ... ok
+test solid_sphere_path_accepts_a_world_pick ... ok
+test solid_sphere_around_curve_uses_the_selected_curve ... ok
+test solid_sphere_accepts_diameter_option ... ok
+test solid_sphere_vertical_mode_uses_center_radius ... ok
+test solid_sphere_two_point_mode_uses_a_diameter ... ok
+test solid_sphere_tangent_uses_the_curve_normal_and_radius ... ok
+test solid_sphere_tangent_curve_two_points_finds_a_circle ... ok
+test sphere_two_point_mode_uses_the_shared_choice_option ... ok
+test solid_sphere_two_point_accepts_diameter_input ... ok
+test solid_sphere_tangent_two_curves_and_point_finds_a_circle ... ok
+test solid_extrude_pipe_extract_and_fillet_dispatch ... ok
+test solid_sphere_tangent_two_curves_finds_a_circle ... ok
+test solid_ellipsoid_menu_cmd_undo_and_archive_roundtrip ... ok
+test solid_sphere_tangent_three_curves_finds_the_incircle ... ok
+test solid_primitives_are_menu_bound_and_closed ... ok
+
+test result: ok. 70 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 20.69s
+
+     Running tests\solid_workflows.rs (L:\om9-target\debug\deps\solid_workflows-398d44b418c911f2.exe)
+
+running 9 tests
+test native_ui_saved_solid_workflows ... ignored, requires files saved by the native UI; set OM9_SOLID_NATIVE_REVIEW_DIRECTORY
+test invalid_topology_indices_do_not_edit_edge_or_face_zero ... ok
+test circle_extrusion_preserves_exact_geometry ... ok
+test text_menu_has_content_height_retry_and_cancel ... ok
+test extrude_all_is_one_atomic_transaction ... ok
+test pipe_extract_fillet_shell_and_cap_have_measured_menu_results ... ok
+test boolean_two_objects_menu_has_operation_prompt ... ok
+test immediate_boolean_menu_actions_have_measured_results ... ok
+test remaining_primitive_menu_prompts_produce_analytic_volumes ... ok
+
+test result: ok. 8 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 2.20s
+
+     Running tests\spiral.rs (L:\om9-target\debug\deps\spiral-738a13d5b0e1c8f1.exe)
+
+running 5 tests
+test spiral_exposes_options ... ok
+test spiral_preview_grows_with_the_radius ... ok
+test spiral_grows_from_start_to_end_radius ... ok
+test spiral_accepts_start_radius_option ... ok
+test spiral_accepts_a_custom_axis ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests\split_srf.rs (L:\om9-target\debug\deps\split_srf-b3d4861dd8cc3eeb.exe)
+
+running 1 test
+test splitsrf_options_stage_axis_then_parameter ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\startup_contract.rs (L:\om9-target\debug\deps\startup_contract-3efd2bb37da0c694.exe)
+
+running 3 tests
+test a_failed_start_leaves_the_document_and_the_layout_untouched ... ok
+test negative_fixture_reports_every_start_failure_instead_of_exiting_silently ... ok
+test positive_fixture_starts_one_window_with_the_openmatrix9_title_and_an_empty_document ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+
+     Running tests\status_bar_overlap.rs (L:\om9-target\debug\deps\status_bar_overlap-94023899fede4b05.exe)
+
+running 4 tests
+test normal_1600x1000_control_shows_the_full_summary ... ok
+test capped_911x480_with_right_dock_does_not_overlap ... ok
+test narrow_800x600_with_right_dock_does_not_overlap ... ok
+test long_error_at_floor_800x400_keeps_dismiss_and_message_apart ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.67s
+
+     Running tests\stress_instances.rs (L:\om9-target\debug\deps\stress_instances-35aa08e6a8b98da4.exe)
+
+running 1 test
+test generate_instance_stress_project ... ignored, writes a large stress project; run explicitly with OM9_STRESS_SOURCE/OM9_STRESS_TARGET
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\subobject_occurrences.rs (L:\om9-target\debug\deps\subobject_occurrences-52db5ee4d74db540.exe)
+
+running 5 tests
+test hidden_nested_member_is_not_a_selectable_subobject ... ok
+test two_paths_inside_one_root_keep_the_same_leaf_face_as_two_selections ... ok
+test shared_leaf_faces_remain_distinct_across_mirrored_root_occurrences ... ok
+test invalid_path_source_and_old_publication_do_not_rematch ... ok
+test ctrl_shift_click_keeps_the_full_path_and_outlines_only_that_member_in_four_views ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.57s
+
+     Running tests\subobject_selection.rs (L:\om9-target\debug\deps\subobject_selection-506b1c7afd0f0d62.exe)
+
+running 8 tests
+test the_geometry_kind_is_checked ... ok
+test an_unknown_owner_is_refused_and_nothing_is_stored ... ok
+test invalid_topology_and_a_tessellation_diagonal_are_rejected ... ok
+test toggling_the_same_subobject_removes_it ... ok
+test the_object_selection_is_not_disturbed_by_subobjects ... ok
+test subobjects_are_added_in_pick_order_and_duplicates_are_ignored ... ok
+test a_subobject_whose_object_is_gone_is_pruned ... ok
+test publication_prunes_subobjects_and_undo_never_rematches_them ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\super_select_ui.rs (L:\om9-target\debug\deps\super_select_ui-afd32a43207f1096.exe)
+
+running 1 test
+test the_tools_menu_selects_the_semantic_gem ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.71s
+
+     Running tests\superselect_jewelry.rs (L:\om9-target\debug\deps\superselect_jewelry-058ad14abaa43cc3.exe)
+
+running 2 tests
+test g1_to_g5_the_filters_use_typed_evidence_only ... ok
+test h1_to_h5_a_name_or_a_colour_is_not_a_gem ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\surface_aliases.rs (L:\om9-target\debug\deps\surface_aliases-6aabe79540ae5b87.exe)
+
+running 2 tests
+test blendsrf_builds_a_surface_between_two_curves ... ok
+test sweep1_builds_a_surface_along_a_rail ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\surface_menu.rs (L:\om9-target\debug\deps\surface_menu-a54d54ca9421cfb4.exe)
+
+running 62 tests
+test enabled_rows_dispatch_and_the_remaining_rows_stay_visible_disabled ... ok
+test every_surface_row_declares_its_matrix_command_line_name ... ok
+test every_documented_surface_menu_row_has_one_stable_id_and_icon ... ok
+test every_authored_surface_menu_icon_maps_to_an_available_command ... ok
+test four_rail_profile_metadata_round_trips_on_a_curve ... ok
+test a_zero_offset_is_refused_and_cancel_clears_the_prompt ... ok
+test planar_curves_build_a_surface_from_coplanar_curves ... ok
+test adjust_surface_seam_waits_for_axis_and_tolerance ... ok
+test cutting_plane_collects_three_points_and_commits_a_plane ... ok
+test plane_from_corners_collects_three_points_and_refuses_collinear_input ... ok
+test match_surfaces_accepts_the_documented_continuity_option ... ok
+test match_surfaces_waits_for_edge_names_and_commits_one_surface ... ok
+test shared_history_icons_keep_distinct_command_ids ... ok
+test soft_edit_copy_no_edits_the_selected_surface_in_place ... ok
+test set_surface_tangent_waits_for_edge_and_direction ... ok
+test soft_edit_direction_constraint_projects_the_move ... ok
+test drape_builds_a_surface_over_selected_points ... ok
+test chamfer_setback_uses_the_shared_option_entry ... ok
+test chamfer_surfaces_waits_for_a_setback ... ok
+test soft_edit_rejects_an_unknown_option_and_keeps_running ... ok
+test surface_edit_without_selection_or_with_a_curve_is_refused_without_a_transaction ... ok
+test extend_surface_waits_for_edge_and_distance ... ok
+test soft_edit_moves_nearby_poles_and_commits_one_surface ... ok
+test soft_edit_options_stage_the_base_point_and_documented_options ... ok
+test soft_edit_fix_edges_keeps_the_boundary_poles ... ok
+test blend_and_loft_combine_two_selected_curves_into_one_surface ... ok
+test edge_curves_build_a_surface_from_two_or_four_edges ... ok
+test patch_builds_a_four_boundary_surface ... ok
+test shrink_surface_waits_for_a_uv_subdomain ... ok
+test the_surface_catalog_covers_every_l3_owner ... ok
+test offset_and_extrude_normal_wait_for_distance_and_commit_one_surface ... ok
+test rebuild_and_unroll_run_from_a_selected_surface_and_commit_one_transaction ... ok
+test typed_shared_labels_follow_the_selected_object ... ok
+test split_at_isocurve_creates_two_surfaces_in_one_transaction ... ok
+test fillet_radius_options_use_the_shared_entry ... ok
+test typed_rebuild_uses_the_surface_owner_when_a_surface_is_selected ... ok
+test tween_surfaces_waits_for_a_fraction_and_commits_one_surface ... ok
+test every_surface_command_line_name_resolves_like_its_menu_row ... ok
+test menu_and_command_line_dispatch_the_same_surface_command ... ok
+test merge_surfaces_joins_two_matching_boundaries ... ok
+test fillet_and_variable_chamfer_strips_commit_surfaces ... ok
+test variable_blend_options_stage_start_then_end ... ok
+test typed_offset_srf_runs_the_same_service_as_the_menu_row ... ok
+test untrim_removes_a_trim_extension_and_refuses_an_untrimmed_surface ... ok
+test variable_offset_waits_for_two_distances_and_an_axis ... ok
+test variable_offset_options_stage_start_end_axis ... ok
+test variable_chamfer_options_stage_start_then_end ... ok
+test variable_blend_waits_for_tangent_scales ... ok
+test profile_sweep_uses_the_sweep1_service ... ok
+test rail_revolve_waits_for_an_axis_and_commits_one_surface ... ok
+test extrude_all_creates_one_surface_per_curve ... ok
+test extrude_all_height_uses_the_shared_option_entry ... ok
+test sweep_multi_creates_one_surface_per_profile_in_one_transaction ... ok
+test network_sweep1_and_sweep2_build_surfaces_from_ordered_curves ... ok
+test sweep_history_hides_closed_for_an_open_rail ... ok
+test sweep_history_offers_closed_only_for_a_closed_rail_and_two_profiles ... ok
+test sweep2_slash_collects_two_alignment_points ... ok
+test sweep1_history_builds_a_multi_profile_brep_and_records_history ... ok
+test four_rail_profile_command_tags_profiles_then_sweep4_uses_them ... ok
+test sweep4_resolves_rails_from_four_rail_profile_metadata ... ok
+test sweep2_history_builds_a_two_rail_brep_and_records_history ... ok
+test sweep4_sews_four_rail_patches_into_a_polysurface ... ok
+
+test result: ok. 62 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.50s
+
+     Running tests\surface_options.rs (L:\om9-target\debug\deps\surface_options-75ef88715dc9de47.exe)
+
+running 1 test
+test surface_distance_uses_the_shared_value_entry ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\sweep2_cmd.rs (L:\om9-target\debug\deps\sweep2_cmd-23d1f19bdc08c2b0.exe)
+
+running 1 test
+test sweep2_builds_a_surface_from_profile_and_two_rails ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests\tangent_srf.rs (L:\om9-target\debug\deps\tangent_srf-782f7a7b3ad33355.exe)
+
+running 1 test
+test tangentsrf_options_stage_edge_then_direction ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\three_dm_brep_pick.rs (L:\om9-target\debug\deps\three_dm_brep_pick-a20262a129eb3922.exe)
+
+running 1 test
+test imported_brep_faces_and_edges_are_pickable ... ignored, requires OM9_THREE_DM_OM9 from an editable Rhino 5 import
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_dm_brep_roundtrip.rs (L:\om9-target\debug\deps\three_dm_brep_roundtrip-d7ba0e9d9c95524a.exe)
+
+running 1 test
+test brep_roundtrips_as_brep_without_becoming_a_mesh ... ignored, requires an admitted om9-exchange-native.exe and a BRep 3DM fixture
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_dm_curve_roundtrip.rs (L:\om9-target\debug\deps\three_dm_curve_roundtrip-31aa1ce0ceea70d1.exe)
+
+running 1 test
+test line_circle_nurbs_and_mesh_survive_the_3dm_round_trip_exactly ... ignored, requires an admitted om9-exchange-native.exe
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_dm_editable_brep.rs (L:\om9-target\debug\deps\three_dm_editable_brep-c4c4dd9f7f001373.exe)
+
+running 1 test
+test rhino5_imports_all_breps_as_editable_and_exports_again ... ignored, requires admitted native reader + OCCT runtime + a Rhino 5 fixture
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_dm_groups.rs (L:\om9-target\debug\deps\three_dm_groups-a05daa6f17d673a6.exe)
+
+running 1 test
+test rhino5_group_membership_round_trips ... ignored, requires OM9_EXCHANGE_NATIVE and the OCCT runtime on PATH
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_dm_hatch.rs (L:\om9-target\debug\deps\three_dm_hatch-835b30ee99bc872b.exe)
+
+running 1 test
+test rhino5_hatch_geometry_round_trips_as_display_proxy ... ignored, requires OM9_EXCHANGE_NATIVE and the OCCT runtime on PATH
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_dm_line_patterns.rs (L:\om9-target\debug\deps\three_dm_line_patterns-f05e4eb35e1d7bf5.exe)
+
+running 1 test
+test rhino5_line_pattern_table_round_trips ... ignored, requires OM9_EXCHANGE_NATIVE and the OCCT runtime on PATH
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_dm_native_roundtrip.rs (L:\om9-target\debug\deps\three_dm_native_roundtrip-d3e001f5182b0bb5.exe)
+
+running 3 tests
+test controller_host_adapter_imports_and_exports_without_the_cli ... ignored, requires an admitted om9-exchange-native.exe and a 3DM fixture
+test failed_import_keeps_document_and_undo ... ignored, requires an admitted om9-exchange-native.exe
+test rust_cli_imports_and_exports_a_3dm_roundtrip ... ignored, requires an admitted om9-exchange-native.exe and a 3DM fixture
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\three_dm_ui_smoke.rs (L:\om9-target\debug\deps\three_dm_ui_smoke-ba92045442b9b261.exe)
+
+running 1 test
+test imported_editable_document_reaches_four_views ... ignored, requires OM9_THREE_DM_OM9 from an editable Rhino 5 import
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\through_points.rs (L:\om9-target\debug\deps\through_points-8d0d2269f7492720.exe)
+
+running 2 tests
+test curve_through_points_interpolates_selected_points ... ok
+test through_points_accepts_degree_option ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\to_lines.rs (L:\om9-target\debug\deps\to_lines-37a83be65d7bb377.exe)
+
+running 2 tests
+test to_lines_exposes_count_token ... ok
+test convert_curve_to_lines_uses_the_requested_segments ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\top11.rs (L:\om9-target\debug\deps\top11-e9fcc28ac2d7965b.exe)
+
+running 28 tests
+test m03_03_08_002_circle_and_surface_control_grips_reach_the_toolbar_adapter ... ok
+test m03_03_08_002_surface_edit_grips_keep_periodic_and_reversed_records ... ok
+test split_point_rejects_non_line_without_document_changes ... ok
+test split_point_line_accepts_world_coordinates_and_undo_redo ... ok
+test m03_03_08_002_control_point_toggle_uses_f10_and_selection_only ... ok
+test mirror_can_start_before_selection_and_cancel ... ok
+test split_point_command_alias_and_cancel_leave_line_intact ... ok
+test m03_03_08_006_toolbar_has_eleven_actions_and_ring_rail_opens_the_builder ... ok
+test m03_03_08_002_grip_drag_moves_a_control_point_and_undo_restores_it ... ok
+test move_prompt_names_the_next_point ... ok
+test m03_03_08_003_mirror_delete_input_reflects_the_original_in_place ... ok
+test top11_move_can_start_before_selection_and_undo ... ok
+test m03_03_08_003_mirror_collects_a_plane_and_creates_a_copy ... ok
+test m03_03_08_003_three_point_plane_and_non_rigid_mirror ... ok
+test m03_03_08_001_duplicate_base_point_places_multiple_copies_until_enter ... ok
+test m03_03_08_001_duplicate_is_in_place_one_undo_and_selects_the_copy ... ok
+test m03_03_08_003_move_and_rotate_collect_points_and_commit_placements ... ok
+test top11_can_remove_picked_selection_and_cutters_before_commit ... ok
+test command_names_and_top11_prefix_share_the_toolbar_path ... ok
+test m03_03_08_004_multiple_cutters_split_and_trim_one_target ... ok
+test m03_03_08_004_join_explode_split_and_trim_run_from_the_toolbar ... ok
+test every_top11_action_can_open_object_selection_and_cancel ... ok
+test m03_03_08_001_duplicate_options_project_and_reuse_the_last_move ... ok
+test m03_03_08_002_surface_edit_grid_is_fast_through_the_adapter ... ok
+test split_multiple_curves_is_one_undo_and_preserves_unhit_target ... ok
+test m03_03_08_004_a_surface_can_be_the_cutting_object ... ok
+test m03_03_08_004_stress_join_explode_split_trim_cycles ... ok
+test split_multiple_curves_accepts_cutters_that_hit_different_targets ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+
+     Running tests\top11_brep.rs (L:\om9-target\debug\deps\top11_brep-0a2a10b4e79d4ff5.exe)
+
+running 14 tests
+test explode_single_face_rejects_without_mutating_document ... ok
+test top11_join_without_document_tolerance_is_atomic ... ok
+test top11_join_disconnected_faces_keeps_both_without_undo ... ok
+test brep_can_be_a_cutting_object_for_split ... ok
+test top11_join_three_faces_with_disconnected_member_is_atomic ... ok
+test top11_join_faces_with_different_placements_and_undo ... ok
+test top11_join_adjacent_brep_faces_and_undo ... ok
+test brep_mirror_copy_leaves_the_source_in_place ... ok
+test exact_brep_intersection_uses_the_analytic_sphere_surface ... ok
+test brep_mirror_accepts_a_non_rigid_placement ... ok
+test top11_explode_brep_creates_faces_in_one_undo ... ok
+test top11_join_three_faces_finds_connected_order_and_undo_redo ... ok
+test brep_mirror_deletes_input_in_place_and_keeps_one_undo ... ok
+test exact_brep_intersection_handles_nurbs_and_polycurve_targets ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests\top11_options.rs (L:\om9-target\debug\deps\top11_options-b639c176ac3a6e50.exe)
+
+running 10 tests
+test duplicate_flags_are_exposed_and_toggle_owner_state ... ok
+test move_vertical_uses_active_cplane_normal_and_undo ... ok
+test mirror_copy_flag_uses_the_shared_option_entry ... ok
+test rotate_reference_points_move_original_and_cancel_preserves_it ... ok
+test rotate_copy_option_can_be_supplied_with_command ... ok
+test mirror_axis_default_copies_and_cancel_is_non_mutating ... ok
+test duplicate_in_place_option_uses_one_undo_and_redo ... ok
+test rotate_copy_accepts_typed_center_and_angle_and_undo_redo ... ok
+test move_vertical_typed_world_points_preserve_both_signs_and_cancel ... ok
+test mirror_cplane_axes_use_the_shared_options_and_undo_redo ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests\transform_corrections.rs (L:\om9-target\debug\deps\transform_corrections-cda138d9bdb2c8dc.exe)
+
+running 7 tests
+test inverse_surface_routines_exist_and_return_measured_projection ... ok
+test blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing ... FAILED
+test setpt_cplane_axes_and_cancel_are_read_only_until_commit ... ok
+test roadlike_follows_the_tangent_and_preserves_cplane_up ... ok
+test setpt_edits_only_the_requested_control_coordinates_and_keeps_placement ... ok
+test spacing_with_no_copy_refuses_and_the_same_run_can_retry ... ok
+test spacing_is_in_mm_and_preserves_the_original_in_one_undo ... ok
+
+failures:
+
+---- blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing stdout ----
+
+thread 'blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing' (42600) panicked at crates\om9-app\tests\transform_corrections.rs:160:9:
+assertion failed: Controller::availability(id).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing
+
+test result: FAILED. 6 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `-p om9-app --test transform_corrections`
+     Running tests\transform_menu.rs (L:\om9-target\debug\deps\transform_menu-d9dceb804f2cfd4f.exe)
+
+running 50 tests
+test m03_04_01_016_orient_perpendicular_to_curve_stands_the_object_on_the_path ... ok
+test m03_04_01_005_orient_two_points_translates_the_selection ... ok
+test m03_04_01_010_project_to_cplane_lands_objects_from_different_heights ... ok
+test m03_04_01_006_orient_three_points_turns_the_selection ... ok
+test m03_04_01_007_rotate_3d_turns_ninety_degrees_about_the_cplane_normal ... ok
+test m03_04_01_003_scale1d_grows_only_along_the_cplane_x ... ok
+test m03_04_01_002_scale2d_leaves_the_normal_axis_alone ... ok
+test m03_04_01_010_project_to_cplane_drops_each_object_onto_the_plane ... ok
+test m03_04_01_004_scale_non_uniform_applies_three_factors ... ok
+test m03_04_01_017_orient_on_curve_follows_the_tangent ... ok
+test m03_04_01_001_scale_3d_scales_the_box_about_the_base_point ... ok
+test m03_04_01_008_bend_turns_the_curve_into_an_arc ... ok
+test m03_04_01_023_array_linear_spaces_the_copies_along_the_plane_x ... ok
+test m03_04_01_009_array_polar_creates_the_requested_count ... ok
+test m03_04_01_022_array_along_curve_spaces_copies_by_arc_length ... ok
+test m03_04_01_030_set_points_edits_the_selected_point_coordinates ... ok
+test m03_04_01_015_orient_on_surface_stands_the_object_on_the_surface ... ok
+test m03_04_01_018_symmetry_mirrors_across_the_picked_plane ... ok
+test m03_04_01_034_shear_slides_the_section_along_the_picked_direction ... ok
+test m03_04_01_031_scale_by_plane_scales_along_the_plane_normal ... ok
+test m03_04_01_035_twist_turns_the_section_over_the_span ... ok
+test m03_04_01_032_stretch_scales_along_the_picked_direction ... ok
+test m03_04_01_039_move_uvn_refuses_a_non_surface_selection ... ok
+test m03_04_01_033_taper_scales_the_section_over_the_span ... ok
+test m03_04_01_036_maelstrom_twists_and_pulls_the_section_in ... ok
+test m03_04_01_024_array_along_surface_places_copies_on_the_surface_grid ... ok
+test m03_04_01_038_remap_maps_the_source_plane_onto_the_cplane ... ok
+test m03_04_01_026_array_creates_the_requested_grid ... ok
+test m03_04_01_012_smart_flow_rigid_moves_the_frame ... ok
+test m03_04_01_042_every_catalogued_row_is_enabled_or_refused_with_a_reason ... ok
+test m03_04_01_cage_rows_refuse_without_a_cage ... ok
+test m03_04_01_040_soft_move_moves_only_inside_the_falloff ... ok
+test m03_04_01_020_cage_edit_moves_the_attached_geometry ... ok
+test m03_04_01_041_create_cage_wraps_the_selection_in_a_box ... ok
+test m03_04_01_039_move_uvn_offsets_the_control_net_along_u_v_and_the_normal ... ok
+test m03_04_01_025_array_curve_on_surface_projects_the_stations_onto_the_surface ... ok
+test m03_04_01_flow_rows_need_two_frames_and_one_object ... ok
+test m03_04_01_negatives_refuse_without_changing_the_document ... ok
+test m03_04_01_021_release_from_cage_keeps_the_geometry ... ok
+test m03_04_01_deform_rows_refuse_a_solid ... ok
+test m03_04_01_042_catalog_matches_the_authored_menu_features_and_icons ... ok
+test m03_04_01_027_flow_along_curve_carries_geometry_onto_the_target_path ... ok
+test m03_04_01_menu_click_and_typed_command_run_the_same_body ... ok
+test m03_04_01_curve_rows_refuse_a_selection_without_exactly_one_path ... ok
+test m03_04_01_reference_rows_refuse_a_selection_without_their_reference ... ok
+test m03_04_01_015_smart_flow_pulldown_brings_curves_to_the_base ... ok
+test m03_04_01_029_splop_wraps_the_selection_onto_the_surface ... ok
+test m03_04_01_011_smart_flow_maps_from_the_base_surface ... ok
+test m03_04_01_028_flow_along_surface_maps_the_source_parameters_onto_the_target ... ok
+test m03_04_01_014_smart_flow_break_marks_the_link_broken ... ok
+
+test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests\tween_curves.rs (L:\om9-target\debug\deps\tween_curves-2041f2ae1bec4167.exe)
+
+running 2 tests
+test tween_curves_builds_the_midpoint_curve ... ok
+test tween_curves_count_creates_multiple_curves ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\tween_surfaces.rs (L:\om9-target\debug\deps\tween_surfaces-a310b685d7f2ce0f.exe)
+
+running 2 tests
+test tweensurfaces_builds_an_intermediate_surface ... ok
+test tween_fraction_uses_the_shared_entry ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\ui_events.rs (L:\om9-target\debug\deps\ui_events-f8e6a99e9b729453.exe)
+
+running 6 tests
+test reference_workspace_places_sidebar_left_and_through_finger_below_looking_down ... ok
+test construction_grid_colors_only_positive_axes_like_the_reference ... FAILED
+test printable_viewport_input_routes_to_cmd_when_no_other_editor_owns_focus ... ok
+test actual_editor_select_all_cut_paste_cannot_mutate_transcript_prefix_or_execute_paste ... ok
+test f6_remains_open_between_frames_and_unpinned_escape_restores_command_focus ... ok
+test rendered_cmd_events_build_line_undo_redo_and_cancel_without_direct_model_writes ... ok
+
+failures:
+
+---- construction_grid_colors_only_positive_axes_like_the_reference stdout ----
+
+thread 'construction_grid_colors_only_positive_axes_like_the_reference' (4772) panicked at crates\om9-app\tests\ui_events.rs:158:10:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    construction_grid_colors_only_positive_axes_like_the_reference
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.87s
+
+error: test failed, to rerun pass `-p om9-app --test ui_events`
+     Running tests\utilities.rs (L:\om9-target\debug\deps\utilities-d9fc8923696f65a2.exe)
+
+running 5 tests
+test naked_edges_select_open_meshes ... ok
+test checked_repair_error_keeps_all_selected_objects_and_undo_unchanged ... ok
+test mesh_reduce_preserves_uv_and_material_sidecar ... ok
+test bounds_center_group_and_ungroup_are_undoable ... ok
+test mesh_from_nurbs_and_reduce_basic ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests\uv_curves.rs (L:\om9-target\debug\deps\uv_curves-73c9dcfdaf5ff1e4.exe)
+
+running 1 test
+test create_uv_curves_writes_the_uv_rectangle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\viewport_layout.rs (L:\om9-target\debug\deps\viewport_layout-3fb36a24487a1e52.exe)
+
+running 3 tests
+test matrix_four_view_camera_presets_are_distinct_and_valid ... ok
+test maximize_is_per_view_and_restores_all_four_views ... ok
+test jewelry_grid_axes_follow_each_view_cplane ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\viewport_title_menu.rs (L:\om9-target\debug\deps\viewport_title_menu-1dd6a29eb256a60b.exe)
+
+running 18 tests
+test workspace_snapshot_restore_cannot_revive_a_used_menu ... ok
+test wireframe_with_exhausted_revision_refuses_before_any_layout_or_camera_change ... ok
+test shaded_switches_only_the_view_mode_and_keeps_the_model_and_journal ... ok
+test wireframe_changes_only_captured_view_and_no_op_preserves_revision ... ok
+test mismatched_view_key_cannot_redirect_menu_to_a_neighbor ... ok
+test render_plugin_and_unimplemented_modes_refuse_without_changing_any_view_or_model ... ok
+test fresh_layout_clock_with_copied_view_states_cannot_reset_menu_authority ... ok
+test layout_roundtrip_keeps_views_exact_but_does_not_revive_a_previous_capture ... ok
+test foreign_closed_and_replaced_view_capture_rejects_even_with_equal_visible_state ... ok
+test changed_document_or_target_view_invalidates_popup_without_resetting_prior_state ... ok
+test captured_maximize_preserves_model_redo_pending_point_and_all_camera_poses ... ok
+test replacing_target_view_dismisses_popup_before_command_input_resumes ... ok
+test keyboard_enter_activates_focused_menu_item_and_returns_to_command_draft ... ok
+test escape_closes_title_popup_and_preserves_numeric_draft_and_pending_command ... ok
+test outside_canvas_click_only_dismisses_popup_and_preserves_pending_point ... ok
+test long_title_menu_scrolls_to_last_reference_item_in_a_short_window ... ok
+test title_popup_has_reference_actions_instead_of_the_old_three_entry_stub ... ok
+test popup_keyboard_cannot_commit_command_after_tab_reaches_editor ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.44s
+
+     Running tests\window_minimum.rs (L:\om9-target\debug\deps\window_minimum-de8618a8034927cf.exe)
+
+running 5 tests
+test first_frame_on_a_1366x768_screen_at_100_percent_asks_for_1280x688 ... ok
+test unknown_monitor_asks_for_the_plain_supported_minimum ... ok
+test small_logical_screens_cap_the_minimum_to_the_usable_area ... ok
+test first_frame_on_a_large_screen_asks_for_1280x720 ... ok
+test the_command_is_sent_once_and_again_only_when_the_monitor_changes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.38s
+
+     Running tests\wireframe.rs (L:\om9-target\debug\deps\wireframe-be40f8d509b59ae8.exe)
+
+running 1 test
+test dup_edge_extracts_the_brep_display_edges ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.49s
+
+     Running tests\workbench_regions.rs (L:\om9-target\debug\deps\workbench_regions-9d53ee14f53b1a98.exe)
+
+running 8 tests
+test positive_fixture_cases_match_the_hand_computed_regions ... ok
+test negative_fixture_cases_are_explicit_and_leave_the_layout_unchanged ... ok
+test negative_fixture_sweep_never_overlaps_or_hides_the_command_input ... ok
+test an_unrelated_failure_is_not_cleared_by_the_region_check ... ok
+test normal_window_shows_left_rail_four_viewports_and_the_right_dock ... ok
+test the_plan_matches_the_regions_egui_actually_lays_out ... ok
+test narrow_window_yields_the_right_dock_and_keeps_the_command_input ... ok
+test too_small_window_reports_visibly_and_changes_nothing_else ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.47s
+
+     Running tests\workbench_regions_sizes.rs (L:\om9-target\debug\deps\workbench_regions_sizes-f5d1531731a725f3.exe)
+
+running 10 tests
+test startup_refuses_a_window_below_1280x720 ... ok
+test capped_high_dpi_case_911x480 ... ok
+test unsupported_size_error_path ... ok
+test hidden_command_line_and_right_dock_toggle_cannot_lose_the_command_input ... ok
+test command_undo_redo_save_and_reopen_leave_the_region_plan_alone ... ok
+test simulated_dpi_scales_keep_the_contract_in_point_space ... ok
+test layout_evidence_table ... ok
+test supported_sizes_keep_the_contract ... ok
+test dock_threshold_sweep_1150_to_1250 ... ok
+test left_rail_max_justification_table ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 36.21s
+
+   Doc-tests om9_app
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: 8 targets failed:
+    `-p om9-app --lib`
+    `-p om9-app --test command_snapshot`
+    `-p om9-app --test file_widgets`
+    `-p om9-app --test global_status_surface`
+    `-p om9-app --test mesh_fill`
+    `-p om9-app --test shell_docking`
+    `-p om9-app --test transform_corrections`
+    `-p om9-app --test ui_events`

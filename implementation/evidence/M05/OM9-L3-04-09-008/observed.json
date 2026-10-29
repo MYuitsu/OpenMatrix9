@@ -1,0 +1,21 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-09-008",
+  "title": "Gem Facet Outline Girdle Reference API",
+  "scope": "`GemReferenceGeometry`; `gem_reference(spec, name)`; `GemGeometryReference`; `girdle_outline` / `table_outline` / `profile_points` / `crown_facet` / `pavilion_facet`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "named girdle/table/facet references with finite stable outward normals",
+  "negative": "unknown names/indices and degenerate facets are typed refusals",
+  "manual_gate": "AUTO_ONLY",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "statement": "AUTO_ONLY backend capability; acceptance rests on the automated checks.",
+  "l4": {
+    "l4_receipts": [],
+    "fixture_manifest_sha256": "9daa8e8336af8f66de5e3870128ca0fac0060936462029007b4704f25f76df42"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_assets.rs"
+  ]
+}

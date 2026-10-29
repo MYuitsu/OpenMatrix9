@@ -1,0 +1,43 @@
+{
+  "schema": "om9.evidence.implement.v1",
+  "l4": "OM9-L4-04-17-006-03",
+  "l3": "OM9-L3-04-17-006",
+  "recorded_at": "2026-10-28",
+  "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+  "changed_files": [
+    "crates/om9-core/src/cutters/boolean.rs",
+    "crates/om9-app/src/session/channel_cutters.rs"
+  ],
+  "implementation": [
+    "cutters::boolean::apply",
+    "session::channel_cutters::RowCutterSession::recompute",
+    "session::Controller::row_cutter_commit",
+    "model::CUTTER_CUT_EXTENSION_SLOT"
+  ],
+  "command_options": [
+    "Boolean=off|on|one",
+    "Preserve=preserve|remove"
+  ],
+  "verification": {
+    "commands": [
+      "cargo test -p om9-app --test channel_cutters the_interactive_boolean_cuts_every_selected_metal_body",
+      "cargo test -p om9-app --test channel_cutters a_boolean_without_a_metal_body_is_refused_and_keeps_the_preview",
+      "cargo test -p om9-core --test cutters the_interactive_boolean_keeps_or_removes_the_cutter_bodies"
+    ],
+    "results": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": 0,
+      "cargo test -p om9-core --test channel_cutters -j 2": "10 passed",
+      "cargo test -p om9-app --test channel_cutters -j 2": "7 passed",
+      "cargo test -p om9-core -j 2": "911 passed, 0 failed",
+      "cargo test -p om9-app --lib -j 2": "202 passed, 2 failed (ui::icon_size_audit, pre-existing)",
+      "cargo test -p om9-app --test gem_cutters -j 2": "7 passed, 0 failed",
+      "cargo test -p om9-app --test head_commands -j 2": "9 passed, 0 failed"
+    }
+  },
+  "limitations": [
+    "The Boolean reuses the one mesh CSG service (mesh_csg::mesh_boolean); it never runs OCCT inside the adapter.",
+    "Every target must be a closed mesh body; a surface body is refused instead of silently meshed.",
+    "The cut is applied in world space, so a row cut through several bodies is one transaction but not one CSG union."
+  ]
+}

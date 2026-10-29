@@ -76,9 +76,15 @@ impl Controller {
         {
             if pending.mode != "Center" {
                 self.arc_pending = Some(pending);
-                return Some(Err(Error::Invalid("Radius=/Diameter= requires Center mode")));
+                return Some(Err(Error::Invalid(
+                    "Radius=/Diameter= requires Center mode",
+                )));
             }
-            let Some(mut radius) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(mut radius) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.arc_pending = Some(pending);
                 return Some(Err(Error::Invalid("radius must be positive")));
             };
@@ -98,7 +104,9 @@ impl Controller {
         if let Some(mode) = mode {
             if !pending.points.is_empty() {
                 self.arc_pending = Some(pending);
-                return Some(Err(Error::Invalid("choose arc mode before the first point")));
+                return Some(Err(Error::Invalid(
+                    "choose arc mode before the first point",
+                )));
             }
             pending.mode = mode;
             pending.points.clear();
@@ -143,9 +151,12 @@ impl Controller {
             }
             let normal = unit(normal)?;
             let delta = [start[0] - end[0], start[1] - end[1], start[2] - end[2]];
-            let denominator = 2.0 * (normal[0] * delta[0] + normal[1] * delta[1] + normal[2] * delta[2]);
+            let denominator =
+                2.0 * (normal[0] * delta[0] + normal[1] * delta[1] + normal[2] * delta[2]);
             if denominator.abs() <= 1e-12 {
-                return Err(Error::Invalid("arc start direction is collinear with the end"));
+                return Err(Error::Invalid(
+                    "arc start direction is collinear with the end",
+                ));
             }
             let length_squared = delta[0].powi(2) + delta[1].powi(2) + delta[2].powi(2);
             let offset = -length_squared / denominator;
@@ -155,17 +166,29 @@ impl Controller {
                 start[2] + normal[2] * offset,
             ];
             let radius = distance(center, start);
-            let x = unit([start[0] - center[0], start[1] - center[1], start[2] - center[2]])?;
+            let x = unit([
+                start[0] - center[0],
+                start[1] - center[1],
+                start[2] - center[2],
+            ])?;
             let y = unit(cross(plane_normal, x))?;
             let end_angle = signed_angle(x, y, end, center);
-            let sweep = if end_angle <= 0.0 { end_angle + std::f64::consts::TAU } else { end_angle };
+            let sweep = if end_angle <= 0.0 {
+                end_angle + std::f64::consts::TAU
+            } else {
+                end_angle
+            };
             return self.commit_arc(center, x, y, radius, 0.0, sweep);
         }
         if pending.mode == "Center" {
             let center = a;
             let start = b;
             let end = c;
-            let x = unit([start[0] - center[0], start[1] - center[1], start[2] - center[2]])?;
+            let x = unit([
+                start[0] - center[0],
+                start[1] - center[1],
+                start[2] - center[2],
+            ])?;
             let radius = pending.radius.unwrap_or_else(|| distance(center, start));
             if pending.radius.is_none()
                 && (distance(center, end) - radius).abs() > 1e-6 * radius.max(1.0)
@@ -175,7 +198,11 @@ impl Controller {
             let y = unit(cross(plane_normal, x))?;
             let start_angle = 0.0;
             let end_angle = signed_angle(x, y, end, center);
-            let sweep = if end_angle <= 0.0 { end_angle + std::f64::consts::TAU } else { end_angle };
+            let sweep = if end_angle <= 0.0 {
+                end_angle + std::f64::consts::TAU
+            } else {
+                end_angle
+            };
             return self.commit_arc(center, x, y, radius, start_angle, sweep);
         }
         let curve = om9_core::curve_build::arc_through(a, b, c)?;
@@ -191,9 +218,7 @@ impl Controller {
         start_angle: f64,
         sweep: f64,
     ) -> Result<(), Error> {
-        let curve = om9_core::curve_build::arc_by_center(
-            center, x, y, radius, start_angle, sweep,
-        )?;
+        let curve = om9_core::curve_build::arc_by_center(center, x, y, radius, start_angle, sweep)?;
         self.commit_geometry(ARC, "Arc", Geometry::Curve(curve))
     }
 
@@ -236,9 +261,11 @@ impl Controller {
                 Ok(normal) => normal,
                 Err(_) => return Vec::new(),
             };
-            let Ok(tangent) =
-                unit([tangent_point[0] - start[0], tangent_point[1] - start[1], tangent_point[2] - start[2]])
-            else {
+            let Ok(tangent) = unit([
+                tangent_point[0] - start[0],
+                tangent_point[1] - start[1],
+                tangent_point[2] - start[2],
+            ]) else {
                 return Vec::new();
             };
             let mut normal = cross(plane_normal, tangent);
@@ -262,8 +289,11 @@ impl Controller {
                 start[2] + normal[2] * offset,
             ];
             let radius = distance(center, start);
-            let Ok(x) = unit([start[0] - center[0], start[1] - center[1], start[2] - center[2]])
-            else {
+            let Ok(x) = unit([
+                start[0] - center[0],
+                start[1] - center[1],
+                start[2] - center[2],
+            ]) else {
                 return Vec::new();
             };
             let Ok(y) = unit(cross(plane_normal, x)) else {
@@ -288,9 +318,11 @@ impl Controller {
             ]) else {
                 return Vec::new();
             };
-            let Ok(x) =
-                unit([start[0] - center[0], start[1] - center[1], start[2] - center[2]])
-            else {
+            let Ok(x) = unit([
+                start[0] - center[0],
+                start[1] - center[1],
+                start[2] - center[2],
+            ]) else {
                 return Vec::new();
             };
             let radius = pending.radius.unwrap_or_else(|| distance(center, start));
@@ -319,23 +351,24 @@ impl Controller {
                 ..
             }) = om9_core::curve_build::arc_through(pending.points[0], pending.points[1], point)
         {
-                    let angles = angle_domain.unwrap_or([0.0, std::f64::consts::TAU]);
-                    let steps = 32;
-                    let point_at = |angle: f64| {
-                        let (sin, cos) = angle.sin_cos();
-                        [
-                            center[0] + x[0] * radius * cos + y[0] * radius * sin,
-                            center[1] + x[1] * radius * cos + y[1] * radius * sin,
-                            center[2] + x[2] * radius * cos + y[2] * radius * sin,
-                        ]
-                    };
-                    return (0..steps)
-                        .map(|index| {
-                            let first = angles[0] + (angles[1] - angles[0]) * index as f64 / steps as f64;
-                            let second = angles[0] + (angles[1] - angles[0]) * (index + 1) as f64 / steps as f64;
-                            [point_at(first), point_at(second)]
-                        })
-            .collect();
+            let angles = angle_domain.unwrap_or([0.0, std::f64::consts::TAU]);
+            let steps = 32;
+            let point_at = |angle: f64| {
+                let (sin, cos) = angle.sin_cos();
+                [
+                    center[0] + x[0] * radius * cos + y[0] * radius * sin,
+                    center[1] + x[1] * radius * cos + y[1] * radius * sin,
+                    center[2] + x[2] * radius * cos + y[2] * radius * sin,
+                ]
+            };
+            return (0..steps)
+                .map(|index| {
+                    let first = angles[0] + (angles[1] - angles[0]) * index as f64 / steps as f64;
+                    let second =
+                        angles[0] + (angles[1] - angles[0]) * (index + 1) as f64 / steps as f64;
+                    [point_at(first), point_at(second)]
+                })
+                .collect();
         }
         pending
             .points

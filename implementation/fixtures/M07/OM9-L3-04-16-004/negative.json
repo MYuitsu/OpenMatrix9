@@ -1,0 +1,32 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-16-004",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "Length shorter than CutterLength",
+      "input": "Length=1 CutterLength=2",
+      "expect": "Invalid(\"bezel cutter length\")"
+    },
+    {
+      "case": "count below three",
+      "input": "Count=0",
+      "expect": "Invalid(\"bezel cutter count\")"
+    },
+    {
+      "case": "cutter length below the printable minimum",
+      "input": "CutterLength=0",
+      "expect": "Invalid(\"bezel cutter cutter length\")"
+    },
+    {
+      "case": "angle outside -85..85",
+      "input": "CutterAngle=120",
+      "expect": "Invalid(\"bezel cutter angle\")"
+    },
+    {
+      "case": "Position without Dims=on",
+      "input": "Position=Even",
+      "expect": "Invalid(\"bezel cutter position needs Dims=on\")"
+    }
+  ]
+}

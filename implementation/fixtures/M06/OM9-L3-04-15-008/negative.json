@@ -1,0 +1,19 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-15-008",
+  "cases": [
+    {
+      "input": "selection without a circle",
+      "error": "pull needs a selected circle rail"
+    },
+    {
+      "input": "Mode=Spring",
+      "error": "invalid pull mode option"
+    },
+    {
+      "input": "only the rail selected",
+      "error": "missing pull selection"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

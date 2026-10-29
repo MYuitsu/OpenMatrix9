@@ -1,0 +1,86 @@
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+error: the loop variable `axis` is used to index `basis`
+    --> crates\om9-core\src\gem_cluster.rs:1260:21
+     |
+1260 |         for axis in 0..3 {
+     |                     ^^^^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+     = note: `-D clippy::needless-range-loop` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::needless_range_loop)]`
+help: consider using an iterator and enumerate()
+     |
+1260 -         for axis in 0..3 {
+1260 +         for (axis, <item>) in basis.iter().enumerate() {
+     |
+
+error: the loop variable `row` is used to index `basis`
+    --> crates\om9-core\src\gem_cluster.rs:1261:24
+     |
+1261 |             for row in 0..3 {
+     |                        ^^^^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+help: consider using an iterator and enumerate()
+     |
+1261 -             for row in 0..3 {
+1261 +             for (row, <item>) in basis.iter().enumerate() {
+     |
+
+error: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\settings\bezel.rs:466:9
+    |
+466 |         params.edge_profile = "Nonexistent".to_string();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `settings::bezel::BezelParams { edge_profile: "Nonexistent".to_string(), ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\settings\bezel.rs:465:9
+    |
+465 |         let mut params = BezelParams::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+    = note: `-D clippy::field-reassign-with-default` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::field_reassign_with_default)]`
+
+error: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\settings\bezel.rs:479:9
+    |
+479 |         params.boolean = true;
+    |         ^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `settings::bezel::BezelParams { boolean: true, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\settings\bezel.rs:478:9
+    |
+478 |         let mut params = BezelParams::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+
+error: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\settings\bezel.rs:488:9
+    |
+488 |         params.angle_deg = 15.0;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `settings::bezel::BezelParams { angle_deg: 15.0, shear_rails: true, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\settings\bezel.rs:487:9
+    |
+487 |         let mut params = BezelParams::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+
+error: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\settings\bezel.rs:522:9
+    |
+522 |         bad.count = 200;
+    |         ^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `settings::bezel::ScallopParams { count: 200, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\settings\bezel.rs:521:9
+    |
+521 |         let mut bad = ScallopParams::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+
+    Checking om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+error: could not compile `om9-core` (lib test) due to 6 previous errors
+warning: build failed, waiting for other jobs to finish...

@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-09-007",
+  "title": "Gem Asset Properties And Layer Defaults",
+  "cases": [
+    "a shared instance refuses geometry edits (\"shared gem definition\")",
+    "a locked Gem layer refuses creation and property editing"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

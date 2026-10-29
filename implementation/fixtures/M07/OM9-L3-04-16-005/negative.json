@@ -1,0 +1,27 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-16-005",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "negative or zero clearance",
+      "input": "Clearance=0",
+      "expect": "Invalid(\"cutter clearance\") (never silently clamped)"
+    },
+    {
+      "case": "seat below the cutter bottom",
+      "input": "LowerSeatDepth > LowerDepth",
+      "expect": "Invalid(\"cutter lower seat depth\")"
+    },
+    {
+      "case": "a ring stack that is not monotonic",
+      "input": "a hand-built ring list out of order",
+      "expect": "Invalid(\"cutter ring order\")"
+    },
+    {
+      "case": "the cutter is inside the stone",
+      "input": "GirdleScale below the stone profile",
+      "expect": "Invalid(\"cutter pavilion clearance\")"
+    }
+  ]
+}

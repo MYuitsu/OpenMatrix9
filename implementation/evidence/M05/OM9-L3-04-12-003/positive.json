@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-12-003",
+  "title": "Pave Azure Builder",
+  "cases": [
+    "round azures emit top/through/bottom/seat profiles as closed curves",
+    "hexagonal azures emit six-point profiles; Angle rotates them",
+    "Azure Depth, Size, Through Hole and Seat Angle alter the planned profiles",
+    "Apply inserts all profiles in one Undo step"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

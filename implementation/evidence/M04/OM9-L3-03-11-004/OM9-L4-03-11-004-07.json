@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-11-004",
+  "title": "Builder Live Preview Lifecycle",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "8959e166ab09d166dfc6fcb57d9aeee449433794847ef978494ab8ecd760c930",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "no history/Undo entry from the previews; Escape returns the original state",
+    "negative": "history recipes and undo journal stay empty"
+  },
+  "l4_id": "OM9-L4-03-11-004-07",
+  "role": "ADVERSARIAL",
+  "kind": "adversarial",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/tests/builder_controls.rs",
+    "crates/om9-app/tests/builder_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "escape_after_preview_edits_leaves_the_document_bytewise_unchanged"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "21169fb092dee2350bd6ffc2fccc785351728d9fc53b986f7c1fb4979027d6ef",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "escape_after_preview_edits_leaves_the_document_bytewise_unchanged",
+      "package": "om9-app",
+      "binary": "builder_controls"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "cancel_and_reset_leave_the_document_untouched"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "b5f6399d7663a81e2390afc8807b41ae19c56c0b9002648e8aad55b06a4fd09f",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "cancel_and_reset_leave_the_document_untouched",
+      "package": "om9-app",
+      "binary": "builder_panel"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

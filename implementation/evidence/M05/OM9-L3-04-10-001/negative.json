@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-001",
+  "title": "Gem On Curve Basic",
+  "cases": [
+    "a stone longer than the spacing is refused unless overlap is requested",
+    "an option the tool does not consume (`Sizes=` on the row) is a typed refusal",
+    "a closed curve does not duplicate the seam station",
+    "a wrong selection (zero or two curves) is a typed refusal and opens no session"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

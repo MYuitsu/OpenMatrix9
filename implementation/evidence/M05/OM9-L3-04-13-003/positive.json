@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-13-003",
+  "title": "Gem Match Attributes",
+  "cases": [
+    "the first selected 6 mm stone copies cut/shape/girdle to the 4/5 mm targets",
+    "`Mask=geometry` leaves each target material and colour untouched",
+    "the match commits in one transaction and Undo restores every target"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

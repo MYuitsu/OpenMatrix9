@@ -48,7 +48,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Count=") {
-            let Some(count) = value.parse::<usize>().ok().filter(|count| *count >= 2 && *count <= 100_000) else {
+            let Some(count) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|count| *count >= 2 && *count <= 100_000)
+            else {
                 self.to_lines_pending = Some(pending);
                 return Some(Err(Error::Invalid("count must be 2..100000")));
             };

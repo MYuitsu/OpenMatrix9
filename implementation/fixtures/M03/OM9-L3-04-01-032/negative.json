@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-032",
+  "case": "a factor of 0 or below, or a direction with no length",
+  "expected": "a factor of 0 or below, or a direction with no length -> refused at its own prompt and the run continues on the same question",
+  "test": "m03_04_01_032_stretch_scales_along_the_picked_direction"
+}

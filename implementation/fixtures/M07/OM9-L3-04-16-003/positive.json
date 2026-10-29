@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-16-003",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderGemCutterLibrary",
+  "cases": [
+    {
+      "case": "all ten library presets",
+      "input": "CutterPreset::ALL on a 6.5 mm round brilliant",
+      "expect": "each preset builds one closed cutter that clears the stone"
+    },
+    {
+      "case": "2D scale",
+      "input": "ScaleX=120 ScaleY=120",
+      "expect": "volume grows and the cutter still clears the stone"
+    },
+    {
+      "case": "the committed record",
+      "input": "Preset=Brite then Enter",
+      "expect": "om9.cutter payload has kind=gem_cutter_library and seat=\"Brite Cutter\""
+    }
+  ]
+}

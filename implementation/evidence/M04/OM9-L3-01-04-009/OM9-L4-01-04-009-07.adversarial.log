@@ -1,0 +1,15 @@
+# negative and recovery cases for OM9-L3-01-04-009
+
+$ cargo test -p om9-core --test associative_rebuild -- --exact corrupt_or_missing_fixture_data_fails_to_load
+# exit code: 0
+# captured: 2026-10-26T16:03:38Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test corrupt_or_missing_fixture_data_fails_to_load ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)

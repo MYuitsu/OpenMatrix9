@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Multiple pipes</title>
+<desc>Sweep round profiles along several selected curves. OpenMatrix9 minimal-solid-v3-warm-highlight; authored vector geometry.</desc>
+<path d="M4 25 C6 12 13 19 15 6 M12 26 C14 13 22 20 24 7" fill="none" stroke="#A668D1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="4" cy="25" rx="2.4" ry="1.6" fill="none" stroke="#FFD166" stroke-width="2.2"/><ellipse cx="12" cy="26" rx="2.4" ry="1.6" fill="none" stroke="#FFD166" stroke-width="2.2"/><path d="M23 19 H30 M26.5 15.5 V22.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

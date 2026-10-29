@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-001",
+  "case": "positive",
+  "input": "nodes rail->profile->sweep; typed GeometryRef vs ScalarMm",
+  "expected": "3 nodes, edges follow typed IO; a curve fed into ScalarMm is rejected",
+  "tests": [
+    "typed_edges_follow_the_declared_io_and_link_producers",
+    "a_curve_in_a_scalar_input_and_a_wrong_output_type_are_refused",
+    "a_legacy_recipe_without_ports_is_reported_untyped_never_guessed",
+    "record_feature_enforces_identity_document_and_output_ownership"
+  ]
+}

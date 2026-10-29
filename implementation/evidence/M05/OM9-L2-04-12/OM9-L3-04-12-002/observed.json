@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-12-002",
+  "title": "Manual Pave Builder",
+  "scope": "opens Manual Pavé on one selected surface",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": [
+    "an explicit count is honoured exactly",
+    "hexagonal spacing and Angle are typed and recompute the preview",
+    "the manual builder shares the Auto Pavé parameters and the same Apply path"
+  ],
+  "negative": [
+    "a zero count falls back to the region fill instead of inserting an empty layout",
+    "a non-surface selection is refused with an explicit error",
+    "a stone outside the region boundary is never inserted"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-12-002-03"
+    ],
+    "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_pave.rs",
+    "crates/om9-app/tests/gem_pave_panel.rs"
+  ]
+}

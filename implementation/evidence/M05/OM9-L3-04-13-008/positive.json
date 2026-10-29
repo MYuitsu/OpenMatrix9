@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-13-008",
+  "title": "Gem Reporter Count And Weight",
+  "cases": [
+    "two 6 mm stones aggregate into one row with `count = 2`",
+    "the total reports three stones and a positive carat/gram mass",
+    "`carat × 0.2 == grams` holds for every row and for the total",
+    "a ruby and a diamond of the same girdle produce separate rows and the ruby row is heavier by the 4.00/3.52 density ratio",
+    "the mesh mass stays inside ±15% of the trade formula for the authored shapes; a row outside the band is counted and printed",
+    "the report labels itself `NOT A CERTIFICATE`"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

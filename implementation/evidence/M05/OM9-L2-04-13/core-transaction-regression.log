@@ -1,0 +1,43 @@
+$ cargo test -p om9-core --test atomic_transactions --test transaction_scopes -j 2
+# exit code: 0
+# captured: 2026-10-28T04:06:08Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 16 tests
+test legacy_nil_session_is_format_data_until_explicit_runtime_restore ... ok
+test close_and_reopen_of_a_document_clone_cannot_restore_an_old_owner_stamp ... ok
+test revision_overflow_rejects_before_public_state_or_redo_changes ... ok
+test source_document_close_invalidates_job_without_resurrection ... ok
+test postacceptance_notification_failure_reports_committed_receipt ... ok
+test accepted_move_is_one_atomic_undo_and_redo ... ok
+test undo_of_new_insert_does_not_make_its_uuid_available_for_another_object ... ok
+test cancellation_after_prepare_keeps_every_record_and_redo ... ok
+test no_op_commit_never_erases_redo_or_creates_empty_group ... ok
+test cross_document_move_undo_restores_both_document_owners ... ok
+test panicking_callback_is_rejected_and_barrier_is_released ... ok
+test invalid_source_keeps_immediate_state_and_executable_prior_redo ... ok
+test cross_document_prepare_failure_never_transfers_first_participant ... ok
+test intervening_commit_and_undo_do_not_resurrect_a_prepared_job ... ok
+test preacceptance_callback_cannot_mutate_or_veto_with_partial_state ... ok
+test deleted_uuid_cannot_be_reallocated_to_resurrect_an_old_source_stamp ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 8 tests
+test booked_scope_failed_prepare_keeps_booking_and_prior_redo ... ok
+test scope_owned_by_another_thread_cannot_be_finished ... ok
+test wrong_transaction_identity_cannot_borrow_caller_scope ... ok
+test cancellation_keeps_active_nested_scope_and_old_redo_immediately ... ok
+test nonrecording_empty_scope_keeps_prior_stacks_and_success_creates_no_undo ... ok
+test active_scope_merge_retains_first_write_baseline_and_one_undo ... ok
+test nested_savepoint_abort_restores_parent_pending_state ... ok
+test rolled_back_caller_identity_is_retired_and_global_prior_redo_remains_executable ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.36s
+     Running tests\atomic_transactions.rs (cargo-target\debug\deps\atomic_transactions-5170427a18c6b716.exe)
+     Running tests\transaction_scopes.rs (cargo-target\debug\deps\transaction_scopes-809678b12e593889.exe)

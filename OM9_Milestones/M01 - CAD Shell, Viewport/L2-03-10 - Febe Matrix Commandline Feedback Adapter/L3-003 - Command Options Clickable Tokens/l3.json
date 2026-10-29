@@ -217,6 +217,127 @@
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending."
-    ]
+    ],
+    "command_options_2026_10_25": {
+      "date": "2026-10-25",
+      "status": "SCOPED_RUST_AND_WINDOWS_UI_VERIFIED_MANUAL_GATE_PENDING",
+      "scope": "Polyline M/Mode toggles Line/Arc through one parser; P/H flags, protected input, analytic mixed segments, Direction/Center, bounded scene display, Close, Undo/Redo and retry/cancel.",
+      "evidence": [
+        "docs/validation/2026-10-25-command-polyline-shortcuts/README.md",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/commands.json",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/native-debug-replay.json",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/native-release-replay.json"
+      ],
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Helpers tracking and continuously closed PersistentClose preview remain unfinished.",
+        "Center minor arcs only; antipodal/major Center selection is not certified.",
+        "Full M01/M03 human review, macOS and exact mixed-Polycurve 3DM re-export remain open."
+      ]
+    },
+    "polyline_parameter_interface_2026_10_25": {
+      "date": "2026-10-25",
+      "status": "SCOPED_AUTOMATED_AND_WINDOWS_UI_VERIFIED_MANUAL_GATE_PENDING",
+      "scope": "All eight Polyline parameters share typed IDs, names, shortcuts, kinds, current values and activation; keyboard, pointer and typed names reuse one parser. Other command families unchanged.",
+      "evidence": [
+        "docs/validation/2026-10-25-polyline-parameter-interface/README.md",
+        "docs/validation/2026-10-25-polyline-parameter-interface/commands.json",
+        "docs/validation/2026-10-25-polyline-parameter-interface/native-debug.json",
+        "docs/validation/2026-10-25-polyline-parameter-interface/native-release.json"
+      ],
+      "tests": {
+        "app_passed": 216,
+        "failed": 0,
+        "new_rust_tests": 3,
+        "parameter_route_scenarios": 24,
+        "scenario_note": "24 scenarios inside one of the three new Rust tests, not 24 extra test functions",
+        "clippy": "passed",
+        "fmt": "passed",
+        "release": "passed"
+      },
+      "manual_gate_promoted": false,
+      "existing_geometry_and_flag_lifecycle_semantics_changed": false,
+      "remaining": [
+        "Helpers tracking and continuously closed PersistentClose preview remain unfinished.",
+        "Existing Center arc restrictions, exact mixed-Polycurve 3DM re-export, macOS and human gates remain open."
+      ]
+    },
+    "shared_command_parameter_interface_2026_10_25": {
+      "date": "2026-10-25",
+      "status": "SCOPED_AUTOMATED_AND_WINDOWS_UI_VERIFIED_KNOWN_BASELINE_FAILURE_OPEN",
+      "scope": "All 39 existing Command option declaration groups share one interface for owner values, availability, unique advertised accelerators, click/typed activation and value entry. Existing geometry parsers remain owners.",
+      "evidence": [
+        "docs/validation/2026-10-25-command-parameter-interface/README.md",
+        "docs/validation/2026-10-25-command-parameter-interface/commands.json",
+        "docs/validation/2026-10-25-command-parameter-interface/native-debug.json",
+        "docs/validation/2026-10-25-command-parameter-interface/baseline-solid-workflows.json"
+      ],
+      "tests": {
+        "primary_app_tests_passed": 224,
+        "final_interface_tests_passed": 7,
+        "final_contract_tests_passed": 2,
+        "overlapping_reruns_excluded": true,
+        "distinct_app_tests_passed": 225,
+        "owner_integration_tests_passed": 241,
+        "distinct_total_passed": 466,
+        "known_preexisting_failures": 1,
+        "manual_fixture_tests_ignored": 2,
+        "provider_groups": 37,
+        "additional_line_and_polyline_groups": 2,
+        "three_route_matrix_scenarios": 36,
+        "existing_polyline_matrix_scenarios": 24,
+        "clippy": "passed",
+        "debug_build": "passed",
+        "native_debug": "passed",
+        "public_source_audit": "passed",
+        "release": "not rebuilt; existing user release preserved"
+      },
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Known preexisting solid_workflows Box three-number menu assertion remains open; reproduced with pre-expansion source.",
+        "Two native-saved-solid fixture tests remain ignored pending external fixtures.",
+        "Commands without declared options retain positional input; this is not proof of all geometry capabilities.",
+        "Inherited Polyline Helpers, continuously closed preview, Center restrictions and mixed-Polycurve 3DM re-export remain open.",
+        "Human M01/M03 gates and macOS are not signed."
+      ],
+      "skill_rule_update": "PROPOSED_NOT_RECORDED_PENDING_USER_CONSENT"
+    },
+    "polyline_option_owner_version_check_2026_10_26": {
+      "status": "VERIFIED_EXISTING_FIX_WITH_MENU_CMD_AND_NATIVE_REGRESSION",
+      "evidence": [
+        "docs/validation/2026-10-26-polyline-option-owner/README.md",
+        "docs/validation/2026-10-26-polyline-option-owner/evidence.json"
+      ],
+      "production_code_changed": false,
+      "manual_gate_promoted": false
+    },
+    "polyline_standard_handoff_spec_2026_10_26": {
+      "date": "2026-10-26",
+      "status": "DOCUMENTATION_VALIDATED_NOT_IMPLEMENTATION_ACCEPTANCE",
+      "scope": "Documentation-only handoff to standardize all command parameter interactions using Polyline as the interaction reference; current-code inventory, target API/state/inline UI contract, per-owner cards, 13 work packages and 50 unexecuted acceptance templates.",
+      "documents": [
+        "implementation/design/M01/command-options-polyline-standard-20261026/README.md",
+        "implementation/design/M01/command-options-polyline-standard-20261026/SPEC.vi.md",
+        "implementation/design/M01/command-options-polyline-standard-20261026/LUNA-PROMPT.vi.md"
+      ],
+      "evidence": [
+        "implementation/design/M01/command-options-polyline-standard-20261026/documentation-validation.json"
+      ],
+      "future_work_packages": 13,
+      "unexecuted_acceptance_templates": 50,
+      "production_code_changed": false,
+      "manual_gate_promoted": false
+    },
+    "command_integration_skill_rule_2026_10_26": {
+      "status": "USER_AUTHORIZED_SKILL_RULE_SAVED_AND_VALIDATED",
+      "rule": "skills/openmatrix9-feature-port/references/command-integration-contract.md",
+      "evidence": [
+        "docs/validation/2026-10-26-command-skill-contract/README.md",
+        "docs/validation/2026-10-26-command-skill-contract/result.json"
+      ],
+      "scope": "Icon mapping, default invocation and owner parameters with underlined accelerators must be integrated and verified for a complete command.",
+      "production_implementation_promoted": false,
+      "manual_gate_promoted": false
+    }
   }
 }

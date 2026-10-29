@@ -1,0 +1,10 @@
+{
+  "ui_status": "Final verified executable launched; native input/capture helper remains inaccessible",
+  "real_desktop_replay_verified": false,
+  "pid": 4104,
+  "path": "H:/OpenMatrix9/build/standalone-validation/ui-artifacts/measure-transform-20261027/om9-verified.exe",
+  "dependency_path": "L:/om9-target/debug",
+  "manual_gate_closed": false,
+  "sha256": "4a69c74c4da464a40eab9b580e691f0fdf2e3cc304535bb93d9893adfbaa1f8c",
+  "matches_target": true
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "om9.m04.l3_ring_family_evidence.v1",
+  "l3_id": "OM9-L3-04-03-005",
+  "title": "Ring Builder Style Presets",
+  "scope": "`BuilderStyle::snapshot` `StyleLibrary::save_user` / `save_to` / `load_from` `BuilderStyle::apply` `PARAM_ALIASES`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "a saved signet preset reloads and reproduces the same body",
+  "negative": "an unknown schema version is refused, not guessed",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the ring builder panel and gestures; no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-04-03-005-03",
+      "OM9-L4-04-03-005-04",
+      "OM9-L4-04-03-005-05",
+      "OM9-L4-04-03-005-06"
+    ],
+    "fixture_manifest_sha256": "adeefa9651bd94b116277573e28f762503a485c1c0568b61375457748acebd45"
+  }
+}

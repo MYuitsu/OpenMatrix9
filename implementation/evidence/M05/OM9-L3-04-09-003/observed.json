@@ -1,0 +1,28 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-09-003",
+  "title": "Gem Loader Shape Cut Size Picker",
+  "scope": "`Controller::dispatch(OM9-GEM-001)` / `gvLoader`; `GemSession` loader fields; command options; `Controller::gem_apply`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "one gemstone with the selected shape, cut and size in one Undo step; its preview is painted in the viewport and the committed body is an editable B-Rep",
+  "negative": "invalid sizes/options and a locked layer never mutate the document",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-09-003-03"
+    ],
+    "fixture_manifest_sha256": "fe1835a0145b9eb8685c0515ba3c035341b335eb445c23a3be0ea01d05d5205e"
+  },
+  "tests": [
+    "the_loader_previews_without_creating_an_object_and_cancel_leaves_no_phantom",
+    "applying_the_loader_inserts_one_gem_in_one_transaction_and_undo_restores",
+    "loader_options_change_the_cut_shape_size_and_depth",
+    "keep_original_size_keeps_the_replaced_gems_dimensions",
+    "a_bad_loader_option_is_refused_and_the_session_stays_open",
+    "the_loader_preview_is_world_space_and_never_committed",
+    "the_loader_commits_an_editable_brep_with_the_mesh_volume",
+    "the_brep_option_keeps_the_portable_mesh_body"
+  ]
+}

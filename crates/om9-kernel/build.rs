@@ -47,6 +47,7 @@ fn main() {
         .file("src/editing_bridge.cpp")
         .file("src/transform_bridge.cpp")
         .file("src/intersect_bridge.cpp")
+        .file("src/measurement_bridge.cpp")
         // OCCT hides M_PI under strict C++17 and its headers use std::min/std::max.
         .define("_USE_MATH_DEFINES", None)
         .define("NOMINMAX", None)
@@ -154,4 +155,5 @@ fn main() {
     println!("cargo:rerun-if-changed=src/editing_bridge.cpp");
     println!("cargo:rerun-if-changed=src/transform_bridge.cpp");
     println!("cargo:rerun-if-changed=src/intersect_bridge.cpp");
+    println!("cargo:rerun-if-changed=src/measurement_bridge.cpp");
 }

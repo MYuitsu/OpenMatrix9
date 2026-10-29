@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-004",
+  "kind": "positive",
+  "input": "accept a user-authored closed smooth rail for the profile sweep",
+  "expected": "a closed rational-quadratic ellipse rail (9 x 6) validates as closed/planar/non-self-intersecting and a builder sweep over it produces a surface with continuous frames",
+  "verified_by": [
+    "a_custom_rail_must_be_closed_planar_and_non_self_intersecting",
+    "a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one",
+    "the_custom_rail_icon_records_a_validated_closed_rail_and_refuses_an_open_one"
+  ],
+  "notes": [
+    "The self-intersection test includes endpoint-touching crossings: a strict orientation-only test misses a bow-tie whose crossing lands exactly on a sample.",
+    "A clamped NURBS seam can refuse D1; path_frames and tangent_at fall back to a symmetric secant so the frame stays defined without changing the curve."
+  ]
+}

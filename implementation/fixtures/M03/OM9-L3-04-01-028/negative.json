@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-028",
+  "case": "fewer than two surfaces, or no object besides the two frames",
+  "expected": "fewer than two surfaces, or no object besides the two frames -> Error::Missing before the single prompt; a solid object -> Error::Unsupported(\"deformation of a solid\")",
+  "test": "m03_04_01_flow_rows_need_two_frames_and_one_object"
+}

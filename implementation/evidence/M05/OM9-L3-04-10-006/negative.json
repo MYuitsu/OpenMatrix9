@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-006",
+  "title": "Gem Profile Curve And Guides",
+  "cases": [
+    "fewer than two placed stones is `Error::Invalid(\"gem profile needs two stations\")`",
+    "a zero-length guide is refused instead of returning NaN"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

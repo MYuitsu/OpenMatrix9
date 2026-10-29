@@ -1,0 +1,143 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-19-004",
+  "title": "Multi Material Model Mass Breakdown",
+  "generated_at_utc": "2026-10-27T07:12:44Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "AUTO_ONLY",
+  "signature": null,
+  "not_claimed": [
+    "a human signature",
+    "a visual builder-panel review"
+  ],
+  "fixture_manifest_sha256": "15574e230b65115754958f20f87cb15f6263a0536de16a44c0bb5a8a4895c0de",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "body A 100 mm^3 at 10 g/cm^3 = 1.0 g; body B 200 mm^3 at 8 g/cm^3 = 1.6 g; total 2.6 g; an explicit instance count multiplies one row",
+    "negative": "the same body id twice without an explicit count is refused; an assignment that omits a selected body is refused"
+  },
+  "l4_id": "OM9-L4-04-19-004-04",
+  "role": "INTEGRATE",
+  "kind": "integration",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/metal_weight.rs",
+    "crates/om9-app/src/session/metal.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-core/tests/metal_weight.rs",
+    "crates/om9-app/tests/metal_weights.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "multi_material_breakdown_sums_per_body_and_avoids_double_counting"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "f0e80ce0886ae14e4674a22a8544e45b97797e3ece75a6689b82d49f9439e63b",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "multi_material_breakdown_sums_per_body_and_avoids_double_counting",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "a_duplicate_body_id_without_an_explicit_count_is_refused"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2bd572baf0ac9bae4937370bb9e8659ccd5050685f2174d2d63299c4d108aa62",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "a_duplicate_body_id_without_an_explicit_count_is_refused",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "a_breakdown_refuses_unknown_materials_and_bad_counts"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "082e77d40fcda92f81901eef3428b58856de4355c8413a100d03ad99dc77ab5e",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "a_breakdown_refuses_unknown_materials_and_bad_counts",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "metal_weights",
+        "-j",
+        "2",
+        "a_multi_material_selection_reports_each_body_and_the_total"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "44a2538ad24859121088d0b97cd8245fbaf5434c1955eca34e34f4d51825d44e",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.02s"
+      ],
+      "test": "a_multi_material_selection_reports_each_body_and_the_total",
+      "package": "om9-app",
+      "binary": "metal_weights"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "metal_weights",
+        "-j",
+        "2",
+        "an_assignment_that_omits_a_selected_body_is_refused"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "33185d9b39d110ffd55ddff867c7a911cd90527f8fa282f98be041d255fc9b41",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.02s"
+      ],
+      "test": "an_assignment_that_omits_a_selected_body_is_refused",
+      "package": "om9-app",
+      "binary": "metal_weights"
+    }
+  ]
+}

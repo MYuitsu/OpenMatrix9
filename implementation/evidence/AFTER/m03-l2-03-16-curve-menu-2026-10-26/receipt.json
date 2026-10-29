@@ -1,0 +1,105 @@
+{
+  "schema": "om9.evidence.curve-menu.record-sync.v1",
+  "date": "2026-10-26",
+  "module_id": "OM9-L2-03-16",
+  "command": "python tools/sync_m03_l2_03_16_records.py",
+  "menu_rows": 58,
+  "implemented_rows": 58,
+  "tests": {
+    "passed": 320,
+    "failed": 0,
+    "commands": [
+      {
+        "argv": "cargo test -p om9-app -j 2 --test curve_menu --test crv2view --test crv_ends",
+        "cwd": "H:\\OpenMatrix9",
+        "exit_code": 0,
+        "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-menu.log",
+        "stdout_log_sha256": "c5c74cede5ed3bb094894627f9412587e30984d8b8ec8b5eb6511926b35d1959",
+        "passed": 8,
+        "failed": 0
+      },
+      {
+        "argv": "cargo test -p om9-app -j 2 --test angle_isocurve --test apply_crv --test arc --test arc_blend --test blend --test circle --test command_sessions --test command_shortcuts --test command_tokens --test command_transactions --test command_values",
+        "cwd": "H:\\OpenMatrix9",
+        "exit_code": 0,
+        "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-commands-1.log",
+        "stdout_log_sha256": "fb9fe078b6eb1a1107af26d9d83910f302483d84916e7244c7e9bd22f0d7607a",
+        "passed": 74,
+        "failed": 0
+      },
+      {
+        "argv": "cargo test -p om9-app -j 2 --test continue_curve --test continue_interp --test control_curve --test corner_ops --test cross_section --test crv_seam --test curve_boolean --test curve_soft_edit --test divide --test dup_border --test ellipse --test extend_curve --test fillet_corners --test fit --test helix --test interp --test interp_on_surface --test intersect --test intersect_two_sets --test isocurve --test mesh_curve --test offset --test offset_normal --test offset_on_surface --test polygon --test polyline --test polyline_command --test polyline_mode_regression --test polyline_on_surface --test polyline_options_interface --test polyline_shortcuts --test project --test pull --test rebuild --test rect --test section --test silhouette --test sketch --test sketch_on_surface --test spiral --test through_points --test to_lines --test tween_curves --test uv_curves --test wireframe",
+        "cwd": "H:\\OpenMatrix9",
+        "exit_code": 0,
+        "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-commands-2.log",
+        "stdout_log_sha256": "0d85fac701064a5cbf80bea2cfe0fc7c87f8fe2e64c644af3ee0f2bd5f2ec2a8",
+        "passed": 143,
+        "failed": 0
+      },
+      {
+        "argv": "cargo test -p om9-app -j 2 --test chrome_actions --test surface_menu --test builder_slot --test f6_context --test command_context --test command_inline_options",
+        "cwd": "H:\\OpenMatrix9",
+        "exit_code": 0,
+        "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/ui-wiring.log",
+        "stdout_log_sha256": "186ef6b6f57cb6832b86169eca1aa0afa50c53b1ed61391eeaceb60c10229a7b",
+        "passed": 95,
+        "failed": 0
+      }
+    ]
+  },
+  "logs": [
+    {
+      "path": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-menu.log",
+      "sha256": "c5c74cede5ed3bb094894627f9412587e30984d8b8ec8b5eb6511926b35d1959",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "path": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-commands-1.log",
+      "sha256": "fb9fe078b6eb1a1107af26d9d83910f302483d84916e7244c7e9bd22f0d7607a",
+      "passed": 74,
+      "failed": 0
+    },
+    {
+      "path": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-commands-2.log",
+      "sha256": "0d85fac701064a5cbf80bea2cfe0fc7c87f8fe2e64c644af3ee0f2bd5f2ec2a8",
+      "passed": 143,
+      "failed": 0
+    },
+    {
+      "path": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/ui-wiring.log",
+      "sha256": "186ef6b6f57cb6832b86169eca1aa0afa50c53b1ed61391eeaceb60c10229a7b",
+      "passed": 95,
+      "failed": 0
+    }
+  ],
+  "records_changed": 0,
+  "checks": [
+    {
+      "argv": "rustfmt --edition 2024 --check --config skip_children=true <this module's Rust files>",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/fmt.log",
+      "stdout_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": "cargo clippy -p om9-app --test curve_menu -j 2 -- -D warnings",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/clippy.log",
+      "stdout_log_sha256": "090faf0c4a8863cbdddd9b4fdd9909b75a94dee9fb482870f4aff8b4c7929790"
+    },
+    {
+      "argv": "python tools/public_source_audit.py",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/public-source-audit.log",
+      "stdout_log_sha256": "60e81292516497128248dd0acac9fc3eccdd299882394c5617b1ce59c06e3160"
+    }
+  ],
+  "check_notes": [
+    "`crates/om9-app/tests/file_widgets.rs` still fails 7 assertions from the parallel file-lifecycle work (`stage_project_state` on save, `Stale(\"file operation document/context\")`); those tests are outside this module and were left untouched."
+  ],
+  "manual_gate": "M03-UI",
+  "human_approval": null
+}

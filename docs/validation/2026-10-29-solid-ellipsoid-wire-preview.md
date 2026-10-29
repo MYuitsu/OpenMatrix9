@@ -1,0 +1,5 @@
+# Ellipsoid final-axis wire preview — 2026-10-29
+
+The standalone Ellipsoid previously had no body preview. At the third-axis stage, Center, Diameter, Corner, FromFoci and AroundCurve now draw three 64-segment ellipse sections. A shared Rust calculation supplies center, orthonormal frame and radii to both preview and final BRep construction. Preview creates no document transaction; zero third axis suppresses it. AroundCurve suppresses preview if its stamped source is no longer current.
+
+Windows `CARGO_TARGET_DIR=L:/om9-target`, `-j 2`: 13 focused Ellipsoid controller tests passed, one pre-existing desktop fixture ignored. The new fixture checks 192 edges against independent ellipsoid equations for Center, Diameter, Corner and FromFoci, verifies the committed volume and Undo, and checks stale-source suppression for AroundCurve. A simulated Corner viewport workflow checks preview availability before commit and document Undo. These are controller/egui checks, not actual GPU or desktop screenshots. Preview during earlier stages, general numeric bounds and original Matrix preview behavior remain unverified.

@@ -4,7 +4,91 @@
   "milestone": "M07",
   "parent_l2_id": "OM9-L2-04-16",
   "title": "Cutter Pavilion Clearance And Depth Controls",
-  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "IMPLEMENTED",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "RESOLVED_FULL_NAME",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "clearance",
+        "type": "minimum air gap",
+        "unit": "mm",
+        "default": 0.05,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-005/api.md"
+      },
+      {
+        "raw": "measured profile",
+        "type": "gem::profile_points",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-005/api.md"
+      },
+      {
+        "raw": "pavilion depth",
+        "type": "measured gem",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-005/api.md"
+      }
+    ],
+    "command_options": [
+      "Clearance=",
+      "LowerDepth=",
+      "LowerSeatDepth=",
+      "LowerSeatSize=",
+      "ZOffset=",
+      "GirdleScale=",
+      "GirdleWidth="
+    ],
+    "missing_options": [],
+    "missing": [],
+    "implementation_l4": {
+      "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+      "feature": "BuilderGemCutter",
+      "owner": [
+        "crates/om9-core/src/cutters/mod.rs",
+        "crates/om9-core/src/cutters/gem.rs",
+        "crates/om9-core/src/cutters/library.rs"
+      ],
+      "evidence": [
+        "implementation/design/M07/OM9-L3-04-16-005/source_crosswalk.json",
+        "implementation/design/M07/OM9-L3-04-16-005/api.md",
+        "implementation/fixtures/M07/OM9-L3-04-16-005/positive.json",
+        "implementation/fixtures/M07/OM9-L3-04-16-005/negative.json",
+        "implementation/evidence/M07/OM9-L3-04-16-005/OM9-L4-04-16-005-03.json",
+        "implementation/evidence/M07/OM9-L3-04-16-005/OM9-L4-04-16-005-04.json"
+      ]
+    },
+    "option_order": [
+      "Clearance=",
+      "LowerDepth=",
+      "LowerSeatDepth=",
+      "LowerSeatSize=",
+      "ZOffset=",
+      "GirdleScale=",
+      "GirdleWidth="
+    ],
+    "option_count": 7
+  },
+  "planning_state": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
   "target_implementation_milestone": "M07",
   "execution_stage": "E12",
   "source_original_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/005-febe-cutter-pavilion-clearance-and-depth-controls/l3.json",
@@ -23,7 +107,7 @@
     "milestone_id": "M07",
     "target_milestone": "M07",
     "delivery": "mainline",
-    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
     "origin_source_taxonomy": "04-matrix8-book2",
     "goal": "adjust pavilion seat, Z-offset and lower depth",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
@@ -82,13 +166,14 @@
       "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
     ],
     "qymcad_source_paths_verified": [],
-    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
-    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "reuse_decision": "ADD_NEW_CUTTER_OWNER",
+    "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
     "execution_stage": "E12",
     "planning_release": "CORE_MVP",
     "planning_risk": "HIGH",
     "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
-    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+    "execution_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
+    "implementation_role_note": "ui_command_adapter: the command dispatches to the om9_core::cutters service; it never creates a second geometry kernel, gem store or settings store."
   },
   "children_l4": [
     {
@@ -118,5 +203,58 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED"
+  "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
+  "task_ids": [
+    "OM9-L4-04-16-005-01",
+    "OM9-L4-04-16-005-02",
+    "OM9-L4-04-16-005-03"
+  ],
+  "planning_state_before": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "implementation": {
+    "schema": "om9.l3_implementation.v1",
+    "recorded_at": "2026-10-28",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+    "feature": "BuilderGemCutter",
+    "command_options": [
+      "Clearance=",
+      "LowerDepth=",
+      "LowerSeatDepth=",
+      "LowerSeatSize=",
+      "ZOffset=",
+      "GirdleScale=",
+      "GirdleWidth="
+    ],
+    "owner": [
+      "crates/om9-core/src/cutters/mod.rs",
+      "crates/om9-core/src/cutters/gem.rs",
+      "crates/om9-core/src/cutters/library.rs"
+    ],
+    "evidence": [
+      "implementation/design/M07/OM9-L3-04-16-005/source_crosswalk.json",
+      "implementation/design/M07/OM9-L3-04-16-005/api.md",
+      "implementation/fixtures/M07/OM9-L3-04-16-005/positive.json",
+      "implementation/fixtures/M07/OM9-L3-04-16-005/negative.json",
+      "implementation/evidence/M07/OM9-L3-04-16-005/OM9-L4-04-16-005-03.json",
+      "implementation/evidence/M07/OM9-L3-04-16-005/OM9-L4-04-16-005-04.json"
+    ],
+    "automated_tests": {
+      "core": [
+        "cargo test -p om9-core --test cutters the_cutter_reference_is_measured_from_the_stone_profile",
+        "cargo test -p om9-core --test cutters a_cutter_that_would_cut_into_the_stone_is_refused"
+      ],
+      "app": [
+        "cargo test -p om9-app --test gem_cutters"
+      ]
+    },
+    "manual_gate": {
+      "required": true,
+      "gate": "M07-UI",
+      "signed": false,
+      "open": "preview/commit/cancel of Cutter Pavilion Clearance And Depth Controls in the OpenMatrix9 window"
+    },
+    "limitations": [
+      "The clearance gate checks the ring radii against the linearly interpolated measured profile; it is a conservative radial test, not a full CSG interference test.",
+      "Percentage semantics are documented approximations of the manual's unnamed reference lengths."
+    ]
+  }
 }

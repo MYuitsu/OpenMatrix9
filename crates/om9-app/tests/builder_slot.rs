@@ -244,10 +244,17 @@ fn b4_the_bar_carries_no_close_box_and_starts_no_drag() {
 }
 
 #[test]
-fn b5_the_placeholder_is_noninteractive() {
+fn b5_the_placeholder_became_the_live_builder_panel_in_m04() {
+    // The M01 case recorded the reserved slot's placeholder: every widget disabled or hover
+    // only. M04 (`OM9-L2-03-11`) now owns the slot, so the placeholder is superseded by the
+    // builder panel and this case is kept for provenance only. The reservation itself is
+    // still proved by b1..b4.
     let document = fixture("positive.json");
     let case = fixture_case(&document, "B5-the-placeholder-is-noninteractive");
-    assert_eq!(case["expect"]["every_widget_disabled_or_hover_only"], true);
+    assert_eq!(
+        case["expect"]["every_widget_disabled_or_hover_only"], true,
+        "the M01 fixture keeps its placeholder expectation"
+    );
     let source = std::fs::read_to_string(
         PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("src")
@@ -261,41 +268,32 @@ fn b5_the_placeholder_is_noninteractive() {
         .map(|offset| start + offset)
         .expect("end of builder_slot_ui");
     let body = &source[start..end];
-    // Every button/slider/icon in the placeholder is disabled, and the only
-    // allocated box senses hover. A call can span lines, so each hit is checked
-    // against the three lines it starts on, with whitespace normalised away.
-    let lines: Vec<&str> = body.lines().collect();
-    for (index, line) in lines.iter().enumerate() {
-        let code = line.split("//").next().unwrap_or_default();
-        let window: String = lines[index.saturating_sub(2)..=index.min(lines.len() - 1)]
-            .iter()
-            .map(|line| line.split("//").next().unwrap_or_default())
-            .collect::<Vec<_>>()
-            .join(" ")
-            .split_whitespace()
-            .collect();
-        if code.contains("egui::Button::new(") || code.contains("egui::Slider::new(") {
-            assert!(
-                window.contains("add_enabled(false,"),
-                "line {} of builder_slot_ui enables a widget: {code}",
-                index + 1
-            );
-        }
-        if code.contains("allocate_exact_size") {
-            assert!(
-                window.contains("Sense::hover()"),
-                "line {} of builder_slot_ui senses more than hover: {code}",
-                index + 1
-            );
-        }
-        if code.contains("self.icon(") {
-            assert!(
-                window.contains(",false,"),
-                "line {} of builder_slot_ui enables an icon: {code}",
-                index + 1
-            );
-        }
+    let compact: String = body.split_whitespace().collect::<Vec<_>>().join(" ");
+    // The slot now paints the real panel: the mode tabs, the typed fields and the
+    // Apply/Reset/Cancel row, wired to the builder service.
+    for needle in [
+        "builder_tabs()",
+        "builder_field_views()",
+        "builder_set_field",
+        "builder_set_slider",
+        "\"Apply\"",
+        "\"Reset\"",
+        "\"Cancel\"",
+    ] {
+        assert!(
+            compact.contains(needle),
+            "the builder slot must paint {needle}"
+        );
     }
+    // The placeholder's disabled controls are gone, so no widget is created disabled here.
+    assert!(
+        !compact.contains("add_enabled(false,"),
+        "the placeholder controls must not survive the M04 panel"
+    );
+    assert!(
+        !compact.contains("Builder (reserved)"),
+        "the reserved placeholder label must not survive the M04 panel"
+    );
 }
 
 #[test]

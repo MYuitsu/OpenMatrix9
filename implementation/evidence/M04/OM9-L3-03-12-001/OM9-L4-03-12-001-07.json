@@ -1,0 +1,52 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-12-001",
+  "title": "Builder Style Param Snapshot Schema",
+  "generated_at_utc": "2026-10-27T02:48:29Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the Builder Styles window at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "fee758f6c24aab406f3737f52ba6fd39e24906729071cccf12d490529b960688",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "a typed v1 style roundtrips through the file and drives the circle preset",
+    "negative": "unknown schema version, invalid numeric and unknown profile reference are typed errors"
+  },
+  "l4_id": "OM9-L4-03-12-001-07",
+  "role": "ADVERSARIAL",
+  "kind": "adversarial",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/tests/builder_style.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2",
+        "an_unknown_schema_version_or_an_invalid_numeric_is_refused"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "81e90e2c6f1c2a8ed380b96c58980728f1074ec24a114c7fb0764a8ffd8b70b3",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s"
+      ],
+      "test": "an_unknown_schema_version_or_an_invalid_numeric_is_refused",
+      "package": "om9-core",
+      "binary": "builder_style"
+    }
+  ],
+  "manual_gate_note": "Adversarial And Recovery Tests: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

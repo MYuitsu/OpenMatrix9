@@ -1,0 +1,30 @@
+    Blocking waiting for file lock on build directory
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+error: very complex type used. Consider factoring parts into `type` definitions
+   --> crates\om9-core\src\cutters\bezel.rs:170:27
+    |
+170 |     pub fn ends(&self) -> ((f64, f64, f64, f64), (f64, f64, f64, f64)) {
+    |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#type_complexity
+    = note: `-D clippy::type-complexity` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::type_complexity)]`
+
+error: field assignment outside of initializer for an instance created with Default::default()
+   --> crates\om9-core\src\cutters\gem.rs:255:9
+    |
+255 |         params.lower_seat_depth_percent = 25.0;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: consider initializing the variable with `cutters::gem::GemCutterParams { lower_seat_depth_percent: 25.0, ..Default::default() }` and removing relevant reassignments
+   --> crates\om9-core\src\cutters\gem.rs:254:9
+    |
+254 |         let mut params = Self::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#field_reassign_with_default
+    = note: `-D clippy::field-reassign-with-default` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::field_reassign_with_default)]`
+
+error: could not compile `om9-core` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

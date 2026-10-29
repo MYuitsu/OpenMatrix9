@@ -1,0 +1,27 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-16-001",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "the cutter would cut the stone",
+      "input": "GirdleScale=60 with Clearance=0",
+      "expect": "Invalid(\"cutter pavilion clearance\")"
+    },
+    {
+      "case": "unknown mode",
+      "input": "Mode=titan",
+      "expect": "Invalid(\"cutter mode\")"
+    },
+    {
+      "case": "an option before the builder is open",
+      "input": "GirdleScale=110 with no session",
+      "expect": "the command line falls through to the option parser, never a silent no-op"
+    }
+  ]
+}

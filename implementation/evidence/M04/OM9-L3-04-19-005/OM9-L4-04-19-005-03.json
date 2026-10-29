@@ -1,0 +1,143 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-19-005",
+  "title": "Metal Weight Error And Open B-Rep Policy",
+  "generated_at_utc": "2026-10-27T07:12:44Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "AUTO_ONLY",
+  "signature": null,
+  "not_claimed": [
+    "a human signature",
+    "a visual builder-panel review"
+  ],
+  "fixture_manifest_sha256": "8154149147dc8d9e5ce8a91ee1fdf6ef84744b1ebe3a856014aacfaf72e8c917",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "open shell, invalid B-Rep and missing density are typed errors; the document, Undo journal and previous report stay unchanged",
+    "negative": "NaN/infinite/zero volume, zero instances, duplicate bodies and a malformed material option are refused"
+  },
+  "l4_id": "OM9-L4-04-19-005-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/metal_weight.rs",
+    "crates/om9-app/src/session/metal.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-core/tests/metal_weight.rs",
+    "crates/om9-app/tests/metal_weights.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "an_open_shell_or_an_empty_solid_never_gets_a_volume"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "4b9029bd54afb4f600f3811a585f573132281d25978472023ba2eff94504ff61",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "an_open_shell_or_an_empty_solid_never_gets_a_volume",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "non_finite_and_zero_volumes_are_refused"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "20e528105cebdc0d9ea8639c91642a1d865340b5f365211db2bae1573cd23ac5",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "non_finite_and_zero_volumes_are_refused",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "a_duplicate_body_id_without_an_explicit_count_is_refused"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2bd572baf0ac9bae4937370bb9e8659ccd5050685f2174d2d63299c4d108aa62",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "a_duplicate_body_id_without_an_explicit_count_is_refused",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "metal_weights",
+        "-j",
+        "2",
+        "an_open_shell_is_refused_and_the_previous_report_is_preserved"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "61a5b7e616bd8f346e34887e90cc64d9fe69837eeece72add5fe67d1c73b61db",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.02s"
+      ],
+      "test": "an_open_shell_is_refused_and_the_previous_report_is_preserved",
+      "package": "om9-app",
+      "binary": "metal_weights"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "metal_weights",
+        "-j",
+        "2",
+        "a_missing_density_is_a_typed_refusal_not_a_zero_mass"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2cd335ac0ba7376971710ef9c4e57c5d682098c72fb3d418710b837a05e4abf9",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s"
+      ],
+      "test": "a_missing_density_is_a_typed_refusal_not_a_zero_mass",
+      "package": "om9-app",
+      "binary": "metal_weights"
+    }
+  ]
+}

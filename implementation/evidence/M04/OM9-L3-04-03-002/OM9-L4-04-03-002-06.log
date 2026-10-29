@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --lib -j 2 ring_builder::tests::a_signet_ring_is_closed_with_a_visible_top_and_two_shoulders
+# exit code: 0
+# captured: 2026-10-27T09:35:18Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test ring_builder::tests::a_signet_ring_is_closed_with_a_visible_top_and_two_shoulders ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 130 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)
+
+$ cargo test -p om9-app --test ring_family_panel -j 2 the_ring_family_opens_from_the_command_line_and_lists_its_parameters
+# exit code: 0
+# captured: 2026-10-27T09:35:21Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_ring_family_opens_from_the_command_line_and_lists_its_parameters ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.60s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\ring_family_panel.rs (L:\om9-target\debug\deps\ring_family_panel-7d33ae66eb23707a.exe)

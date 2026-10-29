@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-12-006",
+  "title": "Gem Springs And Relaxation",
+  "scope": "opens Gem Springs on a surface + gems",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": [
+    "overlapping stones are pushed apart while staying on the surface",
+    "move/resize use the typed Spacing, Minimum Spacing, Iterations and Strength",
+    "Add/Remove/Lock are represented by the selected gem set and the plan",
+    "Undo restores the previous placements and geometry"
+  ],
+  "negative": [
+    "a spring run without a surface or any gem is refused",
+    "an empty gem set is a typed error",
+    "a non-finite or negative strength is refused"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-12-006-03"
+    ],
+    "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_pave.rs",
+    "crates/om9-app/tests/gem_pave_panel.rs"
+  ]
+}

@@ -308,14 +308,15 @@
     ]
   },
   "runtime_implementation": {
-    "date": "2026-10-23",
+    "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
-    "scope": "38 documented Surface Tools menu rows: one stable command id/icon per L3; Sweep 1/2, Sweep 1 History, Sweep 2 History, Sweep 4, Profile Sweep, Sweep Multi, Merge, Patch, Planar, Variable Offset, Variable Blend, Shrink, Untrim, Chamfer, Fillet, Variable Fillet, Variable Chamfer, Edge Curves, Cutting Plane, Split, Drape, Tangent, Extrude All, Rail Revolve, Match, Seam, Soft Edit, Tween, Extend, Rebuild, Blend, Loft, Network, Unroll, Offset, Extrude Normal and Plane from Corners are functional, the other 3 are verified disabled placeholders with a visible missing-session/owner reason.",
+    "scope": "38 documented Surface Tools menu rows: one stable command id/icon per L3; Sweep 1/2, Sweep 1 History, Sweep 2 History, Sweep 4, Profile Sweep, Sweep Multi, Merge, Patch, Planar, Variable Offset, Variable Blend, Shrink, Untrim, Chamfer, Fillet, Variable Fillet, Variable Chamfer, Edge Curves, Cutting Plane, Split, Drape, Tangent, Extrude All, Rail Revolve, Match, Seam, Soft Edit, Tween, Extend, Rebuild, Blend, Loft, Network, Unroll, Offset, Extrude Normal and Plane from Corners are functional with their documented options, the Matrix script name and the visible label resolving to the same command id, and one transaction/Undo per run.",
     "evidence": [
       "implementation/design/M03/OM9-L2-03-17/README.md",
-      "implementation/evidence/M03/2026-10-23-l2-03-17-checks.json",
-      "implementation/evidence/M03/2026-10-23-l2-03-17-surface-menu.log",
+      "implementation/evidence/M03/2026-10-26-l2-03-17-checks.json",
+      "implementation/evidence/AFTER/m03-l2-03-17-surface-menu-2026-10-26/audit.json",
+      "build/l2-03-17-logs/surface-menu-2026-10-26.log",
       "crates/om9-app/src/surface_menu.rs",
       "crates/om9-app/src/session/surface_edit.rs",
       "crates/om9-app/src/ui/chrome.rs",
@@ -323,7 +324,7 @@
     ],
     "human_approval": null,
     "remaining": [
-      "3 commands have no interactive command session yet; each is disabled with its owner candidate and reason.",
+      "Soft Edit takes its base point and move as typed U/V and Dx/Dy/Dz because the viewport does not project a click onto surface UV parameters yet.",
       "Human M03-UI click/preview review is unsigned.",
       "A source-present surface geometry service does not enable a row by itself."
     ],
@@ -334,11 +335,18 @@
     "manual_gate": "M03-UI",
     "technical_scope_complete": true,
     "latest_verification": {
-      "date": "2026-10-23",
+      "date": "2026-10-26",
       "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
-      "checks": "implementation/evidence/M03/2026-10-23-l2-03-17-checks.json",
+      "checks": "implementation/evidence/M03/2026-10-26-l2-03-17-checks.json",
       "tests": {
-        "surface_menu": "41 passed; 0 failed",
+        "surface_menu": "62 passed; 0 failed",
+        "surface_command_regressions": "match_srf 2, seam_srf 2, sweep2_cmd 1, tween_surfaces 2 passed; 0 failed",
+        "line_fixture_parity": "command_options_and_repeat 6, command_state_machine 3 passed; 0 failed",
+        "smash": "4 passed; 0 failed",
+        "refit_srf": "4 passed; 0 failed",
+        "surface_kernel": "cargo test -p om9-core --test surface_ops: 18 passed; 0 failed",
+        "app_library": "cargo test -p om9-app --lib: 181 passed; 0 failed",
+        "module_audit": "38 rows, 40 authored menu icons (40 wired), integrity: 0 problem(s)",
         "scene": "surface tessellation tests passed",
         "app_check": "exit 0",
         "clippy": "exit 0",

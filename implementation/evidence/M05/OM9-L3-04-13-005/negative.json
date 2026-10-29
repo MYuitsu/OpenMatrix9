@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-13-005",
+  "title": "Gem Style Load",
+  "cases": [
+    "an absent style name is `Missing` and nothing is written",
+    "a malformed store file is a typed refusal, never a partial load"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

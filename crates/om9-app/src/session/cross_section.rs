@@ -46,7 +46,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Count=") {
-            let Some(count) = value.parse::<usize>().ok().filter(|value| (1..=64).contains(value)) else {
+            let Some(count) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (1..=64).contains(value))
+            else {
                 self.cross_section_pending = Some(pending);
                 return Some(Err(Error::Invalid("count must be 1..64")));
             };
@@ -55,7 +59,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Spacing=") {
-            let Some(spacing) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(spacing) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.cross_section_pending = Some(pending);
                 return Some(Err(Error::Invalid("spacing must be positive")));
             };
@@ -65,7 +73,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.cross_section_pending = Some(pending);
-            return Some(Err(Error::Invalid("CrossSectionProfiles accepts Count=, Spacing= or Enter")));
+            return Some(Err(Error::Invalid(
+                "CrossSectionProfiles accepts Count=, Spacing= or Enter",
+            )));
         }
         let plane = self.input_plane();
         let normal = [
@@ -95,7 +105,9 @@ impl Controller {
             return Some(Err(error));
         }
         if made == 0 {
-            return Some(Err(last_error.unwrap_or(Error::Invalid("no section profiles"))));
+            return Some(Err(
+                last_error.unwrap_or(Error::Invalid("no section profiles"))
+            ));
         }
         Some(Ok(()))
     }

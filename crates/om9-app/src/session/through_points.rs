@@ -51,7 +51,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Degree=") {
-            let Some(degree) = value.parse::<usize>().ok().filter(|value| (1..=11).contains(value)) else {
+            let Some(degree) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (1..=11).contains(value))
+            else {
                 self.through_points_pending = Some(pending);
                 return Some(Err(Error::Invalid("degree must be 1..11")));
             };
@@ -71,14 +75,18 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.through_points_pending = Some(pending);
-            return Some(Err(Error::Invalid("CurveThroughPt accepts Enter or Cancel")));
+            return Some(Err(Error::Invalid(
+                "CurveThroughPt accepts Enter or Cancel",
+            )));
         }
         let mut points = pending.points;
         if pending.closed && points.len() >= 4 {
             points.push(points[0]);
         }
         if points.len() <= pending.degree {
-            return Some(Err(Error::Invalid("CurveThroughPt needs more points than degree")));
+            return Some(Err(Error::Invalid(
+                "CurveThroughPt needs more points than degree",
+            )));
         }
         let curve = match om9_core::curve_build::interpolate(
             &points,

@@ -97,3 +97,16 @@ or keep the DLLs beside the test executable (`<target>/debug/deps`):
 - macOS execution is not verified.
 - The planning tree keeps `SPEC_ONLY_NOT_IMPLEMENTED`; delivery is recorded through
   `runtime_implementation` plus this evidence package.
+
+## Solid partition foundation — 2026-10-28
+
+The native adapter partitions one closed BRep solid by one closed BRep solid;
+Rust validates the compound and extracts separately measured pieces. This is
+not the full Boolean Split command. [Evidence and remaining work](../../../../docs/validation/2026-10-28-solid-audit.md).
+
+The subsequent Rust helper partitions multiple closed single-solid targets and
+cutters and deduplicates equivalent cells; command, transaction and UI remain open.
+
+Create Solid now has an OCCT MakerVolume adapter for intersecting BRep
+surfaces and region extraction, with bounded Rust input/output validation.
+The Solid audit records tested cases and unclosed topology and runtime gates.

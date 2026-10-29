@@ -1,0 +1,37 @@
+$ cargo test -p om9-app --test builder_panel --test builder_styles -j 2
+# exit code: 0
+# captured: 2026-10-27T09:34:31Z
+# target dir: L:\om9-target
+
+
+running 10 tests
+test cancel_and_reset_leave_the_document_untouched ... ok
+test a_failed_tab_switch_restores_the_previous_tab ... ok
+test tabs_keep_each_mode_parameters_and_switch_safely ... ok
+test a_handle_drag_and_a_typed_value_share_the_one_field ... ok
+test the_profile_library_changes_the_preview_and_the_applied_shape ... ok
+test the_preset_can_be_chosen_from_the_command_line ... ok
+test the_ring_rail_command_line_opens_edits_and_applies_one_undoable_feature ... ok
+test outside_rail_and_resizer_apply_independent_outputs ... ok
+test a_parameter_edit_and_its_recompute_are_two_undoable_steps ... ok
+test profile_and_sweep_modes_read_the_selection_and_commit_their_own_command ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.47s
+
+
+running 9 tests
+test a_style_for_another_mode_is_listed_disabled_and_refused ... ok
+test the_browser_lists_the_styles_of_the_open_mode ... ok
+test applying_a_style_changes_the_preview_only ... ok
+test the_command_line_routes_style_apply_and_save_to_the_same_service ... ok
+test matching_attributes_copies_from_the_selection_and_keeps_the_ids ... ok
+test saving_a_style_adds_a_user_row_without_rewriting_the_defaults ... ok
+test a_locked_input_keeps_the_browser_read_only ... ok
+test cancel_and_apply_clear_the_applied_style_marker ... ok
+test user_styles_roundtrip_through_the_configured_file ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running tests\builder_panel.rs (L:\om9-target\debug\deps\builder_panel-59c8ebc246fb5c22.exe)
+     Running tests\builder_styles.rs (L:\om9-target\debug\deps\builder_styles-c54c9038cd98df6e.exe)

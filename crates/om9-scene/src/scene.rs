@@ -273,13 +273,13 @@ fn metadata_leaf<'a>(
     }
     Ok((entity, permissions, unlocked))
 }
-/// The initial SDK's polyline is a connected, unreversed list of direct lines.
+/// A displayed polycurve is a connected list of direct lines, arcs or continuous NURBS.
 /// Keep this admission check shared by the allocation plan and display cache;
 /// connecting arbitrary polycurve segments would invent geometry between gaps.
-fn connected_polyline_segments(curve: &Curve) -> Result<&[Curve]> {
+fn connected_polyline_segments<'a>(curve: &'a Curve, limits: &Limits) -> Result<&'a [Curve]> {
     let Curve::Polycurve {
         segments,
-        reversed: false,
+        ..
     } = curve
     else {
         return Err(Error::Unsupported(
@@ -293,19 +293,85 @@ fn connected_polyline_segments(curve: &Curve) -> Result<&[Curve]> {
     }
     let mut previous_end = None;
     for segment in segments {
-        let Curve::Line { start, end, .. } = segment else {
-            return Err(Error::Unsupported(
-                "polycurve display requires direct line segments",
-            ));
+        let (start, end, arc) = match segment {
+            Curve::Line { start, end, .. } => (*start, *end, false),
+            Curve::Circle { domain, angle_domain: Some(_), .. } |
+            Curve::Nurbs(om9_core::geometry::NurbsCurve { domain, periodic: false, seam: None, .. }) => {
+                polyline_display_steps(segment)?;
+                let evaluator = CurveEvaluator::capture(segment, limits)?;
+                let reversed = matches!(segment, Curve::Nurbs(n) if n.reversed);
+                (
+                    evaluator.evaluate(Parameter::Native(domain[usize::from(reversed)]), 0, Transform::identity())?[0],
+                    evaluator.evaluate(Parameter::Native(domain[usize::from(!reversed)]), 0, Transform::identity())?[0],
+                    true,
+                )
+            }
+            _ => {
+                return Err(Error::Unsupported(
+                    "polycurve display requires direct line, arc or continuous NURBS segments",
+                ));
+            }
         };
-        if previous_end.is_some_and(|previous| previous != *start) {
+        if previous_end.is_some_and(|(previous, previous_arc): (Point3, bool)| {
+            if !arc && !previous_arc {
+                previous != start
+            } else {
+                (0..3).any(|axis| {
+                    (previous[axis] - start[axis]).abs()
+                        > 64.0 * f64::EPSILON * previous[axis].abs().max(start[axis].abs()).max(1.0)
+                })
+            }
+        }) {
             return Err(Error::Unsupported(
                 "polycurve display requires connected line segments",
             ));
         }
-        previous_end = Some(*end);
+        previous_end = Some((end, arc));
     }
     Ok(segments)
+}
+
+fn polyline_display_steps(curve: &Curve) -> Result<usize> {
+    match curve {
+        Curve::Line { .. } => Ok(1),
+        Curve::Circle {
+            radius,
+            angle_domain: Some(angles),
+            ..
+        } => {
+            let angle = 2.0 * (1.0 - (0.005 / radius).min(1.0)).acos();
+            let estimate = ((angles[1] - angles[0]) / angle).ceil().max(16.0);
+            if !estimate.is_finite() || estimate > 65535.0 {
+                return Err(Error::Budget("circle display chord samples"));
+            }
+            Ok(estimate as usize)
+        }
+        Curve::Nurbs(n) if !n.periodic && n.seam.is_none() => {
+            // A fully repeated internal knot can be discontinuous; a single
+            // display strip would invent a connector across such a break.
+            let mut i = 0;
+            while i < n.knots.len() {
+                let knot = n.knots[i];
+                let mut end = i + 1;
+                while end < n.knots.len() && n.knots[end] == knot { end += 1; }
+                if knot > n.domain[0] && knot < n.domain[1] && end - i > n.degree {
+                    return Err(Error::Unsupported("discontinuous polycurve NURBS segment"));
+                }
+                i = end;
+            }
+            let spans = n.knots.windows(2).filter(|w| w[0].max(n.domain[0]) < w[1].min(n.domain[1])).count();
+            spans.checked_mul(256).ok_or(Error::Overflow("NURBS display samples"))
+        }
+        _ => Err(Error::Unsupported("polycurve display segment")),
+    }
+}
+
+fn polyline_display_count(segments: &[Curve]) -> Result<usize> {
+    segments.iter().try_fold(1usize, |count, segment| {
+        count
+            .checked_add(polyline_display_steps(segment)?)
+            .ok_or(Error::Overflow("polyline display vertices"))
+    })
 }
 
 fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
@@ -360,11 +426,19 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
             })
         }
         Geometry::Curve(curve @ Curve::Polycurve { .. }) => {
-            let segments = connected_polyline_segments(curve)?;
-            let count = segments
-                .len()
-                .checked_add(1)
-                .ok_or(Error::Overflow("polyline display vertices"))?;
+            // An annotation stores independent line strokes. Render each stroke
+            // explicitly; joining gaps would introduce lines that are not in the model.
+            if let Curve::Polycurve{segments,reversed:false}=curve
+                && connected_polyline_segments(curve,l).is_err()&&segments.iter().all(|s|matches!(s,Curve::Line{..})) {
+                let count=segments.len().checked_mul(2).ok_or(Error::Overflow("line stroke vertices"))?;
+                usage.add(Usage{points:count as u64,..Usage::array::<Point3>(count)?},l)?;
+                usage.add(Usage::array::<[u32;2]>(segments.len())?,l)?;
+                let mut vertices=Vec::with_capacity(count);let mut edges=Vec::with_capacity(segments.len());
+                for segment in segments {if let Curve::Line{start,end,..}=segment{let i=u32::try_from(vertices.len()).map_err(|_|Error::Overflow("stroke vertex index"))?;vertices.extend([*start,*end]);edges.push([i,i+1]);}}
+                return Ok(RenderBuffers::Mesh{vertices,triangles:vec![],edges});
+            }
+            let segments = connected_polyline_segments(curve, l)?;
+            let count = polyline_display_count(segments)?;
             usage.add(
                 Usage {
                     points: count as u64,
@@ -377,14 +451,48 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
                 .try_reserve_exact(count)
                 .map_err(|_| Error::Budget("polyline display allocation"))?;
             for segment in segments {
-                let Curve::Line { start, end, .. } = segment else {
-                    unreachable!()
-                };
-                if points.is_empty() {
-                    points.push(*start);
+                if let Curve::Line { start, end, .. } = segment {
+                    if points.is_empty() {
+                        points.push(*start);
+                    }
+                    points.push(*end);
+                } else if let Curve::Nurbs(n) = segment {
+                    let evaluator = CurveEvaluator::capture(segment, l)?;
+                    for index in 0..n.knots.len()-1 {
+                        let index = if n.reversed { n.knots.len()-2-index } else { index };
+                        let low = n.knots[index].max(n.domain[0]);
+                        let high = n.knots[index+1].min(n.domain[1]);
+                        if low >= high { continue; }
+                        let (start, end) = if n.reversed { (high, low) } else { (low, high) };
+                        if points.is_empty() {
+                            points.push(evaluator.evaluate(Parameter::Native(start), 0, Transform::identity())?[0]);
+                        }
+                        for i in 1..=256 {
+                            let t = if i == 256 { end } else { start + (end-start)*i as f64/256. };
+                            points.push(evaluator.evaluate(Parameter::Native(t), 0, Transform::identity())?[0]);
+                        }
+                    }
+                } else {
+                    let evaluator = CurveEvaluator::capture(segment, l)?;
+                    let domain = match segment {
+                        Curve::Circle { domain, .. } => domain,
+                        _ => unreachable!(),
+                    };
+                    let steps = polyline_display_steps(segment)?;
+                    let first = usize::from(!points.is_empty());
+                    for i in first..=steps {
+                        let t = if i == steps {
+                            domain[1]
+                        } else {
+                            domain[0] + (domain[1] - domain[0]) * i as f64 / steps as f64
+                        };
+                        points.push(
+                            evaluator.evaluate(Parameter::Native(t), 0, Transform::identity())?[0],
+                        );
+                    }
                 }
-                points.push(*end);
             }
+            if matches!(curve, Curve::Polycurve { reversed: true, .. }) { points.reverse(); }
             // Exact corners, not a uniform sampling approximation. A polycurve
             // has no global native domain; picking returns whole-object identity.
             Ok(RenderBuffers::Curve {
@@ -411,6 +519,7 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
                     (*domain, estimate as usize)
                 }
                 Curve::Nurbs(c) if !c.periodic => (c.domain, 256),
+                Curve::Nurbs(c) if c.periodic => {c.certify_repeated_periodic(l)?;(c.domain,256)},
                 _ => return Err(Error::Unsupported("curve display family/segment binding")),
             };
             let count = segments
@@ -805,7 +914,16 @@ impl Scene {
                 Geometry::Point(_) => 1,
                 Geometry::Curve(Curve::Line { .. }) => 2,
                 Geometry::Curve(Curve::Circle { .. }) => 720,
-                Geometry::Curve(Curve::Polycurve { segments, .. }) => segments.len() + 1,
+                Geometry::Curve(curve @ Curve::Polycurve { segments, .. }) => {
+                    match connected_polyline_segments(curve, &self.limits) {
+                        Ok(connected) => polyline_display_count(connected)?,
+                        Err(_) if segments.iter().all(|s| matches!(s, Curve::Line { .. })) => {
+                            usage.add(Usage::array::<[u32; 2]>(segments.len())?, &self.limits)?;
+                            segments.len().checked_mul(2).ok_or(Error::Overflow("stroke vertices"))?
+                        }
+                        Err(_) => segments.len().checked_add(1).ok_or(Error::Overflow("polyline display vertices"))?,
+                    }
+                },
                 Geometry::Curve(Curve::Nurbs(_)) => 257,
                 Geometry::Surface(surface) => {
                     let mut local = Usage::default();
@@ -1149,6 +1267,14 @@ impl Scene {
         )?
         .into_iter()
         .next())
+    }
+
+    /// Nearest matching subobject for each distinct root object under the pointer.
+    pub fn pick_kind_all(
+        &self, screen: [f64; 2], camera: &Camera, viewport: Viewport,
+        tolerance_pixels: f64, intent: PickIntent, kind: PickKind,
+    ) -> Result<Vec<PickHit>> {
+        crate::picking::pick_candidates(self, screen, camera, viewport, tolerance_pixels, intent, kind, false)
     }
 
     /// Every distinct object under the pointer, nearest first. The ambiguity popup lists these.

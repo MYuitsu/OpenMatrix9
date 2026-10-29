@@ -15,12 +15,35 @@ use om9_scene::{
     workspace::Workspace,
 };
 use std::{collections::VecDeque, sync::Arc};
-mod circle;
 mod angle_isocurve;
+pub mod annotation;
 mod apply_crv;
 mod arc;
 mod arc_blend;
 mod blend;
+pub mod builder;
+mod circle;
+mod command_options;
+mod command_line;
+mod dispatch_geometry;
+mod point_input;
+mod text_input;
+mod text_input_surface;
+#[cfg(test)]
+mod command_options_tests;
+#[cfg(all(test, feature = "occt-brep"))]
+mod solid_input_regressions;
+mod continue_curve;
+mod continue_interp;
+pub mod contract;
+mod control_curve;
+mod corner_ops;
+mod cross_section;
+mod crv2view;
+mod crv_ends;
+mod crv_seam;
+mod curve_boolean;
+mod curve_soft_edit;
 mod divide;
 mod dup_border;
 mod ellipse;
@@ -28,49 +51,54 @@ mod extend_curve;
 mod extrude_surface;
 mod fillet_corners;
 mod fit;
-mod offset;
-mod offset_normal;
-mod offset_on_surface;
-mod project;
-mod pull;
-mod continue_curve;
-mod cross_section;
-mod curve_boolean;
-mod curve_soft_edit;
-mod corner_ops;
-mod continue_interp;
-mod control_curve;
-mod crv2view;
-mod crv_ends;
-mod crv_seam;
+pub mod gem;
+pub mod gem_cluster;
+pub mod channel_cutters;
+pub mod gem_cutters;
+pub mod gem_edits;
+pub mod gem_pave;
+pub mod gem_placement;
+pub mod gumball_numeric;
+pub mod head_commands;
 mod heightfield;
 mod helix;
-mod spiral;
+pub mod history;
 mod interp;
 mod interp_on_surface;
-mod mesh_curve;
-mod through_points;
-mod uv_curves;
-mod wireframe;
-mod tween_curves;
-mod to_lines;
 mod intersect;
 mod intersect_two_sets;
 mod isocurve;
+pub mod measure;
+mod mesh_curve;
+pub mod metal;
+mod offset;
+mod offset_normal;
+mod offset_on_surface;
 mod polygon;
 mod polyline;
 mod polyline_on_surface;
+mod project;
+mod pull;
 mod rebuild;
+mod rect;
+mod registry;
+mod refit_srf;
 mod revolve;
+pub mod ring_tools;
 mod section;
+pub mod settings_commands;
 mod silhouette;
 mod sketch;
 mod sketch_on_surface;
-mod rect;
-pub mod contract;
-pub mod gumball_numeric;
+mod spiral;
 pub mod stress;
 mod subobjects;
+mod through_points;
+mod to_lines;
+pub mod transform;
+mod tween_curves;
+mod uv_curves;
+mod wireframe;
 pub use subobjects::SelectedSubobject;
 mod display_state;
 mod f6_state;
@@ -85,6 +113,14 @@ mod plugins;
 mod project_state;
 mod properties;
 mod solid;
+mod solid_pending;
+mod solid_geometry;
+mod solid_pipe;
+mod solid_boolean;
+mod solid_cone;
+mod solid_pyramid;
+mod solid_text_stages;
+mod surface_commands;
 mod surface_edit;
 mod top11;
 pub use properties::{FIELDS, FieldState, PropertyEdit, PropertyField};
@@ -131,6 +167,15 @@ pub struct CommandContext {
     pub epoch: u64,
 }
 
+/// One read-only view of the active command input: owner, run generation,
+/// phase and the option snapshots derived from the same owner state.
+#[derive(Debug, Clone)]
+pub struct CommandInputSnapshot {
+    pub owner: Option<&'static str>,
+    pub run: u64,
+    pub phase: CmdPhase,
+    pub options: Vec<crate::command_options::CommandOption>,
+}
 #[derive(Debug, Clone)]
 struct CommandSession {
     feature: &'static str,
@@ -167,6 +212,10 @@ struct SurfacePairPending {
     feature: &'static str,
     source: om9_core::geometry::NurbsSurface,
     target: om9_core::geometry::NurbsSurface,
+    source_edge: Option<om9_core::surface_ops::SurfaceEdge>,
+    target_edge: Option<om9_core::surface_ops::SurfaceEdge>,
+    /// Match continuity; Position (G0) is the documented default.
+    continuity: om9_core::surface_ops::SurfaceContinuity,
 }
 
 /// A seam command waiting for an axis and tolerance.
@@ -174,13 +223,47 @@ struct SurfacePairPending {
 struct SeamPending {
     feature: &'static str,
     surface: om9_core::geometry::NurbsSurface,
+    axis: Option<om9_core::surface_ops::SurfaceIso>,
+    tolerance_mm: Option<f64>,
 }
 
-/// A soft-edit command waiting for UV, radius and delta.
+/// A soft-edit command waiting for its base point, move vector and documented options.
 #[derive(Debug, Clone)]
 struct SoftEditPending {
     feature: &'static str,
+    id: om9_core::identity::ObjectId,
     surface: om9_core::geometry::NurbsSurface,
+    /// `U`,`V` base point in the surface parameter domain.
+    base: [Option<f64>; 2],
+    /// `Dx`,`Dy`,`Dz` move vector; Matrix's "pick a point to move to" minus the base.
+    delta: [Option<f64>; 3],
+    u_distance: f64,
+    v_distance: f64,
+    copy: bool,
+    fix_edges: bool,
+    constraint: self::surface_edit::SoftEditConstraint,
+}
+
+impl SoftEditPending {
+    fn base_complete(&self) -> bool {
+        self.base.iter().all(Option::is_some)
+    }
+
+    fn delta_complete(&self) -> bool {
+        self.delta.iter().all(Option::is_some)
+    }
+
+    fn base(&self) -> [f64; 2] {
+        [self.base[0].expect("base u"), self.base[1].expect("base v")]
+    }
+
+    fn delta(&self) -> [f64; 3] {
+        [
+            self.delta[0].expect("delta x"),
+            self.delta[1].expect("delta y"),
+            self.delta[2].expect("delta z"),
+        ]
+    }
 }
 
 /// A tween command waiting for a fraction between two surfaces.
@@ -196,6 +279,8 @@ struct TweenPending {
 struct ExtendPending {
     feature: &'static str,
     surface: om9_core::geometry::NurbsSurface,
+    edge: Option<om9_core::surface_ops::SurfaceEdge>,
+    distance_mm: Option<f64>,
 }
 
 /// A split command waiting for an axis and parameter.
@@ -203,6 +288,8 @@ struct ExtendPending {
 struct SplitPending {
     feature: &'static str,
     surface: om9_core::geometry::NurbsSurface,
+    axis: Option<om9_core::surface_ops::SurfaceIso>,
+    parameter: Option<f64>,
 }
 
 /// A tangent command waiting for an edge and direction.
@@ -210,6 +297,8 @@ struct SplitPending {
 struct TangentPending {
     feature: &'static str,
     surface: om9_core::geometry::NurbsSurface,
+    edge: Option<om9_core::surface_ops::SurfaceEdge>,
+    direction: Option<om9_core::geometry::Point3>,
 }
 
 /// An extrude-all command waiting for a height.
@@ -224,6 +313,9 @@ struct ExtrudeAllPending {
 struct VarOffsetPending {
     feature: &'static str,
     surface: om9_core::geometry::NurbsSurface,
+    start: Option<f64>,
+    end: Option<f64>,
+    axis: Option<om9_core::surface_ops::SurfaceIso>,
 }
 
 /// A shrink command waiting for a UV sub-domain.
@@ -231,6 +323,10 @@ struct VarOffsetPending {
 struct ShrinkPending {
     feature: &'static str,
     surface: om9_core::geometry::NurbsSurface,
+    u0: Option<f64>,
+    u1: Option<f64>,
+    v0: Option<f64>,
+    v1: Option<f64>,
 }
 
 /// A variable-blend command waiting for two tangent scales.
@@ -239,6 +335,8 @@ struct VarBlendPending {
     feature: &'static str,
     first: Curve,
     second: Curve,
+    start_scale: Option<f64>,
+    end_scale: Option<f64>,
 }
 
 /// A chamfer command waiting for a setback.
@@ -255,6 +353,8 @@ struct FilletPending {
     feature: &'static str,
     first: Curve,
     second: Curve,
+    start_radius: Option<f64>,
+    end_radius: Option<f64>,
 }
 
 /// A variable chamfer command waiting for two setbacks.
@@ -263,6 +363,8 @@ struct VarChamferPending {
     feature: &'static str,
     first: Curve,
     second: Curve,
+    start_setback: Option<f64>,
+    end_setback: Option<f64>,
 }
 
 /// A Sweep History command waiting for Closed/Flip/Simple options.
@@ -272,6 +374,11 @@ struct HistoryOptionsPending {
     curves: Vec<Curve>,
     ids: Vec<om9_core::identity::ObjectId>,
     rail_count: usize,
+    closed: bool,
+    flip: bool,
+    /// `Closed` is only offered when every rail is closed and at least two profiles
+    /// are selected (Matrix p183/p186); otherwise it starts `No` and is not offered.
+    closed_available: bool,
 }
 
 /// Sweep 2 Add Slash: two alignment points on the two rails.
@@ -287,6 +394,9 @@ struct SlashPending {
 }
 pub struct Controller {
     coordinator: TransactionCoordinator,
+    /// Monotonic command-start generation used to reject stale option IDs.
+    command_run: u64,
+    invoked_feature: Option<String>,
     plugins: Vec<std::rc::Rc<om9_plugin_host::LoadedPlugin>>,
     /// The last accepted world point, for `@x,y` relative entry.
     last_point: Option<om9_core::coords::WorldPoint>,
@@ -308,7 +418,64 @@ pub struct Controller {
     ellipse_pending: Option<self::ellipse::EllipsePending>,
     arc_pending: Option<self::arc::ArcPending>,
     rebuild_pending: Option<self::rebuild::RebuildPending>,
+    builder: Option<om9_core::builder::BuilderSession>,
+    /// Open gem tool (loader, builders, positioner); its preview owns nothing in the document.
+    gem_session: Option<self::gem::GemSession>,
+    /// Open F6 Gem Properties editor.
+    gem_editor: Option<self::gem::GemPropertiesEditor>,
+    /// Open gem-on-curve/surface placement tool (`OM9-L2-04-10`). Its preview owns nothing in
+    /// the document; Apply commits one transaction.
+    gem_placement: Option<self::gem_placement::GemPlacementSession>,
+    /// Open halo/cluster/baguette builder (`OM9-L2-04-11`). Its preview owns nothing in the
+    /// document; Apply commits one transaction.
+    gem_cluster: Option<self::gem_cluster::GemClusterSession>,
+    /// Open gem edit/report tool (`OM9-L2-04-13`). A mutating tool previews every stone and
+    /// commits ONE transaction on Apply; the report tools never touch the document.
+    gem_edits: Option<self::gem_edits::GemEditsSession>,
+    /// Open pavé/azure/prong/sphere/springs builder (`OM9-L2-04-12`). Its preview owns
+    /// nothing in the document; Apply commits one transaction.
+    gem_pave: Option<self::gem_pave::GemPaveSession>,
+    /// Open Gem Cutter / Gem Cutter Library builder (`OM9-L2-04-16`). Its preview owns nothing
+    /// in the document; Enter commits one transaction (the Interactive Boolean cut plus the
+    /// cutter bodies under the Preserve/Remove answer).
+    gem_cutters: Option<self::gem_cutters::GemCutterSession>,
+    /// Open Channel / Micro Prong / Bright Cut builder (`OM9-L2-04-17`). One staged session
+    /// for the four row commands; Enter commits the Boolean cuts and the cutter bodies.
+    row_cutters: Option<self::channel_cutters::RowCutterSession>,
+    /// Inactive builder tabs, each keeping its own parameters while another tab is active.
+    builder_saved: std::collections::BTreeMap<
+        om9_core::builder::BuilderKind,
+        om9_core::builder::BuilderSession,
+    >,
+    /// Builder styles: the built-in library plus the user's own (`OM9-L2-03-12`).
+    style_library: om9_core::builder_style::StyleLibrary,
+    /// Where user styles persist. `OM9_STYLE_LIBRARY` names the file; without it the user
+    /// list lives for the session only.
+    style_path: Option<std::path::PathBuf>,
+    /// The last style-load problem, shown once in the panel instead of being swallowed.
+    style_error: Option<String>,
+    /// The style the open session last applied, for the browser's selected state.
+    applied_style: Option<String>,
+    /// Pavé styles (`OM9-L3-04-12-001`): built-ins plus the user's own snapshots.
+    pave_style_library: om9_core::gem_pave::PaveStyleLibrary,
+    /// Where user pavé styles persist (`OM9_PAVE_STYLE_LIBRARY`); without it they live for
+    /// this session only.
+    pave_style_path: Option<std::path::PathBuf>,
+    /// Last pavé style problem, shown once in the builder window.
+    pave_style_error: Option<String>,
+    history_cache: om9_core::associative::RecomputeCache,
+    /// Matrix History recording policy for recipes created from now on (`OM9-L3-03-13-001`).
+    history_record: bool,
+    /// Associative recompute policy (`OM9-L3-03-13-002`).
+    history_update: bool,
+    /// True while a rebuild owns the document; close/open refuses to race it (`-006`).
+    history_rebuilding: bool,
+    /// One-shot message for the UI status line after a history operation.
+    history_notice: Option<String>,
+    /// The command line asked for the history report window.
+    history_window_requested: bool,
     fit_pending: Option<self::fit::FitPending>,
+    refit_srf_pending: Option<self::refit_srf::RefitSrfPending>,
     offset_curve_pending: Option<self::offset::OffsetPending>,
     project_pending: Option<self::project::ProjectPending>,
     blend_pending: Option<self::blend::BlendPending>,
@@ -357,6 +524,33 @@ pub struct Controller {
     variable_chamfer_pending: Option<VarChamferPending>,
     history_options_pending: Option<HistoryOptionsPending>,
     slash_pending: Option<SlashPending>,
+    /// Active read-out of the Measure menu (OM9-L2-03-20). It is read-only: the
+    /// document and the Undo journal never change.
+    measure_pending: Option<self::measure::MeasurePending>,
+    annotation_pending: Option<self::annotation::Pending>,
+    annotation_style: om9_core::annotation::Style,
+    transform_pending: Option<self::transform::TransformPending>,
+    /// The last published read-out, tagged with the selection it measured.
+    last_measurement: Option<self::measure::MeasurementLabel>,
+    /// Metal material registry and the last valid Metal Weights report (`OM9-L2-04-19`).
+    metal_registry: om9_core::metal_weight::MetalMaterialRegistry,
+    last_metal_report: Option<self::metal::MetalWeightReport>,
+    /// Staged head/bezel command (`OM9-L2-04-14`).
+    head_pending: Option<self::head_commands::HeadPending>,
+    head_sequence: u64,
+    /// Staged setting-parts command (`OM9-L2-04-15`) and the features it already committed.
+    settings_pending: Option<self::settings_commands::SettingsPending>,
+    settings_volumes: Vec<(String, f64)>,
+    /// Settings features committed as cutters; they remove metal and stay out of the mass.
+    pub(crate) settings_cutters: Vec<String>,
+    /// Volume each committed cutter removes, so the mass read-out can report the net metal.
+    pub(crate) settings_cutter_volumes: Vec<(String, f64)>,
+    /// User (Bezier) profiles saved in this session; the profile library is editable here.
+    pub(crate) head_profiles: Vec<om9_core::settings::head::Profile>,
+    /// The last committed channel border, reused by Metal Piece's optional border input.
+    pub(crate) settings_border: Option<om9_core::settings::channel_border::ChannelBorder>,
+    settings_sequence: u64,
+    last_settings_mass: Option<self::settings_commands::SettingsMassReport>,
     /// Active edit/control point display for the selected curves.
     top11_grip: Option<om9_core::top11::GripMode>,
     /// Faces, edges and vertices picked with Ctrl+Shift+click, in pick order.
@@ -521,6 +715,8 @@ impl Controller {
         let scene = Scene::capture_in_world(&coordinator, id, held)?;
         Ok(Self {
             coordinator,
+            command_run: 0,
+            invoked_feature: None,
             plugins: Vec::new(),
             last_point: None,
             ortho: false,
@@ -538,7 +734,50 @@ impl Controller {
             ellipse_pending: None,
             arc_pending: None,
             rebuild_pending: None,
+            builder: None,
+            gem_session: None,
+            gem_editor: None,
+            gem_placement: None,
+            gem_cluster: None,
+            gem_edits: None,
+            gem_pave: None,
+            gem_cutters: None,
+            row_cutters: None,
+            builder_saved: std::collections::BTreeMap::new(),
+            style_library: {
+                let mut library = om9_core::builder_style::StyleLibrary::builtin();
+                if let Some(path) = std::env::var_os("OM9_STYLE_LIBRARY") {
+                    // A broken user file never hides the built-in library; the error is kept
+                    // for the panel to show once.
+                    let _ = library.load_from(&std::path::PathBuf::from(path));
+                }
+                library
+            },
+            style_path: std::env::var_os("OM9_STYLE_LIBRARY").map(std::path::PathBuf::from),
+            style_error: None,
+            applied_style: None,
+            pave_style_library: {
+                let mut library = om9_core::gem_pave::PaveStyleLibrary::builtin();
+                if let Some(path) = std::env::var_os("OM9_PAVE_STYLE_LIBRARY")
+                    && let Ok(loaded) = om9_core::gem_pave::PaveStyleLibrary::load_user(
+                        &std::path::PathBuf::from(path),
+                    )
+                {
+                    library = loaded;
+                }
+                library
+            },
+            pave_style_path: std::env::var_os("OM9_PAVE_STYLE_LIBRARY")
+                .map(std::path::PathBuf::from),
+            pave_style_error: None,
+            history_cache: om9_core::associative::RecomputeCache::default(),
+            history_record: true,
+            history_update: true,
+            history_rebuilding: false,
+            history_notice: None,
+            history_window_requested: false,
             fit_pending: None,
+            refit_srf_pending: None,
             offset_curve_pending: None,
             project_pending: None,
             blend_pending: None,
@@ -586,6 +825,23 @@ impl Controller {
             variable_chamfer_pending: None,
             history_options_pending: None,
             slash_pending: None,
+            measure_pending: None,
+            annotation_pending: None,
+            annotation_style: om9_core::annotation::Style::default(),
+            transform_pending: None,
+            last_measurement: None,
+            metal_registry: om9_core::metal_weight::MetalMaterialRegistry::builtin(),
+            last_metal_report: None,
+            head_pending: None,
+            head_sequence: 0,
+            settings_pending: None,
+            settings_volumes: Vec::new(),
+            settings_cutters: Vec::new(),
+            settings_cutter_volumes: Vec::new(),
+            head_profiles: Vec::new(),
+            settings_border: None,
+            settings_sequence: 0,
+            last_settings_mass: None,
             top11_grip: None,
             subselection: Vec::new(),
             sub_revision: 1,
@@ -620,6 +876,47 @@ impl Controller {
     pub fn scene(&self) -> Option<&Scene> {
         self.scene.as_ref()
     }
+    /// The ordered command events of this session, for text readers and audits.
+    pub fn events(&self) -> &crate::command_events::EventLog {
+        &self.events
+    }
+    /// The four workspace viewport cameras in stable title order, for headless rendering.
+    pub fn view_cameras(
+        &self,
+    ) -> Vec<(
+        &'static str,
+        om9_scene::camera::Camera,
+        om9_scene::camera::CPlane,
+    )> {
+        let mut views: Vec<_> = self
+            .workspace
+            .views
+            .values()
+            .map(|view| (view.id.title(), view.camera.clone(), view.cplane.clone()))
+            .collect();
+        views.sort_by_key(|(title, _, _)| *title);
+        views
+    }
+    /// The active workspace view title, for headless input replay receipts.
+    pub fn active_view_title(&self) -> &'static str {
+        self.workspace
+            .views
+            .get(&self.workspace.active)
+            .map(|view| view.id.title())
+            .unwrap_or("")
+    }
+    /// Makes the named workspace view active, for headless input replay.
+    pub fn activate_view(&mut self, title: &str) -> Result<()> {
+        let id = self
+            .workspace
+            .views
+            .values()
+            .find(|view| view.id.title().eq_ignore_ascii_case(title))
+            .map(|view| view.id)
+            .ok_or(Error::Missing("workspace view"))?;
+        self.workspace.active = id;
+        Ok(())
+    }
     /// The command an empty Enter would run again: the last completed command
     /// that may be repeated (OM9-L3-01-02-009). Only the interactive geometry
     /// commands are repeatable; a file or destructive command is never repeated
@@ -648,376 +945,6 @@ impl Controller {
     }
     /// The repeat slot as stored, for the audit: it is either empty or a
     /// repeatable feature.
-    /// Resolves a typed command name through the declared aliases of the implemented commands.
-    /// Registry aliases such as `Ln` are part of the record, so typing them must reach the same command.
-    pub fn resolve_alias(text: &str) -> Option<&'static str> {
-        let text = text.trim();
-        if text.eq_ignore_ascii_case("undo") {
-            return Some("undo");
-        }
-        if text.eq_ignore_ascii_case("redo") {
-            return Some("redo");
-        }
-        if let Some(command) = Self::view_command(text) {
-            return Some(command);
-        }
-        if text.eq_ignore_ascii_case("circle") || text.eq_ignore_ascii_case(self::circle::CIRCLE) {
-            return Some(self::circle::CIRCLE);
-        }
-        if text.eq_ignore_ascii_case("rectangle")
-            || text.eq_ignore_ascii_case(self::rect::RECTANGLE)
-        {
-            return Some(self::rect::RECTANGLE);
-        }
-        if text.eq_ignore_ascii_case("polyline")
-            || text.eq_ignore_ascii_case(self::polyline::POLYLINE)
-        {
-            return Some(self::polyline::POLYLINE);
-        }
-        if text.eq_ignore_ascii_case("interpcrv")
-            || text.eq_ignore_ascii_case(self::interp::INTERP)
-        {
-            return Some(self::interp::INTERP);
-        }
-        if text.eq_ignore_ascii_case("ellipse")
-            || text.eq_ignore_ascii_case(self::ellipse::ELLIPSE)
-        {
-            return Some(self::ellipse::ELLIPSE);
-        }
-        if text.eq_ignore_ascii_case("arc") || text.eq_ignore_ascii_case(self::arc::ARC) {
-            return Some(self::arc::ARC);
-        }
-        if text.eq_ignore_ascii_case("arc_startpoint")
-            || text.eq_ignore_ascii_case(self::arc::ARC_START)
-        {
-            return Some(self::arc::ARC_START);
-        }
-        if text.eq_ignore_ascii_case("rebuild")
-            || text.eq_ignore_ascii_case(self::rebuild::REBUILD)
-        {
-            return Some(self::rebuild::REBUILD);
-        }
-        if text.eq_ignore_ascii_case("fitcrv") || text.eq_ignore_ascii_case(self::fit::FIT) {
-            return Some(self::fit::FIT);
-        }
-        if text.eq_ignore_ascii_case("offset") || text.eq_ignore_ascii_case(self::offset::OFFSET) {
-            return Some(self::offset::OFFSET);
-        }
-        if text.eq_ignore_ascii_case("project")
-            || text.eq_ignore_ascii_case(self::project::PROJECT)
-        {
-            return Some(self::project::PROJECT);
-        }
-        if text.eq_ignore_ascii_case("blend") || text.eq_ignore_ascii_case(self::blend::BLEND) {
-            return Some(self::blend::BLEND);
-        }
-        if text.eq_ignore_ascii_case("blendcrv")
-            || text.eq_ignore_ascii_case(self::blend::BLEND_CRV)
-        {
-            return Some(self::blend::BLEND_CRV);
-        }
-        if text.eq_ignore_ascii_case("match") || text.eq_ignore_ascii_case(self::blend::MATCH) {
-            return Some(self::blend::MATCH);
-        }
-        if text.eq_ignore_ascii_case("extractisocurve")
-            || text.eq_ignore_ascii_case(self::isocurve::ISOCURVE)
-        {
-            return Some(self::isocurve::ISOCURVE);
-        }
-        if text.eq_ignore_ascii_case("pull") || text.eq_ignore_ascii_case(self::pull::PULL) {
-            return Some(self::pull::PULL);
-        }
-        if text.eq_ignore_ascii_case("intersect")
-            || text.eq_ignore_ascii_case(self::intersect::INTERSECT)
-        {
-            return Some(self::intersect::INTERSECT);
-        }
-        if text.eq_ignore_ascii_case("intersecttwosets")
-            || text.eq_ignore_ascii_case(self::intersect_two_sets::INTERSECT_TWO_SETS)
-        {
-            return Some(self::intersect_two_sets::INTERSECT_TWO_SETS);
-        }
-        if text.eq_ignore_ascii_case("crv2view")
-            || text.eq_ignore_ascii_case(self::crv2view::CRV2VIEW)
-        {
-            return Some(self::crv2view::CRV2VIEW);
-        }
-        if text.eq_ignore_ascii_case("curvethroughpt")
-            || text.eq_ignore_ascii_case(self::through_points::THROUGH_POINTS)
-        {
-            return Some(self::through_points::THROUGH_POINTS);
-        }
-        if text.eq_ignore_ascii_case("polygon")
-            || text.eq_ignore_ascii_case(self::polygon::POLYGON)
-        {
-            return Some(self::polygon::POLYGON);
-        }
-        if text.eq_ignore_ascii_case("helix") || text.eq_ignore_ascii_case(self::helix::HELIX) {
-            return Some(self::helix::HELIX);
-        }
-        if text.eq_ignore_ascii_case("spiral") || text.eq_ignore_ascii_case(self::spiral::SPIRAL) {
-            return Some(self::spiral::SPIRAL);
-        }
-        if text.eq_ignore_ascii_case("divide") || text.eq_ignore_ascii_case(self::divide::DIVIDE) {
-            return Some(self::divide::DIVIDE);
-        }
-        if text.eq_ignore_ascii_case("convert") || text.eq_ignore_ascii_case(self::to_lines::TO_LINES)
-        {
-            return Some(self::to_lines::TO_LINES);
-        }
-        if text.eq_ignore_ascii_case("extend")
-            || text.eq_ignore_ascii_case(self::extend_curve::EXTEND)
-        {
-            return Some(self::extend_curve::EXTEND);
-        }
-        if text.eq_ignore_ascii_case("tweencurves")
-            || text.eq_ignore_ascii_case(self::tween_curves::TWEEN_CURVES)
-        {
-            return Some(self::tween_curves::TWEEN_CURVES);
-        }
-        if text.eq_ignore_ascii_case("continueinterpcrv")
-            || text.eq_ignore_ascii_case(self::continue_interp::CONTINUE_INTERP)
-        {
-            return Some(self::continue_interp::CONTINUE_INTERP);
-        }
-        if text.eq_ignore_ascii_case("arcblend")
-            || text.eq_ignore_ascii_case(self::arc_blend::ARC_BLEND)
-        {
-            return Some(self::arc_blend::ARC_BLEND);
-        }
-        if text.eq_ignore_ascii_case("dupedge")
-            || text.eq_ignore_ascii_case(self::wireframe::DUP_EDGE)
-        {
-            return Some(self::wireframe::DUP_EDGE);
-        }
-        if text.eq_ignore_ascii_case("extractwire")
-            || text.eq_ignore_ascii_case(self::wireframe::EXTRACT_WIRE)
-        {
-            return Some(self::wireframe::EXTRACT_WIRE);
-        }
-        if text.eq_ignore_ascii_case("crvstart")
-            || text.eq_ignore_ascii_case(self::crv_ends::CRV_START)
-        {
-            return Some(self::crv_ends::CRV_START);
-        }
-        if text.eq_ignore_ascii_case("crvend") || text.eq_ignore_ascii_case(self::crv_ends::CRV_END)
-        {
-            return Some(self::crv_ends::CRV_END);
-        }
-        if text.eq_ignore_ascii_case("interpcrvonsrf")
-            || text.eq_ignore_ascii_case(self::interp_on_surface::INTERP_ON_SURFACE)
-        {
-            return Some(self::interp_on_surface::INTERP_ON_SURFACE);
-        }
-        if text.eq_ignore_ascii_case("section") || text.eq_ignore_ascii_case(self::section::SECTION) {
-            return Some(self::section::SECTION);
-        }
-        if text.eq_ignore_ascii_case("revolve") || text.eq_ignore_ascii_case(self::revolve::REVOLVE)
-        {
-            return Some(self::revolve::REVOLVE);
-        }
-        if text.eq_ignore_ascii_case("curveboolean")
-            || text.eq_ignore_ascii_case(self::curve_boolean::CURVE_BOOLEAN)
-        {
-            return Some(self::curve_boolean::CURVE_BOOLEAN);
-        }
-        if text.eq_ignore_ascii_case("loft") {
-            return Some(self::surface_edit::LOFT);
-        }
-        if text.eq_ignore_ascii_case("sweep1") {
-            return Some(self::surface_edit::SWEEP1);
-        }
-        if text.eq_ignore_ascii_case("sweep2") {
-            return Some(self::surface_edit::SWEEP2);
-        }
-        if text.eq_ignore_ascii_case("networksrf") {
-            return Some(self::surface_edit::NETWORK);
-        }
-        if text.eq_ignore_ascii_case("patch") {
-            return Some(self::surface_edit::PATCH);
-        }
-        if text.eq_ignore_ascii_case("blendsrf") {
-            return Some(self::surface_edit::BLEND);
-        }
-        if text.eq_ignore_ascii_case("seamsrf") || text.eq_ignore_ascii_case("seam") {
-            return Some(self::surface_edit::SEAM);
-        }
-        if text.eq_ignore_ascii_case("mergesrf") {
-            return Some(self::surface_edit::MERGE);
-        }
-        if text.eq_ignore_ascii_case("matchsrf") {
-            return Some(self::surface_edit::MATCH);
-        }
-        if text.eq_ignore_ascii_case("tweensurfaces") || text.eq_ignore_ascii_case("tween") {
-            return Some(self::surface_edit::TWEEN);
-        }
-        if text.eq_ignore_ascii_case("railrevolve") {
-            return Some(self::surface_edit::RAIL_REVOLVE);
-        }
-        if text.eq_ignore_ascii_case("extendsrf") {
-            return Some(self::surface_edit::EXTEND);
-        }
-        if text.eq_ignore_ascii_case("shrinksrf") {
-            return Some(self::surface_edit::SHRINK);
-        }
-        if text.eq_ignore_ascii_case("unrollsrf") {
-            return Some(self::surface_edit::UNROLL);
-        }
-        if text.eq_ignore_ascii_case("offsetsrf") {
-            return Some(self::surface_edit::OFFSET);
-        }
-        if text.eq_ignore_ascii_case("planarsrf") {
-            return Some(self::surface_edit::PLANAR_CURVES);
-        }
-        if text.eq_ignore_ascii_case("edgesrf") {
-            return Some(self::surface_edit::EDGE_CURVES);
-        }
-        if text.eq_ignore_ascii_case("heightfield")
-            || text.eq_ignore_ascii_case(self::heightfield::HEIGHTFIELD)
-        {
-            return Some(self::heightfield::HEIGHTFIELD);
-        }
-        if text.eq_ignore_ascii_case("extrudesurface")
-            || text.eq_ignore_ascii_case(self::extrude_surface::EXTRUDE)
-        {
-            return Some(self::extrude_surface::EXTRUDE);
-        }
-        if text.eq_ignore_ascii_case("angleisocurve")
-            || text.eq_ignore_ascii_case(self::angle_isocurve::ANGLE_ISOCURVE)
-        {
-            return Some(self::angle_isocurve::ANGLE_ISOCURVE);
-        }
-        if text.eq_ignore_ascii_case("curvesoftedit")
-            || text.eq_ignore_ascii_case(self::curve_soft_edit::CURVE_SOFT_EDIT)
-        {
-            return Some(self::curve_soft_edit::CURVE_SOFT_EDIT);
-        }
-        if text.eq_ignore_ascii_case("crosssectionprofiles")
-            || text.eq_ignore_ascii_case(self::cross_section::CROSS_SECTION)
-        {
-            return Some(self::cross_section::CROSS_SECTION);
-        }
-        if text.eq_ignore_ascii_case("filletcorners")
-            || text.eq_ignore_ascii_case(self::fillet_corners::FILLET_CORNERS)
-        {
-            return Some(self::fillet_corners::FILLET_CORNERS);
-        }
-        if text.eq_ignore_ascii_case("silhouette")
-            || text.eq_ignore_ascii_case(self::silhouette::SILHOUETTE)
-        {
-            return Some(self::silhouette::SILHOUETTE);
-        }
-        if text.eq_ignore_ascii_case("mesh") || text.eq_ignore_ascii_case(self::mesh_curve::MESH_CURVE)
-        {
-            return Some(self::mesh_curve::MESH_CURVE);
-        }
-        if text.eq_ignore_ascii_case("createuvcrv")
-            || text.eq_ignore_ascii_case(self::uv_curves::CREATE_UV)
-        {
-            return Some(self::uv_curves::CREATE_UV);
-        }
-        if text.eq_ignore_ascii_case("applycrv")
-            || text.eq_ignore_ascii_case(self::apply_crv::APPLY_CRV)
-        {
-            return Some(self::apply_crv::APPLY_CRV);
-        }
-        if text.eq_ignore_ascii_case("offsetcrvonsrf")
-            || text.eq_ignore_ascii_case(self::offset_on_surface::OFFSET_ON_SURFACE)
-        {
-            return Some(self::offset_on_surface::OFFSET_ON_SURFACE);
-        }
-        if text.eq_ignore_ascii_case("offset normal")
-            || text.eq_ignore_ascii_case("offsetnormal")
-            || text.eq_ignore_ascii_case(self::offset_normal::OFFSET_NORMAL)
-        {
-            return Some(self::offset_normal::OFFSET_NORMAL);
-        }
-        if text.eq_ignore_ascii_case("curvefillet")
-            || text.eq_ignore_ascii_case(self::corner_ops::FILLET)
-        {
-            return Some(self::corner_ops::FILLET);
-        }
-        if text.eq_ignore_ascii_case("curvechamfer")
-            || text.eq_ignore_ascii_case(self::corner_ops::CHAMFER)
-        {
-            return Some(self::corner_ops::CHAMFER);
-        }
-        if text.eq_ignore_ascii_case("crvseam")
-            || text.eq_ignore_ascii_case(self::crv_seam::CRV_SEAM)
-        {
-            return Some(self::crv_seam::CRV_SEAM);
-        }
-        if text.eq_ignore_ascii_case("curve")
-            || text.eq_ignore_ascii_case(self::control_curve::CONTROL_CURVE)
-        {
-            return Some(self::control_curve::CONTROL_CURVE);
-        }
-        if text.eq_ignore_ascii_case("continuecurve")
-            || text.eq_ignore_ascii_case(self::continue_curve::CONTINUE_CURVE)
-        {
-            return Some(self::continue_curve::CONTINUE_CURVE);
-        }
-        if text.eq_ignore_ascii_case("polylineonsrf")
-            || text.eq_ignore_ascii_case(self::polyline_on_surface::POLYLINE_ON_SURFACE)
-        {
-            return Some(self::polyline_on_surface::POLYLINE_ON_SURFACE);
-        }
-        if text.eq_ignore_ascii_case("sketch") || text.eq_ignore_ascii_case(self::sketch::SKETCH) {
-            return Some(self::sketch::SKETCH);
-        }
-        if text.eq_ignore_ascii_case("sketchonsrf")
-            || text.eq_ignore_ascii_case(self::sketch_on_surface::SKETCH_ON_SURFACE)
-        {
-            return Some(self::sketch_on_surface::SKETCH_ON_SURFACE);
-        }
-        if text.eq_ignore_ascii_case("dupborder")
-            || text.eq_ignore_ascii_case(self::dup_border::DUP_BORDER)
-        {
-            return Some(self::dup_border::DUP_BORDER);
-        }
-        for descriptor in [Self::line_descriptor(), Self::point_descriptor()] {
-            if text.eq_ignore_ascii_case(&descriptor.feature)
-                || descriptor
-                    .aliases
-                    .iter()
-                    .any(|alias| text.eq_ignore_ascii_case(alias))
-            {
-                return Some(if descriptor.feature == LINE {
-                    LINE
-                } else {
-                    POINT
-                });
-            }
-        }
-        None
-    }
-
-    /// Canonical immediate view commands accepted by the command line.
-    pub fn view_command(text: &str) -> Option<&'static str> {
-        let text = text.trim();
-        let aliases: &[&str] = match text {
-            t if t.eq_ignore_ascii_case("ZoomExtents")
-                || t.eq_ignore_ascii_case("ZE")
-                || t.eq_ignore_ascii_case("ViewZoomZoomExtents") =>
-            {
-                &["ViewZoomZoomExtents"]
-            }
-            t if t.eq_ignore_ascii_case("ZoomSelected")
-                || t.eq_ignore_ascii_case("ZS")
-                || t.eq_ignore_ascii_case("ViewZoomZoomSelected") =>
-            {
-                &["ViewZoomZoomSelected"]
-            }
-            t if t.eq_ignore_ascii_case("Home") || t.eq_ignore_ascii_case("ViewHome") => {
-                &["ViewHome"]
-            }
-            t if t.eq_ignore_ascii_case("Center") || t.eq_ignore_ascii_case("ViewCenter") => {
-                &["ViewCenter"]
-            }
-            _ => return None,
-        };
-        aliases.first().copied()
-    }
 
     /// Whether the running line command draws both sides of its start point.
     pub fn both_sides(&self) -> Option<bool> {
@@ -1038,6 +965,18 @@ impl Controller {
         self.session
             .as_ref()
             .map(|session| session.feature)
+            .or_else(|| self.solid_pending.as_ref().map(|pending| pending.feature))
+            .or_else(|| self.measure_pending.as_ref().map(|pending| pending.feature))
+            .or_else(|| {
+                self.annotation_pending
+                    .as_ref()
+                    .map(|pending| pending.feature)
+            })
+            .or_else(|| {
+                self.transform_pending
+                    .as_ref()
+                    .map(|pending| pending.feature)
+            })
             .or_else(|| self.repeatable_last())
     }
     pub fn repeat_slot(&self) -> Option<&str> {
@@ -1056,6 +995,7 @@ impl Controller {
             || self.arc_pending.is_some()
             || self.rebuild_pending.is_some()
             || self.fit_pending.is_some()
+            || self.refit_srf_pending.is_some()
             || self.offset_curve_pending.is_some()
             || self.project_pending.is_some()
             || self.blend_pending.is_some()
@@ -1072,6 +1012,19 @@ impl Controller {
             || self.tween_curves_pending.is_some()
             || self.continue_interp_pending.is_some()
             || self.arc_blend_pending.is_some()
+            || self.control_curve_pending.is_some()
+            || self.continue_curve_pending.is_some()
+            || self.angle_isocurve_pending.is_some()
+            || self.corner_pending.is_some()
+            || self.cross_section_pending.is_some()
+            || self.crv_seam_pending.is_some()
+            || self.curve_soft_edit_pending.is_some()
+            || self.fillet_corners_pending.is_some()
+            || self.offset_normal_pending.is_some()
+            || self.offset_on_surface_pending.is_some()
+            || self.pull_pending.is_some()
+            || self.extrude_surface_pending.is_some()
+            || self.heightfield_pending.is_some()
         {
             return true;
         }
@@ -1094,6 +1047,20 @@ impl Controller {
             || self.variable_chamfer_pending.is_some()
             || self.history_options_pending.is_some()
             || self.slash_pending.is_some()
+            || self.measure_pending.is_some()
+            || self.annotation_pending.is_some()
+            || self.transform_pending.is_some()
+            || self.builder.is_some()
+            || self.head_pending.is_some()
+            || self.settings_pending.is_some()
+            || self.gem_session.is_some()
+            || self.gem_editor.is_some()
+            || self.gem_placement.is_some()
+            || self.gem_cluster.is_some()
+            || self.gem_edits.is_some()
+            || self.gem_pave.is_some()
+            || self.gem_cutters.is_some()
+            || self.row_cutters.is_some()
         {
             return true;
         }
@@ -1105,6 +1072,12 @@ impl Controller {
             Some(s) => self.validate_context(&s.context).is_ok(),
         }
     }
+    /// Feature that started the current live command, without falling back to repeat.
+    pub fn running_feature(&self) -> Option<&str> {
+        self.is_running()
+            .then_some(self.invoked_feature.as_deref())
+            .flatten()
+    }
     /// Drop a session whose context is gone. Returns true when one was dropped,
     /// so a caller (the window, the command line) can report the cancellation.
     pub fn cancel_if_stale(&mut self) -> bool {
@@ -1115,13 +1088,69 @@ impl Controller {
         false
     }
     pub fn availability(feature: &str) -> Result<()> {
+        if self::gem::handles(feature) {
+            return Ok(());
+        }
+        // The placement family (`OM9-L2-04-10`) is a normal command; its selection is
+        // validated when the tool opens, so availability never depends on the current pick.
+        if self::gem_placement::handles(feature)
+            || self::gem_placement::command_name(feature).is_some()
+        {
+            return Ok(());
+        }
+        // The halo/cluster/baguette family (`OM9-L2-04-11`) validates its selection when it
+        // opens, exactly like the placement family.
+        if self::gem_cluster::handles(feature) || self::gem_cluster::command_name(feature).is_some()
+        {
+            return Ok(());
+        }
+        // The gem edit/report family (`OM9-L2-04-13`) validates its selection when it opens.
+        if self::gem_edits::handles(feature) || self::gem_edits::command_name(feature).is_some() {
+            return Ok(());
+        }
+        // The pavé/azure/prong family (`OM9-L2-04-12`) validates its selection when it opens.
+        if self::gem_pave::PaveTool::handles(feature)
+            || self::gem_pave::PaveTool::command_name(feature).is_some()
+        {
+            return Ok(());
+        }
+        // The cutter family (`OM9-L2-04-16`) validates its gem selection when it opens.
+        if self::gem_cutters::CutterTool::handles(feature)
+            || self::gem_cutters::CutterTool::command_name(feature).is_some()
+        {
+            return Ok(());
+        }
+        if self::channel_cutters::RowTool::handles(feature)
+            || self::channel_cutters::RowTool::command_name(feature).is_some()
+        {
+            return Ok(());
+        }
+        if self::annotation::handles(feature) {
+            return Ok(());
+        }
+        if self::metal::handles_command(feature) {
+            return Ok(());
+        }
+        if self::head_commands::handles_command(feature) {
+            return Ok(());
+        }
+        if self::settings_commands::handles_command(feature) {
+            return Ok(());
+        }
+        if self::ring_tools::handles_command(feature) {
+            return Ok(());
+        }
         if crate::file_lifecycle::FileKind::from_feature(feature).is_some() {
             return Ok(());
         }
-        if solid::mode_command(feature).is_some() {
-            return Ok(());
+        if let Some((target, _)) = solid::mode_command(feature) {
+            return Self::availability(target);
+        }
+        if matches!(feature, "SolidBooleanSplit" | "SolidCreateSolid" | "SolidExtractSurfaceCopy" | "SolidPipeChain" | "SolidGVDMultiPipe" | "OM9-SOLID-021") {
+            return if cfg!(feature = "occt-brep") { Ok(()) } else { Err(Error::Unsupported("Solid command requires OCCT")) };
         }
         if solid::handles(feature) {
+            if !cfg!(feature = "occt-brep") { return Err(Error::Unsupported("Solid command requires OCCT")); }
             return crate::solid_menu::by_feature(feature)
                 .filter(|binding| binding.enabled())
                 .map(|_| ())
@@ -1130,66 +1159,91 @@ impl Controller {
                         .map_or("solid command is not catalogued", |binding| binding.reason),
                 ));
         }
-        if surface_edit::handles(feature)
-            || surface_edit::handles_numeric(feature)
-            || surface_edit::handles_curves(feature)
-            || surface_edit::handles_history(feature)
-            || surface_edit::handles_sweep4(feature)
-            || surface_edit::handles_four_rail_profile(feature)
-            || surface_edit::handles_surface_pair(feature)
-            || surface_edit::handles_seam(feature)
-            || surface_edit::handles_soft_edit(feature)
-            || surface_edit::handles_tween(feature)
-            || surface_edit::handles_extend(feature)
-            || surface_edit::handles_split(feature)
-            || surface_edit::handles_drape(feature)
-            || surface_edit::handles_tangent(feature)
-            || surface_edit::handles_extrude_all(feature)
-            || surface_edit::handles_planar(feature)
-            || surface_edit::handles_variable_offset(feature)
-            || surface_edit::handles_shrink(feature)
-            || surface_edit::handles_variable_blend(feature)
-            || surface_edit::handles_untrim(feature)
-            || surface_edit::handles_chamfer(feature)
-            || surface_edit::handles_fillet(feature)
-            || surface_edit::handles_variable_chamfer(feature)
-            || surface_edit::handles_sweep_multi(feature)
-            || surface_edit::handles_merge(feature)
-            || surface_edit::plane_like(feature)
-        {
+        if surface_edit::handles_command(feature) {
             return Ok(());
         }
+        if self::transform::handles(feature) {
+            return Ok(());
+        }
+        if let Some(reason) = crate::transform_menu::unavailable_reason(feature) {
+            return Err(Error::Unsupported(reason));
+        }
         match feature {
-            LINE | POINT | self::circle::CIRCLE | self::rect::RECTANGLE
-            | self::polyline::POLYLINE | self::interp::INTERP | self::ellipse::ELLIPSE
-            | self::arc::ARC | self::arc::ARC_START | self::rebuild::REBUILD
-            | self::fit::FIT | self::offset::OFFSET | self::project::PROJECT
-            | self::blend::BLEND | self::blend::BLEND_CRV | self::blend::MATCH
+            LINE
+            | POINT
+            | self::circle::CIRCLE
+            | self::rect::RECTANGLE
+            | self::polyline::POLYLINE
+            | self::interp::INTERP
+            | self::ellipse::ELLIPSE
+            | self::arc::ARC
+            | self::arc::ARC_START
+            | self::rebuild::REBUILD
+            | self::fit::FIT
+            | self::refit_srf::REFIT
+            | self::offset::OFFSET
+            | self::project::PROJECT
+            | self::blend::BLEND
+            | self::blend::BLEND_CRV
+            | self::blend::MATCH
             | self::isocurve::ISOCURVE
             | self::pull::PULL
             | self::interp_on_surface::INTERP_ON_SURFACE
             | self::polyline_on_surface::POLYLINE_ON_SURFACE
             | self::sketch_on_surface::SKETCH_ON_SURFACE
-            | self::intersect::INTERSECT | self::intersect_two_sets::INTERSECT_TWO_SETS
-            | self::crv2view::CRV2VIEW | self::through_points::THROUGH_POINTS
-            | self::polygon::POLYGON | self::helix::HELIX | self::spiral::SPIRAL
-            | self::divide::DIVIDE | self::crv_ends::CRV_START | self::crv_ends::CRV_END
-            | self::dup_border::DUP_BORDER | self::to_lines::TO_LINES
-            | self::extend_curve::EXTEND | self::tween_curves::TWEEN_CURVES
-            | self::continue_interp::CONTINUE_INTERP | self::arc_blend::ARC_BLEND
-            | self::wireframe::DUP_EDGE | self::wireframe::EXTRACT_WIRE
-            | self::section::SECTION | self::sketch::SKETCH | self::revolve::REVOLVE
-            | self::curve_boolean::CURVE_BOOLEAN | self::cross_section::CROSS_SECTION
-            | self::fillet_corners::FILLET_CORNERS | self::silhouette::SILHOUETTE
-            | self::curve_soft_edit::CURVE_SOFT_EDIT | self::angle_isocurve::ANGLE_ISOCURVE
-            | self::extrude_surface::EXTRUDE | self::heightfield::HEIGHTFIELD
-            | self::mesh_curve::MESH_CURVE | self::uv_curves::CREATE_UV | self::apply_crv::APPLY_CRV
-            | self::offset_on_surface::OFFSET_ON_SURFACE | self::offset_normal::OFFSET_NORMAL
-            | self::corner_ops::FILLET | self::corner_ops::CHAMFER
+            | self::intersect::INTERSECT
+            | self::intersect_two_sets::INTERSECT_TWO_SETS
+            | self::crv2view::CRV2VIEW
+            | self::crv2view::CRV2VIEW_HISTORY
+            | self::through_points::THROUGH_POINTS
+            | self::polygon::POLYGON
+            | self::helix::HELIX
+            | self::spiral::SPIRAL
+            | self::divide::DIVIDE
+            | self::crv_ends::CRV_START
+            | self::crv_ends::CRV_END
+            | self::dup_border::DUP_BORDER
+            | self::to_lines::TO_LINES
+            | self::extend_curve::EXTEND
+            | self::tween_curves::TWEEN_CURVES
+            | self::continue_interp::CONTINUE_INTERP
+            | self::arc_blend::ARC_BLEND
+            | self::wireframe::DUP_EDGE
+            | self::wireframe::EXTRACT_WIRE
+            | self::section::SECTION
+            | self::sketch::SKETCH
+            | self::revolve::REVOLVE
+            | self::curve_boolean::CURVE_BOOLEAN
+            | self::cross_section::CROSS_SECTION
+            | self::fillet_corners::FILLET_CORNERS
+            | self::silhouette::SILHOUETTE
+            | self::curve_soft_edit::CURVE_SOFT_EDIT
+            | self::angle_isocurve::ANGLE_ISOCURVE
+            | self::extrude_surface::EXTRUDE
+            | self::heightfield::HEIGHTFIELD
+            | self::mesh_curve::MESH_CURVE
+            | self::uv_curves::CREATE_UV
+            | self::apply_crv::APPLY_CRV
+            | self::offset_on_surface::OFFSET_ON_SURFACE
+            | self::offset_normal::OFFSET_NORMAL
+            | self::corner_ops::FILLET
+            | self::corner_ops::CHAMFER
             | self::crv_seam::CRV_SEAM
-            | self::control_curve::CONTROL_CURVE | self::continue_curve::CONTINUE_CURVE
-            | "MeshStress" | ZOOM_EXTENTS | ZOOM_SELECTED
-            | VIEW_HOME | VIEW_CENTER => Ok(()),
+            | self::control_curve::CONTROL_CURVE
+            | self::continue_curve::CONTINUE_CURVE
+            | "MeshStress"
+            | self::measure::DISTANCE
+            | self::measure::ANGLE
+            | self::measure::LENGTH
+            | self::measure::RADIUS
+            | self::measure::BOUNDING_BOX
+            | self::measure::OBJECT_SUMMARY
+            | self::measure::AREA
+            | self::measure::VOLUME
+            | ZOOM_EXTENTS
+            | ZOOM_SELECTED
+            | VIEW_HOME
+            | VIEW_CENTER => Ok(()),
             _ => Err(Error::Unsupported(
                 "command has no accepted standalone operation",
             )),
@@ -1257,7 +1311,22 @@ impl Controller {
         feature: &str,
         origin: InvocationOrigin,
     ) -> Result<DispatchOutcome> {
+        if !self.is_running() {
+            self.invoked_feature = None;
+        }
+        self.command_run = self.command_run.wrapping_add(1);
+        // A new command invalidates the previous read-out: the label shown in the
+        // Command Line always belongs to the run the user just started
+        // (OM9-L3-03-20-005).
+        self.last_measurement = None;
+        if let Some(result) = self.dispatch_history_feature(feature) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
         if let Some((target, mode)) = solid::mode_command(feature) {
+            if self.is_running() {
+                return Err(Error::Busy);
+            }
+            Self::availability(target)?;
             self.dispatch_solid(target)?;
             if let Some(result) = self.submit_solid_text(&format!("Mode={mode}")) {
                 result?;
@@ -1267,400 +1336,11 @@ impl Controller {
         if let Some(kind) = crate::file_lifecycle::FileKind::from_feature(feature) {
             return self.begin_file_operation(kind).map(DispatchOutcome::File);
         }
-        self.dispatch_geometry(feature, origin)
-            .map(|_| DispatchOutcome::Command)
-    }
-    fn dispatch_geometry(&mut self, feature: &str, _origin: InvocationOrigin) -> Result<()> {
-        Self::availability(feature)?;
-        if self.is_running() {
-            return Err(Error::Busy);
+        let result = self.dispatch_geometry(feature, origin);
+        if result.is_ok() {
+            self.invoked_feature = self.is_running().then(|| feature.to_owned());
         }
-        let feature = match feature {
-            ZOOM_EXTENTS => {
-                self.zoom_extents(1.6)?;
-                return Ok(());
-            }
-            ZOOM_SELECTED => {
-                self.zoom_selected(1.6)?;
-                return Ok(());
-            }
-            VIEW_HOME => {
-                self.view_home()?;
-                return Ok(());
-            }
-            VIEW_CENTER => {
-                self.view_center()?;
-                return Ok(());
-            }
-            LINE => LINE,
-            POINT => POINT,
-            "Circle" | self::circle::CIRCLE => {
-                return self.dispatch_circle();
-            }
-            "Rectangle" | self::rect::RECTANGLE => {
-                return self.dispatch_rect();
-            }
-            "Polyline" | self::polyline::POLYLINE => {
-                return self.dispatch_polyline();
-            }
-            "InterpCrv" | self::interp::INTERP => {
-                return self.dispatch_interp();
-            }
-            "Ellipse" | self::ellipse::ELLIPSE => {
-                return self.dispatch_ellipse();
-            }
-            "Arc" | self::arc::ARC => {
-                return self.dispatch_arc();
-            }
-            "Arc_StartPoint" | self::arc::ARC_START => {
-                return self.dispatch_arc_start();
-            }
-            "Rebuild" | self::rebuild::REBUILD => {
-                return self.dispatch_rebuild();
-            }
-            "FitCrv" | self::fit::FIT => {
-                return self.dispatch_fit();
-            }
-            "Offset" | self::offset::OFFSET => {
-                return self.dispatch_offset_curve();
-            }
-            "Project" | self::project::PROJECT => {
-                return self.dispatch_project();
-            }
-            "Blend" | self::blend::BLEND => {
-                return self.dispatch_blend();
-            }
-            "BlendCrv" | self::blend::BLEND_CRV => {
-                return self.dispatch_blend();
-            }
-            "Match" | self::blend::MATCH => {
-                return self.dispatch_match();
-            }
-            "ExtractIsocurve" | self::isocurve::ISOCURVE => {
-                return self.dispatch_isocurve();
-            }
-            "Pull" | self::pull::PULL => {
-                return self.dispatch_pull();
-            }
-            "Intersect" | self::intersect::INTERSECT => {
-                return self.dispatch_intersect();
-            }
-            "IntersectTwoSets" | self::intersect_two_sets::INTERSECT_TWO_SETS => {
-                return self.dispatch_intersect_two_sets();
-            }
-            "Crv2View" | self::crv2view::CRV2VIEW => {
-                return self.dispatch_crv2view();
-            }
-            "CurveThroughPt" | self::through_points::THROUGH_POINTS => {
-                return self.dispatch_through_points();
-            }
-            "Polygon" | self::polygon::POLYGON => {
-                return self.dispatch_polygon();
-            }
-            "Helix" | self::helix::HELIX => {
-                return self.dispatch_helix();
-            }
-            "Spiral" | self::spiral::SPIRAL => {
-                return self.dispatch_spiral();
-            }
-            "Divide" | self::divide::DIVIDE => {
-                return self.dispatch_divide();
-            }
-            "CrvStart" | self::crv_ends::CRV_START => {
-                return self.dispatch_crv_mark(false);
-            }
-            "CrvEnd" | self::crv_ends::CRV_END => {
-                return self.dispatch_crv_mark(true);
-            }
-            "DupBorder" | self::dup_border::DUP_BORDER => {
-                return self.dispatch_dup_border();
-            }
-            "Convert" | self::to_lines::TO_LINES => {
-                return self.dispatch_to_lines();
-            }
-            "Extend" | self::extend_curve::EXTEND => {
-                return self.dispatch_extend_curve();
-            }
-            "TweenCurves" | self::tween_curves::TWEEN_CURVES => {
-                return self.dispatch_tween_curves();
-            }
-            "ContinueinterpCrv" | self::continue_interp::CONTINUE_INTERP => {
-                return self.dispatch_continue_interp();
-            }
-            "ArcBlend" | self::arc_blend::ARC_BLEND => {
-                return self.dispatch_arc_blend();
-            }
-            "InterpCrvOnSrf" | self::interp_on_surface::INTERP_ON_SURFACE => {
-                return self.dispatch_interp_on_surface();
-            }
-            "Section" | self::section::SECTION => {
-                return self.dispatch_section();
-            }
-            "Revolve" | self::revolve::REVOLVE => {
-                return self.dispatch_revolve();
-            }
-            "CurveBoolean" | self::curve_boolean::CURVE_BOOLEAN => {
-                return self.dispatch_curve_boolean();
-            }
-            "Heightfield" | self::heightfield::HEIGHTFIELD => {
-                return self.dispatch_heightfield();
-            }
-            "ExtrudeSurface" | self::extrude_surface::EXTRUDE => {
-                return self.dispatch_extrude_surface();
-            }
-            "AngleIsocurve" | self::angle_isocurve::ANGLE_ISOCURVE => {
-                return self.dispatch_angle_isocurve();
-            }
-            "CurveSoftEdit" | self::curve_soft_edit::CURVE_SOFT_EDIT => {
-                return self.dispatch_curve_soft_edit();
-            }
-            "CrossSectionProfiles" | self::cross_section::CROSS_SECTION => {
-                return self.dispatch_cross_section();
-            }
-            "FilletCorners" | self::fillet_corners::FILLET_CORNERS => {
-                return self.dispatch_fillet_corners();
-            }
-            "Silhouette" | self::silhouette::SILHOUETTE => {
-                return self.dispatch_silhouette();
-            }
-            "Mesh" | self::mesh_curve::MESH_CURVE => {
-                return self.dispatch_mesh_curve();
-            }
-            "CreateUVCrv" | self::uv_curves::CREATE_UV => {
-                return self.dispatch_create_uv();
-            }
-            "ApplyCrv" | self::apply_crv::APPLY_CRV => {
-                return self.dispatch_apply_crv();
-            }
-            "OffsetCrvOnSrf" | self::offset_on_surface::OFFSET_ON_SURFACE => {
-                return self.dispatch_offset_on_surface();
-            }
-            "Offset Normal" | self::offset_normal::OFFSET_NORMAL => {
-                return self.dispatch_offset_normal();
-            }
-            "CurveFillet" | self::corner_ops::FILLET => {
-                return self.dispatch_corner(self::corner_ops::FILLET);
-            }
-            "CurveChamfer" | self::corner_ops::CHAMFER => {
-                return self.dispatch_corner(self::corner_ops::CHAMFER);
-            }
-            "CrvSeam" | self::crv_seam::CRV_SEAM => {
-                return self.dispatch_crv_seam();
-            }
-            "Curve" | self::control_curve::CONTROL_CURVE => {
-                return self.dispatch_control_curve();
-            }
-            "ContinueCurve" | self::continue_curve::CONTINUE_CURVE => {
-                return self.dispatch_continue_curve();
-            }
-            "PolylineOnSrf" | self::polyline_on_surface::POLYLINE_ON_SURFACE => {
-                return self.dispatch_polyline_on_surface();
-            }
-            "Sketch" | self::sketch::SKETCH => {
-                return self.dispatch_sketch();
-            }
-            "SketchOnSrf" | self::sketch_on_surface::SKETCH_ON_SURFACE => {
-                return self.dispatch_sketch_on_surface();
-            }
-            "DupEdge" | self::wireframe::DUP_EDGE => {
-                return self.dispatch_wireframe(self::wireframe::DUP_EDGE);
-            }
-            "ExtractWire" | self::wireframe::EXTRACT_WIRE => {
-                return self.dispatch_wireframe(self::wireframe::EXTRACT_WIRE);
-            }
-            "MeshStress" => {
-                // Menu or search invocation: the same command as typing `MeshStress` in the line.
-                self.insert_stress_meshes(self::stress::DEFAULT_STRESS_MESHES)?;
-                return Ok(());
-            }
-            _ if solid::handles(feature) => {
-                self.dispatch_solid(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles(feature) => {
-                let geometry = surface_edit::apply(
-                    feature,
-                    self.document(),
-                    &self.selection,
-                    self.coordinator.limits(),
-                )?;
-                self.events.emit(
-                    crate::command_events::EventKind::Started,
-                    surface_edit::static_feature(feature),
-                    "selected surface",
-                    None,
-                );
-                self.commit_geometry(
-                    surface_edit::static_feature(feature),
-                    surface_edit::label(feature),
-                    geometry,
-                )?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_numeric(feature) => {
-                self.dispatch_surface_distance(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_drape(feature) => {
-                self.dispatch_drape(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_fillet(feature) => {
-                self.dispatch_fillet(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_variable_chamfer(feature) => {
-                self.dispatch_variable_chamfer(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_chamfer(feature) => {
-                self.dispatch_chamfer(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_untrim(feature) => {
-                self.dispatch_untrim(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_variable_blend(feature) => {
-                self.dispatch_variable_blend(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_shrink(feature) => {
-                self.dispatch_shrink(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_variable_offset(feature) => {
-                self.dispatch_variable_offset(feature)?;
-                return Ok(());
-            }
-            "EdgeSrf" => {
-                let geometry = surface_edit::apply_curves(
-                    self::surface_edit::EDGE_CURVES,
-                    self.document(),
-                    self.selected_ordered().as_slice(),
-                    self.coordinator.limits(),
-                )?;
-                self.commit_geometry(
-                    self::surface_edit::EDGE_CURVES,
-                    "EdgeSrf",
-                    geometry,
-                )?;
-                return Ok(());
-            }
-            "PlanarSrf" => {
-                self.dispatch_planar_curves(self::surface_edit::PLANAR_CURVES)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_planar(feature) => {
-                self.dispatch_planar_curves(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_extrude_all(feature) => {
-                self.dispatch_extrude_all(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_tangent(feature) => {
-                self.dispatch_tangent(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_split(feature) => {
-                self.dispatch_split(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_extend(feature) => {
-                self.dispatch_extend(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_tween(feature) => {
-                self.dispatch_tween(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_soft_edit(feature) => {
-                self.dispatch_soft_edit(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_seam(feature) => {
-                self.dispatch_seam(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_surface_pair(feature) => {
-                self.dispatch_surface_pair(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_merge(feature) => {
-                self.dispatch_merge(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_sweep_multi(feature) => {
-                self.dispatch_sweep_multi(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_curve_pair(feature) => {
-                self.dispatch_curve_pair(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_four_rail_profile(feature) => {
-                self.dispatch_four_rail_profile(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_sweep4(feature) => {
-                self.dispatch_sweep4(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_history(feature) => {
-                self.dispatch_sweep_history(feature)?;
-                return Ok(());
-            }
-            _ if surface_edit::handles_curves(feature) => {
-                let geometry = surface_edit::apply_curves(
-                    feature,
-                    self.document(),
-                    &self.selected_ordered(),
-                    self.coordinator.limits(),
-                )?;
-                self.events.emit(
-                    crate::command_events::EventKind::Started,
-                    surface_edit::static_feature(feature),
-                    "selected curves",
-                    None,
-                );
-                self.commit_geometry(
-                    surface_edit::static_feature(feature),
-                    surface_edit::label(feature),
-                    geometry,
-                )?;
-                return Ok(());
-            }
-            surface_edit::PLANE_CORNERS | surface_edit::CUTTING_PLANE => {
-                surface_edit::static_feature(feature)
-            }
-            _ => unreachable!(),
-        };
-        let view = &self.workspace.views[&self.workspace.active];
-        let context = CommandContext {
-            document: self.document,
-            view: self.workspace.active,
-            selection: self.selection.iter().copied().collect(),
-            revision: self.document().context_revision,
-            epoch: self.coordinator.epoch(),
-        };
-        self.session = Some(CommandSession {
-            feature,
-            context,
-            plane: view.cplane,
-            unit: self.document().page_unit,
-            start: None,
-            both_sides: false,
-            length_mm: None,
-            points: Vec::new(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "started",
-            None,
-        );
-        Ok(())
+        result.map(|_| DispatchOutcome::Command)
     }
     /// The session facts a command would start against right now.
     pub fn context(&self) -> CommandContext {
@@ -1712,267 +1392,11 @@ impl Controller {
         if self.seam_pending.is_some() {
             return CmdPhase::AwaitEnd;
         }
-        if self.soft_edit_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.tween_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.extend_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.split_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.tangent_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.extrude_all_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.variable_offset_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.shrink_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.variable_blend_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.chamfer_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.fillet_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.variable_chamfer_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.history_options_pending.is_some() {
-            return CmdPhase::AwaitEnd;
-        }
-        if self.slash_pending.is_some() {
-            return CmdPhase::AwaitPoint;
-        }
         match &self.session {
             None => CmdPhase::Idle,
-            Some(s) if s.feature == POINT => CmdPhase::AwaitPoint,
-            Some(s) if s.start.is_none() => CmdPhase::AwaitPoint,
-            Some(_) => CmdPhase::AwaitEnd,
+            Some(session) if session.start.is_some() => CmdPhase::AwaitEnd,
+            Some(_) => CmdPhase::AwaitPoint,
         }
-    }
-    pub fn prompt(&self) -> &'static str {
-        // A session whose context is gone asks for nothing: the prompt and the
-        // phase machine must never disagree (OM9-L3-01-02-004 N5).
-        if !self.is_running() {
-            return "Command: ";
-        }
-        if let Some(pending) = &self.solid_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.circle_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.rect_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.polyline_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.interp_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.ellipse_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.arc_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.rebuild_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.fit_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.offset_curve_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.project_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.blend_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.isocurve_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.pull_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.intersect_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.crv2view_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.crv_seam_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.control_curve_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.offset_on_surface_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.offset_normal_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.corner_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.cross_section_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.fillet_corners_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.continue_curve_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.through_points_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.polygon_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.helix_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.spiral_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.divide_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.to_lines_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.extend_curve_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.tween_curves_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.continue_interp_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.arc_blend_pending {
-            return pending.prompt();
-        }
-        if let Some(prompt) = self.top11_prompt() {
-            return prompt;
-        }
-        if let Some(pending) = &self.surface_pending {
-            return if pending.feature == surface_edit::OFFSET {
-                "Offset distance: "
-            } else {
-                "Extrude distance: "
-            };
-        }
-        if self.curve_pair_pending.is_some() {
-            return "Rail revolve axis origin,direction: ";
-        }
-        if self.surface_pair_pending.is_some() {
-            return "Match edges (source,target): ";
-        }
-        if self.seam_pending.is_some() {
-            return "Seam axis,tolerance (e.g. U,0.01): ";
-        }
-        if self.soft_edit_pending.is_some() {
-            return "Soft edit u,v,radius_u,radius_v,dx,dy,dz: ";
-        }
-        if let Some(pending) = &self.curve_soft_edit_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.angle_isocurve_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.extrude_surface_pending {
-            return pending.prompt();
-        }
-        if let Some(pending) = &self.heightfield_pending {
-            return pending.prompt();
-        }
-        if self.tween_pending.is_some() {
-            return "Tween fraction (0..1): ";
-        }
-        if self.extend_pending.is_some() {
-            return "Extend edge,distance (e.g. U1,5): ";
-        }
-        if self.split_pending.is_some() {
-            return "Split axis,parameter (e.g. U,0.5): ";
-        }
-        if self.tangent_pending.is_some() {
-            return "Tangent edge,dx,dy,dz: ";
-        }
-        if self.extrude_all_pending.is_some() {
-            return "Extrude all height: ";
-        }
-        if self.variable_offset_pending.is_some() {
-            return "Distances start,end,axis (e.g. 1,5,U): ";
-        }
-        if self.shrink_pending.is_some() {
-            return "Shrink u0,u1,v0,v1: ";
-        }
-        if self.variable_blend_pending.is_some() {
-            return "Tangent scales start,end (e.g. 1,2): ";
-        }
-        if self.chamfer_pending.is_some() {
-            return "Chamfer setback: ";
-        }
-        if let Some(pending) = &self.fillet_pending {
-            return if pending.feature == surface_edit::VARIABLE_FILLET {
-                "Fillet radii start,end: "
-            } else {
-                "Fillet radius: "
-            };
-        }
-        if self.variable_chamfer_pending.is_some() {
-            return "Chamfer setbacks start,end: ";
-        }
-        if self.history_options_pending.is_some() {
-            return "Sweep options closed,flip,simple,slash (Enter=open): ";
-        }
-        if let Some(pending) = &self.slash_pending {
-            return if pending.points.is_empty() {
-                "Slash point on first rail: "
-            } else {
-                "Slash point on second rail: "
-            };
-        }
-        match &self.session {
-            None => "Command: ",
-            Some(s) if s.feature == POINT => "Location of point: ",
-            Some(s) if surface_edit::plane_like(s.feature) => match s.points.len() {
-                0 => "First corner: ",
-                1 => "Second corner: ",
-                _ => "Third corner: ",
-            },
-            Some(s) => match (s.start.is_some(), s.both_sides) {
-                (false, false) => "Start of line (BothSides=No): ",
-                (false, true) => "Start of line (BothSides=Yes): ",
-                (true, false) => "End of line (BothSides=No): ",
-                (true, true) => "End of line (BothSides=Yes): ",
-            },
-        }
-    }
-    fn validate_session(&self) -> Result<&CommandSession> {
-        let s = self
-            .session
-            .as_ref()
-            .ok_or(Error::Missing("active command"))?;
-        self.validate_context(&s.context)?;
-        Ok(s)
     }
     pub fn set_cplane(&mut self, plane: CPlane) -> Result<()> {
         if self.is_running() {
@@ -2177,6 +1601,20 @@ impl Controller {
         plane.point([local[0], local[1], 0.])
     }
     pub fn cancel(&mut self) {
+        if self.solid_face_needs_pick() || self.solid_pending.as_ref().is_some_and(|p| p.feature == "OM9-SOLID-029" || p.pipe_chain) || self.solid_fillet_needs_edge() || self.solid_fillet_preview().is_some() {
+            self.clear_subselection();
+        }
+        self.builder_cancel();
+        self.head_pending = None;
+        self.settings_pending = None;
+        self.gem_cancel();
+        self.gem_placement_cancel();
+        self.gem_cluster_cancel();
+        self.gem_edits_cancel();
+        self.gem_pave_cancel();
+        self.gem_cutter_cancel();
+        self.row_cutter_cancel();
+        self.gem_editor = None;
         self.solid_pending = None;
         self.circle_pending = None;
         self.rect_pending = None;
@@ -2186,6 +1624,7 @@ impl Controller {
         self.arc_pending = None;
         self.rebuild_pending = None;
         self.fit_pending = None;
+        self.refit_srf_pending = None;
         self.offset_curve_pending = None;
         self.project_pending = None;
         self.blend_pending = None;
@@ -2369,6 +1808,30 @@ impl Controller {
                 Some(crate::command_events::EventOutcome::Cancelled),
             );
         }
+        if let Some(pending) = self.measure_pending.take() {
+            self.events.emit(
+                crate::command_events::EventKind::Finished,
+                pending.feature,
+                "cancelled",
+                Some(crate::command_events::EventOutcome::Cancelled),
+            );
+        }
+        if let Some(pending) = self.annotation_pending.take() {
+            self.events.emit(
+                crate::command_events::EventKind::Finished,
+                pending.feature,
+                "cancelled",
+                Some(crate::command_events::EventOutcome::Cancelled),
+            );
+        }
+        if let Some(pending) = self.transform_pending.take() {
+            self.events.emit(
+                crate::command_events::EventKind::Finished,
+                pending.feature,
+                "cancelled",
+                Some(crate::command_events::EventOutcome::Cancelled),
+            );
+        }
         if let Some(s) = self.session.take() {
             self.events.emit(
                 crate::command_events::EventKind::Finished,
@@ -2395,9 +1858,108 @@ impl Controller {
         self.submit_effect(text).map(|_| ())
     }
     pub fn submit_effect(&mut self, text: &str) -> Result<DispatchOutcome> {
+        if !self.is_running() {
+            self.invoked_feature = None;
+        }
         if text.len() > 4096 {
             return Err(Error::Budget("command input"));
         }
+        // An open builder owns the command line: a field, Apply, Reset or Cancel.
+        if let Some(result) = self.builder_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // An open head/bezel builder owns the command line too (`OM9-L2-04-14`).
+        if let Some(result) = self.submit_head_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // An open gem tool owns the command line: an option, Apply or Cancel.
+        if let Some(result) = self.gem_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // An open placement tool owns the command line the same way (`OM9-L2-04-10`).
+        if let Some(result) = self.gem_placement_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // An open halo/cluster/baguette builder owns the command line too (`OM9-L2-04-11`).
+        if let Some(result) = self.gem_cluster_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // An open gem edit/report tool owns the command line too (`OM9-L2-04-13`).
+        if let Some(result) = self.gem_edits_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // An open pavé/azure/prong builder owns the command line too (`OM9-L2-04-12`).
+        if let Some(result) = self.gem_pave_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // An open Gem Cutter / Library builder owns the command line too (`OM9-L2-04-16`).
+        if let Some(result) = self.gem_cutter_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // The Channel / Micro Prong / Bright Cut builders own it too (`OM9-L2-04-17`).
+        if let Some(result) = self.row_cutter_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // Matrix History switches/report live on the same command line (`-006`).
+        if let Some(result) = self.submit_history_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        if let Some(command) = self::metal::parse_command(text)? {
+            return self
+                .calculate_metal_weights(command.material.as_deref())
+                .map(|_| DispatchOutcome::Command);
+        }
+        if let Some(material) = self::settings_commands::parse_mass_command(text)? {
+            return self
+                .calculate_settings_mass(material.as_deref())
+                .map(|_| DispatchOutcome::Command);
+        }
+        if let Some(feature) = self::ring_tools::command_name(text) {
+            return self
+                .dispatch_ring_tool(feature)
+                .map(|_| DispatchOutcome::Command);
+        }
+        // Typed placement commands (`gvGemOnCrv`, `gvGemFlow`, ...) reach the same handler as
+        // the palette icons (`OM9-L2-04-10`).
+        if let Some(feature) = self::gem_placement::command_name(text) {
+            return self
+                .dispatch_gem_placement(feature)
+                .map(|_| DispatchOutcome::Command);
+        }
+        // Typed halo/cluster/baguette commands (`gvHaloBuilder`, `gvGemsBetween2Crvs`, ...)
+        // reach the same handler as the palette icons (`OM9-L2-04-11`).
+        if let Some(feature) = self::gem_cluster::command_name(text) {
+            return self
+                .dispatch_gem_cluster(feature)
+                .map(|_| DispatchOutcome::Command);
+        }
+        // Typed pavé/azure/prong commands (`gvPaveDialog`, `gvPaveSphere`, ...).
+        if let Some(feature) = self::gem_pave::PaveTool::command_name(text) {
+            return self
+                .dispatch_gem_pave(feature)
+                .map(|_| DispatchOutcome::Command);
+        }
+        if let Some(feature) = self::gem::command_name(text) {
+            return self.dispatch_gem(feature).map(|_| DispatchOutcome::Command);
+        }
+        // Typed cutter commands (`gvAzureCutter`, `gvGemCutterLibrary`) reach the same handler
+        // as the palette icons (`OM9-L2-04-16`).
+        if let Some(feature) = self::gem_cutters::CutterTool::command_name(text) {
+            return self
+                .dispatch_gem_cutter(feature)
+                .map(|_| DispatchOutcome::Command);
+        }
+        if let Some(feature) = self::channel_cutters::RowTool::command_name(text) {
+            return self
+                .dispatch_row_cutter(feature)
+                .map(|_| DispatchOutcome::Command);
+        }
+        // The three builder command names start their mode from the command line too.
+        if let Some(kind) = self::builder::builder_command(text) {
+            return self.begin_builder(kind).map(|_| DispatchOutcome::Command);
+        }
+        let canonical = self.canonical_option_assignment(text);
+        let text = canonical.as_deref().unwrap_or(text);
         if text.trim().is_empty()
             && let Some(result) = self.top11_finish()
         {
@@ -2422,6 +1984,9 @@ impl Controller {
         if let Some(result) = self.submit_interp_text(text.trim()) {
             return result.map(|_| DispatchOutcome::Command);
         }
+        if let Some(result) = self.submit_settings_text(text.trim()) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
         if let Some(result) = self.submit_ellipse_text(text.trim()) {
             return result.map(|_| DispatchOutcome::Command);
         }
@@ -2432,6 +1997,9 @@ impl Controller {
             return result.map(|_| DispatchOutcome::Command);
         }
         if let Some(result) = self.submit_fit_text(text.trim()) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        if let Some(result) = self.submit_refit_srf_text(text.trim()) {
             return result.map(|_| DispatchOutcome::Command);
         }
         if let Some(result) = self.submit_offset_curve_text(text.trim()) {
@@ -2530,2093 +2098,6 @@ impl Controller {
         }
         self.submit_geometry_text(text)
             .map(|_| DispatchOutcome::Command)
-    }
-    fn submit_geometry_text(&mut self, text: &str) -> Result<()> {
-        if text.len() > 4096 {
-            return Err(Error::Budget("command input"));
-        }
-        let text = text.trim();
-        if self.history_options_pending.is_some() {
-            let pending = self
-                .history_options_pending
-                .as_ref()
-                .expect("history options")
-                .clone();
-            let mut closed = false;
-            let mut flip = false;
-            let mut slash = false;
-            if !text.is_empty() {
-                for token in text.to_ascii_lowercase().split([',', ' ']) {
-                    match token.trim() {
-                        "closed" | "yes" => closed = true,
-                        "flip" => flip = true,
-                        "slash" => slash = true,
-                        "open" | "no" | "simple" => {}
-                        "" => {}
-                        _ => return Err(Error::Invalid("sweep option")),
-                    }
-                }
-            }
-            if slash {
-                if pending.rail_count != 2 {
-                    return Err(Error::Invalid("slash needs two rails"));
-                }
-                self.history_options_pending = None;
-                self.slash_pending = Some(SlashPending {
-                    feature: pending.feature,
-                    curves: pending.curves,
-                    ids: pending.ids,
-                    rail_count: pending.rail_count,
-                    closed,
-                    flip,
-                    points: Vec::new(),
-                });
-                return Ok(());
-            }
-            let brep = self.build_sweep_history(
-                pending.feature,
-                &pending.curves,
-                pending.rail_count,
-                closed,
-                flip,
-                None,
-            )?;
-            let entity = Entity::new(
-                surface_edit::label(pending.feature),
-                Geometry::Brep(brep),
-                self.document().current_layer,
-            );
-            let mut inputs = Vec::with_capacity(pending.ids.len());
-            for (index, id) in pending.ids.iter().enumerate() {
-                inputs.push(SourceBinding {
-                    role: if index < pending.rail_count {
-                        "rail"
-                    } else {
-                        "profile"
-                    }
-                    .into(),
-                    source: self.document().stamp(*id)?,
-                    selection: Selection::Whole,
-                });
-            }
-            self.history_options_pending = None;
-            return self.commit_entity_with_history(
-                pending.feature,
-                surface_edit::label(pending.feature),
-                entity,
-                if pending.feature == surface_edit::SWEEP2_HISTORY {
-                    "Sweep2History"
-                } else {
-                    "Sweep1History"
-                },
-                inputs,
-            );
-        }
-        if self.fillet_pending.is_some() {
-            let pending = self.fillet_pending.as_ref().expect("fillet").clone();
-            let (start, end) = if pending.feature == surface_edit::VARIABLE_FILLET {
-                let values: Vec<f64> = text
-                    .split(',')
-                    .map(|value| value.trim().parse::<f64>())
-                    .collect::<std::result::Result<_, _>>()
-                    .map_err(|_| Error::Invalid("fillet radii"))?;
-                if values.len() != 2 {
-                    return Err(Error::Invalid("fillet radii"));
-                }
-                (values[0], values[1])
-            } else {
-                let radius: f64 = text.parse().map_err(|_| Error::Invalid("fillet radius"))?;
-                (radius, radius)
-            };
-            let geometry = surface_edit::apply_fillet(
-                &pending.first,
-                &pending.second,
-                start,
-                end,
-                self.coordinator.limits(),
-            )?;
-            self.fillet_pending = None;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.variable_chamfer_pending.is_some() {
-            let values: Vec<f64> = text
-                .split(',')
-                .map(|value| value.trim().parse::<f64>())
-                .collect::<std::result::Result<_, _>>()
-                .map_err(|_| Error::Invalid("chamfer setbacks"))?;
-            if values.len() != 2 {
-                return Err(Error::Invalid("chamfer setbacks"));
-            }
-            let pending = self
-                .variable_chamfer_pending
-                .as_ref()
-                .expect("variable chamfer")
-                .clone();
-            let geometry = surface_edit::apply_variable_chamfer(
-                &pending.first,
-                &pending.second,
-                values[0],
-                values[1],
-                self.coordinator.limits(),
-            )?;
-            self.variable_chamfer_pending = None;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.chamfer_pending.is_some() {
-            let setback: f64 = text
-                .parse()
-                .map_err(|_| Error::Invalid("chamfer setback"))?;
-            if !setback.is_finite() || setback <= 0.0 {
-                return Err(Error::Invalid("chamfer setback"));
-            }
-            let pending = self.chamfer_pending.as_ref().expect("chamfer").clone();
-            let geometry = surface_edit::apply_chamfer(
-                &pending.first,
-                &pending.second,
-                setback,
-                self.coordinator.limits(),
-            )?;
-            self.chamfer_pending = None;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.variable_blend_pending.is_some() {
-            let values: Vec<f64> = text
-                .split(',')
-                .map(|value| value.trim().parse::<f64>())
-                .collect::<std::result::Result<_, _>>()
-                .map_err(|_| Error::Invalid("variable blend scale"))?;
-            if values.len() != 2 || values.iter().any(|value| !value.is_finite()) {
-                return Err(Error::Invalid("variable blend scale"));
-            }
-            let pending = self
-                .variable_blend_pending
-                .as_ref()
-                .expect("variable blend")
-                .clone();
-            let geometry = surface_edit::apply_variable_blend(
-                &pending.first,
-                &pending.second,
-                values[0],
-                values[1],
-                self.coordinator.limits(),
-            )?;
-            self.variable_blend_pending = None;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.shrink_pending.is_some() {
-            let values: Vec<f64> = text
-                .split(',')
-                .map(|value| value.trim().parse::<f64>())
-                .collect::<std::result::Result<_, _>>()
-                .map_err(|_| Error::Invalid("shrink domain"))?;
-            if values.len() != 4 || values.iter().any(|value| !value.is_finite()) {
-                return Err(Error::Invalid("shrink domain"));
-            }
-            let pending = self.shrink_pending.as_ref().expect("shrink").clone();
-            let geometry = surface_edit::apply_shrink(
-                &pending.surface,
-                [values[0], values[1]],
-                [values[2], values[3]],
-                self.coordinator.limits(),
-            )?;
-            self.shrink_pending = None;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.variable_offset_pending.is_some() {
-            let mut parts = text.split(',');
-            let start = parts
-                .next()
-                .ok_or(Error::Invalid("variable offset start"))?
-                .trim()
-                .parse::<f64>()
-                .map_err(|_| Error::Invalid("variable offset start"))?;
-            let end = parts
-                .next()
-                .ok_or(Error::Invalid("variable offset end"))?
-                .trim()
-                .parse::<f64>()
-                .map_err(|_| Error::Invalid("variable offset end"))?;
-            let axis = parts
-                .next()
-                .ok_or(Error::Invalid("variable offset axis"))
-                .and_then(surface_edit::parse_iso)?;
-            if parts.next().is_some() {
-                return Err(Error::Invalid("variable offset input"));
-            }
-            let pending = self
-                .variable_offset_pending
-                .as_ref()
-                .expect("variable offset")
-                .clone();
-            let geometry = surface_edit::apply_variable_offset(
-                &pending.surface,
-                start,
-                end,
-                axis,
-                self.coordinator.limits(),
-            )?;
-            self.variable_offset_pending = None;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.extrude_all_pending.is_some() {
-            let height: f64 = text.parse().map_err(|_| Error::Invalid("extrude height"))?;
-            if !height.is_finite() || height == 0.0 {
-                return Err(Error::Invalid("extrude height"));
-            }
-            let pending = self
-                .extrude_all_pending
-                .as_ref()
-                .expect("extrude all")
-                .clone();
-            let geometries = surface_edit::apply_extrude_all(
-                &pending.curves,
-                height,
-                self.coordinator.limits(),
-            )?;
-            self.extrude_all_pending = None;
-            let items = geometries
-                .into_iter()
-                .map(|geometry| (surface_edit::label(pending.feature), geometry))
-                .collect();
-            return self.commit_geometries(
-                pending.feature,
-                surface_edit::label(pending.feature),
-                items,
-            );
-        }
-        if self.tangent_pending.is_some() {
-            let mut parts = text.split(',');
-            let edge = parts
-                .next()
-                .ok_or(Error::Invalid("surface tangent edge"))
-                .and_then(surface_edit::parse_surface_edge)?;
-            let values: Vec<f64> = parts
-                .map(|value| value.trim().parse::<f64>())
-                .collect::<std::result::Result<_, _>>()
-                .map_err(|_| Error::Invalid("surface tangent direction"))?;
-            if values.len() != 3 || values.iter().any(|value| !value.is_finite()) {
-                return Err(Error::Invalid("surface tangent direction"));
-            }
-            let pending = self.tangent_pending.as_ref().expect("tangent").clone();
-            let geometry = surface_edit::apply_tangent(
-                &pending.surface,
-                edge,
-                [values[0], values[1], values[2]],
-                self.coordinator.limits(),
-            )?;
-            self.tangent_pending = None;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.split_pending.is_some() {
-            let mut parts = text.split(',');
-            let axis = parts
-                .next()
-                .ok_or(Error::Invalid("surface split axis"))
-                .and_then(surface_edit::parse_iso)?;
-            let parameter = parts
-                .next()
-                .ok_or(Error::Invalid("surface split parameter"))?
-                .trim()
-                .parse::<f64>()
-                .map_err(|_| Error::Invalid("surface split parameter"))?;
-            if parts.next().is_some() {
-                return Err(Error::Invalid("surface split input"));
-            }
-            let pending = self.split_pending.as_ref().expect("split").clone();
-            let geometries = surface_edit::apply_split(
-                &pending.surface,
-                axis,
-                parameter,
-                self.coordinator.limits(),
-            )?;
-            self.split_pending = None;
-            self.events.emit(
-                crate::command_events::EventKind::Started,
-                pending.feature,
-                "surface split",
-                None,
-            );
-            let items = geometries
-                .into_iter()
-                .map(|geometry| (surface_edit::label(pending.feature), geometry))
-                .collect();
-            return self.commit_geometries(
-                pending.feature,
-                surface_edit::label(pending.feature),
-                items,
-            );
-        }
-        if self.extend_pending.is_some() {
-            let mut parts = text.split(',');
-            let edge = parts
-                .next()
-                .ok_or(Error::Invalid("surface extend edge"))
-                .and_then(surface_edit::parse_surface_edge)?;
-            let distance = parts
-                .next()
-                .ok_or(Error::Invalid("surface extend distance"))?
-                .trim()
-                .parse::<f64>()
-                .map_err(|_| Error::Invalid("surface extend distance"))?;
-            if parts.next().is_some() {
-                return Err(Error::Invalid("surface extend input"));
-            }
-            let pending = self.extend_pending.take().expect("extend");
-            let geometry = surface_edit::apply_extend(
-                &pending.surface,
-                edge,
-                distance,
-                self.coordinator.limits(),
-            )?;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.tween_pending.is_some() {
-            let fraction: f64 = text.parse().map_err(|_| Error::Invalid("tween fraction"))?;
-            if !fraction.is_finite() || !(0.0..=1.0).contains(&fraction) {
-                return Err(Error::Invalid("tween fraction"));
-            }
-            let pending = self.tween_pending.take().expect("tween");
-            let geometry = surface_edit::apply_tween(
-                &pending.first,
-                &pending.second,
-                fraction,
-                self.coordinator.limits(),
-            )?;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.soft_edit_pending.is_some() {
-            let values: Vec<f64> = text
-                .split(',')
-                .map(|value| value.trim().parse::<f64>())
-                .collect::<std::result::Result<_, _>>()
-                .map_err(|_| Error::Invalid("soft edit input"))?;
-            if values.len() != 7 || values.iter().any(|value| !value.is_finite()) {
-                return Err(Error::Invalid("soft edit input"));
-            }
-            let pending = self.soft_edit_pending.take().expect("soft edit");
-            let geometry = surface_edit::apply_soft_edit(
-                &pending.surface,
-                [values[0], values[1]],
-                [values[2], values[3]],
-                [values[4], values[5], values[6]],
-                self.coordinator.limits(),
-            )?;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.seam_pending.is_some() {
-            let mut parts = text.split(',');
-            let axis = parts
-                .next()
-                .ok_or(Error::Invalid("surface seam axis"))
-                .and_then(surface_edit::parse_iso)?;
-            let tolerance = parts
-                .next()
-                .ok_or(Error::Invalid("surface seam tolerance"))?
-                .trim()
-                .parse::<f64>()
-                .map_err(|_| Error::Invalid("surface seam tolerance"))?;
-            if parts.next().is_some() {
-                return Err(Error::Invalid("surface seam input"));
-            }
-            let pending = self.seam_pending.take().expect("seam");
-            let geometry = surface_edit::apply_seam(
-                &pending.surface,
-                axis,
-                tolerance,
-                self.coordinator.limits(),
-            )?;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.surface_pair_pending.is_some() {
-            let mut parts = text.split(',');
-            let source = parts
-                .next()
-                .ok_or(Error::Invalid("surface source edge"))
-                .and_then(surface_edit::parse_surface_edge)?;
-            let target = parts
-                .next()
-                .ok_or(Error::Invalid("surface target edge"))
-                .and_then(surface_edit::parse_surface_edge)?;
-            if parts.next().is_some() {
-                return Err(Error::Invalid("surface match edges"));
-            }
-            let pending = self.surface_pair_pending.take().expect("surface pair");
-            let geometry = surface_edit::apply_match(
-                &pending.source,
-                &pending.target,
-                source,
-                target,
-                self.coordinator.limits(),
-            )?;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.curve_pair_pending.is_some() {
-            let values: Vec<f64> = text
-                .split(',')
-                .map(|value| value.trim().parse::<f64>())
-                .collect::<std::result::Result<_, _>>()
-                .map_err(|_| Error::Invalid("rail revolve axis"))?;
-            if values.len() != 6 || values.iter().any(|value| !value.is_finite()) {
-                return Err(Error::Invalid("rail revolve axis"));
-            }
-            let pending = self.curve_pair_pending.take().expect("curve pair");
-            let geometry = surface_edit::apply_rail_revolve(
-                &pending.profile,
-                &pending.rail,
-                [values[0], values[1], values[2]],
-                [values[3], values[4], values[5]],
-                self.coordinator.limits(),
-            )?;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if self.surface_pending.is_some() {
-            let distance: f64 = text
-                .parse()
-                .map_err(|_| Error::Invalid("surface distance"))?;
-            if !distance.is_finite() || distance == 0.0 {
-                return Err(Error::Invalid("surface distance"));
-            }
-            let pending = self.surface_pending.take().expect("surface pending");
-            let geometry = surface_edit::apply_numeric(
-                pending.feature,
-                &pending.surface,
-                distance,
-                self.coordinator.limits(),
-            )?;
-            return self.commit_geometry(
-                surface_edit::static_feature(pending.feature),
-                surface_edit::label(pending.feature),
-                geometry,
-            );
-        }
-        if let Some(command) = parse_gumball_placement(text) {
-            match command {
-                GumballPlacement::Origin(origin) => self.relocate_gumball(Some(origin)),
-                GumballPlacement::Reset => self.relocate_gumball(None),
-                GumballPlacement::World => {
-                    self.set_gumball_alignment(self::gumball::GumballAlignment::World)
-                }
-                GumballPlacement::Object => {
-                    self.set_gumball_alignment(self::gumball::GumballAlignment::Object)
-                }
-                GumballPlacement::CPlane => {
-                    self.set_gumball_alignment(self::gumball::GumballAlignment::CPlane)
-                }
-            }
-            self.events.emit(
-                crate::command_events::EventKind::Finished,
-                "Gumball",
-                "gumball placement",
-                None,
-            );
-            return Ok(());
-        }
-        if let Some(edit) = self::gumball_numeric::parse(text) {
-            use self::gumball_numeric::NumericEdit;
-            let result = match edit {
-                NumericEdit::Move(delta) => self.numeric_move(delta),
-                NumericEdit::Rotate(axis, degrees) => self.numeric_rotate(axis, degrees),
-                NumericEdit::Scale(axis, factor) => self.numeric_scale(axis, factor),
-            };
-            let moved = result?;
-            self.events.emit(
-                crate::command_events::EventKind::Finished,
-                "Gumball",
-                &format!("applied to {moved} objects"),
-                None,
-            );
-            return Ok(());
-        }
-        if let Some(count) = parse_mesh_stress(text) {
-            let created = self.insert_stress_meshes(count)?;
-            self.events.emit(
-                crate::command_events::EventKind::Finished,
-                "MeshStress",
-                &format!("created {created} meshes"),
-                None,
-            );
-            return Ok(());
-        }
-        if let Some(choice) = crate::layer_command::parse(text, self.document())? {
-            return self.set_current_layer(choice);
-        }
-        if !self.is_running() {
-            if text.is_empty() {
-                let repeat = self
-                    .repeatable_last()
-                    .map(str::to_owned)
-                    .ok_or(Error::Missing("previous repeatable command"))?;
-                return self.dispatch(&repeat, InvocationOrigin::Cmd);
-            }
-            return match Self::resolve_alias(text) {
-                Some(LINE) => self.dispatch(LINE, InvocationOrigin::Cmd),
-                Some(POINT) => self.dispatch(POINT, InvocationOrigin::Cmd),
-                Some(self::circle::CIRCLE) => self.dispatch(self::circle::CIRCLE, InvocationOrigin::Cmd),
-                Some(self::rect::RECTANGLE) => {
-                    self.dispatch(self::rect::RECTANGLE, InvocationOrigin::Cmd)
-                }
-                Some(self::polyline::POLYLINE) => {
-                    self.dispatch(self::polyline::POLYLINE, InvocationOrigin::Cmd)
-                }
-                Some(self::interp::INTERP) => {
-                    self.dispatch(self::interp::INTERP, InvocationOrigin::Cmd)
-                }
-                Some(self::ellipse::ELLIPSE) => {
-                    self.dispatch(self::ellipse::ELLIPSE, InvocationOrigin::Cmd)
-                }
-                Some(self::arc::ARC) => self.dispatch(self::arc::ARC, InvocationOrigin::Cmd),
-                Some(self::arc::ARC_START) => {
-                    self.dispatch(self::arc::ARC_START, InvocationOrigin::Cmd)
-                }
-                Some(self::rebuild::REBUILD) => {
-                    self.dispatch(self::rebuild::REBUILD, InvocationOrigin::Cmd)
-                }
-                Some(self::fit::FIT) => self.dispatch(self::fit::FIT, InvocationOrigin::Cmd),
-                Some(self::offset::OFFSET) => {
-                    self.dispatch(self::offset::OFFSET, InvocationOrigin::Cmd)
-                }
-                Some(self::project::PROJECT) => {
-                    self.dispatch(self::project::PROJECT, InvocationOrigin::Cmd)
-                }
-                Some(self::blend::BLEND) => self.dispatch(self::blend::BLEND, InvocationOrigin::Cmd),
-                Some(self::blend::BLEND_CRV) => {
-                    self.dispatch(self::blend::BLEND_CRV, InvocationOrigin::Cmd)
-                }
-                Some(self::blend::MATCH) => self.dispatch(self::blend::MATCH, InvocationOrigin::Cmd),
-                Some(self::isocurve::ISOCURVE) => {
-                    self.dispatch(self::isocurve::ISOCURVE, InvocationOrigin::Cmd)
-                }
-                Some(self::pull::PULL) => self.dispatch(self::pull::PULL, InvocationOrigin::Cmd),
-                Some(self::intersect::INTERSECT) => {
-                    self.dispatch(self::intersect::INTERSECT, InvocationOrigin::Cmd)
-                }
-                Some(self::intersect_two_sets::INTERSECT_TWO_SETS) => {
-                    self.dispatch(
-                        self::intersect_two_sets::INTERSECT_TWO_SETS,
-                        InvocationOrigin::Cmd,
-                    )
-                }
-                Some(self::crv2view::CRV2VIEW) => {
-                    self.dispatch(self::crv2view::CRV2VIEW, InvocationOrigin::Cmd)
-                }
-                Some(self::through_points::THROUGH_POINTS) => {
-                    self.dispatch(self::through_points::THROUGH_POINTS, InvocationOrigin::Cmd)
-                }
-                Some(self::polygon::POLYGON) => {
-                    self.dispatch(self::polygon::POLYGON, InvocationOrigin::Cmd)
-                }
-                Some(self::helix::HELIX) => self.dispatch(self::helix::HELIX, InvocationOrigin::Cmd),
-                Some(self::spiral::SPIRAL) => {
-                    self.dispatch(self::spiral::SPIRAL, InvocationOrigin::Cmd)
-                }
-                Some(self::divide::DIVIDE) => {
-                    self.dispatch(self::divide::DIVIDE, InvocationOrigin::Cmd)
-                }
-                Some(self::to_lines::TO_LINES) => {
-                    self.dispatch(self::to_lines::TO_LINES, InvocationOrigin::Cmd)
-                }
-                Some(self::extend_curve::EXTEND) => {
-                    self.dispatch(self::extend_curve::EXTEND, InvocationOrigin::Cmd)
-                }
-                Some(self::tween_curves::TWEEN_CURVES) => {
-                    self.dispatch(self::tween_curves::TWEEN_CURVES, InvocationOrigin::Cmd)
-                }
-                Some(self::continue_interp::CONTINUE_INTERP) => {
-                    self.dispatch(self::continue_interp::CONTINUE_INTERP, InvocationOrigin::Cmd)
-                }
-                Some(self::arc_blend::ARC_BLEND) => {
-                    self.dispatch(self::arc_blend::ARC_BLEND, InvocationOrigin::Cmd)
-                }
-                Some(self::section::SECTION) => {
-                    self.dispatch(self::section::SECTION, InvocationOrigin::Cmd)
-                }
-                Some(self::revolve::REVOLVE) => {
-                    self.dispatch(self::revolve::REVOLVE, InvocationOrigin::Cmd)
-                }
-                Some(self::curve_boolean::CURVE_BOOLEAN) => {
-                    self.dispatch(self::curve_boolean::CURVE_BOOLEAN, InvocationOrigin::Cmd)
-                }
-                Some(self::heightfield::HEIGHTFIELD) => {
-                    self.dispatch(self::heightfield::HEIGHTFIELD, InvocationOrigin::Cmd)
-                }
-                Some(self::extrude_surface::EXTRUDE) => {
-                    self.dispatch(self::extrude_surface::EXTRUDE, InvocationOrigin::Cmd)
-                }
-                Some(self::angle_isocurve::ANGLE_ISOCURVE) => {
-                    self.dispatch(
-                        self::angle_isocurve::ANGLE_ISOCURVE,
-                        InvocationOrigin::Cmd,
-                    )
-                }
-                Some(self::curve_soft_edit::CURVE_SOFT_EDIT) => {
-                    self.dispatch(
-                        self::curve_soft_edit::CURVE_SOFT_EDIT,
-                        InvocationOrigin::Cmd,
-                    )
-                }
-                Some(self::cross_section::CROSS_SECTION) => {
-                    self.dispatch(self::cross_section::CROSS_SECTION, InvocationOrigin::Cmd)
-                }
-                Some(self::fillet_corners::FILLET_CORNERS) => {
-                    self.dispatch(self::fillet_corners::FILLET_CORNERS, InvocationOrigin::Cmd)
-                }
-                Some(self::silhouette::SILHOUETTE) => {
-                    self.dispatch(self::silhouette::SILHOUETTE, InvocationOrigin::Cmd)
-                }
-                Some(self::mesh_curve::MESH_CURVE) => {
-                    self.dispatch(self::mesh_curve::MESH_CURVE, InvocationOrigin::Cmd)
-                }
-                Some(self::uv_curves::CREATE_UV) => {
-                    self.dispatch(self::uv_curves::CREATE_UV, InvocationOrigin::Cmd)
-                }
-                Some(self::apply_crv::APPLY_CRV) => {
-                    self.dispatch(self::apply_crv::APPLY_CRV, InvocationOrigin::Cmd)
-                }
-                Some(self::offset_normal::OFFSET_NORMAL) => {
-                    self.dispatch(self::offset_normal::OFFSET_NORMAL, InvocationOrigin::Cmd)
-                }
-                Some(self::corner_ops::FILLET) => {
-                    self.dispatch(self::corner_ops::FILLET, InvocationOrigin::Cmd)
-                }
-                Some(self::corner_ops::CHAMFER) => {
-                    self.dispatch(self::corner_ops::CHAMFER, InvocationOrigin::Cmd)
-                }
-                Some(self::offset_on_surface::OFFSET_ON_SURFACE) => {
-                    self.dispatch(
-                        self::offset_on_surface::OFFSET_ON_SURFACE,
-                        InvocationOrigin::Cmd,
-                    )
-                }
-                Some(self::crv_seam::CRV_SEAM) => {
-                    self.dispatch(self::crv_seam::CRV_SEAM, InvocationOrigin::Cmd)
-                }
-                Some(self::control_curve::CONTROL_CURVE) => {
-                    self.dispatch(self::control_curve::CONTROL_CURVE, InvocationOrigin::Cmd)
-                }
-                Some(self::continue_curve::CONTINUE_CURVE) => {
-                    self.dispatch(self::continue_curve::CONTINUE_CURVE, InvocationOrigin::Cmd)
-                }
-                Some(self::sketch::SKETCH) => {
-                    self.dispatch(self::sketch::SKETCH, InvocationOrigin::Cmd)
-                }
-                Some(self::sketch_on_surface::SKETCH_ON_SURFACE) => {
-                    self.dispatch(
-                        self::sketch_on_surface::SKETCH_ON_SURFACE,
-                        InvocationOrigin::Cmd,
-                    )
-                }
-                Some(self::polyline_on_surface::POLYLINE_ON_SURFACE) => {
-                    self.dispatch(
-                        self::polyline_on_surface::POLYLINE_ON_SURFACE,
-                        InvocationOrigin::Cmd,
-                    )
-                }
-                Some(self::interp_on_surface::INTERP_ON_SURFACE) => {
-                    self.dispatch(
-                        self::interp_on_surface::INTERP_ON_SURFACE,
-                        InvocationOrigin::Cmd,
-                    )
-                }
-                Some(self::wireframe::DUP_EDGE) => {
-                    self.dispatch(self::wireframe::DUP_EDGE, InvocationOrigin::Cmd)
-                }
-                Some(self::wireframe::EXTRACT_WIRE) => {
-                    self.dispatch(self::wireframe::EXTRACT_WIRE, InvocationOrigin::Cmd)
-                }
-                Some(self::crv_ends::CRV_START) => {
-                    self.dispatch(self::crv_ends::CRV_START, InvocationOrigin::Cmd)
-                }
-                Some(self::crv_ends::CRV_END) => {
-                    self.dispatch(self::crv_ends::CRV_END, InvocationOrigin::Cmd)
-                }
-                Some(self::dup_border::DUP_BORDER) => {
-                    self.dispatch(self::dup_border::DUP_BORDER, InvocationOrigin::Cmd)
-                }
-                Some(command)
-                    if matches!(
-                        command,
-                        ZOOM_EXTENTS | ZOOM_SELECTED | VIEW_HOME | VIEW_CENTER
-                    ) =>
-                {
-                    self.dispatch(command, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_planar(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_curves(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_numeric(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_extend(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_shrink(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_tween(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_merge(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_seam(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some(feature) if surface_edit::handles_surface_pair(feature) => {
-                    self.dispatch(feature, InvocationOrigin::Cmd)
-                }
-                Some("undo") => self.undo(),
-                Some("redo") => self.redo(),
-                _ => Err(Error::Unsupported("unknown/unavailable command")),
-            };
-        }
-        let s = self.validate_session()?.clone();
-        if text.is_empty() {
-            return Err(Error::Invalid("point required"));
-        }
-        // Rhino p22: an option can be activated by typing its underlined letter. BothSides is the only flag
-        // the implemented commands declare, so `B` toggles it through the same assignment path.
-        if s.feature == LINE && text.chars().count() == 1 && text.eq_ignore_ascii_case("b") {
-            self.set_both_sides(!s.both_sides)?;
-            return Ok(());
-        }
-        if let Some(parsed) = crate::option_parser::parse_option(
-            self.document().page_unit,
-            &Self::line_descriptor(),
-            text,
-        )? {
-            if s.feature != LINE {
-                // A command that declares no options refuses every assignment, by
-                // name: POINT has none.
-                return Err(Error::Unsupported("command option"));
-            }
-            match parsed.value {
-                crate::option_parser::OptionValue::Flag(both_sides) => {
-                    self.session.as_mut().expect("session").both_sides = both_sides;
-                }
-                crate::option_parser::OptionValue::Number { value_mm, .. } => {
-                    // `Length` fixes the end point's distance from the start; the
-                    // click then chooses the direction (OM9-L3-01-02-005).
-                    self.session.as_mut().expect("session").length_mm = Some(value_mm);
-                }
-            }
-            return Ok(());
-        }
-        // Typed world/local/relative input: the grammar, prompts and error labels are
-        // unchanged, but a local point only becomes world through the captured frame.
-        let input = om9_core::coords::parse_input(text, s.unit)?;
-        let world =
-            om9_core::coords::resolve_with_base(input, Some(&s.plane), self.relative_base())?;
-        self.accept_world_point(world.xyz())
-    }
-    pub fn accept_world_point(&mut self, point: Point3) -> Result<()> {
-        finite(point)?;
-        if self.circle_pending.is_some() {
-            return self.accept_circle_point(point);
-        }
-        if self.control_curve_pending.is_some() {
-            return self.accept_control_curve_point(point);
-        }
-        if self.continue_curve_pending.is_some() {
-            return self.accept_continue_curve_point(point);
-        }
-        if self.rect_pending.is_some() {
-            return self.accept_rect_point(point);
-        }
-        if self.polyline_pending.is_some() {
-            return self.accept_polyline_point(point);
-        }
-        if self.interp_pending.is_some() {
-            return self.accept_interp_point(point);
-        }
-        if self.polygon_pending.is_some() {
-            return self.accept_polygon_point(point);
-        }
-        if self.continue_interp_pending.is_some() {
-            return self.accept_continue_interp_point(point);
-        }
-        if self.helix_pending.is_some() {
-            return self.accept_helix_point(point);
-        }
-        if self.spiral_pending.is_some() {
-            return self.accept_spiral_point(point);
-        }
-        if self.ellipse_pending.is_some() {
-            return self.accept_ellipse_point(point);
-        }
-        if self.arc_pending.is_some() {
-            return self.accept_arc_point(point);
-        }
-        if self
-            .solid_pending
-            .as_ref()
-            .is_some_and(|pending| pending.sphere_mode)
-        {
-            return self.accept_sphere_point(point);
-        }
-        if self.solid_pending.as_ref().is_some_and(|pending| {
-            pending.box_mode
-                && pending.box_kind == "Center"
-                && pending.points.len() == 1
-                && pending.box_length > 0.0
-                && pending.box_width.is_some()
-        }) {
-            let pending = self.solid_pending.take().expect("center box pending");
-            let center = pending.points[0];
-            let height = (point[2] - center[2]).abs();
-            if height <= 1e-9 {
-                self.solid_pending = Some(pending);
-                return Err(Error::Invalid("box height must be positive"));
-            }
-            return self.solid_box_dimensions(
-                center,
-                pending.box_length,
-                pending.box_width.unwrap_or(pending.box_length),
-                height,
-            );
-        }
-        if let Some(pending) = self.solid_pending.as_mut()
-            && pending.box_mode
-            && pending.points.len() < 2
-        {
-            pending.points.push(point);
-            return Ok(());
-        }
-        if self
-            .solid_pending
-            .as_ref()
-            .is_some_and(|pending| pending.box_mode && pending.points.len() >= 2)
-        {
-            let pending = self.solid_pending.take().expect("box pending");
-            if matches!(pending.box_kind, "ThreePoint" | "Vertical") && pending.box_width.is_none()
-            {
-                self.solid_pending = Some(pending);
-                return Err(Error::Missing("enter the box width first"));
-            }
-            let first = pending.points[0];
-            let second = pending.points[1];
-            let height = (point[2] - first[2]).abs();
-            if height <= 1e-9 {
-                self.solid_pending = Some(pending);
-                return Err(Error::Invalid("box height must be positive"));
-            }
-            return self.solid_box_points(
-                first,
-                second,
-                height,
-                pending.box_kind,
-                pending.box_width,
-            );
-        }
-        if self.slash_pending.is_some() {
-            let mut pending = self.slash_pending.as_ref().expect("slash").clone();
-            pending.points.push(point);
-            if pending.points.len() < 2 {
-                self.slash_pending = Some(pending);
-                self.last_point = Some(om9_core::coords::WorldPoint::try_new(point)?);
-                return Ok(());
-            }
-            let slash = [pending.points[0], pending.points[1]];
-            self.slash_pending = None;
-            let brep = self.build_sweep_history(
-                pending.feature,
-                &pending.curves,
-                pending.rail_count,
-                pending.closed,
-                pending.flip,
-                Some(slash),
-            )?;
-            let entity = Entity::new(
-                surface_edit::label(pending.feature),
-                Geometry::Brep(brep),
-                self.document().current_layer,
-            );
-            let mut inputs = Vec::with_capacity(pending.ids.len());
-            for (index, id) in pending.ids.iter().enumerate() {
-                inputs.push(SourceBinding {
-                    role: if index < pending.rail_count {
-                        "rail"
-                    } else {
-                        "profile"
-                    }
-                    .into(),
-                    source: self.document().stamp(*id)?,
-                    selection: Selection::Whole,
-                });
-            }
-            return self.commit_entity_with_history(
-                pending.feature,
-                surface_edit::label(pending.feature),
-                entity,
-                "Sweep2History",
-                inputs,
-            );
-        }
-        if self.top11_pending.is_some() {
-            self.last_point = Some(om9_core::coords::WorldPoint::try_new(point)?);
-            self.top11_accept_point(point)?;
-            return Ok(());
-        }
-        let s = self.validate_session()?.clone();
-        self.last_point = Some(om9_core::coords::WorldPoint::try_new(point)?);
-        if surface_edit::plane_like(s.feature) {
-            let collected = {
-                let session = self.session.as_mut().expect("session");
-                session.points.push(point);
-                session.points.clone()
-            };
-            if collected.len() < 3 {
-                self.events.emit(
-                    crate::command_events::EventKind::Progress,
-                    s.feature,
-                    "corner",
-                    None,
-                );
-                return Ok(());
-            }
-            let corners = [collected[0], collected[1], collected[2]];
-            let surface = surface_edit::plane_from_corners(corners, self.coordinator.limits())?;
-            return self.commit_geometry(
-                s.feature,
-                surface_edit::label(s.feature),
-                Geometry::Surface(surface),
-            );
-        }
-        let geometry = if s.feature == POINT {
-            Geometry::Point(point)
-        } else {
-            let Some(center) = s.start else {
-                self.session.as_mut().expect("session").start = Some(point);
-                self.events.emit(
-                    crate::command_events::EventKind::Progress,
-                    s.feature,
-                    "first point",
-                    None,
-                );
-                return Ok(());
-            };
-            let start = if s.both_sides {
-                std::array::from_fn(|i| 2. * center[i] - point[i])
-            } else {
-                center
-            };
-            finite(start)?;
-            // A fixed length keeps the clicked direction and scales it.
-            let end = match s.length_mm {
-                None => point,
-                Some(fixed) => {
-                    let d = [
-                        point[0] - start[0],
-                        point[1] - start[1],
-                        point[2] - start[2],
-                    ];
-                    let span = d[0].hypot(d[1]).hypot(d[2]);
-                    if !span.is_finite() || span <= 0. {
-                        return Err(Error::Invalid("direction for the fixed length"));
-                    }
-                    let scale = fixed / span;
-                    let end = std::array::from_fn(|i| start[i] + d[i] * scale);
-                    finite(end)?;
-                    end
-                }
-            };
-            let length = (end[0] - start[0])
-                .hypot(end[1] - start[1])
-                .hypot(end[2] - start[2]);
-            if !length.is_finite() || length <= 0. {
-                return Err(Error::Invalid("nonzero finite line length"));
-            }
-            Geometry::Curve(Curve::Line {
-                start,
-                end,
-                domain: [0., length],
-            })
-        };
-        let name = if s.feature == POINT { "Point" } else { "Line" };
-        self.commit_geometry(s.feature, name, geometry)
-    }
-    /// Start a fillet command that waits for one or two radii.
-    fn dispatch_fillet(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let (first, second) = self.selected_curve_pair()?;
-        self.fillet_pending = Some(FilletPending {
-            feature,
-            first,
-            second,
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "fillet strip",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a variable-chamfer command that waits for two setbacks.
-    fn dispatch_variable_chamfer(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let (first, second) = self.selected_curve_pair()?;
-        self.variable_chamfer_pending = Some(VarChamferPending {
-            feature,
-            first,
-            second,
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "variable chamfer strip",
-            None,
-        );
-        Ok(())
-    }
-    fn selected_curve_pair(&self) -> Result<(Curve, Curve)> {
-        let ordered = self.selected_ordered();
-        if ordered.len() != 2 {
-            return Err(Error::Invalid("two curve selection"));
-        }
-        let mut curves = Vec::with_capacity(2);
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        Ok((curves[0].clone(), curves[1].clone()))
-    }
-    /// Start a chamfer command that waits for a setback.
-    fn dispatch_chamfer(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        if ordered.len() != 2 {
-            return Err(Error::Invalid("two curve selection"));
-        }
-        let mut curves = Vec::with_capacity(2);
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        self.chamfer_pending = Some(ChamferPending {
-            feature,
-            first: curves[0].clone(),
-            second: curves[1].clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "chamfer strip",
-            None,
-        );
-        Ok(())
-    }
-    /// Remove one trim extension and commit the untrimmed copy.
-    fn dispatch_untrim(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        if !matches!(entity.geometry, Geometry::Surface(_)) {
-            return Err(Error::Invalid("surface selection"));
-        }
-        let untrimmed = surface_edit::untrim_entity(entity, self.coordinator.limits())?;
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "untrim surface",
-            None,
-        );
-        self.commit_entity(feature, surface_edit::label(feature), untrimmed)
-    }
-    /// Start a variable-blend command that waits for two tangent scales.
-    fn dispatch_variable_blend(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        if ordered.len() != 2 {
-            return Err(Error::Invalid("two curve selection"));
-        }
-        let mut curves = Vec::with_capacity(2);
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        self.variable_blend_pending = Some(VarBlendPending {
-            feature,
-            first: curves[0].clone(),
-            second: curves[1].clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "variable blend",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a shrink command that waits for a UV sub-domain.
-    fn dispatch_shrink(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        let Geometry::Surface(surface) = &entity.geometry else {
-            return Err(Error::Invalid("surface selection"));
-        };
-        self.shrink_pending = Some(ShrinkPending {
-            feature,
-            surface: surface.clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "shrink surface",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a variable-offset command that waits for two distances and an axis.
-    fn dispatch_variable_offset(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        let Geometry::Surface(surface) = &entity.geometry else {
-            return Err(Error::Invalid("surface selection"));
-        };
-        self.variable_offset_pending = Some(VarOffsetPending {
-            feature,
-            surface: surface.clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "variable offset",
-            None,
-        );
-        Ok(())
-    }
-    /// Build a planar surface from selected coplanar curves.
-    fn dispatch_planar_curves(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        let mut curves = Vec::with_capacity(ordered.len());
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        if curves.is_empty() {
-            return Err(Error::Invalid("planar curve count"));
-        }
-        let geometry = surface_edit::apply_planar_curves(&curves, self.coordinator.limits())?;
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "planar curves",
-            None,
-        );
-        self.commit_geometry(feature, surface_edit::label(feature), geometry)
-    }
-    /// Start an extrude-all command that waits for a height.
-    fn dispatch_extrude_all(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        let mut curves = Vec::with_capacity(ordered.len());
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        if curves.is_empty() {
-            return Err(Error::Invalid("curve selection"));
-        }
-        self.extrude_all_pending = Some(ExtrudeAllPending { feature, curves });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "extrude all curves",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a tangent command that waits for an edge and direction.
-    fn dispatch_tangent(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        let Geometry::Surface(surface) = &entity.geometry else {
-            return Err(Error::Invalid("surface selection"));
-        };
-        self.tangent_pending = Some(TangentPending {
-            feature,
-            surface: surface.clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "surface tangent",
-            None,
-        );
-        Ok(())
-    }
-    /// Drape a surface over selected point entities.
-    fn dispatch_drape(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        let mut points = Vec::with_capacity(ordered.len());
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected point"))?;
-            let Geometry::Point(point) = entity.geometry else {
-                return Err(Error::Invalid("point selection"));
-            };
-            points.push(point);
-        }
-        if points.len() < 3 {
-            return Err(Error::Invalid("drape point count"));
-        }
-        let geometry = surface_edit::apply_drape(&points, self.coordinator.limits())?;
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "drape points",
-            None,
-        );
-        self.commit_geometry(feature, surface_edit::label(feature), geometry)
-    }
-    /// Split a surface at an interior isocurve.
-    fn dispatch_split(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        let Geometry::Surface(surface) = &entity.geometry else {
-            return Err(Error::Invalid("surface selection"));
-        };
-        self.split_pending = Some(SplitPending {
-            feature,
-            surface: surface.clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "surface split",
-            None,
-        );
-        Ok(())
-    }
-    /// Start an extend command that waits for an edge and distance.
-    fn dispatch_extend(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        let Geometry::Surface(surface) = &entity.geometry else {
-            return Err(Error::Invalid("surface selection"));
-        };
-        self.extend_pending = Some(ExtendPending {
-            feature,
-            surface: surface.clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "surface extend",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a tween command that waits for a fraction.
-    fn dispatch_tween(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        if ordered.len() != 2 {
-            return Err(Error::Invalid("two surface selection"));
-        }
-        let mut surfaces = Vec::with_capacity(2);
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected surface"))?;
-            let Geometry::Surface(surface) = &entity.geometry else {
-                return Err(Error::Invalid("surface selection"));
-            };
-            surfaces.push(surface.clone());
-        }
-        self.tween_pending = Some(TweenPending {
-            feature,
-            first: surfaces[0].clone(),
-            second: surfaces[1].clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "surface tween",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a soft-edit command that waits for UV, radius and delta.
-    fn dispatch_soft_edit(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        let Geometry::Surface(surface) = &entity.geometry else {
-            return Err(Error::Invalid("surface selection"));
-        };
-        self.soft_edit_pending = Some(SoftEditPending {
-            feature,
-            surface: surface.clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "surface soft edit",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a seam command that waits for its axis and tolerance.
-    fn dispatch_seam(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        let Geometry::Surface(surface) = &entity.geometry else {
-            return Err(Error::Invalid("surface selection"));
-        };
-        self.seam_pending = Some(SeamPending {
-            feature,
-            surface: surface.clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "surface seam",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a two-surface command that waits for edge names.
-    fn dispatch_surface_pair(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        if ordered.len() != 2 {
-            return Err(Error::Invalid("two surface selection"));
-        }
-        let mut surfaces = Vec::with_capacity(2);
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected surface"))?;
-            let Geometry::Surface(surface) = &entity.geometry else {
-                return Err(Error::Invalid("surface selection"));
-            };
-            surfaces.push(surface.clone());
-        }
-        self.surface_pair_pending = Some(SurfacePairPending {
-            feature,
-            source: surfaces[0].clone(),
-            target: surfaces[1].clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "surface match edges",
-            None,
-        );
-        Ok(())
-    }
-    /// Attach FourRailProfile metadata to selected profile curves.
-    fn dispatch_four_rail_profile(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        if ordered.len() < 5 {
-            return Err(Error::Invalid("four rails and a profile"));
-        }
-        let rails: [om9_core::identity::ObjectId; 4] = ordered[..4]
-            .try_into()
-            .map_err(|_| Error::Invalid("four rails"))?;
-        let mut rail_points = Vec::with_capacity(4);
-        for id in &rails {
-            let entity = self
-                .document()
-                .entities
-                .get(id)
-                .ok_or(Error::Missing("four rail"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("four rail curve"));
-            };
-            rail_points.push(
-                om9_core::surface_kernel::sample_curve(curve, 33, self.coordinator.limits())
-                    .map_err(|_| Error::Unsupported("four rail curve"))?,
-            );
-        }
-        let first_profile = self
-            .document()
-            .entities
-            .get(&ordered[4])
-            .ok_or(Error::Missing("four rail profile"))?;
-        let Geometry::Curve(first_curve) = &first_profile.geometry else {
-            return Err(Error::Invalid("profile curve"));
-        };
-        let first_points =
-            om9_core::surface_kernel::sample_curve(first_curve, 64, self.coordinator.limits())
-                .map_err(|_| Error::Unsupported("four rail profile curve"))?;
-        let (_, rail_params) = rail_intersections(
-            first_curve,
-            &first_points,
-            &rail_points,
-            self.coordinator.limits(),
-        )
-        .ok_or(Error::Invalid("four rail profile intersections"))?;
-        let mut rail_order = [0usize, 1, 2, 3];
-        rail_order.sort_by(|left, right| rail_params[*left].total_cmp(&rail_params[*right]));
-        let rails = [
-            rails[rail_order[0]],
-            rails[rail_order[1]],
-            rails[rail_order[2]],
-            rails[rail_order[3]],
-        ];
-        let mut mutations = Vec::with_capacity(ordered.len() - 4);
-        for id in &ordered[4..] {
-            let entity = self
-                .document()
-                .entities
-                .get(id)
-                .ok_or(Error::Missing("selected profile"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("profile curve"));
-            };
-            let points =
-                om9_core::surface_kernel::sample_curve(curve, 16, self.coordinator.limits())
-                    .map_err(|_| Error::Unsupported("four rail profile curve"))?;
-            let mut chord = None;
-            let mut normal = None;
-            'outer: for i in 1..points.len() {
-                let first = [
-                    points[i][0] - points[0][0],
-                    points[i][1] - points[0][1],
-                    points[i][2] - points[0][2],
-                ];
-                for j in (i + 1)..points.len() {
-                    let second = [
-                        points[j][0] - points[0][0],
-                        points[j][1] - points[0][1],
-                        points[j][2] - points[0][2],
-                    ];
-                    let candidate = [
-                        first[1] * second[2] - first[2] * second[1],
-                        first[2] * second[0] - first[0] * second[2],
-                        first[0] * second[1] - first[1] * second[0],
-                    ];
-                    let length = candidate[0].hypot(candidate[1]).hypot(candidate[2]);
-                    if length > 1.0e-9 {
-                        chord = Some(first);
-                        normal = Some([
-                            candidate[0] / length,
-                            candidate[1] / length,
-                            candidate[2] / length,
-                        ]);
-                        break 'outer;
-                    }
-                }
-            }
-            let (chord, normal) = match (chord, normal) {
-                (Some(chord), Some(normal)) => (chord, normal),
-                _ => return Err(Error::Invalid("four rail profile plane")),
-            };
-            let chord_len = chord[0].hypot(chord[1]).hypot(chord[2]);
-            let metadata = om9_core::rhino_semantics::FourRailProfile {
-                rails,
-                origin: points[0],
-                normal,
-                x_axis: [
-                    chord[0] / chord_len,
-                    chord[1] / chord_len,
-                    chord[2] / chord_len,
-                ],
-            };
-            let mut extensions = entity.extensions.clone();
-            extensions.insert(
-                om9_core::model::FOUR_RAIL_PROFILE_EXTENSION_SLOT.to_string(),
-                metadata.to_extension()?,
-            );
-            mutations.push(Mutation::Extensions {
-                source: self.document().stamp(*id)?,
-                extensions,
-            });
-        }
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "four rail profile",
-            None,
-        );
-        let prepared = self
-            .coordinator
-            .prepare(TransactionRequest::new("FourRailProfile", mutations))?;
-        let receipt = self.coordinator.commit(prepared)?;
-        if receipt.published {
-            self.refresh_scene()?;
-            self.sync_published(om9_core::changes::ChangeCause::Edit);
-        }
-        self.events.emit(
-            crate::command_events::EventKind::Finished,
-            feature,
-            "four rail profile",
-            Some(if receipt.published {
-                crate::command_events::EventOutcome::Committed
-            } else {
-                crate::command_events::EventOutcome::Refused
-            }),
-        );
-        Ok(())
-    }
-    #[cfg(feature = "occt-brep")]
-    fn build_sweep4(&self, curves: &[Curve]) -> Result<om9_core::brep::Brep> {
-        use om9_core::surface_kernel;
-        if curves.len() < 6 {
-            return Err(Error::Invalid("four rails and two profiles"));
-        }
-        let limits = self.coordinator.limits();
-        let mut rails = Vec::with_capacity(4);
-        for curve in &curves[..4] {
-            rails.push(
-                surface_kernel::sample_curve(curve, 33, limits)
-                    .map_err(|_| Error::Unsupported("Sweep 4 rail"))?,
-            );
-        }
-        let mut profiles = Vec::with_capacity(curves.len() - 4);
-        for curve in &curves[4..] {
-            profiles.push(
-                surface_kernel::sample_curve(curve, 64, limits)
-                    .map_err(|_| Error::Unsupported("Sweep 4 profile"))?,
-            );
-        }
-        let (_, first_params) = rail_intersections(&curves[4], &profiles[0], &rails, limits)
-            .ok_or(Error::Invalid("four rail profile intersections"))?;
-        let mut order = [0usize, 1, 2, 3];
-        order.sort_by(|left, right| first_params[*left].total_cmp(&first_params[*right]));
-        let ordered_rails: Vec<Vec<Point3>> =
-            order.iter().map(|index| rails[*index].clone()).collect();
-        let mut entries: Vec<(f64, [f64; 4], Vec<Point3>)> = Vec::with_capacity(profiles.len());
-        for (index, profile) in profiles.into_iter().enumerate() {
-            let (indices, _) = rail_intersections(&curves[4 + index], &profile, &rails, limits)
-                .ok_or(Error::Invalid("four rail profile intersections"))?;
-            let mut ordered = [0.0f64; 4];
-            for (slot, rail) in order.iter().enumerate() {
-                ordered[slot] = indices[*rail];
-            }
-            for left in 0..4 {
-                for right in (left + 1)..4 {
-                    if (ordered[left] - ordered[right]).abs() <= 1.0e-6 {
-                        return Err(Error::Invalid("four rail profile intersections"));
-                    }
-                }
-            }
-            entries.push((ordered[0], ordered, profile));
-        }
-        entries.sort_by(|left, right| left.0.total_cmp(&right.0));
-        let mut sections: [Vec<Vec<Point3>>; 4] = Default::default();
-        for (_, indices, profile) in entries {
-            for quadrant in 0..4 {
-                let start = indices[quadrant];
-                let end = indices[(quadrant + 1) % 4];
-                sections[quadrant].push(profile_segment(&profile, start, end));
-            }
-        }
-        om9_kernel::creation::four_rail_sweep(
-            &ordered_rails
-                .try_into()
-                .map_err(|_| Error::Invalid("four rails"))?,
-            &sections,
-            1.0e-3,
-            om9_kernel::creation::DEFAULT_DEFLECTION_MM,
-            limits,
-        )
-        .map_err(|_| Error::Unsupported("Sweep 4 builder"))
-    }
-
-    #[cfg(feature = "occt-brep")]
-    fn dispatch_sweep4(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let mut ordered = self.selected_ordered();
-        if ordered.len() < 6 {
-            // Profiles created by Four Rail Profile carry their four rail ids;
-            // selecting only those profiles is enough to resolve the rails.
-            let mut rails: Option<[om9_core::identity::ObjectId; 4]> = None;
-            let mut profiles = Vec::new();
-            for id in &ordered {
-                let entity = self
-                    .document()
-                    .entities
-                    .get(id)
-                    .ok_or(Error::Missing("selected profile"))?;
-                let metadata = om9_core::rhino_semantics::four_rail_profile_of(
-                    entity,
-                    self.coordinator.limits(),
-                )?
-                .ok_or(Error::Invalid("profile has no FourRailProfile metadata"))?;
-                if let Some(existing) = rails {
-                    if existing != metadata.rails {
-                        return Err(Error::Invalid("profiles use different four rails"));
-                    }
-                } else {
-                    rails = Some(metadata.rails);
-                }
-                profiles.push(*id);
-            }
-            let Some(rails) = rails else {
-                return Err(Error::Invalid("four rails and two profiles"));
-            };
-            ordered = rails.to_vec();
-            ordered.extend(profiles);
-        }
-        if ordered.len() < 6 {
-            return Err(Error::Invalid("four rails and two profiles"));
-        }
-        let mut curves = Vec::with_capacity(ordered.len());
-        for id in &ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        let brep = self.build_sweep4(&curves)?;
-        let entity = Entity::new(
-            surface_edit::label(feature),
-            Geometry::Brep(brep),
-            self.document().current_layer,
-        );
-        let mut inputs = Vec::with_capacity(ordered.len());
-        for (index, id) in ordered.iter().enumerate() {
-            inputs.push(SourceBinding {
-                role: if index < 4 { "rail" } else { "profile" }.into(),
-                source: self.document().stamp(*id)?,
-                selection: Selection::Whole,
-            });
-        }
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "four rail sweep",
-            None,
-        );
-        self.commit_entity_with_history(
-            feature,
-            surface_edit::label(feature),
-            entity,
-            "Sweep4",
-            inputs,
-        )
-    }
-
-    #[cfg(not(feature = "occt-brep"))]
-    fn dispatch_sweep4(&mut self, _feature: &str) -> Result<()> {
-        Err(Error::Unsupported("Sweep 4 requires OCCT"))
-    }
-    /// Multi-profile Sweep 1/2 History through the OCCT pipe-shell adapter.
-    #[cfg(feature = "occt-brep")]
-    fn dispatch_sweep_history(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let rail_count = if feature == surface_edit::SWEEP2_HISTORY {
-            2
-        } else {
-            1
-        };
-        let ordered = self.selected_ordered();
-        if ordered.len() <= rail_count {
-            return Err(Error::Invalid("rail and profile selection"));
-        }
-        let mut curves = Vec::with_capacity(ordered.len());
-        for id in &ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        self.history_options_pending = Some(HistoryOptionsPending {
-            feature,
-            curves,
-            ids: ordered,
-            rail_count,
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "multi-profile sweep options",
-            None,
-        );
-        Ok(())
-    }
-
-    #[cfg(feature = "occt-brep")]
-    fn build_sweep_history(
-        &self,
-        _feature: &'static str,
-        curves: &[Curve],
-        rail_count: usize,
-        closed: bool,
-        flip: bool,
-        slash: Option<[Point3; 2]>,
-    ) -> Result<om9_core::brep::Brep> {
-        use om9_core::surface_kernel;
-        let limits = self.coordinator.limits();
-        let mut rails: Vec<Vec<Point3>> = Vec::with_capacity(rail_count);
-        for curve in &curves[..rail_count] {
-            rails.push(
-                surface_kernel::sample_curve(curve, 33, limits)
-                    .map_err(|_| Error::Unsupported("Sweep history builder"))?,
-            );
-        }
-        let mut profiles: Vec<Vec<Point3>> = Vec::with_capacity(curves.len() - rail_count);
-        for curve in &curves[rail_count..] {
-            profiles.push(
-                surface_kernel::sample_curve(curve, 24, limits)
-                    .map_err(|_| Error::Unsupported("Sweep history builder"))?,
-            );
-        }
-        if flip {
-            profiles.reverse();
-            for profile in &mut profiles {
-                profile.reverse();
-            }
-        }
-        if let Some([a, b]) = slash {
-            let section = slash_alignment_section(&profiles, &rails, a, b)?;
-            profiles.push(section);
-        }
-        if closed {
-            let first = rails[0][0];
-            let last = rails[0][rails[0].len() - 1];
-            let dx = first[0] - last[0];
-            let dy = first[1] - last[1];
-            let dz = first[2] - last[2];
-            if dx * dx + dy * dy + dz * dz > 1.0e-12 {
-                return Err(Error::Invalid("closed sweep needs a closed rail"));
-            }
-            if profiles.len() > 1 {
-                let first_profile = profiles[0].clone();
-                profiles.push(first_profile);
-            }
-        }
-        om9_kernel::creation::pipe_shell(
-            &rails[0],
-            rails.get(1).map(Vec::as_slice),
-            &profiles,
-            false,
-            om9_kernel::creation::DEFAULT_DEFLECTION_MM,
-            limits,
-        )
-        .map_err(|_| Error::Unsupported("Sweep history builder"))
-    }
-
-    #[cfg(not(feature = "occt-brep"))]
-    fn build_sweep_history(
-        &self,
-        _feature: &'static str,
-        _curves: &[Curve],
-        _rail_count: usize,
-        _closed: bool,
-        _flip: bool,
-        _slash: Option<[Point3; 2]>,
-    ) -> Result<om9_core::brep::Brep> {
-        Err(Error::Unsupported("Sweep History requires OCCT"))
-    }
-
-    #[cfg(not(feature = "occt-brep"))]
-    fn dispatch_sweep_history(&mut self, _feature: &str) -> Result<()> {
-        Err(Error::Unsupported("Sweep History requires OCCT"))
-    }
-    /// Merge two selected surfaces sharing a boundary.
-    fn dispatch_merge(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        if ordered.len() != 2 {
-            return Err(Error::Invalid("two surface selection"));
-        }
-        let mut surfaces = Vec::with_capacity(2);
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected surface"))?;
-            let Geometry::Surface(surface) = &entity.geometry else {
-                return Err(Error::Invalid("surface selection"));
-            };
-            surfaces.push(surface.clone());
-        }
-        let geometry =
-            surface_edit::apply_merge(&surfaces[0], &surfaces[1], self.coordinator.limits())?;
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "merge surfaces",
-            None,
-        );
-        self.commit_geometry(feature, surface_edit::label(feature), geometry)
-    }
-    /// Sweep all profiles after the first selected curve along that rail.
-    fn dispatch_sweep_multi(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        if ordered.len() < 2 {
-            return Err(Error::Invalid("rail and profile selection"));
-        }
-        let mut curves = Vec::with_capacity(ordered.len());
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        let rail = curves.remove(0);
-        let surfaces = surface_edit::apply_sweep_multi(&rail, &curves, self.coordinator.limits())?;
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "sweep multi",
-            None,
-        );
-        let items = surfaces
-            .into_iter()
-            .map(|surface| (surface_edit::label(feature), surface))
-            .collect();
-        self.commit_geometries(feature, surface_edit::label(feature), items)
-    }
-    /// Start a profile/rail command that waits for its axis.
-    fn dispatch_curve_pair(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let ordered = self.selected_ordered();
-        if ordered.len() != 2 {
-            return Err(Error::Invalid("profile and rail selection"));
-        }
-        let mut curves = Vec::with_capacity(2);
-        for id in ordered {
-            let entity = self
-                .document()
-                .entities
-                .get(&id)
-                .ok_or(Error::Missing("selected curve"))?;
-            let Geometry::Curve(curve) = &entity.geometry else {
-                return Err(Error::Invalid("curve selection"));
-            };
-            curves.push(curve.clone());
-        }
-        self.curve_pair_pending = Some(CurvePairPending {
-            feature,
-            profile: curves[0].clone(),
-            rail: curves[1].clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "rail revolve axis",
-            None,
-        );
-        Ok(())
-    }
-    /// Start a selected-surface command that waits for one numeric distance.
-    fn dispatch_surface_distance(&mut self, feature: &str) -> Result<()> {
-        let feature = surface_edit::static_feature(feature);
-        let id = self
-            .selection
-            .iter()
-            .next()
-            .copied()
-            .ok_or(Error::Missing("surface selection"))?;
-        let entity = self
-            .document()
-            .entities
-            .get(&id)
-            .ok_or(Error::Missing("selected surface"))?;
-        let Geometry::Surface(surface) = &entity.geometry else {
-            return Err(Error::Invalid("surface selection"));
-        };
-        self.surface_pending = Some(SurfacePending {
-            feature,
-            surface: surface.clone(),
-        });
-        self.events.emit(
-            crate::command_events::EventKind::Started,
-            feature,
-            "surface distance",
-            None,
-        );
-        Ok(())
     }
     /// Insert one authored geometry item and publish it. Shared by the interactive point
     /// commands and the immediate selected-surface edit commands (`Unroll`, `Rebuild`).
@@ -4727,6 +2208,9 @@ impl Controller {
             },
         );
         recipe.state = EvaluationState::Pending;
+        recipe.policy.record = self.history_record;
+        recipe.policy.update = self.history_update;
+        let record = self.history_record;
         let old_scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
         if old_scene.epoch != self.coordinator.epoch() {
             return Err(Error::Stale("command scene"));
@@ -4737,23 +2221,21 @@ impl Controller {
             self.coordinator.limits(),
         )?;
         let expected_revision = self.document().revision;
-        let prepared = self.coordinator.prepare_with_held_usage(
-            TransactionRequest::new(
-                name,
-                vec![
-                    Mutation::Insert {
-                        document: self.document,
-                        entity,
-                    },
-                    Mutation::History {
-                        document: self.document,
-                        expected_revision,
-                        recipe: Box::new(recipe),
-                    },
-                ],
-            ),
-            held,
-        )?;
+        let mut mutations = vec![Mutation::Insert {
+            document: self.document,
+            entity,
+        }];
+        if record {
+            mutations.push(Mutation::History {
+                document: self.document,
+                expected_revision,
+                recipe: Box::new(recipe),
+                published: vec![],
+            });
+        }
+        let prepared = self
+            .coordinator
+            .prepare_with_held_usage(TransactionRequest::new(name, mutations), held)?;
         let epoch = self
             .coordinator
             .epoch()
@@ -4766,16 +2248,18 @@ impl Controller {
             self.coordinator.limits(),
         )?;
         let receipt = self.coordinator.commit(prepared)?;
-        if receipt.published {
+        if receipt.published || !record {
             self.scene = Some(scene);
             self.recent.push_back(feature.into());
             while self.recent.len() > 9 {
                 self.recent.pop_front();
             }
             self.repeat = Some(feature.into());
-            self.sync_published(om9_core::changes::ChangeCause::Edit);
+            if record {
+                self.sync_published(om9_core::changes::ChangeCause::Edit);
+            }
         }
-        let outcome = if receipt.published {
+        let outcome = if receipt.published || !record {
             crate::command_events::EventOutcome::Committed
         } else {
             crate::command_events::EventOutcome::Refused
@@ -5201,8 +2685,18 @@ impl Controller {
             };
             curves.push(curve.clone());
         }
-        let brep = if recipe.command == "Sweep4" {
-            self.build_sweep4(&curves)?
+        let geometry = if recipe.command == "Crv2ViewHistory" {
+            if curves.len() != 2 {
+                return Err(Error::Invalid("history recipe inputs"));
+            }
+            let curve = self::crv2view::build_from_two_views(
+                &curves[0],
+                &curves[1],
+                self.coordinator.limits(),
+            )?;
+            Geometry::Curve(curve)
+        } else if recipe.command == "Sweep4" {
+            Geometry::Brep(self.build_sweep4(&curves)?)
         } else {
             let rail_count = match recipe.command.as_str() {
                 "Sweep1History" => 1,
@@ -5227,24 +2721,23 @@ impl Controller {
                         .map_err(|_| Error::Unsupported("history replay profile"))?,
                 );
             }
-            om9_kernel::creation::pipe_shell(
-                &rails[0],
-                rails.get(1).map(Vec::as_slice),
-                &profiles,
-                false,
-                om9_kernel::creation::DEFAULT_DEFLECTION_MM,
-                limits,
+            Geometry::Brep(
+                om9_kernel::creation::pipe_shell(
+                    &rails[0],
+                    rails.get(1).map(Vec::as_slice),
+                    &profiles,
+                    false,
+                    om9_kernel::creation::DEFAULT_DEFLECTION_MM,
+                    limits,
+                )
+                .map_err(|_| Error::Unsupported("history replay builder"))?,
             )
-            .map_err(|_| Error::Unsupported("history replay builder"))?
         };
         let output = recipe.outputs[0];
         let source = self.document().stamp(output)?;
         let prepared = self.coordinator.prepare(TransactionRequest::new(
             "ReplayHistory",
-            vec![Mutation::Geometry {
-                source,
-                geometry: Geometry::Brep(brep),
-            }],
+            vec![Mutation::Geometry { source, geometry }],
         ))?;
         let receipt = self.coordinator.commit(prepared)?;
         if receipt.published {
@@ -5310,6 +2803,121 @@ impl Controller {
 }
 
 /// Parses `MeshStress` / `MeshStress 2000` into a count.
+fn parse_soft_value(text: &str) -> Result<f64> {
+    let value: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("soft edit input"))?;
+    if !value.is_finite() {
+        return Err(Error::Invalid("soft edit input"));
+    }
+    Ok(value)
+}
+fn parse_soft_distance(text: &str) -> Result<f64> {
+    let value = parse_soft_value(text)?;
+    if value <= 0.0 {
+        return Err(Error::Invalid("soft edit distance"));
+    }
+    Ok(value)
+}
+fn parse_soft_flag(text: &str) -> Result<bool> {
+    match text.trim().to_ascii_lowercase().as_str() {
+        "yes" | "y" | "true" | "on" => Ok(true),
+        "no" | "n" | "false" | "off" => Ok(false),
+        _ => Err(Error::Invalid("soft edit flag")),
+    }
+}
+fn parse_shrink_value(text: &str) -> Result<f64> {
+    let value: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("shrink domain"))?;
+    if !value.is_finite() {
+        return Err(Error::Invalid("shrink domain"));
+    }
+    Ok(value)
+}
+fn parse_offset_distance(text: &str) -> Result<f64> {
+    let distance: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("variable offset distance"))?;
+    if !distance.is_finite() {
+        return Err(Error::Invalid("variable offset distance"));
+    }
+    Ok(distance)
+}
+fn parse_blend_scale(text: &str) -> Result<f64> {
+    let scale: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("variable blend scale"))?;
+    if !scale.is_finite() {
+        return Err(Error::Invalid("variable blend scale"));
+    }
+    Ok(scale)
+}
+fn parse_chamfer_setback(text: &str) -> Result<f64> {
+    let setback: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("chamfer setbacks"))?;
+    if !setback.is_finite() || setback <= 0.0 {
+        return Err(Error::Invalid("chamfer setbacks"));
+    }
+    Ok(setback)
+}
+fn parse_fillet_radius(text: &str) -> Result<f64> {
+    let radius: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("fillet radius"))?;
+    if !radius.is_finite() || radius <= 0.0 {
+        return Err(Error::Invalid("fillet radius"));
+    }
+    Ok(radius)
+}
+fn parse_tangent_direction(text: &str) -> Result<[f64; 3]> {
+    let values: Vec<f64> = text
+        .split(',')
+        .map(|value| value.trim().parse::<f64>())
+        .collect::<std::result::Result<_, _>>()
+        .map_err(|_| Error::Invalid("surface tangent direction"))?;
+    if values.len() != 3 || values.iter().any(|value| !value.is_finite()) {
+        return Err(Error::Invalid("surface tangent direction"));
+    }
+    Ok([values[0], values[1], values[2]])
+}
+fn parse_split_parameter(text: &str) -> Result<f64> {
+    let parameter: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("surface split parameter"))?;
+    if !parameter.is_finite() || parameter <= 0.0 || parameter >= 1.0 {
+        return Err(Error::Invalid("surface split parameter"));
+    }
+    Ok(parameter)
+}
+fn parse_extend_distance(text: &str) -> Result<f64> {
+    let distance: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("surface extend distance"))?;
+    if !distance.is_finite() {
+        return Err(Error::Invalid("surface extend distance"));
+    }
+    Ok(distance)
+}
+fn parse_seam_tolerance(text: &str) -> Result<f64> {
+    let tolerance: f64 = text
+        .trim()
+        .parse()
+        .map_err(|_| Error::Invalid("surface seam tolerance"))?;
+    if !tolerance.is_finite() || tolerance < 0.0 {
+        return Err(Error::Invalid("surface seam tolerance"));
+    }
+    Ok(tolerance)
+}
 fn parse_mesh_stress(text: &str) -> Option<usize> {
     let mut words = text.split_whitespace();
     let command = words.next()?;

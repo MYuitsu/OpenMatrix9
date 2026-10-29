@@ -4,31 +4,64 @@
   "menu_icon": "CurvePointObjectMarkCurveEnd",
   "command_id": "OM9-CURVE-032",
   "menu_and_commandline_same_id": true,
-  "enabled": false,
-  "disabled_reason": "no verified backend owner for Mark Curve End; menu stays disabled",
-  "visible_disabled_reason": true,
-  "ui_state": "DISABLED_VISIBLE_REASON",
+  "enabled": true,
+  "disabled_reason": "",
+  "visible_disabled_reason": false,
+  "ui_state": "ENABLED",
   "owner_service_reused": null,
   "transaction": "one session; one Undo entry",
   "smoke_receipt": "implementation/evidence/M03/OM9-L3-03-16-033/OM9-L4-03-16-033-02.wire.json",
-  "status": "VERIFIED_DISABLED_PLACEHOLDER",
+  "status": "VERIFIED_ENABLED_SESSION",
   "task_id": "OM9-L4-03-16-033-02",
   "role": "WIRE_UI",
   "commands": [
     {
-      "argv": "cargo test -p om9-app --test curve_menu",
+      "argv": "cargo test -p om9-app -j 2 --test curve_menu --test crv2view --test crv_ends",
       "cwd": "H:\\OpenMatrix9",
       "exit_code": 0,
-      "stdout_log": "build/l2-03-16-logs/curve-menu.log",
-      "stdout_log_sha256": "393cc79e359e9292748c085a0eded27fa7caad37eae06339a197bc9f2144d396"
+      "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-menu.log",
+      "stdout_log_sha256": "c5c74cede5ed3bb094894627f9412587e30984d8b8ec8b5eb6511926b35d1959",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "argv": "cargo test -p om9-app -j 2 --test angle_isocurve --test apply_crv --test arc --test arc_blend --test blend --test circle --test command_sessions --test command_shortcuts --test command_tokens --test command_transactions --test command_values",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-commands-1.log",
+      "stdout_log_sha256": "fb9fe078b6eb1a1107af26d9d83910f302483d84916e7244c7e9bd22f0d7607a",
+      "passed": 74,
+      "failed": 0
+    },
+    {
+      "argv": "cargo test -p om9-app -j 2 --test continue_curve --test continue_interp --test control_curve --test corner_ops --test cross_section --test crv_seam --test curve_boolean --test curve_soft_edit --test divide --test dup_border --test ellipse --test extend_curve --test fillet_corners --test fit --test helix --test interp --test interp_on_surface --test intersect --test intersect_two_sets --test isocurve --test mesh_curve --test offset --test offset_normal --test offset_on_surface --test polygon --test polyline --test polyline_command --test polyline_mode_regression --test polyline_on_surface --test polyline_options_interface --test polyline_shortcuts --test project --test pull --test rebuild --test rect --test section --test silhouette --test sketch --test sketch_on_surface --test spiral --test through_points --test to_lines --test tween_curves --test uv_curves --test wireframe",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/curve-commands-2.log",
+      "stdout_log_sha256": "0d85fac701064a5cbf80bea2cfe0fc7c87f8fe2e64c644af3ee0f2bd5f2ec2a8",
+      "passed": 143,
+      "failed": 0
+    },
+    {
+      "argv": "cargo test -p om9-app -j 2 --test chrome_actions --test surface_menu --test builder_slot --test f6_context --test command_context --test command_inline_options",
+      "cwd": "H:\\OpenMatrix9",
+      "exit_code": 0,
+      "stdout_log": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/ui-wiring.log",
+      "stdout_log_sha256": "186ef6b6f57cb6832b86169eca1aa0afa50c53b1ed61391eeaceb60c10229a7b",
+      "passed": 95,
+      "failed": 0
     }
   ],
   "observed": {
     "catalog_rows": 58,
-    "enabled_rows": 2,
-    "disabled_rows": 56,
+    "enabled_rows": 58,
+    "disabled_rows": 0,
+    "menu_label_matches_command": "passed",
+    "documented_script_matches_command": "passed",
+    "icon_maps_to_same_command": "passed",
     "line_point_geometry_smoke": "passed",
-    "disabled_reason_visible": true
+    "test_passed": 320,
+    "test_failed": 0
   },
   "expected": {
     "menu_and_commandline_same_id": true,
@@ -41,10 +74,15 @@
     "crates/om9-app/src/ui/chrome.rs"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-033/wire_ui.json": "df3f079ff9f67b66e88cfd8c73effba9a102177ec2178a31619040e3af3762ef",
-    "crates/om9-app/src/curve_menu.rs": "871fea98affbefb851d6c3e14182693565cc27b697ee6cfebea1b5932d7d8e50",
-    "crates/om9-app/src/ui/chrome.rs": "3c8865298d10ed3dae24e54ea989a825e6a815cc7718ddfaf18ef5a8af0cf6e0"
+    "implementation/design/M03/OM9-L3-03-16-033/wire_ui.json": "02fbb09c9cda9c8fc8237e95570f6254af221ad4ef607b3314ea014ac305c231",
+    "crates/om9-app/src/curve_menu.rs": "5fe221085552e47b96a4d382e34b19baca6ffdedb012b293831a13f2a48198fb",
+    "crates/om9-app/src/icons.rs": "2c50d208b241a67d5332884323e158cefefe4263f80351e345e9dd0542837535",
+    "crates/om9-app/src/ui/chrome.rs": "42097e89f157bdd740cc231a8601121f3412476c14887c45545e334621f63387",
+    "crates/om9-app/tests/curve_menu.rs": "6b27aac2be26a6bcb2254231703851eb9b607972b2d22892863916777a59595c"
   },
   "human_approval": null,
-  "manual_gate": "M03-UI"
+  "manual_gate": "M03-UI",
+  "date": "2026-10-26",
+  "menu_label": "Mark Curve End",
+  "documented_script": "CrvEnd"
 }

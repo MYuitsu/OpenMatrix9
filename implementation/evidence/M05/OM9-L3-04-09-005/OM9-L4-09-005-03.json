@@ -1,0 +1,89 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-09-005",
+  "l4_id": "OM9-L4-09-005-03",
+  "title": "Gem Emerald And Baguette Builders",
+  "generated_at_utc": "2026-10-27T09:23:29Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the gem window at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "5a2950cb7d9e2cf59fe9a970acaf734e639e5ff2529de017c99a04e00242c289",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "emerald and baguette commit the requested length/width/corner/depth/girdle",
+    "negative": "a degenerate girdle and an oversized corner are refused"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/transaction.rs",
+    "crates/om9-core/tests/gem_assets.rs",
+    "crates/om9-kernel/src/brep.rs",
+    "crates/om9-kernel/src/gem.rs",
+    "crates/om9-kernel/src/lib.rs",
+    "crates/om9-kernel/src/brep_bridge.cpp",
+    "crates/om9-kernel/Cargo.toml",
+    "crates/om9-kernel/tests/gem_brep.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/f6.rs",
+    "crates/om9-app/src/icons.rs",
+    "crates/om9-app/tests/gem_panel.rs",
+    "tools/record_m05_l2_04_09_gem_assets.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_emerald_builder_commits_the_requested_dimensions"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "f5d1c539119e75d9ab9d0abec4774479f7382c7ad7e3f4b2df986e0effda7c4f",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.12s"
+      ],
+      "test": "the_emerald_builder_commits_the_requested_dimensions",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_baguette_builder_refuses_a_degenerate_girdle_and_an_oversized_corner"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "a59714d3396a2734917701204c0fe465f4f16fa49c9335e9ca15c0725fff1572",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.08s"
+      ],
+      "test": "the_baguette_builder_refuses_a_degenerate_girdle_and_an_oversized_corner",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

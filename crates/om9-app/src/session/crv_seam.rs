@@ -48,7 +48,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Seam=") {
-            let Some(fraction) = value.parse::<f64>().ok().filter(|value| value.is_finite() && (0.0..=1.0).contains(value)) else {
+            let Some(fraction) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && (0.0..=1.0).contains(value))
+            else {
                 self.crv_seam_pending = Some(pending);
                 return Some(Err(Error::Invalid("seam fraction must be 0..1")));
             };

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-11-002",
+  "title": "Cluster Builder",
+  "cases": [
+    "a second ring without ring spacing is refused",
+    "a count below 3 or above MAX_ACCENTS is refused",
+    "a cluster on a non-gem selection is refused"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

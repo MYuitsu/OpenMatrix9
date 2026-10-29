@@ -240,7 +240,8 @@ impl MatrixApp {
                 ) {
                     self.hover = None;
                     self.transcript.set_draft("");
-                    self.transcript.set_prompt(self.controller.prompt());
+                    self.transcript
+                        .set_prompt(&self.controller.prompt_with_options());
                     self.view_menu_capture = None;
                     self.file_picker_request = None;
                     self.file_picker_attempted = None;
@@ -260,7 +261,8 @@ impl MatrixApp {
                             .append_history(&format!("project manager state: {error}"));
                     }
                 }
-                self.transcript.set_prompt(self.controller.prompt());
+                self.transcript
+                    .set_prompt(&self.controller.prompt_with_options());
                 self.focus_cmd = self.controller.file_operation().is_none();
                 ctx.request_repaint();
                 Ok(())
@@ -308,6 +310,19 @@ impl MatrixApp {
             ctx.request_repaint();
             return Ok(());
         };
+        if self
+            .controller
+            .file_operation()
+            .and_then(|operation| operation.kind())
+            .is_some_and(|kind| {
+                matches!(
+                    kind,
+                    crate::file_lifecycle::FileKind::Save | crate::file_lifecycle::FileKind::SaveAs
+                )
+            })
+        {
+            self.stage_project_state()?;
+        }
         let result = self.controller.accept_file_path(token, &path);
         self.file_feedback(ctx, result)
     }

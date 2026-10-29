@@ -1,0 +1,13 @@
+{
+  "git_head": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "dirty_worktree": true,
+  "preexisting_changes_preserved": true,
+  "source_sha256": {
+    "crates/om9-app/src/polyline_options.rs": "3b4dbf517fe934e7a8aacc7cd2c63432979cc012102f17ecf2a35ce872617f36",
+    "crates/om9-app/src/lib.rs": "53aa81683c8e28a7cb85d5ca502621f7570e1fd67855cae1384102ac311a64e0",
+    "crates/om9-app/src/session/polyline.rs": "b11c8b1e8de886e7d3458580d104b13d1ee6bd719eda96302be2c0afc63a7655",
+    "crates/om9-app/src/ui.rs": "6da9f79f65a06aba827e1897174dde27054b81a85d7966da4aa163eef5bd96ee",
+    "crates/om9-app/src/ui/command.rs": "82cfe752328ae70a29d03a3f902d2584527d1c124deedc0e5746c5d33e50f251",
+    "crates/om9-app/tests/polyline_options_interface.rs": "c3e34b8675d07270c6a4d418e23e97400a89df8b0be445789a4d5fadcf3d4c0c"
+  }
+}

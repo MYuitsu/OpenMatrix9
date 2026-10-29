@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-001",
+  "kind": "negative",
+  "input": "a planar Surface dropped into the rail Curve slot",
+  "expected": "Invalid(builder input kind) before a field or preview exists",
+  "verified_by": [
+    "a_typed_input_slot_refuses_the_wrong_geometry_kind_and_keeps_the_entity_id"
+  ],
+  "document_unchanged": true
+}

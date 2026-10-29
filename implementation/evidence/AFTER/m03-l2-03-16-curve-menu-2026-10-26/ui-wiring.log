@@ -1,0 +1,133 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.59s
+     Running tests\builder_slot.rs (L:\om9-target\debug\deps\builder_slot-9ec03b25ef03a0e6.exe)
+
+running 9 tests
+test fixture_design_pair_is_present ... ok
+test b1_the_slot_is_reserved_directly_below_projects ... ok
+test b5_the_placeholder_is_noninteractive ... ok
+test b6_to_y4_a_layout_file_cannot_break_the_reservation ... ok
+test b2_every_placement_is_refused_and_changes_nothing ... ok
+test y2_y3_y5_the_slot_is_a_placeholder_and_never_a_menu ... ok
+test b3_the_slot_owns_no_model ... ok
+test b4_the_bar_carries_no_close_box_and_starts_no_drag ... ok
+test y1_a_click_on_the_bar_is_refused ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
+
+     Running tests\chrome_actions.rs (L:\om9-target\debug\deps\chrome_actions-d2a72f8b3f88912e.exe)
+
+running 13 tests
+test every_reference_menu_has_its_full_icon_list ... ok
+test main_menu_categories_wrap_at_the_rail_edge ... ok
+test f4_toggles_world_datum_without_mutating_document ... ok
+test unregistered_right_click_slot_never_executes_a_previous_action ... ok
+test view_tab_switches_active_and_maximized_view ... ok
+test help_popup_contains_help_and_about_without_feature_catalog_actions ... ok
+test main_menu_category_tabs_switch_palette_without_document_mutation ... ok
+test top_menu_labels_are_interactive_and_return_to_categories ... ok
+test display_toolbar_tab_does_not_reuse_enabled_geometry_palette ... ok
+test view_tab_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test icons_scale_with_the_screen_size ... ok
+test view_menu_restores_cmd_focus_and_preserves_numeric_draft ... ok
+test snaps_are_noninvoking_even_where_the_old_sidebar_displayed_point_and_line ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
+
+     Running tests\command_context.rs (L:\om9-target\debug\deps\command_context-cadbd7465bf6ca22.exe)
+
+running 5 tests
+test fixture_design_pair_is_present ... ok
+test c1_the_context_snapshot_names_document_view_selection_and_revisions ... ok
+test c3_a_context_whose_view_or_document_is_gone_is_stale ... ok
+test c2_a_view_tab_switch_keeps_the_command_and_its_context ... ok
+test c4_a_command_keeps_the_context_it_started_against ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_inline_options.rs (L:\om9-target\debug\deps\command_inline_options-60a27bfd3dca4c68.exe)
+
+running 4 tests
+test idle_prompt_never_gains_an_option_signature ... ok
+test polyline_keeps_its_own_signature_without_duplication ... ok
+test prompt_with_options_names_every_option_inline_for_each_starter ... ok
+test the_command_bar_underlines_interp_options_inside_the_prompt ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+     Running tests\f6_context.rs (L:\om9-target\debug\deps\f6_context-261513675ea976b2.exe)
+
+running 2 tests
+test f6_uses_the_selected_class_and_empty_general_context ... ok
+test a_custom_menu_persists_in_the_project_with_stable_order_and_stale_disable ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\surface_menu.rs (L:\om9-target\debug\deps\surface_menu-a54d54ca9421cfb4.exe)
+
+running 62 tests
+test enabled_rows_dispatch_and_the_remaining_rows_stay_visible_disabled ... ok
+test every_authored_surface_menu_icon_maps_to_an_available_command ... ok
+test every_surface_row_declares_its_matrix_command_line_name ... ok
+test every_documented_surface_menu_row_has_one_stable_id_and_icon ... ok
+test every_surface_command_line_name_resolves_like_its_menu_row ... ok
+test four_rail_profile_metadata_round_trips_on_a_curve ... ok
+test a_zero_offset_is_refused_and_cancel_clears_the_prompt ... ok
+test planar_curves_build_a_surface_from_coplanar_curves ... ok
+test cutting_plane_collects_three_points_and_commits_a_plane ... ok
+test adjust_surface_seam_waits_for_axis_and_tolerance ... ok
+test match_surfaces_waits_for_edge_names_and_commits_one_surface ... ok
+test match_surfaces_accepts_the_documented_continuity_option ... ok
+test shared_history_icons_keep_distinct_command_ids ... ok
+test plane_from_corners_collects_three_points_and_refuses_collinear_input ... ok
+test soft_edit_copy_no_edits_the_selected_surface_in_place ... ok
+test set_surface_tangent_waits_for_edge_and_direction ... ok
+test soft_edit_direction_constraint_projects_the_move ... ok
+test drape_builds_a_surface_over_selected_points ... ok
+test soft_edit_fix_edges_keeps_the_boundary_poles ... ok
+test soft_edit_rejects_an_unknown_option_and_keeps_running ... ok
+test surface_edit_without_selection_or_with_a_curve_is_refused_without_a_transaction ... ok
+test chamfer_setback_uses_the_shared_option_entry ... ok
+test chamfer_surfaces_waits_for_a_setback ... ok
+test soft_edit_moves_nearby_poles_and_commits_one_surface ... ok
+test soft_edit_options_stage_the_base_point_and_documented_options ... ok
+test extend_surface_waits_for_edge_and_distance ... ok
+test offset_and_extrude_normal_wait_for_distance_and_commit_one_surface ... ok
+test blend_and_loft_combine_two_selected_curves_into_one_surface ... ok
+test the_surface_catalog_covers_every_l3_owner ... ok
+test patch_builds_a_four_boundary_surface ... ok
+test shrink_surface_waits_for_a_uv_subdomain ... ok
+test edge_curves_build_a_surface_from_two_or_four_edges ... ok
+test rebuild_and_unroll_run_from_a_selected_surface_and_commit_one_transaction ... ok
+test typed_shared_labels_follow_the_selected_object ... ok
+test menu_and_command_line_dispatch_the_same_surface_command ... ok
+test split_at_isocurve_creates_two_surfaces_in_one_transaction ... ok
+test fillet_radius_options_use_the_shared_entry ... ok
+test untrim_removes_a_trim_extension_and_refuses_an_untrimmed_surface ... ok
+test typed_rebuild_uses_the_surface_owner_when_a_surface_is_selected ... ok
+test tween_surfaces_waits_for_a_fraction_and_commits_one_surface ... ok
+test variable_chamfer_options_stage_start_then_end ... ok
+test variable_blend_options_stage_start_then_end ... ok
+test merge_surfaces_joins_two_matching_boundaries ... ok
+test fillet_and_variable_chamfer_strips_commit_surfaces ... ok
+test variable_offset_waits_for_two_distances_and_an_axis ... ok
+test variable_blend_waits_for_tangent_scales ... ok
+test variable_offset_options_stage_start_end_axis ... ok
+test typed_offset_srf_runs_the_same_service_as_the_menu_row ... ok
+test rail_revolve_waits_for_an_axis_and_commits_one_surface ... ok
+test profile_sweep_uses_the_sweep1_service ... ok
+test extrude_all_height_uses_the_shared_option_entry ... ok
+test extrude_all_creates_one_surface_per_curve ... ok
+test sweep_multi_creates_one_surface_per_profile_in_one_transaction ... ok
+test network_sweep1_and_sweep2_build_surfaces_from_ordered_curves ... ok
+test sweep_history_hides_closed_for_an_open_rail ... ok
+test sweep_history_offers_closed_only_for_a_closed_rail_and_two_profiles ... ok
+test sweep2_slash_collects_two_alignment_points ... ok
+test sweep1_history_builds_a_multi_profile_brep_and_records_history ... ok
+test four_rail_profile_command_tags_profiles_then_sweep4_uses_them ... ok
+test sweep4_resolves_rails_from_four_rail_profile_metadata ... ok
+test sweep2_history_builds_a_two_rail_brep_and_records_history ... ok
+test sweep4_sews_four_rail_patches_into_a_polysurface ... ok
+
+test result: ok. 62 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.04s
+

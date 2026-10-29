@@ -14,6 +14,8 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
+#include <BRepBuilderAPI_TransitionMode.hxx>
+#include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepCheck_Shell.hxx>
 #include <BRepLib.hxx>
@@ -34,6 +36,12 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TopoDS_Shell.hxx>
+#include <TopoDS_Solid.hxx>
+#include <TopoDS.hxx>
+#include <TopExp_Explorer.hxx>
+#include <BRepGProp.hxx>
+#include <GProp_GProps.hxx>
+#include <ShapeAnalysis_Shell.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRep_Builder.hxx>
@@ -205,6 +213,20 @@ extern "C" int om9_occt_primitive(int kind, const double* params, size_t count, 
     shape = sections.Shape();
     break;
    }
+   case 7: {  // pyramid over a Rust-validated planar profile, apex on the local axis
+    if (count < 10 || (count - 1) % 3 != 0) throw std::invalid_argument("pyramid profile parameters");
+    require_positive(params[0], "pyramid profile height");
+    const size_t vertices = (count - 1) / 3;
+    if (vertices > max_points || vertices > max_bytes / 512) throw std::invalid_argument("pyramid profile budget");
+    BRepOffsetAPI_ThruSections sections(true, true, 1.0e-6);
+    sections.CheckCompatibility(false);
+    sections.AddWire(make_wire(params + 1, vertices));
+    sections.AddVertex(BRepBuilderAPI_MakeVertex(gp_Pnt(0.0, 0.0, params[0])));
+    sections.Build();
+    if (!sections.IsDone()) throw std::runtime_error("pyramid profile build failed");
+    shape = sections.Shape();
+    break;
+   }
    default:
     throw std::invalid_argument("unknown primitive kind");
   }
@@ -232,8 +254,10 @@ extern "C" int om9_occt_extrude(const double* points, size_t count, const double
                                   direction[2] * direction[2]);
   if (!std::isfinite(length) || length <= 1.0e-12)
    throw std::invalid_argument("extrusion direction is zero");
-  const TopoDS_Shape profile = capped ? TopoDS_Shape(make_planar_face(points, count))
-                                      : TopoDS_Shape(make_open_wire(points, count));
+  if (capped < 0 || capped > 2) throw std::invalid_argument("invalid extrusion profile mode");
+  const TopoDS_Shape profile = capped == 1 ? TopoDS_Shape(make_planar_face(points, count))
+                               : capped == 2 ? TopoDS_Shape(make_wire(points, count))
+                                             : TopoDS_Shape(make_open_wire(points, count));
   BRepPrimAPI_MakePrism prism(profile, gp_Vec(direction[0], direction[1], direction[2]));
   return om9_emit_brep_snapshot(checked(prism.Shape(), "invalid extrusion"), deflection, max_points,
                                 max_nodes, max_bytes, sink, context, message, capacity);
@@ -516,3 +540,214 @@ extern "C" int om9_occt_tube(const double* stations, size_t station_count, doubl
  }
 }
 
+// The per-station radii and frames are validated and owned by Rust. This bridge
+// builds exact circular sections and delegates lofting to OCCT.
+extern "C" int om9_occt_tube_radii(const double* stations, const double* radii,
+                                   size_t station_count, int solid, int ruled, double deflection,
+                                   size_t max_points, size_t max_nodes, size_t max_bytes,
+                                   Om9BrepSink sink, void* context, char* message, int capacity) {
+ try {
+  if (!stations || !radii || station_count < 2) throw std::invalid_argument("tube needs two stations");
+  BRepOffsetAPI_ThruSections tube(solid != 0, ruled != 0, 1.0e-6);
+  tube.CheckCompatibility(false);
+  for (size_t i = 0; i < station_count; ++i) {
+   const double* s = stations + 9 * i;
+   require_finite(s, 9, "tube station");
+   require_positive(radii[i], "tube radius");
+   const gp_Ax2 axes(gp_Pnt(s[0], s[1], s[2]), gp_Dir(s[3], s[4], s[5]), gp_Dir(s[6], s[7], s[8]));
+   Handle(Geom_Circle) circle = new Geom_Circle(axes, radii[i]);
+   BRepBuilderAPI_MakeEdge edge(circle);
+   if (!edge.IsDone()) throw std::runtime_error("tube section edge");
+   BRepBuilderAPI_MakeWire wire(edge.Edge());
+   if (!wire.IsDone()) throw std::runtime_error("tube section wire");
+   tube.AddWire(wire.Wire());
+  }
+  tube.Build();
+  if (!tube.IsDone()) throw std::runtime_error("tube build failed");
+  return om9_emit_brep_snapshot(checked(tube.Shape(), "invalid tube"), deflection, max_points,
+                                max_nodes, max_bytes, sink, context, message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown tube failure");
+  return 2;
+ }
+}
+
+// OCCT adapter for an oriented hemispherical solid used to cap an existing body.
+extern "C" int om9_occt_hemisphere(const double* frame, double radius, int forward,
+                                    double deflection, size_t max_points, size_t max_nodes,
+                                    size_t max_bytes, Om9BrepSink sink, void* context,
+                                    char* message, int capacity) {
+ try {
+  require_finite(frame, 6, "hemisphere frame");
+  require_positive(radius, "hemisphere radius");
+  const gp_Pnt center(frame[0], frame[1], frame[2]);
+  const gp_Vec direction(frame[3], frame[4], frame[5]);
+  if (direction.Magnitude() <= 1.0e-12) throw std::invalid_argument("hemisphere direction");
+  const gp_Ax2 axis(center, gp_Dir(direction));
+  const double half_pi = std::acos(-1.0) / 2.0;
+  BRepPrimAPI_MakeSphere sphere(axis, radius, forward ? 0.0 : -half_pi, forward ? half_pi : 0.0);
+  return om9_emit_brep_snapshot(checked(sphere.Shape(), "invalid hemisphere"), deflection,
+                                max_points, max_nodes, max_bytes, sink, context, message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown hemisphere failure"); return 2;
+ }
+}
+
+// OCCT adapter for a straight conical body with two exact hemispherical caps.
+extern "C" int om9_occt_round_pipe(const double* endpoints, double r0, double r1,
+                                    double deflection, size_t max_points, size_t max_nodes,
+                                    size_t max_bytes, Om9BrepSink sink, void* context,
+                                    char* message, int capacity) {
+ try {
+  require_finite(endpoints, 6, "round pipe endpoints");
+  require_positive(r0, "round pipe start radius");
+  require_positive(r1, "round pipe end radius");
+  const gp_Pnt start(endpoints[0], endpoints[1], endpoints[2]);
+  const gp_Pnt end(endpoints[3], endpoints[4], endpoints[5]);
+  const gp_Vec direction(start, end);
+  const double length = direction.Magnitude();
+  if (length <= 1.0e-6) throw std::invalid_argument("round pipe rail length");
+  const gp_Dir axis(direction);
+  const gp_Ax2 a0(start, axis), a1(end, axis);
+  const double half_pi = std::acos(-1.0) / 2.0;
+  const TopoDS_Shape body = r0 == r1 ? BRepPrimAPI_MakeCylinder(a0, r0, length).Shape()
+                                    : BRepPrimAPI_MakeCone(a0, r0, r1, length).Shape();
+  BRepPrimAPI_MakeSphere first(a0, r0, -half_pi, 0.0);
+  BRepPrimAPI_MakeSphere last(a1, r1, 0.0, half_pi);
+  BRepAlgoAPI_Fuse start_join(body, first.Shape());
+  start_join.Build();
+  if (!start_join.IsDone()) throw std::runtime_error("round pipe start cap union failed");
+  BRepAlgoAPI_Fuse end_join(start_join.Shape(), last.Shape());
+  end_join.Build();
+  if (!end_join.IsDone()) throw std::runtime_error("round pipe end cap union failed");
+  return om9_emit_brep_snapshot(checked(end_join.Shape(), "invalid round pipe"), deflection,
+                                max_points, max_nodes, max_bytes, sink, context, message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown round pipe failure");
+  return 2;
+ }
+}
+
+// Circular sweep on an open polyline with mitered (right-corner) transitions.
+extern "C" int om9_occt_pipe_miter(const double* path, size_t count, double radius,
+                                    int solid, double deflection, size_t max_points,
+                                    size_t max_nodes, size_t max_bytes, Om9BrepSink sink,
+                                    void* context, char* message, int capacity) {
+ try {
+  require_finite(path, count * 3, "pipe path");
+  require_positive(radius, "pipe radius");
+  if (count < 2) throw std::invalid_argument("pipe path needs two points");
+  const gp_Pnt start(path[0], path[1], path[2]);
+  const gp_Pnt next(path[3], path[4], path[5]);
+  const gp_Ax2 axes(start, gp_Dir(gp_Vec(start, next)));
+  Handle(Geom_Circle) circle = new Geom_Circle(axes, radius);
+  BRepBuilderAPI_MakeEdge edge(circle);
+  if (!edge.IsDone()) throw std::runtime_error("pipe profile edge failed");
+  BRepBuilderAPI_MakeWire section(edge.Edge());
+  if (!section.IsDone()) throw std::runtime_error("pipe profile wire failed");
+  BRepOffsetAPI_MakePipeShell pipe(make_open_wire(path, count));
+  pipe.SetMode(false);
+  pipe.SetTransitionMode(BRepBuilderAPI_RightCorner);
+  pipe.Add(section.Wire(), false, false);
+  pipe.Build();
+  if (!pipe.IsDone()) throw std::runtime_error("pipe sweep failed");
+  if (solid != 0 && !pipe.MakeSolid()) throw std::runtime_error("pipe cap failed");
+  return om9_emit_brep_snapshot(checked(pipe.Shape(), "invalid pipe sweep"), deflection,
+                                max_points, max_nodes, max_bytes, sink, context, message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown pipe sweep failure");
+  return 2;
+ }
+}
+
+// Ring builder family (`OM9-L2-04-03`, `OM9-L3-04-03-007`): sew planar quads into one
+// closed solid. Rust has already validated the sections and their winding; this adapter
+// refuses anything that does not sew into exactly one closed shell with a positive volume,
+// so the OCCT body and the mesh body describe the same ring.
+extern "C" int om9_occt_sew_solid(const double* points, size_t point_count, const int32_t* quads,
+                                  size_t quad_count, double tolerance, double deflection,
+                                  size_t max_points, size_t max_nodes, size_t max_bytes,
+                                  Om9BrepSink sink, void* context, char* message, int capacity) {
+ try {
+  if (!points || point_count < 4) throw std::invalid_argument("sew solid needs four points");
+  if (!quads || quad_count < 4) throw std::invalid_argument("sew solid needs four faces");
+  require_finite(points, point_count * 3, "sew solid point");
+  require_positive(tolerance, "sew tolerance");
+  BRepBuilderAPI_Sewing sewing(tolerance);
+  // A modulated section leaves a side quad slightly non-planar (the outer radius changes
+  // between the two stations), and a planar face cannot be built from it. Splitting every
+  // quad into two triangles keeps every face exactly planar while the surface, the volume
+  // and the closed boundary stay those of the sampled sections.
+  for (size_t q = 0; q < quad_count; ++q) {
+   const int32_t* corner = quads + 4 * q;
+   for (int half = 0; half < 2; ++half) {
+    const int triangle[3] = {corner[0], corner[1 + half], corner[2 + half]};
+    BRepBuilderAPI_MakePolygon polygon;
+    for (int k = 0; k < 3; ++k) {
+     if (triangle[k] < 0) throw std::invalid_argument("sew solid face index");
+     const size_t vertex = static_cast<size_t>(triangle[k]);
+     if (vertex >= point_count) throw std::invalid_argument("sew solid face index");
+     const double* p = points + 3 * vertex;
+     polygon.Add(gp_Pnt(p[0], p[1], p[2]));
+    }
+    polygon.Close();
+    if (!polygon.IsDone()) throw std::runtime_error("sew solid face wire");
+    BRepBuilderAPI_MakeFace face(polygon.Wire(), true);
+    if (!face.IsDone()) throw std::runtime_error("sew solid face");
+    sewing.Add(face.Face());
+   }
+  }
+  sewing.Perform();
+  const TopoDS_Shape sewn = sewing.SewedShape();
+  if (sewn.IsNull()) throw std::runtime_error("sew solid produced no shape");
+  size_t shells = 0;
+  for (TopExp_Explorer explorer(sewn, TopAbs_SHELL); explorer.More(); explorer.Next()) ++shells;
+  if (shells != 1) throw std::runtime_error("sew solid is not one shell");
+  ShapeAnalysis_Shell shell_check;
+  shell_check.LoadShells(sewn);
+  if (shell_check.HasFreeEdges()) throw std::runtime_error("sew solid has free edges");
+  TopoDS_Shell shell;
+  for (TopExp_Explorer explorer(sewn, TopAbs_SHELL); explorer.More(); explorer.Next()) {
+   shell = TopoDS::Shell(explorer.Current());
+  }
+  BRepBuilderAPI_MakeSolid solid(shell);
+  if (!solid.IsDone()) throw std::runtime_error("sew solid failed");
+  const TopoDS_Shape body = checked(solid.Solid(), "sew solid is not a valid solid");
+  GProp_GProps properties;
+  BRepGProp::VolumeProperties(body, properties);
+  if (!(properties.Mass() > 0.0)) throw std::runtime_error("sew solid volume");
+  return om9_emit_brep_snapshot(body, deflection, max_points, max_nodes, max_bytes, sink, context,
+                                message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown sew solid failure");
+  return 2;
+ }
+}

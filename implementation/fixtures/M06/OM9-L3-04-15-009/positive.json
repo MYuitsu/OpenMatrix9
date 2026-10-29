@@ -1,0 +1,21 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-009",
+  "cases": [
+    {
+      "input": "Ends=None vs Ends=Two on the same row",
+      "expect": "the end mode changes the placement only; the style and stone prongs stay the same",
+      "oracle": "om9-core tests/settings_family.rs::row_end_modes_and_prong_spacing_change_the_placement_only"
+    },
+    {
+      "input": "prong builder staged",
+      "expect": "the option row exposes Ends= and Spacing= next to the prong values",
+      "oracle": "om9-app tests/settings_commands.rs::the_prong_builder_stages_the_documented_option_row"
+    }
+  ],
+  "automated_tests": [
+    "the_prong_builder_stages_the_documented_option_row",
+    "settings::prong::tests::end_modes",
+    "tests/settings_family.rs::row_end_modes_and_prong_spacing_change_the_placement_only"
+  ]
+}

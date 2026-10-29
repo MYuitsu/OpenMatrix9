@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-027-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-027",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-027",
   "source_command": "Extend Curve",
   "menu_icon": "CurveExtendCurveExtendCurve",
   "owner_candidate": "",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "no verified backend owner for Extend Curve; menu stays disabled",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-027/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-027/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-027/dispatch_contract.json": "ae75c7b7aea25accbdd9f7f68659b207391d1d9d0ade33fd67e5a1b878b5ed6f",
-    "implementation/design/M03/OM9-L3-03-16-027/dispatch_contract.md": "000229e90997543c58f24d5bf369afd3e1c8ab2f4034f9b9d3f282c53a2e3ccb"
+    "implementation/design/M03/OM9-L3-03-16-027/dispatch_contract.json": "3288cb43ad340865e8eb102214a1edd95b47a29206fbffd19e242c0aad5d45e1",
+    "implementation/design/M03/OM9-L3-03-16-027/dispatch_contract.md": "4db5b18347ab4dfb1b97f70486822ed2b64607e456df4e9be144fdf8e19005f4"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Extend"
 }

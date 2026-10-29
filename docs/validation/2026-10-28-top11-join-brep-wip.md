@@ -1,0 +1,9 @@
+# Top 11 BRep Join — work in progress
+
+The M03 reference says Join joins touching surfaces along naked edges. Work in progress adds a Top 11 path for exactly two BReps with equal placements, using the document's explicit absolute tolerance and the existing OCCT sewing adapter. The path checks that the result has the expected faces, one shell and fewer naked edges before publishing a single transaction. These checks are not yet proven sufficient for every topology; no production acceptance is claimed.
+
+The new adjacent-face test was run before the change and failed with `Unsupported("join needs two or more curves")`. After the change, `cargo test -p om9-app -j 2 --test top11_brep --test top11 --test top11_options` waited for the `L:\om9-target` build lock held by another `cargo test -p om9-app -j 2`. It was stopped while still waiting; no post-change compile or test result exists. The adjacent-face, disconnected-face and missing-tolerance tests must be run after the lock is released. `rustfmt` and `tools/public_source_audit.py` succeeded; these do not validate geometry.
+
+This is incomplete: more than two inputs, different placements, raw NURBS surfaces, mixed types, actual UI, and all remaining Top 11 gaps require implementation or verification. Until tested, this change must not be treated as working or accepted. Next action: run the three test binaries on the current source, fix compilation or failed cases, then validate topology and undo/redo on more input classes.
+
+Follow-up: the adjacent-face fixture now checks Redo after Undo. A new targeted test run was queued but again waited for the same build lock, held by an actively compiling full `om9-app` test run. The new fixture passed rustfmt checking only; no new compile or test result is claimed. Do not launch a second build with additional parallelism while the other build holds the target.

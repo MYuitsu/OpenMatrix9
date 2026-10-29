@@ -18,7 +18,7 @@ fn menu_cmd_and_f6_dispatch_the_same_line_phases_and_atomic_commit() {
     ] {
         let mut c = controller();
         c.dispatch(LINE, origin).unwrap();
-        assert_eq!(c.prompt(), "Start of line (BothSides=No): ");
+        assert_eq!(c.prompt(), "Start of line (BothSides=No Length=): ");
         c.accept_world_point([1., 2., 3.]).unwrap();
         assert!(c.document().entities.is_empty());
         assert_eq!(c.coordinator().undo_len(), 0);
@@ -105,7 +105,7 @@ fn unavailable_command_and_unknown_options_cannot_publish_or_replace_active_sess
     assert!(c.submit("Normal=Yes").is_err());
     assert!(c.submit("Invented=Yes").is_err());
     assert_eq!(c.coordinator().snapshot(), before);
-    assert_eq!(c.prompt(), "End of line (BothSides=No): ");
+    assert_eq!(c.prompt(), "End of line (BothSides=No Length=): ");
 }
 #[test]
 fn scene_is_derived_from_published_document_and_recent_icons_hold_nine_completed_commands() {

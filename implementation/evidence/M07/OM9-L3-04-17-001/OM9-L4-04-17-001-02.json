@@ -1,0 +1,71 @@
+{
+  "schema": "om9.evidence.domain.v1",
+  "l4": "OM9-L4-04-17-001-02",
+  "l3": "OM9-L3-04-17-001",
+  "recorded_at": "2026-10-28",
+  "status": "DOMAIN_INTEGRATION_RECORDED",
+  "implementation": [
+    "cutters::channel::ChannelParams",
+    "cutters::channel::build_row",
+    "cutters::channel::ChannelCutter",
+    "cutters::sweep",
+    "session::channel_cutters::RowCutterSession"
+  ],
+  "design": [
+    "implementation/design/M07/OM9-L3-04-17-001/source_crosswalk.json",
+    "implementation/design/M07/OM9-L3-04-17-001/api.md"
+  ],
+  "fixtures": [
+    "implementation/fixtures/M07/OM9-L3-04-17-001/positive.json",
+    "implementation/fixtures/M07/OM9-L3-04-17-001/negative.json"
+  ],
+  "positive_cases": [
+    {
+      "case": "three stones on a 7 mm row",
+      "input": "ChannelParams::for_row + build_row",
+      "expect": "one closed trench of 5 stations, positive volume, gem_ids in row order"
+    },
+    {
+      "case": "the preview owns nothing",
+      "input": "dispatch BuilderChannelBuilder on a 3-stone row",
+      "expect": "document entity count unchanged until Enter; Undo restores it"
+    },
+    {
+      "case": "the committed record",
+      "input": "Enter",
+      "expect": "one Channel Builder body with om9.cutter kind=channel_cutter and row=[Gem 0, Gem 1, Gem 2]"
+    }
+  ],
+  "negative_cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "a channel narrower than its stone",
+      "input": "Width=2.0 with a 6.5 mm stone",
+      "expect": "Invalid(\"channel width\")"
+    },
+    {
+      "case": "a trench deeper than the stone allows",
+      "input": "Depth=9.0",
+      "expect": "Invalid(\"channel depth\")"
+    },
+    {
+      "case": "coincident stones",
+      "input": "two centres 0.001 mm apart",
+      "expect": "Invalid(\"channel row\")"
+    },
+    {
+      "case": "an unknown option",
+      "input": "Width=wide",
+      "expect": "Invalid(\"channel width\")"
+    }
+  ],
+  "limitations": [
+    "The channel is a swept 4-corner prism (one station per stone plus two end caps), not a B-Rep solid.",
+    "A channel narrower than its widest stone is refused instead of clipped: the stones sit in the channel it cuts.",
+    "The end profiles shape the two end caps only; the middle section (Middle=Wide|Deep) is a third profile."
+  ]
+}

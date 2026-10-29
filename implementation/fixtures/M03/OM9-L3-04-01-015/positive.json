@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-015",
+  "case": "tilted reference surface (10u, 10v, 10u), box 0..2, point (5,5,5)",
+  "expected": "tilted reference surface (10u, 10v, 10u), box 0..2, point (5,5,5) -> the object's reference point lands on (5,5,5) and its Z axis is the surface normal (-1,0,1)/sqrt 2, one Undo entry",
+  "test": "m03_04_01_015_orient_on_surface_stands_the_object_on_the_surface"
+}

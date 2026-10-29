@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-001",
+  "case": "fewer than three points never creates an annotation: the command keeps asking, and cancelling leaves the document revision unchanged",
+  "expected": "fewer than three points never creates an annotation: the command keeps asking, and cancelling leaves the document revision unchanged",
+  "test": "crates/om9-app/tests/annotation.rs::preview_cancel_invalid_witness_and_native_archive_roundtrip"
+}

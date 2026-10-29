@@ -9,7 +9,7 @@
     {
       "id": "O1-a-flag-is-read-without-case-or-padding",
       "typed": ["BothSides=Yes", "bothsides=no", " BothSides = No "],
-      "expect": { "prompts": ["Start of line (BothSides=Yes): ", "Start of line (BothSides=No): ", "Start of line (BothSides=No): "] }
+      "expect": { "prompts": ["Start of line (BothSides=Yes Length=): ", "Start of line (BothSides=No Length=): ", "Start of line (BothSides=No Length=): "] }
     },
     {
       "id": "O2-a-length-fixes-the-end-distance-and-the-click-chooses-the-direction",

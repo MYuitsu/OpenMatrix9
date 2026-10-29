@@ -1,0 +1,101 @@
+{
+  "schema": "om9.evidence.batch.v1",
+  "date": "2026-10-27",
+  "l2_id": "OM9-L2-04-01",
+  "title": "Transform deformer rows: Bend, Taper, Shear, Twist, Maelstrom, Soft Move",
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03_UI_PENDING",
+  "kernel": {
+    "module": "crates/om9-core/src/deform.rs",
+    "public_api": [
+      "Deform::{Bend, Taper, Twist, Shear, Maelstrom, SoftMove}",
+      "Deform::validate",
+      "Deform::span",
+      "Deform::map",
+      "deform::apply",
+      "deform::apply_placed"
+    ],
+    "tests": "cargo test -p om9-core --lib deform -> 7 passed"
+  },
+  "rows": [
+    {
+      "l3_id": "OM9-L3-04-01-008",
+      "feature": "OM9-TRANSFORM-007",
+      "command": "Bend",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs",
+        "crates/om9-core/src/curve_ops.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_008_bend_turns_the_curve_into_an_arc",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-008/OM9-L3-04-01-008-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-033",
+      "feature": "OM9-TRANSFORM-033",
+      "command": "Taper",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs",
+        "crates/om9-core/src/curve_ops.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_033_taper_scales_the_section_over_the_span",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-033/OM9-L3-04-01-033-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-034",
+      "feature": "OM9-TRANSFORM-034",
+      "command": "Shear",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_034_shear_slides_the_section_along_the_picked_direction",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-034/OM9-L3-04-01-034-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-035",
+      "feature": "OM9-TRANSFORM-036",
+      "command": "Twist",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs",
+        "crates/om9-core/src/curve_ops.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_035_twist_turns_the_section_over_the_span",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-035/OM9-L3-04-01-035-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-036",
+      "feature": "OM9-TRANSFORM-035",
+      "command": "Maelstrom",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs",
+        "crates/om9-core/src/curve_ops.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_036_maelstrom_twists_and_pulls_the_section_in",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-036/OM9-L3-04-01-036-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-040",
+      "feature": "OM9-TRANSFORM-040",
+      "command": "SoftMove",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_040_soft_move_moves_only_inside_the_falloff",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-040/OM9-L3-04-01-040-01.json"
+    }
+  ],
+  "totals": {
+    "catalogued_rows": 41,
+    "implemented_rows": 29,
+    "disabled_rows": 12,
+    "tests": {
+      "app_transform_menu": "36 passed; 0 failed",
+      "core_deform": "7 passed; 0 failed"
+    }
+  },
+  "notes": [
+    "the kernel had no deformer at all: the six maps were added to crates/om9-core/src/deform.rs before any row was enabled, so no row reports a body that does not exist",
+    "a nonlinear map cannot live in a placement, so a deform writes geometry; a shear is the affine case and keeps a line a line",
+    "a solid is refused with a typed error instead of being deformed on its display mesh",
+    "the M08-owned rows keep their planning state, their owner milestone and their own manual gate"
+  ]
+}

@@ -3,7 +3,7 @@
   "id": "OM9-L2-04-15",
   "milestone": "M06",
   "title": "02-febe-prong-channel-metal-and-bead-settings",
-  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "planning_state": "IMPLEMENTED_AUTOMATED_EVIDENCE_UI_REVIEW_OPEN",
   "scope": "Prong/Channel/Metal Piece/Bead settings",
   "source_original_path": "specs/06-ms06-settings-and-prongs/02-febe-prong-channel-metal-and-bead-settings/module.json",
   "definition": {
@@ -96,7 +96,7 @@
       "target_implementation_milestone": "M06"
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED",
+  "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
   "planned_l4_count_m06": 40,
   "sdk_integration_plan": {
     "recorded_at": "2026-10-21",
@@ -133,6 +133,168 @@
       "OM9-L3-04-15-008",
       "OM9-L3-04-15-009",
       "OM9-L3-04-15-010"
+    ]
+  },
+  "implementation": {
+    "schema": "om9.l2_implementation.v1",
+    "recorded_at": "2026-10-27",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
+    "scope": "10 L3 command adapters over one shared settings domain: prongs, prong editor, surface prong, metal piece, channel border, bead on curve, bead on surface, pull to rail, row end modes and the settings mass read-out.",
+    "shared_input": "settings::gems::GemRow built from the gem owner's om9.gem records",
+    "shared_output": "prong/bead/metal bodies with the om9.settings.prong payload; mass through metal_weight",
+    "features": [
+      {
+        "l3": "OM9-L3-04-15-001",
+        "feature": "BuilderProngAdder",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-001/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-001/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-001/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-001/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-001/OM9-L4-15-001-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-001/OM9-L4-15-001-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-002",
+        "feature": "BuilderProngEditor",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-002/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-002/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-002/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-002/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-002/OM9-L4-15-002-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-002/OM9-L4-15-002-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-003",
+        "feature": "BuilderProngOnSurface",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-003/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-003/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-003/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-003/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-003/OM9-L4-15-003-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-003/OM9-L4-15-003-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-004",
+        "feature": "BuilderMetalPiece",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-004/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-004/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-004/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-004/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-004/OM9-L4-15-004-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-004/OM9-L4-15-004-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-005",
+        "feature": "BuilderChannelBorderCurve",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-005/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-005/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-005/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-005/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-005/OM9-L4-15-005-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-005/OM9-L4-15-005-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-006",
+        "feature": "BuilderBeadOnCrv",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-006/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-006/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-006/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-006/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-006/OM9-L4-15-006-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-006/OM9-L4-15-006-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-007",
+        "feature": "BuilderBeadOnSurface",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-007/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-007/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-007/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-007/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-007/OM9-L4-15-007-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-007/OM9-L4-15-007-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-008",
+        "feature": "BuilderPullToRail",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-008/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-008/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-008/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-008/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-008/OM9-L4-15-008-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-008/OM9-L4-15-008-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-009",
+        "feature": null,
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-009/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-009/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-009/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-009/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-009/OM9-L4-15-009-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-009/OM9-L4-15-009-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-15-010",
+        "feature": "SettingsMass",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-15-010/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-15-010/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-15-010/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-15-010/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-15-010/OM9-L4-15-010-03.json",
+          "implementation/evidence/M06/OM9-L3-04-15-010/OM9-L4-15-010-04.json"
+        ]
+      }
+    ],
+    "automated_evidence": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": 0,
+      "cargo test -p om9-core --lib settings:: -j 2": "90 passed",
+      "cargo test -p om9-core --test settings_family -j 2": "14 passed",
+      "cargo test -p om9-app --test settings_commands -j 2": "24 passed",
+      "cargo test -p om9-core -j 2": "781 passed across 70 suites",
+      "summary": "implementation/evidence/M06/OM9-L3-04-15-001/summary.json"
+    },
+    "manual_gate": {
+      "required": true,
+      "gate": "M06-UI",
+      "signed": false,
+      "note": "no human UI review is claimed; the dashboard keeps the 10 L3 at WIP until a reviewer signs"
+    },
+    "limitations": [
+      "4 Prongs Close builds the sheet's closer pair: both North-side prongs sit inside the 4 Prongs 0 spacing and stay two distinct prongs.",
+      "A selection without gem objects is refused: the builder consumes the shared gem row instead of guessing.",
+      "A tight row can put the facing prongs of two stones on one point; the builder merges that pair into one shared prong and reports merged_prongs rather than refusing the style.",
+      "Border=On consumes the last committed channel border; the app never re-derives a border from the row.",
+      "Corner smoothing is the documented 0..1 angle; the exact Matrix corner radius law is not verified.",
+      "Count and Spacing are alternatives: setting one clears the other, and the last bead sits on the end fraction.",
+      "Curve mode needs a curve: it follows the picked curve, or the committed channel border with Border=On; with neither it is a typed Missing('metal piece curve'), never a row-offset body.",
+      "Cutter features are committed as bodies but never weighed; the report counts them under excluded_cutters.",
+      "Drop is negative-up per the sheet wording; the UI still has to confirm the sign on the preview.",
+      "F4 direction falls back to world +Z at the world centre.",
+      "Only a selected circle rail is accepted; an arc or line rail returns a typed refusal.",
+      "SettingsMass is a text command without a toolbar slot; mass covers settings features committed in this session.",
+      "The base bead diameter is 1.0 mm (OM9 engineering default); the sheet only gives the scale.",
+      "The editor rebuilds from the om9.settings.prong payload; a body without it is refused rather than re-derived.",
+      "These are command options, not a toolbar icon; the record says so instead of inventing an icon id."
     ]
   }
 }

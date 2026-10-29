@@ -1,0 +1,665 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-03-18-012-04",
+  "milestone": "M03",
+  "parent_l3_id": "OM9-L3-03-18-012",
+  "owner_l2_id": "OM9-L2-03-18",
+  "title": "Parameter Implementation — Solid · Box — menu binding",
+  "task_role": "PARAMETER_IMPLEMENTATION",
+  "planning_state": "NOT_STARTED",
+  "execution_stage": "E07",
+  "mini_gate_id": "G03-A",
+  "risk": "NORMAL",
+  "purpose": "Implement command-inline parameters for Solid · Box (Box)",
+  "parent_l3_file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-012 - Solid · Box - menu binding/l3.json",
+  "preconditions": {
+    "milestone": "M03 prior gates and existing menu-binding L4 verified",
+    "required_l4_verified_ids": [
+      "OM9-L4-03-18-012-01",
+      "OM9-L4-03-18-012-02",
+      "OM9-L4-03-18-012-03"
+    ],
+    "technical_environment": "Real OpenMatrix9 fork, pinned QymCAD audit checkout, Rust/OCCT toolchain, test fixtures",
+    "owners": [
+      "OM9-L3-01-09-001"
+    ],
+    "unresolved_owner_policy": "Verify owner function signatures and tests before integration"
+  },
+  "source_context": {
+    "source_revision_qymcad": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+    "source_revision_opennurbs": null,
+    "files_to_inspect": [
+      "crates/qymcad/src/command_catalog.rs",
+      "crates/qymcad/src/gui.rs",
+      "crates/qymcad-core/src/feature/kind.rs"
+    ],
+    "source_links": [
+      {
+        "path": "crates/qymcad/src/command_catalog.rs",
+        "reference": "https://github.com/QymIs-Tech/QymCAD/blob/c116f8f224ebffe0ada049c91c0d15df3634f00d/crates/qymcad/src/command_catalog.rs",
+        "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+        "review": "CONTENT_READ_AT_PINNED_REVISION"
+      },
+      {
+        "path": "crates/qymcad/src/gui.rs",
+        "reference": "https://github.com/QymIs-Tech/QymCAD/blob/c116f8f224ebffe0ada049c91c0d15df3634f00d/crates/qymcad/src/gui.rs",
+        "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+        "review": "CONTENT_READ_AT_PINNED_REVISION"
+      },
+      {
+        "path": "crates/qymcad-core/src/feature/kind.rs",
+        "reference": "https://github.com/QymIs-Tech/QymCAD/blob/c116f8f224ebffe0ada049c91c0d15df3634f00d/crates/qymcad-core/src/feature/kind.rs",
+        "revision": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+        "review": "CONTENT_READ_AT_PINNED_REVISION"
+      }
+    ],
+    "review_state": "SOURCE_REFERENCE_ONLY_REQUIRES_LOCAL_SIGNATURE_BUILD_VERIFICATION",
+    "resolution_rule": "Pin git checkout; record real path:symbol:line; classify REUSE/ADAPT/ADD or BLOCKED; no fabricated symbol certainty"
+  },
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Box",
+        "Diagonal",
+        "3 Points, Height",
+        "Vertical Base",
+        "Center of Base, Conter, Height"
+      ],
+      "option_count": 5
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Solid",
+      "command": "Box",
+      "option": "Box",
+      "root_group": false,
+      "path": [
+        "Solid",
+        "Box"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "origin (0,0,0), dimensions 10×20×30 mm",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-012 - Solid · Box - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Box",
+        "command_id": "SolidBoxCornertoCornerHeight",
+        "script": "! _Box",
+        "alt_script": "! _Box _P",
+        "alt_label": "Box 3 Points",
+        "covered_by_l3": "OM9-L3-03-18-012",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Box",
+          "typed_forms": [
+            "Box"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Diagonal",
+        "command_id": "SolidBoxDiagonal",
+        "script": "! _Box _Diagonal",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Diagonal",
+          "typed_forms": [
+            "Diagonal"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "3 Points, Height",
+        "command_id": "SolidBox3PointsHeight",
+        "script": "! _Box _3Point",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "3 Points, Height",
+          "typed_forms": [
+            "3 Points, Height"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Vertical Base",
+        "command_id": "SolidBoxVerticalBase",
+        "script": "! _Box _Vertical",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Vertical Base",
+          "typed_forms": [
+            "Vertical Base"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Center of Base, Conter, Height",
+        "command_id": "SolidBoxCenterofBaseCornerHeight",
+        "script": "! _Box _Center",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Center of Base, Conter, Height",
+          "typed_forms": [
+            "Center of Base, Conter, Height"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Diagonal",
+      "3 Points, Height",
+      "Vertical Base",
+      "Center of Base, Conter, Height"
+    ],
+    "missing": [
+      "option:Diagonal: type/default/range/unit/prompt",
+      "option:3 Points, Height: type/default/range/unit/prompt",
+      "option:Vertical Base: type/default/range/unit/prompt",
+      "option:Center of Base, Conter, Height: type/default/range/unit/prompt",
+      "input:origin (0,0,0), dimensions 10×20×30 mm: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-18-012-04"
+  },
+  "work_plan": {
+    "steps": [
+      "Read OM9_Milestones/M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-012 - Solid · Box - menu binding/l3.json#/parameter_contract.interaction and each command_options[].inline record; treat the L3 contract as the single source.",
+      "Classify every option as toggle/cycle/choice/value-entry/point-entry/specialized/unsupported, with stage availability and disabled reason; do not invent a shortcut or default.",
+      "Implement the shared inline token/span formatter: keyboard initials, typed full names and click targets all call Controller::submit; remove the legacy floating button row for this command.",
+      "Resolve type/default/range/unit/current value from the owner snapshot, not by parsing the prompt or display label; keep UNRESOLVED where the owner is not yet known.",
+      "Add fixtures for keyboard, click span, stale run/ID, nonempty draft, IME/paste, invalid token, cancel/Esc and Undo; assert owner state and no document mutation.",
+      "Run focused tests and record observed evidence; a rendered inline token or a passing metadata test is not a runtime PASS."
+    ],
+    "role_checklist": [
+      "Do not duplicate the geometry owner; dispatch through the existing command/feature service.",
+      "One prompt/editor/draft only; preserve nonempty drafts, paste, IME, selection and unrelated focus.",
+      "Advertise only the recorded unique stage accelerator; fall back to the full option name instead of guessing a conflicting initial.",
+      "Do not activate hidden options; keep unsupported options visible and disabled with an explicit reason.",
+      "Remove the legacy per-command button row after the inline path is migrated; do not run both paths."
+    ],
+    "input_fixture": "origin (0,0,0), dimensions 10×20×30 mm",
+    "expected_positive": "Each listed inline option accepts keyboard/click input, updates owner state and produces the documented observable result.",
+    "expected_negative": "Invalid, stale, hidden or unsupported inline input is rejected with a visible reason, draft/focus preserved and no document mutation.",
+    "required_technical_decisions": [
+      "Option type/default/range/unit are resolved from manual and owner code, not inferred from the catalog label.",
+      "One shared CommandOptionInterface/formatter serves menu, CMD, inline keyboard and click paths.",
+      "Shortcut resolution is full name first, then a unique already-advertised stage accelerator; conflicts do not get a fabricated initial."
+    ],
+    "suggested_commands": [
+      "git rev-parse HEAD",
+      "cargo test -p om9-app --test curve_menu"
+    ],
+    "commands_not_executed": true
+  },
+  "acceptance": {
+    "positive_fixture_id": "OM9-L3-03-18-012-PARAM-POSITIVE",
+    "negative_fixture_id": "OM9-L3-03-18-012-PARAM-NEGATIVE",
+    "required_receipts": [
+      "parameter_schema",
+      "inline_option_schema",
+      "controller_submit_receipt",
+      "keyboard_and_click_fixtures",
+      "command_dispatch"
+    ],
+    "required_artifact_after_execution": "implementation/M03/OM9-L3-03-18-012/command_inline_contract.json",
+    "required_evidence_after_execution": "implementation/evidence/M03/OM9-L4-03-18-012-04.json",
+    "expected_observable": "Every inline option has typed value/activation/availability metadata and keyboard/click routes through Controller::submit.",
+    "negative_observable": "Invalid, stale, hidden or conflicting inline input is refused with a visible reason, draft/focus preserved and no document mutation.",
+    "gate": "EXECUTION_REQUIRED",
+    "checklist": [
+      "All inline options have activation/availability/shortcut/value owner or an explicit BLOCKED reason.",
+      "Keyboard initial/full name and click span use the same Controller::submit handler.",
+      "No legacy floating button row remains for this command after migration.",
+      "Evidence contains actual keyboard/click receipts, owner state and observed outputs."
+    ],
+    "pass_rule": "EXECUTION_PASS only with actual tests and evidence; planning text is not implementation proof.",
+    "never_claim_success_if_fixture_missing": true,
+    "runtime_feature_success_required_for_this_role": true,
+    "design_complete_does_not_mark_feature_implemented": true
+  },
+  "execution_policy": {
+    "mode": "PLANNING_SPEC_READY_EXECUTION_REQUIRES_ENVIRONMENT",
+    "one_task_per_agent_run": true,
+    "status_transitions": [
+      "NOT_STARTED",
+      "IN_PROGRESS",
+      "BLOCKED",
+      "READY_FOR_REVIEW",
+      "VERIFIED_PASS"
+    ],
+    "stop_codes": [
+      "BLOCKED_M02",
+      "BLOCKED_MINIGATE",
+      "BLOCKED_DEPENDENCY",
+      "BLOCKED_SOURCE",
+      "BLOCKED_OWNER",
+      "BLOCKED_FIXTURE",
+      "BLOCKED_ENV",
+      "BLOCKED_APPROVAL"
+    ],
+    "deferred_work": "Never introduce M04/M08 capabilities or unapproved license/API dependencies inside this task",
+    "no_implementation_or_tests_claimed": true
+  },
+  "ui_backend_separation": {
+    "frontend": "Thin command routing, selection validation, feedback and UI state only",
+    "backend": "Must reuse one verified owning geometry handler; do not copy BRep math into command menu",
+    "ownership_candidates_are_not_implementation_proof": true,
+    "missing_implementation": "Disabled action with user-visible reason until backend exists and tests pass"
+  },
+  "execution_handoff": {
+    "schema": "om9.m03.luna.hardened.task",
+    "read_l3_file_first": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-012 - Solid · Box - menu binding/l3.json",
+    "task_role": "PARAMETER_IMPLEMENTATION",
+    "role_artifact_kind": "parameter_contract",
+    "mandatory_artifact_fields": [
+      "parameter_contract",
+      "interaction",
+      "inline",
+      "option_types",
+      "defaults",
+      "ranges",
+      "units",
+      "shortcut_availability_activation",
+      "positive_and_negative_fixtures"
+    ],
+    "proof_scope": "Documented and source-verified routing is enough; not a working UI claim.",
+    "specific_task_title": "Dispatch Contract — Solid · Box — menu binding",
+    "domain": "UI_COMMAND",
+    "parent_fixture_reference": "m03_luna_execution_contract.golden_test_design",
+    "focused_test_reference": "m03_luna_execution_contract.focused_test_handoff",
+    "proposed_command_only_not_verified": "cargo test -p qymcad m03_03_18_012 -- --exact",
+    "source_paths_are_candidates_not_proven_implementation": true,
+    "upstream_revision_required": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
+    "local_resolution_sequence": [
+      "1. Confirm M00/M01/M02 actual gate evidence and required predecessor tasks; if unavailable STOP BLOCKED_GATE",
+      "2. Open real source checkout, confirm SHA and verify file:symbol:signature:callsite:test; if missing STOP BLOCKED_SOURCE",
+      "3. Confirm exact owner crate, test registration and fixture provenance; do not assume speculative crate/command exists",
+      "4. Execute only this role and produce mandatory artifact; runtime tasks require actual compilation and focused receipts",
+      "5. Compare observed with expected (and numeric tolerance), preserve document/Undo on rejection; record receipt/hash",
+      "6. If approval is required, mark READY_FOR_REVIEW and await human reviewer, never self-approve"
+    ],
+    "proposed_command_templates_not_bundled_or_run": [
+      "git rev-parse HEAD",
+      "git grep -n \"<command_name>\" -- crates/qymcad"
+    ],
+    "required_prerequisite_scope": "All required IDs and previous gates must be independently VERIFIED_PASS; this archive is planning-only",
+    "role_satisfaction_policy": "Document-only roles can be reviewed without feature runtime; runtime roles require actual tests and binary fixture where applicable",
+    "stop_if": [
+      "missing source or symbol owner",
+      "missing runtime toolchain for runtime role",
+      "missing registered test or fixture binary for runtime role",
+      "test non-zero exit or value outside tolerance",
+      "inconsistent Undo/Redo or lost topology",
+      "license approval pending",
+      "unverified previous-gate approval"
+    ],
+    "output_location_after_execution": "implementation/M03/OM9-L3-03-18-012/01_dispatch_contract.json",
+    "evidence_location_after_execution": "implementation/evidence/M03/OM9-L4-03-18-012-01.json",
+    "not_executed": true,
+    "ui_owner_policy": {
+      "enabled_only_with_verified_backend": true,
+      "fallback": "disabled UI with explicit reason, not fake success",
+      "dispatch_owner_module": "verify command catalog and backend service before enabling",
+      "test_negative": "locked layer or empty selection; command disabled and document unmodified"
+    }
+  },
+  "reference_supplements": {
+    "schema_version": 1,
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "crosswalk_date": "2026-10-15",
+    "status": "requirements_only_not_runtime_evidence",
+    "focus": "Menu binding Solid phải gọi đúng lệnh/kernel owner; sheet manual cho đường lệnh và option.",
+    "rhino5_core_chapters": [
+      {
+        "anchor_id": "RCORE-01",
+        "kind": "rhino5_core_chapter",
+        "title": "Kiểu đối tượng và ranh giới kernel",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "25-31 / in 17-23",
+        "capability_ids": [
+          "RCORE-01.C01",
+          "RCORE-01.C02",
+          "RCORE-01.C03",
+          "RCORE-01.C04",
+          "RCORE-01.C05",
+          "RCORE-01.C06",
+          "RCORE-01.C07",
+          "RCORE-01.C08",
+          "RCORE-01.C09",
+          "RCORE-01.C10",
+          "RCORE-01.C11",
+          "RCORE-01.C12"
+        ],
+        "fixture_ids": [
+          "RCORE-01.T01",
+          "RCORE-01.T02",
+          "RCORE-01.T03",
+          "RCORE-01.T04"
+        ],
+        "official_help": [
+          {
+            "label": "ExtrudeCrv",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/extrudecrv.htm"
+          },
+          {
+            "label": "Mesh",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/mesh.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      },
+      {
+        "anchor_id": "RCORE-07",
+        "kind": "rhino5_core_chapter",
+        "title": "NURBS editing và modeling",
+        "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "guide_pdf_pages": "53-67 / in 45-59; 69-71 / in 61-63; 73-91 / in 65-83",
+        "capability_ids": [
+          "RCORE-07.C01",
+          "RCORE-07.C02",
+          "RCORE-07.C03",
+          "RCORE-07.C04",
+          "RCORE-07.C05",
+          "RCORE-07.C06",
+          "RCORE-07.C07",
+          "RCORE-07.C08",
+          "RCORE-07.C09",
+          "RCORE-07.C10",
+          "RCORE-07.C11",
+          "RCORE-07.C12"
+        ],
+        "fixture_ids": [
+          "RCORE-07.T01",
+          "RCORE-07.T03",
+          "RCORE-07.T05",
+          "RCORE-07.T07",
+          "RCORE-07.T08",
+          "RCORE-07.T10"
+        ],
+        "official_help": [
+          {
+            "label": "PointsOn / PointsOff",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/pointson.htm"
+          },
+          {
+            "label": "Rebuild",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuild.htm"
+          },
+          {
+            "label": "FitCrv",
+            "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/fitcrv.htm"
+          }
+        ],
+        "verification_state": "INDEX_READ_NOT_EXECUTED",
+        "index_runtime_snapshot": "2026-10-09"
+      }
+    ],
+    "matrix9_reference_sources": [
+      {
+        "anchor_id": "mx-matrixdata",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/MatrixData/MatrixPoint.cs",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "MatrixData family",
+        "role_for_this_task": "M03 OM9-L2-03-18 reference source",
+        "source_role": "typed Rhino object data wrappers",
+        "detail": "Typed Matrix data wrappers: MatrixPoint, MatrixCurve, MatrixSurface, MatrixProfile, MatrixBoolean, MatrixDouble(Length/Angle/PointOnCrv), MatrixGemInstance(List), MatrixGemBlock(List), MatrixList - i.e. the Matrix9 view of Rhino-like object types.",
+        "observed_identifiers": [
+          "MatrixPoint",
+          "MatrixCurve",
+          "MatrixSurface",
+          "MatrixProfile",
+          "MatrixBoolean",
+          "MatrixDouble",
+          "MatrixDoubleLength",
+          "MatrixDoubleAngle",
+          "MatrixDoublePointOnCrv",
+          "MatrixGemInstance",
+          "MatrixGemInstanceList",
+          "MatrixGemBlock",
+          "MatrixGemBlockList",
+          "MatrixList"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      },
+      {
+        "anchor_id": "mx-export-import",
+        "kind": "matrix9_recovered_source",
+        "source_class": "PRIVATE_REFERENCE_NOT_FOR_PUBLICATION",
+        "project": "Matrix (managed plugin)",
+        "path": "Matrix/Utilities/Helpers/ExportHelper.cs",
+        "root": "ref/matrix/decompiled-ui",
+        "unit": "ExportHelper",
+        "role_for_this_task": "M03 OM9-L2-03-18 reference source",
+        "source_role": "3dm/format export-import helper",
+        "detail": "Export helper plus the file/project entry points (modFileSystem 52 declarations, clsMInterface Import/Export, frmDialogSave, frmMenuProjects) - the Matrix9 path a 3DM import/export task must be compared against.",
+        "observed_identifiers": [
+          "ExportHelper",
+          "modFileSystem",
+          "frmDialogSave",
+          "Import",
+          "Export"
+        ],
+        "verification_state": "PATH_INDEXED_SYMBOL_CANDIDATE"
+      }
+    ],
+    "manual_reference_sheets": [
+      {
+        "anchor_id": "mx-sheet-m8book1-p219-222-solid-tools",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 1",
+        "pages": "219-222",
+        "section": "Solid Tools",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "m8book1__p219-222__solid-tools",
+        "path": "OM9_Milestones/M03 - Geometry 3DM/L2-01-09 - 01-be-occt-geometry/reference/text/m8book1__p219-222__solid-tools.md",
+        "role_for_this_task": "authored sheet in this L3: m8book1__p219-222__solid-tools",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      },
+      {
+        "anchor_id": "mx-sheet-m8book1-p232-233-box",
+        "kind": "matrix_manual_reference_sheet",
+        "source_class": "IN_REPOSITORY_AUTHORED_REFERENCE_SHEET",
+        "manual": "Matrix 8 Instruction Manual Book 1",
+        "pages": "232-233",
+        "section": "Box",
+        "topic": "authored Matrix manual section",
+        "sheet_id": "m8book1__p232-233__box",
+        "path": "OM9_Milestones/M03 - Geometry 3DM/L2-01-09 - 01-be-occt-geometry/L3-001 - Analytic Solid Primitive Factories/reference/text/m8book1__p232-233__box.md",
+        "role_for_this_task": "authored sheet in this L3: m8book1__p232-233__box",
+        "verification_state": "SHEET_PRESENT_IN_MILESTONE_SPECS",
+        "note": "Sheet documents the command path, options and stated defaults; it is documentation, not runtime evidence, and defaults must be re-read from the sheet before use."
+      }
+    ],
+    "usage_rules": [
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
+    ],
+    "does_not_establish": [
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
+    ]
+  },
+  "reference_source_policy": {
+    "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
+    "reference_families": [
+      {
+        "family": "rhino5_core",
+        "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
+        "access_class": "public_official_documentation_user_approved_exception",
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
+      },
+      {
+        "family": "matrix9_recovered",
+        "source_id": "ref/matrix",
+        "access_class": "private_reference_export",
+        "projects": [
+          "Matrix (managed plugin)",
+          "MatrixWPFControls",
+          "MatrixControls",
+          "MatrixCommon",
+          "PIMData",
+          "MatrixTranslation",
+          "Matrix90 (VB6 EXE)",
+          "MatrixCmdBar (VB6 OCX)"
+        ],
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
+      },
+      {
+        "family": "rhino5_geometry",
+        "source_id": "ref/rhino5/dnspy/Rhino_DotNet + ref/rhino5/dnspy/RhinoCommon + ref/rhino5/ghidra",
+        "access_class": "private_reference_export",
+        "sources": [
+          "Rhino 5 Rhino_DotNet (RMA.OpenNURBS / RMA.Rhino)",
+          "Rhino 5 RhinoCommon",
+          "Rhino 5 ghidra export"
+        ],
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
+      }
+    ],
+    "forbidden_in_deliverables": [
+      "Reference source bodies, decompiler listings, native resource blobs and recovered images.",
+      "Private archive paths in public documentation, manifests or release packages."
+    ],
+    "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "IMPLEMENT",
+    "role_label_on_record": "PARAMETER_IMPLEMENTATION",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-03-18",
+    "goal": "Implement command-inline parameters for Solid · Box (Box)",
+    "algorithm_on_record": "None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "adapt the pinned algorithm, do not copy it; licence scope comes from M00",
+    "sketch": "// Parameter Implementation — Solid · Box — menu binding\n// ROLE: IMPLEMENT - skeleton only; body is deliberately unimplemented.\n\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n///\n/// Owner: OM9-L2-03-18\n/// Positive fixture: valid input from the fixture\n/// Negative fixture: invalid, empty or degenerate input\n///\n/// Algorithm notes carried from the planning record:\n//   1. None\npub fn om9_l4_03_18_012_04(/* typed inputs from the contract */) -> Result</* Output */, Error> {\n    // TODO(OM9-L4-03-18-012-04): implement exactly one owner's behaviour here.\n    //   1. validate typed inputs; reject empty/degenerate input with a typed error.\n    //   2. do the work through the owning kernel/domain service, never a second engine.\n    //   3. return a typed result; never report success on a partial write.\n    unimplemented!(\"OM9-L4-03-18-012-04 not implemented\")\n}\n\n#[cfg(test)]\nmod tests {\n    // Positive: valid input from the fixture\n    #[test]\n    fn positive_om9_l4_03_18_012_04() {\n        // RED until implemented: assert the measured oracle, not a smoke check.\n        // Oracle: measured positive oracle\n        unimplemented!()\n    }\n\n    // Negative: invalid, empty or degenerate input\n    #[test]\n    fn negative_om9_l4_03_18_012_04() {\n        // Oracle: typed error with unchanged state\n        // Assert a typed error and unchanged state (no partial document mutation).\n        unimplemented!()\n    }\n}"
+  },
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

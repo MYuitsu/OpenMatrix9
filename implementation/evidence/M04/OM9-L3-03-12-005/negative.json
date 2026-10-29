@@ -1,0 +1,16 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"style mode\")",
+      "style": "gem family on a ring builder"
+    },
+    {
+      "expect": "Invalid(\"style builder\")",
+      "style": "builder tag gem_builder"
+    },
+    {
+      "expect": "Invalid(\"style mode\")",
+      "style": "only foreign parameters"
+    }
+  ]
+}

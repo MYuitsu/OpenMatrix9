@@ -1,0 +1,5 @@
+{
+  "crates/om9-app/src/session/rect.rs": "b8fa321d49b026a2c236dd00a1b781a13d8d4c389cdcbf763db40dcfc0a17b38",
+  "crates/om9-app/tests/rect.rs": "05588e7a0f0a360f40bec2a5576a481e78206a9c4236365bd8d04e41f0992938",
+  "crates/om9-app/src/session.rs": "cb00b8dc4a66e39baed6d6da0ac01238d0f6ca8bbbefa35c408fda8e6e9005d0"
+}

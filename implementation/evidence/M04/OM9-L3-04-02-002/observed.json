@@ -1,0 +1,19 @@
+{
+  "schema": "om9.m04.l3_builder_evidence.v1",
+  "l3_id": "OM9-L3-04-02-002",
+  "title": "Outside Ring Rail Generator",
+  "scope": "Concentric outer rail at offset_mm from a closed circular rail; non-circular or non-positive offset refused, source rail untouched.",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "an_outside_rail_offsets_a_closed_circular_rail_only",
+    "outside_rail_and_resizer_apply_independent_outputs"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the panel and handle gestures; no reviewer signature is claimed.",
+  "logs": [
+    "core-builder.log",
+    "app-builder.log",
+    "workspace-check.log"
+  ]
+}

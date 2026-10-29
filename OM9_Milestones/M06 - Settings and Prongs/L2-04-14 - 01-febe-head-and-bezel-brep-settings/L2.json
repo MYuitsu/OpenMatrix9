@@ -3,7 +3,7 @@
   "id": "OM9-L2-04-14",
   "milestone": "M06",
   "title": "01-febe-head-and-bezel-brep-settings",
-  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "planning_state": "IMPLEMENTED_AUTOMATED_EVIDENCE_UI_REVIEW_OPEN",
   "scope": "Head Builder, Bezel Builder với NURBS/BRep",
   "source_original_path": "specs/06-ms06-settings-and-prongs/01-febe-head-and-bezel-brep-settings/module.json",
   "definition": {
@@ -94,7 +94,7 @@
       "target_implementation_milestone": "M06"
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED",
+  "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
   "planned_l4_count_m06": 36,
   "sdk_integration_plan": {
     "recorded_at": "2026-10-21",
@@ -130,6 +130,160 @@
       "OM9-L3-04-14-007",
       "OM9-L3-04-14-008",
       "OM9-L3-04-14-009"
+    ]
+  },
+  "implementation": {
+    "schema": "om9.l2_implementation.v1",
+    "recorded_at": "2026-10-27",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
+    "scope": "9 L3 over one shared head/bezel domain: basket head with the seat cut into the stone, half bezel, four edit levels, three bezel modes with the Boolean finger rail groove, scallop cutters weighed as removed volume, the typed profile library with user Bezier sections, girdle seat frames and the rebuild/validity report.",
+    "shared_input": "the gem owner's om9.gem record (GemSpec + document placement) becomes one GemGirdle",
+    "shared_output": "closed head/bezel/scallop meshes with the om9.settings.head/bezel/scallop payloads",
+    "features": [
+      {
+        "l3": "OM9-L3-04-14-001",
+        "feature": "BuilderHead",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-001/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-001/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-001/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-001/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-001/OM9-L4-14-001-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-001/OM9-L4-14-001-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-14-002",
+        "feature": "BuilderHead",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-002/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-002/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-002/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-002/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-002/OM9-L4-14-002-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-002/OM9-L4-14-002-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-14-003",
+        "feature": "BuilderHead",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-003/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-003/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-003/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-003/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-003/OM9-L4-14-003-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-003/OM9-L4-14-003-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-14-004",
+        "feature": "BuilderBezel",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-004/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-004/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-004/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-004/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-004/OM9-L4-14-004-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-004/OM9-L4-14-004-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-14-005",
+        "feature": "BuilderBezel",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-005/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-005/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-005/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-005/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-005/OM9-L4-14-005-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-005/OM9-L4-14-005-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-14-006",
+        "feature": "BuilderBezelCutter",
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-006/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-006/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-006/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-006/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-006/OM9-L4-14-006-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-006/OM9-L4-14-006-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-14-007",
+        "feature": null,
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-007/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-007/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-007/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-007/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-007/OM9-L4-14-007-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-007/OM9-L4-14-007-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-14-008",
+        "feature": null,
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-008/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-008/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-008/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-008/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-008/OM9-L4-14-008-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-008/OM9-L4-14-008-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-14-009",
+        "feature": null,
+        "evidence": [
+          "implementation/design/M06/OM9-L3-04-14-009/source_crosswalk.json",
+          "implementation/design/M06/OM9-L3-04-14-009/api.md",
+          "implementation/fixtures/M06/OM9-L3-04-14-009/positive.json",
+          "implementation/fixtures/M06/OM9-L3-04-14-009/negative.json",
+          "implementation/evidence/M06/OM9-L3-04-14-009/OM9-L4-14-009-03.json",
+          "implementation/evidence/M06/OM9-L3-04-14-009/OM9-L4-14-009-04.json"
+        ]
+      }
+    ],
+    "automated_evidence": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": "0",
+      "cargo test -p om9-core --lib settings::head -j 2": "12 passed",
+      "cargo test -p om9-core --lib settings::bezel -j 2": "10 passed",
+      "cargo test -p om9-app --test head_commands -j 2": "9 passed",
+      "cargo test -p om9-core --lib -j 2": "171 passed",
+      "summary": "implementation/evidence/M06/OM9-L3-04-14-001/summary.json"
+    },
+    "manual_gate": {
+      "required": true,
+      "gate": "M06-UI",
+      "signed": false,
+      "note": "no human UI review is claimed; the dashboard keeps the 9 L3 at WIP until a reviewer signs"
+    },
+    "limitations": [
+      "A field outside the level's scope is refused as invalid head edit level field instead of being silently widened.",
+      "A payload without the om9.settings.head slot is refused rather than re-derived.",
+      "A scallop cutter is the edge profile extruded along the outline tangent; the cut itself is not performed here (the scallop is a separate cutter body).",
+      "A selection without a gem object is refused: the builder consumes the gem owner's om9.gem record.",
+      "Boolean=On is evaluated in the section frame: the finger rail is a ring on the same girdle, so the groove is the rail section swept along the outline. A non-ring target would need the 3-D CSG owner.",
+      "Cutter bodies never weigh in the metal mass; the report adds their cutter volume and the net metal (a bound on the removed metal) so the numbers are not silently ignored.",
+      "Half-bezel mode ignores the prong profile (the manual states there are no prong profile options in half-bezel mode) and reports it as prong_profile_ignored.",
+      "Level 1/2/3 edit the whole prong or rail set; only Level 4 with Prong=/Rail= edits a single element.",
+      "Profile=Bezier:x,y;x,y;... samples a closed cubic Bezier into a typed section; Profiles never insert a scene object, they only shape a builder section.",
+      "Prong clearance is measured against the inscribed girdle radius; a faceted outline is inscribed in its profile circle.",
+      "The band follows the girdle arc between Position and Position+Span; the white rotation handle is UI scope.",
+      "The committed Finger Rail body is an Insert alongside the notched ring; it carries the same om9.settings.bezel payload so a rebuild can find it.",
+      "The default head drop follows the stone (35% of the pavilion depth, capped at 0.9 mm) so the base stays above the culet.",
+      "The edge profile drives the corner shape only; the section parameters (height/top/base/dome/angle/chamfer) are explicit typed values.",
+      "The library is read-only built-ins plus the session's user list; ProfileSave= keeps a user section and Profile=<name> resolves it. The Bezier control-point editing UI is not part of this owner.",
+      "The seat cutter is a trapezoid wedge under the girdle; the cut is a mesh CSG difference and refuses a non-closed result.",
+      "The seat frames are published here; Enter applies the seat cut to the gem body through Mutation::Geometry on the gem owner's entity, so Undo restores both the stone and the head.",
+      "Under Bezel shifts the section below the girdle band; Gallery Rail is one ring below it. Both share the closed-ring and Boolean gates.",
+      "Validity is measured per body (closed, positive volume, unique ids) on the generated mesh; the OCCT B-Rep swap is the kernel adapter's own gate."
     ]
   }
 }

@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-13-005",
+  "title": "Edit Existing Builder By History",
+  "generated_at_utc": "2026-10-27T03:41:04Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/icon/window review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "05fcff5acca88b2e0763c356bd79bc562baba1d3e6878b9b073bb352f71b467b",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "the ring builder reopens at the recorded 22 mm diameter; Apply at 24 mm updates the same object and recipe in one transaction",
+    "negative": "missing builder kind/schema mismatch or an object without a recipe -> typed refusal, no partial edit"
+  },
+  "l4_id": "OM9-L4-03-13-005-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/history.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/tests/history_updates.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "history_updates",
+        "-j",
+        "2",
+        "edit_from_history_reopens_the_builder_at_the_recorded_parameters"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "1c96e06c8e26639053a63c0651390021b695e05186c603869c8d2c67b5a89b8c",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.01s"
+      ],
+      "test": "edit_from_history_reopens_the_builder_at_the_recorded_parameters",
+      "package": "om9-app",
+      "binary": "history_updates"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

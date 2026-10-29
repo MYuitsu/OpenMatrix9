@@ -1,0 +1,67 @@
+{
+  "batch": "RECTANGLE-SIGNED-CORNERS-CMD-FIX-20261026",
+  "recorded_at_utc": "2026-10-26T13:42:06.840550+00:00",
+  "target": "standalone Rust OM9 Windows x64, default features, GPU",
+  "head": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "source_sha256": {
+    "crates/om9-app/src/session/rect.rs": "d67298a0feda8685d5149f7b68b986d8ffff1f9e0fc7b6449a9576e2be475e06",
+    "crates/om9-app/tests/rectangle_regressions.rs": "6ca7d3b4b5305e2ae4022ef49b7b76198ead427e52745a2a14997d8d9db6f568",
+    "crates/om9-app/src/session.rs": "cb00b8dc4a66e39baed6d6da0ac01238d0f6ca8bbbefa35c408fda8e6e9005d0",
+    "crates/om9-core/src/coords.rs": "151fe8cc89ba5887333cd52d41e25e82ffe881544b2bc3a3c29b9e86090e477c",
+    "crates/om9-app/src/ui.rs": "a5f711ed75ad67c5979a493e980951e91ca0abe951639bcb61ca9a203d5dd851"
+  },
+  "shared_session_file_unchanged_by_this_task": true,
+  "binary_sha256": "5ea01881bb3528343be972731ea4f0e20597f02cf9700d70d67b72ef5d0137ce",
+  "runtime_launch": {
+    "pid": 2952,
+    "executable": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\rectangle-fix-20261026\\om9.exe",
+    "sha256": "5ea01881bb3528343be972731ea4f0e20597f02cf9700d70d67b72ef5d0137ce",
+    "launched_at_utc": "2026-10-26T13:32:17.914950+00:00",
+    "isolated_layout": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\rectangle-fix-20261026\\ui-layout.json",
+    "runtime_dll_directory": "L:/om9-target/debug",
+    "initial_staged_launch": "Loader exit 0xC0000135 with only SDK bin on PATH; reused existing debug runtime DLL directory, no native code change."
+  },
+  "rust_source_newer_than_binary": [],
+  "tests": {
+    "red_regression_tests_failed": 5,
+    "green_focused_tests_passed": 42,
+    "green_regression_tests_passed": 5,
+    "quadrant_cases": 24,
+    "separate_test_functions": false,
+    "scoped_rustfmt_check": "PASS",
+    "scoped_git_diff_check": "PASS",
+    "public_source_audit": {
+      "source_files": 12679,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "artifact_sha256": {
+    "docs/validation/2026-10-26-rectangle-fix/before-hashes.json": "6d8a2454f24969aeb459a9d1bdbf57a2ed52f92a0608252e426ea694b25b02ea",
+    "docs/validation/2026-10-26-rectangle-fix/build.log": "43410aa8ed1fa7c260a09d7c4b02f6d1376ab1cd49664b6c0d161d6d80faa534",
+    "docs/validation/2026-10-26-rectangle-fix/green.log": "0978ff3aae8a17e7f159b82617361a13117f9fff201569f10b89d9009ecdb65e",
+    "docs/validation/2026-10-26-rectangle-fix/prune.log": "4b809f320a7e2effc50c26a0b60ce1180b6dfb393d3116d59f45d6f90ad04f84",
+    "docs/validation/2026-10-26-rectangle-fix/public-source-audit.json": "4b9bf6d5f018dd15db850586d4999c6637a6059113db8e1405da5c53ef12ce78",
+    "docs/validation/2026-10-26-rectangle-fix/README.md": "f92323302e258ee7fb656ae2ad8bf008367bb923b568211fee5b2fa49a90dec0",
+    "docs/validation/2026-10-26-rectangle-fix/red.log": "3556a83d8c702b1a14a862c42b9b2addaf685cf4d6cddb6e4026d633b2a2d230",
+    "docs/validation/2026-10-26-rectangle-fix/runtime-launch.json": "7610a0b710206b85da297494f553f82469ac1a4f10ac8657371efe3a7563650a",
+    "implementation/evidence/AFTER/rectangle-signed-corners-20261026/cmd-committed-negative.png": "935eccc111cebcf513528abb5fbf663346525674d42204f39c4d45191d70b4fd",
+    "implementation/evidence/AFTER/rectangle-signed-corners-20261026/cmd-first-accepted.png": "e28de44d9185a1fbfd5c32b2dee3eaa892b5c1cd603384656881446765ccdb22",
+    "implementation/evidence/AFTER/rectangle-signed-corners-20261026/committed-down-right.png": "5682bafbee2d9ea3eba47ac6cc9f4b79f7bcb46447693406ac76d4314aa67963",
+    "implementation/evidence/AFTER/rectangle-signed-corners-20261026/preview-down-right.png": "803e5666cfed5acacd48c2f60d8e3f138494bd11980089eda70a38741e9e70d3"
+  },
+  "gui_observation": {
+    "performed_by": "AI using computer-use skill; not human gate sign-off",
+    "icon_mouse_preview_and_commit": "PASS at observed frames",
+    "typed_CMD_first_and_opposite_corner": "PASS at observed frames",
+    "saved_project_fixture": false,
+    "continuous_frame_present_measurement": false
+  },
+  "native_code_changed": false,
+  "opennurbs_measurement_run": false,
+  "human_approval": null,
+  "full_command_acceptance_promoted": false,
+  "next_action": "Use corrected local executable; fingerprinted GPU frame timing only if transient disappearance persists."
+}

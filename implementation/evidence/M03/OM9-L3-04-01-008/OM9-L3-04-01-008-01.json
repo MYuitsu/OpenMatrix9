@@ -1,0 +1,14 @@
+{
+  "l4_id": "OM9-L3-04-01-008-01",
+  "l3_id": "OM9-L3-04-01-008",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Bend: golden case 'path (0,0,0)->(10,0,0), base (0,0,0), axis (1,0,0), bend direction (0,1,0), 90 degrees -> the far end lands on (10/(pi/2), 10/(pi/2), 0) = (6.3662, 6.3662, 0) as a polycurve of the mapped samples, one Undo entry'",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_008_bend_turns_the_curve_into_an_arc",
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_deform_rows_refuse_a_solid",
+    "crates/om9-core/src/deform.rs"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

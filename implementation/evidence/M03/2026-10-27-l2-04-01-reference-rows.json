@@ -1,0 +1,91 @@
+{
+  "schema": "om9.evidence.batch.v1",
+  "date": "2026-10-27",
+  "l2_id": "OM9-L2-04-01",
+  "title": "Transform reference-frame rows: Orient on Surface/Curve, Symmetry, Array Along Surface, Array Curve on Surface, Stretch",
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03-UI_PENDING",
+  "rows": [
+    {
+      "l3_id": "OM9-L3-04-01-015",
+      "feature": "OM9-TRANSFORM-013",
+      "command": "OrientOnSrf",
+      "owner_services": [
+        "crates/om9-core/src/curve_surface_ops.rs",
+        "crates/om9-core/src/surface_kernel.rs",
+        "crates/om9-core/src/transform_session.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_015_orient_on_surface_stands_the_object_on_the_surface",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-015/OM9-L3-04-01-015-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-017",
+      "feature": "OM9-TRANSFORM-017",
+      "command": "OrientOnCrv",
+      "owner_services": [
+        "crates/om9-core/src/curve_ops.rs",
+        "crates/om9-core/src/curve_surface_ops.rs",
+        "crates/om9-core/src/transform_session.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_017_orient_on_curve_follows_the_tangent",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-017/OM9-L3-04-01-017-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-018",
+      "feature": "OM9-TRANSFORM-018",
+      "command": "Symmetry",
+      "owner_services": [
+        "crates/om9-core/src/geometry.rs",
+        "crates/om9-app/src/session/transform.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_018_symmetry_mirrors_across_the_picked_plane",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-018/OM9-L3-04-01-018-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-024",
+      "feature": "OM9-TRANSFORM-023",
+      "command": "ArraySrf",
+      "owner_services": [
+        "crates/om9-core/src/surface_kernel.rs",
+        "crates/om9-core/src/transform_session.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_024_array_along_surface_places_copies_on_the_surface_grid",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-024/OM9-L3-04-01-024-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-025",
+      "feature": "OM9-TRANSFORM-026",
+      "command": "ArrayCrvOnSrf",
+      "owner_services": [
+        "crates/om9-core/src/curve_ops.rs",
+        "crates/om9-core/src/curve_surface_ops.rs",
+        "crates/om9-core/src/surface_kernel.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_025_array_curve_on_surface_projects_the_stations_onto_the_surface",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-025/OM9-L3-04-01-025-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-032",
+      "feature": "OM9-TRANSFORM-032",
+      "command": "Stretch",
+      "owner_services": [
+        "crates/om9-core/src/gumball.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_032_stretch_scales_along_the_picked_direction",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-032/OM9-L3-04-01-032-01.json"
+    }
+  ],
+  "totals": {
+    "catalogued_rows": 41,
+    "implemented_rows": 23,
+    "disabled_rows": 18,
+    "tests": {
+      "app_transform_menu": "29 passed; 0 failed"
+    }
+  },
+  "notes": [
+    "the six rows were enabled after their owner services were located in om9-core; no command was enabled without a body",
+    "the M08-owned rows keep their planning state, their owner milestone and their own manual gate",
+    "the two remaining blocked rows are Solid Points ON (no sub-object control-point service) and Make Down Facing (UNRESOLVED_BLOCK_ENABLE)"
+  ]
+}

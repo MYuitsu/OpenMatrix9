@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-014",
+  "case": "the same frame rule as Smart Flow: two surfaces and at least one curve",
+  "expected": "the same frame rule as Smart Flow: two surfaces and at least one curve",
+  "test": "m03_04_01_015_smart_flow_pulldown_brings_curves_to_the_base"
+}

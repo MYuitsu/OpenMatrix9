@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-022-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-022",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-023",
   "source_command": "Fillet Corners",
   "menu_icon": "CurveFilletCorners",
   "owner_candidate": "OM9-L3-02-04-006",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Fillet Corners command session is not wired; owner candidate OM9-L3-02-04-006 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-022/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-022/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-022/dispatch_contract.json": "e959b1edb4f147bdee5f6b428715bdb0451f2675be2309d64e8f67edecb6186c",
-    "implementation/design/M03/OM9-L3-03-16-022/dispatch_contract.md": "2a4085edc75d489075a8c5e87c2167eddf1576758071d7e271500ed5133e3da5"
+    "implementation/design/M03/OM9-L3-03-16-022/dispatch_contract.json": "4a75b6a154647f61a04fe8285e7b7f537b751f8a49d8c1cf8d470df2cf39d801",
+    "implementation/design/M03/OM9-L3-03-16-022/dispatch_contract.md": "8dd218a47eaf441adeb6eb7c8e4ab898e278046f02cf37af338d58dc2feb62a5"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "FilletCorners"
 }

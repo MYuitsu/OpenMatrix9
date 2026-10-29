@@ -30,11 +30,8 @@ impl Controller {
             return Err(Error::Invalid("curve selection"));
         }
         for curve in curves {
-            let samples = om9_core::surface_kernel::sample_curve(
-                &curve,
-                32,
-                self.coordinator.limits(),
-            )?;
+            let samples =
+                om9_core::surface_kernel::sample_curve(&curve, 32, self.coordinator.limits())?;
             let mut parameters = Vec::with_capacity(samples.len());
             for point in samples {
                 parameters.push(

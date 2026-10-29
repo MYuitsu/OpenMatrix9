@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-12-008",
+  "title": "Pave History Geometry Refresh",
+  "cases": [
+    "a feature whose UV left the new surface domain reports conflicts instead of silently dropping ids",
+    "a feature with mismatched gem/uv counts is refused",
+    "re-applying with unresolved conflicts is a typed error"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

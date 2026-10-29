@@ -1,0 +1,15 @@
+$ cargo test -p om9-app --lib -j 2 gem_edits
+# exit code: 0
+# captured: 2026-10-28T04:05:58Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 3 tests
+test ui::gem_edits::tests::a_stone_outside_the_view_is_skipped_instead_of_pinned_to_the_edge ... ok
+test ui::gem_edits::tests::a_round_stone_with_a_custom_profile_still_maps_its_girdle ... ok
+test ui::gem_edits::tests::every_visible_stone_gets_a_numbered_caption_inside_the_viewport ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 192 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running unittests src\lib.rs (cargo-target\debug\deps\om9_app-394fd906d65bc36f.exe)

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "asset_policy": "authored Render SVG first; authored Cutters SVG first; authored Settings SVG first; authored Gems SVG first; authored Tools SVG first; authored SubD SVG first; authored Builder SVG first; authored Emboss SVG first; authored Surface SVG first; authored Transform SVG first; authored Solid SVG first; authored Curve SVG first; Authored SVG only; external bitmap/archive import disabled",
+  "asset_policy": "authored Solid SVG first; authored Render SVG first; authored Cutters SVG first; authored Settings SVG first; authored Gems SVG first; authored Tools SVG first; authored SubD SVG first; authored Builder SVG first; authored Emboss SVG first; authored Surface SVG first; authored Transform SVG first; authored Solid SVG first; authored Curve SVG first; Authored SVG only; external bitmap/archive import disabled",
   "resolved": [
     "TopIconDuplicate",
     "TopIconEditPointsOn",
@@ -189,8 +189,19 @@
     "SolidExtrudePlanarCurveStraight",
     "SolidGVDAllExtrude",
     "SolidPipe",
+    "SolidGVDMultiPipe",
     "SolidBoxCornertoCornerHeight",
+    "SolidBoxDiagonal",
+    "SolidBox3PointsHeight",
+    "SolidBoxVerticalBase",
+    "SolidBoxCenterofBaseCornerHeight",
     "SolidSphereCenterRadius",
+    "SolidSphere2Points",
+    "SolidSphere3Points",
+    "SolidSphere4Points",
+    "SolidSphereAroundCurve",
+    "SolidSphereTangenttoCurves",
+    "SolidSphereFitSpheretoPoints",
     "SolidEllipsoidFromCenter",
     "SolidTorus",
     "SolidCylinder",
@@ -8511,6 +8522,1165 @@
       "spec_id": "OM9-TRANSFORM-022",
       "semantic_source": "local Transform spec",
       "design_note": "Warp cage edges and captured object together; align all cage lines with the deformed outline"
+    },
+    "ToolbarSculptSculpt": {
+      "symbol": "ToolbarSculptSculpt",
+      "label": "Sculpt Sculpt",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "73d359947ab6844b9851d53ef778ea55a8823d0eff2abf4c3603bcaec2447f65"
+    },
+    "ToolbarSculptBrush": {
+      "symbol": "ToolbarSculptBrush",
+      "label": "Sculpt Brush",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "4d4a1345a9751275bfd31195b1ea003af45b591bbe5351442db5392bca1bb67c"
+    },
+    "ToolbarSculptCrease": {
+      "symbol": "ToolbarSculptCrease",
+      "label": "Sculpt Crease",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "1debd853aeb0d045d1243f1437a40756d59c5ab28f5f26081f11ed15db9afd3d"
+    },
+    "ToolbarSculptFlatten": {
+      "symbol": "ToolbarSculptFlatten",
+      "label": "Sculpt Flatten",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "a0b01dc1d69296278d000ad47f4b1f4bfe9b13dcaee29a19659008fa62346e13"
+    },
+    "ToolbarSculptInflate": {
+      "symbol": "ToolbarSculptInflate",
+      "label": "Sculpt Inflate",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "a6dddf9f9216d6941e02b710a68d3ad3dfc0017beb03dc6a87ddb5241fc656ec"
+    },
+    "ToolbarSculptPinch": {
+      "symbol": "ToolbarSculptPinch",
+      "label": "Sculpt Pinch",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "8ed1745693e32bd6527099402d887eac521b33ed9711d26935a2384a6879702b"
+    },
+    "ToolbarSculptSmooth": {
+      "symbol": "ToolbarSculptSmooth",
+      "label": "Sculpt Smooth",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "78cf20d9fead9eff504cc24cce8fb503bf95309cb2b3f96298817e76a18ad5e4"
+    },
+    "ToolbarSculptTwist": {
+      "symbol": "ToolbarSculptTwist",
+      "label": "Sculpt Twist",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "04c35a15c6d78add66ec03f6c84d054f90f135c32018af4aa13ac2aefd74604c"
+    },
+    "ToolbarSculptDrag": {
+      "symbol": "ToolbarSculptDrag",
+      "label": "Sculpt Drag",
+      "style": "toolbar-sculpt-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#cf3439",
+        "#eeeeee",
+        "#3a3a3a"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "dfef97952cb681888a7862787f4456fd855869bddc3d09652ba94dc723631dd2"
+    },
+    "ToolbarEmbossEmboss": {
+      "symbol": "ToolbarEmbossEmboss",
+      "label": "Emboss",
+      "style": "toolbar-emboss-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#b63439",
+        "#cf3439",
+        "#eeeeee"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "4fa4efeefc1c15cde45ce9dda45b7e9cd5b0a78459fffe2f99ad976a043ef54f"
+    },
+    "ToolbarEmbossResources": {
+      "symbol": "ToolbarEmbossResources",
+      "label": "Resources",
+      "style": "toolbar-emboss-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#b63439",
+        "#cf3439",
+        "#eeeeee"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "e38f1f1ca261b6ad36bacfb21dc766c55a44916f703a18f04f4f033984b7c8e1"
+    },
+    "ToolbarEmbossTextureCreator": {
+      "symbol": "ToolbarEmbossTextureCreator",
+      "label": "TextureCreator",
+      "style": "toolbar-emboss-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#b63439",
+        "#cf3439",
+        "#eeeeee"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "9758711b626d31bf24748f6893782d3d77a3352cde06040ee2e808065895d972"
+    },
+    "ToolbarEmbossRasterToVector": {
+      "symbol": "ToolbarEmbossRasterToVector",
+      "label": "RasterToVector",
+      "style": "toolbar-emboss-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#b63439",
+        "#cf3439",
+        "#eeeeee"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "87daf341ae845db2c6f226627a1dd7b07193d488afdd0a6dc6170400da264f0f"
+    },
+    "ToolbarEmbossTextOnCurve": {
+      "symbol": "ToolbarEmbossTextOnCurve",
+      "label": "TextOnCurve",
+      "style": "toolbar-emboss-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#b63439",
+        "#cf3439",
+        "#eeeeee"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "2518ff6e6f0b1e1e2d6f0e7df76057aff18d3dbd812c29405c486c41240686af"
+    },
+    "ToolbarEmbossDecimator": {
+      "symbol": "ToolbarEmbossDecimator",
+      "label": "Decimator",
+      "style": "toolbar-emboss-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#b63439",
+        "#cf3439",
+        "#eeeeee"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "313735d432c43af024bb0ca63862eb530af9fbf2989704acdb3f3509b0d7d59b"
+    },
+    "ToolbarSubDEditMode": {
+      "symbol": "ToolbarSubDEditMode",
+      "label": "EditMode",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "491a14c666dde4c0ca7859c6522a092452d2eb860e9eb3f94add93bba8232995"
+    },
+    "ToolbarSubDPrimitives": {
+      "symbol": "ToolbarSubDPrimitives",
+      "label": "Primitives",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "c188d57de1c3ff65fcb670e693b40ad56fba6da266d5180274a02159d84fa86f"
+    },
+    "ToolbarSubDCreation": {
+      "symbol": "ToolbarSubDCreation",
+      "label": "Creation",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "563782883225d298604ff9777cd1808ed8577a108bd86f3adf76cb93eca1e562"
+    },
+    "ToolbarSubDEdition": {
+      "symbol": "ToolbarSubDEdition",
+      "label": "Edition",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "dc441424d3c0ad85ea14b882439f01742aab8cce4ce445d9b2e34ec7280bfab4"
+    },
+    "ToolbarSubDSelection": {
+      "symbol": "ToolbarSubDSelection",
+      "label": "Selection",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "90f868a38be553fd0d5f6ee3acff84a2c4e3df8269fb4d1eb24ca47828537a35"
+    },
+    "ToolbarSubDHotkeys": {
+      "symbol": "ToolbarSubDHotkeys",
+      "label": "Hotkeys",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "07ba056736810d93f020233e2fc776d3ed749cdcf9e0da2c697b8984f63f8fe0"
+    },
+    "ToolbarSubDSettings": {
+      "symbol": "ToolbarSubDSettings",
+      "label": "Settings",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "af18024167bf1b0739ce901bf091ba8ccbe95cda99eb8351049a8f19d5c523b1"
+    },
+    "ToolbarSubDHelp": {
+      "symbol": "ToolbarSubDHelp",
+      "label": "Help",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "db780ef1edd440d6f6dcf1f841f0749aa049c1b27640b946226f861a4caf96b6"
+    },
+    "ToolbarSubDFeedback": {
+      "symbol": "ToolbarSubDFeedback",
+      "label": "Feedback",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "43407c8fb04c21e2ec7b0d85b1e7a159d58165fcc416ba3610bd47d1a2637aa5"
+    },
+    "ToolbarSubDElements": {
+      "symbol": "ToolbarSubDElements",
+      "label": "Elements",
+      "style": "toolbar-subd-v1",
+      "semantic_source": "locally installed Clayoo toolbar command labels",
+      "palette": [
+        "#c43b40",
+        "#eeeeee",
+        "#555555"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "854e77c4c235f4ef8b09582c400f82ee96496f4912b316bcbf0165420b88b12e"
+    },
+    "ToolbarStandardCut": {
+      "symbol": "ToolbarStandardCut",
+      "label": "Cut",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "0e9a37b44ffc3703f599366cf899c11975414b3222598814b745e1e638ef0010"
+    },
+    "ToolbarStandardCopy": {
+      "symbol": "ToolbarStandardCopy",
+      "label": "Copy",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "d7afbce36754394b72d991222df10efb987650264634ffb5d9d35f8f4e0978f5"
+    },
+    "ToolbarStandardPaste": {
+      "symbol": "ToolbarStandardPaste",
+      "label": "Paste",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "5e88e945022bd3cdb85b3cab68b1babee5caab687f0b4ace9216e8312a5e565c"
+    },
+    "ToolbarStandardPan": {
+      "symbol": "ToolbarStandardPan",
+      "label": "Pan",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "89e80eba58d241d2914c21c65c4db92213e210001f72d818a0c1fd7b4e7285fc"
+    },
+    "ToolbarStandardRotateView": {
+      "symbol": "ToolbarStandardRotateView",
+      "label": "RotateView",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "e1c71520f8a6bff29d7d8333741e1a4c7b27017e8aa3d365706e7e8f1414e8ee"
+    },
+    "ToolbarStandardUndoView": {
+      "symbol": "ToolbarStandardUndoView",
+      "label": "UndoView",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "a0221934512aa613dd08e9a6a75184bef8ff5e993786fda7521e05e9f484eb3b"
+    },
+    "ToolbarStandardFourViews": {
+      "symbol": "ToolbarStandardFourViews",
+      "label": "FourViews",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "1f10538ac20470735955971276c47d6b410da8f60aadb7bbd8fd282d2dfb1326"
+    },
+    "ToolbarStandardCPlaneOrigin": {
+      "symbol": "ToolbarStandardCPlaneOrigin",
+      "label": "CPlaneOrigin",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "ad82e420e38e7b015fadd9c2ce326e99c53cc24987fba38239be5bd8aa9e9ff4"
+    },
+    "ToolbarStandardHelp": {
+      "symbol": "ToolbarStandardHelp",
+      "label": "Help",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "6e95643c23f744779c28123670d2f715e7ddac3de733227caa3c44a756dcf54d"
+    },
+    "ToolbarStandardDocumentProperties": {
+      "symbol": "ToolbarStandardDocumentProperties",
+      "label": "DocumentProperties",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "7c301625cf2bce11ccd7f02f3769d8da0f8a50197fa73e01c3c4aca5c69ee193"
+    },
+    "ToolbarStandardRightView": {
+      "symbol": "ToolbarStandardRightView",
+      "label": "RightView",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "cd6b72c503d0858241fc90f514aab2e48e761967cdd139ca18406db85026a74b"
+    },
+    "ToolbarStandardObjectSnaps": {
+      "symbol": "ToolbarStandardObjectSnaps",
+      "label": "ObjectSnaps",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "a37962cf59ee5dde01a5a6da608f90bb01f0f265c4ae6834555478fffafaafc5"
+    },
+    "ToolbarStandardSelectAll": {
+      "symbol": "ToolbarStandardSelectAll",
+      "label": "SelectAll",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "fdc3641fe599ad7bb99025f86a9e74b8c36ae4fc8d3c7647311fb6ea9e8c3e96"
+    },
+    "ToolbarStandardHide": {
+      "symbol": "ToolbarStandardHide",
+      "label": "Hide",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "668d95a443f3efb5af7cbcd84fd48ee93e3af4161fcc407e99e53ca5b698fcdb"
+    },
+    "ToolbarStandardLock": {
+      "symbol": "ToolbarStandardLock",
+      "label": "Lock",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "442184f384f2653d6e26f9179332cfad1f36c17bd8544c3597daad492e667087"
+    },
+    "ToolbarStandardShade": {
+      "symbol": "ToolbarStandardShade",
+      "label": "Shade",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "9cc476cdf227da263e9ac4674d6249533a016a136463f764ebe1356a7c551233"
+    },
+    "ToolbarStandardRender": {
+      "symbol": "ToolbarStandardRender",
+      "label": "Render",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "150b99b4b6bd8e7643c136688c159558b119abd842e7dbe32877ce401b1f2021"
+    },
+    "ToolbarStandardSpotlight": {
+      "symbol": "ToolbarStandardSpotlight",
+      "label": "Spotlight",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "eb796df114437bd5f572bb595a930154f28a5d618bdebda46eda408e199f15dd"
+    },
+    "ToolbarStandardLinearDimension": {
+      "symbol": "ToolbarStandardLinearDimension",
+      "label": "LinearDimension",
+      "style": "toolbar-standard-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels",
+      "palette": [
+        "#eeeeee",
+        "#444444",
+        "#d34642",
+        "#e3b83b",
+        "#5a89cf"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "aca5312d819ec6eb4623003ae4e5ea44a5920f1b2eec129927a1ac539f890ad2"
+    },
+    "ToolbarVisibilityHide": {
+      "symbol": "ToolbarVisibilityHide",
+      "label": "Hide",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "b40276115fb8b34201b56ac14f56eabad2f1a0fb2ed8617f659477c948ad8d94"
+    },
+    "ToolbarVisibilityShow": {
+      "symbol": "ToolbarVisibilityShow",
+      "label": "Show",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "42aeff0dd6eec922afa62899cb618463a83e9cebfe3aa85850ed40923fe9793c"
+    },
+    "ToolbarVisibilityShowSelected": {
+      "symbol": "ToolbarVisibilityShowSelected",
+      "label": "ShowSelected",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "94e9e68b0b4314ee257beb8ba2f302ec8b40ef7d43e9be76d03923553548b3a7"
+    },
+    "ToolbarVisibilityInvertHide": {
+      "symbol": "ToolbarVisibilityInvertHide",
+      "label": "InvertHide",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "f26c002f39d663bb9094867ef0ce9caa395bebdf176d79694f8e720b52c06700"
+    },
+    "ToolbarVisibilityHideSwap": {
+      "symbol": "ToolbarVisibilityHideSwap",
+      "label": "HideSwap",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "bc443fe2c21cb007553b287cb8f8b7221da4c8ddb85f0c9373b579f57cdaa991"
+    },
+    "ToolbarVisibilityLock": {
+      "symbol": "ToolbarVisibilityLock",
+      "label": "Lock",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "3e64bda7574099ae2e1cd7dc2766a48767581b49dcd01c768642c3a18d6d4b05"
+    },
+    "ToolbarVisibilityUnlock": {
+      "symbol": "ToolbarVisibilityUnlock",
+      "label": "Unlock",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "02626461a0a5f28b0f62883545c6a018ba18ebf4350b85532e2d559beac983a4"
+    },
+    "ToolbarVisibilityUnlockSelected": {
+      "symbol": "ToolbarVisibilityUnlockSelected",
+      "label": "UnlockSelected",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "5c2ee6ccb5c3ed5393ba2bb74d670a8ff994d1a24d04d3f662150730895e3e8c"
+    },
+    "ToolbarVisibilityInvertLock": {
+      "symbol": "ToolbarVisibilityInvertLock",
+      "label": "InvertLock",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "6b23c1f0dbce1c4532225021f8de873919314b616ae1343a0ebffa9a611f7a46"
+    },
+    "ToolbarVisibilityLockSwap": {
+      "symbol": "ToolbarVisibilityLockSwap",
+      "label": "LockSwap",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "91df84fd53b5734f9fd8d3968bbdf7ac8c95e30c34448692e3c5550c6294a7b0"
+    },
+    "ToolbarVisibilityInvertHidePoints": {
+      "symbol": "ToolbarVisibilityInvertHidePoints",
+      "label": "InvertHidePoints",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "3410da4942c4da4a4a98c4f8df97186c9a588ff5b95b613e17d56118910f68e5"
+    },
+    "ToolbarVisibilityHidePoints": {
+      "symbol": "ToolbarVisibilityHidePoints",
+      "label": "HidePoints",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "d1aff258982d6e99fe92b09392ba78108ab53fc3a15baa1bdd7231f0b5a7c8dc"
+    },
+    "ToolbarVisibilityClippingPlane": {
+      "symbol": "ToolbarVisibilityClippingPlane",
+      "label": "ClippingPlane",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "412d8748ed871fd5ac007bdd5609f9d43e037170b60de074ef28721b7db6f12e"
+    },
+    "ToolbarVisibilityDisableClipping": {
+      "symbol": "ToolbarVisibilityDisableClipping",
+      "label": "DisableClipping",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "d8a2703ebe8eb5deb01bc08be691d344d2a17b7ecc4fdac979ed4b71c3d47419"
+    },
+    "ToolbarVisibilityHideA": {
+      "symbol": "ToolbarVisibilityHideA",
+      "label": "HideA",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "1ecca324d606045879e57f77fa20f5205a8501438a8369f2b43d0013a3bb703e"
+    },
+    "ToolbarVisibilityHideB": {
+      "symbol": "ToolbarVisibilityHideB",
+      "label": "HideB",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "15cff317a9078c8be6b9a58c044ab374097d993e33854e4f969997b24108427c"
+    },
+    "ToolbarVisibilityHideC": {
+      "symbol": "ToolbarVisibilityHideC",
+      "label": "HideC",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "f1e1a9e2506f49ba59ab86148cfb5e8492fe7cfa53714018f2d949321ef9c589"
+    },
+    "ToolbarVisibilityHideCustom": {
+      "symbol": "ToolbarVisibilityHideCustom",
+      "label": "HideCustom",
+      "style": "toolbar-visibility-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#777777",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "68d74593b014cbd81e56e417df99625739463f6c1995be1f95d1e512d279a679"
+    },
+    "ToolbarDisplayRendered": {
+      "symbol": "ToolbarDisplayRendered",
+      "label": "Rendered",
+      "style": "toolbar-display-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#426ab8",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "6a1477ebdbcb2a17c86767ee430ddfdbcec3f80853445a4d02c5d20d1be58d3d"
+    },
+    "ToolbarDisplayXRay": {
+      "symbol": "ToolbarDisplayXRay",
+      "label": "XRay",
+      "style": "toolbar-display-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#426ab8",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "15c30c7da80cd68dd8bf359c56523dbd914063c576bf3663f6543bc1196e9ba1"
+    },
+    "ToolbarDisplayPen": {
+      "symbol": "ToolbarDisplayPen",
+      "label": "Pen",
+      "style": "toolbar-display-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#426ab8",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "e43cdb649cf0e7a6bc2577585424115775454d14be31e4d308e41fab3c4a5135"
+    },
+    "ToolbarDisplayArtistic": {
+      "symbol": "ToolbarDisplayArtistic",
+      "label": "Artistic",
+      "style": "toolbar-display-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#426ab8",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "6cb45a60bfe8b9c12a5326f040714adb4c731fca698181d7b5d7546fa400dfbb"
+    },
+    "ToolbarDisplayMeshSettings": {
+      "symbol": "ToolbarDisplayMeshSettings",
+      "label": "MeshSettings",
+      "style": "toolbar-display-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#426ab8",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "6667dc982448f6757b6ad375f004c8ee29f570782e5adf65369af2d8761aab16"
+    },
+    "ToolbarDisplayFlatShade": {
+      "symbol": "ToolbarDisplayFlatShade",
+      "label": "FlatShade",
+      "style": "toolbar-display-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#426ab8",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "25131ad297aa00ba6b806f9866dc452e8a1b8ae68d52eec6a648815eb89726ef"
+    },
+    "ToolbarDisplayObjectShading": {
+      "symbol": "ToolbarDisplayObjectShading",
+      "label": "ObjectShading",
+      "style": "toolbar-display-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#426ab8",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "026c856d9ab36ace305f702519fc6362e5bb0279302473178ba12dec54eb4387"
+    },
+    "ToolbarDisplayDisplayPanel": {
+      "symbol": "ToolbarDisplayDisplayPanel",
+      "label": "DisplayPanel",
+      "style": "toolbar-display-v1",
+      "semantic_source": "locally installed Matrix toolbar command labels and macros",
+      "palette": [
+        "#eeeeee",
+        "#426ab8",
+        "#e3b83b",
+        "#d34642"
+      ],
+      "mapping": "authored-command-symbol",
+      "sha256": "207c871d2a8df1de43f47c562b614ba7fa3df1071fb5c46863f47ce695f0dbb4"
+    },
+    "SolidBooleanSplit": {
+      "symbol": "SolidBooleanSplit",
+      "label": "Boolean split",
+      "meaning": "Split intersecting solid regions into separate pieces",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "c817b96ef48a56140e662a27f9e9a0cbfef8685e1c6f37c74942dcea34c68578",
+      "palette": [
+        "#A668D1",
+        "#FFD166",
+        "#FFFFFF"
+      ],
+      "spec_id": null,
+      "semantic_source": "Rhino 5 command help"
+    },
+    "SolidCreateSolid": {
+      "symbol": "SolidCreateSolid",
+      "label": "Create solid",
+      "meaning": "Build closed solid regions from intersecting surfaces",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "9cb8df0083ff518d59ca4d834b28a2b3c4b3130d25ce1ad2b5a596fd3dacd812",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": null,
+      "semantic_source": "Rhino 5 command help"
+    },
+    "SolidGVDMultiPipe": {
+      "symbol": "SolidGVDMultiPipe",
+      "label": "Multiple pipes",
+      "meaning": "Sweep round profiles along several selected curves",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "1fffc104dc0a1f86811273cb1b199c8e80b9ba31d01163f98049773bd96dc18a",
+      "palette": [
+        "#A668D1",
+        "#FFD166",
+        "#FFFFFF"
+      ],
+      "spec_id": "OM9-SOLID-011",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidBoxDiagonal": {
+      "symbol": "SolidBoxDiagonal",
+      "label": "Box diagonal",
+      "meaning": "Box from diagonal base corners",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "b1cb5d26e602d5a37a2ec87010e127d4eee8e41383111c7254782815f61955bd",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-012",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidBox3PointsHeight": {
+      "symbol": "SolidBox3PointsHeight",
+      "label": "Box three points",
+      "meaning": "Box from an edge and width",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "f78543fe199b0f7644e442e81293be3c5405b210a6535e7fa6fadfeb1de57a68",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-012",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidBoxVerticalBase": {
+      "symbol": "SolidBoxVerticalBase",
+      "label": "Box vertical base",
+      "meaning": "Box with a vertical base plane",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "62887dc3272bc580a4881850160e80cea75ce8cea8ea5ed16dbb726b73171872",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-012",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidBoxCenterofBaseCornerHeight": {
+      "symbol": "SolidBoxCenterofBaseCornerHeight",
+      "label": "Box from center",
+      "meaning": "Box around a center point",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "904614cce671b16031cf153810d2b3bd1810b613ffbd38029ac2f4a8baae5244",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-012",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidSphere2Points": {
+      "symbol": "SolidSphere2Points",
+      "label": "Sphere two points",
+      "meaning": "Sphere defined by diameter endpoints",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "a31e8fe593ecf7b9b014fc92066ae1663aca94b387afb7e452c809a1cab2f605",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-014",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidSphere3Points": {
+      "symbol": "SolidSphere3Points",
+      "label": "Sphere three points",
+      "meaning": "Sphere defined by three points",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "e775a8c4862443aba57f4694153d7a3f0cac675b299b184cd0dcf17a0f1926b4",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-014",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidSphere4Points": {
+      "symbol": "SolidSphere4Points",
+      "label": "Sphere four points",
+      "meaning": "Sphere defined by four points",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "f1ae3ed2ae6aec955cb207601fa88ed78b42e5568b067faf5138412b25972eb7",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-014",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidSphereAroundCurve": {
+      "symbol": "SolidSphereAroundCurve",
+      "label": "Sphere around curve",
+      "meaning": "Sphere centered on a selected curve",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "020a858e48933d0e76b38864dfe00f3bad377a7e2b84065c906a1d5edb13e04a",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-014",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidSphereTangenttoCurves": {
+      "symbol": "SolidSphereTangenttoCurves",
+      "label": "Sphere tangent",
+      "meaning": "Sphere tangent to curves",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "ded665fb4b14e57738a95bdd9d72447ac74c98093a7127a554086e516381ad80",
+      "palette": [
+        "#A668D1",
+        "#FFD166",
+        "#FFFFFF"
+      ],
+      "spec_id": "OM9-SOLID-014",
+      "semantic_source": "local Solid spec"
+    },
+    "SolidSphereFitSpheretoPoints": {
+      "symbol": "SolidSphereFitSpheretoPoints",
+      "label": "Sphere fit points",
+      "meaning": "Fit a sphere to selected points",
+      "style": "minimal-solid-v3-warm-highlight",
+      "mapping": "authored-command-symbol",
+      "sha256": "1ac085d4397035322492250cab1bfd03537ff9195506147a0febd583eb515557",
+      "palette": [
+        "#A668D1",
+        "#FFD166"
+      ],
+      "spec_id": "OM9-SOLID-014",
+      "semantic_source": "local Solid spec"
     }
   },
   "curve_icon_style": {
@@ -8525,7 +9695,7 @@
   "mapping_note": "Curve symbols use authored geometry and precede legacy image sources. ",
   "solid_icon_style": {
     "name": "minimal-solid-v3-warm-highlight",
-    "count": 30,
+    "count": 43,
     "source": "OpenMatrix9-authored-svg",
     "generator": "tools/solid_icons.py",
     "geometry": "authored geometric primitives; no tracing or embedded bitmaps",

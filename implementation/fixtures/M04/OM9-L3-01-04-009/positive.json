@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-009",
+  "case": "positive",
+  "input": "fixture graph ring rail->profile->sweep with a gem placeholder",
+  "expected": "deterministic baseline hash across sessions; an edited rebuild matches a fresh build",
+  "tests": [
+    "the_baseline_is_deterministic_across_sessions_and_round_trips",
+    "editing_a_parameter_and_rebuilding_matches_a_fresh_build",
+    "corrupt_or_missing_fixture_data_fails_to_load",
+    "options_are_hashed_by_content_not_by_allocation"
+  ]
+}

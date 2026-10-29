@@ -56,7 +56,6 @@ fn arc_preview_has_thirty_two_segments() {
     assert_eq!(c.arc_preview([-1.0, 0.0, 0.0]).len(), 32);
 }
 
-
 #[test]
 fn arc_start_direction_uses_the_start_tangent() {
     let mut c = controller();
@@ -68,7 +67,6 @@ fn arc_start_direction_uses_the_start_tangent() {
     assert!((radius - 0.5).abs() < 1e-9);
     assert!((angles[1] - angles[0] - std::f64::consts::PI).abs() < 1e-6);
 }
-
 
 #[test]
 fn arc_center_follows_the_active_cplane() {
@@ -94,7 +92,6 @@ fn arc_center_follows_the_active_cplane() {
     assert!(normal[1].abs() > 0.99, "{normal:?}");
 }
 
-
 #[test]
 fn arc_center_preview_follows_the_active_cplane() {
     let mut c = controller();
@@ -113,7 +110,6 @@ fn arc_center_preview_follows_the_active_cplane() {
     }
 }
 
-
 #[test]
 fn arc_start_point_preview_follows_the_active_cplane() {
     let mut c = controller();
@@ -130,7 +126,6 @@ fn arc_start_point_preview_follows_the_active_cplane() {
     }
 }
 
-
 #[test]
 fn arc_mode_tokens_and_mode_lock() {
     let mut c = controller();
@@ -143,7 +138,6 @@ fn arc_mode_tokens_and_mode_lock() {
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     assert!(c.submit("3point").is_err());
 }
-
 
 #[test]
 fn arc_radius_option_sets_the_radius() {
@@ -159,7 +153,6 @@ fn arc_radius_option_sets_the_radius() {
     assert!((angles[1] - angles[0] - std::f64::consts::FRAC_PI_2).abs() < 1e-6);
 }
 
-
 #[test]
 fn arc_mode_change_clears_the_radius_option() {
     let mut c = controller();
@@ -173,7 +166,6 @@ fn arc_mode_change_clears_the_radius_option() {
     let (radius, _) = arc(&c);
     assert!((radius - 1.0).abs() < 1e-9, "{radius}");
 }
-
 
 #[test]
 fn arc_radius_preview_uses_the_preset() {
@@ -191,7 +183,6 @@ fn arc_radius_preview_uses_the_preset() {
     }
 }
 
-
 #[test]
 fn arc_accepts_diameter_option() {
     let mut c = controller();
@@ -203,4 +194,26 @@ fn arc_accepts_diameter_option() {
     c.accept_world_point([0.0, 10.0, 0.0]).unwrap();
     let (radius, _) = arc(&c);
     assert!((radius - 5.0).abs() < 1e-9);
+}
+
+#[test]
+fn arc_center_uses_the_shared_choice_option() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    let mut c = controller();
+    c.submit("Arc").unwrap();
+    let center = c
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Center")
+        .expect("Center option");
+    assert_eq!(
+        c.activate_command_option(center.id).unwrap(),
+        CommandOptionEffect::Applied
+    );
+    c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    c.accept_world_point([1.0, 0.0, 0.0]).unwrap();
+    c.accept_world_point([0.0, 1.0, 0.0]).unwrap();
+    let (radius, angles) = arc(&c);
+    assert!((radius - 1.0).abs() < 1e-9);
+    assert!((angles[1] - angles[0] - std::f64::consts::FRAC_PI_2).abs() < 1e-6);
 }

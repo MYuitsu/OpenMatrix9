@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-031",
+  "case": "factor 0",
+  "expected": "`Error::Invalid(\"scale factor\")`; the run stays open",
+  "test": "m03_04_01_031_scale_by_plane_scales_along_the_plane_normal"
+}

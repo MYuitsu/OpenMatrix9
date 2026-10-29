@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-11-004",
+  "title": "Tapered Baguettes Between Two Curves",
+  "cases": [
+    "a zero-length span is refused",
+    "a one-curve selection is refused with an explicit error",
+    "an unknown option is a typed error and the session stays open"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

@@ -1,0 +1,7 @@
+{
+  "expect": {
+    "closed": true,
+    "volume": "> 0"
+  },
+  "input": "closed signet and eternity bodies"
+}

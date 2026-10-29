@@ -1,0 +1,26 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-14-008",
+  "cases": [
+    {
+      "input": "4 seats on a round girdle at 0.15 mm depth",
+      "expect": "four frames whose origin sits the seat depth below the girdle plane, unit normal, ids gem:<id>:seat:NN, identical on a rebuild",
+      "oracle": "om9-core src/settings/head.rs::seat_frames_are_stable_and_on_the_girdle"
+    },
+    {
+      "input": "Enter on a head with the default seat depth",
+      "expect": "the gem body is replaced by the seated mesh (smaller stone), the seat cut payload is stored and Undo restores the whole document",
+      "oracle": "om9-app tests/head_commands.rs::the_seat_cut_opens_the_stone_and_undo_restores_it"
+    },
+    {
+      "input": "every head preview",
+      "expect": "the message reports the seat count and the seat depth; the frames follow the same girdle as the prongs",
+      "oracle": "om9-app tests/head_commands.rs::the_head_icon_stages_a_basket_and_enter_commits_prongs_and_rails"
+    }
+  ],
+  "automated_tests": [
+    "the_seat_cut_opens_the_stone_and_undo_restores_it",
+    "seat_frames_are_stable_and_on_the_girdle",
+    "the_seat_cut_removes_stone_under_the_girdle"
+  ]
+}

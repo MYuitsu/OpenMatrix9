@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-11-001",
+  "title": "Builder Typed Input Boxes",
+  "owner": "om9-core BuilderSession input slots",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [
+        "BuilderKind::input_roles",
+        "BuilderSession::new",
+        "BuilderSession::inputs"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/geometry.rs",
+      "symbols": [
+        "GeometryKind"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/tests/builder_controls.rs",
+      "symbols": [
+        "a_typed_input_slot_refuses_the_wrong_geometry_kind_and_keeps_the_entity_id"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3 skill/plan record is planning input; runtime behavior is established by the receipts.",
+    "`om9-core` has no Gem geometry kind: this builder family declares Curve slots only, so the generic fixture's GemRef placeholder is out of scope. The Surface-into-Curve refusal covers the typed-slot negative."
+  ]
+}

@@ -1,0 +1,7 @@
+$ cargo check --workspace --all-targets -j 2
+# exit code: 0
+# captured: 2026-10-27T01:13:28Z
+# target dir: L:\om9-target
+
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.69s

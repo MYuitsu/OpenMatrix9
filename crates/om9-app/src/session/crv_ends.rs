@@ -1,11 +1,15 @@
-//! Mark curve start/end (`CrvStart`, `CrvEnd`, OM9-CURVE-032/033).
+//! Mark curve start/end (`CrvStart`, `CrvEnd`, OM9-CURVE-033/032).
+//!
+//! The stable ids follow the authored FEATURES catalog: OM9-CURVE-033 is
+//! `Mark Curve Start` and OM9-CURVE-032 is `Mark Curve End`, so the menu row
+//! and the typed command cannot disagree about which end they mark.
 
 use om9_core::geometry::{Geometry, Point3};
 
 use super::{Controller, Error};
 
-pub const CRV_START: &str = "OM9-CURVE-032";
-pub const CRV_END: &str = "OM9-CURVE-033";
+pub const CRV_START: &str = "OM9-CURVE-033";
+pub const CRV_END: &str = "OM9-CURVE-032";
 
 impl Controller {
     pub fn dispatch_crv_mark(&mut self, end: bool) -> Result<(), Error> {
@@ -23,11 +27,7 @@ impl Controller {
         let Geometry::Curve(curve) = &entity.geometry else {
             return Err(Error::Invalid("curve selection"));
         };
-        let samples = om9_core::surface_kernel::sample_curve(
-            curve,
-            2,
-            self.coordinator.limits(),
-        )?;
+        let samples = om9_core::surface_kernel::sample_curve(curve, 2, self.coordinator.limits())?;
         let point: Point3 = if end {
             *samples.last().ok_or(Error::Invalid("curve samples"))?
         } else {

@@ -1,0 +1,14 @@
+{
+  "l3_id": "OM9-L3-03-21-013",
+  "title": "Recenter Dimension Text — menu binding",
+  "owner": "OM9-L2-03-21",
+  "date": "2026-10-27",
+  "sources": [
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-21 - Model-space annotations/L3-013 - Recenter Dimension Text/l3.json",
+    "crates/om9-app/src/session/annotation.rs",
+    "crates/om9-core/src/annotation.rs",
+    "crates/om9-app/tests/annotation.rs",
+    "crates/om9-app/tests/annotation_ui.rs"
+  ],
+  "qymcad_source_paths_verified": []
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-008",
+  "title": "Gem Follow Underlying Curve",
+  "cases": [
+    "the same `GemId` is kept when the curve changes and only the transform is updated",
+    "stations past a shortened curve become CONFLICT instead of moving to a wrong place",
+    "the whole follow is one transaction and Undo restores the ACTIVE links"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

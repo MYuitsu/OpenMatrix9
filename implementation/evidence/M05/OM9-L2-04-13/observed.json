@@ -1,0 +1,172 @@
+{
+  "schema": "om9.m05.l2_gem_edits_evidence.v1",
+  "l2_id": "OM9-L2-04-13",
+  "title": "Gem Instance Edits And Reports",
+  "date": "2026-10-28",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "code": [
+    "crates/om9-core/src/gem_edits.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/src/session/gem_edits.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem_edits.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/gem_edits.rs",
+    "tools/record_m05_l2_04_13_gem_instance_edits.py"
+  ],
+  "checks": [
+    {
+      "artifact": "core-gem-edits.log",
+      "command": "cargo test -p om9-core --test gem_edits -j 2",
+      "exit_code": 0,
+      "sha256": "bb9c398938210b592dd94640cd9847fb8727657d5e75cb776cf734e9a5e09b0b"
+    },
+    {
+      "artifact": "app-gem-edits.log",
+      "command": "cargo test -p om9-app --test gem_edits -j 2",
+      "exit_code": 0,
+      "sha256": "50603479e1332a2a2e9ea5590bc533c06e0296fd5f8fe96af7ddc047b370440a"
+    },
+    {
+      "artifact": "app-gem-map-overlay.log",
+      "command": "cargo test -p om9-app --lib -j 2 gem_edits",
+      "exit_code": 0,
+      "sha256": "bcc658609b1feb39460e491a5d935c7c0375c070ae4abac2daa1e8ac111cbb4e"
+    },
+    {
+      "artifact": "core-gem-assets-regression.log",
+      "command": "cargo test -p om9-core --test gem_assets -j 2",
+      "exit_code": 0,
+      "sha256": "8dd247faaf4589ea53ef350fdb914f868cb83a50faf16bba38ed68cb770f5363"
+    },
+    {
+      "artifact": "app-gem-panel-regression.log",
+      "command": "cargo test -p om9-app --test gem_panel -j 2",
+      "exit_code": 0,
+      "sha256": "641d78898d9a798782bdc4fa6d304b382a287b6f27be5f891866f380d76f5192"
+    },
+    {
+      "artifact": "core-transaction-regression.log",
+      "command": "cargo test -p om9-core --test atomic_transactions --test transaction_scopes -j 2",
+      "exit_code": 0,
+      "sha256": "a20524057724742a414ad1b3cd550f50a1a9ea12a826b849c025f5050a3438b0"
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": "cargo check --workspace --all-targets -j 2",
+      "exit_code": 0,
+      "sha256": "01f4b07cb532dd7ace1321671ef06282ef7b8c8a550d61dcf1030a293da981f6"
+    },
+    {
+      "artifact": "clippy-gem-edits.log",
+      "command": "cargo clippy -p om9-core -p om9-app --all-targets -j 2 -- --cap-lints warn",
+      "exit_code": 0,
+      "sha256": "22685f534585e3e7c66c6c947ded25c5173722cf84c78116679c51473a96b6ed"
+    }
+  ],
+  "l3": {
+    "OM9-L3-04-13-001": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-001-03"
+      ],
+      "fixture_manifest_sha256": "2e4ea00ac366d5459c93f162e803ed9667eb073a8e603ee1225f6f0f479466c2",
+      "command": "BuilderGemPositioner / gvGemPositioner",
+      "test": "the_positioner_moves_and_rotates_the_instance_in_place"
+    },
+    "OM9-L3-04-13-002": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-002-03"
+      ],
+      "fixture_manifest_sha256": "4577816eb06438ce0d3f2e15c2107bd719875d8c1dfb0292993d3590619880b9",
+      "command": "BuilderGemControl / gvGemControl",
+      "test": "control_edits_every_selected_stone_in_one_transaction_and_undo_restores_it"
+    },
+    "OM9-L3-04-13-003": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-003-03"
+      ],
+      "fixture_manifest_sha256": "faa75cc00774ec8e4b256c2c146980cd506ec304654cd9011b628facbeb45d07",
+      "command": "OthersMatchAttributes / gvMatchAttributes",
+      "test": "match_attributes_copies_geometry_from_the_first_selected_stone"
+    },
+    "OM9-L3-04-13-004": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-004-03"
+      ],
+      "fixture_manifest_sha256": "df0bffe2d302f0c8c19135ffccf7c6d9bd92698e6ec79aa8864b681c2ac891b3",
+      "command": "OthersSaveStyle / gvSaveStyle",
+      "test": "save_and_load_style_roundtrip_through_the_style_file"
+    },
+    "OM9-L3-04-13-005": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-005-03"
+      ],
+      "fixture_manifest_sha256": "af40e53413e06a044ddc0e349805d4a8400b626ef6aba39e3ba25d5af96877c8",
+      "command": "OthersLoadStyle / gvLoadStyle",
+      "test": "save_and_load_style_roundtrip_through_the_style_file"
+    },
+    "OM9-L3-04-13-006": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-006-03"
+      ],
+      "fixture_manifest_sha256": "260604f349a6a5be5a7fbf0d0c49a55e67af2a9ac524f8db20a2a5573603fff5",
+      "command": "BuilderGemUpdate / gvGemUpdate",
+      "test": "update_rebuilds_the_geometry_from_the_stored_record"
+    },
+    "OM9-L3-04-13-007": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-007-03"
+      ],
+      "fixture_manifest_sha256": "d2bb405f79939923effd565d6b3c84de2f00d0156a0dc2fa8f054257b648ea2a",
+      "command": "BuilderGemMap / gvGemMap",
+      "test": "the_map_numbers_the_selected_stones_without_touching_the_document"
+    },
+    "OM9-L3-04-13-008": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-008-03"
+      ],
+      "fixture_manifest_sha256": "fc50ad93ad06d80184d659c9c518103a300f107e2f9f5ce04af3ad27d4fcaf1c",
+      "command": "BuilderGemReporter / gvGemReport",
+      "test": "the_reporter_aggregates_count_and_calculated_mass"
+    },
+    "OM9-L3-04-13-009": {
+      "manual_gate": "M05-UI",
+      "l4_receipts": [
+        "OM9-L4-13-009-03"
+      ],
+      "fixture_manifest_sha256": "d5235739f3e9f21e7954d2a666518b106a674de590bdac6e53fb09fc6159822d",
+      "command": "GemAttributeHistory / gvGemHistory",
+      "test": "an_edit_keeps_the_placement_link_and_the_attribute_history_shows_it"
+    }
+  },
+  "tests": {
+    "core_gem_edits": "14 passed (partial edit, round rule, cut/shape refusal, match mask, style round-trip/store/atomic save, report grouping/material density/trade-formula cross-check, map numbering, identity preservation)",
+    "app_gem_edits": "11 passed (positioner regression, one-transaction control, match, style save/load, update regeneration, read-only map/report, material density, history and link preservation, typed command)",
+    "app_gem_map_overlay": "3 passed (numbered caption projection, off-screen skip, caption clamped inside the viewport)",
+    "clippy": "cargo clippy -p om9-core -p om9-app --all-targets -- --cap-lints warn; diagnostics scoped to this task's files and foreign warnings listed below",
+    "clippy_foreign_warnings": [
+      "crates/om9-core/src/settings/bezel.rs",
+      "crates/om9-core/src/settings/head.rs"
+    ]
+  },
+  "uncertainties": [
+    "All nine L3 keep the M05-UI manual gate open: no human has reviewed the edit/report commands on screen and no reviewer signature is claimed.",
+    "Only Windows x64 was exercised in this run.",
+    "The app test binaries link OCCT, so the run needs the OCCT bin and VC runtime directories on PATH; that environment requirement is recorded, not hidden.",
+    "CARGO_TARGET_DIR is H:/OpenMatrix9/cargo-target because this sandbox denies writes to the L:/om9-target directory named in AGENTS.md.",
+    "The clippy gate runs with `--cap-lints warn` and is scoped to the files this task owns: the shared checkout also contains concurrent in-flight work whose deny-by-default clippy error (settings/bezel.rs) would otherwise stop the whole batch; those diagnostics are listed in clippy_foreign_warnings.",
+    "The Gem Map overlay is automated-tested as projection data (one numbered caption per visible stone, captions clamped inside the viewport, off-screen stones skipped) and is painted in the committed viewport path; human pixel acceptance still needs the M05-UI pass.",
+    "The reporter's mass is the closed mesh volume × the material density from the gemological table, cross-checked against the published trade formula inside a ±15% band; it stays a computed value and the report prints `NOT A CERTIFICATE`, because only a gemologist can certify a stone."
+  ]
+}

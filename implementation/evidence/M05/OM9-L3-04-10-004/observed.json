@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-004",
+  "title": "Gem List On Curve",
+  "command": "BuilderGemListOnCrv / gvGemListOnCrv",
+  "scope": "`gem_placement::place_on_curve_variable`; `GemPlacementTool::ListOnCurve`; `CurveParams::with_range`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "heterogeneous diameters placed in order with per-stone specs",
+  "negative": "empty or invalid stone lists are typed refusals",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-004-03"
+    ],
+    "fixture_manifest_sha256": "bd7c91a9cdb9c49c524c5994142ba9a280a53ef8f6dccde3397f1b716446691f"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "the_list_tool_places_heterogeneous_stones_in_order"
+}

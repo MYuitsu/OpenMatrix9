@@ -1,0 +1,16 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.09s
+     Running tests\command_options_interface.rs (L:/om9-target\debug\deps\command_options_interface-002cd866143f863f.exe)
+
+running 8 tests
+test stale_options_are_refused_and_value_activation_does_not_mutate_owner ... ok
+test line_length_snapshot_uses_the_input_unit_without_rescaling_geometry ... ok
+test collisions_are_unique_numeric_input_and_paste_are_preserved ... ok
+test accelerators_do_not_repeat_or_interrupt_ime_drafts_and_other_editors ... ok
+test line_repeat_slot_never_leaks_options_into_polyline ... ok
+test fixed_choices_refresh_the_selected_value_on_every_input_route ... ok
+test numeric_options_keep_invalid_draft_and_commit_actual_geometry_once ... ok
+test commands_share_keyboard_pointer_and_typed_activation ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.41s
+

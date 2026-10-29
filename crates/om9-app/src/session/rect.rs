@@ -1,6 +1,7 @@
 //! Rectangle command behaviour ported from the FreeCAD Qt Curve controller.
 
 use om9_core::geometry::{Curve, Geometry, Point3};
+use om9_scene::camera::CPlane;
 
 use super::{Controller, Error};
 
@@ -15,6 +16,30 @@ pub struct RectPending {
     pub square: bool,
 }
 
+/// One signed construction shared by the corner preview and the committed curve.
+struct CornerFrame {
+    origin: Point3,
+    x: Point3,
+    y: Point3,
+    width: f64,
+    height: f64,
+}
+
+impl CornerFrame {
+    fn wire(&self) -> Vec<[Point3; 2]> {
+        let corner = |u: f64, v: f64| {
+            std::array::from_fn(|axis| self.origin[axis] + self.x[axis] * u + self.y[axis] * v)
+        };
+        let points = [
+            self.origin,
+            corner(self.width, 0.),
+            corner(self.width, self.height),
+            corner(0., self.height),
+        ];
+        (0..4).map(|i| [points[i], points[(i + 1) % 4]]).collect()
+    }
+}
+
 impl Default for RectPending {
     fn default() -> Self {
         Self::new()
@@ -22,6 +47,47 @@ impl Default for RectPending {
 }
 
 impl RectPending {
+    fn corner_frame(&self, point: Point3, plane: CPlane) -> Result<CornerFrame, Error> {
+        let first = *self
+            .points
+            .first()
+            .ok_or(Error::Missing("rectangle corner"))?;
+        let delta: Point3 = std::array::from_fn(|axis| point[axis] - first[axis]);
+        let along_x: f64 = (0..3).map(|axis| delta[axis] * plane.x[axis]).sum();
+        let along_y: f64 = (0..3).map(|axis| delta[axis] * plane.y[axis]).sum();
+        let mut width = self.width.unwrap_or(along_x.abs());
+        let mut height = self.height.unwrap_or(along_y.abs());
+        if self.mode == "Center" {
+            width *= 2.;
+            height *= 2.;
+        }
+        if self.square {
+            width = width.max(height);
+            height = width;
+        }
+        if width <= 1e-9 || height <= 1e-9 {
+            return Err(Error::Invalid("rectangle must be non-degenerate"));
+        }
+        let x = plane
+            .x
+            .map(|value| if along_x < 0. { -value } else { value });
+        let y = plane
+            .y
+            .map(|value| if along_y < 0. { -value } else { value });
+        let origin = if self.mode == "Center" {
+            std::array::from_fn(|axis| first[axis] - x[axis] * width * 0.5 - y[axis] * height * 0.5)
+        } else {
+            first
+        };
+        Ok(CornerFrame {
+            origin,
+            x,
+            y,
+            width,
+            height,
+        })
+    }
+
     pub fn new() -> Self {
         Self {
             mode: "Corners",
@@ -79,7 +145,9 @@ impl Controller {
         }
         if (option == "vertical" || option == "v") && !pending.points.is_empty() {
             self.rect_pending = Some(pending);
-            return Some(Err(Error::Invalid("choose Vertical before the first point")));
+            return Some(Err(Error::Invalid(
+                "choose Vertical before the first point",
+            )));
         }
         if option == "vertical" || option == "v" {
             pending.mode = "Vertical";
@@ -111,6 +179,21 @@ impl Controller {
             }
             self.rect_pending = Some(pending);
             return Some(Ok(()));
+        }
+        if text.contains(',') && !text.contains('=') {
+            let plane = self.input_plane();
+            let base = pending
+                .points
+                .last()
+                .copied()
+                .map(om9_core::coords::WorldPoint::try_new)
+                .transpose();
+            self.rect_pending = Some(pending);
+            return Some((|| {
+                let input = om9_core::coords::parse_input(text, self.document().page_unit)?;
+                let world = om9_core::coords::resolve_with_base(input, Some(&plane), base?)?;
+                self.accept_world_point(world.xyz())
+            })());
         }
         if pending.points.is_empty() {
             self.rect_pending = Some(pending);
@@ -156,7 +239,11 @@ impl Controller {
             };
             let first = pending.points[0];
             let second = pending.points[1];
-            let e = [second[0] - first[0], second[1] - first[1], second[2] - first[2]];
+            let e = [
+                second[0] - first[0],
+                second[1] - first[1],
+                second[2] - first[2],
+            ];
             let length = (e[0].powi(2) + e[1].powi(2) + e[2].powi(2)).sqrt();
             if length <= 1e-9 {
                 self.rect_pending = Some(pending);
@@ -223,7 +310,9 @@ impl Controller {
             return Some(self.commit_rect(first, plane.x, plane.y, width, height));
         }
         self.rect_pending = Some(pending);
-        Some(Err(Error::Invalid("rectangle needs Width=/Height= or a second corner")))
+        Some(Err(Error::Invalid(
+            "rectangle needs Width=/Height= or a second corner",
+        )))
     }
 
     pub fn accept_rect_point(&mut self, point: Point3) -> Result<(), Error> {
@@ -269,7 +358,11 @@ impl Controller {
             if pending.points.len() >= 3 {
                 let second = pending.points[1];
                 let point = pending.points[2];
-                let e = [second[0] - first[0], second[1] - first[1], second[2] - first[2]];
+                let e = [
+                    second[0] - first[0],
+                    second[1] - first[1],
+                    second[2] - first[2],
+                ];
                 let length = (e[0].powi(2) + e[1].powi(2) + e[2].powi(2)).sqrt();
                 let x = [e[0] / length, e[1] / length, e[2] / length];
                 if pending.mode == "Vertical" {
@@ -326,35 +419,14 @@ impl Controller {
             self.rect_pending = Some(pending);
             return Ok(());
         }
-        let delta = [point[0] - first[0], point[1] - first[1], point[2] - first[2]];
-        let along_x = (delta[0] * plane.x[0] + delta[1] * plane.x[1] + delta[2] * plane.x[2]).abs();
-        let along_y = (delta[0] * plane.y[0] + delta[1] * plane.y[1] + delta[2] * plane.y[2]).abs();
-        let mut width = pending.width.unwrap_or(along_x);
-        let mut height = pending.height.unwrap_or(along_y);
-        if pending.mode == "Center" {
-            width *= 2.0;
-            height *= 2.0;
-        }
-        if pending.square {
-            let side = width.max(height);
-            width = side;
-            height = side;
-        }
-        if width <= 1e-9 || height <= 1e-9 {
-            self.rect_pending = Some(pending);
-            return Err(Error::Invalid("rectangle must be non-degenerate"));
-        }
-        self.rect_pending = None;
-        let plane = self.input_plane();
-        if pending.mode == "Center" {
-            let origin = [
-                first[0] - plane.x[0] * width * 0.5 - plane.y[0] * height * 0.5,
-                first[1] - plane.x[1] * width * 0.5 - plane.y[1] * height * 0.5,
-                first[2] - plane.x[2] * width * 0.5 - plane.y[2] * height * 0.5,
-            ];
-            return self.commit_rect(origin, plane.x, plane.y, width, height);
-        }
-        self.commit_rect(first, plane.x, plane.y, width, height)
+        let frame = match pending.corner_frame(point, plane) {
+            Ok(frame) => frame,
+            Err(error) => {
+                self.rect_pending = Some(pending);
+                return Err(error);
+            }
+        };
+        self.commit_rect(frame.origin, frame.x, frame.y, frame.width, frame.height)
     }
 
     fn commit_rect(
@@ -425,7 +497,11 @@ impl Controller {
                     origin[2] + z[2] * length * sign,
                 ];
             }
-            let e = [second[0] - origin[0], second[1] - origin[1], second[2] - origin[2]];
+            let e = [
+                second[0] - origin[0],
+                second[1] - origin[1],
+                second[2] - origin[2],
+            ];
             let length = (e[0].powi(2) + e[1].powi(2) + e[2].powi(2)).sqrt();
             if length <= 1e-9 {
                 return Vec::new();
@@ -486,50 +562,9 @@ impl Controller {
                 .map(|index| [corners[index], corners[(index + 1) % 4]])
                 .collect();
         }
-        let delta = [point[0] - origin[0], point[1] - origin[1], point[2] - origin[2]];
-        let along_x = (delta[0] * plane.x[0] + delta[1] * plane.x[1] + delta[2] * plane.x[2]).abs();
-        let along_y = (delta[0] * plane.y[0] + delta[1] * plane.y[1] + delta[2] * plane.y[2]).abs();
-        let mut width = pending.width.unwrap_or(along_x);
-        let mut height = pending.height.unwrap_or(along_y);
-        if pending.mode == "Center" {
-            width *= 2.0;
-            height *= 2.0;
-        }
-        if pending.square {
-            let side = width.max(height);
-            width = side;
-            height = side;
-        }
-        if width <= 1e-9 || height <= 1e-9 {
-            return Vec::new();
-        }
-        let x = plane.x;
-        let y = plane.y;
-        let base = if pending.mode == "Center" {
-            [
-                origin[0] - x[0] * width * 0.5 - y[0] * height * 0.5,
-                origin[1] - x[1] * width * 0.5 - y[1] * height * 0.5,
-                origin[2] - x[2] * width * 0.5 - y[2] * height * 0.5,
-            ]
-        } else {
-            origin
-        };
-        let corner_at = |x_scale: f64, y_scale: f64| {
-            [
-                base[0] + x[0] * x_scale + y[0] * y_scale,
-                base[1] + x[1] * x_scale + y[1] * y_scale,
-                base[2] + x[2] * x_scale + y[2] * y_scale,
-            ]
-        };
-        let corners = [
-            base,
-            corner_at(width, 0.0),
-            corner_at(width, height),
-            corner_at(0.0, height),
-        ];
-        (0..4)
-            .map(|index| [corners[index], corners[(index + 1) % 4]])
-            .collect()
+        pending
+            .corner_frame(point, plane)
+            .map_or_else(|_| Vec::new(), |frame| frame.wire())
     }
 }
 

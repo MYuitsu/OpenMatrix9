@@ -1,0 +1,19 @@
+$ cargo test -p om9-core --test producers -j 2
+# exit code: 0
+# captured: 2026-10-26T19:21:07Z
+# target dir: L:\om9-target
+
+
+running 7 tests
+test an_unregistered_command_is_refused_before_geometry_runs ... ok
+test a_geometry_only_producer_still_works_but_cannot_serve_references ... ok
+test a_custom_topology_provider_can_replace_the_snapshot_policy ... ok
+test snapshot_topology_names_curves_surfaces_and_points ... ok
+test the_registry_builds_rail_profile_and_sweep_from_parameters ... ok
+test a_parameter_edit_rebuilds_the_chain_through_the_producer_registry ... ok
+test a_sweep_reference_survives_an_allowed_edit_and_refuses_a_tight_move ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\producers.rs (L:\om9-target\debug\deps\producers-60edfc60fc81aa50.exe)

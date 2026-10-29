@@ -1,0 +1,9 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-001",
+  "kind": "negative",
+  "expected": "toggle while an edit transaction is open -> Invalid(history record during edit transaction), policy unchanged",
+  "verified_by": [
+    "record_off_commits_geometry_without_a_recipe_and_toggles_stamp_new_records"
+  ]
+}

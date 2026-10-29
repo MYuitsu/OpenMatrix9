@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-005",
+  "kind": "negative",
+  "expected": "a selection that is not four rails plus two profiles is refused; the command does not insert metadata or a partial surface",
+  "verified_by": [
+    "the_four_profile_icon_reaches_the_existing_four_rail_metadata_command",
+    "the_four_profile_icon_refuses_an_inconsistent_selection",
+    "four_rail_profile_command_tags_profiles_then_sweep4_uses_them"
+  ]
+}

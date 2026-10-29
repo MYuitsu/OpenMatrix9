@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-17-003",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderBrightCutChannel",
+  "cases": [
+    {
+      "case": "two stones, mirror on",
+      "input": "BrightParams::for_gem on a baguette row",
+      "expect": "one facet per stone per side (4 bodies), each closed"
+    },
+    {
+      "case": "Mirror=off",
+      "input": "Mirror=off",
+      "expect": "one facet per stone on one side of the channel"
+    },
+    {
+      "case": "the committed record",
+      "input": "Enter",
+      "expect": "om9.cutter kind=bright_cut_channel with the row provenance"
+    }
+  ]
+}

@@ -96,6 +96,7 @@ struct Harness {
     pool: SharedResourcePool,
     state: egui_wgpu::RenderState,
     frame: u64,
+    hidden_sources: Option<[om9_core::identity::ObjectId; 2]>,
 }
 impl Harness {
     fn new() -> Option<Self> {
@@ -107,6 +108,7 @@ impl Harness {
             pool,
             state,
             frame: 0,
+            hidden_sources: None,
         })
     }
     fn frame(&mut self, scene: &Scene, camera: &Camera, generation: u64, rect: egui::Rect) {
@@ -139,6 +141,7 @@ impl Harness {
                 &BTreeSet::new(),
                 0,
                 0,
+                self.hidden_sources,
                 false,
             );
         });
@@ -165,6 +168,39 @@ impl Harness {
             std::thread::sleep(Duration::from_millis(1));
         }
     }
+}
+
+#[test]
+fn preview_visibility_rebuilds_gpu_resources_and_restores_source_objects() {
+    let Some(mut h) = Harness::new() else {
+        eprintln!("SKIP: no GPU adapter");
+        return;
+    };
+    let scene = scene(3);
+    let ids = [scene.objects[0].root, scene.objects[1].root];
+    let camera = Camera::perspective([0., -10., 5.], [0.; 3], [0., 0., 1.], 0.6).unwrap();
+    h.finish(&scene, &camera, 0);
+    assert_eq!(h.port.frame_stats().unwrap().objects, 3);
+    h.hidden_sources = Some(ids);
+    h.finish(&scene, &camera, 0);
+    assert_eq!(h.port.frame_stats().unwrap().objects, 1);
+    assert_eq!(scene.objects.len(), 3);
+    assert!(
+        ids.iter()
+            .all(|id| !scene.document.entities[id].attributes.hidden)
+    );
+    h.hidden_sources = None;
+    h.finish(&scene, &camera, 0);
+    assert_eq!(h.port.frame_stats().unwrap().objects, 3);
+    h.hidden_sources = Some(ids);
+    h.frame(&scene, &camera, 0, rect());
+    h.hidden_sources = None;
+    h.finish(&scene, &camera, 0);
+    assert_eq!(
+        h.port.frame_stats().unwrap().objects,
+        3,
+        "an obsolete masked frame must not publish after cancellation"
+    );
 }
 fn rect() -> egui::Rect {
     egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(320., 240.))

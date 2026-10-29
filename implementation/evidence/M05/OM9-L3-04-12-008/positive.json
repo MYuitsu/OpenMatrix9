@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-12-008",
+  "title": "Pave History Geometry Refresh",
+  "cases": [
+    "the feature stores the host surface, typed params and ordered child GemIds under om9.gem.pave",
+    "refreshing a feature after reopening preserves every child id",
+    "re-applying a changed builder keeps the ids that still exist and deletes only trailing stones",
+    "Undo restores both the previous layout and the previous feature record"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

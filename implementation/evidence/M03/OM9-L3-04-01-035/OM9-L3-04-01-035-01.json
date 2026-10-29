@@ -1,0 +1,14 @@
+{
+  "l4_id": "OM9-L3-04-01-035-01",
+  "l3_id": "OM9-L3-04-01-035",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Twist: golden case 'path (0,1,0)->(10,1,0), base (0,0,0), axis (1,0,0), 90 degrees -> the 1 mm offset turns onto +Z, so the far end sits at (10,0,1), one Undo entry'",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_035_twist_turns_the_section_over_the_span",
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_deform_rows_refuse_a_solid",
+    "crates/om9-core/src/deform.rs"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

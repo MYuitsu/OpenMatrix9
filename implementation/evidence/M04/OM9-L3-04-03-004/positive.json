@@ -1,0 +1,7 @@
+{
+  "expect": {
+    "closed": true,
+    "volume": "> the signet body"
+  },
+  "input": "diameter 18 mm, top 10x12 mm, shoulder 2.5 mm"
+}

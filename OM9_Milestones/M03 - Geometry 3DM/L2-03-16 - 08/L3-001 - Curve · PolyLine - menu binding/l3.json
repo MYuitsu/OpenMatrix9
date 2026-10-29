@@ -4,6 +4,152 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-16",
   "title": "Curve · PolyLine — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Polyline",
+        "Through Points",
+        "On Mesh"
+      ],
+      "option_count": 3
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Curve",
+      "command": "Polyline",
+      "option": "Polyline",
+      "root_group": false,
+      "path": [
+        "Curve",
+        "Polyline"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "start (0,0,0), end (3,4,0) mm",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-16 - 08/L3-001 - Curve · PolyLine - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Polyline",
+        "command_id": "CurvePolylinePolyline",
+        "script": "! _Polyline _P=N",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-001",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Polyline",
+          "typed_forms": [
+            "Polyline"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Through Points",
+        "command_id": "CurvePolylineThroughPoints",
+        "script": "! _CurveThroughPt _Degree=1",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Through Points",
+          "typed_forms": [
+            "Through Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "On Mesh",
+        "command_id": "CurvePolylineOnMesh",
+        "script": "! _PolylineOnMesh",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "On Mesh",
+          "typed_forms": [
+            "On Mesh"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Through Points",
+      "On Mesh"
+    ],
+    "missing": [
+      "option:Through Points: type/default/range/unit/prompt",
+      "option:On Mesh: type/default/range/unit/prompt",
+      "input:start (0,0,0), end (3,4,0) mm: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-16-001-04"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E04",
@@ -121,13 +267,25 @@
       "depends_on_task_ids": [
         "OM9-L4-03-16-001-02"
       ]
+    },
+    {
+      "id": "OM9-L4-03-16-001-04",
+      "title": "Parameter Implementation — Curve · PolyLine — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-001 - Curve · PolyLine - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-16-001-01",
+        "OM9-L4-03-16-001-02",
+        "OM9-L4-03-16-001-03"
+      ]
     }
   ],
   "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-03-16-001-01",
     "OM9-L4-03-16-001-02",
-    "OM9-L4-03-16-001-03"
+    "OM9-L4-03-16-001-03",
+    "OM9-L4-03-16-001-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -278,10 +436,10 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
-    "date": "2026-10-23",
+    "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
-    "scope": "cataloged command id with verified visible disabled reason; no interactive session yet",
+    "scope": "one cataloged command id shared by the Matrix Curve menu row and the command line, with an interactive Rust session and verified geometry",
     "owner": {
       "crate": "om9-app",
       "files": [
@@ -299,12 +457,12 @@
       "implementation/fixtures/M03/OM9-L3-03-16-001/positive.json",
       "implementation/fixtures/M03/OM9-L3-03-16-001/negative.json",
       "implementation/evidence/M03/OM9-L3-03-16-001/",
-      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json"
+      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json",
+      "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/receipt.json"
     ],
     "tests": [
-      "cargo test -p om9-app --test curve_menu: 4 passed",
-      "Line/Point geometry smoke: passed",
-      "disabled reason catalog: 56 rows verified"
+      "cargo test -p om9-app --test curve_menu: 5 passed (58-row id/icon/label/script/menu-dispatch parity)",
+      "cargo test -p om9-app (curve command regressions): 320 passed, 0 failed"
     ],
     "l4_evidence": {
       "OM9-L4-03-16-001-01": "1/1",
@@ -314,8 +472,60 @@
     "human_approval": null,
     "manual_gate": "M03-UI",
     "remaining": [
-      "No interactive command session yet; the menu is disabled with a visible reason.",
-      "Human M03-UI review is unsigned."
-    ]
+      "Human M03-UI click/preview review is unsigned."
+    ],
+    "command_options_2026_10_25": {
+      "date": "2026-10-25",
+      "status": "SCOPED_RUST_AND_WINDOWS_UI_VERIFIED_MANUAL_GATE_PENDING",
+      "scope": "Polyline M/Mode toggles Line/Arc through one parser; P/H flags, protected input, analytic mixed segments, Direction/Center, bounded scene display, Close, Undo/Redo and retry/cancel.",
+      "evidence": [
+        "docs/validation/2026-10-25-command-polyline-shortcuts/README.md",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/commands.json",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/native-debug-replay.json",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/native-release-replay.json"
+      ],
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Helpers tracking and continuously closed PersistentClose preview remain unfinished.",
+        "Center minor arcs only; antipodal/major Center selection is not certified.",
+        "Full M01/M03 human review, macOS and exact mixed-Polycurve 3DM re-export remain open."
+      ]
+    },
+    "polyline_parameter_interface_2026_10_25": {
+      "date": "2026-10-25",
+      "status": "SCOPED_AUTOMATED_AND_WINDOWS_UI_VERIFIED_MANUAL_GATE_PENDING",
+      "scope": "All eight Polyline parameters share typed IDs, names, shortcuts, kinds, current values and activation; keyboard, pointer and typed names reuse one parser. Other command families unchanged.",
+      "evidence": [
+        "docs/validation/2026-10-25-polyline-parameter-interface/README.md",
+        "docs/validation/2026-10-25-polyline-parameter-interface/commands.json",
+        "docs/validation/2026-10-25-polyline-parameter-interface/native-debug.json",
+        "docs/validation/2026-10-25-polyline-parameter-interface/native-release.json"
+      ],
+      "tests": {
+        "app_passed": 216,
+        "failed": 0,
+        "new_rust_tests": 3,
+        "parameter_route_scenarios": 24,
+        "scenario_note": "24 scenarios inside one of the three new Rust tests, not 24 extra test functions",
+        "clippy": "passed",
+        "fmt": "passed",
+        "release": "passed"
+      },
+      "manual_gate_promoted": false,
+      "existing_geometry_and_flag_lifecycle_semantics_changed": false,
+      "remaining": [
+        "Helpers tracking and continuously closed PersistentClose preview remain unfinished.",
+        "Existing Center arc restrictions, exact mixed-Polycurve 3DM re-export, macOS and human gates remain open."
+      ]
+    },
+    "menu_binding": {
+      "date": "2026-10-26",
+      "feature": "OM9-CURVE-001",
+      "menu_label": "PolyLine",
+      "menu_icon": "CurvePolylinePolyline",
+      "documented_script": "Polyline",
+      "binding_state": "Implemented",
+      "same_id_menu_and_commandline": true
+    }
   }
 }

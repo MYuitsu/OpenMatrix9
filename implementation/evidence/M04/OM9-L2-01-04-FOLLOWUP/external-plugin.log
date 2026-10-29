@@ -1,0 +1,8 @@
+$ cargo check -p om9-hello-plugin -j 2
+# exit code: 0
+# captured: 2026-10-26T19:21:10Z
+# target dir: L:\om9-target
+
+    Checking om9-sdk v0.1.0 (H:\OpenMatrix9\crates\om9-sdk)
+    Checking om9-hello-plugin v0.1.0 (H:\OpenMatrix9\sdk\examples\hello-plugin)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.88s

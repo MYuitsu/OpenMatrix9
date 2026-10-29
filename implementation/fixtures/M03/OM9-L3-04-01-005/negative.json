@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-005",
+  "case": "target point text `later`",
+  "expected": "`Error::Invalid` from the coordinate parser; the run stays open and the document is untouched",
+  "test": "m03_04_01_005_orient_two_points_translates_the_selection"
+}

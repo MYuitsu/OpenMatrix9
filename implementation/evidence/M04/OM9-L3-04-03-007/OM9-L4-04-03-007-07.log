@@ -1,0 +1,41 @@
+$ cargo test -p om9-core --test ring_family -j 2 the_final_validation_gate_rejects_an_open_or_too_thin_ring
+# exit code: 0
+# captured: 2026-10-27T09:36:05Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_final_validation_gate_rejects_an_open_or_too_thin_ring ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family.rs (L:\om9-target\debug\deps\ring_family-96685c27dfebd318.exe)
+
+$ cargo test -p om9-core --test ring_family -j 2 the_ring_family_is_registered_as_builder_modes_and_as_style_targets
+# exit code: 0
+# captured: 2026-10-27T09:36:05Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_ring_family_is_registered_as_builder_modes_and_as_style_targets ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family.rs (L:\om9-target\debug\deps\ring_family-96685c27dfebd318.exe)
+
+$ cargo test -p om9-kernel --features 3dm-brep --test ring_family_brep -j 2 a_ring_body_with_a_missing_face_is_refused_instead_of_published_open
+# exit code: 0
+# captured: 2026-10-27T09:36:06Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_ring_body_with_a_missing_face_is_refused_instead_of_published_open ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.17s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family_brep.rs (L:\om9-target\debug\deps\ring_family_brep-978ce2d9e95264df.exe)

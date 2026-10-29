@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-09-001",
+  "title": "Gem Shape Cut Dimension Schema",
+  "cases": [
+    "every cut x shape round-trips through JSON with the same schema and version",
+    "round diamond 6.5 mm, 3.95 mm deep -> length == width == 6.5, depth == 3.95",
+    "emerald 9x7x4.5 with a 0.2 mm girdle keeps length/width/depth/girdle",
+    "cabochon has crown height > 0 and pavilion depth == 0"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

@@ -1,0 +1,132 @@
+{
+  "schema": "om9.m03.checks.v1",
+  "work_item": "m03-l2-03-17-surface-menu-2026-10-26",
+  "date": "2026-10-26",
+  "target": "standalone Rust OM9, Windows x64",
+  "milestone": "OM9-L2-03-17",
+  "title": "09-febe-matrix-surface-menu-workflows",
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "summary": "Audited the 38 documented Surface Tools rows against the code, authored icons, Matrix scripts and option sheets. Every row is Implemented with a unique command id, an authored icon that menu_catalog::SURFACE and icons.rs embed, and the Matrix script name; the menu click and the typed script/label resolve to the same feature through resolve_alias/resolve_typed_command, and each row runs its owner service through surface_edit/om9_core::surface_ops as one transaction/Undo. Behavior gaps closed this round: Sweep 1/2 History Closed became conditional (closed rail + two profiles, hidden and refused otherwise), Soft Edit now exposes UDistance/VDistance/Copy/FixEdges/DirConstraint with typed U/V and Dx/Dy/Dz, Match Surfaces now supports Continuity Position/Tangency/Curvature committed on Enter, and the two last dead menu icons were implemented: Smash (OM9-SURFACE-141) flattens with surface_ops::smash and reports the measured stretch, and surface Refit to Tolerance (OM9-SURFACE-142) waits for Tolerance= and rebuilds with surface_ops::refit_to_tolerance. All 40 authored menu icons now reach an available command; the 16 rows without an owner candidate name OM9-L2-03-17 and the catalog test asserts one.",
+  "checks": [
+    {
+      "name": "surface menu and parity catalog",
+      "command": "cargo test -p om9-app --test surface_menu",
+      "result": "62 passed; 0 failed",
+      "log": "build/l2-03-17-logs/surface-menu-2026-10-26.log"
+    },
+    {
+      "name": "surface command regressions",
+      "command": "cargo test -p om9-app --test smash --test refit_srf --test match_srf --test seam_srf --test sweep2_cmd --test tween_surfaces",
+      "result": "15 passed; 0 failed",
+      "log": "build/l2-03-17-logs/surface-commands-2026-10-26.log"
+    },
+    {
+      "name": "line/state fixture parity",
+      "command": "cargo test -p om9-app --test command_options_and_repeat --test command_state_machine",
+      "result": "9 passed; 0 failed",
+      "log": "build/l2-03-17-logs/surface-menu-2026-10-26.log"
+    },
+    {
+      "name": "app compile",
+      "command": "cargo check -p om9-app -j 2",
+      "result": "exit 0",
+      "log": "build/l2-03-17-logs/check-2026-10-26.log"
+    },
+    {
+      "name": "clippy",
+      "command": "cargo clippy -p om9-app --lib --test surface_menu --test smash --test refit_srf -j 2 -- -D warnings; cargo clippy -p om9-core --lib --test surface_ops -j 2 -- -D warnings",
+      "result": "exit 0",
+      "log": "build/l2-03-17-logs/clippy-2026-10-26.log"
+    },
+    {
+      "name": "format",
+      "command": "rustfmt --edition 2024 --check --config skip_children=true crates/om9-app/src/lib.rs crates/om9-app/src/ui/chrome.rs crates/om9-app/src/session.rs crates/om9-app/src/session/surface_edit.rs crates/om9-app/src/session/refit_srf.rs crates/om9-app/src/session/command_options.rs crates/om9-app/src/session/command_options_tests.rs crates/om9-app/src/icons.rs crates/om9-app/src/surface_menu.rs crates/om9-app/tests/surface_menu.rs crates/om9-app/tests/smash.rs crates/om9-app/tests/refit_srf.rs crates/om9-core/src/surface_ops.rs crates/om9-core/tests/surface_ops.rs",
+      "result": "exit 0",
+      "log": "build/l2-03-17-logs/fmt-2026-10-26.log"
+    },
+    {
+      "name": "public source audit",
+      "command": "python tools/public_source_audit.py",
+      "result": "exit 0; 0 errors",
+      "log": "build/l2-03-17-logs/public-source-audit-2026-10-26.log"
+    },
+    {
+      "name": "module audit",
+      "command": "python tools/audit_m03_l2_03_17.py",
+      "result": "integrity: 0 problem(s)",
+      "log": "implementation/evidence/AFTER/m03-l2-03-17-surface-menu-2026-10-26/audit.json"
+    },
+    {
+      "name": "surface kernel smash and refit to tolerance",
+      "command": "cargo test -p om9-core --test surface_ops",
+      "result": "18 passed; 0 failed",
+      "log": "build/l2-03-17-logs/surface-ops-2026-10-26.log"
+    },
+    {
+      "name": "app library (icons, sessions, option owners)",
+      "command": "cargo test -p om9-app --lib -j 2",
+      "result": "181 passed; 0 failed",
+      "log": "build/l2-03-17-logs/lib-2026-10-26.log"
+    }
+  ],
+  "menu_coverage": "menu_catalog::SURFACE has all 40 authored icons and all 40 resolve to an available command: 38 milestone rows plus the four menu-only owners (Revolve OM9-SURFACE-018, Heightfield from Image OM9-SURFACE-031, Smash OM9-SURFACE-141, RefitSrf OM9-SURFACE-142). No authored menu icon is a placeholder any more.",
+  "script_names": "37/38 Matrix scripts appear verbatim in the authored sheets; Surface Extrude All has no quoted script and accepts ExtrudeCrv plus its authored label",
+  "counts": {
+    "l3": 38,
+    "l4": 114,
+    "enabled": 38,
+    "disabled_visible_reason": 0,
+    "menu_icons": 40,
+    "menu_icons_wired": 40,
+    "menu_only_commands": 4
+  },
+  "l4_evidence": {
+    "OM9-L3-03-17-001": "3/3",
+    "OM9-L3-03-17-002": "3/3",
+    "OM9-L3-03-17-003": "3/3",
+    "OM9-L3-03-17-004": "3/3",
+    "OM9-L3-03-17-005": "3/3",
+    "OM9-L3-03-17-006": "3/3",
+    "OM9-L3-03-17-007": "3/3",
+    "OM9-L3-03-17-008": "3/3",
+    "OM9-L3-03-17-009": "3/3",
+    "OM9-L3-03-17-010": "3/3",
+    "OM9-L3-03-17-011": "3/3",
+    "OM9-L3-03-17-012": "3/3",
+    "OM9-L3-03-17-013": "3/3",
+    "OM9-L3-03-17-014": "3/3",
+    "OM9-L3-03-17-015": "3/3",
+    "OM9-L3-03-17-016": "3/3",
+    "OM9-L3-03-17-017": "3/3",
+    "OM9-L3-03-17-018": "3/3",
+    "OM9-L3-03-17-019": "3/3",
+    "OM9-L3-03-17-020": "3/3",
+    "OM9-L3-03-17-021": "3/3",
+    "OM9-L3-03-17-022": "3/3",
+    "OM9-L3-03-17-023": "3/3",
+    "OM9-L3-03-17-024": "3/3",
+    "OM9-L3-03-17-025": "3/3",
+    "OM9-L3-03-17-026": "3/3",
+    "OM9-L3-03-17-027": "3/3",
+    "OM9-L3-03-17-028": "3/3",
+    "OM9-L3-03-17-029": "3/3",
+    "OM9-L3-03-17-030": "3/3",
+    "OM9-L3-03-17-031": "3/3",
+    "OM9-L3-03-17-032": "3/3",
+    "OM9-L3-03-17-033": "3/3",
+    "OM9-L3-03-17-034": "3/3",
+    "OM9-L3-03-17-035": "3/3",
+    "OM9-L3-03-17-036": "3/3",
+    "OM9-L3-03-17-037": "3/3",
+    "OM9-L3-03-17-038": "3/3"
+  },
+  "manual_gate": "M03-UI",
+  "human_approval": null,
+  "full_l2_complete": false,
+  "remaining": [
+    "Soft Edit takes its base point and move as typed U/V and Dx/Dy/Dz because the viewport does not project a click onto surface UV parameters yet.",
+    "Smash reports a sampling-level stretch instead of an exact isometry error, and Refit to Tolerance bounds its search to degree 1..=3 and 4..=24 poles per direction, measured on a 9×9 parameter grid.",
+    "Human M03-UI click/preview review is unsigned.",
+    "The whole-app suite carries pre-existing failures outside this module (rewrites of ui/command.rs, ui/files.rs and session/solid.rs in flight, plus the recorded mesh_fill/ui_events CPU-painter tests); the module's own targets are green."
+  ]
+}

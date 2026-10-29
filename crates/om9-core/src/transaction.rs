@@ -89,6 +89,29 @@ impl World {
     }
 }
 
+/// Conservative storage of one published result, mirroring `PublishedResult::validate`
+/// without requiring the post-mutation document. The exact revision check runs on the
+/// staged document.
+fn published_result_usage(
+    id: ObjectId,
+    result: &crate::result::PublishedResult,
+    l: &Limits,
+) -> Result<Usage> {
+    let _ = id;
+    let mut u = Usage {
+        bytes: std::mem::size_of::<crate::result::PublishedResult>() as u64
+            + result.operation.capacity() as u64,
+        ..Usage::default()
+    };
+    u.add(result.geometry_snapshot.validate(l)?, l)?;
+    u.add(
+        Usage::array::<crate::identity::SourceStamp>(result.source_stamps.capacity())?,
+        l,
+    )?;
+    u.add(result.conversion.validate(l)?, l)?;
+    Ok(u)
+}
+
 /// The validated owner is already in total; all other counters remain reserved.
 fn validation_limits(l: &Limits, total: Usage, owner: Usage) -> Result<Limits> {
     let difference = |all: u64, own: u64| {
@@ -227,6 +250,20 @@ pub enum Mutation {
         document: DocumentId,
         expected_revision: u64,
         recipe: Box<crate::history::Recipe>,
+        /// Published results for the recipe's outputs, applied after the entity insert.
+        /// An insert without a result is valid for a feature whose geometry is not yet
+        /// published; a builder that computes the geometry publishes both together.
+        published: Vec<(ObjectId, crate::result::PublishedResult)>,
+    },
+    /// Replace one recorded feature and the published results of its outputs after a
+    /// recompute, in one atomic step. The recipes must already exist; a recompute never
+    /// invents a feature. Geometry mutations for the same outputs come first so the
+    /// published snapshots and the entities agree when the transaction is validated.
+    HistoryUpdate {
+        document: DocumentId,
+        expected_revision: u64,
+        recipes: Vec<Box<crate::history::Recipe>>,
+        published: Vec<(ObjectId, crate::result::PublishedResult)>,
     },
     /// Adds one occurrence set of a definition plus the definition itself in a
     /// single atomic step: a definition never exists without its occurrences and
@@ -273,6 +310,21 @@ impl Mutation {
             _ => None,
         }
     }
+    /// The field a source mutation writes. Two mutations may touch the same object in one
+    /// transaction as long as they write different fields (geometry + payload + label +
+    /// attributes is one user edit, so it must be one transaction and one Undo).
+    fn write_field(&self) -> &'static str {
+        match self {
+            Self::Delete { .. } => "delete",
+            Self::Placement { .. } => "placement",
+            Self::Geometry { .. } => "geometry",
+            Self::Attributes { .. } => "attributes",
+            Self::Label { .. } => "label",
+            Self::Move { .. } => "move",
+            Self::Extension { .. } => "extension",
+            _ => "other",
+        }
+    }
     fn participants(&self) -> Vec<DocumentId> {
         match self {
             Self::Layers(plan) => {
@@ -290,6 +342,7 @@ impl Mutation {
             | Self::Context { document, .. }
             | Self::Tolerance { document, .. }
             | Self::History { document, .. }
+            | Self::HistoryUpdate { document, .. }
             | Self::DefinitionInsert { document, .. }
             | Self::FeatureInsert { document, .. }
             | Self::GroupCreate { document, .. }
@@ -334,6 +387,22 @@ impl TransactionRequest {
                 Mutation::Import { bundle, .. } => value = bundle.storage_usage(l)?,
                 Mutation::ResourceInsert { resource, .. } => value = resource.validate(l)?,
                 Mutation::Insert { entity, .. } => {
+                    if !entity.extensions.is_empty() {
+                        value.add(
+                            Usage::btree::<String, Extension>(entity.extensions.len())?,
+                            l,
+                        )?;
+                    }
+                    for (slot, extension) in &entity.extensions {
+                        value.add(
+                            Usage {
+                                bytes: slot.capacity() as u64,
+                                ..Usage::default()
+                            },
+                            l,
+                        )?;
+                        value.add(extension.validate(l)?, l)?;
+                    }
                     value.add(entity.geometry.validate(l)?, l)?;
                     value.add(
                         Usage {
@@ -405,6 +474,24 @@ impl TransactionRequest {
                     )?;
                     if let Some(extension) = extension {
                         value.add(extension.validate(l)?, l)?;
+                    }
+                }
+                Mutation::HistoryUpdate {
+                    recipes, published, ..
+                } => {
+                    for recipe in recipes {
+                        value.add(crate::model::Document::recipe_storage_usage(recipe, l)?, l)?;
+                    }
+                    for (id, result) in published {
+                        value.add(published_result_usage(*id, result, l)?, l)?;
+                    }
+                }
+                Mutation::History {
+                    recipe, published, ..
+                } => {
+                    value.add(crate::model::Document::recipe_storage_usage(recipe, l)?, l)?;
+                    for (id, result) in published {
+                        value.add(published_result_usage(*id, result, l)?, l)?;
                     }
                 }
                 Mutation::Publish(result) => {
@@ -1419,7 +1506,7 @@ impl TransactionCoordinator {
         let map_slots = changed.checked_mul(4).ok_or(Error::Overflow("Undo maps"))?;
         for storage in [
             Usage::btree::<DocumentId, ()>(changed)?,
-            Usage::btree::<(DocumentId, ObjectId), ()>(writes_bound)?,
+            Usage::btree::<(DocumentId, ObjectId, &'static str), ()>(writes_bound)?,
             Usage::btree::<(DocumentId, LayerId), ()>(count)?,
             Usage::btree::<(DocumentId, crate::layers::PresetSlot), ()>(count)?,
             Usage::btree::<(DocumentId, LayerId), &crate::model::Layer>(count)?,
@@ -1505,7 +1592,7 @@ impl TransactionCoordinator {
                 if !d.permissions(source.object, false)?.editable {
                     return Err(Error::Permission("source edit"));
                 }
-                if !writes.insert((source.document, source.object)) {
+                if !writes.insert((source.document, source.object, mutation.write_field())) {
                     return Err(Error::Invalid("conflicting source writes"));
                 }
                 if matches!(
@@ -1552,7 +1639,7 @@ impl TransactionCoordinator {
                         return Err(Error::Invalid("conflicting current layer writes"));
                     }
                     for source in plan.assigned_sources() {
-                        if !writes.insert((source.document, source.object)) {
+                        if !writes.insert((source.document, source.object, "layer-assign")) {
                             return Err(Error::Invalid("conflicting assigned object writes"));
                         }
                     }
@@ -1616,7 +1703,7 @@ impl TransactionCoordinator {
                         &limits,
                     )?;
                     for output in &result.outputs {
-                        if !writes.insert((result.document, output.entity.id)) {
+                        if !writes.insert((result.document, output.entity.id, "publish")) {
                             return Err(Error::Invalid("conflicting prepared output writes"));
                         }
                     }
@@ -1739,7 +1826,7 @@ impl TransactionCoordinator {
                         return Err(Error::Invalid("conflicting import resource writes"));
                     }
                     for entity in &bundle.entities {
-                        if !writes.insert((*document, entity.id)) {
+                        if !writes.insert((*document, entity.id, "import")) {
                             return Err(Error::Invalid("conflicting imported object writes"));
                         }
                     }
@@ -1870,6 +1957,7 @@ impl TransactionCoordinator {
                     document,
                     expected_revision,
                     recipe,
+                    published,
                 } => {
                     let d = base.document(*document)?;
                     if d.revision != *expected_revision {
@@ -1878,7 +1966,50 @@ impl TransactionCoordinator {
                     if d.history.recipes.contains_key(&recipe.id) {
                         return Err(Error::Invalid("duplicate history recipe"));
                     }
-                    peak.add(recipe.validate(d, &limits)?, &limits)?;
+                    for (id, _) in published {
+                        if !recipe.outputs.contains(id) {
+                            return Err(Error::Invalid("history result output"));
+                        }
+                    }
+                    // A builder records a Clean recipe whose output entity arrives in the
+                    // same request; only ids inserted by this request count as pending.
+                    let pending: BTreeSet<ObjectId> = created_objects
+                        .iter()
+                        .filter(|(created, _)| created == document)
+                        .map(|(_, id)| *id)
+                        .collect();
+                    peak.add(recipe.validate_with_pending(d, &limits, &pending)?, &limits)?;
+                }
+                Mutation::HistoryUpdate {
+                    document,
+                    expected_revision,
+                    recipes,
+                    published,
+                } => {
+                    let d = base.document(*document)?;
+                    if d.revision != *expected_revision {
+                        return Err(Error::Stale("history document revision"));
+                    }
+                    for recipe in recipes {
+                        if recipe.document != *document
+                            || !d.history.recipes.contains_key(&recipe.id)
+                        {
+                            return Err(Error::Missing("history recipe"));
+                        }
+                        peak.add(recipe.validate(d, &limits)?, &limits)?;
+                    }
+                    for (id, _) in published {
+                        if !recipes.iter().any(|recipe| recipe.outputs.contains(id)) {
+                            return Err(Error::Invalid("history result output"));
+                        }
+                        // The new result is checked against the staged document after the
+                        // geometry mutations run; validating it here would compare it with
+                        // the pre-rebuild revision.
+                        peak.add(
+                            Usage::array::<(ObjectId, crate::result::PublishedResult)>(1)?,
+                            &limits,
+                        )?;
+                    }
                 }
                 Mutation::DefinitionInsert {
                     document,
@@ -2393,11 +2524,33 @@ impl TransactionCoordinator {
                     staged.document_mut(document)?.tolerance = Some(tolerance);
                 }
                 Mutation::History {
-                    document, recipe, ..
+                    document,
+                    recipe,
+                    published,
+                    ..
                 } => {
                     let d = staged.document_mut(document)?;
                     if d.history.recipes.insert(recipe.id, *recipe).is_some() {
                         return Err(Error::Invalid("duplicate history recipe"));
+                    }
+                    for (id, result) in published {
+                        d.results.insert(id, result);
+                    }
+                }
+                Mutation::HistoryUpdate {
+                    document,
+                    recipes,
+                    published,
+                    ..
+                } => {
+                    let d = staged.document_mut(document)?;
+                    for recipe in recipes {
+                        if d.history.recipes.insert(recipe.id, *recipe).is_none() {
+                            return Err(Error::Missing("history recipe"));
+                        }
+                    }
+                    for (id, result) in published {
+                        d.results.insert(id, result);
                     }
                 }
                 Mutation::DefinitionInsert {

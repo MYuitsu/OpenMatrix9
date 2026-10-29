@@ -1,0 +1,39 @@
+[rtk] /!\ No hook installed — run `rtk init -g` for automatic token savings
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.67s
+     Running tests\annotation.rs (L:/om9-target\debug\deps\annotation-7e0ce975861f36e5.exe)
+
+running 8 tests
+test all_thirteen_catalog_ids_have_distinct_icons_and_one_dispatcher ... ok
+test session_style_defaults_and_transformed_values_are_observable ... ok
+test scene_displays_independent_dimension_strokes_without_connecting_gaps ... ok
+test diameter_and_radius_use_the_placed_circle_and_keep_source ... ok
+test text_and_leader_edit_text_without_flattening_semantics ... ok
+test edits_options_and_recenter_preserve_identity_and_are_atomic ... ok
+test preview_cancel_invalid_witness_and_native_archive_roundtrip ... ok
+test five_dimension_families_have_independent_value_oracles_and_one_undo ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\annotation_ui.rs (L:/om9-target\debug\deps\annotation_ui-5540a0fb407ff88e.exe)
+
+running 3 tests
+test object_summary_is_reached_by_the_analyze_menu ... ok
+test hovering_distance_draws_a_value_before_commit_and_keeps_the_document_unchanged ... ok
+test the_measure_palette_horizontal_icon_creates_a_visible_dimension_label ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.51s
+
+     Running tests\measure_extended.rs (L:/om9-target\debug\deps\measure_extended-95f953457a857744.exe)
+
+running 7 tests
+test placed_arc_keeps_its_trim_under_nonuniform_scale ... ok
+test object_distance_uses_trimmed_curves_and_finite_surface_domains ... ok
+test summary_groups_instances_and_counts_only_placed_explicit_carats ... ok
+test isocurve_and_surface_area_use_world_placement ... ok
+test dynamic_ortho_and_continuous_distance_are_read_only ... ok
+test radius_on_an_ellipse_is_pointwise_and_a_line_has_no_finite_curvature ... ok
+test canonical_brep_edges_area_volume_and_object_distance_have_numeric_oracles ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

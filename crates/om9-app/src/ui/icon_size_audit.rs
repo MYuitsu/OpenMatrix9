@@ -147,10 +147,10 @@ fn icon_size_audit_all_categories_at_common_resolutions_and_scales() {
     ];
     // Literal 100% anchors independently pin the current rendered slot sizes.
     for (width, height, main_edge, toolbar_edge) in [
-        (1280., 720., 24., 23.),
-        (1366., 768., 24., 23.),
-        (1920., 1080., 34., 32.),
-        (2560., 1440., 34., 32.),
+        (1280., 720., 24., 17.25),
+        (1366., 768., 24., 17.25),
+        (1920., 1080., 34., 24.),
+        (2560., 1440., 34., 24.),
     ] {
         for ppp in [1., 1.25, 1.5] {
             let label = format!("{width}x{height}@{ppp}");
@@ -212,7 +212,7 @@ fn icon_size_audit_all_categories_at_common_resolutions_and_scales() {
                     "dock_slot_pt": app.left_icon_edge, "dock_art_pt": app.left_icon_edge - 3.,
                     "main_slot_pt": main, "main_art_pt": main - 3.,
                     "history_slot_pt": history,
-                    "toolbar_slot_pt": toolbar, "toolbar_art_pt": toolbar - 3.,
+                    "toolbar_slot_pt": toolbar, "toolbar_art_pt": toolbar - 2.25,
                     "fixed_slot_pt": fixed, "fixed_art_pt": fixed - 3.,
                     "dock_slot_device_px": app.left_icon_edge * ppp,
                     "main_slot_device_px": main * ppp,

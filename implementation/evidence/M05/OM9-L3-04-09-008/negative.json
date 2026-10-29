@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-09-008",
+  "title": "Gem Facet Outline Girdle Reference API",
+  "cases": [
+    "an unknown reference name or facet index is refused",
+    "a degenerate facet (zero normal) is refused instead of returning NaN"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

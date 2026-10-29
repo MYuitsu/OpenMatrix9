@@ -1,0 +1,62 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-007",
+  "kind": "positive",
+  "input": "Rail Profile tab; choose circle in the library; Apply",
+  "expected": "preview is a circle before Apply, document unchanged until Apply; applied recipe carries preset=circle",
+  "verified_by": [
+    "the_profile_library_switches_shape_and_refuses_a_removed_preset",
+    "the_profile_library_changes_the_preview_and_the_applied_shape",
+    "the_preset_can_be_chosen_from_the_command_line"
+  ],
+  "receipts": [
+    {
+      "test": "the_profile_library_switches_shape_and_refuses_a_removed_preset",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2",
+        "the_profile_library_switches_shape_and_refuses_a_removed_preset"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "a2fbe6e5e76ea5bdb3f0206b306b44589a1d74de13c275ff36c91fe960eef9e5"
+    },
+    {
+      "test": "the_profile_library_changes_the_preview_and_the_applied_shape",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "the_profile_library_changes_the_preview_and_the_applied_shape"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2e3afa0c6285dc87e9a26d4520c2b653de16317bab67884c536287fc87f594e9"
+    },
+    {
+      "test": "the_preset_can_be_chosen_from_the_command_line",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "the_preset_can_be_chosen_from_the_command_line"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "dac6b1e9fdf9e892094b72b82c26f40929b9dd3291fb851ceb201c5dd906ca8e"
+    }
+  ]
+}

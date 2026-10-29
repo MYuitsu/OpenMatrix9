@@ -217,11 +217,11 @@ fn icons_scale_with_the_screen_size() {
 }
 
 #[test]
-fn every_reference_menu_has_its_full_icon_list() {
+fn pinned_menu_lists_have_expected_counts() {
     for (name, expected) in [
         ("Curve", 58),
         ("Surface", 40),
-        ("Solid", 30),
+        ("Solid", 43),
         ("Transform", 40),
         ("SubD", 58),
         ("Art", 7),
@@ -242,6 +242,208 @@ fn every_reference_menu_has_its_full_icon_list() {
             expected
         );
     }
+}
+
+#[test]
+fn sphere_variant_icons_start_the_recovered_modes() {
+    for (index, prompt) in [(0,"First diameter endpoint"),(1,"First point"),(2,"First point"),(3,"Pick center on curve"),(4,"Select tangent curve"),(5,"Add points")] {
+        let (mut app, context, _) = startup();let solid=app.main_category_rect(2).unwrap().center();
+        click(&mut app,&context,solid);frame(&mut app,&context,vec![]);
+        context.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Solid")),1usize));frame(&mut app,&context,vec![]);
+        let icon=app.rail_icon_rects[2+index];click(&mut app,&context,icon.center());
+        assert_eq!(app.controller.active_feature(),Some("OM9-SOLID-014"));
+        assert!(app.controller.prompt().starts_with(prompt),"{}",app.controller.prompt());assert_eq!(app.controller.coordinator().undo_len(),0);
+    }
+}
+
+#[test]
+fn box_variant_icons_start_the_recovered_modes() {
+    for (index, prompt) in [(15,"First corner"),(16,"Start of edge"),(17,"Start of edge"),(18,"Center of base")] {
+        let (mut app, context, _) = startup();
+        let solid=app.main_category_rect(2).unwrap().center();click(&mut app,&context,solid);frame(&mut app,&context,vec![]);
+        let icon=app.rail_icon_rects[2+index];click(&mut app,&context,icon.center());
+        assert_eq!(app.controller.active_feature(),Some("OM9-SOLID-012"));
+        assert!(app.controller.prompt().starts_with(prompt),"{}",app.controller.prompt());
+        assert_eq!(app.controller.coordinator().undo_len(),0);
+    }
+}
+
+#[test]
+fn multi_pipe_menu_icon_starts_multiple_selection() {
+    let (mut app, context, _) = startup();
+    let solid = app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app, &context, solid);
+    frame(&mut app, &context, vec![]);
+    let icon = app.rail_icon_rects[2 + 13];
+    click(&mut app, &context, icon.center());
+    assert_eq!(app.controller.active_feature(), Some("OM9-SOLID-011"));
+    assert_eq!(app.controller.prompt(), "Select curves for Pipe (Enter when done)");
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn create_solid_menu_icon_starts_shared_command() {
+    let (mut app, context, _) = startup();
+    let solid = app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app, &context, solid);
+    assert_eq!(app.main_menu_category(), 2);
+    for index in [2 + 5] {
+        let rect = app.rail_icon_rects[index];
+        click(&mut app, &context, rect.center());
+        assert_eq!(app.controller.active_feature(), Some("SolidCreateSolid"));
+        assert!(app.controller.document().entities.is_empty());
+        assert_eq!(app.controller.coordinator().undo_len(), 0);
+        app.controller.cancel();
+    }
+}
+
+#[test]
+fn boolean_split_menu_icon_starts_shared_command() {
+    let (mut app, context, _) = startup();
+    let solid = app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app, &context, solid);
+    let rect = app.rail_icon_rects[2 + 4];
+    click(&mut app, &context, rect.center());
+    assert_eq!(app.controller.active_feature(), Some("SolidBooleanSplit"));
+    assert!(app.controller.prompt().contains("first set"));
+    assert!(app.controller.document().entities.is_empty());
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn truncated_cone_right_click_starts_two_point_variant() {
+    let (mut app,context,_)=startup();
+    let solid=app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app,&context,solid); frame(&mut app,&context,vec![]);
+    context.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Solid")),1usize));
+    frame(&mut app,&context,vec![]);
+    let icon=app.rail_icon_rects[2+12]; secondary_click(&mut app,&context,icon.center());
+    assert_eq!(app.controller.active_feature(),Some("OM9-SOLID-020"));
+    assert_eq!(app.controller.prompt(),"First diameter endpoint");
+    assert_eq!(app.controller.coordinator().undo_len(),0);
+}
+
+#[test]
+fn ellipsoid_right_click_starts_diameter_variant() {
+    let (mut app, context, _) = startup();
+    let solid = app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app, &context, solid);
+    frame(&mut app, &context, vec![]);
+    context.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Solid")),1usize));frame(&mut app,&context,vec![]);
+    let icon = app.rail_icon_rects[2+6];
+    secondary_click(&mut app, &context, icon.center());
+    assert_eq!(app.controller.active_feature(), Some("OM9-SOLID-013"));
+    assert_eq!(app.controller.prompt(), "First end of first axis");
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn torus_right_click_starts_two_point_variant() {
+    let (mut app,context,_)=startup();
+    let solid=app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app,&context,solid); frame(&mut app,&context,vec![]);
+    context.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Solid")),1usize));frame(&mut app,&context,vec![]);
+    let icon=app.rail_icon_rects[2+7]; secondary_click(&mut app,&context,icon.center());
+    assert_eq!(app.controller.active_feature(),Some("OM9-SOLID-015"));
+    assert_eq!(app.controller.prompt(),"First diameter endpoint");
+    assert_eq!(app.controller.coordinator().undo_len(),0);
+}
+
+#[test]
+fn cone_right_click_starts_two_point_variant() {
+    let (mut app,context,_)=startup();let solid=app.main_category_rect(2).expect("Solid category").center();click(&mut app,&context,solid);frame(&mut app,&context,vec![]);
+    context.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Solid")),1usize));frame(&mut app,&context,vec![]);
+    let icon=app.rail_icon_rects[2+11];secondary_click(&mut app,&context,icon.center());assert_eq!(app.controller.active_feature(),Some("OM9-SOLID-019"));
+    assert_eq!(app.controller.prompt(),"First diameter endpoint");assert_eq!(app.controller.coordinator().undo_len(),0);
+}
+
+#[test]
+fn pyramid_right_click_starts_five_point_star() {
+    let (mut app,context,_)=startup();let solid=app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app,&context,solid);frame(&mut app,&context,vec![]);context.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Solid")),1usize));frame(&mut app,&context,vec![]);let icon=app.rail_icon_rects[2+10];secondary_click(&mut app,&context,icon.center());
+    assert_eq!(app.controller.active_feature(),Some("OM9-SOLID-018"));app.controller.accept_world_point([0.,0.,0.]).unwrap();app.controller.submit("5").unwrap();
+    assert_eq!(app.controller.prompt(),"Second star radius or point (Automatic)");app.controller.submit("2").unwrap();app.controller.submit("6").unwrap();
+    let e=app.controller.document().entities.values().next().unwrap();let om9_core::geometry::Geometry::Brep(body)=&e.geometry else{panic!()};
+    let m=om9_kernel::creation::measure(body,app.controller.coordinator().limits()).unwrap();assert!((m.volume_mm3-5.*5.*2.*(std::f64::consts::PI/5.).sin()*2.).abs()<1e-6);
+}
+
+#[test]
+fn tube_right_click_starts_two_point_variant() {
+    let (mut app,context,_)=startup();let solid=app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app,&context,solid);frame(&mut app,&context,vec![]);context.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Solid")),1usize));frame(&mut app,&context,vec![]);let icon=app.rail_icon_rects[2+9];secondary_click(&mut app,&context,icon.center());
+    assert_eq!(app.controller.active_feature(),Some("OM9-SOLID-017"));assert_eq!(app.controller.prompt(),"First diameter endpoint");
+    assert_eq!(app.controller.coordinator().undo_len(),0);
+}
+
+#[test]
+fn cylinder_right_click_starts_two_point_variant() {
+    let (mut app,context,_)=startup();let solid=app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app,&context,solid);frame(&mut app,&context,vec![]);context.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Solid")),1usize));frame(&mut app,&context,vec![]);let icon=app.rail_icon_rects[2+8];secondary_click(&mut app,&context,icon.center());
+    assert_eq!(app.controller.active_feature(),Some("OM9-SOLID-016"));assert_eq!(app.controller.prompt(),"First diameter endpoint");
+}
+
+#[test]
+fn pipe_right_click_starts_chain_variant() {
+    let (mut app, context, _) = startup();
+    let solid = app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app, &context, solid);
+    frame(&mut app, &context, vec![]);
+    let icon = app.rail_icon_rects[2 + 12];
+    secondary_click(&mut app, &context, icon.center());
+    assert_eq!(app.controller.active_feature(), Some("OM9-SOLID-011"));
+    assert!(app.controller.prompt().contains("connected curve segments"));
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn extract_surface_right_click_starts_copy_variant() {
+    use om9_app::command_options::CommandOptionInterface;
+    let (mut app, context, _) = startup();
+    let solid = app.main_category_rect(2).expect("Solid category").center();
+    click(&mut app, &context, solid);
+    assert_eq!(app.main_menu_category(), 2);
+    frame(&mut app, &context, vec![]);
+    frame(&mut app, &context, vec![]);
+    let icon = app.rail_icon_rects[2 + 7];
+    secondary_click(&mut app, &context, icon.center());
+    assert_eq!(app.controller.active_feature(), Some("OM9-SOLID-006"));
+    let copy = app
+        .controller
+        .command_options()
+        .into_iter()
+        .find(|o| o.id.name() == "Copy")
+        .unwrap();
+    assert_eq!(copy.label, "Copy=Yes");
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn extract_surface_right_click_with_preselection() {
+    use om9_app::command_options::CommandOptionInterface;
+    let (mut app, context, _) = startup();
+    app.controller.submit("Box 10 10 10").unwrap();
+    let id = *app.controller.document().entities.keys().next().unwrap();
+    app.controller.select_objects(&[id]).unwrap();
+    let before = app.controller.document().entities[&id].clone();
+    let history_count = app.controller.recent().len();
+    let undo_before = app.controller.coordinator().undo_len();
+    frame(&mut app, &context, vec![]);
+    let solid = app.main_category_rect(2).unwrap().center();
+    click(&mut app, &context, solid);
+    let icon = app.rail_icon_rects[history_count + 2 + 7];
+    secondary_click(&mut app, &context, icon.center());
+    assert_eq!(app.controller.active_feature(), Some("OM9-SOLID-006"));
+    let copy = app
+        .controller
+        .command_options()
+        .into_iter()
+        .find(|o| o.id.name() == "Copy")
+        .unwrap();
+    assert_eq!(copy.label, "Copy=Yes");
+    app.controller.submit("0").unwrap();
+    assert_eq!(app.controller.document().entities[&id], before);
+    assert_eq!(app.controller.document().entities.len(), 2);
+    assert_eq!(app.controller.coordinator().undo_len(), undo_before + 1);
 }
 
 #[test]

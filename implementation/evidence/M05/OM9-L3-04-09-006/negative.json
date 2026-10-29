@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-09-006",
+  "title": "Gem Instance Create Rotate And Position",
+  "cases": [
+    "the positioner needs exactly one gem: a line -> Invalid(\"gem positioner needs one gem\")",
+    "geometry/scale edits on an instance are refused (definition owns the mesh)"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

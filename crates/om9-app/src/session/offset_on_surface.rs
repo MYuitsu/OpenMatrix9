@@ -54,7 +54,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Distance=") {
-            let Some(distance) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value != 0.0) else {
+            let Some(distance) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value != 0.0)
+            else {
                 self.offset_on_surface_pending = Some(pending);
                 return Some(Err(Error::Invalid("distance must be non-zero")));
             };
@@ -64,7 +68,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.offset_on_surface_pending = Some(pending);
-            return Some(Err(Error::Invalid("OffsetCrvOnSrf accepts Distance= or Enter")));
+            return Some(Err(Error::Invalid(
+                "OffsetCrvOnSrf accepts Distance= or Enter",
+            )));
         }
         let samples = match om9_core::surface_kernel::sample_curve(
             &pending.curve,
@@ -105,7 +111,11 @@ impl Controller {
             } else {
                 previous
             };
-            let tangent = [next[0] - previous[0], next[1] - previous[1], next[2] - previous[2]];
+            let tangent = [
+                next[0] - previous[0],
+                next[1] - previous[1],
+                next[2] - previous[2],
+            ];
             let side = [
                 tangent[1] * normal[2] - tangent[2] * normal[1],
                 tangent[2] * normal[0] - tangent[0] * normal[2],
@@ -139,11 +149,7 @@ impl Controller {
             Ok(curve) => curve,
             Err(error) => return Some(Err(error)),
         };
-        Some(self.commit_geometry(
-            OFFSET_ON_SURFACE,
-            "OffsetCrvOnSrf",
-            Geometry::Curve(curve),
-        ))
+        Some(self.commit_geometry(OFFSET_ON_SURFACE, "OffsetCrvOnSrf", Geometry::Curve(curve)))
     }
 
     pub fn offset_on_surface_option_tokens(&self) -> Vec<(&'static str, &'static str)> {

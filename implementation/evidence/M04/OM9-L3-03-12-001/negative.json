@@ -1,0 +1,32 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"style schema\")",
+      "schema": "om9.builder_style.v2"
+    },
+    {
+      "expect": "Invalid(\"style numeric\")",
+      "parameters": {
+        "width_mm": {
+          "length_mm": -1.0
+        }
+      }
+    },
+    {
+      "expect": "Invalid(\"style schema\")",
+      "parameters": {
+        "width_mm": {
+          "length_mm": "wide"
+        }
+      }
+    },
+    {
+      "expect": "Invalid(\"style profile\")",
+      "parameters": {
+        "profile_ref": {
+          "choice": "triangular"
+        }
+      }
+    }
+  ]
+}

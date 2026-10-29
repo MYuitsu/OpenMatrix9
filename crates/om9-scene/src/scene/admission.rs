@@ -31,15 +31,25 @@ fn buffer_bound(geometry: &Geometry, limits: &Limits) -> Result<Option<Usage>> {
         }
         Geometry::Curve(curve) => {
             if matches!(curve, Curve::Polycurve { .. }) {
-                let segments = match connected_polyline_segments(curve) {
+                let segments = match connected_polyline_segments(curve, limits) {
                     Ok(segments) => segments,
-                    Err(Error::Unsupported(_)) => return Ok(None),
+                    Err(Error::Unsupported(_)) => {
+                        if let Curve::Polycurve{segments,reversed:false}=curve
+                            && segments.iter().all(|s|matches!(s,Curve::Line{..})) {
+                            let count=segments.len().checked_mul(2).ok_or(Error::Overflow("stroke display vertices"))?;
+                            usage.add(Usage::array::<Point3>(count)?,limits)?;
+                            usage.add(Usage::array::<[u32;2]>(segments.len())?,limits)?;
+                            usage.points=count as u64;return Ok(Some(usage));
+                        }
+                        return Ok(None);
+                    },
                     Err(error) => return Err(error),
                 };
-                let count = segments
-                    .len()
-                    .checked_add(1)
-                    .ok_or(Error::Overflow("polyline display vertices"))?;
+                let count = segments.iter().try_fold(1usize, |count, segment| {
+                    count
+                        .checked_add(polyline_display_steps(segment)?)
+                        .ok_or(Error::Overflow("polyline display vertices"))
+                })?;
                 usage.add(Usage::array::<Point3>(count)?, limits)?;
                 usage.points = count as u64;
                 usage.check(limits)?;

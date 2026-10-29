@@ -1,0 +1,22 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-010",
+  "cases": [
+    {
+      "input": "two settings features committed, SettingsMass",
+      "expect": "grams and dwt from the shared metal owner, one entry per feature",
+      "oracle": "om9-app tests/settings_commands.rs::settings_mass_reports_grams_from_the_committed_features"
+    },
+    {
+      "input": "prong set volume",
+      "expect": "settings_mass equals MetalEstimate for the same volume and material",
+      "oracle": "om9-core tests/settings_family.rs::settings_mass_matches_the_metal_owner_for_the_prong_volume"
+    }
+  ],
+  "automated_tests": [
+    "settings_mass_reports_grams_from_the_committed_features",
+    "cutter_features_stay_out_of_the_mass",
+    "settings::associative::tests",
+    "tests/settings_family.rs::settings_mass_matches_the_metal_owner_for_the_prong_volume"
+  ]
+}

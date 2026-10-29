@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-018",
+  "case": "box 0..2, plane through (0,0,0) with normal +X",
+  "expected": "box 0..2, plane through (0,0,0) with normal +X -> the box centre moves to (-1,1,1) with 0 (one object) and to (-1,1,1) plus (1,1,1) with 1 (two objects), one Undo entry",
+  "test": "m03_04_01_018_symmetry_mirrors_across_the_picked_plane"
+}

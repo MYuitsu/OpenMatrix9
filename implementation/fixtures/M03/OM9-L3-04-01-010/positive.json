@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-010",
+  "case": "one box on the CPlane and one raised 10 mm, both selected",
+  "expected": "each object moves along the normal by its own signed height, so both end on the plane, in one Undo entry",
+  "test": "m03_04_01_010_project_to_cplane_drops_each_object_onto_the_plane"
+}

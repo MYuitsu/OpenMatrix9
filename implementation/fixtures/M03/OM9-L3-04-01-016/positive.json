@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-016",
+  "case": "box centred at (1,1,0) on a path from (0,0,0) to (10,0,0), point (5,2,0)",
+  "expected": "box centred at (1,1,0) on a path from (0,0,0) to (10,0,0), point (5,2,0) → the object stands at (5,0,0) with its normal along +X, the path does not move, one Undo entry",
+  "test": "m03_04_01_016_orient_perpendicular_to_curve_stands_the_object_on_the_path"
+}

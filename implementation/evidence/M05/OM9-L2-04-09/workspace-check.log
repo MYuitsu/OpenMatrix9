@@ -1,0 +1,16 @@
+$ cargo check --workspace --all-targets -j 2
+# exit code: 0
+# captured: 2026-10-27T09:22:59Z
+# target dir: L:\om9-target
+
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Checking om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Checking om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+    Checking om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+    Checking om9-3dm v0.1.0 (H:\OpenMatrix9\crates\om9-3dm)
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Checking om9-render v0.1.0 (H:\OpenMatrix9\crates\om9-render)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 50.33s

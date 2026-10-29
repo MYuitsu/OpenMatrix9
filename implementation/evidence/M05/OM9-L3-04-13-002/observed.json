@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_edits_evidence.v1",
+  "l3_id": "OM9-L3-04-13-002",
+  "title": "Gem Control And Size Edits",
+  "command": "BuilderGemControl / gvGemControl",
+  "scope": "`om9_core::gem_edits::GemEdit`; `GemEdit::{spec,record,validate,changes_geometry}`; `Controller::dispatch_gem_edits` + `gem_edits_text`; `Controller::gem_edits_apply`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "one-transaction multi-stone edit with stable identities and Undo/Redo",
+  "negative": "wrong selection and unused options are typed refusals",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-13-002-03"
+    ],
+    "fixture_manifest_sha256": "4577816eb06438ce0d3f2e15c2107bd719875d8c1dfb0292993d3590619880b9"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/tests/gem_edits.rs"
+  ],
+  "test": "control_edits_every_selected_stone_in_one_transaction_and_undo_restores_it"
+}

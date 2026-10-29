@@ -4,6 +4,274 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-04-01",
   "title": "Transform · Orient 2 Points — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Orient 2 Points",
+        "Orient 3 Points",
+        "Orient on Surface",
+        "Orient on Curve",
+        "Orient Perpendicular to Curve",
+        "Orient Curve to Edge",
+        "Remap to C-Plane"
+      ],
+      "option_count": 7
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Transform",
+      "command": "Orient",
+      "option": "Orient 2 Points",
+      "root_group": false,
+      "path": [
+        "Transform",
+        "Orient"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "point (2,3,4) mm or selected CP with known ID",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-005 - Transform · Orient 2 Points - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Orient 2 Points",
+        "command_id": "TransformOrient2Points",
+        "script": "! _Orient _Pause _Copy=_Yes _Scale=_3D ",
+        "alt_script": "! _Orient _Pause _Copy=No _Scale=3D",
+        "alt_label": "Orient 2 Points Copy=No",
+        "covered_by_l3": "OM9-L3-04-01-005",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Orient 2 Points",
+          "typed_forms": [
+            "Orient 2 Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Orient 3 Points",
+        "command_id": "TransformOrient3Points",
+        "script": "! _Orient3Pt _Pause _Copy=_Yes",
+        "alt_script": "! _Orient3Pt _Pause _Copy=No",
+        "alt_label": "Orient 3 Points Copy=No",
+        "covered_by_l3": "OM9-L3-04-01-006",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Orient 3 Points",
+          "typed_forms": [
+            "Orient 3 Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Orient on Surface",
+        "command_id": "TransformOrientOnSurface",
+        "script": "! _OrientOnSrf",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-015",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Orient on Surface",
+          "typed_forms": [
+            "Orient on Surface"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Orient on Curve",
+        "command_id": "TransformOrientOrientOnCurve",
+        "script": "! _OrientOnCrv",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-017",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Orient on Curve",
+          "typed_forms": [
+            "Orient on Curve"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Orient Perpendicular to Curve",
+        "command_id": "TransformOrientPerpendiculartoCurve",
+        "script": "! _OrientOnCrv _Pause _Pause _Pause _Copy=_Yes _Perpendicular",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-016",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Orient Perpendicular to Curve",
+          "typed_forms": [
+            "Orient Perpendicular to Curve"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Orient Curve to Edge",
+        "command_id": "TransformOrientCurvetoEdge",
+        "script": "! _OrientCrvToEdge",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Orient Curve to Edge",
+          "typed_forms": [
+            "Orient Curve to Edge"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Remap to C-Plane",
+        "command_id": "TransformOrientRemaptoCPlane",
+        "script": "! _RemapCPlane",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-038",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Remap to C-Plane",
+          "typed_forms": [
+            "Remap to C-Plane"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Orient Curve to Edge"
+    ],
+    "missing": [
+      "option:Orient Curve to Edge: type/default/range/unit/prompt",
+      "input:point (2,3,4) mm or selected CP with known ID: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-04-01-005-04"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
@@ -124,13 +392,25 @@
       "depends_on_task_ids": [
         "OM9-L4-04-01-005-02"
       ]
+    },
+    {
+      "id": "OM9-L4-04-01-005-04",
+      "title": "Parameter Implementation — Transform · Orient 2 Points — menu binding",
+      "file": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-005 - Transform · Orient 2 Points - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-04-01-005-01",
+        "OM9-L4-04-01-005-02",
+        "OM9-L4-04-01-005-03"
+      ]
     }
   ],
   "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
   "task_ids": [
     "OM9-L4-04-01-005-01",
     "OM9-L4-04-01-005-02",
-    "OM9-L4-04-01-005-03"
+    "OM9-L4-04-01-005-03",
+    "OM9-L4-04-01-005-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -280,5 +560,22 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "OM9-L3-04-01-005_2026_10_26": {
+      "date": "2026-10-26",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Transform row `Orient 2 Points` runs through session::transform with one transaction per command; the menu row and the typed command name reach the same body, and the row answers availability from transform_menu::BINDINGS.",
+      "l4_verified": 1,
+      "tests": {
+        "app_transform_menu": "16 passed; 0 failed"
+      },
+      "evidence": [
+        "implementation/design/M03/OM9-L3-04-01-005",
+        "implementation/fixtures/M03/OM9-L3-04-01-005",
+        "implementation/evidence/M03/OM9-L3-04-01-005"
+      ],
+      "manual_gate": "M03-UI"
+    }
+  }
 }

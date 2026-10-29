@@ -1,0 +1,13 @@
+{
+  "origin": "Original captures of the isolated OpenMatrix9 debug replay through @oai/sky; user screenshot and user drawing are not copied.",
+  "launch": {
+    "pid": 63392,
+    "binary": "L:\\om9-target\\debug\\om9.exe",
+    "sha256": "28915c56c1b2ab659624360939356c8a10dfcf8fafb0e96765ee5779cae76494",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\polyline-option-owner-20261026"
+  },
+  "files": {
+    "polyline-length-after-first-point.png": "789f717900d6bec9ac9bff7ee12282d8dd7138d263d463c1d5f5936b11bed42b",
+    "polyline-start-after-line.png": "244e83b898b8d877186af5e3a2c7c052be5700dace6babf074654f916de458c0"
+  }
+}

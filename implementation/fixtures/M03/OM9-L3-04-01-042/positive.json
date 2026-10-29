@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-042",
+  "case": "ask availability for all 41 catalogued Transform rows",
+  "expected": "14 rows answer Ok because their body exists; the other 27 answer `Unsupported(reason)` with a non-empty reason that the menu shows as a disabled row",
+  "test": "m03_04_01_042_every_catalogued_row_is_enabled_or_refused_with_a_reason"
+}

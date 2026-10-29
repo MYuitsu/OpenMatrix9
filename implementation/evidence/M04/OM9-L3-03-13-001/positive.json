@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-001",
+  "kind": "positive",
+  "input": "turn history recording on/off for a selected command sequence",
+  "expected": "record off inserts the rail geometry without a recipe; record on stores the typed recipe; a toggle is refused while the builder transaction is open",
+  "verified_by": [
+    "record_off_commits_geometry_without_a_recipe_and_toggles_stamp_new_records"
+  ],
+  "notes": [
+    "Recording off omits the History mutation entirely: the entity is committed in the same one-transaction journal, so Undo still removes it.",
+    "The policy is stamped on new recipes (record/update) rather than rewriting recipes that already exist."
+  ]
+}

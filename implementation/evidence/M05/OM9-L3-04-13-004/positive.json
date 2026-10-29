@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-13-004",
+  "title": "Gem Style Save",
+  "cases": [
+    "a 6 mm round stone saves as `Round Six` and the versioned JSON file is written",
+    "the file carries the schema, the name and every saved attribute",
+    "saving the same name again replaces the style instead of duplicating it"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

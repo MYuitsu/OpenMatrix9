@@ -1,0 +1,83 @@
+{
+  "schema": "om9.regression_acceptance.v1",
+  "task_id": "OM9-L4-14-003-04",
+  "l3_id": "OM9-L3-04-14-003",
+  "title": "Head Builder Prong Rail Level Edit",
+  "automated_tests": {
+    "core": [
+      "a_level_four_edit_touches_only_the_selected_prong",
+      "an_overall_edit_rebuilds_every_prong"
+    ],
+    "app": [
+      "a_level_four_edit_changes_only_its_prong_in_the_preview"
+    ]
+  },
+  "negative_cases": [
+    {
+      "input": "Grouped level with an overall field",
+      "error": "invalid head edit level field"
+    },
+    {
+      "input": "Prong index 0",
+      "error": "invalid head prong index"
+    }
+  ],
+  "manual_gate": {
+    "gate": "M06-UI",
+    "signed": false,
+    "required": true
+  },
+  "runs": [
+    {
+      "command": "cargo test -p om9-core --lib settings::head -j 2",
+      "exit_code": 0,
+      "seconds": 0.34,
+      "tests_passed": 12,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/core_head.log",
+      "at": "2026-10-28T03:27:38+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core --lib settings::bezel -j 2",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "tests_passed": 10,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/core_bezel.log",
+      "at": "2026-10-28T03:27:39+00:00"
+    },
+    {
+      "command": "cargo test -p om9-app --test head_commands -j 2",
+      "exit_code": 0,
+      "seconds": 1.16,
+      "tests_passed": 9,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/app_head.log",
+      "at": "2026-10-28T03:27:40+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core --lib -j 2",
+      "exit_code": 0,
+      "seconds": 0.37,
+      "tests_passed": 171,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/core_lib.log",
+      "at": "2026-10-28T03:27:40+00:00"
+    },
+    {
+      "command": "cargo check -p om9-app -j 2",
+      "exit_code": 0,
+      "seconds": 1.85,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/app_check.log",
+      "at": "2026-10-28T03:27:42+00:00"
+    }
+  ],
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "automation",
+    "note": "no human UI review; M06-UI stays open"
+  },
+  "git_head": "71852257e59f4117c3b3bfca73f047ac546f76c2"
+}

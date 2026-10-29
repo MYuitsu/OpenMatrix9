@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-13-001",
+  "title": "Matrix History Record Toggle",
+  "owner": "om9-app Controller history API over om9-core HistoryGraph",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-app/src/session/history.rs",
+      "symbols": [
+        "Controller::set_history_record",
+        "Controller::toggle_history_record"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [
+        "Controller::builder_apply"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session.rs",
+      "symbols": [
+        "Controller::history_record",
+        "Controller::commit_entity_with_history"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/sidebar_palettes.rs",
+      "symbols": [
+        "fixed_sidebar_palette",
+        "RhinoHistoryON",
+        "GVHistoryRecordON"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "Recording off omits the History mutation entirely: the entity is committed in the same one-transaction journal, so Undo still removes it.",
+    "The policy is stamped on new recipes (record/update) rather than rewriting recipes that already exist."
+  ]
+}

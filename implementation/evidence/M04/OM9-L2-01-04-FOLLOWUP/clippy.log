@@ -1,0 +1,10 @@
+$ cargo clippy -p om9-core -p om9-sdk -p om9-plugin-host -p om9-hello-plugin --all-targets -j 2 -- -D warnings
+# exit code: 0
+# captured: 2026-10-26T19:21:17Z
+# target dir: L:\om9-target
+
+    Checking om9-sdk v0.1.0 (H:\OpenMatrix9\crates\om9-sdk)
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Checking om9-hello-plugin v0.1.0 (H:\OpenMatrix9\sdk\examples\hello-plugin)
+    Checking om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.32s

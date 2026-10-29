@@ -1,0 +1,105 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-03-002",
+  "title": "Signet Ring Builder",
+  "generated_at_utc": "2026-10-27T09:35:18Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the ring builder panel at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "3335a39ef7c1cd61dc7ca2da8a8f4209cfe39b82bd7d1d51c4ee780bd08c7076",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "closed signet body with a visible top and two shoulders",
+    "negative": "negative wall, folded top contour and zero shoulder are refused"
+  },
+  "l4_id": "OM9-L4-04-03-002-07",
+  "role": "ADVERSARIAL",
+  "kind": "adversarial",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/ring_builder.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/ring_family.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/tests/ring_family_panel.rs",
+    "crates/om9-kernel/src/associative.rs",
+    "crates/om9-kernel/src/creation.rs",
+    "crates/om9-kernel/src/creation_bridge.cpp",
+    "crates/om9-kernel/tests/ring_family_brep.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--lib",
+        "-j",
+        "2",
+        "ring_builder::tests::a_signet_ring_refuses_a_negative_wall_and_a_self_intersecting_top"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "c4f92f9289cbd5bb77a29be545e2572553e7ac43c1c05d43738848e25c9fd71c",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 130 filtered out; finished in 0.00s"
+      ],
+      "test": "ring_builder::tests::a_signet_ring_refuses_a_negative_wall_and_a_self_intersecting_top",
+      "package": "om9-core",
+      "binary": "om9-core"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_family_panel",
+        "-j",
+        "2",
+        "an_invalid_ring_parameter_is_refused_and_the_document_stays_empty"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "51a6d247b447ca30622c5b16627c7e12eceeeee4f54b099260f2bf85efc4cb10",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 3.05s"
+      ],
+      "test": "an_invalid_ring_parameter_is_refused_and_the_document_stays_empty",
+      "package": "om9-app",
+      "binary": "ring_family_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-kernel",
+        "--features",
+        "3dm-brep",
+        "--test",
+        "ring_family_brep",
+        "-j",
+        "2",
+        "a_ring_body_with_a_missing_face_is_refused_instead_of_published_open"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "1e74c1cad599c6755cfee9f400dc0b9494bd3b95c44b5d545889b936c3d2fba9",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.18s"
+      ],
+      "test": "a_ring_body_with_a_missing_face_is_refused_instead_of_published_open",
+      "package": "om9-kernel",
+      "binary": "ring_family_brep"
+    }
+  ],
+  "manual_gate_note": "Adversarial And Recovery Tests: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

@@ -161,6 +161,17 @@ pub fn closest_point_on_curve(
     limits: &Limits,
 ) -> Result<(f64, Point3, f64)> {
     finite(point)?;
+    if let Curve::Line { start, end, .. } = curve {
+        curve.validate(limits)?;
+        let direction = sub(*end, *start);
+        let squared = dot(direction, direction);
+        if squared <= f64::MIN_POSITIVE {
+            return Err(Error::Invalid("closest point on degenerate line"));
+        }
+        let fraction = clamp(dot(sub(point, *start), direction) / squared, 0., 1.);
+        let value = add(*start, scale(direction, fraction));
+        return Ok((fraction, value, distance(value, point)));
+    }
     let samples = 64;
     let mut best = 0.0;
     let mut best_distance = f64::INFINITY;

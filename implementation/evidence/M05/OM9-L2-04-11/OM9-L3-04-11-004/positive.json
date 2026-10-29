@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-11-004",
+  "title": "Tapered Baguettes Between Two Curves",
+  "cases": [
+    "one stone is measured between Point A and Point B on the first wall",
+    "the two widths are the local wall gaps, so the stone is tapered and bent",
+    "the tapered profile keeps Baguette/Gem identity and is a closed mesh"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

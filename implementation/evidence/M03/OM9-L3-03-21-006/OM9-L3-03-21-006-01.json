@@ -1,0 +1,13 @@
+{
+  "l4_id": "OM9-L3-03-21-006-01",
+  "l3_id": "OM9-L3-03-21-006",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Diameter Dimension: circle of radius 5 at (2,2) -> the label reads 10, and editing the circle's radius later does not silently re-write the stored annotation",
+  "tests": [
+    "crates/om9-app/tests/annotation.rs::diameter_and_radius_use_the_placed_circle_and_keep_source",
+    "crates/om9-app/tests/annotation.rs::m03_04_01_all_thirteen_catalog_ids_have_distinct_icons_and_one_dispatcher"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

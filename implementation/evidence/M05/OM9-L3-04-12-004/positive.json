@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-12-004",
+  "title": "Pave Prong Layout",
+  "cases": [
+    "shared prongs sit between touching stones, center prongs between three",
+    "unshared stones receive boundary prongs and an isolated stone still gets one",
+    "Fillet, Height, Drop, Taper, Scale and shared/unshared/center sizes are typed",
+    "Apply inserts every prong marker in one Undo step"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

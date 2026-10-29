@@ -51,7 +51,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Radius=") {
-            let Some(radius) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(radius) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.fillet_corners_pending = Some(pending);
                 return Some(Err(Error::Invalid("radius must be positive")));
             };
@@ -61,7 +65,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.fillet_corners_pending = Some(pending);
-            return Some(Err(Error::Invalid("FilletCorners accepts Radius= or Enter")));
+            return Some(Err(Error::Invalid(
+                "FilletCorners accepts Radius= or Enter",
+            )));
         }
         let Curve::Polycurve { segments, .. } = &pending.curve else {
             return Some(Err(Error::Invalid("polyline selection")));
@@ -86,7 +92,11 @@ impl Controller {
             plane.x[0] * plane.y[1] - plane.x[1] * plane.y[0],
         ];
         let closed = distance(points[0], *points.last().expect("points")) < 1e-9;
-        let unique = if closed { points.len() - 1 } else { points.len() };
+        let unique = if closed {
+            points.len() - 1
+        } else {
+            points.len()
+        };
         let corners: Vec<usize> = if closed {
             (0..unique).collect()
         } else {

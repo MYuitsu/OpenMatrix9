@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-17-004",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderBrightCutter",
+  "cases": [
+    {
+      "case": "six facets around a round brilliant",
+      "input": "BrightParams::for_gem",
+      "expect": "six closed facets, positive total volume, summary names the stone"
+    },
+    {
+      "case": "Height, Length and 2D Scale",
+      "input": "Scale2D=140",
+      "expect": "the facet reaches further and the volume grows"
+    },
+    {
+      "case": "the committed record",
+      "input": "Enter",
+      "expect": "six Bright Cutter bodies carrying om9.cutter kind=bright_cutter"
+    }
+  ]
+}

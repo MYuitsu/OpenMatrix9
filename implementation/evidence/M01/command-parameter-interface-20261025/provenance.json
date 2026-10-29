@@ -1,0 +1,14 @@
+{
+  "origin": "Original captures of the locally built OpenMatrix9 debug executable using computer-use @oai/sky; no commercial input image copied.",
+  "binary": {
+    "pid": 49140,
+    "binary": "L:\\om9-target\\debug\\om9.exe",
+    "sha256": "28915c56c1b2ab659624360939356c8a10dfcf8fafb0e96765ee5779cae76494",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\command-parameter-interface-debug-20261025"
+  },
+  "files": {
+    "circle-deformable.png": "fb079f9ddc58ef245eae97f7d7aff3ed86f6fdda9691334ab9214388137f2d51",
+    "helix-turns.png": "d9bcb2728f7673283ce986113cdec9bafe90dc26a5ecf6b1379c9e00cf6a8aed",
+    "rectangle-square.png": "caba43d4128d8f99e23d63b713a7c53acd808054093d1f363a7a7f8203a8308b"
+  }
+}

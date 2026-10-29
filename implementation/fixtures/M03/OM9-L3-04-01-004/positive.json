@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-004",
+  "case": "box 10x10x10 at the world origin, base point 0,0,0, factors 2 / 3 / 4",
+  "expected": "the far corner moves from (10,10,10) to (20,30,40)",
+  "test": "m03_04_01_004_scale_non_uniform_applies_three_factors"
+}

@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-027",
+  "case": "source (0,0,0)->(10,0,0), target (0,0,0)->(0,10,0), 1 x 2 x 2 mesh at (5,1,0), source pick (9,0,0)",
+  "expected": "source (0,0,0)->(10,0,0), target (0,0,0)->(0,10,0), 1 x 2 x 2 mesh at (5,1,0), source pick (9,0,0) -> the corners at stations 5 and 6 land on (-1,5,0) and (-1,6,0), one Undo entry",
+  "test": "m03_04_01_027_flow_along_curve_carries_geometry_onto_the_target_path"
+}

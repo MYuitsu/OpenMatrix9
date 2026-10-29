@@ -1,0 +1,59 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3": "OM9-L3-04-17-006",
+  "title": "Multiple Stone Interactive Boolean",
+  "recorded_at": "2026-10-28",
+  "manual": {
+    "filename": "OM9_Milestones/M07 - Cutters/L2-04-17 - 02-febe-channel-microprong-brightcut-cutters/reference/text/m8book2__p272-274__creating-cutters.md",
+    "pdf_pages_1based": [
+      272,
+      274
+    ],
+    "printed_pages": [
+      498,
+      500
+    ]
+  },
+  "feature": "BuilderChannelBuilder",
+  "commands": [
+    "BuilderChannelBuilder",
+    "BuilderMicroProngCutter",
+    "BuilderBrightCutChannel"
+  ],
+  "rust_owner": [
+    "crates/om9-core/src/cutters/boolean.rs",
+    "crates/om9-app/src/session/channel_cutters.rs"
+  ],
+  "symbols": [
+    "cutters::boolean::apply",
+    "session::channel_cutters::RowCutterSession::recompute",
+    "session::Controller::row_cutter_commit",
+    "model::CUTTER_CUT_EXTENSION_SLOT"
+  ],
+  "reuse_decision": {
+    "decision": "ADD",
+    "reason": "Audit: the Cutters chapter had no channel/micro-prong/bright-cut command at all. The menu catalog already listed the four icons and display.rs already expected an om9.cutter payload, but no session resolved or built them, and the M06 scallop owner sweeps one edge profile rather than a stone row. This owner adds the row cutter kernel once and the app dispatches to it.",
+    "reuses": [
+      "OM9-L2-04-16 (cutters::{sweep, loft, solid, volume_mm3}, boolean::{apply, BooleanMode, CutterKeep}, the om9.cutter record)",
+      "OM9-L2-04-09 (gem::GemSpec + the gem owner's om9.gem record)",
+      "OM9-L2-01-10 (geometry::Transform placement)",
+      "OM9-L2-04-15 (the prong/channel metal owner that consumes these cutters)"
+    ]
+  },
+  "previous_code_audit": [
+    "menu_catalog::CUTTERS listed BuilderChannelBuilder, BuilderMicroProngCutter, BuilderBrightCutChannel and BuilderBrightCutter, and icons.rs bound all four SVGs.",
+    "display.rs CutterRecord { kind, seat } and CUTTER_EXTENSION_SLOT existed with no writer.",
+    "session.rs resolved none of the four ids: a click fell through the unsupported-command path.",
+    "crates/om9-core/src/cutters/ had the gem, library, bezel and boolean kernels but no row cutter geometry."
+  ],
+  "tests": [
+    "cargo test -p om9-app --test channel_cutters the_interactive_boolean_cuts_every_selected_metal_body",
+    "cargo test -p om9-app --test channel_cutters a_boolean_without_a_metal_body_is_refused_and_keeps_the_preview",
+    "cargo test -p om9-core --test cutters the_interactive_boolean_keeps_or_removes_the_cutter_bodies"
+  ],
+  "limitations": [
+    "The Boolean reuses the one mesh CSG service (mesh_csg::mesh_boolean); it never runs OCCT inside the adapter.",
+    "Every target must be a closed mesh body; a surface body is refused instead of silently meshed.",
+    "The cut is applied in world space, so a row cut through several bodies is one transaction but not one CSG union."
+  ]
+}

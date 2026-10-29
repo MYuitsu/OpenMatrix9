@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-009",
+  "kind": "positive",
+  "input": "selected rail from F6 and command-line RingBuilder with equal parameters",
+  "expected": "both dispatch the same builder service and event flow",
+  "verified_by": [
+    "the_f6_prefill_and_the_command_line_reach_the_same_builder_service",
+    "f6_uses_the_selected_class_and_empty_general_context"
+  ],
+  "receipts": [
+    {
+      "test": "the_f6_prefill_and_the_command_line_reach_the_same_builder_service",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "the_f6_prefill_and_the_command_line_reach_the_same_builder_service"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "6ad454aa73c51b40e5308e9f5b782c9e07d59ffbed04984c880771ccf167650f"
+    },
+    {
+      "test": "f6_uses_the_selected_class_and_empty_general_context",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "f6_context",
+        "-j",
+        "2",
+        "f6_uses_the_selected_class_and_empty_general_context"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "9bb2338df0781da139b63510fecc21e05f6f67c4387a0bf8a0e319e514626c32"
+    }
+  ]
+}

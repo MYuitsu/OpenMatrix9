@@ -6,7 +6,7 @@
   "command_id": "OM9-CURVE-019",
   "menu_icon": "CurveCurveFromObjectsExtractIsocurve",
   "owner_candidate": "OM9-L3-02-04-010",
-  "decision": "BLOCKED_OWNER",
+  "decision": "IMPLEMENTED",
   "reviewed_upstream": [
     {
       "path": "crates/qymcad/src/command_catalog.rs",
@@ -39,5 +39,7 @@
       "Controller::availability"
     ]
   },
-  "rationale": "interactive Extract Isocurve command session is not wired; owner candidate OM9-L3-02-04-010 is unverified"
+  "rationale": "the local Curve menu binding dispatches the Rust command session; the documented Matrix command spelling is accepted as an alias",
+  "menu_label": "Extract Isocurve",
+  "documented_script": "ExtractIsocurve"
 }

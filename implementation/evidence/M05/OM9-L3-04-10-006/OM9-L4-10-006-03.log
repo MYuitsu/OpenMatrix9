@@ -1,0 +1,13 @@
+$ cargo test -p om9-app --test gem_placement -j 2 profile_and_guides_insert_construction_curves
+# exit code: 0
+# captured: 2026-10-27T13:45:04Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test profile_and_guides_insert_construction_curves ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.06s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests\gem_placement.rs (cargo-target\debug\deps\gem_placement-6deb83edeedfcaef.exe)

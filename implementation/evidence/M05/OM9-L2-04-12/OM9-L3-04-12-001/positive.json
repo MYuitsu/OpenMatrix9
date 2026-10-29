@@ -1,0 +1,14 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-12-001",
+  "title": "Auto Pave Builder",
+  "cases": [
+    "the lattice fills the selected surface region and every stone lies inside it",
+    "spacing, margin, border, angle and sizing stay within the typed range",
+    "Average/Pattern/Start=Base Direction/Curve/Edges/Seeds all produce a plan",
+    "a selected open curve becomes the attractor; selected closed curves clip the region",
+    "a saved style restores pattern, spacing, corrections and the manual count",
+    "Apply inserts every stone in one Undo step and Cancel leaves no phantom"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

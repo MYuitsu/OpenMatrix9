@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-10-009",
+  "l4_id": "OM9-L4-10-009-03",
+  "title": "Gem Flow Placement",
+  "generated_at_utc": "2026-10-27T13:45:07Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "M05-UI",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the placement command at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "5fb0cd0d67b8853029c6d92f61f13575b22614eea2c39694b4d03b7376dff895",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "rigid flow from a base curve/surface to a curve/surface target with a retargeted link",
+    "negative": "missing targets and unmappable stations are typed refusals/conflicts"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_placement.rs",
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/src/session/gem_placement.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/tests/gem_placement.rs",
+    "tools/record_m05_l2_04_10_gem_placement.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_placement",
+        "-j",
+        "2",
+        "flow_carries_the_same_stones_onto_a_target_curve"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "55637345eb58e363361f7fe24cff3c563d171d1342fcc69915adc8532ad5c5e1",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.05s"
+      ],
+      "test": "flow_carries_the_same_stones_onto_a_target_curve",
+      "package": "om9-app",
+      "binary": "gem_placement"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_placement",
+        "-j",
+        "2",
+        "flow_carries_surface_stones_onto_another_surface"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "f5b7fb28a9a2b90656aa21644eb869fde6810eefaec73cac96535747f9562d37",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.04s"
+      ],
+      "test": "flow_carries_surface_stones_onto_another_surface",
+      "package": "om9-app",
+      "binary": "gem_placement"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

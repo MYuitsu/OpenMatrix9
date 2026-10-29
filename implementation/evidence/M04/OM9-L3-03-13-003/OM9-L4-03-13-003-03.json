@@ -1,0 +1,56 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-13-003",
+  "title": "Matrix History Broken Link Report",
+  "generated_at_utc": "2026-10-27T03:41:04Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/icon/window review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "087ff644bf3bd97870109cbd4c3ff630ad5fc1bc4cd4adbda0d919246083fa6c",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "the History window lists each recorded feature, its recipe id, state and a detail naming the missing source id; a missing rail input is reported with its role, with no silent repair and an explicit Edit/Clear remediation",
+    "negative": "the phantom stale reference survives save/reopen and is still reported instead of being dropped"
+  },
+  "l4_id": "OM9-L4-03-13-003-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/history_ops.rs",
+    "crates/om9-app/src/session/history.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/history_links.rs",
+    "crates/om9-app/tests/history_updates.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "history_updates",
+        "-j",
+        "2",
+        "the_report_names_a_missing_input_and_survives_a_reopen"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "a35eb040dd018b94afc1dec0260bd2ae84c4b892e80b58a0ca1bbca67195a2e9",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "the_report_names_a_missing_input_and_survives_a_reopen",
+      "package": "om9-app",
+      "binary": "history_updates"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

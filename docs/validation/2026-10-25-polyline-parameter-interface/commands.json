@@ -1,0 +1,127 @@
+[
+  {
+    "label": "app-regression",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "om9-app",
+      "--lib",
+      "--test",
+      "polyline_options_interface",
+      "--test",
+      "polyline_mode_regression",
+      "--test",
+      "polyline_shortcuts",
+      "--test",
+      "polyline_command",
+      "--test",
+      "polyline",
+      "--test",
+      "pinned_command",
+      "--test",
+      "command_tokens",
+      "--test",
+      "command_shortcuts",
+      "--test",
+      "command_transcript",
+      "--test",
+      "command_options_and_repeat",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 216,
+    "failed": 0
+  },
+  {
+    "label": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "om9-app",
+      "--lib",
+      "-j",
+      "2",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  {
+    "label": "debug-build",
+    "command": [
+      "cargo",
+      "build",
+      "-p",
+      "om9-app",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  {
+    "label": "fmt",
+    "command": [
+      "rustfmt",
+      "--check",
+      "--edition",
+      "2024",
+      "--config",
+      "skip_children=true",
+      "crates/om9-app/src/polyline_options.rs",
+      "crates/om9-app/src/session/polyline.rs",
+      "crates/om9-app/src/ui.rs",
+      "crates/om9-app/src/ui/command.rs",
+      "crates/om9-app/tests/polyline_options_interface.rs"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  {
+    "label": "release-build",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "-p",
+      "om9-app",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0
+  },
+  {
+    "label": "public-source-audit",
+    "command": [
+      "python",
+      "tools/public_source_audit.py"
+    ],
+    "exit_code": 0
+  },
+  {
+    "label": "artifact-prune",
+    "command": [
+      "python",
+      "tools/prune_build_artifacts.py",
+      "--apply"
+    ],
+    "exit_code": 0
+  },
+  {
+    "label": "diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0
+  }
+]

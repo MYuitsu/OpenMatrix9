@@ -4,6 +4,800 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-04-01",
   "title": "Transform · Soft Move — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "ROOT_GROUP",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE_ROOT_GROUP",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "ROOT_MENU_COMMAND",
+      "option_order": [],
+      "option_count": 24
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Transform",
+      "command": "(root)",
+      "option": "Soft Move",
+      "root_group": true,
+      "path": [
+        "Transform",
+        "(root)"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "Selection context + typed command arguments for Transform · Soft Move — menu binding; dispatch to owner OM9-L2-04-08 (feature 004), not a duplicate math engine.",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-040 - Transform · Soft Move - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.expected_domain_inputs"
+      },
+      {
+        "raw": "planning/E13.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-040 - Transform · Soft Move - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      },
+      {
+        "raw": "planning/M00/SOURCE_AUDIT_V012.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-040 - Transform · Soft Move - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      },
+      {
+        "raw": "planning/M08/LUNA_START_HERE.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-040 - Transform · Soft Move - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Move",
+        "command_id": "TransformMove",
+        "script": "! _Move",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Move",
+          "typed_forms": [
+            "Move"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Copy",
+        "command_id": "TransformCopy",
+        "script": "! _Copy",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Copy",
+          "typed_forms": [
+            "Copy"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Rotate",
+        "command_id": "TransformRotate",
+        "script": "! _Rotate _Copy=No",
+        "alt_script": "! _Rotate _Copy=Yes",
+        "alt_label": "Rotate Copy",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Rotate",
+          "typed_forms": [
+            "Rotate"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Rotate 3-D",
+        "command_id": "TransformRotate3D",
+        "script": "! _Rotate3D _Pause _Pause _Pause _Copy=No",
+        "alt_script": "! _Rotate3D _Pause _Pause _Pause _Copy=Yes",
+        "alt_label": "Rotate 3-D Copy",
+        "covered_by_l3": "OM9-L3-04-01-007",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Rotate 3-D",
+          "typed_forms": [
+            "Rotate 3-D"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Smart Pattern",
+        "command_id": "TransformSmartPattern",
+        "script": "! _GVSmartPattern",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Smart Pattern",
+          "typed_forms": [
+            "Smart Pattern"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Shear",
+        "command_id": "TransformShear",
+        "script": "! _Shear",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-034",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Shear",
+          "typed_forms": [
+            "Shear"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Mirror",
+        "command_id": "TransformMirror",
+        "script": "! _Mirror",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Mirror",
+          "typed_forms": [
+            "Mirror"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Symmetry",
+        "command_id": "TransformSymmetry",
+        "script": "! _Symmetry",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-018",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Symmetry",
+          "typed_forms": [
+            "Symmetry"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Align",
+        "command_id": "TransformAlign",
+        "script": "! _Align",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Align",
+          "typed_forms": [
+            "Align"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Set Points",
+        "command_id": "TransformSetPoints",
+        "script": "! _SetPt",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-030",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Set Points",
+          "typed_forms": [
+            "Set Points"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Project to C-Plane",
+        "command_id": "TransformProjecttoCPlane",
+        "script": "! _ProjectToCPlane",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-010",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Project to C-Plane",
+          "typed_forms": [
+            "Project to C-Plane"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Twist",
+        "command_id": "TransformTwist",
+        "script": "! _Twist",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-035",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Twist",
+          "typed_forms": [
+            "Twist"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Bend",
+        "command_id": "TransformBend",
+        "script": "! _Bend",
+        "alt_script": "! _Bend _Pause _Pause _Pause _Symmetric=Yes",
+        "alt_label": "Bend Symmetric",
+        "covered_by_l3": "OM9-L3-04-01-008",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Bend",
+          "typed_forms": [
+            "Bend"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Taper",
+        "command_id": "TransformTaper",
+        "script": "! _Taper",
+        "alt_script": "! _Taper _Pause _Pause _Pause _Flat=Yes _infinite=Yes",
+        "alt_label": "Taper Flat Infinite",
+        "covered_by_l3": "OM9-L3-04-01-033",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Taper",
+          "typed_forms": [
+            "Taper"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Stretch",
+        "command_id": "TransformStretch",
+        "script": "! _Stretch",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-032",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Stretch",
+          "typed_forms": [
+            "Stretch"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Maelstrom",
+        "command_id": "TransformMaelstrom",
+        "script": "! _Maelstrom",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-036",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Maelstrom",
+          "typed_forms": [
+            "Maelstrom"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Splop",
+        "command_id": "TransformSplop",
+        "script": "! _Splop",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-029",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Splop",
+          "typed_forms": [
+            "Splop"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Flow along Curve",
+        "command_id": "TransformFlowAlongCurve",
+        "script": "! _Flow _Pause _Stretch=_Yes",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-027",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Flow along Curve",
+          "typed_forms": [
+            "Flow along Curve"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Flow along Surface",
+        "command_id": "TransformFlowAlongSurface",
+        "script": "! _FlowAlongSrf",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-028",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Flow along Surface",
+          "typed_forms": [
+            "Flow along Surface"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Smooth",
+        "command_id": "TransformSmooth",
+        "script": "! _Smooth",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Smooth",
+          "typed_forms": [
+            "Smooth"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Move UVN",
+        "command_id": "TransformMoveUVN",
+        "script": "! _MoveUVN",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-039",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Move UVN",
+          "typed_forms": [
+            "Move UVN"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Soft Move",
+        "command_id": "TransformSoftMove",
+        "script": "! _SoftMove",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-040",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Soft Move",
+          "typed_forms": [
+            "Soft Move"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Box Edit",
+        "command_id": "TransformBoxEdit",
+        "script": "! _BoxEdit",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Box Edit",
+          "typed_forms": [
+            "Box Edit"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Solid Points On",
+        "command_id": "TransformSolidPtOn",
+        "script": "! _SolidPtOn",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-019",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Solid Points On",
+          "typed_forms": [
+            "Solid Points On"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [],
+    "missing": [
+      "input:Selection context + typed command arguments for Transform · Soft Move — menu binding; dispatch to owner OM9-L2-04-08 (feature 004), not a duplicate math engine.: type/default/range",
+      "input:planning/E13.md: type/default/range",
+      "input:planning/M00/SOURCE_AUDIT_V012.md: type/default/range",
+      "input:planning/M08/LUNA_START_HERE.md: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M08",
   "execution_stage": "E13",
@@ -120,5 +914,33 @@
     "implementation_owner_milestone": "M08",
     "reason": "Original implementation schedule is authoritative; do not implement twice in M03",
     "scope": "No M03 L4 assigned"
+  },
+  "task_ids": [
+    "OM9-L4-04-01-040-01",
+    "OM9-L4-04-01-040-02"
+  ],
+  "runtime_implementation": {
+    "OM9-L3-04-01-040_2026_10_27": {
+      "date": "2026-10-27",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "points inside the falloff radius move by the picked displacement with a smoothstep weight `(1 - (d/r)^2)^2`: the base moves by the whole displacement, the weight and its slope reach zero at the radius, and geometry outside the radius is untouched.",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs"
+      ],
+      "l4_verified": [
+        "OM9-L3-04-01-040-01"
+      ],
+      "tests": {
+        "app_transform_menu": "36 passed; 0 failed",
+        "core_deform": "7 passed; 0 failed"
+      },
+      "evidence": [
+        "implementation/design/M03/OM9-L3-04-01-040/README.md",
+        "implementation/fixtures/M03/OM9-L3-04-01-040/positive.json",
+        "implementation/evidence/M03/OM9-L3-04-01-040/OM9-L3-04-01-040-01.json"
+      ],
+      "manual_gate": "M03-UI",
+      "milestone_note": "early implementation inside the M03 bridge: the row keeps its M08 owner and its own manual gate, and M08 remains responsible for its acceptance"
+    }
   }
 }

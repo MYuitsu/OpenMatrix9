@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-005",
+  "kind": "negative",
+  "input": "drag a handle on a locked layer, or with no selection",
+  "expected": "handles hidden / typed refusal; committed document unchanged",
+  "verified_by": [
+    "a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle",
+    "a_locked_input_makes_the_builder_read_only_and_hides_its_handles"
+  ],
+  "document_unchanged": true
+}

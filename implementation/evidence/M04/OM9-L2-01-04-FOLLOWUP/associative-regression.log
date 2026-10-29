@@ -1,0 +1,36 @@
+$ cargo test -p om9-core --test associative_rebuild -j 2
+# exit code: 0
+# captured: 2026-10-26T19:21:09Z
+# target dir: L:\om9-target
+
+
+running 24 tests
+test a_cycle_is_refused_instead_of_being_ordered_or_planned ... ok
+test a_semantic_reference_survives_an_allowed_edit_and_refuses_ambiguity ... ok
+test a_delete_during_an_async_rebuild_is_refused_not_raced ... ok
+test a_legacy_recipe_without_ports_is_reported_untyped_never_guessed ... ok
+test a_detached_feature_cannot_keep_a_semantic_reference ... ok
+test a_producer_that_breaks_the_recorded_output_set_creates_no_corrupt_node ... ok
+test options_are_hashed_by_content_not_by_allocation ... ok
+test a_successful_rebuild_updates_geometry_published_result_and_cache ... ok
+test a_curve_in_a_scalar_input_and_a_wrong_output_type_are_refused ... ok
+test editing_the_source_dirties_b_and_d_then_c_in_topological_order ... ok
+test a_cache_entry_with_an_outdated_input_stamp_is_a_miss_even_when_the_graph_is_clean ... ok
+test only_the_affected_chain_recomputes_and_independent_cache_entries_are_untouched ... ok
+test a_failed_rebuild_keeps_the_last_good_geometry_result_and_cache_entry ... ok
+test deleting_the_parent_marks_the_child_broken_and_reports_the_policy_choices ... ok
+test detach_and_remove_policies_leave_no_dangling_reference ... ok
+test provenance_refuses_a_bare_number_a_missing_input_id_and_a_duplicate_role ... ok
+test provenance_reopens_the_exact_command_parameters_inputs_and_unit ... ok
+test escape_discards_transient_nodes_and_a_moved_base_is_refused ... ok
+test record_feature_enforces_identity_document_and_output_ownership ... ok
+test corrupt_or_missing_fixture_data_fails_to_load ... ok
+test typed_edges_follow_the_declared_io_and_link_producers ... ok
+test editing_a_parameter_and_rebuilding_matches_a_fresh_build ... ok
+test preview_edits_never_touch_the_committed_document_until_one_apply ... ok
+test the_baseline_is_deterministic_across_sessions_and_round_trips ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)

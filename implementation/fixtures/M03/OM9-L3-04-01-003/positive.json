@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-003",
+  "case": "box 10x10x10 at the world origin, base point 0,0,0, factor 3",
+  "expected": "the far corner moves from (10,10,10) to (30,10,10)",
+  "test": "m03_04_01_003_scale1d_grows_only_along_the_cplane_x"
+}

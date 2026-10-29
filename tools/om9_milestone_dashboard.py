@@ -266,13 +266,23 @@ def build() -> tuple[list[Milestone], Index]:
                     continue
                 l3_document = load(l3_path)
                 specification = l3_document.get("specification", {})
+                task_ids = [str(task) for task in l3_document.get("task_ids", [])]
+                child_l4_ids = [
+                    str(child_l4.get("id"))
+                    for child_l4 in l3_document.get("children_l4", [])
+                    if child_l4.get("id")
+                ]
+                # ``task_ids`` predates the parameter-contract L4s; fall back to the
+                # actual children so new L4s are visible in the per-L3 L4 column.
+                if child_l4_ids and (not task_ids or set(task_ids) != set(child_l4_ids)):
+                    task_ids = child_l4_ids
                 level3 = Level3(
                     id=str(l3_document.get("id", child_id)),
                     title=str(l3_document.get("title", "")),
                     stage=str(specification.get("execution_stage", "")),
                     risk=str(specification.get("planning_risk", "")),
                     manual=bool(specification.get("requires_manual_test", False)),
-                    task_ids=[str(task) for task in l3_document.get("task_ids", [])],
+                    task_ids=task_ids,
                     path=l3_path,
                 )
                 bucket = evidence.get(level3.id)
@@ -315,13 +325,23 @@ def build() -> tuple[list[Milestone], Index]:
                     continue
                 l3_document = load(l3_path)
                 specification = l3_document.get("specification", {})
+                task_ids = [str(task) for task in l3_document.get("task_ids", [])]
+                child_l4_ids = [
+                    str(child_l4.get("id"))
+                    for child_l4 in l3_document.get("children_l4", [])
+                    if child_l4.get("id")
+                ]
+                # ``task_ids`` predates the parameter-contract L4s; fall back to the
+                # actual children so new L4s are visible in the per-L3 L4 column.
+                if child_l4_ids and (not task_ids or set(task_ids) != set(child_l4_ids)):
+                    task_ids = child_l4_ids
                 level3 = Level3(
                     id=str(l3_document.get("id", child_id)),
                     title=str(l3_document.get("title", "")),
                     stage=str(specification.get("execution_stage", "")),
                     risk=str(specification.get("planning_risk", "")),
                     manual=bool(specification.get("requires_manual_test", False)),
-                    task_ids=[str(task) for task in l3_document.get("task_ids", [])],
+                    task_ids=task_ids,
                     path=l3_path,
                 )
                 bucket = evidence.get(level3.id)
@@ -338,14 +358,116 @@ def build() -> tuple[list[Milestone], Index]:
     return milestones, index
 
 
+def parameter_contract_summary(milestones: list[Milestone]) -> tuple[list[dict], dict[str, int]]:
+    """Đếm hợp đồng tham số M03–M07; đây là planning coverage, không phải evidence."""
+    rows: list[dict] = []
+    total = {
+        "l3": 0,
+        "l3_contract": 0,
+        "l4": 0,
+        "l4_contract": 0,
+        "l4_ref": 0,
+        "l4_full": 0,
+        "param_l4": 0,
+        "catalog_l4": 0,
+        "domain_l4": 0,
+        "missing_options": 0,
+    }
+    for milestone in milestones:
+        if milestone.key not in {"M03", "M04", "M05", "M06", "M07"}:
+            continue
+        l3_paths = sorted(milestone.folder.rglob("l3.json"))
+        l4_paths = sorted(milestone.folder.rglob("l4.json"))
+        l3_contract = 0
+        missing_option_keys: set[tuple[str, str, str]] = set()
+        for path in l3_paths:
+            contract = load(path).get("parameter_contract") or {}
+            if contract:
+                l3_contract += 1
+            catalog = contract.get("catalog") or {}
+            for option in contract.get("missing_options") or []:
+                missing_option_keys.add(
+                    (str(catalog.get("menu", "")), str(catalog.get("command", "")), str(option))
+                )
+        l4_contract = 0
+        l4_ref = 0
+        l4_full = 0
+        param_l4 = 0
+        catalog_l4 = 0
+        for path in l4_paths:
+            document = load(path)
+            contract = document.get("parameter_contract") or {}
+            if not contract:
+                continue
+            l4_contract += 1
+            if contract.get("schema") == "om9.parameter_contract.ref.v1":
+                l4_ref += 1
+            elif contract.get("schema") == "om9.parameter_contract.v1":
+                l4_full += 1
+            if document.get("task_role") == "PARAMETER_IMPLEMENTATION":
+                param_l4 += 1
+                if contract.get("catalog"):
+                    catalog_l4 += 1
+        row = {
+            "key": milestone.key,
+            "l3": len(l3_paths),
+            "l3_contract": l3_contract,
+            "l4": len(l4_paths),
+            "l4_contract": l4_contract,
+            "l4_ref": l4_ref,
+            "l4_full": l4_full,
+            "param_l4": param_l4,
+            "catalog_l4": catalog_l4,
+            "domain_l4": param_l4 - catalog_l4,
+            "missing_options": len(missing_option_keys),
+        }
+        rows.append(row)
+        for key in total:
+            total[key] += row.get(key, 0)
+    return rows, total
+
+
+def curve_parameter_summary(milestones: list[Milestone]) -> dict[str, int]:
+    milestone = next((item for item in milestones if item.key == "M03"), None)
+    if milestone is None:
+        return {"l3": 0, "l4": 0, "missing": 0}
+    l3_paths = [
+        path
+        for path in milestone.folder.rglob("l3.json")
+        if path.parent.parent.name.startswith("L2-03-16")
+    ]
+    l4_count = 0
+    root_count = 0
+    missing: set[tuple[str, str]] = set()
+    for path in l3_paths:
+        document = load(path)
+        contract = document.get("parameter_contract") or {}
+        catalog = contract.get("catalog") or {}
+        if catalog.get("root_group"):
+            root_count += 1
+        for option in contract.get("missing_options") or []:
+            missing.add((str(catalog.get("command", "")), str(option)))
+        for l4_path in path.parent.rglob("l4.json"):
+            l4 = load(l4_path)
+            if l4.get("task_role") == "PARAMETER_IMPLEMENTATION":
+                l4_count += 1
+    return {"l3": len(l3_paths), "l4": l4_count, "root": root_count, "missing": len(missing)}
+
+
 def recent_ledger(limit: int = 8) -> tuple[list[dict], str]:
     if not LEDGER.exists():
         return [], ""
     document = json.loads(LEDGER.read_text(encoding="utf-8"))
     items = [item for item in document.get("items", []) if isinstance(item, dict)]
+    active_key = document.get("active_item")
+    active_item = next((item for item in items if item.get("key") == active_key), None)
     recent = list(reversed(items))[:limit]
+    # The active item is the current scope: surface its note and next action first even when
+    # it sits earlier in the ledger than the latest appended entries.
+    if active_item is not None and active_item not in recent:
+        recent = [active_item] + recent[: limit - 1]
     next_action = ""
-    for item in reversed(items):
+    for item in ([active_item] if active_item else []) + list(reversed(items)):
         if item.get("next_action"):
             next_action = str(item["next_action"])
             break
@@ -387,6 +509,15 @@ def render(milestones: list[Milestone], index: Index) -> str:
         f"> **{total[DONE]}** L3 đã nghiệm thu · **{total[WIP]}** có bằng chứng chưa ký · "
         f"**{total[TODO]}** mới ở mức kế hoạch (tổng {sum(total.values())} L3)."
     )
+    param_rows, param_total = parameter_contract_summary(milestones)
+    lines.append(">")
+    lines.append(
+        f"> Hợp đồng tham số M03–M07: **{param_total['l3_contract']}/{param_total['l3']}** L3 · "
+        f"**{param_total['l4_contract']}/{param_total['l4']}** L4 · "
+        f"**{param_total['param_l4']}** L4 `PARAMETER_IMPLEMENTATION` "
+        f"({param_total['catalog_l4']} catalog + {param_total['domain_l4']} domain) · "
+        f"**{param_total['missing_options']}** option còn thiếu metadata."
+    )
     lines.append(">")
     lines.append(
         "> Dashboard chỉ đọc bằng chứng thật; cây kế hoạch vẫn giữ "
@@ -415,6 +546,43 @@ def render(milestones: list[Milestone], index: Index) -> str:
         )
     lines.append("")
 
+    lines.append("## Hợp đồng tham số M03–M07 (planning coverage)")
+    lines.append("")
+    lines.append("| Milestone | L3 | L3 có contract | L4 | L4 có contract | L4 tham số mới |")
+    lines.append("|---|---:|---:|---:|---:|---:|")
+    for row in param_rows:
+        lines.append(
+            f"| **{row['key']}** | {row['l3']} | {row['l3_contract']} | {row['l4']} | "
+            f"{row['l4_contract']} | {row['param_l4']} |"
+        )
+    lines.append(
+        f"| **Tổng** | **{param_total['l3']}** | **{param_total['l3_contract']}** | "
+        f"**{param_total['l4']}** | **{param_total['l4_contract']}** | **{param_total['param_l4']}** |"
+    )
+    lines.append("")
+    lines.append(
+        f"- {param_total['l4_ref']} L4 dùng contract rút gọn `om9.parameter_contract.ref.v1`; "
+        f"{param_total['l4_full']} L4 dùng contract đầy đủ `om9.parameter_contract.v1`."
+    )
+    lines.append(
+        f"- {param_total['catalog_l4']} L4 command-inline thuộc catalog; "
+        f"{param_total['domain_l4']} L4 xử lý L3 domain không có input máy đọc được."
+    )
+    lines.append(
+        "- Số L4 tính theo thư mục milestone (gồm L4 hosted); cột `L4 (bằng chứng)` trong cây "
+        "chi tiết chỉ hiển thị L4 thuộc L3 của milestone đó."
+    )
+    curve = curve_parameter_summary(milestones)
+    lines.append(
+        f"- Curve (`L2-03-16`): **{curve['l3']}** L3 · **{curve['l4']}** L4 tham số · "
+        f"**{curve['missing']}** option thiếu; **{curve['root']}** L3 root-group không có option family."
+    )
+    lines.append(
+        "- `type`/`default`/`range`/`unit` chưa xác minh vẫn ghi `UNRESOLVED`; đây là planning "
+        "coverage, không phải bằng chứng thực thi hay nâng trạng thái gate."
+    )
+    lines.append("")
+
     lines.append("## Cấu trúc chi tiết (Mxx → L1 → L2 → L3)")
     lines.append("")
     for milestone in milestones:
@@ -440,7 +608,7 @@ def render(milestones: list[Milestone], index: Index) -> str:
                 lines.append("")
                 lines.append(f"_{module.scope}_")
             lines.append("")
-            lines.append("| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |")
+            lines.append("| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |")
             lines.append("|---|---|---|---|---:|---|---|")
             for child in module.children:
                 evidence = ", ".join(f"`{source}`" for source in child.evidence) or "—"
@@ -461,10 +629,25 @@ def render(milestones: list[Milestone], index: Index) -> str:
     lines.append("|---|---|---|---|")
     for item in recent:
         scope = str(item.get("scope", "")).replace("|", "/")
+        # Older records carry `id`; newer ones carry `key`. Show either rather than an
+        # empty cell, and keep a note row readable.
+        label = item.get("id") or item.get("key") or ""
         lines.append(
-            f"| {item.get('date', '')} | `{item.get('id', '')}` | {item.get('status', '')} | {scope[:120]} |"
+            f"| {item.get('date', '')} | `{label}` | {item.get('status', '')} | {scope[:120]} |"
         )
     lines.append("")
+    notes = [
+        (str(item.get("date", "")), str(item.get("notes", "")))
+        for item in recent
+        if item.get("notes")
+    ]
+    if notes:
+        lines.append("### Ghi chú gần đây")
+        lines.append("")
+        for date, note in notes[:4]:
+            clipped = note if len(note) <= 800 else note[:800].rstrip() + "…"
+            lines.append(f"- **{date}** — {clipped}")
+        lines.append("")
     if next_action:
         lines.append("## Việc kế tiếp")
         lines.append("")

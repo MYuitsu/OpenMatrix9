@@ -1,0 +1,15 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-14-002",
+  "cases": [
+    {
+      "input": "Half bezel span 0",
+      "error": "invalid half bezel span"
+    },
+    {
+      "input": "Half bezel thickness below 0.05 mm",
+      "error": "invalid half bezel thickness"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

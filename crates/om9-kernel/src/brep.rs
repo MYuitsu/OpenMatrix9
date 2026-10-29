@@ -69,6 +69,21 @@ unsafe extern "C" {
         message: *mut c_char,
         capacity: c_int,
     ) -> c_int;
+    fn om9_occt_brep_from_triangles(
+        points: *const f64,
+        point_count: usize,
+        triangles: *const [u32; 3],
+        triangle_count: usize,
+        tolerance: f64,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: unsafe extern "C" fn(*mut c_void, *const Snapshot) -> c_int,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
 }
 struct Context<'a> {
     limits: &'a Limits,
@@ -282,6 +297,80 @@ pub fn read_brep(source: &str, deflection_mm: f64, limits: &Limits) -> Result<Br
     }
     snapshot(source, 0, [0.; 3], deflection_mm, limits)
 }
+/// The sewing tolerance used when a mesh becomes one editable B-Rep. Gem facets share their corner
+/// coordinates exactly, so a micron is far below any authored feature and still above OCCT noise.
+pub const MESH_BREP_TOLERANCE_MM: f64 = 1.0e-6;
+/// Build one closed B-Rep from an indexed triangle mesh.
+///
+/// The mesh must be a closed manifold: every edge belongs to exactly two triangles. The adapter
+/// sews one planar face per triangle into a single shell and promotes it to a solid, so an open or
+/// non-manifold mesh is refused instead of being sealed shut.
+pub fn from_triangles(
+    points: &[[f64; 3]],
+    triangles: &[[u32; 3]],
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, KernelError> {
+    if points.len() < 4
+        || triangles.len() < 4
+        || !deflection_mm.is_finite()
+        || deflection_mm <= 0.
+        || points.len() as u64 > limits.max_points
+        || triangles.len() as u64 > limits.max_nodes
+    {
+        return Err(KernelError::InvalidInput("mesh BRep input budget".into()));
+    }
+    if triangles
+        .iter()
+        .any(|t| t.iter().any(|corner| *corner as usize >= points.len()))
+    {
+        return Err(KernelError::InvalidInput(
+            "mesh BRep corner out of range".into(),
+        ));
+    }
+    snapshot_via(deflection_mm, limits, |sink, context, message, capacity| {
+        // SAFETY: both flat arrays are live for the synchronous complete call and the adapter only
+        // copies from them.
+        unsafe {
+            om9_occt_brep_from_triangles(
+                points.as_ptr().cast::<f64>(),
+                points.len(),
+                triangles.as_ptr(),
+                triangles.len(),
+                MESH_BREP_TOLERANCE_MM,
+                deflection_mm,
+                bound(limits.max_points),
+                bound(limits.max_nodes),
+                bound(limits.max_bytes),
+                sink,
+                context,
+                message,
+                capacity,
+            )
+        }
+    })
+}
+
+/// Build one closed B-Rep from a core [`Mesh`], fan-triangulating its 3- and 4-corner faces.
+///
+/// The entity keeps the authored mesh as its portable form; this adapter produces the same boundary
+/// as OCCT topology for the kernel-side operations.
+pub fn from_mesh(mesh: &Mesh, deflection_mm: f64, limits: &Limits) -> Result<Brep, KernelError> {
+    mesh.validate(limits)
+        .map_err(|error| KernelError::InvalidInput(error.to_string()))?;
+    let corners: usize = mesh.faces.iter().map(|face| face.len() - 2).sum();
+    let mut triangles = Vec::new();
+    triangles
+        .try_reserve_exact(corners)
+        .map_err(|_| KernelError::InvalidInput("mesh BRep budget".into()))?;
+    for face in &mesh.faces {
+        for index in 1..face.len() - 1 {
+            triangles.push([face[0], face[index], face[index + 1]]);
+        }
+    }
+    from_triangles(&mesh.vertices, &triangles, deflection_mm, limits)
+}
+
 /// Measures canonical source, never deriving volume from the display mesh or its bounding box.
 pub fn source_volume(shape: &Brep, limits: &Limits) -> Result<f64, KernelError> {
     shape

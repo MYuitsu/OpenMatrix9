@@ -123,6 +123,9 @@ pub struct GestureSession {
     pub view: ViewId,
     pub button: eframe::egui::PointerButton,
     pub last: eframe::egui::Pos2,
+    pub start: eframe::egui::Pos2,
+    pub moved: bool,
+    pub curve_command_run: Option<u64>,
     /// Modifier decision captured at press time; a later frame without a modifier event
     /// must not turn a Shift-pan into an orbit.
     pub pan: bool,
@@ -183,6 +186,9 @@ impl NavigationController {
             view: id,
             button,
             last: pos,
+            start: pos,
+            moved: false,
+            curve_command_run: None,
             pan: false,
         });
     }

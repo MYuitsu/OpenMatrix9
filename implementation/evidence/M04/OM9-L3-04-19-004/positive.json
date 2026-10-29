@@ -1,0 +1,18 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-19-004",
+  "kind": "positive",
+  "input": "sum per-body weights and keep instances from double-counting",
+  "expected": "body A 100 mm^3 at 10 g/cm^3 = 1.0 g; body B 200 mm^3 at 8 g/cm^3 = 1.6 g; total 2.6 g; an explicit instance count multiplies one row",
+  "verified_by": [
+    "multi_material_breakdown_sums_per_body_and_avoids_double_counting",
+    "a_duplicate_body_id_without_an_explicit_count_is_refused",
+    "a_breakdown_refuses_unknown_materials_and_bad_counts",
+    "a_multi_material_selection_reports_each_body_and_the_total",
+    "an_assignment_that_omits_a_selected_body_is_refused"
+  ],
+  "notes": [
+    "A duplicate key is refused rather than silently merged; the one-row `instances` field is the only way to state a count.",
+    "The app assignment list must cover the selection exactly once, so a report cannot omit a selected body."
+  ]
+}

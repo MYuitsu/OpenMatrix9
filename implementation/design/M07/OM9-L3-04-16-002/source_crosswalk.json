@@ -1,0 +1,54 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3": "OM9-L3-04-16-002",
+  "title": "Gem Cutter Multiple Stones",
+  "recorded_at": "2026-10-28",
+  "manual": {
+    "filename": "reference/text/m8book2__p274-279__gem-cutter.md",
+    "pdf_pages_1based": [
+      274,
+      279
+    ],
+    "printed_pages": [
+      500,
+      505
+    ]
+  },
+  "feature": "BuilderGemCutter",
+  "commands": [
+    "BuilderGemCutter"
+  ],
+  "rust_owner": [
+    "crates/om9-core/src/cutters/gem.rs",
+    "crates/om9-app/src/session/gem_cutters.rs"
+  ],
+  "symbols": [
+    "cutters::gem::build_for_stones",
+    "session::gem_cutters::GemCutterSession::open",
+    "Controller::gem_cutter_commit"
+  ],
+  "reuse_decision": {
+    "decision": "ADD",
+    "reason": "Audit: the Cutters chapter had no cutter command at all. The M06 scallop builder (settings::bezel::build_scallop) sweeps one edge profile and the gem_pave azure curves are placement curves, so neither is a cutter body service. The M07 owner adds the cutter kernel once and the app dispatches to it; no second gem/settings store is created.",
+    "reuses": [
+      "OM9-L2-04-09 (gem::GemSpec, gem::profile_points, gem::girdle_outline)",
+      "OM9-L2-01-10 (geometry::Transform, closed-mesh admission)",
+      "OM9-L2-04-14 (settings::head::GemGirdle, settings::bezel::ScallopParams for the shared gvBezelCutter)",
+      "mesh_csg::mesh_boolean (the one mesh CSG service)"
+    ]
+  },
+  "previous_code_audit": [
+    "crates/om9-app/src/menu_catalog.rs CUTTERS already lists BuilderGemCutter and BuilderGemCutterLibrary, but session.rs did not resolve, dispatch or prompt for either id.",
+    "crates/om9-app/src/display.rs CutterRecord { kind, seat } and CUTTER_EXTENSION_SLOT already existed, so the display filter expected a payload nobody wrote.",
+    "crates/om9-app/src/icons.rs already maps cutters-minimal/BuilderGemCutter(.Library).svg.",
+    "crates/om9-core/src/settings/bezel.rs owned BuilderBezelCutter (Scallop Bezel) with a swept edge profile; the Cutters chapter's dimensional controls were absent."
+  ],
+  "tests": [
+    "cargo test -p om9-core --test cutters multiple_stones_get_one_cutter_each",
+    "cargo test -p om9-core --lib cutters::gem::tests::multiple_stones_get_one_cutter_each_and_an_empty_group_is_refused"
+  ],
+  "limitations": [
+    "Every stone gets the same parameter set; per-stone overrides are not part of this owner.",
+    "A mixed selection (gems plus one metal body) uses the metal body as the Interactive Boolean surface."
+  ]
+}

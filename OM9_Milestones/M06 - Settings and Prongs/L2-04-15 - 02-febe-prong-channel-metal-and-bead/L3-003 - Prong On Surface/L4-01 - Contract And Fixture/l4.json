@@ -44,6 +44,23 @@
   "manual_interpretation_note": "Sách 2 trang in 487–488, Prong on Surface. Nếu L3 chỉ có parent_l2_range: đây là chỉ mục tra cứu bổ sung, không khẳng định manual có heading độc lập.",
   "source_claim_level": "SOURCE_MANUAL_AND_L3_ONLY__NO_APP_CODE_CONFIRMED",
   "purpose": "Prong On Surface: chốt dữ liệu/api và fixture. target surface có UV/normal; điểm pick; prong profile",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M06 - Settings and Prongs/L2-04-15 - 02-febe-prong-channel-metal-and-bead/L3-003 - Prong On Surface/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 3,
+    "implementation_l4": null
+  },
   "inputs": [
     "target surface có UV/normal; điểm pick; prong profile",
     "L3 canonical: specs/06-ms06-settings-and-prongs/02-febe-prong-channel-metal-and-bead-settings/003-febe-prong-on-surface/l3.json",
@@ -397,7 +414,10 @@
       "stage": "Dùng chung cho bước 1, 2, 8 (thân, vành, cutter)",
       "why_for_this_task": "Chấu trên surface cần closest point và giao thuộc OCCT; không được tự viết lại phép chiếu.",
       "om9_backend": "OCCT cho sweep/loft/boolean/offset; openNURBS cho curve và 3DM",
-      "steps_cited": [1, 4],
+      "steps_cited": [
+        1,
+        4
+      ],
       "algorithm_steps": [
         "K1. Định hướng: từ curve/rail, dựng frame và định hướng profile trước khi sweep (nhóm hàm Orient*Nalp, OrientProfileToRailNalp).",
         "K4. Cắt/giao: trim curve theo surface, giao surface-surface, split profile, offset."
@@ -439,4 +459,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

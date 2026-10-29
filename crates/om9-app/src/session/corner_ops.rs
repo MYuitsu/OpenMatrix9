@@ -61,7 +61,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Radius=") {
-            let Some(radius) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(radius) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.corner_pending = Some(pending);
                 return Some(Err(Error::Invalid("radius must be positive")));
             };
@@ -70,7 +74,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Distance=") {
-            let Some(distance) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(distance) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.corner_pending = Some(pending);
                 return Some(Err(Error::Invalid("distance must be positive")));
             };
@@ -80,7 +88,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.corner_pending = Some(pending);
-            return Some(Err(Error::Invalid("Fillet/Chamfer accept a number or Enter")));
+            return Some(Err(Error::Invalid(
+                "Fillet/Chamfer accept a number or Enter",
+            )));
         }
         let plane = self.input_plane();
         let normal = [

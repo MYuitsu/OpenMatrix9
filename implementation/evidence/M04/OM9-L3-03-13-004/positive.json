@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-004",
+  "kind": "positive",
+  "input": "detach a specific object while leaving other associations",
+  "expected": "clearing the profile detaches only its recipe; the profile geometry stays, the rail recipe stays Clean and the report lists the remaining feature",
+  "verified_by": [
+    "clear_history_detaches_only_the_selected_object_and_refuses_a_lock"
+  ],
+  "notes": [
+    "Detach is one HistoryUpdate transaction (state Detached), so Undo restores the association.",
+    "The published result is intentionally kept as a plain snapshot; there is no result-removal mutation in the transaction model.",
+    "A frozen (lock) recipe is refused so Clear never bypasses the lock."
+  ]
+}

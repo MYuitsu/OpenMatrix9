@@ -76,7 +76,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.curve_soft_edit_pending = Some(pending);
-            return Some(Err(Error::Invalid("CurveSoftEdit accepts Index=, Point= or Enter")));
+            return Some(Err(Error::Invalid(
+                "CurveSoftEdit accepts Index=, Point= or Enter",
+            )));
         }
         if !pending.has_target {
             self.curve_soft_edit_pending = Some(pending);

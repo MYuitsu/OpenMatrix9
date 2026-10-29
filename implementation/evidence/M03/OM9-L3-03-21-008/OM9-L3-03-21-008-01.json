@@ -1,0 +1,13 @@
+{
+  "l4_id": "OM9-L3-03-21-008-01",
+  "l3_id": "OM9-L3-03-21-008",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Leader: tip (1,1), elbow (5,5), text at (6,6) and the text \"Gem A\" -> one annotation whose two segments are independent strokes",
+  "tests": [
+    "crates/om9-app/tests/annotation.rs::text_and_leader_edit_text_without_flattening_semantics",
+    "crates/om9-app/tests/annotation.rs::m03_04_01_all_thirteen_catalog_ids_have_distinct_icons_and_one_dispatcher"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

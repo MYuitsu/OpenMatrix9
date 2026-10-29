@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-011",
+  "title": "Gem To Curve Surface History Links",
+  "cases": [
+    "an unreadable link is reported, not silently ignored",
+    "a stale revision cannot refresh the link, and a broken record is refused"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

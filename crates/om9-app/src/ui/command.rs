@@ -2,6 +2,7 @@
 //! One protected text document and one native editor state. The live row is a
 //! pinned projection of that same document, never a second editable text buffer.
 use super::*;
+use crate::command_options::{CommandOption, CommandOptionInterface};
 use std::sync::Arc;
 
 // Sampled from the user's 2026-10-20 green/gold reference.
@@ -35,6 +36,58 @@ fn apply_command_theme(ui: &mut egui::Ui) {
     visuals.widgets.hovered.weak_bg_fill = COMMAND_SELECTION;
 }
 
+fn shortcut_button(ui: &mut egui::Ui, option: &CommandOption) -> egui::Response {
+    let mut job = egui::text::LayoutJob::default();
+    let mut underlined = false;
+    for ch in option.label.chars() {
+        let underline = !underlined
+            && option
+                .shortcut
+                .is_some_and(|key| ch.eq_ignore_ascii_case(&key));
+        underlined |= underline;
+        job.append(
+            &ch.to_string(),
+            0.0,
+            egui::TextFormat {
+                underline: if underline {
+                    Stroke::new(1.0, COMMAND_GOLD)
+                } else {
+                    Stroke::NONE
+                },
+                color: COMMAND_GOLD,
+                ..Default::default()
+            },
+        );
+    }
+    ui.add(egui::Button::new(job))
+}
+fn consume_command_shortcut(ctx: &egui::Context, shortcut: char) -> bool {
+    let text = shortcut.to_string();
+    ctx.input_mut(|input| {
+        if input.events.iter().any(|event| {
+            matches!(event, egui::Event::Paste(_) | egui::Event::Ime(_))
+                || matches!(event, egui::Event::Text(value) if value.chars().count() != 1)
+        }) {
+            return false;
+        }
+        let pressed = input.events.iter().any(|event| {
+            matches!(event,
+            egui::Event::Key { key: pressed_key, pressed: true, modifiers, .. }
+            if pressed_key.name().eq_ignore_ascii_case(&text) && !modifiers.ctrl && !modifiers.alt && !modifiers.command)
+        });
+        let hit = input.events.iter().any(|event| {
+            matches!(event,
+            egui::Event::Key { key: pressed_key, pressed: true, repeat: false, modifiers, .. }
+            if pressed_key.name().eq_ignore_ascii_case(&text) && !modifiers.ctrl && !modifiers.alt && !modifiers.command)
+        });
+        if pressed {
+            input.events.retain(|event| !matches!(event,
+                egui::Event::Key { key: pressed_key, pressed: true, .. } if pressed_key.name().eq_ignore_ascii_case(&text))
+                && !matches!(event, egui::Event::Text(value) if value.eq_ignore_ascii_case(&text)));
+        }
+        hit
+    })
+}
 impl MatrixApp {
     pub(super) fn command_ui(&mut self, ui: &mut egui::Ui) {
         apply_command_theme(ui);
@@ -92,6 +145,22 @@ impl MatrixApp {
             let ids: Vec<_> = self.controller.selected().iter().copied().collect();
             let result = self.controller.delete_objects(&ids).map(|_| ());
             self.feedback(result);
+        }
+        // One accelerator path for every owner: the declared snapshot decides
+        // which letter is advertised; typed text never bypasses the resolver.
+        if !composing
+            && !popup_open
+            && (focused || ctx.memory(|m| m.focused().is_none()))
+            && self.transcript.draft().is_empty()
+        {
+            for option in self.controller.command_options() {
+                if let Some(shortcut) = option.shortcut
+                    && consume_command_shortcut(&ctx, shortcut)
+                {
+                    self.submit_command_option(option.id);
+                    break;
+                }
+            }
         }
         if enter {
             self.submit_draft();
@@ -176,7 +245,85 @@ impl MatrixApp {
         let full_origin = scrolled.inner.galley_pos;
         let history_chars = self.transcript.history().chars().count();
         let live: String = self.transcript.text().chars().skip(history_chars).collect();
-        let live_galley = ui.fonts_mut(|f| f.layout_no_wrap(live, font, COMMAND_GOLD));
+        let live_prompt = &live[..live.len() - self.transcript.draft().len()];
+        let options = self.controller.command_options();
+        let mut search_from = 0;
+        let inline_options = !options.is_empty()
+            && options.iter().all(|option| {
+                if let Some(at) = live_prompt[search_from..].find(option.label.as_str()) {
+                    search_from += at + option.label.len();
+                    true
+                } else {
+                    false
+                }
+            });
+        let mut live_job = egui::text::LayoutJob::default();
+        let mut offset = 0;
+        for option in options.iter().filter(|_| inline_options) {
+            let label = &option.label;
+            if let Some(relative) = live_prompt[offset..].find(label.as_str()) {
+                let byte = offset + relative;
+                live_job.append(
+                    &live[offset..byte],
+                    0.0,
+                    egui::TextFormat {
+                        font_id: font.clone(),
+                        color: COMMAND_GOLD,
+                        ..Default::default()
+                    },
+                );
+                let underline = option
+                    .shortcut
+                    .and_then(|shortcut| {
+                        label.char_indices().find_map(|(index, ch)| {
+                            ch.eq_ignore_ascii_case(&shortcut).then_some(byte + index)
+                        })
+                    })
+                    .unwrap_or(byte);
+                if underline > byte {
+                    live_job.append(
+                        &live[byte..underline],
+                        0.0,
+                        egui::TextFormat {
+                            font_id: font.clone(),
+                            color: COMMAND_GOLD,
+                            ..Default::default()
+                        },
+                    );
+                }
+                let next = underline + live[underline..].chars().next().map_or(0, char::len_utf8);
+                live_job.append(
+                    &live[underline..next],
+                    0.0,
+                    egui::TextFormat {
+                        font_id: font.clone(),
+                        color: COMMAND_GOLD,
+                        underline: Stroke::new(1.0, COMMAND_GOLD),
+                        ..Default::default()
+                    },
+                );
+                live_job.append(
+                    &live[next..byte + label.len()],
+                    0.0,
+                    egui::TextFormat {
+                        font_id: font.clone(),
+                        color: COMMAND_GOLD,
+                        ..Default::default()
+                    },
+                );
+                offset = byte + label.len();
+            }
+        }
+        live_job.append(
+            &live[offset..],
+            0.0,
+            egui::TextFormat {
+                font_id: font.clone(),
+                color: COMMAND_GOLD,
+                ..Default::default()
+            },
+        );
+        let live_galley = ui.fonts_mut(|f| f.layout_job(live_job));
         let rect = Rect::from_min_size(
             egui::pos2(area.left(), area.bottom() - row_height),
             Vec2::new(area.width(), row_height),
@@ -216,6 +363,38 @@ impl MatrixApp {
             .cmd_horizontal_offset
             .min((live_galley.size().x - rect.width() + 4.).max(0.));
         origin.x -= self.cmd_horizontal_offset;
+        // Clickable underlined polyline option shortcuts drawn over the prompt.
+        self.cmd_token_rects.clear();
+        if inline_options && !popup_open && !composing && self.transcript.draft().is_empty() {
+            let mut option_offset = 0;
+            for option in &options {
+                let label = &option.label;
+                if let Some(relative) = live_prompt[option_offset..].find(label.as_str()) {
+                    let byte = option_offset + relative;
+                    option_offset = byte + label.len();
+                    let chars = live[..byte].chars().count();
+                    let x = origin.x + live_galley.pos_from_cursor(CCursor::new(chars)).left();
+                    let end = live_galley
+                        .pos_from_cursor(CCursor::new(chars + label.chars().count()))
+                        .left();
+                    let hit = Rect::from_min_size(
+                        egui::pos2(x, origin.y),
+                        Vec2::new(end - (x - origin.x), row_height),
+                    )
+                    .intersect(rect);
+                    self.cmd_token_rects
+                        .insert(option.id.name().to_owned(), hit);
+                    let response = ui.interact(
+                        hit,
+                        id.with(("command-shortcut", option.id)),
+                        Sense::click(),
+                    );
+                    if response.clicked() {
+                        self.submit_command_option(option.id);
+                    }
+                }
+            }
+        }
         let history_drag = ui.is_being_dragged(id);
         let pointer = response.interact_pointer_pos().or_else(|| {
             if history_drag {
@@ -291,851 +470,62 @@ impl MatrixApp {
             }
         }
         painter.galley(origin, Arc::clone(&live_galley), COMMAND_GOLD);
-        // Declared options as clickable tokens above the entry row, so a click and a typed assignment reach
-        // the same parser path. Clicking a flag twice cannot commit anything: it only toggles the option.
-        self.cmd_token_rects.clear();
-        if !popup_open
-            && self.controller.phase() != crate::session::CmdPhase::Idle
-            && self.controller.active_feature() == Some(crate::session::LINE)
-        {
-            let both = self.controller.both_sides().unwrap_or(false);
-            let mut clicked: Option<&'static str> = None;
-            egui::Area::new(egui::Id::new("cmd-option-tokens"))
-                .fixed_pos(egui::pos2(rect.left(), rect.top() - 21.0))
+        // All other owners use the same descriptors and activation route.
+        // Wrap inside the command area's width, never position after a long prompt.
+        if !inline_options && !options.is_empty() && !popup_open {
+            let mut width = 0.;
+            let mut rows = 1.;
+            for option in &options {
+                let w =
+                    ui.fonts_mut(|f| {
+                        f.layout_no_wrap(option.label.clone(), font.clone(), COMMAND_GOLD)
+                    })
+                    .size()
+                    .x + 18.;
+                if width + w > rect.width() {
+                    rows += 1.;
+                    width = 0.;
+                }
+                width += w;
+            }
+            let mut clicked = None;
+            egui::Area::new(id.with("option-tokens"))
+                .fixed_pos(egui::pos2(
+                    rect.left(),
+                    (rect.top() - rows * 23.).max(area.top()),
+                ))
                 .order(egui::Order::Middle)
                 .show(&ctx, |ui| {
                     apply_command_theme(ui);
-                    ui.horizontal(|ui| {
-                        for (name, label) in [
-                            (
-                                "BothSides",
-                                if both {
-                                    "BothSides=Yes"
-                                } else {
-                                    "BothSides=No"
-                                },
-                            ),
-                            ("Length", "Length="),
-                        ] {
-                            let response = ui.small_button(label);
-                            self.cmd_token_rects.insert(name.to_owned(), response.rect);
+                    ui.set_max_width(rect.width());
+                    ui.horizontal_wrapped(|ui| {
+                        for option in &options {
+                            let response = ui
+                                .add_enabled_ui(
+                                    !composing && self.transcript.draft().is_empty(),
+                                    |ui| shortcut_button(ui, option),
+                                )
+                                .inner;
+                            self.cmd_token_rects
+                                .insert(option.id.name().to_owned(), response.rect);
+                            // Keep the legacy lookup key for external UI audits.
+                            if matches!(
+                                option.kind,
+                                crate::command_options::CommandOptionKind::Number
+                                    | crate::command_options::CommandOptionKind::Point
+                                    | crate::command_options::CommandOptionKind::Text
+                            ) {
+                                self.cmd_token_rects
+                                    .insert(format!("{}=", option.id.name()), response.rect);
+                            }
                             if response.clicked() {
-                                clicked = Some(name);
+                                clicked = Some(option.id);
                             }
                         }
                     });
                 });
-            if let Some(name) = clicked {
-                if name == "BothSides" {
-                    let _ = self.controller.set_both_sides(!both);
-                } else {
-                    self.transcript.set_draft("Length=");
-                    self.focus_cmd = true;
-                }
-            }
-        }
-        if !popup_open && self.controller.phase() != crate::session::CmdPhase::Idle {
-            let solid_tokens = self.controller.solid_option_tokens();
-            let circle_tokens = self.controller.circle_option_tokens();
-            let rect_tokens = self.controller.rect_option_tokens();
-            let polyline_tokens = self.controller.polyline_option_tokens();
-            let interp_tokens = self.controller.interp_option_tokens();
-            let ellipse_tokens = self.controller.ellipse_option_tokens();
-            let arc_tokens = self.controller.arc_option_tokens();
-            let rebuild_tokens = self.controller.rebuild_option_tokens();
-            let fit_tokens = self.controller.fit_option_tokens();
-            let offset_tokens = self.controller.offset_curve_option_tokens();
-            let project_tokens = self.controller.project_option_tokens();
-            let blend_tokens = self.controller.blend_option_tokens();
-            let isocurve_tokens = self.controller.isocurve_option_tokens();
-            let pull_tokens = self.controller.pull_option_tokens();
-            let is_pull = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && !pull_tokens.is_empty();
-            let intersect_tokens = self.controller.intersect_option_tokens();
-            let crv2view_tokens = self.controller.crv2view_option_tokens();
-            let through_points_tokens = self.controller.through_points_option_tokens();
-            let polygon_tokens = self.controller.polygon_option_tokens();
-            let helix_tokens = self.controller.helix_option_tokens();
-            let spiral_tokens = self.controller.spiral_option_tokens();
-            let fillet_corners_tokens = self.controller.fillet_corners_option_tokens();
-            let is_fillet_corners = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !fillet_corners_tokens.is_empty();
-            let heightfield_tokens = self.controller.heightfield_option_tokens();
-            let is_heightfield = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !heightfield_tokens.is_empty();
-            let extrude_surface_tokens = self.controller.extrude_surface_option_tokens();
-            let is_extrude_surface = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !extrude_surface_tokens.is_empty();
-            let angle_isocurve_tokens = self.controller.angle_isocurve_option_tokens();
-            let is_angle_isocurve = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !angle_isocurve_tokens.is_empty();
-            let curve_soft_edit_tokens = self.controller.curve_soft_edit_option_tokens();
-            let is_curve_soft_edit = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !curve_soft_edit_tokens.is_empty();
-            let cross_section_tokens = self.controller.cross_section_option_tokens();
-            let is_cross_section = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !cross_section_tokens.is_empty();
-            let corner_tokens = self.controller.corner_option_tokens();
-            let is_corner = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !corner_tokens.is_empty();
-            let offset_normal_tokens = self.controller.offset_normal_option_tokens();
-            let is_offset_normal = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !offset_normal_tokens.is_empty();
-            let offset_on_surface_tokens = self.controller.offset_on_surface_option_tokens();
-            let is_offset_on_surface = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !offset_on_surface_tokens.is_empty();
-            let continue_curve_tokens = self.controller.continue_curve_option_tokens();
-            let is_continue_curve = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !continue_curve_tokens.is_empty();
-            let control_curve_tokens = self.controller.control_curve_option_tokens();
-            let is_control_curve = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !control_curve_tokens.is_empty();
-            let crv_seam_tokens = self.controller.crv_seam_option_tokens();
-            let is_crv_seam = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && pull_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !crv_seam_tokens.is_empty();
-            let divide_tokens = self.controller.divide_option_tokens();
-            let to_lines_tokens = self.controller.to_lines_option_tokens();
-            let extend_curve_tokens = self.controller.extend_curve_option_tokens();
-            let tween_curves_tokens = self.controller.tween_curves_option_tokens();
-            let continue_interp_tokens = self.controller.continue_interp_option_tokens();
-            let arc_blend_tokens = self.controller.arc_blend_option_tokens();
-            let is_arc_blend = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && divide_tokens.is_empty()
-                && to_lines_tokens.is_empty()
-                && extend_curve_tokens.is_empty()
-                && tween_curves_tokens.is_empty()
-                && continue_interp_tokens.is_empty()
-                && !arc_blend_tokens.is_empty();
-            let is_continue_interp = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && divide_tokens.is_empty()
-                && to_lines_tokens.is_empty()
-                && extend_curve_tokens.is_empty()
-                && tween_curves_tokens.is_empty()
-                && !continue_interp_tokens.is_empty();
-            let is_tween_curves = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && divide_tokens.is_empty()
-                && to_lines_tokens.is_empty()
-                && extend_curve_tokens.is_empty()
-                && !tween_curves_tokens.is_empty();
-            let is_extend_curve = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && divide_tokens.is_empty()
-                && to_lines_tokens.is_empty()
-                && !extend_curve_tokens.is_empty();
-            let is_to_lines = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && divide_tokens.is_empty()
-                && !to_lines_tokens.is_empty();
-            let is_divide = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && spiral_tokens.is_empty()
-                && !divide_tokens.is_empty();
-            let is_spiral = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && helix_tokens.is_empty()
-                && !spiral_tokens.is_empty();
-            let is_helix = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && polygon_tokens.is_empty()
-                && !helix_tokens.is_empty();
-            let is_polygon = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && through_points_tokens.is_empty()
-                && !polygon_tokens.is_empty();
-            let is_through_points = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && crv2view_tokens.is_empty()
-                && !through_points_tokens.is_empty();
-            let is_crv2view = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && intersect_tokens.is_empty()
-                && !crv2view_tokens.is_empty();
-            let is_intersect = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && isocurve_tokens.is_empty()
-                && !intersect_tokens.is_empty();
-            let is_isocurve = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && blend_tokens.is_empty()
-                && !isocurve_tokens.is_empty();
-            let is_blend = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && project_tokens.is_empty()
-                && !blend_tokens.is_empty();
-            let is_project = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && offset_tokens.is_empty()
-                && !project_tokens.is_empty();
-            let is_offset = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && fit_tokens.is_empty()
-                && !offset_tokens.is_empty();
-            let is_fit = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && rebuild_tokens.is_empty()
-                && !fit_tokens.is_empty();
-            let is_rebuild = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && arc_tokens.is_empty()
-                && !rebuild_tokens.is_empty();
-            let is_arc = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && ellipse_tokens.is_empty()
-                && !arc_tokens.is_empty();
-            let is_ellipse = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && interp_tokens.is_empty()
-                && !ellipse_tokens.is_empty();
-            let is_interp = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && polyline_tokens.is_empty()
-                && !interp_tokens.is_empty();
-            let is_polyline = solid_tokens.is_empty()
-                && circle_tokens.is_empty()
-                && rect_tokens.is_empty()
-                && !polyline_tokens.is_empty();
-            let is_rect =
-                solid_tokens.is_empty() && circle_tokens.is_empty() && !rect_tokens.is_empty();
-            let is_circle = solid_tokens.is_empty() && !circle_tokens.is_empty();
-            let tokens = if is_arc_blend {
-                arc_blend_tokens
-            } else if is_continue_interp {
-                continue_interp_tokens
-            } else if is_tween_curves {
-                tween_curves_tokens
-            } else if is_extend_curve {
-                extend_curve_tokens
-            } else if is_fillet_corners {
-                fillet_corners_tokens
-            } else if is_heightfield {
-                heightfield_tokens
-            } else if is_extrude_surface {
-                extrude_surface_tokens
-            } else if is_angle_isocurve {
-                angle_isocurve_tokens
-            } else if is_curve_soft_edit {
-                curve_soft_edit_tokens
-            } else if is_cross_section {
-                cross_section_tokens
-            } else if is_corner {
-                corner_tokens
-            } else if is_offset_normal {
-                offset_normal_tokens
-            } else if is_offset_on_surface {
-                offset_on_surface_tokens
-            } else if is_continue_curve {
-                continue_curve_tokens
-            } else if is_control_curve {
-                control_curve_tokens
-            } else if is_crv_seam {
-                crv_seam_tokens
-            } else if is_to_lines {
-                to_lines_tokens
-            } else if is_divide {
-                divide_tokens
-            } else if is_spiral {
-                spiral_tokens
-            } else if is_helix {
-                helix_tokens
-            } else if is_polygon {
-                polygon_tokens
-            } else if is_through_points {
-                through_points_tokens
-            } else if is_crv2view {
-                crv2view_tokens
-            } else if is_intersect {
-                intersect_tokens
-            } else if is_isocurve {
-                isocurve_tokens
-            } else if is_blend {
-                blend_tokens
-            } else if is_project {
-                project_tokens
-            } else if is_offset {
-                offset_tokens
-            } else if is_fit {
-                fit_tokens
-            } else if is_rebuild {
-                rebuild_tokens
-            } else if is_arc {
-                arc_tokens
-            } else if is_ellipse {
-                ellipse_tokens
-            } else if is_interp {
-                interp_tokens
-            } else if is_polyline {
-                polyline_tokens
-            } else if is_rect {
-                rect_tokens
-            } else if is_circle {
-                circle_tokens
-            } else {
-                solid_tokens
-            };
-            if !tokens.is_empty() {
-                let mut clicked: Option<&'static str> = None;
-                egui::Area::new(egui::Id::new("cmd-solid-option-tokens"))
-                    .fixed_pos(egui::pos2(rect.left(), rect.top() - 21.0))
-                    .order(egui::Order::Middle)
-                    .show(&ctx, |ui| {
-                        apply_command_theme(ui);
-                        ui.horizontal(|ui| {
-                            for (label, command) in &tokens {
-                                let response = ui.small_button(*label);
-                                self.cmd_token_rects
-                                    .insert((*label).to_owned(), response.rect);
-                                if response.clicked() {
-                                    clicked = Some(*command);
-                                }
-                            }
-                        });
-                    });
-                if let Some(command) = clicked {
-                    let result = if is_pull {
-                        self.controller.submit_pull_text(command)
-                    } else if is_arc_blend {
-                        self.controller.submit_arc_blend_text(command)
-                    } else if is_continue_interp {
-                        self.controller.submit_continue_interp_text(command)
-                    } else if is_tween_curves {
-                        self.controller.submit_tween_curves_text(command)
-                    } else if is_extend_curve {
-                        self.controller.submit_extend_curve_text(command)
-                    } else if is_fillet_corners {
-                        self.controller.submit_fillet_corners_text(command)
-                    } else if is_heightfield {
-                        self.controller.submit_heightfield_text(command)
-                    } else if is_extrude_surface {
-                        self.controller.submit_extrude_surface_text(command)
-                    } else if is_angle_isocurve {
-                        self.controller.submit_angle_isocurve_text(command)
-                    } else if is_curve_soft_edit {
-                        self.controller.submit_curve_soft_edit_text(command)
-                    } else if is_cross_section {
-                        self.controller.submit_cross_section_text(command)
-                    } else if is_corner {
-                        self.controller.submit_corner_text(command)
-                    } else if is_offset_normal {
-                        self.controller.submit_offset_normal_text(command)
-                    } else if is_offset_on_surface {
-                        self.controller.submit_offset_on_surface_text(command)
-                    } else if is_continue_curve {
-                        self.controller.submit_continue_curve_text(command)
-                    } else if is_control_curve {
-                        self.controller.submit_control_curve_text(command)
-                    } else if is_crv_seam {
-                        self.controller.submit_crv_seam_text(command)
-                    } else if is_to_lines {
-                        self.controller.submit_to_lines_text(command)
-                    } else if is_divide {
-                        self.controller.submit_divide_text(command)
-                    } else if is_spiral {
-                        self.controller.submit_spiral_text(command)
-                    } else if is_helix {
-                        self.controller.submit_helix_text(command)
-                    } else if is_polygon {
-                        self.controller.submit_polygon_text(command)
-                    } else if is_through_points {
-                        self.controller.submit_through_points_text(command)
-                    } else if is_crv2view {
-                        self.controller.submit_crv2view_text(command)
-                    } else if is_intersect {
-                        self.controller.submit_intersect_text(command)
-                    } else if is_isocurve {
-                        self.controller.submit_isocurve_text(command)
-                    } else if is_blend {
-                        self.controller.submit_blend_text(command)
-                    } else if is_project {
-                        self.controller.submit_project_text(command)
-                    } else if is_offset {
-                        self.controller.submit_offset_curve_text(command)
-                    } else if is_fit {
-                        self.controller.submit_fit_text(command)
-                    } else if is_rebuild {
-                        self.controller.submit_rebuild_text(command)
-                    } else if is_arc {
-                        self.controller.submit_arc_text(command)
-                    } else if is_ellipse {
-                        self.controller.submit_ellipse_text(command)
-                    } else if is_interp {
-                        self.controller.submit_interp_text(command)
-                    } else if is_polyline {
-                        self.controller.submit_polyline_text(command)
-                    } else if is_rect {
-                        self.controller.submit_rect_text(command)
-                    } else if is_circle {
-                        self.controller.submit_circle_text(command)
-                    } else {
-                        self.controller.submit_solid_text(command)
-                    };
-                    if let Some(result) = result {
-                        self.feedback(result);
-                    }
-                }
+            if let Some(option) = clicked {
+                self.submit_command_option(option);
             }
         }
         state.store(&ctx, id);

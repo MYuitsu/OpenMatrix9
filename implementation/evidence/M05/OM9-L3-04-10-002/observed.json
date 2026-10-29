@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-002",
+  "title": "Gem On Curve Advanced",
+  "command": "BuilderGemOnCrvAdvanced / gvGemOnCrvAdvanced",
+  "scope": "`gem_placement::taper_specs(start, end, count)`; `gem_placement::place_on_curve_variable`; `GemPlacementTool::OnCurveAdvanced`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "monotonic variable-diameter row between the two requested sizes",
+  "negative": "bad sizes and mismatched spec lists are typed refusals",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-002-03"
+    ],
+    "fixture_manifest_sha256": "9f6e9f49324d6b512ea125c39d06d0b9f18b09c4381d70326ad8539aaf2df159"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "the_advanced_tool_tapers_the_row_from_the_start_size_to_the_end_size"
+}

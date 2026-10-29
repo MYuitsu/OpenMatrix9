@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-20-004",
+  "case": "2 curves, 1 surface, 1 solid, 1 gem slot, 1 unknown slot",
+  "input": "2 curves, 1 surface, 1 solid, 1 gem slot, 1 unknown slot",
+  "expected": "`Objects: 6 total (...) \u00b7 gems 1 \u00b7 heads 0 \u00b7 rails 0 \u00b7 cutters 0 \u00b7 unknown 1`; definitions reported apart"
+}

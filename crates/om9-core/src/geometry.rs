@@ -247,6 +247,35 @@ fn poles_weights(poles: &[Point3], weights: &[f64], limits: &Limits) -> Result<U
     Ok(usage)
 }
 impl NurbsCurve {
+    /// Admit an explicitly repeated-pole periodic basis. This is deliberately
+    /// stricter than metadata validation and does not certify arbitrary imports.
+    pub fn certify_repeated_periodic(&self, limits: &Limits) -> Result<()> {
+        self.validate(limits)?;
+        let degree=self.degree;let count=self.poles.len();
+        if !self.periodic || count<=degree*2 || self.domain != [self.knots[degree],self.knots[count]] {
+            return Err(Error::Unsupported("periodic NURBS basis is not certified"));
+        }
+        let period=count-degree;let span=self.domain[1]-self.domain[0];
+        let seam=self.domain[0];
+        let multiplicity=self.knots.partition_point(|k|*k<=seam)-self.knots.partition_point(|k|*k<seam);
+        if multiplicity>degree {return Err(Error::Unsupported("periodic NURBS seam is discontinuous"));}
+        for i in 0..degree {
+            if self.poles[i]!=self.poles[period+i] || self.weights[i]!=self.weights[period+i] {
+                return Err(Error::Unsupported("periodic NURBS control points do not repeat"));
+            }
+        }
+        for i in 0..self.knots.len()-period {
+            let left=self.knots[i];let right=self.knots[i+period];
+            let roundoff=2.*f64::EPSILON*left.abs().max(right.abs()).max(span.abs());
+            if roundoff>span.abs()*1e-5 {
+                return Err(Error::Unsupported("periodic NURBS knot precision is insufficient"));
+            }
+            if ((right-left)-span).abs()>span.abs()*1e-12+roundoff {
+                return Err(Error::Unsupported("periodic NURBS knots do not repeat"));
+            }
+        }
+        Ok(())
+    }
     pub fn validate(&self, limits: &Limits) -> Result<Usage> {
         axis(
             self.degree,

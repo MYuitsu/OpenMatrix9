@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-011",
+  "title": "Gem To Curve Surface History Links",
+  "cases": [
+    "a link round-trips through the extension and a saved/reopened document",
+    "every placed gem carries a readable link with its source and arc length",
+    "the report lists one line per linked gem"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

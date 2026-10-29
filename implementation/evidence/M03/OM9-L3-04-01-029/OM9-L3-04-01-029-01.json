@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-029-01",
+  "l3_id": "OM9-L3-04-01-029",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Splop: golden case '10 x 10 plane at z=0, curve (1,1,2)->(3,1,2) -> the ends land on (1,1,0) and (3,1,0), one Undo entry'",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_029_splop_wraps_the_selection_onto_the_surface"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

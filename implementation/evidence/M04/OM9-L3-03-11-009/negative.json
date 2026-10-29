@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-009",
+  "kind": "negative",
+  "input": "unknown builder command, or a rail builder with no selection",
+  "expected": "typed error; no builder session is opened",
+  "verified_by": [
+    "the_f6_prefill_and_the_command_line_reach_the_same_builder_service",
+    "f6_uses_the_selected_class_and_empty_general_context"
+  ],
+  "document_unchanged": true
+}

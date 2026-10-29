@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-004",
+  "title": "Gem List On Curve",
+  "cases": [
+    "an empty list is `Error::Missing(\"gem spec list\")`",
+    "a diameter that fails `GemSpec::round` is refused, never silently replaced"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

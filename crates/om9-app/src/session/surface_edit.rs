@@ -9,6 +9,7 @@ use om9_core::{
 };
 
 pub const REBUILD: &str = "OM9-SURFACE-006";
+pub const SMASH: &str = "OM9-SURFACE-141";
 pub const UNROLL: &str = "OM9-SURFACE-134";
 pub const OFFSET: &str = "OM9-SURFACE-025";
 pub const EXTRUDE_NORMAL: &str = "OM9-SURFACE-133";
@@ -39,9 +40,11 @@ pub const VARIABLE_OFFSET: &str = "OM9-SURFACE-026";
 pub const SHRINK: &str = "OM9-SURFACE-012";
 pub const SWEEP1_HISTORY: &str = "OM9-SURFACE-102";
 pub const SWEEP2_HISTORY: &str = "OM9-SURFACE-104";
-#[allow(dead_code)]
 pub const SWEEP4: &str = "OM9-SURFACE-119";
 pub const FOUR_RAIL_PROFILE: &str = "OM9-TOOLS-004";
+/// The `BuilderFourProfile` icon id. It reaches the same four-rail metadata command as the
+/// older Tools id.
+pub const FOUR_RAIL_PROFILE_ICON: &str = "OM9-TOOLS-032";
 pub const VARIABLE_BLEND: &str = "OM9-SURFACE-008";
 pub const UNTRIM: &str = "OM9-SURFACE-017";
 pub const CHAMFER: &str = "OM9-SURFACE-023";
@@ -51,6 +54,12 @@ pub const VARIABLE_CHAMFER: &str = "OM9-SURFACE-024";
 
 pub fn handles(feature: &str) -> bool {
     matches!(feature, REBUILD | UNROLL)
+}
+
+/// `Smash` flattens a surface that `Unroll Surface` can only approximate. It keeps the
+/// flattening contract of `unroll` and reports the measured stretch instead of failing.
+pub fn handles_smash(feature: &str) -> bool {
+    feature == SMASH
 }
 
 /// Commands that combine selected curves into one surface.
@@ -186,7 +195,7 @@ pub fn handles_sweep4(feature: &str) -> bool {
 
 /// Four Rail Profile metadata command.
 pub fn handles_four_rail_profile(feature: &str) -> bool {
-    feature == FOUR_RAIL_PROFILE
+    matches!(feature, FOUR_RAIL_PROFILE | FOUR_RAIL_PROFILE_ICON)
 }
 
 /// Commands that collect one numeric distance after the selected surface.
@@ -194,10 +203,48 @@ pub fn handles_numeric(feature: &str) -> bool {
     matches!(feature, OFFSET | EXTRUDE_NORMAL)
 }
 
+/// Whether `feature` is one of the Surface Tools commands bound by `OM9-L2-03-17`.
+///
+/// This is the single dispatch gate for the menu row and the typed command line: every
+/// bound feature reaches `Controller::dispatch_geometry`, which calls the matching
+/// `apply_*` service function exactly once.
+pub fn handles_command(feature: &str) -> bool {
+    handles(feature)
+        || handles_numeric(feature)
+        || handles_curves(feature)
+        || handles_curve_pair(feature)
+        || handles_history(feature)
+        || handles_sweep4(feature)
+        || handles_four_rail_profile(feature)
+        || handles_surface_pair(feature)
+        || handles_seam(feature)
+        || handles_soft_edit(feature)
+        || handles_tween(feature)
+        || handles_extend(feature)
+        || handles_split(feature)
+        || handles_drape(feature)
+        || handles_tangent(feature)
+        || handles_extrude_all(feature)
+        || handles_planar(feature)
+        || handles_variable_offset(feature)
+        || handles_shrink(feature)
+        || handles_variable_blend(feature)
+        || handles_untrim(feature)
+        || handles_chamfer(feature)
+        || handles_fillet(feature)
+        || handles_variable_chamfer(feature)
+        || handles_sweep_multi(feature)
+        || handles_merge(feature)
+        || handles_smash(feature)
+        || plane_like(feature)
+}
+
 pub fn label(feature: &str) -> &'static str {
     match feature {
         REBUILD => "Rebuild Surface",
+        FOUR_RAIL_PROFILE | FOUR_RAIL_PROFILE_ICON => "Four Rail Profile",
         UNROLL => "Unroll Surface",
+        SMASH => "Smash",
         OFFSET => "Offset Surface",
         EXTRUDE_NORMAL => "Extrude Normal to Surface",
         PLANE_CORNERS => "Plane from Corners",
@@ -242,6 +289,7 @@ pub fn label(feature: &str) -> &'static str {
 pub fn static_feature(feature: &str) -> &'static str {
     match feature {
         UNROLL => UNROLL,
+        SMASH => SMASH,
         OFFSET => OFFSET,
         EXTRUDE_NORMAL => EXTRUDE_NORMAL,
         PLANE_CORNERS => PLANE_CORNERS,
@@ -278,6 +326,7 @@ pub fn static_feature(feature: &str) -> &'static str {
         EXTEND => EXTEND,
         SWEEP_MULTI => SWEEP_MULTI,
         MERGE => MERGE,
+        FOUR_RAIL_PROFILE | FOUR_RAIL_PROFILE_ICON => FOUR_RAIL_PROFILE,
         _ => REBUILD,
     }
 }
@@ -463,15 +512,124 @@ pub fn apply_tween(
         .map(Geometry::Surface)
 }
 
+/// Direction constraint for Soft Edit (Matrix Book 1 p217, `DirConstraint`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SoftEditConstraint {
+    None,
+    SurfaceNormal,
+    UTangent,
+    VTangent,
+}
+
+impl SoftEditConstraint {
+    pub fn parse(text: &str) -> Result<Self, Error> {
+        match text.trim().to_ascii_lowercase().as_str() {
+            "none" => Ok(Self::None),
+            "srfnormal" | "normal" => Ok(Self::SurfaceNormal),
+            "utangent" | "u tangent" => Ok(Self::UTangent),
+            "vtangent" | "v tangent" => Ok(Self::VTangent),
+            _ => Err(Error::Invalid("soft edit direction constraint")),
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::None => "None",
+            Self::SurfaceNormal => "SrfNormal",
+            Self::UTangent => "UTangent",
+            Self::VTangent => "VTangent",
+        }
+    }
+
+    /// The next constraint in the documented order, for the option row.
+    pub fn next(self) -> Self {
+        match self {
+            Self::None => Self::SurfaceNormal,
+            Self::SurfaceNormal => Self::UTangent,
+            Self::UTangent => Self::VTangent,
+            Self::VTangent => Self::None,
+        }
+    }
+
+    /// The `DirConstraint=` line that selects the next constraint.
+    pub fn next_command(self) -> &'static str {
+        match self.next() {
+            Self::None => "DirConstraint=None",
+            Self::SurfaceNormal => "DirConstraint=SrfNormal",
+            Self::UTangent => "DirConstraint=UTangent",
+            Self::VTangent => "DirConstraint=VTangent",
+        }
+    }
+}
+
+fn normalized(vector: om9_core::geometry::Point3) -> Result<om9_core::geometry::Point3, Error> {
+    let length = (vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]).sqrt();
+    if !length.is_finite() || length <= 1e-12 {
+        return Err(Error::Invalid("soft edit direction constraint"));
+    }
+    Ok([vector[0] / length, vector[1] / length, vector[2] / length])
+}
+
+fn project_onto(
+    delta: om9_core::geometry::Point3,
+    axis: om9_core::geometry::Point3,
+) -> om9_core::geometry::Point3 {
+    let dot = delta[0] * axis[0] + delta[1] * axis[1] + delta[2] * axis[2];
+    [axis[0] * dot, axis[1] * dot, axis[2] * dot]
+}
+
 /// Move the surface poles near one UV point by `delta`.
+///
+/// `U Distance`/`V Distance` are the influence radii handed to the falloff in the
+/// surface's parameter domain, where `1` covers the whole domain (the documented
+/// default). `FixEdges` restores the boundary poles afterwards; `DirConstraint`
+/// projects the move onto the surface normal or one of its tangents.
 pub fn apply_soft_edit(
     surface: &om9_core::geometry::NurbsSurface,
     at: [f64; 2],
     radius: [f64; 2],
     delta: om9_core::geometry::Point3,
+    constraint: SoftEditConstraint,
+    fix_edges: bool,
     limits: &Limits,
 ) -> Result<Geometry, Error> {
-    om9_core::surface_ops::softedit(surface, at, delta, radius, limits).map(Geometry::Surface)
+    let delta = match constraint {
+        SoftEditConstraint::None => delta,
+        SoftEditConstraint::SurfaceNormal => project_onto(
+            delta,
+            om9_core::surface_kernel::normal(surface, at[0], at[1], limits)?,
+        ),
+        SoftEditConstraint::UTangent => project_onto(
+            delta,
+            normalized(om9_core::surface_kernel::derivatives(surface, at[0], at[1], limits)?.du)?,
+        ),
+        SoftEditConstraint::VTangent => project_onto(
+            delta,
+            normalized(om9_core::surface_kernel::derivatives(surface, at[0], at[1], limits)?.dv)?,
+        ),
+    };
+    if constraint != SoftEditConstraint::None
+        && (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]).sqrt() <= 1e-12
+    {
+        return Err(Error::Invalid(
+            "soft edit move is parallel to the constraint",
+        ));
+    }
+    let mut edited = om9_core::surface_ops::softedit(surface, at, delta, radius, limits)?;
+    if fix_edges {
+        let [size_u, size_v] = surface.size;
+        for i in 0..size_u {
+            for j in 0..size_v {
+                if i == 0 || i + 1 == size_u || j == 0 || j + 1 == size_v {
+                    let index = i * size_v + j;
+                    edited.poles[index] = surface.poles[index];
+                    edited.weights[index] = surface.weights[index];
+                }
+            }
+        }
+        edited.validate(limits)?;
+    }
+    Ok(Geometry::Surface(edited))
 }
 
 /// Parse `U` or `V` for a surface seam.
@@ -507,12 +665,34 @@ pub fn parse_surface_edge(text: &str) -> Result<om9_core::surface_ops::SurfaceEd
     }
 }
 
-/// Match `source` at `source_edge` to `target` at `target_edge` at G0.
+/// Parse `Continuity=Position|Tangency|Curvature` for Match Surfaces.
+pub fn parse_match_continuity(
+    text: &str,
+) -> Result<om9_core::surface_ops::SurfaceContinuity, Error> {
+    match text.trim().to_ascii_lowercase().as_str() {
+        "position" | "pos" | "g0" => Ok(om9_core::surface_ops::SurfaceContinuity::G0),
+        "tangency" | "tan" | "g1" => Ok(om9_core::surface_ops::SurfaceContinuity::G1),
+        "curvature" | "curv" | "g2" => Ok(om9_core::surface_ops::SurfaceContinuity::G2),
+        _ => Err(Error::Invalid("match continuity")),
+    }
+}
+
+/// The documented label of a continuity setting.
+pub fn continuity_label(continuity: om9_core::surface_ops::SurfaceContinuity) -> &'static str {
+    match continuity {
+        om9_core::surface_ops::SurfaceContinuity::G0 => "Position",
+        om9_core::surface_ops::SurfaceContinuity::G1 => "Tangency",
+        om9_core::surface_ops::SurfaceContinuity::G2 => "Curvature",
+    }
+}
+
+/// Match `source` at `source_edge` to `target` at `target_edge` with `continuity`.
 pub fn apply_match(
     source: &om9_core::geometry::NurbsSurface,
     target: &om9_core::geometry::NurbsSurface,
     source_edge: om9_core::surface_ops::SurfaceEdge,
     target_edge: om9_core::surface_ops::SurfaceEdge,
+    continuity: om9_core::surface_ops::SurfaceContinuity,
     limits: &Limits,
 ) -> Result<Geometry, Error> {
     let report = om9_core::surface_ops::match_surface(
@@ -520,7 +700,7 @@ pub fn apply_match(
         source_edge,
         target,
         target_edge,
-        om9_core::surface_ops::SurfaceContinuity::G0,
+        continuity,
         limits,
     )?;
     Ok(Geometry::Surface(report.surface))
@@ -721,6 +901,14 @@ pub fn apply_sweep_multi(
                 .map(Geometry::Surface)
         })
         .collect()
+}
+
+/// Flatten one surface with `Smash`; the measured stretch is returned for the run report.
+pub fn apply_smash(
+    surface: &om9_core::geometry::NurbsSurface,
+    limits: &Limits,
+) -> Result<om9_core::surface_ops::Smash, Error> {
+    om9_core::surface_ops::smash(surface, [8, 8], limits)
 }
 
 /// Apply the command to the single selected surface. Missing selection, a

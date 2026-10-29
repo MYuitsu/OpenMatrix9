@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-13-003",
+  "title": "Gem Match Attributes",
+  "cases": [
+    "an empty mask (`Mask=` with no group) is a typed refusal",
+    "an unknown mask token is a typed refusal, never ignored",
+    "one selected stone cannot be both source and target"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

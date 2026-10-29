@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m05.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-09-001",
+  "title": "Gem Shape Cut Dimension Schema",
+  "owner": "om9-core gem owner + om9-app gem session/window",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/gem.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-core/tests/gem_assets.rs",
+      "state": "REGISTERED_TESTS"
+    },
+    {
+      "path": "crates/om9-app/src/session/gem.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-app/src/ui/gem.rs",
+      "state": "IMPLEMENTED_WINDOW"
+    },
+    {
+      "path": "crates/om9-app/tests/gem_panel.rs",
+      "state": "REGISTERED_TESTS"
+    },
+    {
+      "path": "crates/om9-core/src/transaction.rs",
+      "state": "FIELD-AWARE WRITE ADMISSION"
+    }
+  ],
+  "source_audit": {
+    "matrix_assets": "NOT_COPIED",
+    "result": "PROCEDURAL_ASSETS_ONLY",
+    "detail": "No Matrix gemstone binary asset, catalogue bitmap or decompiled resource is read or shipped. Every cut/shape outline and mesh is generated from the typed spec in crates/om9-core/src/gem.rs; the canonical library is authored sizes, not imported geometry."
+  },
+  "planning_inputs": [
+    "OM9_Milestones/M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L3-001 - Gem Shape Cut Dimension Schema/l3.json",
+    "OM9_Milestones/M05 - Gems and Layout/L2-04-09 - 01-febe-gem-asset-shapes-and-loader/L2.json"
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The existing M05 settings contract (settings::gems::GemStone/GemRow) is an input row for prong/channel/metal settings and is NOT this runtime gem record.",
+    "The Matrix command names gvLoader/gvEmerald/gvBaguette/gvGemPositioner are kept."
+  ]
+}

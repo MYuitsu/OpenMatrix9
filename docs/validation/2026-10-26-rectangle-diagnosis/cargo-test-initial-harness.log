@@ -1,0 +1,41 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.33s
+     Running tests\rect.rs (L:/om9-target\debug\deps\rect-642ca4d04402cd07.exe)
+
+running 16 tests
+test rectangle_vertical_preview_uses_the_vertical_edge ... ok
+test rectangle_center_preview_is_centered ... ok
+test rectangle_three_point_preview_uses_the_edge_frame ... ok
+test rectangle_preview_follows_the_active_cplane ... ok
+test rectangle_preview_has_four_edges ... ok
+test rectangle_two_corners_match ... ok
+test rectangle_accepts_length_option ... ok
+test rectangle_square_option_uses_the_longer_side ... ok
+test rectangle_follows_the_active_cplane ... ok
+test rectangle_width_and_height_commit_after_enter ... ok
+test rectangle_center_mode_uses_the_center_and_doubles_the_extent ... ok
+test rectangle_vertical_mode_uses_a_vertical_edge ... ok
+test rectangle_three_point_mode_uses_edge_then_width ... ok
+test rectangle_three_point_accepts_numeric_height ... ok
+test rectangle_square_uses_the_shared_option_snapshot ... ok
+test rectangle_three_point_accepts_numeric_width ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\rectangle_quadrants_diagnostic.rs (L:/om9-target\debug\deps\rectangle_quadrants_diagnostic-96c96c34e852e811.exe)
+
+running 1 test
+
+thread 'opposite_corner_is_preserved_in_all_four_quadrants' (34828) panicked at crates\om9-app\tests\rectangle_quadrants_diagnostic.rs:20:35:
+called `Result::unwrap()` on an `Err` value: Invalid("rectangle needs a first corner")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test opposite_corner_is_preserved_in_all_four_quadrants ... FAILED
+
+failures:
+
+failures:
+    opposite_corner_is_preserved_in_all_four_quadrants
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p om9-app --test rectangle_quadrants_diagnostic`

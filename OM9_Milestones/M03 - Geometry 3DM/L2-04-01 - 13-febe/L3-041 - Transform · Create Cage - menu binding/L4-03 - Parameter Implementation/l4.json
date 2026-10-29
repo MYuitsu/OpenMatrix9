@@ -1,0 +1,289 @@
+{
+  "level": "L4",
+  "id": "OM9-L4-04-01-041-03",
+  "milestone": "M03",
+  "parent_l3_id": "OM9-L3-04-01-041",
+  "owner_l2_id": "OM9-L2-04-01",
+  "title": "Parameter Implementation — Transform · Create Cage — menu binding",
+  "task_role": "PARAMETER_IMPLEMENTATION",
+  "planning_state": "NOT_STARTED",
+  "execution_stage": "E13",
+  "mini_gate_id": "G03-A",
+  "risk": "NORMAL",
+  "purpose": "Implement command-inline parameters for Transform · Cage Editing (Create Cage)",
+  "parent_l3_file": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-041 - Transform · Create Cage - menu binding/l3.json",
+  "preconditions": {
+    "milestone": "M03 prior gates and existing menu-binding L4 verified",
+    "required_l4_verified_ids": [
+      "OM9-L4-04-01-041-01",
+      "OM9-L4-04-01-041-02"
+    ],
+    "technical_environment": "Real OpenMatrix9 fork, pinned QymCAD audit checkout, Rust/OCCT toolchain, test fixtures",
+    "owners": [],
+    "unresolved_owner_policy": "Verify owner function signatures and tests before integration"
+  },
+  "source_context": {},
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Create Cage",
+        "Cage Edit",
+        "Release from Cage"
+      ],
+      "option_count": 3
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Transform",
+      "command": "Cage Editing",
+      "option": "Create Cage",
+      "root_group": false,
+      "path": [
+        "Transform",
+        "Cage Editing"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "Selection context + typed command arguments for Transform · Create Cage — menu binding; dispatch to owner OM9-L2-04-08 (feature 005), not a duplicate math engine.",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-041 - Transform · Create Cage - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.expected_domain_inputs"
+      },
+      {
+        "raw": "planning/E13.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-041 - Transform · Create Cage - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      },
+      {
+        "raw": "planning/M00/SOURCE_AUDIT_V012.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-041 - Transform · Create Cage - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      },
+      {
+        "raw": "planning/M08/LUNA_START_HERE.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-041 - Transform · Create Cage - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Create Cage",
+        "command_id": "TransformCageEditingCreateCage",
+        "script": "! _Cage",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-041",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Create Cage",
+          "typed_forms": [
+            "Create Cage"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Cage Edit",
+        "command_id": "TransformCageEditingCageEdit",
+        "script": "! _CageEdit",
+        "alt_script": "! _CageEdit _Pause _B _W",
+        "alt_label": "Cage Edit Bounding Box",
+        "covered_by_l3": "OM9-L3-04-01-020",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Cage Edit",
+          "typed_forms": [
+            "Cage Edit"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Release from Cage",
+        "command_id": "TransformCageEditingReleaseFromCage",
+        "script": "! _ReleaseFromCage",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-021",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Release from Cage",
+          "typed_forms": [
+            "Release from Cage"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [],
+    "missing": [
+      "input:Selection context + typed command arguments for Transform · Create Cage — menu binding; dispatch to owner OM9-L2-04-08 (feature 005), not a duplicate math engine.: type/default/range",
+      "input:planning/E13.md: type/default/range",
+      "input:planning/M00/SOURCE_AUDIT_V012.md: type/default/range",
+      "input:planning/M08/LUNA_START_HERE.md: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-04-01-041-03"
+  },
+  "work_plan": {
+    "steps": [
+      "Read OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-041 - Transform · Create Cage - menu binding/l3.json#/parameter_contract.interaction and each command_options[].inline record; treat the L3 contract as the single source.",
+      "Classify every option as toggle/cycle/choice/value-entry/point-entry/specialized/unsupported, with stage availability and disabled reason; do not invent a shortcut or default.",
+      "Implement the shared inline token/span formatter: keyboard initials, typed full names and click targets all call Controller::submit; remove the legacy floating button row for this command.",
+      "Resolve type/default/range/unit/current value from the owner snapshot, not by parsing the prompt or display label; keep UNRESOLVED where the owner is not yet known.",
+      "Add fixtures for keyboard, click span, stale run/ID, nonempty draft, IME/paste, invalid token, cancel/Esc and Undo; assert owner state and no document mutation.",
+      "Run focused tests and record observed evidence; a rendered inline token or a passing metadata test is not a runtime PASS."
+    ],
+    "role_checklist": [
+      "Do not duplicate the geometry owner; dispatch through the existing command/feature service.",
+      "One prompt/editor/draft only; preserve nonempty drafts, paste, IME, selection and unrelated focus.",
+      "Advertise only the recorded unique stage accelerator; fall back to the full option name instead of guessing a conflicting initial.",
+      "Do not activate hidden options; keep unsupported options visible and disabled with an explicit reason.",
+      "Remove the legacy per-command button row after the inline path is migrated; do not run both paths."
+    ],
+    "input_fixture": "Selection context + typed command arguments for Transform · Create Cage — menu binding; dispatch to owner OM9-L2-04-08 (feature 005), not a duplicate math engine.; planning/E13.md; planning/M00/SOURCE_AUDIT_V012.md; planning/M08/LUNA_START_HERE.md",
+    "expected_positive": "Each listed inline option accepts keyboard/click input, updates owner state and produces the documented observable result.",
+    "expected_negative": "Invalid, stale, hidden or unsupported inline input is rejected with a visible reason, draft/focus preserved and no document mutation.",
+    "required_technical_decisions": [
+      "Option type/default/range/unit are resolved from manual and owner code, not inferred from the catalog label.",
+      "One shared CommandOptionInterface/formatter serves menu, CMD, inline keyboard and click paths.",
+      "Shortcut resolution is full name first, then a unique already-advertised stage accelerator; conflicts do not get a fabricated initial."
+    ],
+    "suggested_commands": [
+      "git rev-parse HEAD",
+      "cargo test -p om9-app --test curve_menu"
+    ],
+    "commands_not_executed": true
+  },
+  "acceptance": {
+    "positive_fixture_id": "OM9-L3-04-01-041-PARAM-POSITIVE",
+    "negative_fixture_id": "OM9-L3-04-01-041-PARAM-NEGATIVE",
+    "required_receipts": [
+      "parameter_schema",
+      "inline_option_schema",
+      "controller_submit_receipt",
+      "keyboard_and_click_fixtures",
+      "command_dispatch"
+    ],
+    "required_artifact_after_execution": "implementation/M03/OM9-L3-04-01-041/command_inline_contract.json",
+    "required_evidence_after_execution": "implementation/evidence/M03/OM9-L4-04-01-041-03.json",
+    "expected_observable": "Every inline option has typed value/activation/availability metadata and keyboard/click routes through Controller::submit.",
+    "negative_observable": "Invalid, stale, hidden or conflicting inline input is refused with a visible reason, draft/focus preserved and no document mutation.",
+    "gate": "EXECUTION_REQUIRED",
+    "checklist": [
+      "All inline options have activation/availability/shortcut/value owner or an explicit BLOCKED reason.",
+      "Keyboard initial/full name and click span use the same Controller::submit handler.",
+      "No legacy floating button row remains for this command after migration.",
+      "Evidence contains actual keyboard/click receipts, owner state and observed outputs."
+    ],
+    "pass_rule": "EXECUTION_PASS only with actual tests and evidence; planning text is not implementation proof.",
+    "never_claim_success_if_fixture_missing": true,
+    "runtime_feature_success_required_for_this_role": true,
+    "design_complete_does_not_mark_feature_implemented": true
+  },
+  "execution_policy": {},
+  "ui_backend_separation": {},
+  "execution_handoff": {
+    "task_role": "PARAMETER_IMPLEMENTATION",
+    "role_artifact_kind": "parameter_contract",
+    "read_l3_file_first": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-041 - Transform · Create Cage - menu binding/l3.json",
+    "mandatory_artifact_fields": [
+      "parameter_contract",
+      "interaction",
+      "inline",
+      "option_types",
+      "defaults",
+      "ranges",
+      "units",
+      "shortcut_availability_activation",
+      "positive_and_negative_fixtures"
+    ]
+  },
+  "reference_supplements": {},
+  "reference_source_policy": {},
+  "implementation_samples": {
+    "schema": "om9.l4.implementation_samples.v1",
+    "policy_id": "om9.implementation_sample.skeleton.v1",
+    "status": "author_skeleton_untrusted",
+    "language": "rust",
+    "role": "IMPLEMENT",
+    "role_label_on_record": "PARAMETER_IMPLEMENTATION",
+    "role_provenance": "recorded_on_task",
+    "owner_boundary": "OM9-L2-04-01",
+    "goal": "Implement command-inline parameters for Transform · Cage Editing (Create Cage)",
+    "algorithm_on_record": "None",
+    "proposed_signature_on_record": "",
+    "sketch_is_untested": true,
+    "not_runtime_evidence": true,
+    "must_not_be_reported_as_implemented": true,
+    "reference_note": "adapt the pinned algorithm, do not copy it; licence scope comes from M00",
+    "sketch": "// Parameter Implementation — Transform · Create Cage — menu binding\n// ROLE: IMPLEMENT - skeleton only; body is deliberately unimplemented.\n\n// TODO(API): no verified signature in this record yet; freeze the type before coding\n/// Contract on record: (not frozen yet)\n///\n/// Owner: OM9-L2-04-01\n/// Positive fixture: valid input from the fixture\n/// Negative fixture: invalid, empty or degenerate input\n///\n/// Algorithm notes carried from the planning record:\n//   1. None\npub fn om9_l4_04_01_041_03(/* typed inputs from the contract */) -> Result</* Output */, Error> {\n    // TODO(OM9-L4-04-01-041-03): implement exactly one owner's behaviour here.\n    //   1. validate typed inputs; reject empty/degenerate input with a typed error.\n    //   2. do the work through the owning kernel/domain service, never a second engine.\n    //   3. return a typed result; never report success on a partial write.\n    unimplemented!(\"OM9-L4-04-01-041-03 not implemented\")\n}\n\n#[cfg(test)]\nmod tests {\n    // Positive: valid input from the fixture\n    #[test]\n    fn positive_om9_l4_04_01_041_03() {\n        // RED until implemented: assert the measured oracle, not a smoke check.\n        // Oracle: measured positive oracle\n        unimplemented!()\n    }\n\n    // Negative: invalid, empty or degenerate input\n    #[test]\n    fn negative_om9_l4_04_01_041_03() {\n        // Oracle: typed error with unchanged state\n        // Assert a typed error and unchanged state (no partial document mutation).\n        unimplemented!()\n    }\n}"
+  },
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

@@ -117,5 +117,68 @@
       "OM9-L3-04-03-006",
       "OM9-L3-04-03-007"
     ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-27",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+    "scope": "Eternity/Signet/Raised/Award ring builders: portable sections previewed as mesh, committed as an OCCT B-Rep sewn from the same sections, stone frames, viewport handles, preset roundtrip, associative resize and the shared closed/volume gate",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app",
+        "om9-kernel"
+      ],
+      "tests": [
+        "crates/om9-core/src/ring_builder.rs (unit)",
+        "crates/om9-core/tests/ring_family.rs",
+        "crates/om9-app/tests/ring_family_panel.rs",
+        "crates/om9-kernel/tests/ring_family_brep.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M04/OM9-L2-04-03/observed.json",
+      "implementation/evidence/M04/OM9-L2-04-03/README.md",
+      "implementation/evidence/M04/OM9-L2-04-03/core-ring-family.log",
+      "implementation/evidence/M04/OM9-L2-04-03/app-ring-family.log",
+      "implementation/evidence/M04/OM9-L2-04-03/kernel-ring-brep.log",
+      "implementation/evidence/M04/OM9-L2-04-03/workspace-check.log"
+    ],
+    "notes": "Ring body là một surface of revolution; preview là mesh portable, body commit là B-Rep OCCT sew từ đúng các section qua RingFamilyBrepProducer, cả hai qua cổng chung inspect_measures/inspect_geometry nên không có body hở. Viewport handle sửa cùng field với panel (adjust_field). Gem solids ngoài scope (frames only). Builtin style vocabulary vẫn là width/height; ring-preset vocabulary cần approval.",
+    "l3_coverage": {
+      "OM9-L3-04-03-001": "automated_verified_manual_gate_open",
+      "OM9-L3-04-03-002": "automated_verified_manual_gate_open",
+      "OM9-L3-04-03-003": "automated_verified_manual_gate_open",
+      "OM9-L3-04-03-004": "automated_verified_manual_gate_open",
+      "OM9-L3-04-03-005": "automated_verified_manual_gate_open",
+      "OM9-L3-04-03-006": "automated_verified_manual_gate_open",
+      "OM9-L3-04-03-007": "automated_verified_manual_gate_open"
+    },
+    "l4": {
+      "planned": 47,
+      "artifacts": 47,
+      "receipts": 34
+    },
+    "tests": [
+      "core-ring-unit.log: exit 0",
+      "core-ring-family.log: exit 0",
+      "core-builder-regression.log: exit 0",
+      "app-ring-family.log: exit 0",
+      "kernel-ring-brep.log: exit 0",
+      "app-builder-regression.log: exit 0",
+      "clippy-core-lib.log: exit 0",
+      "kernel-clippy.log: exit 0",
+      "workspace-check.log: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M04-UI",
+    "remaining": [
+      "The B-Rep is a closed solid of planar triangles sewn from the sampled sections (chord error about 5 um at 96 segments), not a NURBS surface; a later surface rebuild must pass the same inspect_geometry gate.",
+      "Gem solids are out of scope: the Eternity builder publishes placement frames only (M05 gem integration).",
+      "The builtin style vocabulary still speaks rail-profile width/height; a ring-preset vocabulary (stone count, top pad) is a business-rule change that needs approval.",
+      "Handles cover diameter, width, wall and one kind-specific grip (stone, ridge or shoulder); stone count and shoulder taper have no grip because they are not a single silhouette distance.",
+      "clippy runs with `-A clippy::type_complexity` because one concurrent session's in-flight file (crates/om9-core/src/curve_ops.rs:600) trips that lint; no ring-family file needs the allow.",
+      "macOS runtime is unverified; the evidence is Windows x64 only."
+    ]
   }
 }

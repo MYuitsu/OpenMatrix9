@@ -260,8 +260,8 @@
     }
   ],
   "m03_l4_planned_count": 62,
-  "execution_state": "NOT_STARTED",
-  "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
+  "execution_state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "readiness_state": "AUTOMATED_RUNTIME_READY_FOR_MANUAL_UI_REVIEW",
   "l4_status": "PLANNED_NOT_EXECUTED",
   "planned_l4_count_m08": 44,
   "sdk_integration_plan": {
@@ -444,5 +444,140 @@
         "owner_unchanged": true
       }
     ]
+  },
+  "runtime_implementation": {
+    "l2_04_01_transform_2026_10_26": {
+      "date": "2026-10-26",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "title": "13-febe-matrix-transform-toolbar-bridges",
+      "catalogued_transform_rows": 41,
+      "l3_with_verified_supported_scope": 39,
+      "l3_with_verified_disabled_fallback": 2,
+      "availability_row": "OM9-L3-04-01-042 answers all 41 catalogued rows: 39 run a body; the 2 disabled rows record BLOCKED_OWNER (Solid Points ON needs sub-object grips, Make Down Facing is blocked by its L4-01 owner policy)",
+      "l4_implemented": 40,
+      "tests": {
+        "app_transform_menu": "50 passed; 0 failed",
+        "core_deform": "10 passed; 0 failed",
+        "core_cage": "4 passed; 0 failed"
+      },
+      "evidence": "implementation/evidence/M03/2026-10-26-l2-04-01-transform.json",
+      "commands": "28 verified command bodies: Scale 3D, Scale 2D, Scale 1D, Scale Non-Uniform, Scale By Plane, Orient 2 Points, Orient 3 Points, Orient on Surface, Orient on Curve, Orient Perpendicular to Curve, Symmetry, Bend, Taper, Twist, Shear, Maelstrom, Soft Move, Rotate 3D, Array Polar, Array Linear, Array, Array Along Curve, Array Along Surface, Array Curve on Surface, Stretch, Set Points, Project To C-Plane, Remap to C-Plane",
+      "deferred_to_m08": 22,
+      "open_scope": [
+        "OM9-L3-04-01-019 Solid Points ON: its contract needs editable subobject grips; the selection model is object-level",
+        "OM9-L3-04-01-037 Make Down Facing: L4-01 records unresolved_owner_policy BLOCKED_OWNER (\"design minimal owner extension without enabling button\")",
+        "the Smart Flow rows record a live link but not a history node: a change of the target surface is recomputed by re-running the row, and M08 owns automatic recompute (OM9-L3-04-05-004)",
+        "M03-UI review of the 39 enabled rows is unsigned (manual gate)"
+      ],
+      "manual_gate": "M03-UI",
+      "authored_key_parity": "Every catalog row carries command_key, the authored MainMenu.ini/icons.rs identifier; one mis-bound icon was fixed and two rows without authored artwork are pinned by the test.",
+      "curve_rows": {
+        "selection_rule": "a curve row takes its path from the selection: exactly one selected curve is the path and every other selected object is transformed along it, because the shell has no mid-command object pick",
+        "orient_perpendicular": "OM9-TRANSFORM-016 (L3-04-01-016)",
+        "array_along_curve": "OM9-TRANSFORM-021 (L3-04-01-022)",
+        "snapping": "Shared closest_point_on_curve; analytic line projection, bounded numeric search for other curves.",
+        "spacing": "measured arc length via curve_ops::arc_length and length_between"
+      },
+      "per_object_commit_fix": "commit_transform_mutations applies one step per object when a row hands in one step per target, so Project To C-Plane drops objects from different heights onto the plane instead of applying the first object's distance to all of them",
+      "reference_rows": {
+        "selection_rule": "a reference row takes its frame from the selection: exactly one surface (or one path curve) plus the objects to transform, because the shell has no mid-command object pick",
+        "orient_on_surface": "OM9-TRANSFORM-013 (L3-04-01-015)",
+        "orient_on_curve": "OM9-TRANSFORM-017 (L3-04-01-017)",
+        "symmetry": "OM9-TRANSFORM-018 (L3-04-01-018)",
+        "array_along_surface": "OM9-TRANSFORM-023 (L3-04-01-024)",
+        "array_curve_on_surface": "OM9-TRANSFORM-026 (L3-04-01-025)",
+        "stretch": "OM9-TRANSFORM-032 (L3-04-01-032)",
+        "switches": "the reference rows ask their switches as 0/1 numbers because the typed contract of the module is points and scalars; check_number indexes the scalar, not the field",
+        "mirror": "Symmetry commits an affine reflection of the placement, so every geometry kind mirrors without a geometry-specific mirror routine"
+      },
+      "deformer_rows": {
+        "kernel_owner": "crates/om9-core/src/deform.rs",
+        "deforms": "Bend, Taper, Twist, Shear, Maelstrom, SoftMove",
+        "space": "a deform runs in world space and the result is written back into the object's own frame (top11::bake_geometry + top11::inverse_affine), so one Geometry mutation is one Undo entry and the placement is untouched",
+        "bend": "OM9-TRANSFORM-007 (L3-04-01-008)",
+        "taper": "OM9-TRANSFORM-033 (L3-04-01-033)",
+        "shear": "OM9-TRANSFORM-034 (L3-04-01-034)",
+        "twist": "OM9-TRANSFORM-036 (L3-04-01-035)",
+        "maelstrom": "OM9-TRANSFORM-035 (L3-04-01-036)",
+        "soft_move": "OM9-TRANSFORM-040 (L3-04-01-040)",
+        "sampling": "a nonlinear map turns a straight segment into a curve, so a curve is written as a polycurve of 17 mapped samples; a shear is affine and keeps the line",
+        "solid": "a solid is refused with Error::Unsupported(\"deformation of a solid\"): a B-Rep needs a kernel deformer and a display-mesh deformation would misreport the solid"
+      },
+      "flow_rows": {
+        "flow_along_curve": "OM9-TRANSFORM-027 (L3-04-01-027)",
+        "flow_along_surface": "OM9-TRANSFORM-028 (L3-04-01-028)",
+        "splop": "OM9-TRANSFORM-029 (L3-04-01-029)",
+        "source_frame": "the flow rows take both frames from the selection and name the source by a picked point, because the selection is a set and has no pick order",
+        "rigid": "the flow carries sections rigidly with the frame; it does not stretch geometry along the path and it has no twist control"
+      },
+      "surface_edit_rows": {
+        "move_uvn": "OM9-TRANSFORM-039 (L3-04-01-039)",
+        "frame": "the U tangent, the V tangent and the normal at each pole's Greville parameter, frozen before the edit",
+        "selection": "the row edits surfaces only and refuses any other selected object"
+      },
+      "cage_rows": {
+        "create_cage": "OM9-TRANSFORM-041 (L3-04-01-041)",
+        "cage_edit": "OM9-TRANSFORM-020 (L3-04-01-020)",
+        "release_from_cage": "OM9-TRANSFORM-022 (L3-04-01-021)",
+        "owner": "OM9-L3-04-08-005",
+        "model": "a cage is a mesh box object with the corners it was created with in its om9.cage extension; a caged object carries the back pointer to that cage",
+        "field": "a point keeps its parameter in the cage before the edit (Cage::invert) and lands on the same parameter after it, so one corner move is one exact trilinear displacement"
+      },
+      "smart_flow_rows": {
+        "smart_flow": "OM9-TRANSFORM-011 (L3-04-01-011, owner OM9-L3-04-05-002)",
+        "smart_flow_rigid": "OM9-TRANSFORM-012 (L3-04-01-012, owner OM9-L3-04-05-003)",
+        "smart_flow_break": "OM9-TRANSFORM-014 (L3-04-01-013, owner OM9-L3-04-05-005)",
+        "pull_down_curves": "OM9-TRANSFORM-015 (L3-04-01-014, owner OM9-L3-04-05-006)",
+        "link": "the om9.flow extension records base, target, rigid flag, revision and the ACTIVE/BROKEN state; Break keeps the geometry, and running a flow row again re-activates the link at the next revision"
+      }
+    },
+    "measure_annotation_transform_corrections_2026_10_27": {
+      "date": "2026-10-27",
+      "state": "AUTOMATED_SCOPE_VERIFIED_MANUAL_UI_GATE_OPEN",
+      "evidence": "docs/validation/2026-10-26-measure-completion/README.md",
+      "checks": [
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "core-regressions"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "scene-regressions"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "final-focused"
+        },
+        {
+          "target_dir": "L:/om9-target",
+          "exit_code": 0,
+          "parallelism": 2,
+          "check": "build"
+        }
+      ],
+      "test_counts_by_batch": {
+        "core-regressions": 88,
+        "scene-regressions": 12,
+        "final-focused": 69,
+        "build": 0,
+        "annotation-ui-subset": 3
+      },
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "scope": "Transform corrections; 019/025/037 remain explicitly disabled. ArrayCrv: Count/Spacing mm, Basepoint, NoRotation/Freeform/Roadlike, Preview; shared arc-length station and transaction. SetPt edits canonical point/control coordinates with World/CPlane, axes and zero-based indices; placement unchanged; shared read-only preview."
+    }
+  },
+  "runtime_traceability": {
+    "measure_annotation_transform_corrections_2026_10_27": {
+      "implementation": "Transform corrections; 019/025/037 remain explicitly disabled. ArrayCrv: Count/Spacing mm, Basepoint, NoRotation/Freeform/Roadlike, Preview; shared arc-length station and transaction. SetPt edits canonical point/control coordinates with World/CPlane, axes and zero-based indices; placement unchanged; shared read-only preview.",
+      "tests": "docs/validation/2026-10-26-measure-completion/final-focused.log",
+      "manual_ui": "See runtime-launch.json; no human acceptance signature"
+    }
   }
 }

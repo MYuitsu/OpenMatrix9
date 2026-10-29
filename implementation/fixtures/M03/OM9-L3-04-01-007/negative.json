@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-007",
+  "case": "angle 0",
+  "expected": "`Error::Invalid(\"rotation angle\")`; a zero rotation is refused rather than opening an empty Undo entry",
+  "test": "m03_04_01_007_rotate_3d_turns_ninety_degrees_about_the_cplane_normal"
+}

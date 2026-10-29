@@ -1,0 +1,18 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-16-002",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderGemCutter",
+  "cases": [
+    {
+      "case": "two selected stones",
+      "input": "two GemSpec instances 10 mm apart with one identity placement each",
+      "expect": "one plan per stone, one body per plan, each body translated with its stone"
+    },
+    {
+      "case": "selection order is kept",
+      "input": "gem A then gem B selected",
+      "expect": "plans[0] is A and plans[1] is B; the committed bodies follow that order"
+    }
+  ]
+}

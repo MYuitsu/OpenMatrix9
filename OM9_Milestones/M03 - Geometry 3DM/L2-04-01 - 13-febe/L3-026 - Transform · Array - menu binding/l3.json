@@ -4,6 +4,229 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-04-01",
   "title": "Transform · Array — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Array",
+        "Array Polar",
+        "Array along Curve",
+        "Array along Surface",
+        "Array Curve on Surface",
+        "Array Linear"
+      ],
+      "option_count": 6
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Transform",
+      "command": "Array",
+      "option": "Array",
+      "root_group": false,
+      "path": [
+        "Transform",
+        "Array"
+      ]
+    },
+    "domain_inputs": [],
+    "command_options": [
+      {
+        "label": "Array",
+        "command_id": "TransformArrayRectangular",
+        "script": "! _Array",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-026",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Array",
+          "typed_forms": [
+            "Array"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Array Polar",
+        "command_id": "TransformArrayPolar",
+        "script": "! _ArrayPolar",
+        "alt_script": "! _ArrayPolar _Pause 0",
+        "alt_label": "Array Polar F4",
+        "covered_by_l3": "OM9-L3-04-01-009",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Array Polar",
+          "typed_forms": [
+            "Array Polar"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Array along Curve",
+        "command_id": "TransformArrayAlongCurve",
+        "script": "! _ArrayCrv",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-022",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Array along Curve",
+          "typed_forms": [
+            "Array along Curve"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Array along Surface",
+        "command_id": "TransformArrayAlongSurface",
+        "script": "! _ArraySrf",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-024",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Array along Surface",
+          "typed_forms": [
+            "Array along Surface"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Array Curve on Surface",
+        "command_id": "TransformArrayAlongCurveonSurface",
+        "script": "! _ArrayCrvOnSrf",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-025",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Array Curve on Surface",
+          "typed_forms": [
+            "Array Curve on Surface"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Array Linear",
+        "command_id": "TransformArrayArrayLinear",
+        "script": "! _ArrayLinear",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-023",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Array Linear",
+          "typed_forms": [
+            "Array Linear"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [],
+    "missing": [],
+    "implementation_l4": "OM9-L4-04-01-026-04"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
@@ -123,13 +346,25 @@
       "depends_on_task_ids": [
         "OM9-L4-04-01-026-02"
       ]
+    },
+    {
+      "id": "OM9-L4-04-01-026-04",
+      "title": "Parameter Implementation — Transform · Array — menu binding",
+      "file": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-026 - Transform · Array - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-04-01-026-01",
+        "OM9-L4-04-01-026-02",
+        "OM9-L4-04-01-026-03"
+      ]
     }
   ],
   "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
   "task_ids": [
     "OM9-L4-04-01-026-01",
     "OM9-L4-04-01-026-02",
-    "OM9-L4-04-01-026-03"
+    "OM9-L4-04-01-026-03",
+    "OM9-L4-04-01-026-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -278,5 +513,22 @@
     "test_coverage_status": "PLAN_ONLY_NOT_EXECUTED"
   },
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
-  "acceptance_category": "UI_COMMAND"
+  "acceptance_category": "UI_COMMAND",
+  "runtime_implementation": {
+    "OM9-L3-04-01-026_2026_10_26": {
+      "date": "2026-10-26",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Transform row `Array` runs through session::transform with one transaction per command; the menu row and the typed command name reach the same body, and the row answers availability from transform_menu::BINDINGS.",
+      "l4_verified": 1,
+      "tests": {
+        "app_transform_menu": "16 passed; 0 failed"
+      },
+      "evidence": [
+        "implementation/design/M03/OM9-L3-04-01-026",
+        "implementation/fixtures/M03/OM9-L3-04-01-026",
+        "implementation/evidence/M03/OM9-L3-04-01-026"
+      ],
+      "manual_gate": "M03-UI"
+    }
+  }
 }

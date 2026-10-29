@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-026-01",
+  "l3_id": "OM9-L3-04-01-026",
+  "kind": "Automated Runtime",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Array: golden case 'box 1x1x1 at the world origin, 2 columns, 3 rows, spacing 10 / 20' -> six objects in total (source plus five copies)",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_026_array_creates_the_requested_grid"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

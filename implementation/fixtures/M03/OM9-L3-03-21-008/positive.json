@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-008",
+  "case": "tip (1,1), elbow (5,5), text at (6,6) and the text \"Gem A\"",
+  "expected": "tip (1,1), elbow (5,5), text at (6,6) and the text \"Gem A\" -> one annotation whose two segments are independent strokes",
+  "test": "crates/om9-app/tests/annotation.rs::text_and_leader_edit_text_without_flattening_semantics"
+}

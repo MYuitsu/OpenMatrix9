@@ -73,7 +73,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Sides=") {
-            let Some(sides) = value.parse::<usize>().ok().filter(|sides| (3..=1024).contains(sides)) else {
+            let Some(sides) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|sides| (3..=1024).contains(sides))
+            else {
                 self.polygon_pending = Some(pending);
                 return Some(Err(Error::Invalid("sides must be 3..1024")));
             };
@@ -86,7 +90,9 @@ impl Controller {
             return Some(self.commit_polygon());
         }
         self.polygon_pending = Some(pending);
-        Some(Err(Error::Invalid("Polygon needs center, radius, Sides= or Enter")))
+        Some(Err(Error::Invalid(
+            "Polygon needs center, radius, Sides= or Enter",
+        )))
     }
 
     pub fn accept_polygon_point(&mut self, point: Point3) -> Result<(), Error> {
@@ -109,7 +115,11 @@ impl Controller {
         }
         pending.radius = Some(radius);
         let plane = self.input_plane();
-        let delta = [point[0] - center[0], point[1] - center[1], point[2] - center[2]];
+        let delta = [
+            point[0] - center[0],
+            point[1] - center[1],
+            point[2] - center[2],
+        ];
         let x = delta[0] * plane.x[0] + delta[1] * plane.x[1] + delta[2] * plane.x[2];
         let y = delta[0] * plane.y[0] + delta[1] * plane.y[1] + delta[2] * plane.y[2];
         pending.start_angle = y.atan2(x);
@@ -135,8 +145,8 @@ impl Controller {
         let plane = self.input_plane();
         let mut points = Vec::with_capacity(pending.sides);
         for index in 0..pending.sides {
-            let angle = pending.start_angle
-                + std::f64::consts::TAU * index as f64 / pending.sides as f64;
+            let angle =
+                pending.start_angle + std::f64::consts::TAU * index as f64 / pending.sides as f64;
             let (sin, cos) = angle.sin_cos();
             points.push([
                 center[0] + plane.x[0] * corner * cos + plane.y[0] * corner * sin,
@@ -147,7 +157,6 @@ impl Controller {
         let curve = om9_core::curve_build::polygon(&points)?;
         self.commit_geometry(POLYGON, "Polygon", Geometry::Curve(curve))
     }
-
 
     pub fn polygon_preview(&self, point: Point3) -> Vec<[Point3; 2]> {
         let Some(pending) = self.polygon_pending.as_ref() else {
@@ -161,7 +170,11 @@ impl Controller {
             pending.start_angle
         } else {
             let plane = self.input_plane();
-            let delta = [point[0] - center[0], point[1] - center[1], point[2] - center[2]];
+            let delta = [
+                point[0] - center[0],
+                point[1] - center[1],
+                point[2] - center[2],
+            ];
             let x = delta[0] * plane.x[0] + delta[1] * plane.x[1] + delta[2] * plane.x[2];
             let y = delta[0] * plane.y[0] + delta[1] * plane.y[1] + delta[2] * plane.y[2];
             y.atan2(x)
@@ -177,8 +190,7 @@ impl Controller {
         let plane = self.input_plane();
         let mut points = Vec::with_capacity(pending.sides);
         for index in 0..pending.sides {
-            let angle = start_angle
-                + std::f64::consts::TAU * index as f64 / pending.sides as f64;
+            let angle = start_angle + std::f64::consts::TAU * index as f64 / pending.sides as f64;
             let (sin, cos) = angle.sin_cos();
             points.push([
                 center[0] + plane.x[0] * corner * cos + plane.y[0] * corner * sin,

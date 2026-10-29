@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-11-002",
+  "title": "Cluster Builder",
+  "cases": [
+    "Start Bottom/Top/Left/Right maps to 6/12/9/3 o'clock",
+    "positive Z offset moves the ring down (manual direction)",
+    "Degree rotates each stone about its tangent, verified against the unrotated layout",
+    "Use Maximum Gems derives the count from the circumference; an explicit count is honoured"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

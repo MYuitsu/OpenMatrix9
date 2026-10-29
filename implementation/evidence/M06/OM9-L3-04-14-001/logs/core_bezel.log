@@ -1,0 +1,22 @@
+$ cargo test -p om9-core --lib settings::bezel -j 2
+
+--- stdout ---
+
+running 10 tests
+test settings::bezel::tests::the_clearance_report_measures_the_pavilion_cone ... ok
+test settings::bezel::tests::the_finger_rail_is_validated_by_name ... ok
+test settings::bezel::tests::scallop_builds_one_closed_cutter_per_position ... ok
+test settings::bezel::tests::the_scallop_takes_an_explicit_section ... ok
+test settings::bezel::tests::shear_turns_the_section_into_a_parallelogram ... ok
+test settings::bezel::tests::the_under_bezel_and_gallery_rail_sit_below_the_girdle ... ok
+test settings::bezel::tests::the_boolean_cuts_the_finger_rail_groove_out_of_the_ring ... ok
+test settings::bezel::tests::a_bezier_section_replaces_the_mode_section ... ok
+test settings::bezel::tests::the_edge_profile_is_read_from_the_library ... ok
+test settings::bezel::tests::the_three_modes_build_a_closed_ring ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 161 filtered out; finished in 0.04s
+
+
+--- stderr ---
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running unittests src\lib.rs (cargo-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)

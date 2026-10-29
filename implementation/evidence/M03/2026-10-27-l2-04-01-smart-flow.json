@@ -1,0 +1,69 @@
+{
+  "schema": "om9.evidence.batch.v1",
+  "date": "2026-10-27",
+  "l2_id": "OM9-L2-04-01",
+  "owner_l3_ids": [
+    "OM9-L3-04-05-002",
+    "OM9-L3-04-05-003",
+    "OM9-L3-04-05-005",
+    "OM9-L3-04-05-006"
+  ],
+  "title": "Transform Smart Flow family: flow, rigid, break, pulldown",
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03_UI_PENDING",
+  "kernel": {
+    "module": "crates/om9-core/src/deform.rs",
+    "public_api": [
+      "deform::flow_along_surface",
+      "deform::rigid_flow",
+      "deform::pulldown_from_target"
+    ],
+    "document_schema": "om9.flow extension slot (registered in model::extension_slot_known)"
+  },
+  "rows": [
+    {
+      "l3_id": "OM9-L3-04-01-011",
+      "feature": "OM9-TRANSFORM-011",
+      "command": "SmartFlow",
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_011_smart_flow_maps_from_the_base_surface",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-011/OM9-L3-04-01-011-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-012",
+      "feature": "OM9-TRANSFORM-012",
+      "command": "SmartFlowRigid",
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_012_smart_flow_rigid_moves_the_frame",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-012/OM9-L3-04-01-012-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-013",
+      "feature": "OM9-TRANSFORM-014",
+      "command": "SmartFlowBreak",
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_014_smart_flow_break_marks_the_link_broken",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-013/OM9-L3-04-01-013-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-014",
+      "feature": "OM9-TRANSFORM-015",
+      "command": "SmartFlowPullDownCurves",
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_015_smart_flow_pulldown_brings_curves_to_the_base",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-014/OM9-L3-04-01-014-01.json"
+    }
+  ],
+  "totals": {
+    "catalogued_rows": 41,
+    "implemented_rows": 40,
+    "disabled_rows": 1,
+    "tests": {
+      "app_transform_menu": "50 passed; 0 failed",
+      "core_deform": "10 passed; 0 failed",
+      "core_cage": "4 passed; 0 failed"
+    }
+  },
+  "notes": [
+    "the flow link is persisted document state (om9.flow): base, target, rigid, revision, ACTIVE/BROKEN",
+    "rigid flow moves the placement and never rewrites geometry; the deforming rows write geometry",
+    "automatic history recompute (OM9-L3-04-05-004) is still M08 work: running the row again recomputes from the stored frames",
+    "only Solid Points ON and Make Down Facing stay disabled, each with its own contract citation"
+  ]
+}

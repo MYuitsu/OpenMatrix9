@@ -1,0 +1,79 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-12-005",
+  "l4_id": "OM9-L4-12-005-03",
+  "title": "Pave Sphere Layout",
+  "generated_at_utc": "2026-10-28T05:47:32Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the builder window at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "Count or X/T produce a Fibonacci sphere layout on the typed radius",
+    "negative": "a radius smaller than the stone is refused"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_pave.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/tests/gem_pave.rs",
+    "crates/om9-app/src/session/gem_pave.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem_pave.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/gem_pave_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "gem_pave",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "8919ef80e425eae9a421a8f25e1bcd367c464a90557bbed7ca914a7792eeb779",
+      "summary": [
+        "test result: ok. 13 passed; 0 failed"
+      ],
+      "test": "crates/om9-core/tests/gem_pave.rs",
+      "package": "om9-core",
+      "binary": "gem_pave"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_pave_panel",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "51c733e083063cc2099387a8a63d7bddec5fa4de7beb81977ddfaa4f9daafab6",
+      "summary": [
+        "test result: ok. 14 passed; 0 failed"
+      ],
+      "test": "crates/om9-app/tests/gem_pave_panel.rs",
+      "package": "om9-app",
+      "binary": "gem_pave_panel"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

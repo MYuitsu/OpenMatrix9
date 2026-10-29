@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-034",
+  "case": "path (0,1,0)->(10,1,0), base (0,0,0), measure (1,0,0), shear (0,1,0), factor 0.5",
+  "expected": "path (0,1,0)->(10,1,0), base (0,0,0), measure (1,0,0), shear (0,1,0), factor 0.5 -> the far end sits at (10,6,0) and the curve is still a line, one Undo entry",
+  "test": "m03_04_01_034_shear_slides_the_section_along_the_picked_direction"
+}

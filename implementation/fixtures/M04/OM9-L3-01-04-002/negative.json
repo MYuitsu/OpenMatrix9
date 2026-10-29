@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-002",
+  "case": "negative",
+  "input": "command payload with a bare Number parameter, a nil required input id, a duplicate role or an empty selection",
+  "expected": "Invalid('feature parameter unit/type'), Invalid('feature input identity'), Invalid('feature input role'), Invalid('feature input selection')",
+  "tests": [
+    "provenance_reopens_the_exact_command_parameters_inputs_and_unit",
+    "provenance_refuses_a_bare_number_a_missing_input_id_and_a_duplicate_role"
+  ]
+}

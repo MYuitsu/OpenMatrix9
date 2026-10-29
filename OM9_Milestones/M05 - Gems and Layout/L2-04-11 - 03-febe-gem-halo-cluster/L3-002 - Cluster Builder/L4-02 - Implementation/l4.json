@@ -18,6 +18,23 @@
   "estimated_scope": null,
   "source_code_implementation_verified": false,
   "purpose": "multi-gem cluster around center/given layout",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M05 - Gems and Layout/L2-04-11 - 03-febe-gem-halo-cluster/L3-002 - Cluster Builder/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 2,
+    "implementation_l4": null
+  },
   "parent_goal": "multi-gem cluster around center/given layout",
   "inputs": [
     "one or more anchor GemIds and layout parameters"
@@ -398,7 +415,13 @@
       "stage": "5/6. Halo, cluster, channel và bezel",
       "why_for_this_task": "Cluster: chọn cỡ melee theo bề rộng lòng kênh, dựng rail bằng offset đường bao viên giữa, chia theo họ hình dạng, và KHÔNG có phép kiểm chồng lấn.",
       "om9_backend": "pure Rust cho chọn cỡ đá, số viên và góc; OCCT cho dải kim loại, bezel và join",
-      "steps_cited": [1, 2, 3, 4, 5],
+      "steps_cited": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
       "algorithm_steps": [
         "H1. Đọc kênh: bề rộng lòng kênh bằng ProfileWidth trừ hai dày tường; đích chọn đá bằng bề rộng lòng trừ hai lần khoảng cách.",
         "H2. Chọn cỡ đá melee: duyệt bảng cỡ của định nghĩa đá và giữ mục có độ trải Y gần đích nhất.",
@@ -407,7 +430,9 @@
         "H5. Đặt viên: chia đều theo chiều dài cung (hoặc công thức nhận biết góc với style 1), bỏ qua chỉ số 0 nếu có viên góc, đặt viên góc tại trung điểm đoạn đóng khi khe nhỏ hơn 0.001."
       ],
       "source_file": "CS/CSBlocks/CSCluster.cs",
-      "source_methods": ["Update"],
+      "source_methods": [
+        "Update"
+      ],
       "boundaries_carried": [
         "Cluster KHÔNG có phép kiểm chồng lấn - chống chồng là do cấu trúc; nếu OM9 thêm phép kiểm thì hành vi sẽ khác Matrix.",
         "Số viên phụ thuộc bề rộng kênh ở halo: đổi bề rộng kênh là đổi số đá. Đây là ghép nối có chủ ý, không phải lỗi.",
@@ -421,4 +446,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `IMPLEMENT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

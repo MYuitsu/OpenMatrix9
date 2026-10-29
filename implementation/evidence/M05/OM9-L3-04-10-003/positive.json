@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-003",
+  "title": "Gem Count On Curve",
+  "cases": [
+    "a 100 mm line with 6 mm stones and a 2 mm gap fits 12 stones",
+    "the first centre is 3 mm and the last 91 mm, so both ends are cleared",
+    "the count matches the independent fit arithmetic in the core test"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}
