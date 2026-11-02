@@ -15,4 +15,4 @@ Nối nhanh hai đầu đường cong bằng đường chuyển tiếp (Rhino Bl
 
 ## Tuỳ chọn (lệnh phụ)
 
-- Continuity=Position/Tangency/Curvature/G3/G4 (mặc định Curvature).
+- Continuity1, Continuity2=Position/Tangency/Curvature cho từng đầu (mặc định Curvature), như Blend của Rhino 5.

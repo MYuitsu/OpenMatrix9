@@ -6,9 +6,10 @@
 //! divide, curve boolean, tween, duplicate edge/border, cross sections, sketches, curves on
 //! surfaces, curve to lines, section, match, silhouette, wireframe and soft edit.
 use om9_addon_abi::session::{
-    Event, Geo, Input, Interactive, Plane, Replacement, Reply, Selected, SelectedMesh, Vec3, Want,
+    Event, Geo, Input, Interactive, Plane, Replacement, Reply, Selected, Vec3, Want,
     add, cross, dist, dot, fmt, norm, scale, sub, unit,
 };
+use om9_addon_geom::pick::CurveRef;
 use om9_addon_geom::cmd::{Collected, Flow, Show, load, save};
 use om9_addon_geom::nurbs::{self, Srf};
 use om9_addon_geom::path::{Path, Target};
@@ -312,43 +313,140 @@ fn chains_to_geo(chains: Vec<(Vec<Vec3>, bool)>) -> Vec<Geo> {
     chains.into_iter().map(|(p, c)| polyline(p, c)).collect()
 }
 
+/// Rhino 5 Intersect / IntersectTwoSets: points where curves cross curves or surfaces,
+/// curves where surfaces / solids / meshes cross each other. `pairs` are the selection
+/// index pairs to test.
+fn intersect_objects(sel: &[&Selected], pairs: &[(usize, usize)]) -> Vec<Geo> {
+    let mut points: Vec<Vec3> = Vec::new();
+    let mut out = Vec::new();
+    let solid = |s: &Selected| s.kind != "curve" && s.mesh.as_ref().is_some_and(|m| !m.triangles.is_empty());
+    for &(i, j) in pairs {
+        let (a, b) = (sel[i], sel[j]);
+        match (CurveRef::of(a), CurveRef::of(b)) {
+            (Some(ca), Some(cb)) => points.extend(curve_curve_points(&ca, &cb)),
+            (Some(c), None) if solid(b) => points.extend(curve_mesh_points(&c, b)),
+            (None, Some(c)) if solid(a) => points.extend(curve_mesh_points(&c, a)),
+            (None, None) if solid(a) && solid(b) => {
+                out.extend(chains_to_geo(section::mesh_intersection(
+                    a.mesh.as_ref().unwrap(),
+                    b.mesh.as_ref().unwrap(),
+                )));
+            }
+            _ => {}
+        }
+    }
+    let mut kept: Vec<Vec3> = Vec::new();
+    for p in points {
+        if !kept.iter().any(|q| dist(*q, p) < 1e-6) {
+            kept.push(p);
+        }
+    }
+    out.extend(kept.into_iter().map(|point| Geo::Point { point }));
+    out
+}
+
+/// Where two curves meet (within 1e-6): close segment pairs of dense samples, refined by
+/// alternating closest points.
+fn curve_curve_points(a: &CurveRef, b: &CurveRef) -> Vec<Vec3> {
+    let n = 400;
+    let pa: Vec<Vec3> = (0..=n).map(|k| a.at(k as f64 / n as f64)).collect();
+    let pb: Vec<Vec3> = (0..=n).map(|k| b.at(k as f64 / n as f64)).collect();
+    let seg = |p: &[Vec3], k: usize| dist(p[k], p[k + 1]);
+    let mut out = Vec::new();
+    for i in 0..n {
+        for j in 0..n {
+            let reach = seg(&pa, i) + seg(&pb, j);
+            let (m1, m2) = (scale(add(pa[i], pa[i + 1]), 0.5), scale(add(pb[j], pb[j + 1]), 0.5));
+            if dist(m1, m2) > reach {
+                continue;
+            }
+            let mut p = m1;
+            let mut q = m2;
+            for _ in 0..60 {
+                q = b.closest(p).1;
+                p = a.closest(q).1;
+            }
+            if dist(p, q) < 1e-6 && !out.iter().any(|r: &Vec3| dist(*r, p) < 1e-6) {
+                out.push(scale(add(p, q), 0.5));
+            }
+        }
+    }
+    out
+}
+
+/// Where a curve passes through a surface, solid or mesh (its render mesh; the exact
+/// surface refines the point when there is one).
+fn curve_mesh_points(c: &CurveRef, s: &Selected) -> Vec<Vec3> {
+    let m = s.mesh.as_ref().unwrap();
+    let srf = s.exact.as_ref().and_then(Srf::of);
+    let n = 800;
+    let pts: Vec<Vec3> = (0..=n).map(|k| c.at(k as f64 / n as f64)).collect();
+    let mut out = Vec::new();
+    for k in 0..n {
+        let (p0, p1) = (pts[k], pts[k + 1]);
+        let d = sub(p1, p0);
+        for t in &m.triangles {
+            let [v0, v1, v2] = [0, 1, 2].map(|i| m.vertices[t[i] as usize]);
+            let (e1, e2) = (sub(v1, v0), sub(v2, v0));
+            let h = cross(d, e2);
+            let det = dot(e1, h);
+            if det.abs() < 1e-14 {
+                continue;
+            }
+            let f = 1.0 / det;
+            let sv = sub(p0, v0);
+            let u = f * dot(sv, h);
+            let q = cross(sv, e1);
+            let v = f * dot(d, q);
+            let w = f * dot(e2, q);
+            if u < -1e-9 || v < -1e-9 || u + v > 1.0 + 1e-9 || !(-1e-9..=1.0 + 1e-9).contains(&w) {
+                continue;
+            }
+            let mut hit = add(p0, scale(d, w));
+            if let Some(f) = &srf {
+                // Refine: the curve point nearest the surface point nearest it.
+                for _ in 0..30 {
+                    let (u, v) = f.closest_st(hit);
+                    hit = c.closest(f.at_st(u, v)).1;
+                }
+            }
+            if !out.iter().any(|r: &Vec3| dist(*r, hit) < 1e-6) {
+                out.push(hit);
+            }
+        }
+    }
+    out
+}
+
 fn intersection(e: &Event) -> Reply {
     on_enter(
         e,
         "Select objects to intersect. Press Enter when done",
         || {
-            let ms = meshes(e);
-            if ms.len() < 2 {
-                return Err("select at least two surfaces or solids".into());
+            let sel: Vec<&Selected> = e.selection.iter().collect();
+            if sel.len() < 2 {
+                return Err("select at least two objects".into());
             }
-            let mut out = Vec::new();
-            for i in 0..ms.len() {
-                for j in i + 1..ms.len() {
-                    out.extend(chains_to_geo(section::mesh_intersection(
-                        ms[i].mesh.as_ref().unwrap(),
-                        ms[j].mesh.as_ref().unwrap(),
-                    )));
-                }
-            }
-            finish_curves("Intersection", out)
+            let pairs: Vec<(usize, usize)> = (0..sel.len())
+                .flat_map(|i| (i + 1..sel.len()).map(move |j| (i, j)))
+                .collect();
+            finish_curves("Intersection", intersect_objects(&sel, &pairs))
         },
     )
 }
 
 #[derive(Default, Serialize, Deserialize)]
 struct FirstSet {
-    meshes: Vec<(String, SelectedMesh)>,
+    /// The first set, by id.
+    #[serde(default)]
+    first: Vec<String>,
 }
 
 fn intersect_two_sets(e: &Event) -> Reply {
     let mut st: FirstSet = load(e);
-    let ms = meshes(e);
-    if st.meshes.is_empty() {
-        if matches!(e.input, Input::Enter) && !ms.is_empty() {
-            st.meshes = ms
-                .iter()
-                .map(|s| (s.id.clone(), s.mesh.clone().unwrap()))
-                .collect();
+    if st.first.is_empty() {
+        if matches!(e.input, Input::Enter) && !e.selection.is_empty() {
+            st.first = e.selection.iter().map(|s| s.id.clone()).collect();
             return Reply::ask(
                 "Select second set of objects. Press Enter when done",
                 save(&st),
@@ -358,10 +456,9 @@ fn intersect_two_sets(e: &Event) -> Reply {
         return Reply::ask("Select first set of objects. Press Enter when done", save(&st))
             .want(Want::Objects);
     }
-    let second: Vec<&Selected> = ms
-        .into_iter()
-        .filter(|s| !st.meshes.iter().any(|m| m.0 == s.id))
-        .collect();
+    let sel: Vec<&Selected> = e.selection.iter().collect();
+    let first: Vec<usize> = (0..sel.len()).filter(|&i| st.first.contains(&sel[i].id)).collect();
+    let second: Vec<usize> = (0..sel.len()).filter(|&i| !st.first.contains(&sel[i].id)).collect();
     if !matches!(e.input, Input::Enter) || second.is_empty() {
         return Reply::ask(
             "Select second set of objects. Press Enter when done".to_owned(),
@@ -369,16 +466,11 @@ fn intersect_two_sets(e: &Event) -> Reply {
         )
         .want(Want::Objects);
     }
-    let mut out = Vec::new();
-    for (_, a) in &st.meshes {
-        for b in &second {
-            out.extend(chains_to_geo(section::mesh_intersection(
-                a,
-                b.mesh.as_ref().unwrap(),
-            )));
-        }
-    }
-    finish_curves("Intersect Two Sets", out)
+    let pairs: Vec<(usize, usize)> = first
+        .iter()
+        .flat_map(|&i| second.iter().map(move |&j| (i, j)))
+        .collect();
+    finish_curves("Intersect Two Sets", intersect_objects(&sel, &pairs))
         .unwrap_or_else(|w| Reply::ask("Select second set of objects. Press Enter when done", save(&st)).want(Want::Objects).refuse(w))
 }
 
@@ -691,7 +783,9 @@ fn uv_apply(e: &Event) -> Reply {
 fn through_points(e: &Event) -> Reply {
     let flow = Flow::new("CurveThroughPt")
         .select_prompt("Select points for control points of curve")
-        .num("Degree", 3.0);
+        .num("Degree", 3.0)
+        .choice("CurveType", &["ControlPoint", "Interpolated"], "ControlPoint")
+        .choice("Knots", &["Uniform", "Chord", "SqrtChrd"], "Chord");
     let make = |c: &Collected| -> Result<Geo, String> {
         let pts: Vec<Vec3> = e
             .selection
@@ -722,7 +816,23 @@ fn through_points(e: &Event) -> Reply {
                 .unwrap();
             order.push(rest.remove(i));
         }
-        om9_addon_geom::control_curve(&order, degree as usize).ok_or_else(|| "No curve through these points".to_owned())
+        // Rhino: ControlPoint puts the control points on the points, Interpolated makes the
+        // curve pass through them (with the Knots spacing).
+        let curve = if c.opt(&flow, "CurveType").eq_ignore_ascii_case("Interpolated") {
+            let knots = om9_addon_geom::interp::Knots::parse(c.opt(&flow, "Knots"))
+                .unwrap_or(om9_addon_geom::interp::Knots::Chord);
+            om9_addon_geom::interp::interpolate(
+                &order,
+                degree as usize,
+                knots,
+                None,
+                None,
+                om9_addon_geom::interp::Closing::Open,
+            )
+        } else {
+            om9_addon_geom::control_curve(&order, degree as usize)
+        };
+        curve.ok_or_else(|| "No curve through these points".to_owned())
     };
     flow.step(
         e,
@@ -808,6 +918,11 @@ struct Clicks {
     on_surface: bool,
     #[serde(default)]
     on_mesh: bool,
+    /// Sketch (Rhino 5): `Closed=Yes` closes the stroke, `Planar=Yes` keeps it flat.
+    #[serde(default)]
+    closed: bool,
+    #[serde(default)]
+    planar: bool,
 }
 
 fn continue_curve(e: &Event) -> Reply {
@@ -942,6 +1057,12 @@ fn from_objects(e: &Event) -> Reply {
     )
 }
 
+/// The Sketch commands take Rhino 5's `Closed` (and on the plain Sketch `Planar`,
+/// `OnSurface`, `OnMesh`) before the stroke starts.
+fn sketch_options(cmd: &str) -> bool {
+    matches!(cmd, SKETCH | SKETCH_SRF | SKETCH_MESH)
+}
+
 /// Sketches and curves through clicked points, optionally on a surface.
 fn draw_on(e: &Event) -> Reply {
     let cmd = e.command.as_str();
@@ -953,7 +1074,7 @@ fn draw_on(e: &Event) -> Reply {
         _ => "Interpolate on Surface",
     };
     let mut st: Clicks = load(e);
-    if cmd == SKETCH
+    if sketch_options(cmd)
         && let Input::Option { name, value } = &e.input
     {
         let flag = |cur: bool| match value.as_deref() {
@@ -963,6 +1084,8 @@ fn draw_on(e: &Event) -> Reply {
         match name.as_str() {
             "OnSurface" => st.on_surface = flag(st.on_surface),
             "OnMesh" => st.on_mesh = flag(st.on_mesh),
+            "Closed" => st.closed = flag(st.closed),
+            "Planar" => st.planar = flag(st.planar),
             _ => {}
         }
     }
@@ -1039,11 +1162,22 @@ fn draw_on(e: &Event) -> Reply {
                             );
                         }
                     }
+                    if st.planar && !on_surface {
+                        // Planar: every point in the plane of the first point (CPlane normal).
+                        let o = s[0];
+                        for q in s.iter_mut() {
+                            *q = sub(*q, scale(n, dot(sub(*q, o), n)));
+                        }
+                    }
+                    let closed = st.closed && s.len() >= 4;
+                    if closed && dist(s[0], *s.last().unwrap()) < 1e-9 {
+                        s.pop();
+                    }
                     let poles = (s.len() / 4).clamp(4, 64).min(s.len());
                     let fitted = if s.len() > 8 {
-                        om9_addon_geom::interp::fit(&s, poles, 3, false).or_else(|| smooth(&s, false))
+                        om9_addon_geom::interp::fit(&s, poles, 3, closed).or_else(|| smooth(&s, closed))
                     } else {
-                        smooth(&s, false)
+                        smooth(&s, closed)
                     };
                     if on_surface {
                         fitted.map(|g| {
@@ -1082,9 +1216,13 @@ fn draw_on(e: &Event) -> Reply {
         (false, false, true) => "Next point. Press Enter when done",
     };
     let mut opts = Vec::new();
-    if cmd == SKETCH && !started {
-        opts.push(om9_addon_abi::session::OptionToken::toggle("OnSurface", st.on_surface));
-        opts.push(om9_addon_abi::session::OptionToken::toggle("OnMesh", st.on_mesh));
+    if sketch_options(cmd) && !started {
+        opts.push(om9_addon_abi::session::OptionToken::toggle("Closed", st.closed));
+        if cmd == SKETCH {
+            opts.push(om9_addon_abi::session::OptionToken::toggle("Planar", st.planar));
+            opts.push(om9_addon_abi::session::OptionToken::toggle("OnSurface", st.on_surface));
+            opts.push(om9_addon_abi::session::OptionToken::toggle("OnMesh", st.on_mesh));
+        }
     }
     if started {
         opts.push(om9_addon_abi::session::OptionToken::action("Undo"));

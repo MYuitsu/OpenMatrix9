@@ -20,8 +20,8 @@ handler = "om9_addon_session"
 interactive = true
 aliases = ["Rebuild", "RebuildCrv"]
 summary = "Dựng lại đường cong với số điểm điều khiển và bậc mới (Rhino Rebuild): nút đều, giữ hai đầu, báo độ lệch lớn nhất."
-steps = ["Select curves to rebuild, Enter.", "Chỉnh PointCount, Degree, DeleteInput, PreserveTangents; xem trước; Enter."]
-options = ["PointCount=10: số điểm điều khiển.", "Degree=3: bậc (1–11).", "DeleteInput=Yes: thay đường gốc; No: tạo đường mới.", "PreserveTangents=No: giữ hướng tiếp tuyến hai đầu."]
+steps = ["Select curves to rebuild, Enter.", "Chỉnh PointCount, Degree, DeleteInput (hoặc SelectMasterCurve để lấy theo đường mẫu); xem trước; Enter."]
+options = ["PointCount=10: số điểm điều khiển.", "Degree=3: bậc (1–11).", "DeleteInput=Yes: thay đường gốc; No: tạo đường mới.", "SelectMasterCurve: chọn đường mẫu, lấy số điểm và bậc của nó (như -Rebuild của Rhino 5)."]
 
 [[commands]]
 id = "CurveCurveEditToolsRefitToTolerance"
@@ -41,7 +41,7 @@ interactive = true
 aliases = ["Blend", "QuickBlend"]
 summary = "Nối nhanh hai đầu đường cong bằng đường chuyển tiếp (Rhino Blend): bấm gần đầu cần nối của mỗi đường."
 steps = ["Select first curve near end: bấm đường thứ nhất gần đầu cần nối.", "Select second curve near end: bấm đường thứ hai; đường nối tạo ngay."]
-options = ["Continuity=Position/Tangency/Curvature/G3/G4 (mặc định Curvature)."]
+options = ["Continuity1, Continuity2=Position/Tangency/Curvature cho từng đầu (mặc định Curvature), như Blend của Rhino 5."]
 
 [[commands]]
 id = "CurveBlendCurvesBlendCrv"
@@ -110,7 +110,7 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["Intersect"]
-summary = "Giao tuyến giữa các vật (Rhino Intersect)."
+summary = "Giao giữa các vật như Rhino 5 Intersect: đường cắt đường hoặc đường xuyên mặt cho điểm, mặt/khối/lưới cắt nhau cho đường giao."
 steps = ["Select objects to intersect, Enter."]
 
 [[commands]]
@@ -120,7 +120,7 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["IntersectTwoSets"]
-summary = "Giao tuyến giữa hai nhóm vật (Rhino IntersectTwoSets)."
+summary = "Giao giữa nhóm thứ nhất và nhóm thứ hai (Rhino 5 IntersectTwoSets): điểm cho đường cong, đường giao cho mặt/khối/lưới."
 steps = ["Select first set of objects, Enter.", "Select second set of objects, Enter."]
 
 [[commands]]
@@ -232,7 +232,7 @@ interactive = true
 aliases = ["CurveThroughPt", "CrvThroughPt"]
 summary = "Dựng đường cong lấy các điểm đã chọn làm điểm điều khiển (Rhino CurveThroughPt)."
 steps = ["Select points for control points of curve, Enter."]
-options = ["Degree=3."]
+options = ["Degree=3.", "CurveType=ControlPoint: điểm là điểm điều khiển; Interpolated: đường đi qua các điểm.", "Knots=Uniform/Chord/SqrtChrd: cách chia nút khi Interpolated."]
 
 [[commands]]
 id = "CurveExtendCurveExtendCurve"
@@ -242,7 +242,7 @@ interactive = true
 aliases = ["Extend", "ExtendCrv"]
 summary = "Kéo dài đường cong như Matrix (_Extend Type=Natural): tới vật biên, theo chiều dài gõ vào, hoặc tự do tới điểm bấm."
 steps = ["Select boundary objects or enter extension length: chọn biên rồi Enter, gõ chiều dài, hoặc Enter để kéo tự do.", "Select curve to extend: bấm gần đầu cần kéo (bấm thêm đường khác được).", "Kéo tự do: End of extension.", "Enter để áp dụng."]
-options = ["Type=Natural/Line/Arc/Smooth (mặc định Natural)."]
+options = ["Type=Natural/Line/Arc/Smooth (mặc định Natural).", "Khi kéo tự do với Type=Arc: Center (bấm tâm cung rồi điểm cuối), ToPoint (cung tiếp tuyến kết thúc đúng điểm bấm)."]
 
 [[commands]]
 id = "CurvePointObjectMarkCurveStart"
@@ -356,8 +356,8 @@ interactive = true
 mesh_data = true
 aliases = ["Sketch"]
 summary = "Phác thảo đường cong bằng các điểm bấm (Rhino Sketch); OnSurface/OnMesh để vẽ lên mặt hoặc lưới."
-steps = ["Start of sketch.", "Next point of sketch (Enter để xong)."]
-options = ["OnSurface=No.", "OnMesh=No."]
+steps = ["Start of sketch: bấm điểm đầu.", "Di chuột để vẽ, bấm lần nữa để kết thúc."]
+options = ["Closed=No: khép kín nét vẽ.", "Planar=No: giữ nét vẽ phẳng.", "OnSurface=No.", "OnMesh=No."]
 
 [[commands]]
 id = "CurveFreeFormSketchonSurface"
@@ -427,7 +427,7 @@ interactive = true
 aliases = ["Match", "MatchCrv"]
 summary = "Khớp đầu một đường cong vào đầu đường cong khác (Rhino Match)."
 steps = ["Select open curve to change - select near end.", "Select open curve to match - select near end.", "Chỉnh tuỳ chọn, Enter."]
-options = ["Continuity=Position/Tangency/Curvature (mặc định Curvature).", "PreserveOtherEnd=None/Position/Tangency/Curvature.", "Join: nối hai đường sau khi khớp."]
+options = ["Continuity=Position/Tangency/Curvature (mặc định Curvature).", "PreserveOtherEnd=None/Position/Tangency/Curvature.", "AverageCurves: cả hai đường cùng đổi, gặp nhau ở giữa.", "Join: nối hai đường sau khi khớp.", "Merge: gộp thành một đường (khi Continuity=Curvature)."]
 
 [[commands]]
 id = "CurveCurveFromObjectsSilhouette"

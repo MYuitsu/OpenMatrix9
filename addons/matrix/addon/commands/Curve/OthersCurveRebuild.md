@@ -11,11 +11,11 @@ Dựng lại đường cong với số điểm điều khiển và bậc mới (
 ## Cách dùng
 
 1. Select curves to rebuild, Enter.
-2. Chỉnh PointCount, Degree, DeleteInput, PreserveTangents; xem trước; Enter.
+2. Chỉnh PointCount, Degree, DeleteInput (hoặc SelectMasterCurve để lấy theo đường mẫu); xem trước; Enter.
 
 ## Tuỳ chọn (lệnh phụ)
 
 - PointCount=10: số điểm điều khiển.
 - Degree=3: bậc (1–11).
 - DeleteInput=Yes: thay đường gốc; No: tạo đường mới.
-- PreserveTangents=No: giữ hướng tiếp tuyến hai đầu.
+- SelectMasterCurve: chọn đường mẫu, lấy số điểm và bậc của nó (như -Rebuild của Rhino 5).

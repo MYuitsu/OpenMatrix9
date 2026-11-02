@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 use super::*;
+use om9_addon_abi::session::SelectedMesh;
 use om9_addon_geom::eval_geo;
 use om9_addon_geom::mesh::{Mesh, cuboid, sphere};
 use serde_json::Value;
@@ -18,15 +19,33 @@ fn event(command: &str, input: Input, selection: Vec<Selected>) -> Event {
 
 fn run(command: &str, selection: Vec<Selected>, inputs: Vec<Input>) -> Reply {
     let mut e = event(command, Input::Start, selection);
-    let mut r = CurveTools::step(&e).unwrap();
+    let mut r = step_rec(&e).unwrap();
     for i in inputs {
         e.state = r.state.clone();
         e.input = i;
-        r = CurveTools::step(&e).unwrap();
+        r = step_rec(&e).unwrap();
         assert!(r.error.is_none(), "{command}: {:?} ({})", r.error, r.prompt);
     }
     assert!(r.done, "{command} did not finish: {}", r.prompt);
     r
+}
+
+/// `CurveTools::step`, recording the shapes of every finished run.
+fn step_rec(e: &Event) -> Result<Reply, String> {
+    let r = CurveTools::step(e).map_err(|x| format!("{x:?}"))?;
+    if r.done {
+        audit(&e.command, &e.selection, &r);
+    }
+    Ok(r)
+}
+
+/// Shape audit: record the run's input and output curves (see `om9_addon_geom::audit`).
+fn audit(command: &str, selection: &[Selected], r: &Reply) {
+    let inputs: Vec<Geo> = selection.iter().filter_map(|s| s.exact.clone()).collect();
+    let mut outputs = r.create.clone();
+    outputs.extend(r.replace.iter().map(|x| x.geo.clone()));
+    let test = std::thread::current().name().unwrap_or("").to_owned();
+    om9_addon_geom::audit::record("curve_tools", &test, command, &inputs, &outputs);
 }
 
 fn pt(p: Vec3) -> Input {
@@ -112,7 +131,7 @@ fn length(g: &Geo) -> f64 {
 #[test]
 fn rebuild_and_refit_keep_the_shape() {
     let c = circle("c", [0.0; 3], 5.0);
-    let start = CurveTools::step(&event(REBUILD, Input::Start, vec![])).unwrap();
+    let start = step_rec(&event(REBUILD, Input::Start, vec![])).unwrap();
     assert_eq!(start.prompt, "Select curves to rebuild");
     let r = run(REBUILD, vec![c.clone()], vec![Input::Option { name: "PointCount".into(), value: Some("12".into()) }, Input::Enter]);
     let g = &r.replace[0].geo;
@@ -137,7 +156,7 @@ fn rebuild_and_refit_keep_the_shape() {
 #[test]
 fn divide_by_count_length_and_split() {
     let l = line("l", [0.0; 3], [10.0, 0.0, 0.0]);
-    let start = CurveTools::step(&event(DIVIDE, Input::Start, vec![l.clone()])).unwrap();
+    let start = step_rec(&event(DIVIDE, Input::Start, vec![l.clone()])).unwrap();
     assert_eq!(start.prompt, "Number of segments <10>");
     let r = run(DIVIDE, vec![l.clone()], vec![num(5.0)]);
     assert_eq!(r.create.len(), 6);
@@ -204,7 +223,7 @@ fn enter(command: &str, mut r: Reply, picks: &[(Selected, Vec3)]) -> Reply {
     let mut e = event(command, Input::Enter, picks.iter().map(|p| p.0.clone()).collect());
     e.state = r.state.clone();
     e.pick = picks.last().map(|p| p.1);
-    r = CurveTools::step(&e).unwrap();
+    r = step_rec(&e).unwrap();
     assert!(r.error.is_none(), "{command}: {:?}", r.error);
     r
 }
@@ -258,7 +277,7 @@ fn match_moves_the_picked_end_onto_the_other_curve() {
     let arc = curve("b", Geo::Arc { center: [3.0, 6.0, 0.0], x: [-1.0, 0.0, 0.0], y: [0.0, 1.0, 0.0], radius: 2.0, angle: 1.5 }, false);
     let picks = [(a.clone(), [-1.0, 0.0, 0.0]), (arc.clone(), eval_geo(&arc.exact.clone().unwrap(), 0.05).unwrap())];
     let r = picking(MATCH, &[], &picks);
-    assert_eq!(r.options.iter().map(|o| o.name.as_str()).filter(|n| *n != "Undo").collect::<Vec<_>>(), ["Continuity", "PreserveOtherEnd", "Join"]);
+    assert_eq!(r.options.iter().map(|o| o.name.as_str()).filter(|n| *n != "Undo").collect::<Vec<_>>(), ["Continuity", "PreserveOtherEnd", "AverageCurves", "Join", "Merge"]);
     let r = enter(MATCH, r, &picks);
     let g = replaced(&r, "a");
     let (p, q) = ends_of(g);
@@ -297,7 +316,7 @@ fn offset_prompts_and_polyline_corners() {
         assert_eq!(r.prompt, "Side to offset");
         let mut e = event(OFFSET, pt(side), vec![poly.clone()]);
         e.state = r.state.clone();
-        let r = CurveTools::step(&e).unwrap();
+        let r = step_rec(&e).unwrap();
         assert!(r.done, "{:?}", r.error);
         r.create
     };
@@ -317,7 +336,7 @@ fn offset_prompts_and_polyline_corners() {
     e.selection = vec![poly.clone()];
     e.state = rr.state.clone();
     e.input = pt([5.0, 3.0, 0.0]);
-    rr = CurveTools::step(&e).unwrap();
+    rr = step_rec(&e).unwrap();
     assert!(matches!(&rr.create[0], Geo::Polyline { points, .. } if dist(points[1], [9.0, 1.0, 0.0]) < 1e-12), "{:?}", rr.create);
     // BothSides with a flat cap: one closed outline.
     let both = go(&[("BothSides", "Yes"), ("Cap", "Flat")]);
@@ -342,11 +361,11 @@ fn offset_of_a_free_curve_stays_within_tolerance() {
 /// with the click point; `options` are typed first (`Radius=2`).
 fn picking(command: &str, options: &[(&str, &str)], picks: &[(Selected, Vec3)]) -> Reply {
     let mut e = event(command, Input::Start, vec![]);
-    let mut r = CurveTools::step(&e).unwrap();
+    let mut r = step_rec(&e).unwrap();
     for (name, value) in options {
         e.state = r.state.clone();
         e.input = Input::Option { name: (*name).into(), value: Some((*value).into()) };
-        r = CurveTools::step(&e).unwrap();
+        r = step_rec(&e).unwrap();
         assert!(r.error.is_none(), "{command}: {:?}", r.error);
     }
     for (sel, at) in picks {
@@ -354,7 +373,7 @@ fn picking(command: &str, options: &[(&str, &str)], picks: &[(Selected, Vec3)]) 
         e.selection.push(sel.clone());
         e.pick = Some(*at);
         e.input = Input::Selection;
-        r = CurveTools::step(&e).unwrap();
+        r = step_rec(&e).unwrap();
         assert!(r.error.is_none(), "{command}: {:?} ({})", r.error, r.prompt);
     }
     r
@@ -452,20 +471,20 @@ fn chamfer_measures_from_the_corner() {
 #[test]
 fn clicking_a_number_option_asks_for_it() {
     let mut e = event(FILLET, Input::Start, vec![]);
-    let mut r = CurveTools::step(&e).unwrap();
+    let mut r = step_rec(&e).unwrap();
     e.state = r.state.clone();
     e.input = Input::Option { name: "Radius".into(), value: None };
-    r = CurveTools::step(&e).unwrap();
+    r = step_rec(&e).unwrap();
     assert_eq!(r.prompt, "Radius <1>");
     e.state = r.state.clone();
     e.input = num(0.5);
-    r = CurveTools::step(&e).unwrap();
+    r = step_rec(&e).unwrap();
     assert_eq!(r.prompt, "Select first curve to fillet");
     assert_eq!(r.options[0].value.as_deref(), Some("0.5"));
     // A number typed while picking sets Radius too (Rhino habit).
     e.state = r.state.clone();
     e.input = num(3.0);
-    r = CurveTools::step(&e).unwrap();
+    r = step_rec(&e).unwrap();
     assert_eq!(r.options[0].value.as_deref(), Some("3"));
 }
 
@@ -495,7 +514,7 @@ fn ext_step(r: &Reply, input: Input, sel: Vec<Selected>, pick: Option<Vec3>) -> 
     let mut e = event(EXTEND, input, sel);
     e.state = r.state.clone();
     e.pick = pick;
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     assert!(r.error.is_none(), "{:?} ({})", r.error, r.prompt);
     r
 }
@@ -503,7 +522,7 @@ fn ext_step(r: &Reply, input: Input, sel: Vec<Selected>, pick: Option<Vec3>) -> 
 #[test]
 fn extend_by_length_to_boundaries_and_dynamically() {
     let l = line("l", [0.0; 3], [10.0, 0.0, 0.0]);
-    let start = CurveTools::step(&event(EXTEND, Input::Start, vec![])).unwrap();
+    let start = step_rec(&event(EXTEND, Input::Start, vec![])).unwrap();
     assert_eq!(start.prompt, "Select boundary objects or enter extension length. Press Enter for dynamic extend");
     assert_eq!(start.options[0].value.as_deref(), Some("Natural"));
     // A length, then a pick near the start: the start grows.
@@ -562,7 +581,7 @@ fn csec_makes_profiles_through_the_rails() {
             line(&format!("r{k}"), [0.0, y, z], [10.0, y, z])
         })
         .collect();
-    let start = CurveTools::step(&event(CROSS_SECTION, Input::Start, vec![])).unwrap();
+    let start = step_rec(&event(CROSS_SECTION, Input::Start, vec![])).unwrap();
     assert_eq!(start.prompt, "Select longitudinal curves in order. Press Enter when done");
     let r = run(CROSS_SECTION, rails.clone(), vec![pt([5.0, -5.0, 0.0]), pt([5.0, 5.0, 0.0]), Input::Enter]);
     assert_eq!(r.create.len(), 1);
@@ -647,9 +666,9 @@ fn curve_boolean_of_two_squares() {
     let step = |r: &Reply, input: Input| {
         let mut e = event(CURVE_BOOLEAN, input, sel.clone());
         e.state = r.state.clone();
-        CurveTools::step(&e).unwrap()
+        step_rec(&e).unwrap()
     };
-    let r = CurveTools::step(&event(CURVE_BOOLEAN, Input::Start, sel.clone())).unwrap();
+    let r = step_rec(&event(CURVE_BOOLEAN, Input::Start, sel.clone())).unwrap();
     assert_eq!(r.prompt, "Click inside the regions to keep. Press Enter when done");
     assert_eq!(r.options.iter().map(|o| o.name.as_str()).collect::<Vec<_>>(), ["DeleteInput", "CombineRegions", "AllRegions"]);
     let perimeter = |g: &Geo| length(g);
@@ -685,14 +704,14 @@ fn curve_boolean_keeps_circles_exact_and_finds_rings() {
     let b = circle("b", [0.0; 3], 1.0);
     let line_x = line("l", [-5.0, 0.0, 0.0], [5.0, 0.0, 0.0]);
     let sel = vec![a, b, line_x];
-    let start = CurveTools::step(&event(CURVE_BOOLEAN, Input::Start, sel.clone())).unwrap();
+    let start = step_rec(&event(CURVE_BOOLEAN, Input::Start, sel.clone())).unwrap();
     // The upper half of the ring between the circles.
     let mut e = event(CURVE_BOOLEAN, pt([0.0, 2.0, 0.0]), sel.clone());
     e.state = start.state.clone();
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     let mut e = event(CURVE_BOOLEAN, Input::Enter, sel.clone());
     e.state = r.state.clone();
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     assert_eq!(r.create.len(), 1);
     let g = &r.create[0];
     let want = std::f64::consts::PI * (3.0 + 1.0) + 2.0 * 2.0;
@@ -703,13 +722,13 @@ fn curve_boolean_keeps_circles_exact_and_finds_rings() {
     }
     // Two circles alone: the ring has the small circle as a hole.
     let sel = vec![circle("a", [0.0; 3], 3.0), circle("b", [0.0; 3], 1.0)];
-    let start = CurveTools::step(&event(CURVE_BOOLEAN, Input::Start, sel.clone())).unwrap();
+    let start = step_rec(&event(CURVE_BOOLEAN, Input::Start, sel.clone())).unwrap();
     let mut e = event(CURVE_BOOLEAN, pt([2.0, 0.0, 0.0]), sel.clone());
     e.state = start.state.clone();
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     let mut e = event(CURVE_BOOLEAN, Input::Enter, sel.clone());
     e.state = r.state.clone();
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     assert_eq!(r.create.len(), 2, "outer circle and the hole");
 }
 
@@ -758,10 +777,10 @@ fn soft_edit_moves_only_near_the_pick() {
     assert_eq!(r.options.iter().map(|o| o.name.as_str()).filter(|n| *n != "Undo").collect::<Vec<_>>(), ["Distance", "Copy", "FixEnds"]);
     let mut e = event(SOFT_EDIT, pt([10.0, 0.0, 0.0]), vec![l.clone()]);
     e.state = r.state.clone();
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     let mut e = event(SOFT_EDIT, pt([10.0, 3.0, 0.0]), vec![l.clone()]);
     e.state = r.state.clone();
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     assert!(r.done, "{:?} {}", r.error, r.prompt);
     let g = &r.replace[0].geo;
     let p = nurbs::samples(g, 400);
@@ -775,7 +794,7 @@ fn soft_edit_moves_only_near_the_pick() {
 #[test]
 fn every_command_answers_start() {
     for c in CurveTools::SESSION_COMMANDS {
-        let r = CurveTools::step(&event(c, Input::Start, vec![])).unwrap();
+        let r = step_rec(&event(c, Input::Start, vec![])).unwrap();
         assert!(!r.done, "{c}");
         assert!(!r.prompt.is_empty(), "{c}");
     }
@@ -827,7 +846,7 @@ fn offsets_on_and_normal_to_a_surface() {
         let mut e = event(cmd, input, sel);
         e.state = st.clone();
         e.pick = pick;
-        let r = CurveTools::step(&e).unwrap();
+        let r = step_rec(&e).unwrap();
         assert!(r.error.is_none(), "{cmd}: {:?} ({})", r.error, r.prompt);
         r
     };
@@ -858,14 +877,14 @@ fn extract_isocurves_by_clicking() {
     let srf = patch("p", 0.0);
     let sel = vec![srf.clone()];
     let mut e = event(ISOCURVE, Input::Start, sel.clone());
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     assert_eq!(r.prompt, "Select isocurve location on surface. Press Enter when done");
     assert_eq!(r.options.iter().map(|o| o.name.as_str()).collect::<Vec<_>>(), ["Direction", "Toggle", "ExtractAll"]);
     let mut state = r.state.clone();
     for input in [pt([2.0, 3.0, 0.0]), Input::Option { name: "Direction".into(), value: Some("Both".into()) }, pt([-4.0, 1.0, 0.0]), Input::Enter] {
         e.state = state.clone();
         e.input = input;
-        let r = CurveTools::step(&e).unwrap();
+        let r = step_rec(&e).unwrap();
         assert!(r.error.is_none(), "{:?}", r.error);
         state = r.state.clone();
         if r.done {
@@ -896,23 +915,23 @@ fn points_marks_continue_and_sketch_prompts() {
     // Continue from the start when the start was picked.
     let mut e = event(CONTINUE_CURVE, Input::Selection, vec![l.clone()]);
     e.pick = Some([1.0, 0.0, 0.0]);
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     assert_eq!(r.prompt, "Next point. Press Enter when done");
     assert_eq!(r.rubber_from, Some([0.0; 3]));
     e.state = r.state.clone();
     e.input = pt([-5.0, 3.0, 0.0]);
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     e.state = r.state.clone();
     e.input = Input::Enter;
-    let r = CurveTools::step(&e).unwrap();
+    let r = step_rec(&e).unwrap();
     let (_, q) = ends_of(&r.replace[0].geo);
     assert!(dist(q, [-5.0, 3.0, 0.0]) < 1e-9, "{q:?}");
-    let r = CurveTools::step(&event(SKETCH, Input::Start, vec![])).unwrap();
+    let r = step_rec(&event(SKETCH, Input::Start, vec![])).unwrap();
     assert_eq!(r.prompt, "Start of sketch");
-    assert_eq!(r.options.iter().map(|o| o.name.as_str()).collect::<Vec<_>>(), ["OnSurface", "OnMesh"]);
+    assert_eq!(r.options.iter().map(|o| o.name.as_str()).collect::<Vec<_>>(), ["Closed", "Planar", "OnSurface", "OnMesh"]);
     let mut e = event(SKETCH, Input::Option { name: "OnSurface".into(), value: None }, vec![]);
     e.state = r.state.clone();
-    assert_eq!(CurveTools::step(&e).unwrap().prompt, "Select surface to sketch on");
+    assert_eq!(step_rec(&e).unwrap().prompt, "Select surface to sketch on");
 }
 
 #[test]
@@ -928,7 +947,7 @@ fn project_lands_on_every_layer() {
 #[test]
 fn sketch_follows_the_pointer() {
     let mut e = event(SKETCH, Input::Start, vec![]);
-    let mut r = CurveTools::step(&e).unwrap();
+    let mut r = step_rec(&e).unwrap();
     let path = |x: f64| [x, (x * 0.5).sin(), 0.0];
     let mut steps = vec![pt(path(0.0))];
     steps.extend((1..200).map(|i| Input::Hover { point: path(i as f64 * 0.05) }));
@@ -936,7 +955,7 @@ fn sketch_follows_the_pointer() {
     for input in steps {
         e.state = r.state.clone();
         e.input = input;
-        r = CurveTools::step(&e).unwrap();
+        r = step_rec(&e).unwrap();
         assert!(r.error.is_none(), "{:?}", r.error);
         if !r.done {
             assert!(r.track, "the host keeps hover states");
@@ -1000,4 +1019,176 @@ fn project_keeps_corners_and_only_the_part_on_the_surface() {
     for p in &pent {
         assert!(points.iter().any(|q| dist(*q, [p[0], p[1], 3.0]) < 1e-9));
     }
+}
+
+#[test]
+fn through_points_interpolates_extend_to_point_and_rebuild_to_master() {
+    // CurveThroughPt CurveType=Interpolated: the curve passes through the points.
+    let pts: Vec<Selected> = [[0.0, 0.0, 0.0], [2.0, 2.0, 0.0], [4.0, 0.0, 0.0], [6.0, 2.0, 0.0]]
+        .iter()
+        .enumerate()
+        .map(|(i, p)| point_obj(&format!("p{i}"), *p))
+        .collect();
+    let r = run(THROUGH_POINTS, pts, vec![Input::Option { name: "CurveType".into(), value: Some("Interpolated".into()) }, Input::Enter]);
+    let c = curve("c", r.create[0].clone(), false);
+    let cr = om9_addon_geom::pick::CurveRef::of(&c).unwrap();
+    for p in [[2.0, 2.0, 0.0], [4.0, 0.0, 0.0]] {
+        assert!(dist(cr.closest(p).1, p) < 1e-6, "passes through {p:?}");
+    }
+    // Extend Type=Arc ToPoint: a tangent arc ending exactly at the pick.
+    let l = line("l", [0.0; 3], [10.0, 0.0, 0.0]);
+    let mut e = event(EXTEND, Input::Start, vec![]);
+    let mut state = Value::Null;
+    let mut finished = false;
+    for input in [Input::Option { name: "Type".into(), value: Some("Arc".into()) }, Input::Enter, Input::Selection, Input::Option { name: "ToPoint".into(), value: None }, pt([14.0, 4.0, 0.0]), Input::Enter] {
+        e.state = state.clone();
+        e.input = input.clone();
+        if matches!(input, Input::Selection) {
+            e.pick = Some([9.0, 0.0, 0.0]);
+            e.selection = vec![l.clone()];
+        }
+        let r = step_rec(&e).unwrap();
+        assert!(r.error.is_none(), "{:?} {}", r.error, r.prompt);
+        state = r.state.clone();
+        if r.done {
+            let g = &r.replace[0].geo;
+            let (_, q) = ends_of(g);
+            assert!(dist(q, [14.0, 4.0, 0.0]) < 1e-6, "ends at the pick: {q:?}");
+            let s = nurbs::samples(g, 400);
+            // Tangent at the joint: no kink, the arc leaves along +x.
+            assert!(s.iter().all(|p| p[1] >= -1e-9), "bends toward the point");
+            finished = true;
+        }
+    }
+    assert!(finished, "Extend finished");
+    // Rebuild SelectMasterCurve: the curves take the master's point count and degree.
+    let master = curve("m", om9_addon_geom::control_curve(&[[0.0, 5.0, 0.0], [1.0, 6.0, 0.0], [2.0, 5.0, 0.0], [3.0, 6.0, 0.0], [4.0, 5.0, 0.0]], 2).unwrap(), false);
+    let mut e = event(REBUILD, Input::Start, vec![l.clone()]);
+    let r = step_rec(&e).unwrap();
+    assert!(r.options.iter().any(|o| o.name == "SelectMasterCurve"));
+    e.state = r.state.clone();
+    e.input = Input::Option { name: "SelectMasterCurve".into(), value: None };
+    let r = step_rec(&e).unwrap();
+    assert_eq!(r.prompt, "Select master curve");
+    e.state = r.state.clone();
+    e.input = Input::Selection;
+    e.selection = vec![l.clone(), master];
+    let r = step_rec(&e).unwrap();
+    assert!(r.messages.iter().any(|m| m.contains("5 points, degree 2")), "{:?}", r.messages);
+    e.state = r.state.clone();
+    e.input = Input::Enter;
+    let r = step_rec(&e).unwrap();
+    assert!(r.done, "{}", r.prompt);
+    assert_eq!(r.replace.len(), 1, "the master is not rebuilt");
+    let Geo::Nurbs { degree, points, .. } = &r.replace[0].geo else { panic!() };
+    assert_eq!((*degree, points.len()), (2, 5));
+}
+
+#[test]
+fn rhino5_sketch_closed_and_match_average() {
+    // Sketch Closed=Yes: the stroke comes back closed.
+    let mut e = event(SKETCH, Input::Start, vec![]);
+    let mut r = step_rec(&e).unwrap();
+    let mut steps = vec![Input::Option { name: "Closed".into(), value: Some("Yes".into()) }, pt([5.0, 0.0, 0.0])];
+    steps.extend((1..100).map(|i| {
+        let a = i as f64 * 0.06;
+        Input::Hover { point: [5.0 * a.cos(), 5.0 * a.sin(), 0.0] }
+    }));
+    steps.push(pt([5.0 * 5.94f64.cos(), 5.0 * 5.94f64.sin(), 0.0]));
+    for input in steps {
+        e.state = r.state.clone();
+        e.input = input;
+        r = step_rec(&e).unwrap();
+    }
+    assert!(r.done, "{}", r.prompt);
+    let (p, q) = ends_of(&r.create[0]);
+    assert!(dist(p, q) < 1e-6, "closed: {p:?} {q:?}");
+    // Match AverageCurves: both curves meet halfway between the picked ends.
+    let a = line("a", [0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let b = line("b", [12.0, 2.0, 0.0], [20.0, 2.0, 0.0]);
+    let mut e = event(MATCH, Input::Selection, vec![a.clone()]);
+    e.pick = Some([9.0, 0.0, 0.0]);
+    let r = step_rec(&e).unwrap();
+    e.state = r.state.clone();
+    e.selection = vec![a.clone(), b.clone()];
+    e.pick = Some([13.0, 2.0, 0.0]);
+    let r = step_rec(&e).unwrap();
+    e.state = r.state.clone();
+    e.input = Input::Option { name: "AverageCurves".into(), value: Some("Yes".into()) };
+    let r = step_rec(&e).unwrap();
+    e.state = r.state.clone();
+    e.input = Input::Enter;
+    let r = step_rec(&e).unwrap();
+    assert!(r.done, "{} {:?}", r.prompt, r.error);
+    assert_eq!(r.replace.len(), 2, "both curves change");
+    let (_, ea) = ends_of(&r.replace[0].geo);
+    let (sb, _) = ends_of(&r.replace[1].geo);
+    assert!(dist(ea, [11.0, 1.0, 0.0]) < 1e-6 && dist(sb, [11.0, 1.0, 0.0]) < 1e-6, "{ea:?} {sb:?}");
+}
+
+/// Shape audit of the commands the other tests do not finish: each runs as a user would
+/// and must make the documented shape.
+#[test]
+fn audit_remaining_commands() {
+    let l = line("l", [0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    // Mark Curve Start: a point at the start.
+    let r = run(MARK_START, vec![l.clone()], vec![Input::Enter]);
+    assert_eq!(r.create, vec![Geo::Point { point: [0.0; 3] }]);
+    // Intersect Two Sets: a crossing line in the second set gives one point.
+    let m = line("m", [5.0, -5.0, 0.0], [5.0, 5.0, 0.0]);
+    let mut e = event(INTERSECT_TWO, Input::Start, vec![l.clone()]);
+    let mut r = step_rec(&e).unwrap();
+    for (input, sel) in [(Input::Enter, vec![l.clone()]), (Input::Selection, vec![l.clone(), m.clone()]), (Input::Enter, vec![l.clone(), m.clone()])] {
+        e.state = r.state.clone();
+        e.input = input;
+        e.selection = sel;
+        r = step_rec(&e).unwrap();
+    }
+    assert!(r.done, "{} {:?}", r.prompt, r.error);
+    let hit = r.create.iter().find_map(|g| match g { Geo::Point { point } => Some(*point), _ => None });
+    assert!(hit.is_some_and(|p| dist(p, [5.0, 0.0, 0.0]) < 1e-6), "{:?}", r.create);
+    // Extract Wireframe of a patch: its four border lines at least.
+    let srf = patch("p", 0.0);
+    let r = run(WIREFRAME, vec![srf.clone()], vec![Input::Enter]);
+    assert!(!r.create.is_empty());
+    // Interpolate on Surface: the curve lies on the patch.
+    let mut e = event(INTERP_ON_SRF, Input::Start, vec![srf.clone()]);
+    let mut r = step_rec(&e).unwrap();
+    for input in [pt([-5.0, 0.0, 3.0]), pt([0.0, 4.0, 3.0]), pt([5.0, 0.0, 3.0]), Input::Enter] {
+        e.state = r.state.clone();
+        e.input = input;
+        r = step_rec(&e).unwrap();
+    }
+    assert!(r.done, "{}", r.prompt);
+    for p in nurbs::samples(&r.create[0], 50) {
+        assert!(p[2].abs() < 1e-6, "on the surface: {p:?}");
+    }
+    // Continue Interpolated Curve from the end of a line.
+    let mut e = event(CONTINUE_INTERP, Input::Selection, vec![l.clone()]);
+    e.pick = Some([9.0, 0.0, 0.0]);
+    let mut r = step_rec(&e).unwrap();
+    for input in [pt([15.0, 5.0, 0.0]), pt([20.0, 0.0, 0.0]), Input::Enter] {
+        e.state = r.state.clone();
+        e.input = input;
+        r = step_rec(&e).unwrap();
+    }
+    assert!(r.done, "{}", r.prompt);
+    let g = r.replace.first().map(|x| x.geo.clone()).or_else(|| r.create.first().cloned()).unwrap();
+    let (p, q) = ends_of(&g);
+    assert!(dist(p, [0.0; 3]) < 1e-6 && dist(q, [20.0, 0.0, 0.0]) < 1e-6, "{p:?} {q:?}");
+}
+
+#[test]
+fn intersect_makes_points_for_curves_like_rhino5() {
+    // A vertical line through a patch: one point on the surface; two crossing lines: one point.
+    let srf = patch("p", 3.0);
+    let v = line("v", [1.0, 2.0, -5.0], [1.0, 2.0, 5.0]);
+    let r = run(INTERSECTION, vec![srf, v], vec![Input::Enter]);
+    assert_eq!(r.create.len(), 1, "{:?}", r.create);
+    let Geo::Point { point } = r.create[0] else { panic!("{:?}", r.create) };
+    assert!(dist(point, [1.0, 2.0, 3.0]) < 1e-6, "{point:?}");
+    let a = line("a", [0.0, 0.0, 0.0], [10.0, 10.0, 0.0]);
+    let b = circle("b", [5.0, 5.0, 0.0], 2.0);
+    let r = run(INTERSECTION, vec![a, b], vec![Input::Enter]);
+    assert_eq!(r.create.len(), 2, "a line through a circle crosses it twice");
 }

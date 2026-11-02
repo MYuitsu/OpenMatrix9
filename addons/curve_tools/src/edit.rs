@@ -2,7 +2,7 @@
 //! Rebuild, FitCrv, Divide, Convert and TweenCurves as Matrix (Rhino) runs them.
 //!
 //! - Rebuild: `Select curves to rebuild`, then the Rebuild Curve choices on the command line
-//!   (`PointCount=10 Degree=3 DeleteInput=Yes PreserveTangents=No`), Enter. Uniform knots,
+//!   (`PointCount=10 Degree=3 DeleteInput=Yes SelectMasterCurve`, as Rhino 5's -Rebuild), Enter. Uniform knots,
 //!   least-squares through the old shape, ends kept; the maximum deviation is reported.
 //! - FitCrv: `Select curves to fit`, `DeleteInput=Yes Degree=3 FittingTolerance=0.001`, Enter:
 //!   the fewest control points within the tolerance.
@@ -113,14 +113,81 @@ fn rebuilt(c: &CurveRef, count: usize, degree: usize, tangents: bool) -> Option<
     Some(g)
 }
 
+/// Rebuild's own state around the Flow: Rhino's `SelectMasterCurve` picks a curve whose
+/// point count and degree the rebuilt curves take (the master itself is not rebuilt).
+#[derive(Default, Serialize, Deserialize)]
+struct RebuildState {
+    #[serde(default)]
+    flow: serde_json::Value,
+    #[serde(default)]
+    master: Option<String>,
+    #[serde(default)]
+    picking: bool,
+    #[serde(default)]
+    before: Vec<String>,
+}
+
 pub(crate) fn rebuild(e: &Event) -> Reply {
+    let mut w: RebuildState = load(e);
+    let mut inner = e.clone();
+    inner.state = w.flow.clone();
+    if let Input::Option { name, .. } = &e.input
+        && name.eq_ignore_ascii_case("SelectMasterCurve")
+    {
+        w.picking = true;
+        w.before = e.selection.iter().map(|s| s.id.clone()).collect();
+        return Reply::ask("Select master curve", save(&w)).want(om9_addon_abi::session::Want::Objects);
+    }
+    if w.picking {
+        let master = match e.pick {
+            Some(_) => CurveRef::picked(e, &[]).map(|c| c.0),
+            None => CurveRef::all(e).into_iter().find(|c| !w.before.contains(&c.id)),
+        };
+        let Some(master) = master else {
+            return Reply::ask("Select master curve", save(&w)).want(om9_addon_abi::session::Want::Objects);
+        };
+        let (count, degree) = match master.geo() {
+            Geo::Nurbs { degree, points, .. } => (points.len(), degree),
+            Geo::Polyline { points, closed } => (points.len() + usize::from(closed), 1),
+            Geo::Line { .. } => (2, 1),
+            _ => {
+                return Reply::ask("Select master curve", save(&w))
+                    .want(om9_addon_abi::session::Want::Objects)
+                    .refuse("The master curve must be a NURBS curve or a polyline");
+            }
+        };
+        w.picking = false;
+        w.master = Some(master.id.clone());
+        inner.selection.retain(|s| s.id != master.id);
+        let mut r = Reply::default();
+        for (name, value) in [("PointCount", count as f64), ("Degree", degree as f64)] {
+            inner.input = Input::Option { name: name.into(), value: Some(fmt(value)) };
+            r = rebuild_flow(&inner);
+            inner.state = r.state.clone();
+        }
+        w.flow = r.state.clone();
+        r.state = save(&w);
+        return r.say(format!("Rebuild: {count} points, degree {degree} from the master curve"));
+    }
+    if let Some(m) = &w.master {
+        inner.selection.retain(|s| &s.id != m);
+    }
+    let mut r = rebuild_flow(&inner);
+    w.flow = r.state.clone();
+    r.state = save(&w);
+    if !r.done {
+        r.options.push(om9_addon_abi::session::OptionToken::action("SelectMasterCurve"));
+    }
+    r
+}
+
+fn rebuild_flow(e: &Event) -> Reply {
     let flow = Flow::new("Rebuild")
         .select_prompt("Select curves to rebuild")
         .confirm("Rebuild. Press Enter when done")
         .num("PointCount", 10.0)
         .num("Degree", 3.0)
-        .toggle("DeleteInput", true)
-        .toggle("PreserveTangents", false);
+        .toggle("DeleteInput", true);
     let make = |c: &Collected| -> Result<(Vec<(String, Geo)>, f64), String> {
         let count = c.num(&flow, "PointCount").round() as usize;
         let degree = c.num(&flow, "Degree").round() as usize;
@@ -136,7 +203,7 @@ pub(crate) fn rebuild(e: &Event) -> Reply {
         let mut worst: f64 = 0.0;
         let mut out = Vec::new();
         for cv in CurveRef::all(e) {
-            let g = rebuilt(&cv, count, degree, c.yes(&flow, "PreserveTangents"))
+            let g = rebuilt(&cv, count, degree, false)
                 .ok_or("Rebuild failed")?;
             worst = worst.max(deviation(&cv, &g));
             out.push((cv.id.clone(), g));

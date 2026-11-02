@@ -10,10 +10,12 @@ Phác thảo đường cong bằng các điểm bấm (Rhino Sketch); OnSurface/
 
 ## Cách dùng
 
-1. Start of sketch.
-2. Next point of sketch (Enter để xong).
+1. Start of sketch: bấm điểm đầu.
+2. Di chuột để vẽ, bấm lần nữa để kết thúc.
 
 ## Tuỳ chọn (lệnh phụ)
 
+- Closed=No: khép kín nét vẽ.
+- Planar=No: giữ nét vẽ phẳng.
 - OnSurface=No.
 - OnMesh=No.

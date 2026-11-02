@@ -18,3 +18,4 @@ Kéo dài đường cong như Matrix (_Extend Type=Natural): tới vật biên, 
 ## Tuỳ chọn (lệnh phụ)
 
 - Type=Natural/Line/Arc/Smooth (mặc định Natural).
+- Khi kéo tự do với Type=Arc: Center (bấm tâm cung rồi điểm cuối), ToPoint (cung tiếp tuyến kết thúc đúng điểm bấm).

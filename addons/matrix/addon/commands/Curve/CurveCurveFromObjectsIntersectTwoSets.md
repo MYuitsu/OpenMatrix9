@@ -1,6 +1,6 @@
 # Intersect Two Sets
 
-Giao tuyến giữa hai nhóm vật (Rhino IntersectTwoSets).
+Giao giữa nhóm thứ nhất và nhóm thứ hai (Rhino 5 IntersectTwoSets): điểm cho đường cong, đường giao cho mặt/khối/lưới.
 
 - **Mã lệnh:** `CurveCurveFromObjectsIntersectTwoSets`
 - **Vị trí:** menu Curve, ô số 58

@@ -15,3 +15,5 @@ Dựng đường cong lấy các điểm đã chọn làm điểm điều khiể
 ## Tuỳ chọn (lệnh phụ)
 
 - Degree=3.
+- CurveType=ControlPoint: điểm là điểm điều khiển; Interpolated: đường đi qua các điểm.
+- Knots=Uniform/Chord/SqrtChrd: cách chia nút khi Interpolated.

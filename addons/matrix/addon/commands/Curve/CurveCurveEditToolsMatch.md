@@ -18,4 +18,6 @@ Khớp đầu một đường cong vào đầu đường cong khác (Rhino Match
 
 - Continuity=Position/Tangency/Curvature (mặc định Curvature).
 - PreserveOtherEnd=None/Position/Tangency/Curvature.
+- AverageCurves: cả hai đường cùng đổi, gặp nhau ở giữa.
 - Join: nối hai đường sau khi khớp.
+- Merge: gộp thành một đường (khi Continuity=Curvature).

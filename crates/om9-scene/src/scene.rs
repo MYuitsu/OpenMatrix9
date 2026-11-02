@@ -374,6 +374,24 @@ fn polyline_display_count(segments: &[Curve]) -> Result<usize> {
     })
 }
 
+/// Uniform display samples for a NURBS curve: 256, or 24 per span for curves with many
+/// spans (a spiral or helix of many turns would look faceted with 256), at most 16384.
+fn nurbs_display_segments(c: &om9_core::geometry::NurbsCurve) -> usize {
+    if c.degree <= 1 {
+        return 256;
+    }
+    let mut spans = 1usize;
+    let inside = c.knots.iter().filter(|t| **t > c.domain[0] && **t < c.domain[1]);
+    let mut last = f64::NAN;
+    for &t in inside {
+        if t != last {
+            spans += 1;
+            last = t;
+        }
+    }
+    spans.saturating_mul(24).clamp(256, 16384)
+}
+
 fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
     match g {
         Geometry::Point(p) => {
@@ -518,8 +536,8 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
                     }
                     (*domain, estimate as usize)
                 }
-                Curve::Nurbs(c) if !c.periodic => (c.domain, 256),
-                Curve::Nurbs(c) if c.periodic => {c.certify_repeated_periodic(l)?;(c.domain,256)},
+                Curve::Nurbs(c) if !c.periodic => (c.domain, nurbs_display_segments(c)),
+                Curve::Nurbs(c) if c.periodic => {c.certify_repeated_periodic(l)?;(c.domain,nurbs_display_segments(c))},
                 _ => return Err(Error::Unsupported("curve display family/segment binding")),
             };
             // NURBS kinks sit on knots (a polyline's corners, a joined curve's joints):

@@ -32,6 +32,12 @@ struct State {
     done: Vec<(String, Geo)>,
     /// Dynamic extension waiting for its end point: the curve and which end.
     dynamic: Option<(CurveRef, bool)>,
+    /// Rhino's sub-options at `End of extension`: `ToPoint` (Arc, Smooth: end exactly at the
+    /// pick) or `Center` (Arc: pick the arc centre first).
+    #[serde(default)]
+    mode: String,
+    #[serde(default)]
+    center: Option<Vec3>,
 }
 
 fn how(kind: &str) -> Extension {
@@ -130,7 +136,19 @@ fn ask(st: &State) -> Reply {
                 .to_owned(),
             Want::Objects,
         ),
-        2 => ("End of extension".to_owned(), Want::Point),
+        2 => {
+            // Rhino 5: the Arc type offers Center and ToPoint.
+            if st.kind == "Arc" {
+                options.push(OptionToken::action("Center"));
+                options.push(OptionToken::action("ToPoint"));
+            }
+            let prompt = if st.mode == "Center" && st.center.is_none() {
+                "Center of arc"
+            } else {
+                "End of extension"
+            };
+            (prompt.to_owned(), Want::Point)
+        }
         _ => {
             if let Some(l) = st.length {
                 options.push(OptionToken::number("ExtensionLength", Some(l)));
@@ -222,7 +240,44 @@ pub(crate) fn extend(e: &Event) -> Reply {
                 st.stage = 1;
                 return ask(&st);
             };
+            if let Input::Option { name, .. } = &e.input {
+                if name.eq_ignore_ascii_case("ToPoint") && st.kind == "Arc" {
+                    st.mode = "ToPoint".into();
+                } else if name.eq_ignore_ascii_case("Center") && st.kind == "Arc" {
+                    st.mode = "Center".into();
+                    st.center = None;
+                }
+                return ask(&st);
+            }
+            if st.mode == "Center" && st.center.is_none() {
+                if let Input::Point { point } = &e.input {
+                    st.center = Some(*point);
+                }
+                return ask(&st);
+            }
             match &e.input {
+                Input::Point { point } | Input::Hover { point }
+                    if !st.mode.is_empty() && st.kind != "Natural" && st.kind != "Line" =>
+                {
+                    let made = to_point(&c, at_end, &st.kind, &st.mode, st.center, *point);
+                    if matches!(e.input, Input::Hover { .. }) {
+                        let mut r = ask(&st);
+                        r.preview.extend(made);
+                        return r;
+                    }
+                    match made {
+                        Some(g) => {
+                            st.done.retain(|d| d.0 != c.id);
+                            st.done.push((c.id.clone(), g));
+                            st.dynamic = None;
+                            st.mode.clear();
+                            st.center = None;
+                            st.stage = 1;
+                            ask(&st)
+                        }
+                        None => ask(&st).refuse("Could not extend to that point"),
+                    }
+                }
                 Input::Point { point } | Input::Hover { point } => {
                     let reach =
                         4.0 * (size(&c) + dist(c.at(if at_end { 1.0 } else { 0.0 }), *point));
@@ -291,4 +346,66 @@ pub(crate) fn extend(e: &Event) -> Reply {
             }
         }
     }
+}
+
+/// The extension that ends exactly at `p` (Rhino `ToPoint`, and Arc `Center`): a tangent arc
+/// (Arc), or a curvature-continuous curve (Smooth), joined to the curve.
+fn to_point(
+    c: &CurveRef,
+    at_end: bool,
+    kind: &str,
+    mode: &str,
+    center: Option<Vec3>,
+    p: Vec3,
+) -> Option<Geo> {
+    use om9_addon_abi::session::{add, norm, scale, sub};
+    use om9_addon_geom::blend::{self, Continuity};
+    let t = if at_end { 1.0 } else { 0.0 };
+    let end = blend::end_of(c, t, true);
+    let e = end.point;
+    let tan = end.d[0];
+    let piece = match (kind, mode) {
+        ("Arc", "Center") => {
+            // The centre slides onto the end's normal so the arc stays tangent; the end
+            // point sets the sweep.
+            let k = center?;
+            let v = sub(k, e);
+            let inward = sub(v, scale(tan, dot(v, tan)));
+            if norm(inward) < 1e-9 {
+                return None;
+            }
+            let r = norm(inward);
+            let ctr = add(e, inward);
+            let x = scale(sub(e, ctr), 1.0 / r);
+            let u = sub(p, ctr);
+            let mut angle = dot(u, tan).atan2(dot(u, x));
+            if angle <= 0.0 {
+                angle += std::f64::consts::TAU;
+            }
+            Geo::Arc {
+                center: ctr,
+                x,
+                y: tan,
+                radius: r,
+                angle,
+            }
+        }
+        ("Arc", _) => blend::arc_from(e, tan, p)?,
+        _ => {
+            let target = blend::End {
+                point: p,
+                d: [[0.0; 3]; 4],
+            };
+            blend::bezier_blend(&end, Continuity::Curvature, &target, Continuity::Position, [1.0, 1.0])
+        }
+    };
+    let base = c.geo();
+    let joined = if at_end {
+        join::join(&[base, piece], 1e-6)?
+    } else {
+        // Keep the curve's direction: the piece is joined before its start.
+        let r = join::reverse(&piece)?;
+        join::join(&[r, base], 1e-6)?
+    };
+    Some(joined)
 }

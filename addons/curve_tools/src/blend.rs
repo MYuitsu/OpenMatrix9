@@ -9,7 +9,7 @@
 //! - Arc Blend (`ArcBlend`): two tangent arcs; `AlternateSolution`, `RadiusDifference`, `Join`.
 //! - Match Curve (`Match`): `Select open curve to change - select near end`, `Select open
 //!   curve to match - select near end`, then `Continuity`, `PreserveOtherEnd`, `Join`, Enter.
-use om9_addon_abi::session::{Event, Geo, Replacement, Reply, Vec3, dist, dot, scale, sub};
+use om9_addon_abi::session::{Event, Geo, Replacement, Reply, Vec3, add, dist, dot, scale, sub};
 use om9_addon_geom::blend::{self, Continuity, End};
 use om9_addon_geom::cmd::{Collected, Flow, Show};
 use om9_addon_geom::join;
@@ -88,7 +88,8 @@ pub(crate) fn blend(e: &Event, adjustable: bool) -> Reply {
         Flow::new(label)
             .curve("Select first curve near end")
             .curve("Select second curve near end")
-            .choice("Continuity", &Continuity::NAMES, "Curvature")
+            .choice("Continuity1", &["Position", "Tangency", "Curvature"], "Curvature")
+            .choice("Continuity2", &["Position", "Tangency", "Curvature"], "Curvature")
     };
     flow.label = label.into();
     let make = |c: &Collected| -> Result<Geo, String> {
@@ -101,8 +102,12 @@ pub(crate) fn blend(e: &Event, adjustable: bool) -> Reply {
                 [c.num(&flow, "Bulge1"), c.num(&flow, "Bulge2")],
             )
         } else {
-            let k = Continuity::parse(c.opt(&flow, "Continuity"));
-            (k, k, [false, false], [1.0, 1.0])
+            (
+                Continuity::parse(c.opt(&flow, "Continuity1")),
+                Continuity::parse(c.opt(&flow, "Continuity2")),
+                [false, false],
+                [1.0, 1.0],
+            )
         };
         if bulge.iter().any(|b| *b <= 0.0) {
             return Err("Bulge must be more than 0".into());
@@ -192,9 +197,30 @@ pub(crate) fn match_curve(e: &Event) -> Reply {
             &["None", "Position", "Tangency", "Curvature"],
             "Position",
         )
-        .toggle("Join", false);
+        .toggle("AverageCurves", false)
+        .toggle("Join", false)
+        .toggle("Merge", false);
+    // Rhino 5 AverageCurves: both curves move to meet halfway; the second keeps its
+    // own direction there and the first matches it.
+    let averaged = |c: &Collected| -> Option<(CurveRef, f64)> {
+        let ((a, ta), (b, tb)) = ends(c)?;
+        if !c.yes(&flow, "AverageCurves") {
+            return Some((b, tb));
+        }
+        let ea = blend::end_of(&a, ta, true);
+        let eb = blend::end_of(&b, tb, true);
+        let mid = scale(add(ea.point, eb.point), 0.5);
+        let goal = End {
+            point: mid,
+            d: [scale(eb.d[0], -1.0), eb.d[1], eb.d[2], eb.d[3]],
+        };
+        let moved = matched(&b, tb >= 0.5, &goal, Continuity::Position, Some(Continuity::Position))?;
+        let t = if tb >= 0.5 { 1.0 } else { 0.0 };
+        Some((CurveRef { exact: Some(moved), ..b.clone() }, t))
+    };
     let make = |c: &Collected| -> Result<Geo, String> {
-        let ((a, ta), (b, tb)) = ends(c).ok_or("pick two curves")?;
+        let ((a, ta), _) = ends(c).ok_or("pick two curves")?;
+        let (b, tb) = averaged(c).ok_or("Could not average these curves")?;
         if a.closed {
             return Err("Select an open curve to change".into());
         }
@@ -215,8 +241,17 @@ pub(crate) fn match_curve(e: &Event) -> Reply {
         },
         &|c| {
             let g = make(c)?;
-            let ((a, _), (b, _)) = ends(c).ok_or("pick two curves")?;
-            if c.yes(&flow, "Join") {
+            let ((a, _), _) = ends(c).ok_or("pick two curves")?;
+            let (b, _) = averaged(c).ok_or("Could not average these curves")?;
+            // Merge (Curvature only in Rhino 5) makes one curve, like Join.
+            let merge = c.yes(&flow, "Merge") && c.opt(&flow, "Continuity") == "Curvature";
+            if c.yes(&flow, "AverageCurves") && !(c.yes(&flow, "Join") || merge) {
+                let mut r = Reply::finish(Vec::new()).say("Match Curve: averaged");
+                r.replace.push(Replacement { id: a.id.clone(), geo: g });
+                r.replace.push(Replacement { id: b.id.clone(), geo: b.geo() });
+                return Ok(r);
+            }
+            if c.yes(&flow, "Join") || merge {
                 let joined = join::join(&[g, b.geo()], 1e-6).ok_or("The curves do not join")?;
                 let mut r = Reply::finish(Vec::new()).say("Match Curve: joined");
                 r.replace.push(Replacement {

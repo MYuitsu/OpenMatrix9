@@ -24,6 +24,11 @@ fn run_sel(command: &str, inputs: Vec<Input>, sel: &[Selected]) -> Vec<Reply> {
         }
         out.push(r);
     }
+    if let Some(last) = out.last().filter(|r| r.done) {
+        let inputs: Vec<Geo> = sel.iter().filter_map(|s| s.exact.clone()).collect();
+        let test = std::thread::current().name().unwrap_or("").to_owned();
+        om9_addon_geom::audit::record("curves", &test, command, &inputs, &last.create);
+    }
     out
 }
 fn run(command: &str, inputs: Vec<Input>) -> Vec<Reply> {
@@ -831,3 +836,4 @@ fn line_curves_are_picked_where_clicked() {
     let Geo::Line { start, end } = r.create[0] else { panic!() };
     assert!(dist(start, [1.0, 0.0, 0.0]) < 1e-6 && dist(end, [5.0, 0.0, 0.0]) < 1e-6, "{start:?} {end:?}");
 }
+

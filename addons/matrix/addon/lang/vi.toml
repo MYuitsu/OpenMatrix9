@@ -503,6 +503,14 @@ WebViewer = "Xem trên web"
 RenderEffectsApplyDisplacement = "Hiệu ứng lồi lõm"
 
 [options]
+# Rhino 5 (bổ sung)
+ToPoint = "Tới điểm"
+Closed = "Khép kín"
+Planar = "Phẳng"
+Merge = "Gộp thành một"
+CurveType = "Kiểu đường cong"
+SelectMasterCurve = "Chọn đường cong mẫu"
+AverageCurves = "Trung bình hai đường"
 # Chung
 Undo = "Hoàn tác"
 Close = "Khép kín"
@@ -613,6 +621,9 @@ Toggle = "Đổi hướng"
 FixEnds = "Giữ hai đầu"
 
 [values]
+SqrtChrd = "Căn dây cung"
+Interpolated = "Đi qua điểm"
+ControlPoint = "Điểm điều khiển"
 Yes = "Có"
 No = "Không"
 Line = "Đoạn thẳng"
@@ -645,6 +656,9 @@ All = "Tất cả"
 Used = "Phần đã dùng"
 
 [phrases]
+"Select master curve" = "Chọn đường cong mẫu"
+"The master curve must be a NURBS curve or a polyline" = "Đường cong mẫu phải là đường NURBS hoặc đường gấp khúc"
+"Match Curve: averaged" = "Khớp đường cong: đã lấy trung bình"
 # Chung
 "press Enter" = "nhấn Enter"
 "Press Enter when done" = "Nhấn Enter khi xong"

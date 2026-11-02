@@ -1,6 +1,6 @@
 # Intersection
 
-Giao tuyến giữa các vật (Rhino Intersect).
+Giao giữa các vật như Rhino 5 Intersect: đường cắt đường hoặc đường xuyên mặt cho điểm, mặt/khối/lưới cắt nhau cho đường giao.
 
 - **Mã lệnh:** `CurveCurveFromObjectsIntersection`
 - **Vị trí:** menu Curve, ô số 17
