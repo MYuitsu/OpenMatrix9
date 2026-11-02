@@ -3,7 +3,7 @@
 Đùn tất cả đường cong đang chọn một lần (lỗ tự nhận).
 
 - **Mã lệnh:** `SolidGVDAllExtrude`
-- **Vị trí:** menu Solid, ô số 10
+- **Vị trí:** menu Solid, ô số 12
 - **Icon:** `Resources/icons/solid-minimal/SolidGVDAllExtrude.svg`
 - **Gọi bằng dòng lệnh:** `SolidGVDAllExtrude`, `ExtrudeAll`
 - **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ

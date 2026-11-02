@@ -3,7 +3,7 @@
 Tạo khối chóp đều.
 
 - **Mã lệnh:** `SolidPyramid`
-- **Vị trí:** menu Solid, ô số 18
+- **Vị trí:** menu Solid, ô số 31
 - **Icon:** `Resources/icons/solid-minimal/SolidPyramid.svg`
 - **Gọi bằng dòng lệnh:** `SolidPyramid`, `Pyramid`
 - **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ

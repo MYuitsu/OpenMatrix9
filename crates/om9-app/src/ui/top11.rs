@@ -49,7 +49,8 @@ impl MatrixApp {
         }))
     }
 
-    /// Draw the active edit/control grips over one viewport, including a drag preview.
+    /// Draw the active edit/control grips over one viewport. Picked grips are drawn yellow;
+    /// a grip drag or a gumball gesture on picked grips previews the moved grips and curves.
     pub(super) fn top11_grip_overlay(
         &self,
         ui: &mut egui::Ui,
@@ -68,18 +69,64 @@ impl MatrixApp {
             om9_core::top11::GripMode::Edit => Color32::from_rgb(235, 150, 40),
             om9_core::top11::GripMode::Control => Color32::from_rgb(70, 200, 235),
         };
+        let picked_colour = Color32::from_rgb(255, 230, 0);
+        let gumball = self.controller.grip_preview();
+        let drag_offset = self.grip_drag.as_ref().map(|drag| {
+            [
+                drag.current[0] - drag.handle.point[0],
+                drag.current[1] - drag.handle.point[1],
+                drag.current[2] - drag.handle.point[2],
+            ]
+        });
+        let project = |point: Point3| -> Option<egui::Pos2> {
+            let projected = view.camera.project(point, viewport).ok()??;
+            Some(egui::pos2(
+                projected.screen[0] as f32,
+                projected.screen[1] as f32,
+            ))
+        };
+        // Preview of the edited curves while grips move.
+        let preview = if let (Some(drag), Some(offset)) = (self.grip_drag.as_ref(), drag_offset) {
+            let moves: Vec<_> = drag
+                .group
+                .iter()
+                .map(|grip| (*grip, add(grip.point, offset)))
+                .collect();
+            self.controller.grip_edit_preview(&moves)
+        } else if gumball.is_some() {
+            self.controller.grip_preview_curves()
+        } else {
+            Vec::new()
+        };
+        for curve in &preview {
+            let points: Vec<egui::Pos2> = curve.iter().filter_map(|point| project(*point)).collect();
+            if points.len() >= 2 {
+                painter.add(egui::Shape::line(points, Stroke::new(1.0, picked_colour)));
+            }
+        }
         for handle in handles.iter() {
-            let point = self
+            let picked = self.controller.grip_is_selected(handle);
+            let in_drag = self
                 .grip_drag
                 .as_ref()
-                .filter(|drag| same_grip(drag.handle, *handle))
-                .map_or(handle.point, |drag| drag.current);
-            let Ok(Some(projected)) = view.camera.project(point, viewport) else {
+                .is_some_and(|drag| drag.group.iter().any(|grip| same_grip(*grip, *handle)));
+            let point = match (in_drag, drag_offset, gumball) {
+                (true, Some(offset), _) => add(handle.point, offset),
+                (false, _, Some(delta)) if picked => {
+                    delta.point(handle.point).unwrap_or(handle.point)
+                }
+                _ => handle.point,
+            };
+            let Some(centre) = project(point) else {
                 continue;
             };
-            let centre = egui::pos2(projected.screen[0] as f32, projected.screen[1] as f32);
-            let square = Rect::from_center_size(centre, egui::vec2(6.0, 6.0));
-            painter.rect_filled(square, 0.0, colour);
+            let (fill, size) = if picked || in_drag {
+                (picked_colour, 7.0)
+            } else {
+                (colour, 6.0)
+            };
+            let square = Rect::from_center_size(centre, egui::vec2(size, size));
+            painter.rect_filled(square, 0.0, fill);
             painter.rect_stroke(
                 square,
                 0.0,
@@ -89,8 +136,10 @@ impl MatrixApp {
         }
     }
 
-    /// Start and update a grip drag in the viewport. A release commits one geometry
-    /// transaction; Escape cancels the drag through the normal cancel path.
+    /// Drag grips in the viewport. Pressing a picked grip drags the whole picked group;
+    /// pressing another grip picks it (Shift adds it) and drags it. A release commits one
+    /// geometry transaction; Escape cancels the drag through the normal cancel path. The drag
+    /// follows object snaps, so a grip can be put on an end, a midpoint or another grip.
     pub(super) fn top11_grip_drag_ui(
         &mut self,
         ui: &mut egui::Ui,
@@ -98,7 +147,7 @@ impl MatrixApp {
         view: &om9_scene::workspace::ViewState,
         viewport: Viewport,
     ) {
-        if self.controller.top11_grip_mode().is_none() {
+        if self.controller.top11_grip_mode().is_none() || self.gumball_session.is_some() {
             return;
         }
         if self.grip_drag.is_none() && response.drag_started_by(egui::PointerButton::Primary) {
@@ -109,9 +158,25 @@ impl MatrixApp {
             else {
                 return;
             };
+            if !self.controller.grip_is_selected(&handle) {
+                let (shift, _) = ctrl_or_command(ui);
+                self.controller.select_grips(
+                    &[handle],
+                    if shift {
+                        crate::session::GripPick::Add
+                    } else {
+                        crate::session::GripPick::Replace
+                    },
+                );
+            }
+            let mut group = self.controller.selected_grips();
+            if !group.iter().any(|grip| same_grip(*grip, handle)) {
+                group.push(handle);
+            }
             let plane = self.controller.input_plane();
             self.grip_drag = Some(GripDrag {
                 handle,
+                group,
                 plane: CPlane {
                     origin: handle.point,
                     x: plane.x,
@@ -132,21 +197,31 @@ impl MatrixApp {
                 .ray([pointer.x as f64, pointer.y as f64], viewport)
                 .and_then(|ray| ray.intersect_plane(drag.plane));
             if let Ok(Some(world)) = world {
-                drag.current = world;
+                // Snap the dragged grip like any picked point (End, Mid, Grid …).
+                drag.current = self
+                    .snap
+                    .as_ref()
+                    .map_or(world, |candidate| candidate.world);
             }
         }
         if response.drag_stopped_by(egui::PointerButton::Primary) {
-            let handle = drag.handle;
-            let world = drag.current;
+            let offset = [
+                drag.current[0] - drag.handle.point[0],
+                drag.current[1] - drag.handle.point[1],
+                drag.current[2] - drag.handle.point[2],
+            ];
             self.grip_drag = None;
-            let moved = (0..3)
-                .map(|axis| (world[axis] - handle.point[axis]).abs())
-                .fold(0.0, f64::max);
+            let moved = offset.iter().fold(0.0_f64, |most, axis| most.max(axis.abs()));
             if moved <= 1e-9 {
                 return;
             }
+            let moves: Vec<_> = drag
+                .group
+                .iter()
+                .map(|grip| (*grip, add(grip.point, offset)))
+                .collect();
             *self.grip_cache.borrow_mut() = None;
-            match self.controller.top11_move_grip(handle, world) {
+            match self.controller.top11_move_grips(&moves) {
                 Ok(result) => {
                     let message = result.message();
                     self.status.info(&message);
@@ -163,7 +238,35 @@ impl MatrixApp {
         }
     }
 
-    fn grip_at(
+    /// The grips whose screen points fall inside `band` (window pick of grips).
+    pub(super) fn grips_in_band(
+        &self,
+        view: &om9_scene::workspace::ViewState,
+        viewport: Viewport,
+        band: Rect,
+    ) -> Vec<GripHandle> {
+        let Some(handles) = self.grip_handles_cached() else {
+            return Vec::new();
+        };
+        handles
+            .iter()
+            .filter(|handle| {
+                view.camera
+                    .project(handle.point, viewport)
+                    .ok()
+                    .flatten()
+                    .is_some_and(|projected| {
+                        band.contains(egui::pos2(
+                            projected.screen[0] as f32,
+                            projected.screen[1] as f32,
+                        ))
+                    })
+            })
+            .copied()
+            .collect()
+    }
+
+    pub(super) fn grip_at(
         &self,
         view: &om9_scene::workspace::ViewState,
         viewport: Viewport,
@@ -181,6 +284,10 @@ impl MatrixApp {
             .min_by(|left, right| left.0.total_cmp(&right.0))
             .map(|(_, handle)| handle)
     }
+}
+
+fn add(point: Point3, offset: [f64; 3]) -> Point3 {
+    [point[0] + offset[0], point[1] + offset[1], point[2] + offset[2]]
 }
 
 fn same_grip(left: GripHandle, right: GripHandle) -> bool {

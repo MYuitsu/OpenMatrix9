@@ -3,7 +3,7 @@
 Tạo xuyến (vòng).
 
 - **Mã lệnh:** `SolidTorus`
-- **Vị trí:** menu Solid, ô số 15
+- **Vị trí:** menu Solid, ô số 28
 - **Icon:** `Resources/icons/solid-minimal/SolidTorus.svg`
 - **Gọi bằng dòng lệnh:** `SolidTorus`, `Torus`
 - **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ

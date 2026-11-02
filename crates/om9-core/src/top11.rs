@@ -1055,10 +1055,19 @@ pub fn grip_handles(
             },
             _ => return Err(Error::Unsupported("grips need a curve or surface")),
         };
+        // A joined curve repeats each joint once per segment: show one grip per joint.
+        let joined = matches!(&entity.geometry, Geometry::Curve(Curve::Polycurve { .. }));
         handles
             .try_reserve(source.len())
             .map_err(|_| Error::Budget("grip points"))?;
         for (index, point) in source.iter().enumerate() {
+            if joined
+                && source[..index]
+                    .iter()
+                    .any(|earlier| (0..3).all(|axis| (earlier[axis] - point[axis]).abs() <= 1e-9))
+            {
+                continue;
+            }
             handles.push(GripHandle {
                 object: *id,
                 index,
@@ -1083,6 +1092,35 @@ pub fn grip_points(
         .collect())
 }
 
+/// Move several grips at once (a window-selected group dragged together or moved with the
+/// gumball). Moves are grouped per object and applied to one working copy, so each object
+/// becomes a single edited geometry in the returned list, in first-seen order.
+pub fn move_grips_geometry(
+    document: &Document,
+    moves: &[(GripHandle, Point3)],
+    limits: &Limits,
+) -> Result<Vec<(ObjectId, Geometry)>> {
+    let mut edited: Vec<(ObjectId, Geometry)> = Vec::new();
+    for (handle, world) in moves {
+        finite(*world)?;
+        let entity = document
+            .entities
+            .get(&handle.object)
+            .ok_or(Error::Missing("object"))?;
+        let slot = match edited.iter().position(|(id, _)| *id == handle.object) {
+            Some(slot) => slot,
+            None => {
+                edited.push((handle.object, entity.geometry.clone()));
+                edited.len() - 1
+            }
+        };
+        let local = inverse_affine(entity.placement)?.point(*world)?;
+        let next = move_grip_local(&edited[slot].1, *handle, local, limits)?;
+        edited[slot].1 = next;
+    }
+    Ok(edited)
+}
+
 /// Move one grip to a world point and return the edited geometry.
 pub fn move_grip_geometry(
     document: &Document,
@@ -1096,11 +1134,25 @@ pub fn move_grip_geometry(
         .get(&handle.object)
         .ok_or(Error::Missing("object"))?;
     let local = inverse_affine(entity.placement)?.point(world)?;
-    match &entity.geometry {
+    move_grip_local(&entity.geometry, handle, local, limits)
+}
+
+/// Move one grip of `geometry` to a point in the object's local coordinates.
+fn move_grip_local(
+    geometry: &Geometry,
+    handle: GripHandle,
+    local: Point3,
+    limits: &Limits,
+) -> Result<Geometry> {
+    match geometry {
         Geometry::Curve(curve) => {
             let edited = match handle.mode {
-                GripMode::Control => curve_ops::move_grip(curve, handle.index, local, limits)?,
-                GripMode::Edit => curve_ops::move_edit_point(curve, handle.index, local, limits)?,
+                GripMode::Control => {
+                    curve_ops::move_joint_grip(curve, handle.index, local, false, limits)?
+                }
+                GripMode::Edit => {
+                    curve_ops::move_joint_grip(curve, handle.index, local, true, limits)?
+                }
             };
             edited.validate(limits)?;
             Ok(Geometry::Curve(edited))

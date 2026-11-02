@@ -129,6 +129,7 @@ mod solid_text_stages;
 mod surface_commands;
 mod surface_edit;
 mod top11;
+pub use top11::GripPick;
 pub use properties::{FIELDS, FieldState, PropertyEdit, PropertyField};
 pub const LINE: &str = "OM9-CURVE-002";
 pub const ZOOM_EXTENTS: &str = "ViewZoomZoomExtents";
@@ -559,6 +560,10 @@ pub struct Controller {
     last_settings_mass: Option<self::settings_commands::SettingsMassReport>,
     /// Active edit/control point display for the selected curves.
     top11_grip: Option<om9_core::top11::GripMode>,
+    /// Grips picked by click or window while grips are on: (object, grip index).
+    grip_selection: Vec<(om9_core::identity::ObjectId, usize)>,
+    /// The gumball transform being previewed on the selected grips.
+    grip_preview: Option<om9_core::geometry::Transform>,
     /// Faces, edges and vertices picked with Ctrl+Shift+click, in pick order.
     subselection: Vec<SelectedSubobject>,
     sub_revision: u64,
@@ -864,6 +869,8 @@ impl Controller {
             settings_sequence: 0,
             last_settings_mass: None,
             top11_grip: None,
+            grip_selection: Vec::new(),
+            grip_preview: None,
             subselection: Vec::new(),
             sub_revision: 1,
             preview_revision: 1,
@@ -1694,6 +1701,7 @@ impl Controller {
             );
         }
         self.top11_grip = None;
+        self.grip_selection.clear();
         if let Some(pending) = self.surface_pending.take() {
             self.events.emit(
                 crate::command_events::EventKind::Finished,
@@ -3532,6 +3540,12 @@ impl Controller {
     /// their cached image is stale.
     pub fn preview_gumball(&mut self, delta: om9_core::geometry::Transform) -> Result<()> {
         delta.validate()?;
+        if self.grips_selected() {
+            // Grips move, not whole objects: the viewport previews the edited grips.
+            self.grip_preview = Some(delta);
+            self.preview_revision = self.preview_revision.saturating_add(1);
+            return Ok(());
+        }
         let Some(scene) = self.scene.as_mut() else {
             return Err(Error::Missing("preview scene"));
         };
@@ -3549,6 +3563,7 @@ impl Controller {
 
     /// Drops the transient transform, leaving the document as it was before the drag.
     pub fn clear_gumball_preview(&mut self) {
+        self.grip_preview = None;
         if let Some(scene) = self.scene.as_mut() {
             for object in scene.objects.iter_mut() {
                 object.preview = om9_core::geometry::Transform::identity();

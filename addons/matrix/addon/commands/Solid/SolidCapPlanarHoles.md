@@ -3,7 +3,7 @@
 Bịt kín các lỗ hở (mép hở) của khối.
 
 - **Mã lệnh:** `SolidCapPlanarHoles`
-- **Vị trí:** menu Solid, ô số 5
+- **Vị trí:** menu Solid, ô số 7
 - **Icon:** `Resources/icons/solid-minimal/SolidCapPlanarHoles.svg`
 - **Gọi bằng dòng lệnh:** `SolidCapPlanarHoles`, `Cap`
 - **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ

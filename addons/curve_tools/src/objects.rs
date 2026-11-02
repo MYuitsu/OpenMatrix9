@@ -167,31 +167,201 @@ fn mapped(c: &CurveRef, loose: bool, f: &dyn Fn(Vec3) -> Vec<Vec3>) -> Vec<Geo> 
             .map(|k| rebuild(hits.iter().map(|h| h[k]).collect()))
             .collect();
     }
-    let n = 400;
-    let m = if c.closed { n } else { n + 1 };
-    let hits: Vec<Vec<Vec3>> = (0..m).map(|i| f(c.at(i as f64 / n as f64))).collect();
+    let breaks = corners(c);
+    // Samples: every corner exactly, and a dense spread between them.
+    let mut ts: Vec<f64> = (0..=400).map(|i| i as f64 / 400.0).collect();
+    ts.extend(breaks.iter().copied());
+    ts.sort_by(f64::total_cmp);
+    ts.dedup_by(|a, b| (*a - *b).abs() < 1e-12);
+    if c.closed {
+        ts.pop(); // t = 1 is t = 0
+    }
+    let hits: Vec<Vec<Vec3>> = ts.iter().map(|t| f(c.at(*t))).collect();
     let layers = hits.iter().map(Vec::len).max().unwrap_or(0);
     let mut out = Vec::new();
     for k in 0..layers {
-        let layer: Vec<Option<Vec3>> = hits.iter().map(|h| h.get(k).copied()).collect();
-        if c.closed && layer.iter().all(Option::is_some) {
-            let pts: Vec<Vec3> = layer.into_iter().flatten().collect();
-            out.extend(fit_points(&pts, true));
-            continue;
-        }
-        let mut run = Vec::new();
-        for h in layer {
-            match h {
-                Some(p) => run.push(p),
+        let on = |t: f64| f(c.at(t)).get(k).copied();
+        // Runs of (t, point) on this layer, each ending exactly where the curve leaves it.
+        let mut runs: Vec<Vec<(f64, Vec3)>> = Vec::new();
+        let mut run: Vec<(f64, Vec3)> = Vec::new();
+        let count = ts.len();
+        for i in 0..count {
+            let here = hits[i].get(k).copied();
+            match here {
+                Some(p) => {
+                    if run.is_empty() && i > 0 && hits[i - 1].get(k).is_none() {
+                        // Entering: find the edge between the previous sample and this one.
+                        if let Some(edge) = edge_between(&on, ts[i - 1], ts[i]) {
+                            run.push(edge);
+                        }
+                    }
+                    run.push((ts[i], p));
+                }
                 None => {
-                    out.extend(fit_points(&run, false));
-                    run.clear();
+                    if !run.is_empty() {
+                        if let Some(edge) = edge_between(&on, ts[i], ts[i - 1]) {
+                            run.push(edge);
+                        }
+                        runs.push(std::mem::take(&mut run));
+                    }
                 }
             }
         }
-        out.extend(fit_points(&run, false));
+        let whole = c.closed && runs.is_empty();
+        if !run.is_empty() {
+            if c.closed && !whole && hits[0].get(k).is_some() && !runs.is_empty() {
+                // The run through the seam of a closed curve is one piece.
+                let mut tail = run;
+                tail.extend(runs.remove(0).into_iter().map(|(t, p)| (t + 1.0, p)));
+                runs.push(tail);
+            } else {
+                runs.push(run);
+            }
+        }
+        for mut run in runs {
+            if whole {
+                run.push((1.0, run[0].1));
+            }
+            out.extend(piece(&run, &breaks, whole));
+        }
     }
     out
+}
+
+/// Normalized parameters where the curve turns a corner (polyline vertices, kinks of a
+/// NURBS at full-multiplicity knots), so a projected polygon keeps its sharp corners.
+fn corners(c: &CurveRef) -> Vec<f64> {
+    let candidates: Vec<f64> = match c.exact.as_ref() {
+        Some(Geo::Polyline { points, closed }) => {
+            let segs = points.len() - usize::from(!*closed);
+            (0..=segs).map(|i| i as f64 / segs as f64).collect()
+        }
+        Some(Geo::Nurbs {
+            degree,
+            points,
+            knots,
+            ..
+        }) => {
+            let (a, b) = (knots[*degree], knots[points.len()]);
+            let mut v: Vec<f64> = Vec::new();
+            let inner = &knots[*degree + 1..points.len()];
+            let mut i = 0;
+            while i < inner.len() {
+                let mut j = i;
+                while j < inner.len() && (inner[j] - inner[i]).abs() < 1e-12 {
+                    j += 1;
+                }
+                if j - i >= *degree && b > a {
+                    v.push((inner[i] - a) / (b - a));
+                }
+                i = j;
+            }
+            v.push(0.0);
+            v.push(1.0);
+            v
+        }
+        _ => vec![0.0, 1.0],
+    };
+    let h = 1e-7;
+    let mut out: Vec<f64> = candidates
+        .into_iter()
+        .filter(|&t| {
+            let (before, after) = if t <= 0.0 || t >= 1.0 {
+                // An open curve's ends are not corners; a closed curve's seam may be one.
+                if !c.closed {
+                    return false;
+                }
+                (
+                    unit(sub(c.at(1.0), c.at(1.0 - h))),
+                    unit(sub(c.at(h), c.at(0.0))),
+                )
+            } else {
+                (
+                    unit(sub(c.at(t), c.at(t - h))),
+                    unit(sub(c.at(t + h), c.at(t))),
+                )
+            };
+            dot(before, after) < (0.5f64).to_radians().cos()
+        })
+        .collect();
+    out.sort_by(f64::total_cmp);
+    out.dedup_by(|a, b| (*a - *b).abs() < 1e-12);
+    out
+}
+
+/// The last point on the layer going from `inside` (on it) toward `outside` (off it).
+fn edge_between(
+    on: &dyn Fn(f64) -> Option<Vec3>,
+    outside: f64,
+    inside: f64,
+) -> Option<(f64, Vec3)> {
+    let (mut off, mut good) = (outside, inside);
+    let mut best = None;
+    for _ in 0..30 {
+        let mid = 0.5 * (off + good);
+        match on(mid) {
+            Some(p) => {
+                good = mid;
+                best = Some((mid, p));
+            }
+            None => off = mid,
+        }
+    }
+    best
+}
+
+/// One projected piece: split at the corners, each span a line when it is straight or a
+/// fitted curve, joined back into one curve.
+fn piece(run: &[(f64, Vec3)], breaks: &[f64], closed: bool) -> Option<Geo> {
+    if run.len() < 2 {
+        return None;
+    }
+    let is_break = |t: f64| {
+        let t = t.rem_euclid(1.0);
+        breaks
+            .iter()
+            .any(|b| (b - t).abs() < 1e-9 || (b - t - 1.0).abs() < 1e-9 || (t - b - 1.0).abs() < 1e-9)
+    };
+    let mut spans: Vec<Vec<Vec3>> = vec![vec![run[0].1]];
+    for (i, (t, p)) in run.iter().enumerate().skip(1) {
+        spans.last_mut()?.push(*p);
+        if i + 1 < run.len() && is_break(*t) {
+            spans.push(vec![*p]);
+        }
+    }
+    if closed && spans.len() == 1 {
+        // A smooth closed curve all on the surface stays closed and smooth.
+        let mut pts = spans.remove(0);
+        pts.pop();
+        return fit_points(&pts, true);
+    }
+    let geos: Vec<Geo> = spans
+        .iter()
+        .filter(|s| s.len() >= 2 && dist(s[0], s[s.len() - 1]) + chord(s) > 1e-9)
+        .filter_map(|s| {
+            let (a, b) = (s[0], s[s.len() - 1]);
+            let straight = dist(a, b) > 1e-9
+                && s.iter().all(|p| {
+                    let d = unit(sub(b, a));
+                    let v = sub(*p, a);
+                    dist(*p, add(a, scale(d, dot(v, d)))) <= TOL * 0.1
+                });
+            if straight {
+                Some(Geo::Line { start: a, end: b })
+            } else {
+                fit_points(s, false)
+            }
+        })
+        .collect();
+    match geos.len() {
+        0 => None,
+        1 if !closed => geos.into_iter().next(),
+        _ => om9_addon_geom::join::join(&geos, 1e-6).or_else(|| geos.into_iter().next()),
+    }
+}
+
+fn chord(s: &[Vec3]) -> f64 {
+    s.windows(2).map(|w| dist(w[0], w[1])).sum()
 }
 
 #[derive(Default, Serialize, Deserialize)]

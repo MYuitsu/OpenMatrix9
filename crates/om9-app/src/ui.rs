@@ -443,6 +443,8 @@ struct GumballBasis {
 #[derive(Clone)]
 struct GripDrag {
     handle: om9_core::top11::GripHandle,
+    /// Every grip moving with this drag (the picked group), the pressed one included.
+    group: Vec<om9_core::top11::GripHandle>,
     plane: CPlane,
     current: Point3,
 }
@@ -2323,7 +2325,7 @@ impl MatrixApp {
         {
             self.top11_action("ControlPoints");
         }
-        if self.controller.is_running() && !self.focus_cmd {
+        if self.picking_points() && !self.focus_cmd {
             for (key, kind) in [
                 (Key::E, om9_scene::osnap::SnapKind::End),
                 (Key::M, om9_scene::osnap::SnapKind::Mid),
@@ -2345,7 +2347,9 @@ impl MatrixApp {
                 }
             }
         }
-        if !self.controller.is_running() {
+        // An interactive add-on command waiting for a point snaps like a built-in command.
+        let picking_points = self.picking_points();
+        if !picking_points {
             self.snap = None;
             self.smarttrack.clear();
         }
@@ -2402,8 +2406,13 @@ impl MatrixApp {
                 self.band_view = None;
                 // Escape ends a Top 11 prompt or grip display without touching the
                 // selection, matching the manual's Esc rule for those commands.
-                if self.controller.top11_grip_mode().is_some() || self.grip_drag.is_some() {
+                if self.grip_drag.is_some() {
                     self.grip_drag = None;
+                } else if self.controller.grips_selected() {
+                    // Rhino/Matrix: the first Esc drops the picked grips, the grips stay on.
+                    self.controller
+                        .select_grips(&[], crate::session::GripPick::Replace);
+                } else if self.controller.top11_grip_mode().is_some() {
                 } else if !dragging && !self.controller.is_running() {
                     // No gesture in flight: Esc cancels the selection itself, which is the manual's rule.
                     self.controller.clear_selection();
@@ -3358,8 +3367,9 @@ impl MatrixApp {
             self.object_info_label(ui, &view, viewport, rect);
             self.subselection_overlay(ui, &view, viewport, rect);
             self.top11_grip_overlay(ui, &view, viewport, rect);
-            self.top11_grip_drag_ui(ui, &response, &view, viewport);
+            // The gumball claims a press on its handles first; a press on a grip elsewhere drags grips.
             self.gumball_ui(ui, &response, &view, viewport, rect);
+            self.top11_grip_drag_ui(ui, &response, &view, viewport);
         }
         self.builder_handles_ui(ui, &response, &view, viewport, rect);
         self.selection_band(ui, &response, &view, viewport, rect);
@@ -3742,7 +3752,7 @@ impl MatrixApp {
                 let world = self.controller.constrain_point(world).unwrap_or(world);
                 let mut snap = None;
                 // Snaps also serve the points an interactive add-on command asks for.
-                if (self.controller.is_running() || self.controller.session_wants_point())
+                if self.picking_points()
                     && let Some(scene) = self.controller.scene()
                 {
                     let from = self.controller.relative_base().map(|point| point.xyz());
@@ -4144,6 +4154,28 @@ impl MatrixApp {
                         }
                     }
                 } else {
+                    // Grips on: a click on a grip picks it (Shift adds, Ctrl removes); a click
+                    // elsewhere drops the picked grips and selects objects as usual.
+                    if self.controller.top11_grip_mode().is_some() {
+                        let (shift, ctrl) = ctrl_or_command(ui);
+                        if let Some(grip) =
+                            self.grip_at(&view, viewport, [pos.x as f64, pos.y as f64])
+                        {
+                            let change = if shift {
+                                crate::session::GripPick::Add
+                            } else if ctrl {
+                                crate::session::GripPick::Remove
+                            } else {
+                                crate::session::GripPick::Replace
+                            };
+                            self.controller.select_grips(&[grip], change);
+                            return;
+                        }
+                        if !shift && !ctrl {
+                            self.controller
+                                .select_grips(&[], crate::session::GripPick::Replace);
+                        }
+                    }
                     // A session picking curves by location (Fillet, Extend …) reads where.
                     self.controller.note_session_pick(self.hover);
                     let candidates = self.controller.scene().and_then(|scene| {
@@ -4469,7 +4501,7 @@ impl MatrixApp {
         rect: Rect,
     ) {
         let painter = ui.painter().with_clip_rect(rect);
-        if self.gumball_session.is_some() {
+        if self.gumball_session.is_some() || self.grip_drag.is_some() {
             self.band_start = None;
             return;
         }
@@ -4503,9 +4535,24 @@ impl MatrixApp {
                     // Matrix9: dragging left to right selects objects fully inside the box, right to left
                     // selects anything the box touches.
                     let window = pointer.x >= start.x;
-                    let picked = self.objects_in_band(&view.camera, viewport, band, window);
                     // Rhino: Shift adds to the selection, Ctrl removes from it, plain replaces it.
                     let (shift, ctrl) = ctrl_or_command(ui);
+                    if self.controller.top11_grip_mode().is_some() {
+                        // Grips on: the band picks grips, and the gumball appears on them.
+                        let grips = self.grips_in_band(view, viewport, band);
+                        let change = if shift {
+                            crate::session::GripPick::Add
+                        } else if ctrl {
+                            crate::session::GripPick::Remove
+                        } else {
+                            crate::session::GripPick::Replace
+                        };
+                        self.controller.select_grips(&grips, change);
+                        self.band_start = None;
+                        self.band_view = None;
+                        return;
+                    }
+                    let picked = self.objects_in_band(&view.camera, viewport, band, window);
 
                     let result = if shift {
                         self.controller.add_objects(&picked)
@@ -5039,6 +5086,14 @@ impl MatrixApp {
             self.gumball_last = None;
             self.gumball_basis = None;
         }
+    }
+
+    /// Whether the pointer is placing a point: a running command, an add-on prompt waiting for
+    /// a point, or a grip being dragged. Object snaps apply only then.
+    fn picking_points(&self) -> bool {
+        self.controller.is_running()
+            || self.controller.session_wants_point()
+            || self.grip_drag.is_some()
     }
 
     fn cancel_gumball(&mut self) {

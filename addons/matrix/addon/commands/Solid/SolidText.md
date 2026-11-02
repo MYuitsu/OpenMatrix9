@@ -3,7 +3,7 @@
 Tạo chữ nổi (khối) từ chuỗi chữ, cao và dày tuỳ chọn.
 
 - **Mã lệnh:** `SolidText`
-- **Vị trí:** menu Solid, ô số 8
+- **Vị trí:** menu Solid, ô số 10
 - **Icon:** `Resources/icons/solid-minimal/SolidText.svg`
 - **Gọi bằng dòng lệnh:** `SolidText`, `TextObject`
 - **Cách chạy:** từng bước trên dòng lệnh, kèm bảng BUILDERS; Enter để tạo, Esc để huỷ

@@ -24,6 +24,33 @@ impl Controller {
     /// `None` when nothing is selected, so the viewport draws no gumball at all.
     pub fn gumball_pivot(&self) -> Option<Frame> {
         use om9_scene::scene::RenderBuffers;
+        if self.grips_selected() {
+            // Grips on and some picked: the gumball sits at the picked grips (Rhino/Matrix).
+            let grips = self.selected_grips();
+            if grips.is_empty() {
+                return None;
+            }
+            let (mut min, mut max) = ([f64::INFINITY; 3], [f64::NEG_INFINITY; 3]);
+            for grip in &grips {
+                for i in 0..3 {
+                    min[i] = min[i].min(grip.point[i]);
+                    max[i] = max[i].max(grip.point[i]);
+                }
+            }
+            let origin = self
+                .gumball_origin
+                .unwrap_or_else(|| std::array::from_fn(|i| min[i] * 0.5 + max[i] * 0.5));
+            let axes = match self.gumball_alignment {
+                GumballAlignment::CPlane => cplane_frame(self),
+                _ => Frame::world(),
+            };
+            return Some(Frame {
+                origin,
+                x: axes.x,
+                y: axes.y,
+                z: axes.z,
+            });
+        }
         let scene = self.scene.as_ref()?;
         let (mut min, mut max) = ([f64::INFINITY; 3], [f64::NEG_INFINITY; 3]);
         let mut found = false;
@@ -103,6 +130,9 @@ impl Controller {
             // A click on a handle that never moved must not become an empty journal entry.
             return Ok(());
         }
+        if self.grips_selected() {
+            return self.commit_gumball_grips(session);
+        }
         self.validate_gumball_targets(session)?;
         let mutations = session.move_mutations(self.document())?;
         self.commit_gumball_mutations(name, mutations)
@@ -116,9 +146,27 @@ impl Controller {
         {
             return Ok(());
         }
+        if self.grips_selected() {
+            // Grips cannot be copied: the gesture moves them.
+            return self.commit_gumball_grips(session);
+        }
         self.validate_gumball_targets(session)?;
         let mutations = session.copy_mutations(self.document())?;
         self.commit_gumball_mutations(name, mutations)
+    }
+
+    /// A gumball gesture on picked grips: every grip takes the gesture's transform, and the
+    /// edited curves/surfaces commit as one transaction.
+    fn commit_gumball_grips(&mut self, session: &gumball::Session) -> Result<()> {
+        let delta = session.accumulated();
+        let moves = self
+            .selected_grips()
+            .into_iter()
+            .map(|grip| Ok((grip, delta.point(grip.point)?)))
+            .collect::<Result<Vec<_>>>()?;
+        self.grip_preview = None;
+        self.gumball_origin = None;
+        self.top11_move_grips(&moves).map(|_| ())
     }
 
     /// The shared transaction path used by both gumball modes.

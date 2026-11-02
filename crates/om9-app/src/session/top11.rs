@@ -450,6 +450,131 @@ impl Controller {
         })
     }
 
+    /// The grips picked while grips are on (click, Shift+click, window), as live handles.
+    /// Picks whose object left the selection or whose index no longer exists drop out.
+    pub fn selected_grips(&self) -> Vec<top11::GripHandle> {
+        if self.grip_selection.is_empty() {
+            return Vec::new();
+        }
+        let Ok(handles) = self.top11_grip_handles() else {
+            return Vec::new();
+        };
+        handles
+            .into_iter()
+            .filter(|handle| self.grip_selection.contains(&(handle.object, handle.index)))
+            .collect()
+    }
+
+    /// Whether at least one grip is picked (the gumball then acts on grips).
+    pub fn grips_selected(&self) -> bool {
+        self.top11_grip.is_some() && !self.grip_selection.is_empty()
+    }
+
+    /// Whether this grip is picked.
+    pub fn grip_is_selected(&self, handle: &top11::GripHandle) -> bool {
+        self.grip_selection.contains(&(handle.object, handle.index))
+    }
+
+    /// Pick grips: replace the picked set, add to it (Shift) or remove from it (Ctrl).
+    pub fn select_grips(&mut self, grips: &[top11::GripHandle], change: GripPick) {
+        let keys = grips.iter().map(|handle| (handle.object, handle.index));
+        match change {
+            GripPick::Replace => {
+                self.grip_selection = keys.collect();
+            }
+            GripPick::Add => {
+                for key in keys {
+                    if !self.grip_selection.contains(&key) {
+                        self.grip_selection.push(key);
+                    }
+                }
+            }
+            GripPick::Remove => {
+                let removed: Vec<_> = keys.collect();
+                self.grip_selection.retain(|key| !removed.contains(key));
+            }
+        }
+        self.gumball_origin = None;
+    }
+
+    /// The gumball transform being previewed on the picked grips, if any.
+    pub fn grip_preview(&self) -> Option<om9_core::geometry::Transform> {
+        self.grip_preview
+    }
+
+    /// The picked grips at their previewed positions plus the previewed edited curves, so the
+    /// viewport can show a gumball drag on grips before it is committed.
+    pub fn grip_preview_curves(&self) -> Vec<Vec<Point3>> {
+        let Some(delta) = self.grip_preview else {
+            return Vec::new();
+        };
+        let moves: Vec<_> = self
+            .selected_grips()
+            .into_iter()
+            .filter_map(|handle| Some((handle, delta.point(handle.point).ok()?)))
+            .collect();
+        self.grip_edit_preview(&moves)
+    }
+
+    /// Sample the curves produced by moving `moves`, in world space, for a drag preview.
+    pub fn grip_edit_preview(&self, moves: &[(top11::GripHandle, Point3)]) -> Vec<Vec<Point3>> {
+        let limits = self.coordinator.limits();
+        let Ok(edited) = top11::move_grips_geometry(self.document(), moves, limits) else {
+            return Vec::new();
+        };
+        let mut out = Vec::new();
+        for (id, geometry) in edited {
+            let (Some(entity), om9_core::geometry::Geometry::Curve(curve)) =
+                (self.document().entities.get(&id), &geometry)
+            else {
+                continue;
+            };
+            let Ok(points) = om9_core::curve_ops::sample_curve(curve, 200, limits) else {
+                continue;
+            };
+            out.push(
+                points
+                    .into_iter()
+                    .filter_map(|point| entity.placement.point(point).ok())
+                    .collect(),
+            );
+        }
+        out
+    }
+
+    /// Commit several grip moves as one geometry edit (one Undo entry).
+    pub fn top11_move_grips(
+        &mut self,
+        moves: &[(top11::GripHandle, Point3)],
+    ) -> Result<Top11Result> {
+        let Some(first) = moves.first() else {
+            return Err(Error::Missing("grips to move"));
+        };
+        let edited = top11::move_grips_geometry(self.document(), moves, self.coordinator.limits())?;
+        let mut mutations = Vec::with_capacity(edited.len());
+        let mut ids = Vec::with_capacity(edited.len());
+        for (id, geometry) in edited {
+            let source = self.document().stamp(id)?;
+            mutations.push(Mutation::Geometry { source, geometry });
+            ids.push(id);
+        }
+        let objects = ids.len();
+        let selection: Vec<ObjectId> = self.selection.iter().copied().collect();
+        self.commit_top11(
+            if first.0.mode == GripMode::Edit {
+                Top11Action::EditPoints
+            } else {
+                Top11Action::ControlPoints
+            },
+            mutations,
+            Some(selection),
+        )?;
+        Ok(Top11Result::Completed {
+            label: "Grip edit",
+            objects,
+        })
+    }
+
     pub fn top11_needs_object(&self) -> bool {
         self.top11_pending
             .as_ref()
@@ -1007,6 +1132,7 @@ impl Controller {
                     Some(mode)
                 };
                 self.top11_grip = next;
+                self.grip_selection.clear();
                 Ok(Top11Result::GripMode {
                     label: action.label(),
                     mode: next,
@@ -2347,5 +2473,14 @@ impl Controller {
     pub fn clear_top11(&mut self) {
         self.top11_pending = None;
         self.top11_grip = None;
+        self.grip_selection.clear();
     }
+}
+
+/// How a grip pick changes the picked set.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GripPick {
+    Replace,
+    Add,
+    Remove,
 }

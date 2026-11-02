@@ -522,8 +522,27 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
                 Curve::Nurbs(c) if c.periodic => {c.certify_repeated_periodic(l)?;(c.domain,256)},
                 _ => return Err(Error::Unsupported("curve display family/segment binding")),
             };
+            // NURBS kinks sit on knots (a polyline's corners, a joined curve's joints):
+            // sample every distinct interior knot too, or uniform samples cut the corners.
+            let knot_params: Vec<f64> = match c {
+                Curve::Nurbs(n) => {
+                    let mut k: Vec<f64> = n
+                        .knots
+                        .iter()
+                        .copied()
+                        .filter(|t| *t > domain[0] && *t < domain[1])
+                        .collect();
+                    k.dedup_by(|a, b| (*a - *b).abs() <= 1e-12 * (domain[1] - domain[0]).abs().max(1.));
+                    if k.len() > 65535 {
+                        return Err(Error::Budget("curve display knot samples"));
+                    }
+                    k
+                }
+                _ => Vec::new(),
+            };
             let count = segments
                 .checked_add(1)
+                .and_then(|c| c.checked_add(knot_params.len()))
                 .ok_or(Error::Overflow("display samples"))?;
             usage.add(
                 Usage {
@@ -535,13 +554,24 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
             let mut points = Vec::with_capacity(count);
             let mut parameters = Vec::with_capacity(count);
             let evaluator = CurveEvaluator::capture(c, l)?;
-            for i in 0..count {
-                let fraction = i as f64 / segments as f64;
-                let t = if i == segments {
-                    domain[1]
-                } else {
-                    domain[0] + (domain[1] - domain[0]) * fraction
-                };
+            // Uniform parameters merged with the knots, increasing.
+            let mut ts: Vec<f64> = (0..=segments)
+                .map(|i| {
+                    if i == segments {
+                        domain[1]
+                    } else {
+                        domain[0] + (domain[1] - domain[0]) * (i as f64 / segments as f64)
+                    }
+                })
+                .collect();
+            if !knot_params.is_empty() {
+                ts.extend(&knot_params);
+                ts.sort_by(f64::total_cmp);
+                let span = (domain[1] - domain[0]).abs().max(1.);
+                ts.dedup_by(|a, b| (*a - *b).abs() <= 1e-12 * span);
+            }
+            for (i, &t) in ts.iter().enumerate() {
+                let fraction = if knot_params.is_empty() { i as f64 / segments as f64 } else { (t - domain[0]) / (domain[1] - domain[0]) };
                 if matches!(
                     c,
                     Curve::Circle {

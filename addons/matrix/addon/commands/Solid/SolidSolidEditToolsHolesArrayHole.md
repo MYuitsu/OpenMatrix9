@@ -3,7 +3,7 @@
 Khoan mảng lỗ theo lưới.
 
 - **Mã lệnh:** `SolidSolidEditToolsHolesArrayHole`
-- **Vị trí:** menu Solid, ô số 25
+- **Vị trí:** menu Solid, ô số 38
 - **Icon:** `Resources/icons/solid-minimal/SolidSolidEditToolsHolesArrayHole.svg`
 - **Gọi bằng dòng lệnh:** `SolidSolidEditToolsHolesArrayHole`, `ArrayHole`
 - **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ

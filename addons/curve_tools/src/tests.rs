@@ -947,3 +947,57 @@ fn sketch_follows_the_pointer() {
         assert!((p[1] - (p[0] * 0.5).sin()).abs() < 0.02, "{p:?}");
     }
 }
+
+#[test]
+fn project_keeps_corners_and_only_the_part_on_the_surface() {
+    let top = patch("p", 3.0);
+    // A square half over the patch's right edge (x = 10): only the part over the patch comes
+    // back, open, ending on the edge, with its corners sharp.
+    let sq = Selected {
+        id: "q".into(),
+        kind: "curve".into(),
+        closed: true,
+        points: vec![[4.0, -4.0, 0.0], [16.0, -4.0, 0.0], [16.0, 4.0, 0.0], [4.0, 4.0, 0.0]],
+        exact: Some(Geo::Polyline {
+            points: vec![[4.0, -4.0, 0.0], [16.0, -4.0, 0.0], [16.0, 4.0, 0.0], [4.0, 4.0, 0.0]],
+            closed: true,
+        }),
+        bbox: [[4.0, -4.0, 0.0], [16.0, 4.0, 0.0]],
+        ..Default::default()
+    };
+    let r = run(PROJECT, vec![sq, top.clone()], vec![Input::Enter, Input::Enter]);
+    assert_eq!(r.create.len(), 1, "one piece through the seam: {:?}", r.create);
+    let Geo::Polyline { points, closed } = &r.create[0] else { panic!("{:?}", r.create[0]) };
+    assert!(!closed, "open where it leaves the surface");
+    let ends = [points[0], points[points.len() - 1]];
+    for e in ends {
+        assert!((e[0] - 10.0).abs() < 1e-6 && (e[2] - 3.0).abs() < 1e-9, "ends on the edge: {e:?}");
+    }
+    for corner in [[4.0, -4.0, 3.0], [4.0, 4.0, 3.0]] {
+        assert!(points.iter().any(|p| dist(*p, corner) < 1e-9), "corner {corner:?} in {points:?}");
+    }
+    assert_eq!(points.len(), 4, "edge, corner, corner, edge: {points:?}");
+    // A pentagon all on the surface comes back closed with its five corners.
+    let pent: Vec<Vec3> = (0..5)
+        .map(|i| {
+            let a = i as f64 * std::f64::consts::TAU / 5.0;
+            [5.0 * a.cos(), 5.0 * a.sin(), 0.0]
+        })
+        .collect();
+    let pg = Selected {
+        id: "g".into(),
+        kind: "curve".into(),
+        closed: true,
+        points: pent.clone(),
+        exact: Some(Geo::Polyline { points: pent.clone(), closed: true }),
+        bbox: [[-5.0, -5.0, 0.0], [5.0, 5.0, 0.0]],
+        ..Default::default()
+    };
+    let r = run(PROJECT, vec![pg, top], vec![Input::Enter, Input::Enter]);
+    let Geo::Polyline { points, closed } = &r.create[0] else { panic!("{:?}", r.create[0]) };
+    assert!(closed);
+    assert_eq!(points.len(), 5, "{points:?}");
+    for p in &pent {
+        assert!(points.iter().any(|q| dist(*q, [p[0], p[1], 3.0]) < 1e-9));
+    }
+}
